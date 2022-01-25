@@ -36,7 +36,7 @@ from .Parse import (TypeDeclaration, Type, SymbolDeclaration, Symbol,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
-                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT)
+                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT, NOT_SATISFIABLE)
 from .Idp_to_Z3 import get_symbols_z
 
 
@@ -89,12 +89,6 @@ class Theory(object):
         previous_assignments (Assignment): assignment after previous full propagation
 
         satisfied (Bool): whether propagate found an initial model
-
-        first_prop (Bool): keeps track whether a propagation still needs
-            to happen. If so during a propagate call, first an initial propagation
-            without any choices (including defaults) executes to find the universal
-            consequences of the theory (`S.UNIVERSAL`). This is done once to improve
-            subsequent propagations.
 
         _slvr (Solver): stateful solver used for propagation and model expansion.
             Use self.solver to access.
@@ -152,7 +146,6 @@ class Theory(object):
         self.add(*theories)
 
         self.previous_assignments: Assignments = Assignments()
-        self.first_prop: bool = True
 
         self.satisfied: bool = True
 
@@ -359,7 +352,14 @@ class Theory(object):
 
         Args:
             code (str): the code of the law to be enabled
+
+        Raises:
+            AssertionError: if code is unknown
         """
+        _ = self.solver_reified
+        assert any(e.code == code
+                   for _, e in self.expl_reifs.values()), \
+                f"Cannot enable an unknown law: {code}"
         self.ignored_laws.remove(code)
 
     def disable_law(self, code: str) -> "Theory":
@@ -370,7 +370,14 @@ class Theory(object):
 
         Args:
             code (str): the code of the law to be disabled
+
+        Raises:
+            AssertionError: if code is unknown
         """
+        _ = self.solver_reified
+        assert any(e.code == code
+                   for _, e in self.expl_reifs.values()), \
+                f"Cannot disable an unknown law: {code}"
         self.ignored_laws.add(code)
 
     def constraintz(self) -> List[BoolRef]:
@@ -537,18 +544,22 @@ class Theory(object):
             the models, followed by a string message
         """
         if self.ignored_laws:
-            todo = OrderedSet(a.sentence for a in self.get_core_atoms(
-                [S.UNKNOWN, S.STRUCTURE, S.UNIVERSAL, S.CONSEQUENCE, S.ENV_CONSQ]))
             # TODO: should todo be larger in case complete==True?
             solver = self.solver_reified
             solver.push()
             self._add_assignment_ignored(solver)
+            if not self.previous_assignments:
+                try:
+                    list(self._first_propagate(solver))
+                except IDPZ3Error:  # unsatifiable
+                    yield "No models."
+                    return
         else:
-            todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
             # TODO: should todo be larger in case complete==True?
             solver = self.solver
             solver.push()
             self._add_assignment(solver)
+        todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
 
         for q in todo:
             if (q.is_reified() and self.extended) or complete:
@@ -665,7 +676,9 @@ class Theory(object):
         with values for all terms and atoms that have the same value
         in every model of the theory.
 
-        Terms and propositions starting with '_' are ignored.
+       ``self.satisfied`` is also updated to reflect satisfiability.
+
+        Terms and propositions starting with ``_`` are ignored.
 
         Args:
             tag (S): the status of propagated assignments
@@ -681,7 +694,7 @@ class Theory(object):
             out = list(self._z3_propagate(tag))
         else:
             out = list(self._propagate(tag=tag))
-        self.satisfied = (out[0] != "Not satisfiable.")
+        self.satisfied = (out[0] != NOT_SATISFIABLE)
         return self
 
     def get_range(self, term: str) -> List[str]:
@@ -1057,5 +1070,10 @@ class Theory(object):
                 verify_models(known, models, goal_string)
 
         return models
+
+    def _first_propagate(self, solver):
+        """monkey-patched"""
+        print()
+        pass
 
 Done = True

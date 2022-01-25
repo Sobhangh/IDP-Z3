@@ -104,8 +104,9 @@ def determine_relevance(self: Theory) -> Theory:
     # collect (co-)constraints
     constraints = OrderedSet()
     for constraint in out.constraints:
-        constraints.append(constraint)
-        constraint.co_constraints(constraints)
+        if constraint.code not in self.ignored_laws:
+            constraints.append(constraint)
+            constraint.co_constraints(constraints)
     constraints = split_constraints(constraints)
 
     # constraints have set of questions in out.assignments

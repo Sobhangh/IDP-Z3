@@ -39,7 +39,7 @@ from .Expression import (Expression, AQuantification,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
 from .Problem import Theory
-from .utils import OrderedSet
+from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
 
 start = time.process_time()
 
@@ -284,7 +284,7 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                     break
             yield "No more consequences."
         elif result == unsat:
-            yield "Not satisfiable."
+            yield NOT_SATISFIABLE
             yield str(z3_formula)
         else:
             yield "Unknown satisfiability."
@@ -319,7 +319,7 @@ def _propagate_inner(self, tag, solver, todo):
 
         yield "No more consequences."
     elif res1 == unsat:
-        yield "Not satisfiable."
+        yield NOT_SATISFIABLE
         yield str(solver.sexpr())
     else:
         assert False, "Incorrect solver behavior"
@@ -327,12 +327,16 @@ def _propagate_inner(self, tag, solver, todo):
 Theory._propagate_inner = _propagate_inner
 
 
-def _first_propagate(self):
+def _first_propagate(self, solver):
+    """ determine universals
+
+        Raises:
+            IDPZ3Error: if theory is unsatisfiable
+    """
     # NOTE: some universal assignments may be set due to the environment theory
     todo = OrderedSet(a.sentence for a in self.get_core_atoms(
         [S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE, S.ENV_CONSQ]))
 
-    solver = self.solver
     solver.push()
 
     for q in todo:
@@ -341,10 +345,8 @@ def _first_propagate(self):
 
     res1 = solver.check()
     if res1 == unsat:
-        yield "Not satisfiable."
-        yield str(solver.sexpr())
         solver.pop()
-        return  # unsat theory
+        raise IDPZ3Error(NOT_SATISFIABLE)
 
     assert res1 == sat, "Incorrect solver behavior"
     model = solver.model()
@@ -365,11 +367,10 @@ def _first_propagate(self):
             if (ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
                     not ass.value.same_as(val)):
                 solver.pop()
-                return  # unsat under choices, caller will fix this
+                raise IDPZ3Error(NOT_SATISFIABLE)
             yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
     solver.pop()
-    self.first_prop = False
 Theory._first_propagate = _first_propagate
 
 
@@ -379,10 +380,11 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
     solver = self.solver_reified
     solver.push()
 
-    todo = given_todo.copy() if given_todo else {a.sentence.code: a.sentence
-                     for a in self.assignments.values()
-                     if a.status not in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
-                     (a.status != S.STRUCTURE or a.translate(self) in self.ignored_laws)}
+    todo = (given_todo.copy() if given_todo else
+            {a.sentence.code: a.sentence
+            for a in self.assignments.values()
+            if a.status not in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
+            (a.status != S.STRUCTURE or a.sentence.code in self.ignored_laws)})
 
     self._add_assignment_ignored(solver)
 
@@ -405,8 +407,11 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         yield from self._propagate_ignored(tag, given_todo)
         return
 
-    if self.first_prop:
-        yield from self._first_propagate()
+    if not self.previous_assignments:
+        try:
+            yield from self._first_propagate(self.solver)
+        except IDPZ3Error:
+            pass
 
     removed_choices, added_choices = self._set_consequences_get_changed_choices()
 
@@ -485,7 +490,7 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
             yield "No more consequences."
             #yield from self._propagate(tag=tag)  # incomplete --> finish with normal propagation
         elif result == unsat:
-            yield "Not satisfiable."
+            yield NOT_SATISFIABLE
             yield str(z3_formula)
         else:
             yield "Unknown satisfiability."
