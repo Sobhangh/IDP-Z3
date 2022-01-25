@@ -328,7 +328,11 @@ Theory._propagate_inner = _propagate_inner
 
 
 def _first_propagate(self, solver):
-    "determine universals"
+    """ determine universals
+
+        Raises:
+            IDPZ3Error: if theory is unsatisfiable
+    """
     # NOTE: some universal assignments may be set due to the environment theory
     todo = OrderedSet(a.sentence for a in self.get_core_atoms(
         [S.UNKNOWN, S.EXPANDED, S.DEFAULT, S.GIVEN, S.CONSEQUENCE, S.ENV_CONSQ]))
@@ -363,8 +367,7 @@ def _first_propagate(self, solver):
             if (ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
                     not ass.value.same_as(val)):
                 solver.pop()
-                yield NOT_SATISFIABLE
-                return
+                raise IDPZ3Error(NOT_SATISFIABLE)
             yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
     solver.pop()
