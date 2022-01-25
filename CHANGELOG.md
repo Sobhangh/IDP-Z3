@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+
+## [0.9.1] - 2022-12-25
+
 Highlights of the breaking changes:
 * `model_expand` API is now a regular function, not an iterator
 * API functions do not accept a list of theories anymore (e.g., `model_check([T,S])`.  Use `model_check(T,S)` instead)
