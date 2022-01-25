@@ -80,6 +80,7 @@ Contributors (alphabetical): Jo Devriendt, Pierre Carbonnelle, Simon Vandevelde.
 * fix #151: Error in dropdown using Glue Select
 * fix #160: Irrelevant boxes should show the title
 * fix #167: Incorrect display of numeric value 1 in inconsistency panel
+* fix #180: Incorrect explanation when a proposition is false by default
 
 
 ## [0.8.4] - 2021-09-30
