@@ -453,8 +453,10 @@ def interpret(self, problem):
             and all(a.value is not None for a in sub_exprs)):
             # apply enumeration of predicate over symbols to allow simplification
             # do not do it otherwise, for performance reasons
-            f = problem.interpretations[self.decl.name].interpret_application
-            value = f(problem, 0, self, sub_exprs)
+            interpretation = problem.interpretations[self.decl.name]
+            if interpretation.block.name != DEFAULT:
+                f = interpretation.interpret_application
+                value = f(problem, 0, self, sub_exprs)
         if (not self.in_head and not self.variables):
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
                               for defin in problem.definitions]
