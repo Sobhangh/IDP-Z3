@@ -411,7 +411,8 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         try:
             yield from self._first_propagate(self.solver)
         except IDPZ3Error:
-            pass
+            yield NOT_SATISFIABLE
+            # can't access solver.sexpr()
 
     removed_choices, added_choices = self._set_consequences_get_changed_choices()
 
