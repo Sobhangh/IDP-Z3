@@ -1,0 +1,50 @@
+<ng-container *ngIf=" shownValues.length > 0 ">
+
+  <ng-container [ngSwitch]="withHeader()">
+
+    <p-panel *ngSwitchCase="false"
+      [showHeader]="false"
+      [ngClass]="classes">
+
+      <app-symbol-value *ngFor="let value of shownValues"
+            [symbolInfo]="info"
+            [valueInfo]="value"
+            [withHeader]=false
+            [onlyone]="shownValues.length">
+      </app-symbol-value>
+      <app-symbol-value-slider
+                [symbolInfo]="info"
+                [valueInfo]="value">
+      </app-symbol-value-slider>
+    </p-panel>
+
+
+    <ng-container *ngSwitchDefault>
+      <p-panel
+          [ngClass]="classes">
+        <p-header>
+          <div class="contents">
+            <span class="ui-panel-title" style="font-size:18px;display:inline-block">
+              {{info.guiname.split('_').join(' ')}}
+              {{info.unit != undefined ? "(" + info.unit + ")": ""}}
+            </span>
+            <app-symbol-header [info]="info"></app-symbol-header>
+          </div>
+        </p-header>
+
+
+        <app-symbol-value *ngFor="let value of shownValues"
+                          [symbolInfo]="info"
+                          [valueInfo]="value"
+                          [withHeader]=true>
+        </app-symbol-value>
+        <app-symbol-value-slider
+                          [symbolInfo]="info"
+                          [valueInfo]="value">
+        </app-symbol-value-slider>
+      </p-panel>
+    </ng-container>
+
+  </ng-container>
+
+</ng-container>

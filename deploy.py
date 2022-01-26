@@ -49,17 +49,17 @@ run('python3 test.py generate')
 
 update_statics = query_user("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ")
 if update_statics:
-    require_clean_work_tree("../web-IDP-Z3")
+    require_clean_work_tree("idp_web_client")
 
     # Generate static and commit.
-    run('npm run-script build', cwd='../web-IDP-Z3', check=True)
+    run('npm run-script build', cwd='idp_web_client', check=True)
     print("Copying to static folder ...")
-    copy_tree('../web-IDP-Z3/dist/', './idp_server/static')
+    copy_tree('idp_web_client/dist/', './idp_server/static')
 
     # Check if web-IDP-Z3 is on latest version and clean.
-    branch = get('git rev-parse --abbrev-ref HEAD', cwd="../web-IDP-Z3")
-    assert branch == b'main\n', \
-        "Cannot deploy: web-IDP-Z3 not in main branch !"
+    # branch = get('git rev-parse --abbrev-ref HEAD', cwd="idp_web_client")
+    # assert branch == b'main\n', \
+    #     "Cannot deploy: web-IDP-Z3 not in main branch !"
 
     # Verify we are on main branch.
     branch = get('git rev-parse --abbrev-ref HEAD')
@@ -104,10 +104,11 @@ if update_statics:
     if new_tag:
         # create tag in both projects
         run(f"git tag {tag_version}")
-        run(f"git -C ../web-IDP-Z3 tag {tag_version}")
+        # run(f"git -C idp_web_client tag {tag_version}")
+
         # Push tags.
         run(f"git push origin {tag_version}")
-        run(f"git -C ../web-IDP-Z3 push origin {tag_version}")
+        # run(f"git -C idp_web_client push origin {tag_version}")
 
         # Publish new version on Pypi.
         run("poetry install")
@@ -123,7 +124,7 @@ if update_statics:
 
         # Push to google repository and deploy on GAE.
         run("git push google main")
-        run("git push google main", cwd='../web-IDP-Z3')
+        run("git push google main", cwd='idp_web_client')
         run(f"gcloud app deploy {'' if new_tag else '--no-promote'}")
 
         # update versions.list at https://gist.github.com/IDP-Z3/5d82c61fa39e8aa23da1642a2e2b420a

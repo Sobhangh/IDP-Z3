@@ -1,0 +1,26 @@
+.errStream {
+  white-space: pre;
+}
+
+ngx-monaco-editor {
+  height: 90vh;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.btnbox {
+  margin-bottom: 10px;
+}
+
+.p-col-8 {
+  width: 60%;
+  margin: 5px;
+}
+
+.p-col-4 {
+  width: 30%;
+  margin: 5px;
+}

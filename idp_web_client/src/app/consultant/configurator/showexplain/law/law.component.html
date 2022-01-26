@@ -1,0 +1,9 @@
+<div class="selector">
+  <input type="checkbox"
+         [checked]="true"
+         [disabled]="this.idpService.allowIgnoringLaws == false
+         || lawTuple[1].startsWith('Structure formula ')
+         || lawTuple[1].startsWith('Possible values for ')"
+         (click)="this.changeLaw($event)"/>
+  {{this.idpService.getReading(this.lawTuple)}}
+</div>

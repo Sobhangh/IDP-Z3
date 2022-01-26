@@ -1,0 +1,11 @@
+.selector {
+  display: flex;
+  align-items: top;
+}
+
+button {
+  font-size: 18px;
+  height: 100%;
+  width: 1.5em !important;
+  margin: 0.135em;
+}

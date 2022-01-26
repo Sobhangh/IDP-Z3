@@ -1,0 +1,79 @@
+:host {
+  display: flex;
+  flex-direction: row;
+}
+
+:host >>> .ui-menubar {
+  border: 0
+}
+
+.btnSetting {
+  margin-top: 1em;
+  height: 2em;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-left: 1em;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+}
+
+.setting p {
+  width: 9em;
+}
+
+.setting p-selectButton {
+  width: 15em;
+}
+
+:host >>> .ui-sidebar-left.ui-sidebar-lg, .ui-sidebar-right.ui-sidebar-lg {
+  width: 50%;
+}
+
+.table {
+  background-color: inherit;
+	border-collapse: collapse;
+  text-align: center;
+}
+.table tr:first-child {
+  font-weight: bold;
+  background-color: #EEE;
+}
+.cell {
+  border: 1px solid #c8c8c8;
+  vertical-align: top;
+  padding: 10px;
+}
+
+:host >>> .abstract {
+  height:90%;
+  width:80%
+}
+
+.header_button {
+  font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.editor {
+  float: left;
+  width: 99%;
+}
+
+.resizer {
+  float: right;
+  cursor: col-resize;
+  height: 100vh; /* height of the screen */
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  padding: 0.5%;
+}

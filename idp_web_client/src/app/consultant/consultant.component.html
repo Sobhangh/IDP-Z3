@@ -1,0 +1,25 @@
+<ng-container *ngIf="idpService.ignoredLaws.length > 0">
+  <hr />
+  <div  style="background-color: orange;">
+    &nbsp;Disabled laws:
+    <span *ngFor="let law of idpService.ignoredLaws">
+      <div class="selector">
+        <input type="checkbox" [checked]="false" (change)="this.restoreLaw(law)" />
+        {{this.idpService.getReading(law)}}
+      </div>
+    </span>
+  </div>
+  <hr />
+</ng-container>
+
+<ng-container *ngFor="let c of categories">
+  <button *ngIf="c"
+    title="Click to reset everything under the {{c}} header"
+    pButton icon="pi pi-refresh"
+    [ngClass]="{'small': true, 'ui-button-secondary' : true}"
+    (click)="this.reset(c)"
+  ></button>
+  {{c}}
+  <hr  *ngIf="c"/>
+  <app-configurator [ngStyle]='this.style' [category]=c>Loading...</app-configurator>
+</ng-container>

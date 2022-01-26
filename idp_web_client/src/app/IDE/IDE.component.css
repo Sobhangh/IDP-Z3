@@ -1,0 +1,30 @@
+.lcolumn {
+    float: left;
+    width: 49.5%;
+    padding: 1em;
+  }
+
+.rcolumn {
+    float: left;
+    width: 49.5%;
+    padding: 1em;
+  }
+  
+  
+  /* Clear floats after the columns */
+  .row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+.resizer {
+    float: left;
+    cursor: col-resize;
+    height: 100vh; /* height of the screen */
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    padding: 0.5%;
+}

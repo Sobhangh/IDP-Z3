@@ -1,0 +1,28 @@
+<div class="selector">
+  <ng-container *ngIf="(valueInfo.assignment.value === true || valueInfo.assignment.value === false)">
+    <button title="Click to reset this entry"
+      pButton icon="pi pi-check"
+      [ngClass]="{'small': true, 'ui-button-warning' : true, 'ui-button-raised': true, 'ui-button-rounded': valueInfo.assignment.non_user_choice}"
+      [hidden] = "valueInfo.assignment.value == false"
+      (click)="this.reset()"
+    ></button>
+    <button title="Click to reset this entry"
+      pButton icon="pi pi-times"
+      [ngClass]="{'small': true, 'ui-button-warning' : true, 'ui-button-raised': true, 'ui-button-rounded': valueInfo.assignment.non_user_choice}"
+      [hidden] = "valueInfo.assignment.value == true"
+      (click)="this.reset()"
+    ></button>
+    {{(valueInfo.assignment.reading=="") ? valueInfo.atom.split('_').join(' ') : valueInfo.assignment.reading.split('_').join(' ')}}
+
+  </ng-container>
+
+  <ng-container *ngIf="!(valueInfo.assignment.value === true || valueInfo.assignment.value === false)">
+    <button title="Click to reset this entry"
+      pButton icon="pi pi-check"
+      [ngClass]="{'small': true, 'ui-button-warning' : true, 'ui-button-raised': true, 'ui-button-rounded': valueInfo.assignment.non_user_choice}"
+      [hidden] = "valueInfo.assignment.value == false"
+      (click)="this.reset()"
+    ></button>
+    {{valueInfo.assignment.valueName}} = {{valueInfo.assignment.value}}
+  </ng-container>
+<div>

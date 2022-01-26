@@ -1,0 +1,46 @@
+<span class="icons">
+<button (click)="longInfoVisible = true"
+        *ngIf="info.shortinfo || info.longinfo" [ngClass]="info.longinfo?'link':'nolink'"
+        class="transp"
+        icon="pi pi-info-circle"
+        pButton
+        pTooltip="{{info.shortinfo}}"
+></button>
+<!-- <button *ngIf="info.relevant"
+        class="transp nolink" icon="pi pi-circle-on"
+        pButton
+        pTooltip="{{info.guiname}} is relevant"
+  ></button>
+    <button *ngIf="!info.relevant"
+            class="transp nolink" icon="pi pi-circle-off"
+            pButton
+            pTooltip="{{info.guiname}} is not relevant"
+    ></button>
+  <button
+    *ngIf="compareValues.length > 1"
+    (click)=" show() "
+    class="transp"
+    icon="pi pi-users"
+    pButton
+    pTooltip="compare values"
+  ></button> 
+-->
+</span>
+
+<p-dialog *ngIf="info.longinfo"
+          [dismissableMask]="true"
+          [(visible)]="longInfoVisible"
+          [modal]="true"
+          [responsive]="true"
+          [header]="info.guiname"
+          [style]="{minWidth: '400px', maxWidth:'50%'}">
+  {{info.longinfo}}
+</p-dialog>
+
+<!--<p-dialog #op [dynamic]="true" [appendTo]="'body'">
+  <app-showcompare
+                    *ngIf="op.visible"
+                    [symbolName]="info.idpname"
+                    [valueNames]="compareValues"
+  ></app-showcompare>
+</p-dialog>-->

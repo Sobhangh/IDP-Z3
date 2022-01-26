@@ -1,0 +1,72 @@
+<ng-container *ngIf="symbolInfo.slider">
+
+    <div class="val">
+    <!--
+        <span id="lowerValueLabel">
+        {{symbolInfo.slider.lower_symbol.split("_").join(" ")}}
+        </span>
+
+        <span id="upperValueLabel">
+        {{symbolInfo.slider.upper_symbol.split("_").join(" ")}}
+        </span>
+    -->
+    </div>
+    <div class="slider">
+        <!-- If there is no lowerValueInfo, only a one-directional slider is needed.
+             In this case, we still generate an input but we hide it to make sure the layout stays the same. -->
+        <ng-container *ngIf="lowerValueInfo && (lowerValueInfo.assignment.status=='UNKNOWN' || lowerValueInfo.assignment.choice) && !lowerValueInfo.assignment.values">
+            <input class="float-input" type="number" size="8" step="any" pInputText
+            [disabled] = "this.idpService.openCalls > 0"
+            [value] = "lowerValueInfo.assignment.value"
+            [ngClass] = "lowerValueInfo.assignment.value ? '' : 'required_input'"
+            (blur)       ="this.lowerInputUpdated($event)"
+            (keyup.enter)="this.lowerInputUpdated($event)"
+            [(ngModel)]="lowerInputVal"
+        />
+        </ng-container>
+        <ng-container *ngIf="!lowerValueInfo || !(lowerValueInfo.assignment.status=='UNKNOWN' || lowerValueInfo.assignment.choice) || lowerValueInfo.assignment.values">
+            <input class="float-input" size="8" style="visibility: hidden" />
+        </ng-container>
+
+
+        <!-- Create the slider. -->
+        <p-slider #customSlider
+                  [(ngModel)]="sliderValues"
+                  [style]="{'width':'14em'}"
+                  [ngClass] = "(!lowerValueInfo && !upperValueInfo) ||
+                               ((lowerValueInfo && (lowerValueInfo.assignment.consequence ||
+                                                    lowerValueInfo.assignment.universal)  ||
+                                 !lowerValueInfo) &&
+                               ((upperValueInfo && (upperValueInfo.assignment.consequence ||
+                                                   upperValueInfo.assignment.universal)   ||
+                                 !upperValueInfo)))
+                                                   ? 'irrelevant' : ''"
+                  [disabled] = "this.idpService.openCalls > 0"
+                  [min]="0"
+                  [max]="100"
+                  [range]="true"
+                  (onChange)="sliderUpdated($event)"
+                  (onSlideEnd)="sliderLetGo($event)">
+        </p-slider>
+
+        <!-- If there is no upperValueInfo, only a one-directional slider is needed.
+             In this case, we still generate an input but we hide it to make sure the layout stays the same. -->
+        <ng-container *ngIf="upperValueInfo && (upperValueInfo.assignment.status=='UNKNOWN' || upperValueInfo.assignment.choice) && !upperValueInfo.assignment.values">
+        <input class="float-input" type="number" size="8" step="any" pInputText
+            [disabled] = "this.idpService.openCalls > 0"
+            [value] = "upperValueInfo.assignment.value"
+            [ngClass] = "upperValueInfo.assignment.value ? '' : 'required_input'"
+            (blur)       ="this.upperInputUpdated($event)"
+            (keyup.enter)="this.upperInputUpdated($event)"
+            (onChange)="this.upperInputUpdated($event)"
+            [(ngModel)]="upperInputVal"
+        />
+        </ng-container>
+        <ng-container *ngIf="!upperValueInfo || !(upperValueInfo.assignment.status=='UNKNOWN' || upperValueInfo.assignment.choice) || upperValueInfo.assignment.values">
+            <input class="float-input" size="8" style="visibility: hidden" />
+        </ng-container>
+    </div>
+
+
+
+</ng-container>

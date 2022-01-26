@@ -1,0 +1,129 @@
+
+<ng-container *ngIf="info && info.assignment.typ != 'Bool'">
+  <div class="selector">
+      <!-- buttons to verify -->
+      <ng-container *ngIf="(info.assignment.status=='CONSEQUENCE') && info.assignment.environmental">
+        <ng-container *ngIf="info.assignment.value">
+          <button title='Click to confirm'
+            pButton icon="pi pi-check"
+            [ngClass]="'small ui-button-success sm' + (info.assignment.relevant ? '': ' irrelevant')"
+            (click)="this.confirm(info)"
+          ></button>
+          <button title='Click to see an explanation'
+            pButton icon="pi pi-times"
+            [ngClass]="'small ui-button-danger sm unexpected' + (info.assignment.relevant ? '': ' irrelevant')"
+            (click)="op.toggle($event)"
+          ></button>
+        </ng-container>
+        <ng-container *ngIf="! info.assignment.value">
+          <button title='Click to see an explanation'
+            pButton icon="pi pi-times"
+            [ngClass]="'small ui-button-danger sm unexpected' + (info.assignment.relevant ? '': ' irrelevant')"
+            (click)="op.toggle($event)"
+          ></button>
+          <button title='Click to confirm'
+            pButton icon="pi pi-check"
+            [ngClass]="'small ui-button-success sm' + (info.assignment.relevant ? '': ' irrelevant')"
+            (click)="this.confirm(info)"
+          ></button>
+        </ng-container>
+      </ng-container>
+
+      <span class="valueLabel">
+
+        <!-- Don't repeat the symbol name if the symbol tile has a header -->
+        {{name()}}
+
+        <!-- Calendar -->
+        <ng-container *ngIf="(info.assignment.status=='UNKNOWN' || info.assignment.choice) && !info.assignment.values && info.assignment.typ =='Date'">
+          <p-calendar id="float-input" [(ngModel)]="date_value"
+            dateFormat="#yy-mm-dd" showButtonBar="true"
+            [disabled] = "this.idpService.openCalls > 0"
+            [ngClass] = "(info.assignment.value || !info.assignment.relevant) ? '' : 'required_input'"
+            (ngModelChange)="calendar_update(info)">
+          </p-calendar>
+        </ng-container>
+
+        <!-- input box -->
+        <ng-container *ngIf="(info.assignment.status=='UNKNOWN' || info.assignment.choice) && !info.assignment.values && info.assignment.typ !='Date'">
+          <input id="float-input" type="number" size="8" step="any" pInputText
+            [disabled] = "this.idpService.openCalls > 0"
+            [value] = "info.assignment.value"
+            [ngClass] = "(info.assignment.value || !info.assignment.relevant) ? '' : 'required_input'"
+            (blur)       ="this.update(info, $event)"
+            (keyup.enter)="this.update(info, $event)" />
+        </ng-container>
+
+        <!-- dropdown -->
+        <ng-container *ngIf="(info.assignment.status=='UNKNOWN' || info.assignment.choice) && info.assignment.values">
+          <span [ngClass] = "(info.assignment.value || !info.assignment.relevant) ? '' : 'required_dropdown'">
+          <p-dropdown [options]="info.assignment.values"
+                      [(ngModel)]="info.assignment.value"
+                      (onChange) ="this.updateDropdown(info)"
+                      (onShow)   ="this.idpService.get_range(info)">
+          </p-dropdown>
+          </span>
+        </ng-container>
+
+        <!-- fixed value -->
+        <ng-container *ngIf="info.assignment.consequence || info.assignment.universal">
+          <button [title]="'Click to see an explanation'"
+            [label]="info.assignment.value"
+            [ngClass]="'ui-button-secondary value' + (info.assignment.relevant ? '': ' irrelevant')"
+            pButton type="button"
+            (click)="op.toggle($event)"
+          ></button>
+        </ng-container>
+
+        {{symbolInfo.unit != undefined ? symbolInfo.unit: ""}}
+
+        <!-- symbolInfo not available in explain overlay -->
+        <ng-container *ngIf="(symbolInfo && symbolInfo.showOptimize) && !info.assignment.environmental
+                          && (info.assignment.typ=='Int' || info.assignment.typ=='Real')
+                          && info.assignment.status=='UNKNOWN'">
+            <button [pTooltip]="'Maximize over ' +info.atom"
+              pButton icon="pi pi-arrow-circle-up"
+              (click)="idpService.optimise(info.atom,false)"
+              [ngClass]="'transp' + (info.assignment.relevant ? '': ' irrelevant')"
+            ></button>
+            <button [pTooltip]="'Minimize over ' +info.atom"
+              pButton icon="pi pi-arrow-circle-down"
+              (click)="idpService.optimise(info.atom,true)"
+              [ngClass]="'transp' + (info.assignment.relevant ? '': ' irrelevant')"
+            ></button>
+        </ng-container>
+
+      </span>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="info && info.assignment.typ == 'Bool'">
+  <div class="selector">
+    <app-symbol-value-selector-buttons [assignment]="info.assignment" [symbolInfo]="symbolInfo"></app-symbol-value-selector-buttons>
+    <!--
+    <span title="compare"
+          class="valueLabel link"
+          (click)="info.comparison = !info.comparison">
+
+    -->
+    <!--
+      {{(!reading || info.assignment.reading=="") ? info.atom.split('_').join(' ') : info.assignment.reading.split('_').join(' ')}}
+    -->
+      {{name()}}
+    <!--
+      <button
+        *ngIf="info.comparison"
+        class="transp"
+        pButton icon="pi pi-users"
+      ></button>
+      </span>
+    -->
+  </div>
+
+</ng-container>
+<p-overlayPanel #op [showCloseIcon]="true" appendTo="body">
+  <app-showexplain *ngIf="info.assignment.known && op.visible" [symbolName]="info.assignment.symbolName"
+                   [valueName]="info.assignment.valueName"  [status]="info.assignment.status"
+                   [environmental]="info.assignment.environmental"
+  ></app-showexplain>
+</p-overlayPanel>

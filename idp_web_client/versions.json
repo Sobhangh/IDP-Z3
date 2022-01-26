@@ -1,0 +1,8 @@
+{ "IDP-Z3 latest" : "interactive-consultant.ew.r.appspot.com"
+    , "IDP-Z3 stable" : "interactive-consultant.ew.r.appspot.com"
+    , "IDP-Z3 0.5.4"  : "20201006t101829-dot-interactive-consultant.ew.r.appspot.com"
+    , "IDP-Z3 0.5.3"  : "20200915t113559-dot-interactive-consultant.ew.r.appspot.com"
+    , "IDP-Z3 0.5.1"  : "20200526t173848-dot-interactive-consultant.ew.r.appspot.com"
+    , "local"  : "localhost"
+    , "local " : "127.0.0.1"
+    }

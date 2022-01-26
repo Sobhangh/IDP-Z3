@@ -1,0 +1,11 @@
+<div class="row">
+  <div class="lcolumn" id="editor_IDE">
+    <app-editor id="app-editor"></app-editor>
+  </div>
+  <div class="resizer" id="resizer_IDE"></div>
+  <div class="rcolumn" id="output">
+    <app-IDELine *ngFor="let l of idpService.runResult"
+                [line]="l">
+    </app-IDELine>
+  </div>
+</div>

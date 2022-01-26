@@ -1,0 +1,43 @@
+.val {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+}
+
+.valueLabel {
+  margin-left: 5px;
+}
+
+button {
+  height: 1em;
+  font-size: 14px;
+}
+
+button.transp,
+button.transp:hover,
+button.transp:active,
+button.transp:enabled:focus {
+  width: 1.5em;
+
+  background-color: transparent;
+  color: black;
+  border: none;
+  cursor: hand;
+  border-radius: 0;
+  margin: 0 0 0.1em 0;
+  box-shadow: 0 0 0 0;
+}
+
+.nolink {
+  cursor: default;
+}
+
+.irrelevant {
+  color: rgba(0,0,0,0.5);
+}

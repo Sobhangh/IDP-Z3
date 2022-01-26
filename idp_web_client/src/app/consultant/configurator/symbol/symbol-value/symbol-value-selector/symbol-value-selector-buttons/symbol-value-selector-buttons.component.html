@@ -1,0 +1,150 @@
+<ng-container *ngIf="assignment">
+
+  <div class="buttons">
+    <ng-container *ngIf="assignment.status=='UNKNOWN'">
+      <ng-container *ngIf="assignment.value == null">
+        <button title="Click to assert this statement"
+          pButton icon="pi pi-check"
+          [ngClass]="{'small': true, 'ui-button-success' : assignment.relevant, 'irrelevant': ! assignment.relevant }"
+          (click)="this.update(true)"
+        ></button>
+        <button title="Click to negate this statement"
+          pButton icon="pi pi-times"
+          [ngClass]="{'small': true, 'ui-button-danger' : assignment.relevant, 'irrelevant': ! assignment.relevant }"
+          (click)="this.update(false)"
+        ></button>
+      </ng-container>
+
+      <ng-container *ngIf="assignment.value !== null">
+        <button title="This value was set during a model expansion or optimisation"
+          pButton icon="pi pi-check"
+          [ngClass]="{'small': true, 'ui-button-secondary' : true }"
+          [hidden] = "assignment.value == false"
+        ></button>
+        <button title="This value was set during a model expansion or optimisation"
+          pButton icon="pi pi-times"
+          [ngClass]="{'small': true, 'ui-button-secondary' : true }"
+          [hidden] = "assignment.value === true"
+        ></button>
+      </ng-container>
+    </ng-container>
+
+    <ng-container *ngIf="assignment.choice && !(assignment.status=='EXPANDED' && assignment.environmental)">
+      <button title="Click to reset this entry"
+        pButton icon="pi pi-check"
+        [ngClass]="{'small': true, 'ui-button-warning' : true, 'ui-button-raised': true, 'ui-button-rounded': assignment.non_user_choice}"
+        [hidden] = "assignment.value == false"
+        (click)="assignment.relevant = true; this.update(null)"
+      ></button>
+      <button title="Click to reset this entry"
+        pButton icon="pi pi-times"
+        [ngClass]="{'small': true, 'ui-button-warning' : true, 'ui-button-raised': true, 'ui-button-rounded': assignment.non_user_choice}"
+        [hidden] = "assignment.value === true"
+        (click)="assignment.relevant = true; this.update(null)"
+      ></button>
+    </ng-container>
+
+    <ng-container *ngIf="assignment.status=='EXPANDED' && assignment.environmental">
+      <ng-container *ngIf="assignment.value">
+        <button title='Click to confirm'
+          pButton icon="pi pi-check"
+          class="small ui-button-success"
+          (click)="this.update(this.assignment.value)"
+        ></button>
+        <button title='Click to reset this entry'
+          pButton icon="pi pi-times"
+          class="small ui-button-danger unexpected"
+          (click)="assignment.relevant = true; this.update(!this.assignment.value)"
+        ></button>
+      </ng-container>
+
+      <ng-container *ngIf="!assignment.value">
+        <button title='Click to reset this entry'
+          pButton icon="pi pi-check"
+          class="small ui-button-success unexpected"
+          [hidden] = "assignment.unknown"
+          (click)="assignment.relevant = true; this.update(!this.assignment.value)"
+        ></button>
+        <button title='Click to confirm'
+          pButton icon="pi pi-times"
+          class="small ui-button-danger"
+          [hidden] = "assignment.unknown"
+          (click)="this.update(this.assignment.value)"
+        ></button>
+      </ng-container>
+    </ng-container>
+
+    <ng-container *ngIf="assignment.status=='ENV_CONSQ'">
+        <button title="Click to see an explanation"
+          pButton icon="pi pi-check"
+          [ngClass]="{'small': true, 'ui-button-secondary' : assignment.relevant, 'irrelevant': ! assignment.relevant }"
+          [hidden] = "assignment.value == false"
+          (click)="op.toggle($event)"
+        ></button>
+        <button title="Click to see an explanation"
+          pButton icon="pi pi-times"
+          [ngClass]="{'small': true, 'ui-button-secondary' : assignment.relevant, 'irrelevant': ! assignment.relevant }"
+          [hidden] = "assignment.value === true"
+          (click)="op.toggle($event)"
+        ></button>
+    </ng-container>
+
+
+    <ng-container *ngIf="assignment.status=='UNIVERSAL' || ((assignment.status=='CONSEQUENCE') && !assignment.environmental)">
+        <button title="Click to see an explanation"
+          pButton icon="pi pi-check"
+          [ngClass]="{'small': true, 'ui-button-secondary' : assignment.relevant, 'irrelevant': ! assignment.relevant }"
+          [hidden] = "assignment.value == false"
+          (click)="op.toggle($event)"
+        ></button>
+        <button title="Click to see an explanation"
+          pButton icon="pi pi-times"
+          [ngClass]="{'small': true, 'ui-button-secondary' : assignment.relevant, 'irrelevant': ! assignment.relevant }"
+          [hidden] = "assignment.value === true"
+          (click)="op.toggle($event)"
+        ></button>
+    </ng-container>
+
+    <ng-container *ngIf="(assignment.status=='CONSEQUENCE') && assignment.environmental">
+      <!-- NOTE: this case is not the same as assignment.status=='ENV_CONSQ',
+      where the consequences are due to the environmental theory, which do not
+      need to be verified. Here they are due to the regular theory on the user
+      input, and hence need to be verified. -->
+      <ng-container *ngIf="assignment.value">
+        <button title='Click to confirm'
+          pButton icon="pi pi-check"
+          class="small ui-button-success"
+          (click)="this.update(this.assignment.value)"
+        ></button>
+        <button title='Click to see an explanation'
+          pButton icon="pi pi-times"
+          class="small ui-button-danger unexpected"
+          (click)="op.toggle($event)"
+        ></button>
+      </ng-container>
+
+      <ng-container *ngIf="!assignment.value">
+        <button title='Click to see an explanation'
+          pButton icon="pi pi-check"
+          class="small ui-button-success unexpected"
+          [hidden] = "assignment.unknown"
+          (click)="op.toggle($event)"
+        ></button>
+        <button title='Click to confirm'
+          pButton icon="pi pi-times"
+          class="small ui-button-danger"
+          [hidden] = "assignment.unknown"
+          (click)="this.update(this.assignment.value)"
+        ></button>
+      </ng-container>
+    </ng-container>
+  </div>
+
+  <p-overlayPanel #op [showCloseIcon]="true" appendTo="body">
+    <app-showexplain *ngIf="assignment.known && op.visible" [symbolName]="assignment.symbolName"
+                     [valueName]="assignment.valueName"  [status]="assignment.status"
+                     [environmental]="assignment.environmental"
+    ></app-showexplain>
+  </p-overlayPanel>
+
+</ng-container>

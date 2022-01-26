@@ -1,0 +1,48 @@
+<ng-container *ngIf="idpService.ready()">
+  <div class="heading">
+    <img src='https://storage.googleapis.com/interactive-consultant/assets/KU%20Leuven%20logo.png'>
+    &nbsp;&nbsp;
+    <span class="titlespan">
+
+      <ng-container *ngIf="this.idpService.IDE">  <!-- to force update -->
+        <h1>{{ this.title }}</h1>
+        <app-header></app-header>
+      </ng-container>
+      <ng-container *ngIf="!this.idpService.IDE">
+        <h1>{{ this.title }}</h1>
+        <app-header></app-header>
+      </ng-container>
+
+      <p-progressSpinner [hidden]="idpService.openCalls == 0" [style]="{width: '40px', height: '40px', marginLeft: '2em'}"
+                      animationDuration=".5s"
+                      fill="#EEEEEE" strokeWidth="8"></p-progressSpinner>
+    </span>
+  </div>
+
+  <ng-container *ngIf="! this.idpService.IDE">
+    <app-consultant></app-consultant>
+  </ng-container>
+  <ng-container *ngIf="this.idpService.IDE">
+    <app-IDE></app-IDE>
+  </ng-container>
+
+  <p-toast></p-toast>
+</ng-container>
+
+<ng-container *ngIf="!idpService.ready()">
+  <h2>Oops</h2>
+  <div>
+    Something went wrong while trying to start the application. Please check your specification
+    and try to restart by clicking:
+    <button pButton (click)="idpService.reloadMeta()">Start App</button>
+  </div>
+
+  <app-editor></app-editor>
+</ng-container>
+
+<div class="footContainer" title="This research received funding from the Flemish Government under the “Onderzoeksprogramma Artificiële Intelligentie (AI) Vlaanderen” programme.">
+<a href="https://www.flandersairesearch.be">Funded by the Flemish Government</a>
+<div class="footer">
+  Version: {{idpService.versionInfo}}
+</div>
+</div>

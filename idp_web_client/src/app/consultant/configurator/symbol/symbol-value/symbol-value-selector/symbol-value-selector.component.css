@@ -1,0 +1,83 @@
+.selector {
+  display: flex;
+  align-items: center;
+  height: 1.75em;
+  margin: 0.2em;
+}
+
+.valueLabel {
+  line-height: 0.9;
+}
+
+.ui-button {
+  color: black;
+  background-color: #ededee;
+  border: 1px solid #ededee;
+}
+button.transp,
+button.transp:hover,
+button.transp:active,
+button.transp:enabled:focus {
+  width: 1.5em;
+
+  background-color: transparent;
+  color: black;
+  border: none;
+  cursor: hand;
+  border-radius: 0;
+  margin: 0 0 0.1em 0;
+  box-shadow: 0 0 0 0;
+}
+
+.nolink {
+  cursor: default;
+}
+.link {
+  cursor: pointer;
+}
+
+.buttons {
+  height: 1.75em;
+  display: flex;
+  align-items: center;
+}
+
+button {
+  font-size: 18px;
+  height: 100%;
+  margin: 0.135em;
+}
+
+.value {
+  font-size: 14px;
+  height: 1.75em;
+}
+
+
+
+button.sm {
+  height: 25px;
+  width: 1.5em !important;
+}
+button.unexpected {
+  opacity: 0.2;
+}
+
+.required_input {
+  box-shadow: inset 0 0 0 2px #34A835;
+}
+
+::ng-deep .required_input .ui-inputtext {
+  box-shadow: inset 0 0 0 2px #34A835;
+}
+
+.required_dropdown {
+  display:inline-block;
+  height: 30px !important;
+  border: 2px solid #34A835;
+  border-radius: 3px;
+}
+
+button.irrelevant {
+  color: rgba(0,0,0,0.5);
+}
