@@ -28,7 +28,7 @@ from typing import Any, Iterator, List, Union
 from z3 import Solver
 
 from .Parse import IDP, TheoryBlock, Structure
-from .Problem import Theory
+from .Theory import Theory
 from .Assignments import Status as S, Assignments
 from .utils import NEWL
 

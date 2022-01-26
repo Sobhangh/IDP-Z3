@@ -9,9 +9,9 @@ Traceback (most recent call last):
     for i, xi in enumerate(x):
   File "idp_engine/Run.py", line ??, in model_expand
     problem = Theory(*theories, extended=extended)
-  File "idp_engine/Problem.py", line ??, in __init__
+  File "idp_engine/Theory.py", line ??, in __init__
     self.add(*theories)
-  File "idp_engine/Problem.py", line ??, in add
+  File "idp_engine/Theory.py", line ??, in add
     c.interpret(self)
   File "idp_engine/Interpret.py", line ??, in interpret
     assert self.decl.type != BOOL, \
