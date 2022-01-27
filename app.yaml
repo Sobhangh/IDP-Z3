@@ -9,31 +9,31 @@ automatic_scaling:
 
 handlers:
   - url: /$
-    static_files: idp_server/static/index.html
+    static_files: idp_web_server/static/index.html
     require_matching_file: false
-    upload: idp_server/static/index.html
+    upload: idp_web_server/static/index.html
     secure: always
     http_headers:
       Strict-Transport-Security: max-age=31536000; includeSubDomains
   - url: /IDE
-    static_files: idp_server/static/index.html
+    static_files: idp_web_server/static/index.html
     require_matching_file: false
-    upload: idp_server/static/index.html
+    upload: idp_web_server/static/index.html
     secure: always
     http_headers:
       Strict-Transport-Security: max-age=31536000; includeSubDomains
   - url: /examples/(.*)
-    static_files: idp_server/examples/\1
+    static_files: idp_web_server/examples/\1
     require_matching_file: false
-    upload: idp_server/examples/.*
+    upload: idp_web_server/examples/.*
   - url: /assets//(.*) # to fix bug in client
-    static_files: idp_server/static/assets/\1
+    static_files: idp_web_server/static/assets/\1
     require_matching_file: false
-    upload: idp_server/static/assets/.*
+    upload: idp_web_server/static/assets/.*
   - url: /assets/(.*)
-    static_files: idp_server/static/assets/\1
+    static_files: idp_web_server/static/assets/\1
     require_matching_file: false
-    upload: idp_server/static/assets/.*
+    upload: idp_web_server/static/assets/.*
   - url: /meta
     script: auto
     secure: always
@@ -51,9 +51,9 @@ handlers:
     secure: always
     redirect_http_response_code: '301'
   - url: /(.*)
-    static_files: idp_server/static/\1
+    static_files: idp_web_server/static/\1
     require_matching_file: false
-    upload: idp_server/static/.*
+    upload: idp_web_server/static/.*
     secure: always
     http_headers:
       Strict-Transport-Security: max-age=31536000; includeSubDomains

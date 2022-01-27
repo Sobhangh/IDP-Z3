@@ -40,5 +40,5 @@ You may want to check the `Development and deployment guide <https://gitlab.com/
 
    Architecture.md
    idp_engine.rst
-   idp_server.rst
+   idp_web_server.rst
 

@@ -1,5 +1,5 @@
 
-``idp_server`` module
+``idp_web_server`` module
 =====================
 
 .. toctree::

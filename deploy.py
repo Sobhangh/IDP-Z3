@@ -47,14 +47,14 @@ def query_user(query, default="y", get=False):
 
 run('python3 test.py generate')
 
-update_statics = query_user("Update the '/IDP-Z3/idp_server/static' folder? (Y/n) ")
+update_statics = query_user("Update the '/IDP-Z3/idp_web_server/static' folder? (Y/n) ")
 if update_statics:
     require_clean_work_tree("idp_web_client")
 
     # Generate static and commit.
     run('npm run-script build', cwd='idp_web_client', check=True)
     print("Copying to static folder ...")
-    copy_tree('idp_web_client/dist/', './idp_server/static')
+    copy_tree('idp_web_client/dist/', './idp_web_server/static')
 
     # Check if web-IDP-Z3 is on latest version and clean.
     # branch = get('git rev-parse --abbrev-ref HEAD', cwd="idp_web_client")

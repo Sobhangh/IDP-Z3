@@ -45,7 +45,7 @@ X use 2 machines with different max_concurrent_requests: one for static, the oth
     * `gsutil mb gs://interactive-consultant`
     * `gsutil defacl set public-read gs://interactive-consultant`
 - use [--deploy-url in ng guild](https://stackoverflow.com/questions/46613816/how-to-deploy-angular-4-front-end-to-cdn)
-* sync bucket ? `gsutil -m rsync -r ./idp_server/static gs://interactive-consultant/`
+* sync bucket ? `gsutil -m rsync -r ./idp_web_server/static gs://interactive-consultant/`
 * [font CORS issue](https://stackoverflow.com/questions/33242062/google-cloud-storage-fonts-cors-issue)
     * use http instead of https ? no fix
     * cors-config.json ?  OK   `gsutil cors set cors-config.json gs://interactive-consultant\`
