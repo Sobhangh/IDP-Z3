@@ -1,0 +1,40 @@
+.selector {
+  display: flex;
+  align-items: center;
+  height: 1.75em;
+  margin: 0.2em;
+}
+
+.buttons {
+  height: 1.75em;
+  display: flex;
+  align-items: center;
+}
+
+button {
+  font-size: 18px;
+  height: 100%;
+  width: 1.5em !important;
+  margin: 0.135em;
+}
+
+button,
+button:enabled:hover {
+  background-color: transparent;
+  color: black;
+  border: 0;
+}
+
+button.large {
+  width: 3.27em !important;
+}
+[hidden] {
+  visibility:hidden;
+}
+
+button.unexpected {
+  opacity: 0.2;
+}
+button.irrelevant {
+  color: rgba(0,0,0,0.5);
+}

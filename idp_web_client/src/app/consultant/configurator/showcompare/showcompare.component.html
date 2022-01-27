@@ -1,0 +1,21 @@
+<table>
+  <tr>
+  <td *ngFor="let i of range(valueNames.length)">
+    <app-symbol-value-selector [info]="this.idpService.getValueInfo(symbolName,valueNames[i])"></app-symbol-value-selector>
+
+    <ng-container *ngIf="comparisons && dependencySymbols.length > 0 && dependencyValuesExist">
+      <div style="margin-bottom: 1em">-----------</div>
+      <div *ngFor="let symbolName of dependencySymbols">
+        <div style="font-size: 18px">{{this.idpService.meta.getSymbol(symbolName).guiname}}</div>
+        <app-symbol-value-selector
+          *ngFor="let valueName of getDependencyValues(symbolName)"
+          [info]="makeValueInfo(comparisons[i], symbolName, valueName)"></app-symbol-value-selector>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="comparisons && dependencySymbols.length === 0">
+      <div style="margin-bottom: 1em">There is no difference between the selected values.</div>
+    </ng-container>
+  </td>
+  </tr>
+</table>

@@ -22,7 +22,7 @@ This module contains the logic for the computation of relevance.
 from idp_engine.Assignments import Status as S
 from idp_engine.Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
                                    AConjunction, Brackets, UnappliedSymbol)
-from idp_engine.Problem import Theory
+from idp_engine.Theory import Theory
 from idp_engine.utils import OrderedSet, GOAL_SYMBOL, RELEVANT
 
 

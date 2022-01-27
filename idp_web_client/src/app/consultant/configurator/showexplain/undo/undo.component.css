@@ -1,0 +1,24 @@
+.selector {
+  display: flex;
+  align-items: center;
+  height: 1.75em;
+  margin: 0.2em;
+}
+
+button {
+  font-size: 18px;
+  height: 100%;
+  width: 1.5em !important;
+  margin: 0.135em;
+}
+
+button,
+button:enabled:hover {
+  background-color: transparent;
+  color: black;
+  border: 0;
+}
+
+[hidden] {
+  visibility:hidden;
+}

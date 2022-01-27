@@ -1,8 +1,8 @@
 .. _solver_problem:
 
-idp_engine.Problem
+idp_engine.Theory
 =========================
 
-.. automodule:: idp_engine.Problem
+.. automodule:: idp_engine.Theory
    :members:
    :noindex:

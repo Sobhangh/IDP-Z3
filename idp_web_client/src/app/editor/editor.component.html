@@ -1,0 +1,99 @@
+<p-messages></p-messages>
+<div>
+    <div pTooltip="Cross-product" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('⨯')" styleClass="ui-button-secondary type" label="⨯">
+        </p-button>
+    </div>
+    <div pTooltip="Yields (->)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('→')" styleClass="ui-button-secondary type" label="→">
+        </p-button>
+    </div>
+    <div pTooltip="Bool" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('𝔹')" styleClass="ui-button-secondary type" label="𝔹">
+        </p-button>
+    </div>
+    <div pTooltip="Int" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('ℤ')" styleClass="ui-button-secondary type" label="ℤ">
+        </p-button>
+    </div>
+    <div pTooltip="Real" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('ℝ')" styleClass="ui-button-secondary type" label="ℝ">
+        </p-button>
+    </div>
+
+    <div pTooltip="For all (!)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('∀')" styleClass="ui-button-secondary type" label="∀">
+        </p-button>
+    </div>
+    <div pTooltip="Exists (?)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('∃')" styleClass="ui-button-secondary type" label="∃">
+        </p-button>
+    </div>
+    <div pTooltip="in" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('∈')" styleClass="ui-button-secondary type" label="∈">
+        </p-button>
+    </div>
+    <div pTooltip="not in" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('∉')" styleClass="ui-button-secondary type" label="∉">
+        </p-button>
+    </div>
+    <div pTooltip="Definition (<-)" style="display:inline-block; margin: 5px;">
+
+        <p-button (click)="type('←')" styleClass="ui-button-secondary type" label="←">
+        </p-button>
+    </div>
+    <div pTooltip="And (&)" style="display:inline-block; margin: 5px;">
+
+        <p-button (click)="type('∧')" styleClass="ui-button-secondary type" label="∧">
+        </p-button>
+    </div>
+    <div pTooltip="Or (|)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('∨')" styleClass="ui-button-secondary type" label="∨">
+        </p-button>
+    </div>
+    <div pTooltip="Not (~)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('¬')" styleClass="ui-button-secondary type" label="¬">
+        </p-button>
+    </div>
+    <div pTooltip="Implies (=>)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('⇒')" styleClass="ui-button-secondary type" label="⇒">
+        </p-button>
+    </div>
+    <div pTooltip="Equivalence (<=>)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('⇔')" styleClass="ui-button-secondary type" label="⇔">
+        </p-button>
+    </div>
+    <div pTooltip="Reverse implication (<=)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('⇐')" styleClass="ui-button-secondary type" label="⇐">
+        </p-button>
+    </div>
+    <div pTooltip="Less or equal (=<)" style="display:inline-block; margin: 5px;">
+
+        <p-button (click)="type('≤')" styleClass="ui-button-secondary type" label="≤">
+        </p-button>
+    </div>
+    <div pTooltip="Different (~=)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('≠')" styleClass="ui-button-secondary type" label="≠">
+        </p-button>
+    </div>
+    <div pTooltip="Greater or equal (>=)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('≥')" styleClass="ui-button-secondary type" label="≥">
+        </p-button>
+    </div>
+    <div *ngIf="!textModeUnicode" style="display: inline-block; margin: 5px;">
+        <div pTooltip="Convert to Unicode" style="display:inline-block; margin: 5px;">
+            <p-button (click)="switchTextMode('unicode')" styleClass="ui-button-secondary type" label="Prettify">
+            </p-button>
+        </div>
+    </div>
+    <div *ngIf="textModeUnicode" style="display: inline-block; margin: 5px;">
+        <div pTooltip="Convert to ASCII" style="display:inline-block; margin: 5px;">
+            <p-button (click)="switchTextMode('ascii')" styleClass="ui-button-secondary type" label="To Ascii">
+            </p-button>
+        </div>
+    </div>
+</div>
+<ngx-monaco-editor [(ngModel)]="this.idpService.spec" [options]="editorOptions"
+                   (onInit)="onInitEditor($event)"
+                   class="main"></ngx-monaco-editor>
+

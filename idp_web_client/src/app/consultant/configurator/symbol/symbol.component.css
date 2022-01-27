@@ -1,0 +1,44 @@
+:host >>> .my-panel .ui-panel-titlebar,
+:host >>> .my-panel .ui-panel-content,
+:host >>> .my-panel .ui-panel-footer {
+  background: #EEE;
+}
+:host >>> .green-panel .ui-panel-titlebar,
+:host >>> .green-panel .ui-panel-content,
+:host >>> .green-panel .ui-panel-footer {
+  background: #EEE;
+  border: 1px solid green;
+}
+:host >>> .white-panel .ui-panel-titlebar,
+:host >>> .white-panel .ui-panel-content,
+:host >>> .white-panel .ui-panel-footer {
+  background: white;
+  color: rgba(0,0,0,0.5);
+}
+:host >>> .white-panel .ui-panel-content{
+  border-top: 1px solid #c8c8c8;
+}
+
+:host >>> .propo .ui-panel-content {
+  border-top: 1px solid #c8c8c8;
+}
+:host >>> .green_propo .ui-panel-content {
+  border-top: 1px solid green;
+}
+:host >>> .white_propo .ui-panel-content {
+  background: white;
+}
+
+.contents {
+  display: flex;
+  justify-content: space-between;
+}
+
+.propHeader {
+  display: flex;
+  flex-direction: row;
+}
+
+[hidden] {
+  visibility:hidden;
+}

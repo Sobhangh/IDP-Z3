@@ -1,0 +1,129 @@
+<p-menubar [model]="items" [autoDisplay]="false"></p-menubar>
+
+<div *ngIf="this.idpService.meta.optionalPropagation">
+    <p-inputSwitch
+      [(ngModel)]="propToggle"
+      (onChange)=toggleProp($event)
+      pTooltip="Toggle automatic propagation"
+      styleClass="toggle"></p-inputSwitch>
+</div>
+
+<div *ngIf="this.idpService.meta.optionalRelevance">
+    <p-inputSwitch
+      [(ngModel)]="relToggle"
+      (onChange)=toggleRel($event)
+      pTooltip="Toggle automatic relevance"
+      styleClass="toggle"></p-inputSwitch>
+</div>
+
+<div *ngIf="!this.idpService.IDE">
+  <p-sidebar header="Specification Editor" [(visible)]="display" [style]="editorStyle"
+             (onHide)="this.idpService.reloadMeta()">
+    <h2>Knowledge Editor
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <button pButton (click)="display=false"
+              title="Close editor and run the interactive consultant">
+        Run consultant
+      </button>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <a class="header_button" (click)="checkCode()"
+         title='Check "well-guardedness" of each assertion (for paper on intensional objects)'>
+        Check code
+      </a>
+    </h2>
+    <div class="editor" id="editor">
+    <app-editor></app-editor>
+    </div>
+    <div class="resizer" id="resizer"></div>
+  </p-sidebar>
+</div>
+
+<p-dialog header="File / Share..." [(visible)]="showFileShare">
+  <p>To share this project with someone, you have 2 options:</p>
+  <ul>
+    <li>
+      <p><b>Public, with version control:</b></p>
+      <p>Create a public <a href="https://gist.github.com/" target=blank>gist on Github</a> containing the IDP source file, and send them a URL created as follows:</p>
+      <p>{{origin}}/?gist=&lt;gistID&gt;&file=&lt;filename&gt;</p>
+      <p>&nbsp;</p>
+    </li>
+    <li>
+      <p><b>Private:</b></p>
+      <p>Send them the URL below (after possibly converting it to a <a href='http://tinyurl.com' target=blank>tinyURL</a>):</p>
+      <p>URL :
+        <input id="URL" size="12" step="any" pInputText disabled [value]="URL"/>
+        <button (click)="copyURL()" value="click to copy">Copy</button>
+      </p>
+    </li>
+  </ul>
+</p-dialog>
+
+<p-dialog header="Abstract models" [(visible)]="showExpansions"
+          modal="modal"
+          styleClass="ui-dialog abstract"  [contentStyle]="{'max-height':'100%'}">
+  <ng-container *ngIf="idpService.given.length!=0">
+    <p><b>Given:</b>{{idpService.given}}</p>
+  </ng-container>
+  <ng-container *ngIf="idpService.fixed.length!=0">
+    <p><b>Consequences:</b>{{idpService.fixed}}</p>
+  </ng-container>
+  <ng-container *ngIf="idpService.expansions">
+    <p><b>Variables: {{idpService.models}}</b></p>
+    <table class="table">
+      <tr *ngFor="let row of idpService.expansions">
+        <td *ngFor="let cell of row" class="cell">
+          <p *ngFor="let line of cell">
+            {{line}}
+          </p>
+        </td>
+      </tr>
+    </table>
+  </ng-container>
+  <ng-container *ngIf="idpService.irrelevant.length!=0">
+    <p><b>Irrelevant:</b>{{idpService.irrelevant}}</p>
+  </ng-container>
+  <ng-container *ngIf="idpService.universal.length!=0">
+    <p><b>Universal:</b>{{idpService.universal}}</p>
+  </ng-container>
+</p-dialog>
+
+<p-dialog header="Explain inconsistency" [(visible)]="showExplanation"
+          modal="modal"
+          styleClass="ui-dialog abstract"  [contentStyle]="{'max-height':'100%'}">
+
+  <p>The following choices led to an inconsistency:</p>
+  <div style="width:390px" *ngIf="this.idpService.explanation!=null && this.idpService.explanationlaws!=null">
+    <div style="width:390px">
+      <div *ngFor="let symbolType of this.idpService.symbolTypes()">
+        {{symbolType}}
+        <div *ngFor="let symbolName of this.idpService.dependencySymbols(symbolType)">
+          <ng-container *ngFor="let valueName of this.idpService.getDependencyValues(symbolName)">
+            <app-undo [valueInfo]="this.idpService.getValueInfo(symbolName,valueName)"
+                      [parent]="this">
+            </app-undo>
+          </ng-container>
+        </div>
+      </div>
+
+      <ng-container *ngIf="this.idpService.explanationlaws.length > 0">
+        <div style="font-size: 18px">Laws</div>
+        <div *ngFor="let law of this.idpService.explanationlaws">
+          <app-law [lawTuple]="law"></app-law>
+        </div>
+        <button
+          [hidden] = "this.idpService.allowIgnoringLaws"
+          (click)="this.idpService.allowIgnoringLaws = true"
+        >Allow disabling laws (experts only!)</button>
+      </ng-container>
+    </div>
+  </div>
+
+  <p><br></p>
+  <p>Please undo some of these choices. Pressing below button will verify consistency again.</p>
+  <p><button pButton (click)="this.idpService.doPropagation(true)"
+          title="Run propagation (e.g., after undoing a choice)">
+  Propagate
+  </button></p>
+</p-dialog>
+
+

@@ -1,0 +1,41 @@
+<ng-container *ngIf="explanation">
+  <div style="width:390px">
+    <ng-container *ngIf="status=='UNIVERSAL'">
+      <div style="margin-bottom: 1em; width:390px">This choice is implied from the underlying theory, regardless of other choices.</div>
+    </ng-container>
+
+    <ng-container *ngIf="status=='CONSEQUENCE' || status=='ENV_CONSQ'">
+
+      <ng-container *ngIf="! environmental">
+        <div style="margin-bottom: 1em">Above choice is implied by the following choice(s):</div>
+      </ng-container>
+      <ng-container *ngIf="environmental">
+        <div style="margin-bottom: 1em">You cannot select this choice because of previous choices (which you can undo):</div>
+      </ng-container>
+
+      <div *ngFor="let symbolType of this.idpService.symbolTypes(this.explanation)">
+        {{symbolType}}
+        <div *ngFor="let symbolName of this.idpService.dependencySymbols(symbolType,this.explanation)">
+          <ng-container *ngFor="let valueName of this.idpService.getDependencyValues(symbolName,this.explanation)">
+            <app-undo [valueInfo]="this.idpService.getValueInfo(symbolName,valueName)"
+                      [parent]="this">
+            </app-undo>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="laws.length > 0">
+      <div>Laws</div>
+      <ng-container *ngFor="let law of laws">
+          <app-law [lawTuple]="law"></app-law>
+      </ng-container>
+      <button
+        [hidden] = "this.idpService.allowIgnoringLaws"
+        (click)="this.idpService.allowIgnoringLaws = true"
+      >Allow disabling laws (experts only!)</button>
+    </ng-container>
+  </div>
+</ng-container>
+
+

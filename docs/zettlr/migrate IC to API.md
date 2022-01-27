@@ -36,7 +36,7 @@ X IC: do not restart propagation if model is unknown: it won't fix anything
 - [x] API propagate: consider all assignments without value
     - [x] API problem: fill assignments with all subtences
 X API: restart solver if unknown (not needed ?)
-- [ ] move definitions, constraints, assignments to State.Problem just before get_relevant
+- [ ] move definitions, constraints, assignments to State.Theory just before get_relevant
 - [X] API: add simplify
 - [X] IC: do not cascade propagate: full propagate will take care of it.  Use API.simplify instead
 - [ ] API: add tag argument to propagate

@@ -1,0 +1,39 @@
+<ng-container *ngIf="valueInfo && symbolInfo && (valueInfo.assignment.normal || symbolInfo.view == 'expanded')">
+  <div class="val"
+      [ngClass]="{irrelevant: ! valueInfo.assignment.relevant }">
+
+    <app-symbol-value-selector [info]="valueInfo" [symbolInfo]="symbolInfo" [withHeader]="withHeader"
+    ></app-symbol-value-selector>
+
+    <div class="buttons">
+      <button (click)="longInfoVisible = true"
+              *ngIf="onlyone==1 && (symbolInfo.shortinfo || symbolInfo.longinfo)" 
+              [ngClass]="symbolInfo.longinfo?'link':'nolink'"
+              class="transp"
+              icon="pi pi-info-circle"
+              pButton
+              pTooltip="{{symbolInfo.shortinfo}}"
+      ></button>
+      <button (click)="op.toggle($event)"
+              *ngIf="symbolInfo.showParameters" class="transp"
+              icon="pi pi-sitemap"
+              pButton
+              pTooltip="Show the symbols that define this one"
+      ></button>
+    </div>
+  </div>
+
+
+  <p-dialog *ngIf="symbolInfo.longinfo"
+            [(visible)]="longInfoVisible"
+            [dismissableMask]="true"
+            [header]="symbolInfo.guiname"
+            [modal]="true"
+            [responsive]="true"
+            [style]="{minWidth: '400px', maxWidth:'50%'}"
+            appendTo="body"
+  >
+    {{symbolInfo.longinfo}}
+  </p-dialog>
+  
+</ng-container>

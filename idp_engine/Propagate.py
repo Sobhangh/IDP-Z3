@@ -38,7 +38,7 @@ from .Expression import (Expression, AQuantification,
                     ADisjunction, AConjunction, AppliedSymbol,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
-from .Problem import Theory
+from .Theory import Theory
 from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
 
 start = time.process_time()

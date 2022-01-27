@@ -19,15 +19,14 @@
 
 """
 
-Methods to interpret a theory in a data structure
+Methods to ground / interpret a theory in a data structure
 
-* substitute a constant by its value in an expression
-* replace symbols interpreted in a structure by their interpretation
 * expand quantifiers
+* replace symbols interpreted in the structure by their interpretation
 
 This module also includes methods to:
 
-* substitute an node by another in an AST tree
+* substitute a node by another in an AST tree
 * instantiate an expresion, i.e. replace a variable by a value
 
 This module monkey-patches the ASTNode class and sub-classes.

@@ -55,7 +55,7 @@ Many operations on Theory instances can be chained, e.g., ``Theory(T,S).propagat
 
 The class has the following methods:
 
-.. autoclass:: idp_engine.Problem.Theory
+.. autoclass:: idp_engine.Theory.Theory
     :members:
 
 .. _idp_engine:
