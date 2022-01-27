@@ -1,3 +1,4 @@
+idp_web_client/dist
 idp_web_client/node_modules
 monkeytype.sqlite3
 bin

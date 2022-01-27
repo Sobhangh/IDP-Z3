@@ -13,8 +13,8 @@ Contributors (alphabetical):  Bram Aerts, Ingmar Dasseville, Jo Devriendt, Marc 
 * Install [python3](https://www.python.org/downloads/) on your machine.
 * Install [poetry](https://python-poetry.org/docs/#installation):
     * after that, logout and login if requested, to update `$PATH`
-* Use git to clone https://gitlab.com/krr/IDP-Z3 to a directory on your machine
-* Open a terminal in that directory
+* Use git to clone https://gitlab.com/krr/IDP-Z3 to a directory on your machine, e.g., IDP-Z3
+* Open a terminal in that IDP-Z3 directory
 * If you have several versions of python3, and want to run on a particular one, e.g., 3.9:
     * run `poetry env use 3.9`
     * replace `python3` by `python3.9` in every command below
@@ -28,10 +28,29 @@ To launch the Interactive Consultant web server:
 * open a terminal in that directory and run `poetry run python3 main.py`
 * open your browser at http://127.0.0.1:5000
 
+The Web IDE is at http://127.0.0.1:5000/IDE
+
 
 # Develop
 
 You may want to read about the [technical documentation](http://docs.idp-z3.be/en/latest/code_reference.html) and the [Development and deployment guide](https://gitlab.com/krr/IDP-Z3/-/wikis/Development-and-deployment-guide).
+
+Development on the web client requires additional installation:
+
+* install [nvm](https://github.com/nvm-sh/nvm)
+* `cd idp_web_client`
+* `nvm install 11`
+* `npm ci`
+
+To launch the Interactive Consultant in development mode:
+
+* open a terminal in the IDP-Z3 directory and run `poetry run python3 main.py` to launch the IDP-Z3 server
+* `cd idp_web_client`
+* `npm start`
+* open your browser at http://127.0.0.1:4201
+
+
+# documentation
 
 The user manual is in the `/docs` folder and can be locally generated as follows:
 ~~~~
