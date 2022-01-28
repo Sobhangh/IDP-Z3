@@ -123,7 +123,8 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
                         | enumeration=Enumeration
                         | enumeration=CSVEnumeration
                         | enumeration=ConstructedFrom
-                        | default=Identifier '.'?);
+                        | default=Identifier
+                        ) '.'?;
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
   FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Identifier;
@@ -147,7 +148,7 @@ Goal: 'goal' name=ID;
 View: 'view' viewType=ViewType;
   ViewType: 'normal' | 'expanded';
 
-Display: 'display' '{' (constraints=Expression '.' | interpretations=SymbolInterpretation '.'?)* '}';
+Display: 'display' '{' (constraints=Expression '.' | interpretations=SymbolInterpretation)* '}';
 
 Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}';
 

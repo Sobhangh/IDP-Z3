@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### IDP-Z3
 * fix #181: Should detect error in `∀c in q[()->Bool]:`
+* fix #182: Allow a `.` after a symbol interpretation in a theory
 
 ### Interactive Consultant
 
