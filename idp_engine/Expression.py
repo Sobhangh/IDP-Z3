@@ -549,7 +549,7 @@ class Domain(Symbol):
         super().__init__(**kwargs)
 
     def __str__(self):
-        return self.name + ("" if not self.ins else
+        return self.name + ("" if not self.out else
                             f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
 
     def range():
@@ -589,7 +589,7 @@ class Quantee(Expression):
     The `Concept` type may be qualified, e.g. `Concept[Color->Bool]`
 
     Attributes:
-        vars (List[List[Variable]): the (tuples of) variables being quantified
+        vars (List[List[Variable]]): the (tuples of) variables being quantified
 
         domain (Domain, Optional): a literal Domain to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
 
@@ -608,7 +608,7 @@ class Quantee(Expression):
         self.domain = kwargs.pop('domain') if 'domain' in kwargs else None
         sort = kwargs.pop('sort') if 'sort' in kwargs else None
         if self.domain:
-            self.check(not (self.domain.name != CONCEPT and 0 <len(self.domain.ins)),
+            self.check(self.domain.name == CONCEPT or self.domain.out is None,
                    f"Can't use signature after predicate {self.domain.name}")
 
         self.sub_exprs = ([sort] if sort else
@@ -644,6 +644,21 @@ class Quantee(Expression):
 
 
 class AQuantification(Expression):
+    """ASTNode representing a quantified formula
+
+    Args:
+        annotations (Dict[str, str]):
+            The set of annotations given by the expert in the IDP-Z3 program.
+
+            ``annotations['reading']`` is the annotation
+            giving the intended meaning of the expression (in English).
+
+        q (str): either '∀' or '∃'
+
+        quantees (List[Quantee]): list of variable declarations
+
+        f (Expression): the formula being quantified
+    """
     PRECEDENCE = 20
 
     def __init__(self, **kwargs):
