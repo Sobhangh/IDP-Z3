@@ -1,6 +1,6 @@
 vocabulary V {
-    type Number_t := { 0..17 } 
-    type Players_t := { Computer, You } 
+    type Number_t := { 0..17 }
+    type Players_t := { Computer, You }
     Ball_Amount_at_Start:  -> Number_t
     Balls_taken:  -> Number_t
     Ball_Amount_at_End:  -> Number_t
@@ -26,8 +26,8 @@ theory T: V{
 
 
 structure S: V{
-    Ball_Amount_at_Start := {() -> 17}
-    Max_Draw_Balls := {() -> 3}
-    Start_of_Game := true
+    Ball_Amount_at_Start := {() -> 17}.
+    Max_Draw_Balls := {() -> 3}.
+    Start_of_Game := true.
 }
 

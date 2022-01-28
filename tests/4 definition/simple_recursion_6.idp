@@ -12,7 +12,7 @@ theory T:V {
 }
 
 structure S:V {
-    T := {1,2,3}
+    T := {1,2,3}.
 }
 
 procedure main() {

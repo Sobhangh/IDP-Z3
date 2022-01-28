@@ -16,8 +16,8 @@ theory T:V {
 }
 
 structure S:V {
-    T := {0,1,2,3}
-    p := {(0,1),(0,3)}
+    T := {0,1,2,3}.
+    p := {(0,1),(0,3)}.
 }
 
 procedure main() {

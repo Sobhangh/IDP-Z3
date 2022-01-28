@@ -25,7 +25,7 @@ Netherlands	Germany
 Germany	    France
 Germany	    Denmark
 Germany	    Luxembourg
-France	    Luxembourg }
+France	    Luxembourg }.
 }
 
 -- meta -------------------------------------

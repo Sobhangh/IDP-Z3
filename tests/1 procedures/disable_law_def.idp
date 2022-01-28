@@ -15,7 +15,7 @@ theory T:V {
 }
 
 structure S:V {
-    q := {(a,b),(b,c),(d,e)}
+    q := {(a,b),(b,c),(d,e)}.
 }
 
 procedure main () {

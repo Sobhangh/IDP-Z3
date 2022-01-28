@@ -8,7 +8,7 @@ theory {
 }
 
 structure S:V {
-    p:= true
+    p:= true.
 }
 
 procedure main() {

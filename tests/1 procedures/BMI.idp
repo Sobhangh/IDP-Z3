@@ -48,13 +48,13 @@ theory T:V {
     }
     (weight()=80).
 
-    goal_symbol := {`riskLevel}
+    goal_symbol := {`riskLevel}.
 
 }
 
 
 structure {
-    length := {->160} // this value yields a friendly floating point BMI
+    length := {->160}. // this value yields a friendly floating point BMI
 }
 
 procedure main() {

@@ -8,7 +8,7 @@ vocabulary V {
 }
 theory T1:V {
     p() <=> (∀c in Color: c=red).
-    q := {red, blue}
+    q := {red, blue}.
     (∀c in Color: ~q(c) => c=color()).
     ∀c in Color: c=color().
     ∀c in $(`Color): c=color().
@@ -16,12 +16,12 @@ theory T1:V {
     ∀c in r, c2 in q: c=color().
 }
 theory T2:V {
-    q := {red, blue}
+    q := {red, blue}.
     ∀c in q: c=color().
     ∀c in r, c2 in q: c=color().
 }
 theory T3:V {
-    q := {red, blue}
+    q := {red, blue}.
     (∀c in Color: ~q(c) => c=color()).
     ∀c in $(`Color): c=color().
 }

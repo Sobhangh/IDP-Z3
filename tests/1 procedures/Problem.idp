@@ -15,7 +15,7 @@ theory T:V {
 }
 structure S:V {
     p := true.
-    range := {0..5}
+    range := {0..5}.
 }
 
 procedure main () {

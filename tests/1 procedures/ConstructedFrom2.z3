@@ -11,7 +11,7 @@ theory T:V {
 }
 display {
     expand := {`Color}.
-    goal_symbol := {`Color}
+    goal_symbol := {`Color}.
 }
 
 -- meta -------------------------------------

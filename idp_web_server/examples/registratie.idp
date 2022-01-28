@@ -189,7 +189,7 @@ theory decision:decision {
 
 }
 structure default:environment {
-  region:=Flemish_Region
+  region:=Flemish_Region.
 }
 display {
     goal_symbol := {`tax_amount}

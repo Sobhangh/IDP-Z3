@@ -9,15 +9,15 @@ vocabulary V {
 }
 
 structure S:V {
-    opposite := {red→ green, (green)→ green}
-    f := { (A,A)→ A, (A,B)→ A, (B,A)→ B }
-    is_color := {}
+    opposite := {red→ green, (green)→ green}.
+    f := { (A,A)→ A, (A,B)→ A, (B,A)→ B }.
+    is_color := {}.
 }
 
 structure S2:V {
-    opposite := {red→ green, green→ red} else blue
-    f := { (A,A)→ A, (A,B)→ A, (B,A)→ B } else B
-    is_color := {red}
+    opposite := {red→ green, green→ red} else blue.
+    f := { (A,A)→ A, (A,B)→ A, (B,A)→ B } else B.
+    is_color := {red}.
 }
 
 theory T:V {

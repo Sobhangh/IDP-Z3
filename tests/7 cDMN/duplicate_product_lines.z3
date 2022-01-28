@@ -3,10 +3,10 @@
 
 
 vocabulary V {
-    type Product_t := { 1..7 } 
-    type SKU_t := { SKU1000, SKU1, SKU2, SKU3, SKU4 } 
-    type Price_t := { 1..100 } 
-    type Quantity_t := { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } 
+    type Product_t := { 1..7 }
+    type SKU_t := { SKU1000, SKU1, SKU2, SKU3, SKU4 }
+    type Price_t := { 1..100 }
+    type Quantity_t := { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
     sku_of_Product: Product_t -> SKU_t
     price_of_Product: Product_t -> Price_t
     quantity_of_Product: Product_t -> Quantity_t
@@ -22,9 +22,9 @@ theory T: V{
 
 
 structure S: V{
-    sku_of_Product := {(1) -> SKU1000, (2) -> SKU1, (3) -> SKU2, (4) -> SKU1, (5) -> SKU3, (6) -> SKU3, (7) -> SKU4}
-    price_of_Product := {(1) -> 10, (2) -> 20, (3) -> 30, (4) -> 20, (5) -> 40, (6) -> 42, (7) -> 15}
-    quantity_of_Product := {(1) -> 10, (2) -> 3, (3) -> 1, (4) -> 4, (5) -> 6, (6) -> 8, (7) -> 2}
+    sku_of_Product := {(1) -> SKU1000, (2) -> SKU1, (3) -> SKU2, (4) -> SKU1, (5) -> SKU3, (6) -> SKU3, (7) -> SKU4}.
+    price_of_Product := {(1) -> 10, (2) -> 20, (3) -> 30, (4) -> 20, (5) -> 40, (6) -> 42, (7) -> 15}.
+    quantity_of_Product := {(1) -> 10, (2) -> 3, (3) -> 1, (4) -> 4, (5) -> 6, (6) -> 8, (7) -> 2}.
 }
 
 
