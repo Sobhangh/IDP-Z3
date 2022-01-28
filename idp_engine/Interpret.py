@@ -304,7 +304,7 @@ Symbol.instantiate = instantiate
 
 def range(self):
     range = [t for t in self.decl.range]
-    if self.ins:  # x in Concept[T->T]
+    if self.out:  # x in Concept[T->T]
         range = [v for v in range
                  if v.decl.symbol.decl.arity == len(self.ins)
                  and isinstance(v.decl.symbol.decl, SymbolDeclaration)

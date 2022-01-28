@@ -133,7 +133,7 @@ Symbol.annotate = annotate
 
 def annotate(self, voc, q_vars={}):
     Symbol.annotate(self, voc, q_vars)
-    if self.ins:
+    if self.out:
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
         self.out = self.out.annotate(voc, q_vars)
     return self

@@ -6,8 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+### IDP-Z3
+* fix #181: Should detect error in `∀c in q[()->Bool]:`
 
-## [0.9.1] - 2022-12-25
+### Interactive Consultant
+
+
+
+## [0.9.1] - 2022-01-25
 
 Highlights of the breaking changes:
 * `model_expand` API is now a regular function, not an iterator
