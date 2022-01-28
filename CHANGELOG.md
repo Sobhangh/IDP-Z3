@@ -6,9 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unpublished yet]
 
+Highlights of the breaking changes:
+* A `.` is now required after a symbol interpretation in a theory or structure, e.g. `color := {red, blue, green}.`.
+
 ### IDP-Z3
+* (breaking) fix #182: Require a `.` after a symbol interpretation in a theory or structure
 * fix #181: Should detect error in `∀c in q[()->Bool]:`
-* fix #182: Allow a `.` after a symbol interpretation in a theory
 
 ### Interactive Consultant
 
