@@ -66,4 +66,4 @@ Additional  notes:
 
 * The enumeration of ``goal_string`` is used to compute relevance relative to goals (see the ``determine_relevance`` method in the :ref:`Theory class <Theory_class>`).
 
-
+* The statement may end with a ``.``
