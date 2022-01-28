@@ -5,8 +5,8 @@ vocabulary V {
 }
 
 structure S:V {
-    color := {red, blue, green}
-    opposite := {red-> green, green-> red}
+    color := {red, blue, green}.
+    opposite := {red-> green, green-> red}.
 }
 
 theory T:V {
@@ -14,8 +14,8 @@ theory T:V {
 }
 
 structure S2:V {
-    color := {A, B, C}
-    opposite := {A-> C, C-> A}
+    color := {A, B, C}.
+    opposite := {A-> C, C-> A}.
 }
 
 

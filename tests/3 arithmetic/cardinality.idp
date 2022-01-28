@@ -9,7 +9,7 @@ vocabulary V {
 }
 theory T:V {
     Vehicle(o2). Vehicle(o3).
-    fleetOf := {o1 -> f1, o2->f1, o3->f2}
+    fleetOf := {o1 -> f1, o2->f1, o3->f2}.
     #{V ∈ Vehicle: true} = 2.
     weight(o1)=3.
     weight(o2)=4.

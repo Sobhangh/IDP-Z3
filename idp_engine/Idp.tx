@@ -124,7 +124,7 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
                         | enumeration=CSVEnumeration
                         | enumeration=ConstructedFrom
                         | default=Identifier
-                        ) '.'?;
+                        ) '.';
   FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
   FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
                   ('->' | '→') value=Identifier;

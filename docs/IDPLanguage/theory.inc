@@ -17,10 +17,11 @@ Theory
         // here comes the theory named T, on vocabulary named V
     }
 
-A *theory* is a set of axioms and definitions to be satisfied.
+A *theory* is a set of axioms and definitions to be satisfied, and of symbol interpretations.
 If the names are omitted, the theory is named T, for vocabulary V.
 
-Before explaining their syntax, we need to introduce the concept of term.
+Symbol interpretations are described in the Section on :ref:`Structure<Structure>`.
+Before explaining the syntax of axioms and definitions, we need to introduce the concept of term.
 
 .. _term:
 .. index:: term

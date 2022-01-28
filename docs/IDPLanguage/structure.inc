@@ -10,11 +10,11 @@ Structure
         // here comes the structure named S, for vocabulary named V
     }
 
-A *structure* specifies the interpretation of some type_, predicate_\ s and function_\ s, by enumeration.
+A *structure* specifies the interpretation of some type_, predicate_\ s and function_\ s.
 If the names are omitted, the structure is named S, for vocabulary V.
 
-A structure is a set of statement of the form ``<symbol> := <enumeration>``,
-e.g., ``P := {1..9}``, where the enumeration can be:
+A structure is a set of symbol interpretations of the form ``<symbol> := <interpretation>.``,
+e.g., ``P := {1..9}``, where the interpretation can be:
 
 for nullary predicates (propositions)
     ``true`` or ``false``
@@ -48,13 +48,13 @@ for n-ary functions:
 
 Additional  notes:
 
-* the enumeration for a predicate specifies the tuples that make the predicate true; any other tuple make it false.
+* the interpretation of a predicate is specified by the set of the tuples that make the predicate true; any other tuple makes it false.
 
-* the enumeration for a function may be followed by ``else <default>``, where ``<default>`` is a default value (a rigid term), i.e., a value for the non-enumerated tuples, if any.
+* the interpretation of a function may be followed by ``else <default>``, where ``<default>`` is a default value (a rigid term), i.e., a value for the non-enumerated tuples, if any.
 
 * parenthesis around a tuple can be omitted when the arity is 1, e.g., ``{1-2, 3->4}``
 
-* a predicate may be enumerated using a CSV format, with one tuple per line, e.g., :
+* the interpretation of a predicate may be specified using the CSV format, with one tuple per line, e.g., :
 
 .. code::
 
@@ -64,6 +64,6 @@ Additional  notes:
     5 6
     }
 
-* The enumeration of ``goal_string`` is used to compute relevance relative to goals (see the ``determine_relevance`` method in the :ref:`Theory class <Theory_class>`).
+* The interpretation of ``goal_string`` is used to compute relevance relative to goals (see the ``determine_relevance`` method in the :ref:`Theory class <Theory_class>`).
 
-* The statement may end with a ``.``
+* The tuples of an interpretation can be given in any order.

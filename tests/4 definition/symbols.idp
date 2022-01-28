@@ -23,7 +23,7 @@ theory {
   !x in Concept[color->color]: $(x)(red) is enumerated.
 }
 structure S:V {
-  opposite := {red->blue}
+  opposite := {red->blue}.
 }
 procedure main() {
     pretty_print(Theory(T, S).formula())

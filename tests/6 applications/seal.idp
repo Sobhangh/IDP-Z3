@@ -19,7 +19,7 @@ theory decision:decision {
 }
 
 structure S:decision {
-    measure := {`cSID}
+    measure := {`cSID}.
 }
 procedure main() {
     print(Theory(decision, S).formula())

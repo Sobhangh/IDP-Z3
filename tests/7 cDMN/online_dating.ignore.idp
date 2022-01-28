@@ -1,13 +1,13 @@
 
 
 vocabulary V {
-    type Person_t := { Jane, Jim, Dave } 
-    type Gender_t := { Male, Female } 
-    type City_t := { Seattle, LA } 
-    type Age_t := { 0..100 } 
-    type Interest_t := { skydiving, knitting, reading, soccer, talking } 
-    type Number_t := { 0..100 } 
-    type Score_t := { 0..100 } 
+    type Person_t := { Jane, Jim, Dave }
+    type Gender_t := { Male, Female }
+    type City_t := { Seattle, LA }
+    type Age_t := { 0..100 }
+    type Interest_t := { skydiving, knitting, reading, soccer, talking }
+    type Number_t := { 0..100 }
+    type Score_t := { 0..100 }
     gender_of_Person: Person_t -> Gender_t
     city_of_Person: Person_t -> City_t
     age_of_Person: Person_t -> Age_t
@@ -38,12 +38,12 @@ theory T: V{
 
 
 structure S: V{
-    gender_of_Person := {(Jane) -> Female, (Jim) -> Male, (Dave) -> Male}
-    city_of_Person := {(Jane) -> Seattle, (Jim) -> Seattle, (Dave) -> Seattle}
-    age_of_Person := {(Jane) -> 26, (Jim) -> 29, (Dave) -> 28}
-    minimum_age_of_Person := {(Jane) -> 28, (Jim) -> 24, (Dave) -> 18}
-    maximum_age_of_Person := {(Jane) -> 32, (Jim) -> 29, (Dave) -> 50}
-    minimum_shared_interests_of_Person := {(Jane) -> 1, (Jim) -> 2, (Dave) -> 0}
-    Person_has_Interest := {(Jane,skydiving), (Jane,knitting), (Jane,reading), (Jim,skydiving), (Jim,soccer), (Jim,knitting), (Dave,talking)}
-    Person_accepts_Gender := {(Jane,Male), (Jim,Female), (Dave,Male), (Dave,Female)}
+    gender_of_Person := {(Jane) -> Female, (Jim) -> Male, (Dave) -> Male}.
+    city_of_Person := {(Jane) -> Seattle, (Jim) -> Seattle, (Dave) -> Seattle}.
+    age_of_Person := {(Jane) -> 26, (Jim) -> 29, (Dave) -> 28}.
+    minimum_age_of_Person := {(Jane) -> 28, (Jim) -> 24, (Dave) -> 18}.
+    maximum_age_of_Person := {(Jane) -> 32, (Jim) -> 29, (Dave) -> 50}.
+    minimum_shared_interests_of_Person := {(Jane) -> 1, (Jim) -> 2, (Dave) -> 0}.
+    Person_has_Interest := {(Jane,skydiving), (Jane,knitting), (Jane,reading), (Jim,skydiving), (Jim,soccer), (Jim,knitting), (Dave,talking)}.
+    Person_accepts_Gender := {(Jane,Male), (Jim,Female), (Dave,Male), (Dave,Female)}.
 }

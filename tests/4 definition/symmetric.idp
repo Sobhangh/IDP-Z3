@@ -11,7 +11,7 @@ theory {
     !`p in Concept: symmetric(`p)
 				=> (!x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x)).
     !`p in symmetric: !x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x).
-	symmetric := {`edge}
+	symmetric := {`edge}.
 }
 display {
 	expand := {`edge}.

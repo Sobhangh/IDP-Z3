@@ -121,7 +121,7 @@ theory {
     ~(Length(Sides()) is enumerated) => Length(Sides())=4.
 }
 structure {
-    Length := {1->1, 2->2, 3->3}
+    Length := {1->1, 2->2, 3->3}.
 }
 
 display {
