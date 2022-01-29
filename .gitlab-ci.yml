@@ -6,9 +6,8 @@ test:
         - python3 get-poetry.py
         - source $HOME/.poetry/env
         - poetry install
-        - poetry run coverage run test.py pipeline
+        - poetry run coverage run test.py generate pipeline api
         - poetry run coverage report
-        - poetry run coverage xml
 
 pages:
   image: ubuntu
