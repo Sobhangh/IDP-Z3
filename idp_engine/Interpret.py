@@ -460,9 +460,7 @@ def interpret(self, problem):
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
                               for defin in problem.definitions]
             inst = [x for x in inst if x]
-            if len(inst) == 1:
-                co_constraint = inst[0]
-            elif len(inst) > 1:
+            if inst:
                 co_constraint = AND(inst)
         out = (value if value else
                self._change(sub_exprs=sub_exprs, simpler=simpler,

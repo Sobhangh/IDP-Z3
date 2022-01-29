@@ -102,38 +102,6 @@ def unquote(s):
     return s
 
 
-def in_list(q, ls):
-    if not ls:
-        return True  # e.g. for INT, REAL, DATE
-    if len(ls) == 1:
-        return q == ls[0]
-    return Or([q == i for i in ls])
-
-
-def is_number(s):
-    if str(s) in ['True', 'False']:
-        return False
-    try:
-        float(eval(str(s if not s.endswith('?') else s[:-1]))) # accepts "2/3" or "3.1415?"
-        return True
-    except:
-        return False
-
-
-def splitLast(l):
-    return l[:-1], l[-1]
-
-
-def applyTo(sym, arg):
-    if len(arg) == 0:
-        return sym
-    return sym(arg)
-
-
-def mergeDicts(l):
-    # merge a list of dicts (possibly a comprehension
-    return dict(ChainMap(*reversed(list(l))))
-
 # OrderedSet  #############################################
 
 
