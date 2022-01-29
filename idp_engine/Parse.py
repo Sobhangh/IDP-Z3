@@ -713,7 +713,7 @@ class Structure(ASTNode):
 
 class SymbolInterpretation(ASTNode):
     """
-    AST node representing `<symbol> := { <identifiers*> } else <default>`
+    AST node representing `<symbol> := { <identifiers*> } else <default>.`
 
     Attributes:
         name (string): name of the symbol being enumerated.

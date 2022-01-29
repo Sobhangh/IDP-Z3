@@ -229,10 +229,10 @@ class Assignments(dict):
     def __str__(self) -> str:
         """ Print the assignments in the same format as a model.
 
-        Most symbols are printed as `name := {(val1, ..., val} -> valx, ...}`
+        Most symbols are printed as `name := {(val1, ..., val} -> valx, ...}.`
         with two exceptions:
-            1. Nullary symbols are printed as `name := value`
-            2. Predicates without True atoms are printed as `name := {}`
+            1. Nullary symbols are printed as `name := value.`
+            2. Predicates without True atoms are printed as `name := {}.`
         """
         out = {}
         nullary = set()
@@ -262,7 +262,7 @@ class Assignments(dict):
         model_str = ""
         for k, a in out.items():
             if k in nullary:  # Exception 1.
-                model_str += f"{k} := {a[0][2:]}{NEWL}"
+                model_str += f"{k} := {a[0][2:]}.{NEWL}"
             else:
-                model_str += f"{k} := {{{ ', '.join(s for s in a) }}}{NEWL}"
+                model_str += f"{k} := {{{ ', '.join(s for s in a) }}}.{NEWL}"
         return model_str

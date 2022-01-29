@@ -179,7 +179,7 @@ def determine_relevance(*theories: Union[TheoryBlock, Structure, Theory]) -> Ite
     Relevant questions are those that are not irrelevant.
 
     If ``goal_symbol`` has an enumeration in the theory
-    (e.g., ``goal_symbol := {`tax_amount}``),
+    (e.g., ``goal_symbol := {`tax_amount}.``),
     relevance is computed relative to those goals.
 
     Definitions in the theory are ignored,

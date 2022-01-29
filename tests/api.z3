@@ -2,24 +2,24 @@ ok
 
 Model 1
 ==========
-p := true
-q := true
+p := true.
+q := true.
 
 
 Model 2
 ==========
-p := {}
-q := true
+p := {}.
+q := true.
 
 
 Model 3
 ==========
-p := {}
-q := {}
+p := {}.
+q := {}.
 
 
 No more models.
 
-p := true
-q := true
+p := true.
+q := true.
 

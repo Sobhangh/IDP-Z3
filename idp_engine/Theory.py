@@ -347,7 +347,7 @@ class Theory(object):
     def enable_law(self, code: str) -> "Theory":
         """Enables a law, represented as a code string taken from the output of explain(...).
 
-        The law should not result from a structure (e.g., from ``p:=true``)
+        The law should not result from a structure (e.g., from ``p:=true.``)
         or from a types (e.g., from ``T:={1..10}`` and ``c: () -> T``).
 
         Args:
@@ -365,7 +365,7 @@ class Theory(object):
     def disable_law(self, code: str) -> "Theory":
         """Disables a law, represented as a code string taken from the output of explain(...).
 
-        The law should not result from a structure (e.g., from ``p:=true``)
+        The law should not result from a structure (e.g., from ``p:=true.``)
         or from a types (e.g., from ``T:={1..10}`` and ``c: () -> T``).
 
         Args:

@@ -76,7 +76,7 @@ def determine_relevance(self: Theory) -> Theory:
     The result is found in the ``relevant`` attribute of the assignments in ``self.assignments``.
 
     If ``goal_symbol`` has an enumeration in the theory
-    (e.g., ``goal_symbol := {`tax_amount}``),
+    (e.g., ``goal_symbol := {`tax_amount}.``),
     relevance is computed relative to those goals.
 
     Definitions in the theory are ignored,
