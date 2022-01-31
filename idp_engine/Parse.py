@@ -392,9 +392,9 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Symbol]): the types of the arguments
+        sorts (List[Domain]): the types of the arguments
 
-        out (Symbol): the type of the symbol
+        out (Domain): the type of the symbol
 
         type (string): name of the Z3 type of an instance of the symbol
 
@@ -472,14 +472,14 @@ class SymbolDeclaration(ASTNode):
         """Returns an expression that says whether the `args` are in the domain of the symbol.
 
         Arguments:
-            args: the list of arguments to be checked, e.g. `[1, 2]`
+            args (List[Expression]): the list of arguments to be checked, e.g. `[1, 2]`
 
         Returns:
             Expression: whether `(1,2)` is in the domain of the symbol
         """
         assert len(self.sorts) == len(args), \
             f"Incorrect arity of {str(args)} for {self.name}"
-        return AND([typ.decl.check_bounds(term)
+        return AND([typ.has_in_domain(term)
                    for typ, term in zip(self.sorts, args)])
 
 

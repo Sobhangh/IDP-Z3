@@ -531,9 +531,22 @@ class Symbol(Expression):
     def __repr__(self):
         return str(self)
 
+    def has_in_domain(self, term: Expression) -> Expression:
+        """Returns an expression that says whether term is in the domain of the symbol.
+
+        Args:
+            term (Expression): the argument to be checked
+
+        Returns:
+            Expression: whether `term` is in the domain of the symbol
+        """
+        return self.decl.check_bounds(term)
+
 
 class Domain(Symbol):
     """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
+
+    Inherits from Symbol
 
     Args:
         name (Symbol): name of the concept
@@ -554,6 +567,21 @@ class Domain(Symbol):
 
     def range():
         pass  # monkey-patched
+
+    def has_in_domain(self, term: Expression) -> Expression:
+        """Returns an Expression that says whether `term` is in the domain of the symbol.
+
+        Args:
+            term (Expression): the argument to be checked
+
+        Returns:
+            Expression: whether `term` is in the domain of the symbol
+        """
+        if self.name == CONCEPT:
+            comparisons = [EQUALS([term, c]) for c in self.range()]
+            return OR(comparisons)
+        else:
+            return self.decl.check_bounds(term)
 
 
 class AIfExpr(Expression):
