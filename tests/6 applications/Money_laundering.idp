@@ -2,17 +2,17 @@ vocabulary Type {
     type Color := {red, blue, green}
 }
 vocabulary V1 {
-    extern vocabulary Type
+    import Type
     c1: () -> Color
 }
 vocabulary V2 {
-    extern vocabulary Type
+    import Type
     c2: () -> Color
 }
 
 vocabulary V {
-    extern vocabulary V1
-    extern vocabulary V2
+    import V1
+    import V2
     }
 
 theory T:V {

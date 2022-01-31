@@ -11,7 +11,7 @@ vocabulary environment {
 }
 
 vocabulary decision {
-    extern vocabulary environment
+    import environment
 
     T: ()→Int
     M: ()→material
