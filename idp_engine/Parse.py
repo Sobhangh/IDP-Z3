@@ -39,13 +39,13 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         AIfExpr, AQuantification, Domain, Quantee,
+                         Expression, AIfExpr, AQuantification, Domain, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date,
-                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, OR, EQUIV)
+                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     GOAL_SYMBOL, EXPAND, RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
@@ -448,6 +448,11 @@ class SymbolDeclaration(ASTNode):
         self.block: Optional[Block] = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
 
+    @classmethod
+    def make(cls, strname, arity, sorts, out):
+        o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
+        return o
+
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
             return ''
@@ -463,10 +468,19 @@ class SymbolDeclaration(ASTNode):
         return (self.arity == 1 and self.type == BOOL
                 and self.sorts[0].decl == other)
 
-    @classmethod
-    def make(cls, strname, arity, sorts, out):
-        o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
-        return o
+    def has_in_domain(self, args: List[Expression]) -> Expression:
+        """Returns an expression that says whether the `args` are in the domain of the symbol.
+
+        Arguments:
+            args: the list of arguments to be checked, e.g. `[1, 2]`
+
+        Returns:
+            Expression: whether `(1,2)` is in the domain of the symbol
+        """
+        assert len(self.sorts) == len(args), \
+            f"Incorrect arity of {str(args)} for {self.name}"
+        return AND([typ.decl.check_bounds(term)
+                   for typ, term in zip(self.sorts, args)])
 
 
 Type = Union[TypeDeclaration, SymbolDeclaration]

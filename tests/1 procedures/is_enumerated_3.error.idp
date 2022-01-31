@@ -1,0 +1,16 @@
+
+vocabulary V {
+    type color := {red, blue, green}
+    type country := {Belgium, Netherlands, Luxemburg}
+    p : color → 𝔹
+    q: color -> color
+}
+theory T:V {
+}
+structure S:V {
+    p := {red, Belgium}.
+    // q := {Belgium -> red}.  // ok: raises an error
+}
+procedure main() {
+    pretty_print(model_expand(T, S))
+}

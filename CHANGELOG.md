@@ -11,6 +11,7 @@ Highlights of the breaking changes:
 
 ### IDP-Z3
 * (breaking) fix #182: Require a `.` after a symbol interpretation in a theory or structure
+* fix #183: should check domain in predicate enumerations
 * fix #181: Should detect error in `∀c in q[()->Bool]:`
 
 ### Interactive Consultant

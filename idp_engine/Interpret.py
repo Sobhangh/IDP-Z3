@@ -153,6 +153,15 @@ def interpret(self, problem):
                 args, value = t.args[:-1], t.args[-1]
             else:
                 args, value = t.args, TRUE
+                # check that the arguments are in the domain
+                a = (str(args) if 1<len(args) else
+                     str(args[0]) if len(args)==1 else
+                     "()")
+                self.check(len(self.symbol.decl.sorts) == len(args),
+                    f"Incorrect arity of {a} for {self.name}")
+                self.check(self.symbol.decl.has_in_domain(args).same_as(TRUE),
+                           f"{a} is not in the domain of {self.symbol.name}")
+
             expr = AppliedSymbol.make(self.symbol, args)
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == S.UNKNOWN,
