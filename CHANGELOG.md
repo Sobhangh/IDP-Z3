@@ -15,6 +15,9 @@ Highlights of the breaking changes:
 
 ### Interactive Consultant
 
+### Other
+* MR #207: add analytics to www.idp-z3.be, with user consent
+
 
 
 ## [0.9.1] - 2022-01-25

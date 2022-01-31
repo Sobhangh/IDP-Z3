@@ -1,2 +1,21 @@
 {% extends "!layout.html" %}
 {% set css_files = css_files + [ "_static/custom.css" ] %}
+
+{% block extrahead %}
+<!-- Cookiebot -->
+<script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="bfd098d5-49f2-4b7b-9136-0f23b979484c" data-blockingmode="auto" type="text/javascript"></script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TZWE8Y25PJ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-TZWE8Y25PJ');
+</script>
+{% endblock %}
+
+{% block footer %}
+<script id="CookieDeclaration" src="https://consent.cookiebot.com/bfd098d5-49f2-4b7b-9136-0f23b979484c/cd.js" type="text/javascript" async></script>
+{% endblock %}
