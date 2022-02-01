@@ -3,6 +3,7 @@ flask
 flask_restful
 flask_cors
 gunicorn
+myst-parser
 pycallgraph2
 pyyaml
 readthedocs-sphinx-ext==2.1.4

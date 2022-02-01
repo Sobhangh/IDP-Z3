@@ -132,6 +132,24 @@ The code is organised by steps, not by classes:  for example, all methods to ann
 
 Important classes of the IDP-Z3 engine are: [Expression](/code_modules/engine_expression#idp_engine.Expression.Expression), [Assignment](/code_modules/engine_assignments#idp_engine.Assignments.Assignment), [Theory](/code_modules/engine_problem#idp_engine.Theory.Theory).
 
+
+```{mermaid}
+
+classDiagram
+    Vocabulary *-- TypeDeclaration
+    Vocabulary *-- SymbolDeclaration
+    TypeDeclaration *-- Subtype
+    SymbolDeclaration *-- Subtype
+
+    Theory *-- Definition
+    Theory *-- Constraint
+    Theory *-- SymbolInterpretation
+
+    Definition *-- Rule
+    Rule *-- Expression
+    Constraint *-- Expression
+```
+
 Substitute() modifies the AST "in place".  Because the results of step 1-2 are cached, steps 4-7 are done after copying the AST (custom `copy()`).
 
 
