@@ -19,7 +19,7 @@ Hence, a more advanced skeleton of an IDP-Z3 program is:
     }
 
     vocabulary decision {
-        extern vocabulary environment
+        import environment
         // here comes the specification of the vocabulary to describe the decisions and their consequences
     }
 

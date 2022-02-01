@@ -20,7 +20,7 @@
 Classes to parse an IDP-Z3 theory.
 
 """
-__all__ = ["IDP", "Vocabulary", "Annotations", "Extern",
+__all__ = ["IDP", "Vocabulary", "Annotations", "Import",
            "TypeDeclaration",
            "SymbolDeclaration", "Symbol", "TheoryBlock", "Definition",
            "Rule", "Structure", "Enumeration", "Tuple",
@@ -304,12 +304,12 @@ class Vocabulary(ASTNode):
                 block.interpretations[s.name] = s.interpretation
 
 
-class Extern(ASTNode):
+class Import(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
 
     def __str__(self):
-        return f"extern vocabulary {self.name}"
+        return f"Import {self.name}"
 
 
 class TypeDeclaration(ASTNode):
@@ -1110,7 +1110,7 @@ dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
-                                         Vocabulary, Extern,
+                                         Vocabulary, Import,
                                          TypeDeclaration, Accessor, Domain,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,

@@ -39,7 +39,7 @@ import copy
 from itertools import product
 
 from .Assignments import Status as S
-from .Parse import (Extern, TypeDeclaration,
+from .Parse import (Import, TypeDeclaration,
                     SymbolDeclaration, Symbol, SymbolInterpretation,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
@@ -51,11 +51,11 @@ from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND)
 
 
-# class Extern  ###########################################################
+# class Import  ###########################################################
 
 def interpret(self, problem):
     pass
-Extern.interpret = interpret
+Import.interpret = interpret
 
 
 # class TypeDeclaration  ###########################################################

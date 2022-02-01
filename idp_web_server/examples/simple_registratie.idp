@@ -6,7 +6,7 @@ vocabulary environment {
 }
 
 vocabulary decision {
-    extern vocabulary environment
+    import environment
 
     type Registration_Type := {Social, Modest, Other}
     type Tax_Rate := {1, 7, 10}

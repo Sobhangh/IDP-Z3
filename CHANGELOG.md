@@ -8,10 +8,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 Highlights of the breaking changes:
 * A `.` is now required after a symbol interpretation in a theory or structure, e.g. `color := {red, blue, green}.`. The string output of some API methods also has a `.` after an enumeration.
+* use `import` to include a vocabulary in another.
 
 ### IDP-Z3
 * (breaking) fix #182: Require a `.` after a symbol interpretation in a theory or structure
 * fix #181: Should detect error in `∀c in q[()->Bool]:`
+* (breaking) MR !206: 'import' vocabulary
 
 ### Interactive Consultant
 

@@ -138,8 +138,8 @@ A vocabulary W may include a previously defined vocabulary V:
 .. code::
 
     vocabulary W {
-        extern vocabulary V
-        // here comes the vocabulary named V
+        import V
+        // here comes the vocabulary named W
     }
 
 
