@@ -1,6 +1,6 @@
 
 ``idp_web_server`` module
-=====================
+=========================
 
 .. toctree::
    :maxdepth: 3

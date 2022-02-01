@@ -66,12 +66,12 @@ class Theory(object):
 
         definitions ([Definition]): a list of definitions in this problem
 
+        interpretations (Dict[string, SymbolInterpretation]):
+            A mapping of enumerated symbols to their interpretation.
+
         def_constraints (Dict[SymbolDeclaration, Definition], list[Expression]):
             A mapping of defined symbol to the whole-domain constraints
             equivalent to its definition.
-
-        interpretations (Dict[string, SymbolInterpretation]):
-            A mapping of enumerated symbols to their interpretation.
 
         _constraintz (List(ExprRef), Optional): a list of assertions, co_constraints and definitions in Z3 form
 

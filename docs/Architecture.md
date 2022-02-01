@@ -126,13 +126,136 @@ The conversion to the Z3 format is performed by the following passes over the AS
     c) instantiate the definitions for every calls of the defined symbols (recursively)
 4. convert to Z3, adding the type constraints not enforced by Z3 (`.translate()`)
 
-The graph of calls is outlined in `/docs/zettlr/Call graph.md`.
+Substitute() modifies the AST "in place".  Because the results of step 1-2 are cached, steps 4-7 are done after copying the AST (custom `copy()`).
+
+The graph of calls is outlined below:
+
+```{mermaid}
+    graph TD
+        IDP-Z3 --> parse
+        IDP-Z3 --> execute
+
+        execute -.-> symbolic_propagate;
+        symbolic_propagate --> implicants;
+        execute -.-> simplify;
+        simplify --> substitute;
+        substitute --> update_exprs;
+        execute -.-> formula
+        formula --> interpret
+
+        parse --> Annotate
+        Annotate --> rename_args;
+
+        rename_args --> instantiate;
+        interpret --> instantiate_definition;
+        instantiate_definition --> interpret;
+        interpret --> instantiate;
+        instantiate --> interpret;
+        instantiate --> instantiate_definition;
+        instantiate_definition --> instantiate;
+        interpret --> update_exprs;
+
+        update_exprs -.-> make;
+        instantiate_definition --> make;
+        update_exprs --> _change;
+        interpret --> make;
+        simplify1 --> update_exprs;
+        make --> simplify1;
+        Annotate --> annotate1;
+        make --> annotate1;
+
+        instantiate --> _change;
+        interpret --> _change;
+
+        Annotate --> make;
+        instantiate --> update_exprs;
+```
+
 
 The code is organised by steps, not by classes:  for example, all methods to annotate an expression by another are grouped in [Annotate.py](/code_modules/engine_annotate).  We use [monkey-patching](https://www.geeksforgeeks.org/monkey-patching-in-python-dynamic-behavior/) to attach methods to the classes declared in another module.
 
 Important classes of the IDP-Z3 engine are: [Expression](/code_modules/engine_expression#idp_engine.Expression.Expression), [Assignment](/code_modules/engine_assignments#idp_engine.Assignments.Assignment), [Theory](/code_modules/engine_problem#idp_engine.Theory.Theory).
 
-Substitute() modifies the AST "in place".  Because the results of step 1-2 are cached, steps 4-7 are done after copying the AST (custom `copy()`).
+Below is a simplified class diagram for the classes of the Abstract Syntax tree.
+
+```{mermaid}
+
+classDiagram
+    IDP *-- Vocabulary
+    IDP *-- TheoryBlock
+    IDP *-- Structure
+    IDP *-- Procedure
+    IDP *-- Display
+
+    Vocabulary *-- Import
+    Vocabulary *-- TypeDeclaration
+    Vocabulary *-- SymbolDeclaration
+    TypeDeclaration *-- Constructor
+    SymbolDeclaration *-- Subtype
+    TypeDeclaration o-- Subtype
+
+    TheoryBlock *-- Definition
+    TheoryBlock *-- SymbolInterpretation
+    TheoryBlock *-- Axiom
+
+    Structure *-- SymbolInterpretation
+    SymbolInterpretation *-- Enumeration
+
+    Definition *-- Rule
+    Rule *-- Expression
+    Axiom *-- Expression
+
+    Expression *-- AppliedSymbol
+    Expression *-- UnappliedSymbol
+
+    SymbolDeclaration o-- AppliedSymbol
+    SymbolDeclaration o-- SymbolInterpretation
+    TypeDeclaration   o-- SymbolInterpretation
+    Constructor       o-- AppliedSymbol
+    Constructor       o-- UnappliedSymbol
+
+    class TypeDeclaration {
+        check_bounds(expr)
+    }
+    class SymbolDeclaration {
+        has_in_domain(args)
+        has_in_range(value)
+    }
+    class Enumeration {
+        contains(args, is_function)
+    }
+    class Subtype {
+        has_element(term)
+    }
+    class AppliedSymbol {
+        construct(constructor, args)
+    }
+    class UnappliedSymbol {
+        construct(constructor)
+    }
+```
+
+And a simplified class diagram for the `Theory` class:
+
+```{mermaid}
+
+classDiagram
+    Theory *-- Assignment
+
+    class Theory{
+        declarations
+        axioms
+        definitions
+        interpretations
+        assignments: Assignments
+    }
+    class Assignment{
+        sentence: Expression
+        value: Expression
+        status: Status
+    }
+```
+
 
 
 ## Z3

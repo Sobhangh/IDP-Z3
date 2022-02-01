@@ -34,7 +34,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
 TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
              ( definitions=Definition*
-               constraints=Constraint*
+               constraints=Axiom*
                interpretations=SymbolInterpretation*
              )* '}';
 
@@ -55,7 +55,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
               ']'
             )?;
 
-  Constraint: annotations=Annotations expr=Expression '.';
+  Axiom: annotations=Annotations expr=Expression '.';
 
     Expression:     AQuantification | RImplication;
     RImplication:   ARImplication   | Equivalence;
