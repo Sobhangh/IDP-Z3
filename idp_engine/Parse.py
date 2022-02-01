@@ -479,7 +479,7 @@ class SymbolDeclaration(ASTNode):
         """
         assert len(self.sorts) == len(args), \
             f"Incorrect arity of {str(args)} for {self.name}"
-        return AND([typ.has_in_domain(term)
+        return AND([typ.has_element(term)
                    for typ, term in zip(self.sorts, args)])
 
 

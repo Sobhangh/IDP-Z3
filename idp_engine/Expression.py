@@ -531,7 +531,7 @@ class Symbol(Expression):
     def __repr__(self):
         return str(self)
 
-    def has_in_domain(self, term: Expression) -> Expression:
+    def has_element(self, term: Expression) -> Expression:
         """Returns an expression that says whether `term` is in the type denoted by `self`.
 
         Args:
@@ -568,7 +568,7 @@ class Subtype(Symbol):
     def range():
         pass  # monkey-patched
 
-    def has_in_domain(self, term: Expression) -> Expression:
+    def has_element(self, term: Expression) -> Expression:
         """Returns an Expression that says whether `term` is in the type denoted by `self`.
 
         Args:
