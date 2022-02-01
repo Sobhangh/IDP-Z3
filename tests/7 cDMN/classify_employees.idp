@@ -5,7 +5,7 @@ vocabulary V {
     type Age_t := { 0..100 }
     Marital_Status_of_Person: Marital_Status_t * Person_t -> Marital_Status_t
     Gender_of_Person: Gender_t * Person_t -> Gender_t
-    Age_of_Person: Age_t * Person_t -> Real
+    Age_of_Person: Person_t -> Age_t
     Salary_of_Person: Person_t -> Real
     Minimal_Salary:  -> Real
     Maximal_Salary:  -> Real

@@ -716,6 +716,14 @@ def annotate(self, voc, q_vars):
 Variable.annotate = annotate
 
 
+# Class Number  #######################################################
+
+def annotate(self, voc, q_vars):
+    self.decl = voc.symbol_decls[self.type]
+    return self
+Number.annotate = annotate
+
+
 # Class UnappliedSymbol  #######################################################
 
 def annotate(self, voc, q_vars):
