@@ -8,7 +8,7 @@ vocabulary environment {
     have_masks: () → 𝔹
 }
 vocabulary decision {
-    extern vocabulary environment
+    import environment
 
     type Activity := {Outdoor_sport, Indoor_sport, Restaurant, Cinema, Theater, None}
     activity: () → Activity

@@ -14,9 +14,9 @@ Comment:
 Shebang: '#!' /.*$/;
 
 Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
-  Declaration: Extern | TypeDeclaration | SymbolDeclaration;
+  Declaration: TypeDeclaration | SymbolDeclaration | Import;
 
-    Extern: 'extern' 'vocabulary' (name=ID);
+    Import: 'import' (name=ID);
 
     TypeDeclaration:
       /type[ \t]/

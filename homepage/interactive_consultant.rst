@@ -19,9 +19,17 @@ A short introductory video on the interactive consultant can be found below:
    :width: 800
    :height: 480
 
-And an example of application:
+Our partners at Flanders Make have created a promo video featuring an application:
+
+.. rst-class:: center
+.. youtube:: kpPe0GRjifE
+   :width: 800
+   :height: 480
+
+Here is a more in-depth view of the application above:
 
 .. rst-class:: center
 .. youtube:: hO8k_64b_Oc
    :width: 800
    :height: 480
+

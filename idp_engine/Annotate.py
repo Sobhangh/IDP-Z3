@@ -22,7 +22,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 
-from .Parse import (Vocabulary, Extern, TypeDeclaration, Type, Subtype,
+from .Parse import (Vocabulary, Import, TypeDeclaration, Type, Subtype,
                     SymbolDeclaration, Symbol,
                     TheoryBlock, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
@@ -43,10 +43,10 @@ from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
 def annotate(self, idp):
     self.idp = idp
 
-    # process extern vocabulary and determine the constructors of CONCEPT
+    # process Import and determine the constructors of CONCEPT
     temp = {}  # contains the new self.declarations
     for s in self.declarations:
-        if isinstance(s, Extern):
+        if isinstance(s, Import):
             other = self.idp.vocabularies[s.name]
             for s1 in other.declarations:
                 if s1.name in temp:

@@ -78,7 +78,7 @@ Professional_Buyer:() → Bool
 }
 
 vocabulary decision {
-    extern vocabulary environment
+    import environment
 
     type registration_Type := {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
     type tax_Rate := {1, 2, 4, 7, 6, 10, 12}

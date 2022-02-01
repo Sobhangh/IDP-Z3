@@ -26,7 +26,7 @@ The equivalent ASCII-only encoding is shown on the right.
         [this is the intended meaning of p]
         p : () → 𝔹
 
-        extern vocabulary W
+        import W
     }
 
     theory T:V {
