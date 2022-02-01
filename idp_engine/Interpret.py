@@ -44,7 +44,7 @@ from .Parse import (Extern, TypeDeclaration,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
 from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
-                    AQuantification, Domain, FORALL, IMPLIES, AND, AAggregate,
+                    AQuantification, Subtype, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
@@ -77,7 +77,7 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self, problem):
-    assert all(isinstance(s, Domain) for s in self.sorts), 'internal error'
+    assert all(isinstance(s, Subtype) for s in self.sorts), 'internal error'
     self.in_domain = list(product(*[s.range() for s in self.sorts]))
     self.range = self.out.range()
 
@@ -309,7 +309,7 @@ def instantiate(self, e0, e1, problem=None):
 Symbol.instantiate = instantiate
 
 
-# class Domain ###########################################################
+# class Subtype ###########################################################
 
 def range(self):
     range = [t for t in self.decl.range]
@@ -322,7 +322,7 @@ def range(self):
                          for s, q in zip(v.decl.symbol.decl.sorts,
                                          self.ins))]
     return range
-Domain.range = range
+Subtype.range = range
 
 
 # Class AQuantification  ######################################################
@@ -369,7 +369,7 @@ def interpret(self, problem):
             elif type(domain.decl) == SymbolDeclaration:
                 range = domain.decl.in_domain
                 guard = domain
-            elif isinstance(domain, Domain):
+            elif isinstance(domain, Subtype):
                 range = [[t] for t in domain.range()]
                 guard = None
             else:  # SymbolExpr (e.g. $(`Color))

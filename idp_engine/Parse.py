@@ -39,7 +39,7 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         Expression, AIfExpr, AQuantification, Domain, Quantee,
+                         Expression, AIfExpr, AQuantification, Subtype, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -262,21 +262,21 @@ class Vocabulary(ASTNode):
                 name=CONCEPT,
                 constructors=[]),
             SymbolDeclaration(annotations='', name=Symbol(name=GOAL_SYMBOL),
-                                sorts=[Domain(name=CONCEPT)], out=Domain(name=BOOL)),
+                                sorts=[Subtype(name=CONCEPT)], out=Subtype(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
-                                sorts=[Domain(name=CONCEPT)], out=Domain(name=BOOL)),
+                                sorts=[Subtype(name=CONCEPT)], out=Subtype(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Domain(name=CONCEPT)],
-                                out=Domain(name=INT)),
+                                sorts=[Subtype(name=CONCEPT)],
+                                out=Subtype(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=ABS),
-                                sorts=[Domain(name=INT)],
-                                out=Domain(name=INT)),
+                                sorts=[Subtype(name=INT)],
+                                out=Subtype(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
-                                sorts=[Domain(name=CONCEPT), Domain(name=INT)],
-                                out=Domain(name=CONCEPT)),
+                                sorts=[Subtype(name=CONCEPT), Subtype(name=INT)],
+                                out=Subtype(name=CONCEPT)),
             SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
-                                sorts=[Domain(name=CONCEPT)],
-                                out=Domain(name=CONCEPT))
+                                sorts=[Subtype(name=CONCEPT)],
+                                out=Subtype(name=CONCEPT))
             ] + self.declarations
 
     def __str__(self):
@@ -392,9 +392,9 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Domain]): the types of the arguments
+        sorts (List[Subtype]): the types of the arguments
 
-        out (Domain): the type of the symbol
+        out (Subtype): the type of the symbol
 
         type (string): name of the Z3 type of an instance of the symbol
 
@@ -627,7 +627,7 @@ class Definition(ASTNode):
                 continue
             symbdec = SymbolDeclaration.make(
                 "_"+str(self.id)+"lvl_"+key.name,
-                key.arity, key.sorts, Domain(name=REAL))
+                key.arity, key.sorts, Subtype(name=REAL))
             self.level_symbols[key] = Symbol(name=symbdec.name)
             self.level_symbols[key].decl = symbdec
 
@@ -1125,7 +1125,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Extern,
-                                         TypeDeclaration, Accessor, Domain,
+                                         TypeDeclaration, Accessor, Subtype,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 

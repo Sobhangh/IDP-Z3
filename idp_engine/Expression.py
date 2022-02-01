@@ -532,18 +532,18 @@ class Symbol(Expression):
         return str(self)
 
     def has_in_domain(self, term: Expression) -> Expression:
-        """Returns an expression that says whether term is in the domain of the symbol.
+        """Returns an expression that says whether `term` is in the type denoted by `self`.
 
         Args:
             term (Expression): the argument to be checked
 
         Returns:
-            Expression: whether `term` is in the domain of the symbol
+            Expression: whether `term` is in the type denoted by `self`.
         """
         return self.decl.check_bounds(term)
 
 
-class Domain(Symbol):
+class Subtype(Symbol):
     """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
 
     Inherits from Symbol
@@ -551,9 +551,9 @@ class Domain(Symbol):
     Args:
         name (Symbol): name of the concept
 
-        ins (List[Symbol], Optional): domain of the signature, e.g., `[T, T]`
+        ins (List[Symbol], Optional): domain of the Concept signature, e.g., `[T, T]`
 
-        out (Symbol, Optional): range of the signature, e.g., `Bool`
+        out (Symbol, Optional): range of the Concept signature, e.g., `Bool`
     """
 
     def __init__(self, **kwargs):
@@ -569,13 +569,13 @@ class Domain(Symbol):
         pass  # monkey-patched
 
     def has_in_domain(self, term: Expression) -> Expression:
-        """Returns an Expression that says whether `term` is in the domain of the symbol.
+        """Returns an Expression that says whether `term` is in the type denoted by `self`.
 
         Args:
             term (Expression): the argument to be checked
 
         Returns:
-            Expression: whether `term` is in the domain of the symbol
+            Expression: whether `term` `term` is in the type denoted by `self`.
         """
         if self.name == CONCEPT:
             comparisons = [EQUALS([term, c]) for c in self.range()]
@@ -619,7 +619,7 @@ class Quantee(Expression):
     Attributes:
         vars (List[List[Variable]]): the (tuples of) variables being quantified
 
-        domain (Domain, Optional): a literal Domain to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
+        subtype (Subtype, Optional): a literal Subtype to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
 
         sort (SymbolExpr, Optional): a dereferencing expression, e.g.,. `$(i)`.
 
@@ -633,14 +633,14 @@ class Quantee(Expression):
     """
     def __init__(self, **kwargs):
         self.vars = kwargs.pop('vars')
-        self.domain = kwargs.pop('domain') if 'domain' in kwargs else None
+        self.subtype = kwargs.pop('subtype') if 'subtype' in kwargs else None
         sort = kwargs.pop('sort') if 'sort' in kwargs else None
-        if self.domain:
-            self.check(self.domain.name == CONCEPT or self.domain.out is None,
-                   f"Can't use signature after predicate {self.domain.name}")
+        if self.subtype:
+            self.check(self.subtype.name == CONCEPT or self.subtype.out is None,
+                   f"Can't use signature after predicate {self.subtype.name}")
 
         self.sub_exprs = ([sort] if sort else
-                          [self.domain] if self.domain else
+                          [self.subtype] if self.subtype else
                           [])
         self.arity = None
         for i, v in enumerate(self.vars):
@@ -1204,7 +1204,7 @@ class Variable(Expression):
         self.name = kwargs.pop('name')
         sort = kwargs.pop('sort') if 'sort' in kwargs else None
         self.sort = sort
-        assert sort is None or isinstance(sort, Domain) or isinstance(sort, Symbol)
+        assert sort is None or isinstance(sort, Subtype) or isinstance(sort, Symbol)
 
         super().__init__()
 

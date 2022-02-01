@@ -26,8 +26,8 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=ConstructedFrom))?;
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
-          ( '(' sorts*=Domain[/[*⨯]/] ')' | sorts*=Domain[/[*⨯]/] )
-          ('->' | '→') out=Domain;
+          ( '(' sorts*=Subtype[/[*⨯]/] ')' | sorts*=Subtype[/[*⨯]/] )
+          ('->' | '→') out=Subtype;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
@@ -44,11 +44,11 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
         definiendum=AppliedSymbol
         ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
-      Quantee: ( vars+=Variable[','] ( ('in' | '∈') (domain=Domain | sort=SymbolExpr) )?
-               | vars+=VarTuple[','] ( ('in' | '∈') (domain=Domain | sort=SymbolExpr) )?);
+      Quantee: ( vars+=Variable[','] ( ('in' | '∈') (subtype=Subtype | sort=SymbolExpr) )?
+               | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Subtype | sort=SymbolExpr) )?);
           Variable: name=/`?[^\d\W]\w*\b/;
           VarTuple: '(' vars+=Variable[','] ')';
-          Domain: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
+          Subtype: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
             ( '['
               ( '(' ins*=Symbol[/[*⨯]/] ')' | ins*=Symbol[/[*⨯]/] )
               ('->' | '→') out=Symbol
