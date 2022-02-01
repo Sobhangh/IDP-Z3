@@ -152,7 +152,8 @@ def interpret(self, problem):
 
             if type(self.enumeration) == FunctionEnum:
                 args, value = t.args[:-1], t.args[-1]
-                #TODO test value is in range
+                self.check(self.symbol.decl.has_in_range(value).same_as(TRUE),
+                           f"{value} is not in the range of {self.symbol.name}")
             else:
                 args, value = t.args, TRUE
 

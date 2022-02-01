@@ -1,5 +1,5 @@
 And(opposite(red) == green,
-    opposite(rgb(1, 1)) == red,
+    opposite(rgb(1, 1)) == rgb(1, 2),
     Or(Color == red, Color == rgb(1, 1)),
     Or(is(red, Color),
        is(blue, Color),

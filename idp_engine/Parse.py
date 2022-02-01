@@ -483,6 +483,11 @@ class SymbolDeclaration(ASTNode):
                    for typ, term in zip(self.sorts, args)])
 
 
+    def has_in_range(self, value: Expression) -> Expression:
+        """Returns an expression that says whether `value` is in the range of the symbol.
+        """
+        return self.out.has_element(value)
+
 Type = Union[TypeDeclaration, SymbolDeclaration]
 
 
@@ -944,7 +949,7 @@ class Ranges(Enumeration):
     def contains(self, args, function, arity=None, rank=0, tuples=None):
         var = args[0]
         if not self.elements:
-            return None
+            return TRUE
         if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
             es = [EQUALS([var, c.args[0]]) for c in self.tuples]
             e = OR(es)
