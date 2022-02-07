@@ -1,14 +1,14 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
-	symmetric_symbol: Concept -> Bool
-	symmetric: (Concept) → Bool
+	symmetric_symbol: Concept[node*node -> Bool] -> Bool
+	symmetric: Concept[node*node -> Bool] → Bool
 }
 theory {
     edge(a,b).
-	{! s in Concept: symmetric_symbol(s) ← arity(s)=2 ∧ input_domain(s,1) = input_domain(s,2). }
+	{! s in Concept[node*node -> Bool]: symmetric_symbol(s) ← arity(s)=2 ∧ input_domain(s,1) = input_domain(s,2). }
 	// TODO use symmetric_symbol(`p)
-    { !`p in Concept: symmetric(`p) <- arity(`p)=2 ∧ input_domain(`p,1) = input_domain(`p,2) & (!x, y : $(`p)(x,y) => $(`p)(y,x)). }
+    { !`p in Concept[node*node -> Bool]: symmetric(`p) <- arity(`p)=2 ∧ input_domain(`p,1) = input_domain(`p,2) & (!x, y : $(`p)(x,y) => $(`p)(y,x)). }
 	symmetric(`edge).
 }
 display {
