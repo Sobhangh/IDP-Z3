@@ -22,7 +22,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 
-from .Parse import (Vocabulary, Import, TypeDeclaration, Type, Domain,
+from .Parse import (Vocabulary, Import, TypeDeclaration, Type, Subtype,
                     SymbolDeclaration, Symbol,
                     TheoryBlock, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
@@ -129,7 +129,7 @@ def annotate(self, voc, q_vars):
 Symbol.annotate = annotate
 
 
-# Class Domain  #######################################################
+# Class Subtype  #######################################################
 
 def annotate(self, voc, q_vars={}):
     Symbol.annotate(self, voc, q_vars)
@@ -137,7 +137,7 @@ def annotate(self, voc, q_vars={}):
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
         self.out = self.out.annotate(voc, q_vars)
     return self
-Domain.annotate = annotate
+Subtype.annotate = annotate
 
 
 # Class TheoryBlock  #######################################################
@@ -410,13 +410,13 @@ def annotate(self, voc):
         self.check(a.type in voc.symbol_decls,
                    f"Unknown type: {a.type}" )
         a.decl = SymbolDeclaration(annotations='', name=a.accessor,
-                                   sorts=[Domain(name=self.type)],
-                                   out=Domain(name=a.type))
+                                   sorts=[Subtype(name=self.type)],
+                                   out=Subtype(name=a.type))
         a.decl.annotate(voc)
     self.tester = SymbolDeclaration(annotations='',
                                     name=Symbol(name=f"is_{self.name}"),
-                                    sorts=[Domain(name=self.type)],
-                                    out=Domain(name=BOOL))
+                                    sorts=[Subtype(name=self.type)],
+                                    out=Subtype(name=BOOL))
     self.tester.annotate(voc)
 Constructor.annotate = annotate
 
@@ -643,8 +643,8 @@ def annotate(self, voc, q_vars):
                     symbol_decl = SymbolDeclaration.make(
                         "_"+self.str, # name `_ *`
                         len(q_vars),  # arity
-                        [Domain(name=v.sort.code) for v in q_vars.values()],
-                        Domain(name=self.type)).annotate(voc)    # output_domain
+                        [Subtype(name=v.sort.code) for v in q_vars.values()],
+                        Subtype(name=self.type)).annotate(voc)    # output_domain
                     to_create = True
                 symbol = Symbol(name=symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
@@ -714,6 +714,14 @@ def annotate(self, voc, q_vars):
     self.type = self.sort.decl.name if self.sort and self.sort.decl else ''
     return self
 Variable.annotate = annotate
+
+
+# Class Number  #######################################################
+
+def annotate(self, voc, q_vars):
+    self.decl = voc.symbol_decls[self.type]
+    return self
+Number.annotate = annotate
 
 
 # Class UnappliedSymbol  #######################################################

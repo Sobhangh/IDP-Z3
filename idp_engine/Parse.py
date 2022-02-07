@@ -39,13 +39,13 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         AIfExpr, AQuantification, Domain, Quantee,
+                         Expression, AIfExpr, AQuantification, Subtype, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date,
-                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, OR, EQUIV)
+                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     GOAL_SYMBOL, EXPAND, RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
@@ -262,21 +262,21 @@ class Vocabulary(ASTNode):
                 name=CONCEPT,
                 constructors=[]),
             SymbolDeclaration(annotations='', name=Symbol(name=GOAL_SYMBOL),
-                                sorts=[Domain(name=CONCEPT)], out=Domain(name=BOOL)),
+                                sorts=[Subtype(name=CONCEPT)], out=Subtype(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
-                                sorts=[Domain(name=CONCEPT)], out=Domain(name=BOOL)),
+                                sorts=[Subtype(name=CONCEPT)], out=Subtype(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Domain(name=CONCEPT)],
-                                out=Domain(name=INT)),
+                                sorts=[Subtype(name=CONCEPT)],
+                                out=Subtype(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=ABS),
-                                sorts=[Domain(name=INT)],
-                                out=Domain(name=INT)),
+                                sorts=[Subtype(name=INT)],
+                                out=Subtype(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
-                                sorts=[Domain(name=CONCEPT), Domain(name=INT)],
-                                out=Domain(name=CONCEPT)),
+                                sorts=[Subtype(name=CONCEPT), Subtype(name=INT)],
+                                out=Subtype(name=CONCEPT)),
             SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
-                                sorts=[Domain(name=CONCEPT)],
-                                out=Domain(name=CONCEPT))
+                                sorts=[Subtype(name=CONCEPT)],
+                                out=Subtype(name=CONCEPT))
             ] + self.declarations
 
     def __str__(self):
@@ -392,9 +392,9 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Symbol]): the types of the arguments
+        sorts (List[Subtype]): the types of the arguments
 
-        out (Symbol): the type of the symbol
+        out (Subtype): the type of the symbol
 
         type (string): name of the Z3 type of an instance of the symbol
 
@@ -448,6 +448,11 @@ class SymbolDeclaration(ASTNode):
         self.block: Optional[Block] = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
 
+    @classmethod
+    def make(cls, strname, arity, sorts, out):
+        o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
+        return o
+
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
             return ''
@@ -463,11 +468,25 @@ class SymbolDeclaration(ASTNode):
         return (self.arity == 1 and self.type == BOOL
                 and self.sorts[0].decl == other)
 
-    @classmethod
-    def make(cls, strname, arity, sorts, out):
-        o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
-        return o
+    def has_in_domain(self, args: List[Expression]) -> Expression:
+        """Returns an expression that says whether the `args` are in the domain of the symbol.
 
+        Arguments:
+            args (List[Expression]): the list of arguments to be checked, e.g. `[1, 2]`
+
+        Returns:
+            Expression: whether `(1,2)` is in the domain of the symbol
+        """
+        assert len(self.sorts) == len(args), \
+            f"Incorrect arity of {str(args)} for {self.name}"
+        return AND([typ.has_element(term)
+                   for typ, term in zip(self.sorts, args)])
+
+
+    def has_in_range(self, value: Expression) -> Expression:
+        """Returns an expression that says whether `value` is in the range of the symbol.
+        """
+        return self.out.has_element(value)
 
 Type = Union[TypeDeclaration, SymbolDeclaration]
 
@@ -613,7 +632,7 @@ class Definition(ASTNode):
                 continue
             symbdec = SymbolDeclaration.make(
                 "_"+str(self.id)+"lvl_"+key.name,
-                key.arity, key.sorts, Domain(name=REAL))
+                key.arity, key.sorts, Subtype(name=REAL))
             self.level_symbols[key] = Symbol(name=symbdec.name)
             self.level_symbols[key].decl = symbdec
 
@@ -858,6 +877,12 @@ class ConstructedFrom(Enumeration):
     def contains(self, args, function, arity=None, rank=0, tuples=None):
         """returns True if args belong to the type enumeration"""
         # args must satisfy the tester of one of the constructors
+        assert len(args) == 1, f"Incorrect arity in {self.parent.name}{args}"
+        if type(args[0].decl) == Constructor:  # try to simplify it
+            self.check(self.parent.name == args[0].decl.type,
+                       f"Incorrect type of {args[0]} for {self.parent.name}")
+            return AND([t.decl.out.has_element(e)
+                        for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
         out = [AppliedSymbol.construct(constructor.tester, args)
                 for constructor in self.constructors]
         return OR(out)
@@ -924,7 +949,7 @@ class Ranges(Enumeration):
     def contains(self, args, function, arity=None, rank=0, tuples=None):
         var = args[0]
         if not self.elements:
-            return None
+            return TRUE
         if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
             es = [EQUALS([var, c.args[0]]) for c in self.tuples]
             e = OR(es)
@@ -1111,7 +1136,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Import,
-                                         TypeDeclaration, Accessor, Domain,
+                                         TypeDeclaration, Accessor, Subtype,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 

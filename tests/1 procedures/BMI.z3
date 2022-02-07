@@ -39,9 +39,9 @@ riskLevel() = Low
 
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
 bmi() = $bmi$ ⇔ $bmi$ = weight() / (25600)
+BMILevel() = $BMILevel$ ⇐ $BMILevel$ = Underweight ∧ (bmi() < 18.5 ∧ sex() = Female)
 weight() = 80
 BMILevel() = $BMILevel$ ⇐ $BMILevel$ = Severely_Underweight ∧ (bmi() < 18.5 ∧ sex() = Male)
-BMILevel() = $BMILevel$ ⇐ $BMILevel$ = Underweight ∧ (bmi() < 18.5 ∧ sex() = Female)
 
 (declare-datatypes ((BMILevelt_t 0)) (((Obese_II) (Obese_I) (Normal) (Severely_Underweight) (Underweight) (Overweight) (Extreme_Obesity))))
 (declare-datatypes ((riskLevelt_t 0)) (((High) (Very_High) (Low) (Increased) (Extremely_High))))

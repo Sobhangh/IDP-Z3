@@ -44,7 +44,7 @@ from .Parse import (Import, TypeDeclaration,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
 from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
-                    AQuantification, Domain, FORALL, IMPLIES, AND, AAggregate,
+                    AQuantification, Subtype, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
@@ -77,7 +77,7 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self, problem):
-    assert all(isinstance(s, Domain) for s in self.sorts), 'internal error'
+    assert all(isinstance(s, Subtype) for s in self.sorts), 'internal error'
     self.in_domain = list(product(*[s.range() for s in self.sorts]))
     self.range = self.out.range()
 
@@ -149,10 +149,23 @@ def interpret(self, problem):
     elif not self.name in [GOAL_SYMBOL, EXPAND]:
         # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
+
             if type(self.enumeration) == FunctionEnum:
                 args, value = t.args[:-1], t.args[-1]
+                self.check(self.symbol.decl.has_in_range(value).same_as(TRUE),
+                           f"{value} is not in the range of {self.symbol.name}")
             else:
                 args, value = t.args, TRUE
+
+            # check that the arguments are in the domain
+            a = (str(args) if 1<len(args) else
+                    str(args[0]) if len(args)==1 else
+                    "()")
+            self.check(len(self.symbol.decl.sorts) == len(args),
+                f"Incorrect arity of {a} for {self.name}")
+            self.check(self.symbol.decl.has_in_domain(args).same_as(TRUE),
+                        f"{a} is not in the domain of {self.symbol.name}")
+
             expr = AppliedSymbol.make(self.symbol, args)
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == S.UNKNOWN,
@@ -300,7 +313,7 @@ def instantiate(self, e0, e1, problem=None):
 Symbol.instantiate = instantiate
 
 
-# class Domain ###########################################################
+# class Subtype ###########################################################
 
 def range(self):
     range = [t for t in self.decl.range]
@@ -313,7 +326,7 @@ def range(self):
                          for s, q in zip(v.decl.symbol.decl.sorts,
                                          self.ins))]
     return range
-Domain.range = range
+Subtype.range = range
 
 
 # Class AQuantification  ######################################################
@@ -360,7 +373,7 @@ def interpret(self, problem):
             elif type(domain.decl) == SymbolDeclaration:
                 range = domain.decl.in_domain
                 guard = domain
-            elif isinstance(domain, Domain):
+            elif isinstance(domain, Subtype):
                 range = [[t] for t in domain.range()]
                 guard = None
             else:  # SymbolExpr (e.g. $(`Color))
