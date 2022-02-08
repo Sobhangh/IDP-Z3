@@ -227,6 +227,11 @@ def update_exprs(self, new_exprs):
     operands = list(new_exprs)
     operands1 = [e.value for e in operands]
     if all(e is not None for e in operands1):
+        if any(type(e) in [Number, Date] for e in operands1):
+            for e in operands1:
+                self.check(type(e) in [Number, Date],
+                    f"{e} should be applied to arguments (or prefixed with a back-tick)")
+
         acc, acc1 = operands[0], operands1[0]
         assert len(self.operator) == len(operands1[1:]), "Internal error"
         for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
