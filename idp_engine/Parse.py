@@ -47,7 +47,7 @@ from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, Sy
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
-                    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
@@ -265,18 +265,9 @@ class Vocabulary(ASTNode):
                                 sorts=[Subtype(name=CONCEPT)], out=Subtype(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
                                 sorts=[Subtype(name=CONCEPT)], out=Subtype(name=BOOL)),
-            SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Subtype(name=CONCEPT)],
-                                out=Subtype(name=INT)),
             SymbolDeclaration(annotations='', name=Symbol(name=ABS),
                                 sorts=[Subtype(name=INT)],
                                 out=Subtype(name=INT)),
-            SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
-                                sorts=[Subtype(name=CONCEPT), Subtype(name=INT)],
-                                out=Subtype(name=CONCEPT)),
-            SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
-                                sorts=[Subtype(name=CONCEPT)],
-                                out=Subtype(name=CONCEPT))
             ] + self.declarations
 
     def __str__(self):

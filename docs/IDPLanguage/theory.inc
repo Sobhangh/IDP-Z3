@@ -146,29 +146,6 @@ Quantified formulas
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
     In the first form above, the type of each variable is inferred from their use in |phi|.
 
-    When quantifying a formula of type ``Concept``,
-    the expression must contain a "guard" to prevent arity or type error.
-    A guard is a condition that can be resolved using the available enumerations.
-    In the following example, ``symmetric`` must be defined by enumeration.
-
-    .. code::
-
-        symmetric := {`edge}
-        ∀s ∈ Concept: symmetric(s) => (∀x, y : $(s)(x,y) ⇒ $(s)(y,x)).
-
-    An alternative is to use the introspection functions ``arity, input_domain, output_domain``:
-
-    .. code::
-
-        ∀s ∈ Concept: arity(s)=2 ∧ input_domain(s,1)=input_domain(s,2)
-            ⇒ (∀x ∈ $(input_domain(s,1)), y ∈ $(input_domain(s,2)) : $(s)(x,y) ⇒ $(s)(y,x)).
-
-    Another alternative is to add the signature of the Concept in the quantification:
-
-    .. code::
-
-        ∃x ∈ Concept[()→B]: $(x)().
-
 
 "is (not) enumerated"
     ``f(a,b) is enumerated`` and ``f(a,b) is not enumerated`` are sentences,

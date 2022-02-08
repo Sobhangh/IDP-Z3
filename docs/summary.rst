@@ -37,7 +37,6 @@ The equivalent ASCII-only encoding is shown on the right.
         ∀x,y ∈ T: p(x,y).                         !x,y in T: p(x,y).
         ∀x ∈ p, (y,z) ∈ q: q(x,x) ∨ p(y) ∨ p(z).  !x in p, (y,z) in q: q(x,x) | p(y) | p(z).
         ∃x ∈ Concept[()→B]: $(x)().               ?x in Concept[()->B]: $(x)().
-        ∃x ∈ $(input_domain(`p,1)): p(x).         ?x in $(input_domain(`p,1)): p(x).
         ∃x: p(x).                                 ?x: p(x).
 
 

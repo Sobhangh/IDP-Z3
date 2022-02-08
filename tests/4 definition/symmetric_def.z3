@@ -3,14 +3,11 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
-	symmetric_symbol: Concept[node*node -> Bool] -> Bool
 	symmetric: Concept[node*node -> Bool] → Bool
 }
 theory {
     edge(a,b).
-	{! s in Concept[node*node -> Bool]: symmetric_symbol(s) ← arity(s)=2 ∧ input_domain(s,1) = input_domain(s,2). }
-	// TODO use symmetric_symbol(`p)
-    { !`p in Concept[node*node -> Bool]: symmetric(`p) <- arity(`p)=2 ∧ input_domain(`p,1) = input_domain(`p,2) & (!x, y : $(`p)(x,y) => $(`p)(y,x)). }
+    { !`p in Concept[node*node -> Bool]: symmetric(`p) <- !x, y : $(`p)(x,y) => $(`p)(y,x). }
 	symmetric(`edge).
 }
 display {
@@ -27,12 +24,6 @@ display {
               'showOptimize': True,
               'type': 'function',
               'view': 'expanded'},
-             {'environmental': False,
-              'idpname': 'symmetric_symbol',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'function',
-              'view': 'normal'},
              {'environmental': False,
               'idpname': 'symmetric',
               'priority': 'core',
@@ -123,12 +114,4 @@ display {
                                     'relevant': True,
                                     'status': 'UNIVERSAL',
                                     'typ': 'Bool',
-                                    'value': True}},
- 'symmetric_symbol': {'symmetric_symbol(`edge)': {'environmental': False,
-                                                  'is_assignment': False,
-                                                  'normal': True,
-                                                  'reading': 'symmetric_symbol(`edge)',
-                                                  'relevant': False,
-                                                  'status': 'UNIVERSAL',
-                                                  'typ': 'Bool',
-                                                  'value': True}}}
+                                    'value': True}}}
