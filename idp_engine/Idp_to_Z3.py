@@ -378,8 +378,6 @@ AppliedSymbol.reified = reified
 # Class UnappliedSymbol  #######################################################
 
 def translate1(self, problem: "Theory", vars={}):
-    self.check(type(self.decl) == Constructor,
-               f"{self} should be applied to arguments (or prefixed with a back-tick)")
     return problem.z3[self.name]
 UnappliedSymbol.translate1 = translate1
 

@@ -730,6 +730,8 @@ def annotate(self, voc, q_vars):
     if self.name in voc.symbol_decls:
         self.decl = voc.symbol_decls[self.name]
         self.variables = {}
+        self.check(type(self.decl) == Constructor,
+                   f"{self} should be applied to arguments (or prefixed with a back-tick)")
         return self
     if self.name in q_vars:
         return q_vars[self.name]
