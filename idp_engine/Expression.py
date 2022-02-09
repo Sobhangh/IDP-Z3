@@ -561,7 +561,7 @@ class Subtype(Symbol):
         self.out = kwargs.pop('out', None)
         super().__init__(**kwargs)
         self.check(self.name != CONCEPT or self.out,
-                   f"Concept must be qualified with a type signature in {self}")
+                   f"`Concept` must be qualified with a type signature")
 
     def __str__(self):
         return self.name + ("" if not self.out else

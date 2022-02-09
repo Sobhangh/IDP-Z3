@@ -377,8 +377,6 @@ def interpret(self, problem):
                 range = domain.decl.in_domain
                 guard = domain
             elif isinstance(domain, Subtype):
-                self.check(domain.name != CONCEPT or domain.out,
-                           f"Concept must be qualified with a type signature in {self}")
                 range = [[t] for t in domain.range()]
                 guard = None
             else:  # SymbolExpr (e.g. $(`Color))
