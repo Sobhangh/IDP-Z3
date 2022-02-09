@@ -560,17 +560,19 @@ class Subtype(Symbol):
         self.ins = kwargs.pop('ins', None)
         self.out = kwargs.pop('out', None)
         super().__init__(**kwargs)
-        self.check(self.name != CONCEPT or self.out,
-                   f"`Concept` must be qualified with a type signature")
 
     def __str__(self):
         return self.name + ("" if not self.out else
                             f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
 
     def __eq__(self, other):
-        return (self.out == other.out and
-                len(self.ins) == len(other.ins) and
-                all(s==o for s, o in zip(self.ins, other.ins)))
+        self.check(self.name != CONCEPT or self.out,
+                   f"`Concept` must be qualified with a type signature")
+        return (self.name == other.name and
+                (not self.out or (
+                    self.out == other.out and
+                    len(self.ins) == len(other.ins) and
+                    all(s==o for s, o in zip(self.ins, other.ins)))))
 
     def range():
         pass  # monkey-patched
