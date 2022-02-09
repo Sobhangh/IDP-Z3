@@ -1,12 +1,12 @@
 vocabulary environment {
     Depth : ()→Real
-    measure: Concept -> Bool
 }
 vocabulary decision {
     import environment
 
     type csid := {b, c, d, e, f}
     cSID : ()→csid
+    measure: Concept[()→csid] -> Bool
 }
 theory environment:environment {}
 theory decision:decision {

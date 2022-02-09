@@ -3,7 +3,6 @@ vocabulary {
     p, q: () → Bool
     important: Concept[() → Bool] → Bool
     opposite: color → color
-    f: Concept -> Concept
 }
 theory {
   ~p() | q().
@@ -13,7 +12,6 @@ theory {
   !x in Concept[Concept[()->Bool] -> Bool]: !y in Concept[()->Bool]: $(x)(y).
   `opposite = `opposite.
   `opposite ~= `color.
-  f(`f) = `f.
   !x in Concept[color->color]: $(x)(red) is enumerated.
 }
 structure S:V {
