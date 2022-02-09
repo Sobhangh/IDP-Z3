@@ -261,7 +261,8 @@ def update_arith(self, family, operands):
                 f"Incorrect numeric type in {self}")
         out = operands1[0].py_value
 
-        for e, op in zip(operands1[1:], self.operator):
+        assert len(self.operator) == len(operands1[1:]), "Internal error"
+        for op, e in zip(self.operator, operands1[1:]):
             function = Operator.MAP[op]
 
             if op == '/' and self.type == INT:  # integer division

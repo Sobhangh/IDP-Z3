@@ -872,6 +872,8 @@ class ConstructedFrom(Enumeration):
         if type(args[0].decl) == Constructor:  # try to simplify it
             self.check(self.parent.name == args[0].decl.type,
                        f"Incorrect type of {args[0]} for {self.parent.name}")
+            self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
+                       f"Incorrect arity")
             return AND([t.decl.out.has_element(e)
                         for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
         out = [AppliedSymbol.construct(constructor.tester, args)

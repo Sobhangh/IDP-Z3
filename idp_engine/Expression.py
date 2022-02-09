@@ -565,6 +565,11 @@ class Subtype(Symbol):
         return self.name + ("" if not self.out else
                             f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
 
+    def __eq__(self, other):
+        return (self.out == other.out and
+                len(self.ins) == len(other.ins) and
+                all(s==o for s, o in zip(self.ins, other.ins)))
+
     def range():
         pass  # monkey-patched
 

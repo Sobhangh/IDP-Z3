@@ -1,0 +1,11 @@
+vocabulary V {
+  p : () → 𝔹
+  q: Concept[()->Bool] -> Bool // set of nullary predicates (like p)
+  r: Concept[Concept[()->Bool]->Bool] -> Bool // set of predicates like q
+}
+theory T:V {
+  ! x in Concept[Concept[()->Bool]->Bool]: !y in Concept[()->Bool]: $(x)(y). // r is the full set of predicates that are like q
+}
+procedure main() {
+  pretty_print(Theory(T).formula())
+}
