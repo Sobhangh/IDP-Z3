@@ -13,8 +13,9 @@ Highlights of the breaking changes:
 
 ### IDP-Z3
 * (breaking) fix #182: Require a `.` after a symbol interpretation in a theory or structure
-* fix #183: should check domain and range in enumerations
 * fix #181: Should detect error in `∀c in q[()->Bool]:`
+* fix #183: should check domain and range in enumerations
+* fix #184: nested Concept subtypes
 * (breaking) MR !206: 'import' vocabulary
 
 ### Interactive Consultant

@@ -1,1 +1,1 @@
-And(q(`p))
+And(q(`p), q(`p), p)

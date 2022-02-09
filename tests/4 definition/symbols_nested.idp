@@ -5,6 +5,8 @@ vocabulary V {
 }
 theory T:V {
   ! x in Concept[Concept[()->Bool]->Bool]: !y in Concept[()->Bool]: $(x)(y). // r is the full set of predicates that are like q
+  ! x in Concept[Concept[()->Bool]->Bool]: !y in Concept[()->Bool]: $(x)(y) & $(y)(). // r is the full set of predicates that are like q
+
 }
 procedure main() {
   pretty_print(Theory(T).formula())
