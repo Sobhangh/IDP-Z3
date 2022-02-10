@@ -49,7 +49,7 @@ run('python3 test.py generate')
 
 update_statics = query_user("Update the '/IDP-Z3/idp_web_server/static' folder? (Y/n) ")
 if update_statics:
-    require_clean_work_tree("idp_web_client")
+    #require_clean_work_tree("idp_web_client")
 
     # Generate static and commit.
     run('npm run-script build', cwd='idp_web_client', check=True)
@@ -124,7 +124,7 @@ if update_statics:
 
         # Push to google repository and deploy on GAE.
         run("git push google main")
-        run("git push google main", cwd='idp_web_client')
+        # run("git push google main", cwd='idp_web_client')
         run(f"gcloud app deploy {'' if new_tag else '--no-promote'}")
 
         # update versions.list at https://gist.github.com/IDP-Z3/5d82c61fa39e8aa23da1642a2e2b420a
