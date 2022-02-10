@@ -1,8 +1,8 @@
 {
   "dirty": false,
-  "raw": "v0.5.1-307-g6ff0f32",
-  "hash": "g6ff0f32",
-  "distance": 307,
+  "raw": "v0.5.1-1975-g5525d4ec",
+  "hash": "g5525d4ec",
+  "distance": 1975,
   "tag": "v0.5.1",
   "semver": {
     "raw": "v0.5.1",
@@ -13,6 +13,6 @@
     "build": [],
     "version": "0.5.1"
   },
-  "suffix": "307-g6ff0f32",
-  "semverString": "0.5.1+307.g6ff0f32"
+  "suffix": "1975-g5525d4ec",
+  "semverString": "0.5.1+1975.g5525d4ec"
 }

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
-## [Unpublished yet]
+## [0.9.2] - 2022-02-10
 
 Highlights of the breaking changes:
 * A `.` is now required after a symbol interpretation in a theory or structure, e.g. `color := {red, blue, green}.`. The string output of some API methods also has a `.` after an enumeration.
@@ -17,8 +17,6 @@ Highlights of the breaking changes:
 * fix #183: should check domain and range in enumerations
 * fix #184: nested Concept subtypes
 * (breaking) MR !206: 'import' vocabulary
-
-### Interactive Consultant
 
 ### Other
 * MR #207: add analytics to www.idp-z3.be, with user consent
