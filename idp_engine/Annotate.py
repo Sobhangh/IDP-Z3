@@ -21,6 +21,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 """
 
 from copy import copy
+from itertools import chain
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Type, Subtype,
                     SymbolDeclaration, Symbol,
@@ -114,6 +115,10 @@ def annotate(self, voc):
         s.annotate(voc, {})
     self.out.annotate(voc, {})
     self.type = self.out.name
+
+    for s in chain(self.sorts, [self.out]):
+        self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
+                   f"`Concept` must be qualified with a type signature in {self}")
     return self
 SymbolDeclaration.annotate = annotate
 

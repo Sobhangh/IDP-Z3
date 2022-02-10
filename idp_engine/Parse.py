@@ -47,7 +47,7 @@ from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, Sy
                          Number, Brackets, Date,
                          Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
-                    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, ARITY, INPUT_DOMAIN, OUTPUT_DOMAIN, IDPZ3Error,
+                    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
@@ -262,21 +262,16 @@ class Vocabulary(ASTNode):
                 name=CONCEPT,
                 constructors=[]),
             SymbolDeclaration(annotations='', name=Symbol(name=GOAL_SYMBOL),
-                                sorts=[Subtype(name=CONCEPT)], out=Subtype(name=BOOL)),
+                              sorts=[Subtype(name=CONCEPT, ins=[],
+                                             out=Subtype(name=BOOL))],
+                              out=Subtype(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
-                                sorts=[Subtype(name=CONCEPT)], out=Subtype(name=BOOL)),
-            SymbolDeclaration(annotations='', name=Symbol(name=ARITY),
-                                sorts=[Subtype(name=CONCEPT)],
-                                out=Subtype(name=INT)),
+                              sorts=[Subtype(name=CONCEPT, ins=[],
+                                             out=Subtype(name=BOOL))],
+                              out=Subtype(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ABS),
                                 sorts=[Subtype(name=INT)],
                                 out=Subtype(name=INT)),
-            SymbolDeclaration(annotations='', name=Symbol(name=INPUT_DOMAIN),
-                                sorts=[Subtype(name=CONCEPT), Subtype(name=INT)],
-                                out=Subtype(name=CONCEPT)),
-            SymbolDeclaration(annotations='', name=Symbol(name=OUTPUT_DOMAIN),
-                                sorts=[Subtype(name=CONCEPT)],
-                                out=Subtype(name=CONCEPT))
             ] + self.declarations
 
     def __str__(self):
@@ -881,6 +876,8 @@ class ConstructedFrom(Enumeration):
         if type(args[0].decl) == Constructor:  # try to simplify it
             self.check(self.parent.name == args[0].decl.type,
                        f"Incorrect type of {args[0]} for {self.parent.name}")
+            self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
+                       f"Incorrect arity")
             return AND([t.decl.out.has_element(e)
                         for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
         out = [AppliedSymbol.construct(constructor.tester, args)

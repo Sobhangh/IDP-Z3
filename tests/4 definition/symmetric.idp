@@ -1,16 +1,15 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
-	symmetric: (Concept) → Bool
+	symmetric: (Concept[node*node -> Bool]) → Bool
     Start: ()→node
 }
 theory {
     edge(a,b).
-    !`p in Concept: arity(`p)=2 & input_domain(`p,1)=input_domain(`p,1)
-				=> (!x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x)).
-    !`p in Concept: symmetric(`p)
-				=> (!x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x)).
-    !`p in symmetric: !x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x).
+    !`p in Concept[node*node -> Bool]: !x: !y in node: $(`p)(x,y) => $(`p)(y,x).
+    !`p in Concept[node*node -> Bool]: symmetric(`p)
+				=> (!x: !y in node: $(`p)(x,y) => $(`p)(y,x)).
+    !`p in symmetric: !x: !y in node: $(`p)(x,y) => $(`p)(y,x).
 	symmetric := {`edge}.
 }
 display {

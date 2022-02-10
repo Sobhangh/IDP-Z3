@@ -7,9 +7,6 @@ vocabulary {
 
 
 
-
-
-
 p: () -> 𝔹
 }
 

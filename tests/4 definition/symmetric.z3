@@ -3,16 +3,15 @@
 vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
-	symmetric: (Concept) → Bool
+	symmetric: (Concept[node*node -> Bool]) → Bool
     Start: ()→node
 }
 theory {
     edge(a,b).
-    !`p in Concept: arity(`p)=2 & input_domain(`p,1)=input_domain(`p,1)
-				=> (!x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x)).
-    !`p in Concept: symmetric(`p)
-				=> (!x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x)).
-    !`p in symmetric: !x: !y in $(input_domain(`p,2)): $(`p)(x,y) => $(`p)(y,x).
+    !`p in Concept[node*node -> Bool]: !x: !y in node: $(`p)(x,y) => $(`p)(y,x).
+    !`p in Concept[node*node -> Bool]: symmetric(`p)
+				=> (!x: !y in node: $(`p)(x,y) => $(`p)(y,x)).
+    !`p in symmetric: !x: !y in node: $(`p)(x,y) => $(`p)(y,x).
 	symmetric := {`edge}.
 }
 display {
@@ -119,84 +118,55 @@ display {
                          'relevant': True,
                          'status': 'UNKNOWN',
                          'typ': 'Bool'},
-          '∀`p ∈ Concept : arity(`p) = 2 ∧ input_domain(`p, 1) = input_domain(`p, 1) ⇒ (∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
-                                                                                                                                                                'is_assignment': False,
-                                                                                                                                                                'normal': False,
-                                                                                                                                                                'reading': '∀`p '
-                                                                                                                                                                           '∈ '
-                                                                                                                                                                           'Concept '
-                                                                                                                                                                           ': '
-                                                                                                                                                                           'arity(`p) '
-                                                                                                                                                                           '= '
-                                                                                                                                                                           '2 '
-                                                                                                                                                                           '∧ '
-                                                                                                                                                                           'input_domain(`p, '
-                                                                                                                                                                           '1) '
-                                                                                                                                                                           '= '
-                                                                                                                                                                           'input_domain(`p, '
-                                                                                                                                                                           '1) '
-                                                                                                                                                                           '⇒ '
-                                                                                                                                                                           '(∀x '
-                                                                                                                                                                           '∈ '
-                                                                                                                                                                           'None '
-                                                                                                                                                                           ': '
-                                                                                                                                                                           '∀y '
-                                                                                                                                                                           '∈ '
-                                                                                                                                                                           '$(input_domain(`p, '
-                                                                                                                                                                           '2)) '
-                                                                                                                                                                           ': '
-                                                                                                                                                                           '$(`p)(x, '
-                                                                                                                                                                           'y) '
-                                                                                                                                                                           '⇒ '
-                                                                                                                                                                           '$(`p)(y, '
-                                                                                                                                                                           'x))',
-                                                                                                                                                                'relevant': False,
-                                                                                                                                                                'status': 'UNIVERSAL',
-                                                                                                                                                                'typ': 'Bool',
-                                                                                                                                                                'value': True},
-          '∀`p ∈ Concept : symmetric(`p) ⇒ (∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
-                                                                                                                    'is_assignment': False,
-                                                                                                                    'normal': False,
-                                                                                                                    'reading': '∀`p '
-                                                                                                                               '∈ '
-                                                                                                                               'Concept '
-                                                                                                                               ': '
-                                                                                                                               'symmetric(`p) '
-                                                                                                                               '⇒ '
-                                                                                                                               '(∀x '
-                                                                                                                               '∈ '
-                                                                                                                               'None '
-                                                                                                                               ': '
-                                                                                                                               '∀y '
-                                                                                                                               '∈ '
-                                                                                                                               '$(input_domain(`p, '
-                                                                                                                               '2)) '
-                                                                                                                               ': '
-                                                                                                                               '$(`p)(x, '
-                                                                                                                               'y) '
-                                                                                                                               '⇒ '
-                                                                                                                               '$(`p)(y, '
-                                                                                                                               'x))',
-                                                                                                                    'relevant': False,
-                                                                                                                    'status': 'UNIVERSAL',
-                                                                                                                    'typ': 'Bool',
-                                                                                                                    'value': True},
-          '∀`p ∈ symmetric : ∀x ∈ None : ∀y ∈ $(input_domain(`p, 2)) : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
-                                                                                                    'is_assignment': False,
-                                                                                                    'normal': False,
-                                                                                                    'reading': '∀`p ∈ '
-                                                                                                               'symmetric '
-                                                                                                               ': ∀x ∈ '
-                                                                                                               'None : '
-                                                                                                               '∀y ∈ '
-                                                                                                               '$(input_domain(`p, '
-                                                                                                               '2)) : '
-                                                                                                               '$(`p)(x, '
-                                                                                                               'y) ⇒ '
-                                                                                                               '$(`p)(y, '
-                                                                                                               'x)',
-                                                                                                    'relevant': False,
-                                                                                                    'status': 'UNIVERSAL',
-                                                                                                    'typ': 'Bool',
-                                                                                                    'value': True}},
+          '∀`p ∈ Concept[node*node->𝔹] : symmetric(`p) ⇒ (∀x ∈ None : ∀y ∈ node : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
+                                                                                                                'is_assignment': False,
+                                                                                                                'normal': False,
+                                                                                                                'reading': '∀`p '
+                                                                                                                           '∈ '
+                                                                                                                           'Concept[node*node->𝔹] '
+                                                                                                                           ': '
+                                                                                                                           'symmetric(`p) '
+                                                                                                                           '⇒ '
+                                                                                                                           '(∀x '
+                                                                                                                           '∈ '
+                                                                                                                           'None '
+                                                                                                                           ': '
+                                                                                                                           '∀y '
+                                                                                                                           '∈ '
+                                                                                                                           'node '
+                                                                                                                           ': '
+                                                                                                                           '$(`p)(x, '
+                                                                                                                           'y) '
+                                                                                                                           '⇒ '
+                                                                                                                           '$(`p)(y, '
+                                                                                                                           'x))',
+                                                                                                                'relevant': False,
+                                                                                                                'status': 'UNIVERSAL',
+                                                                                                                'typ': 'Bool',
+                                                                                                                'value': True},
+          '∀`p ∈ Concept[node*node->𝔹] : ∀x ∈ None : ∀y ∈ node : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
+                                                                                              'is_assignment': False,
+                                                                                              'normal': False,
+                                                                                              'reading': '∀`p ∈ '
+                                                                                                         'Concept[node*node->𝔹] '
+                                                                                                         ': ∀x ∈ None '
+                                                                                                         ': ∀y ∈ node '
+                                                                                                         ': $(`p)(x, '
+                                                                                                         'y) ⇒ '
+                                                                                                         '$(`p)(y, x)',
+                                                                                              'relevant': False,
+                                                                                              'status': 'UNIVERSAL',
+                                                                                              'typ': 'Bool',
+                                                                                              'value': True},
+          '∀`p ∈ symmetric : ∀x ∈ None : ∀y ∈ node : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
+                                                                                  'is_assignment': False,
+                                                                                  'normal': False,
+                                                                                  'reading': '∀`p ∈ symmetric : ∀x ∈ '
+                                                                                             'None : ∀y ∈ node : '
+                                                                                             '$(`p)(x, y) ⇒ $(`p)(y, '
+                                                                                             'x)',
+                                                                                  'relevant': False,
+                                                                                  'status': 'UNIVERSAL',
+                                                                                  'typ': 'Bool',
+                                                                                  'value': True}},
  'symmetric': {}}

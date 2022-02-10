@@ -9,11 +9,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Highlights of the breaking changes:
 * A `.` is now required after a symbol interpretation in a theory or structure, e.g. `color := {red, blue, green}.`. The string output of some API methods also has a `.` after an enumeration.
 * use `import` to include a vocabulary in another.
+* `Concept` must always be followed by a type signature, in vocabulary and in quantifications. The introspection functions are not supported anymore (`arity, input_domain, output_domain`)
 
 ### IDP-Z3
 * (breaking) fix #182: Require a `.` after a symbol interpretation in a theory or structure
-* fix #183: should check domain and range in enumerations
 * fix #181: Should detect error in `∀c in q[()->Bool]:`
+* fix #183: should check domain and range in enumerations
+* fix #184: nested Concept subtypes
 * (breaking) MR !206: 'import' vocabulary
 
 ### Interactive Consultant

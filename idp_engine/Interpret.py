@@ -295,6 +295,8 @@ def instantiate1(self, e0, e1, problem=None):
     if out.value is not None:  # replace by new value
         out = out.value
     else:
+        self.check(len(e0) == len(e1),
+                   f"Incorrect arity: {e0}, {e1}")
         for o, n in zip(e0, e1):
             if o.name in out.variables:
                 out.variables.discard(o.name)
@@ -322,7 +324,8 @@ def range(self):
                  if v.decl.symbol.decl.arity == len(self.ins)
                  and isinstance(v.decl.symbol.decl, SymbolDeclaration)
                  and v.decl.symbol.decl.out.name == self.out.name
-                 and all(s.name == q.name
+                 and len(v.decl.symbol.decl.sorts) == len(self.ins)
+                 and all(s == q
                          for s, q in zip(v.decl.symbol.decl.sorts,
                                          self.ins))]
     return range
@@ -547,6 +550,8 @@ Variable.substitute = substitute
 def instantiate1(self, e0, e1, problem=None):
     if self.sort:
         self.sort = self.sort.instantiate(e0, e1, problem)
+    self.check(len(e0) == len(e1),
+               f"Incorrect arity: {e0}, {e1}")
     for o, n in zip(e0, e1):
         if self.code == o.code:
             return n
