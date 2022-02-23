@@ -1,0 +1,13 @@
+vocabulary {
+
+     Base : () -> Real
+     Height: () -> Real
+     p: () -> Bool
+}
+
+theory {
+  p() => 15.0 = Base()*Base().
+  0 < Base().
+  p().
+  Height() = 8.0/3.
+}
