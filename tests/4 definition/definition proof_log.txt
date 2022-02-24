@@ -1,8 +1,0 @@
-
-- 'definition:'
-- 'definition:'
-- '
-
-  Z3 propagation ********************************'
-- 'definition:'
-- 'definition:'

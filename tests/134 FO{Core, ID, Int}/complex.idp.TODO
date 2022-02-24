@@ -1,13 +1,13 @@
 vocabulary {
-    type num = {-1; 0; 1}
+    type num := {-1, 0, 1}
     same: (num) → num
     negated: (num) → num
 }
 
 theory {
-    { !x[num]: same(x) = x. }
-    { !x[num]: same(x) = -(-x). }
-    { !x[num]: negated(same(x)) = (0-x). }
+    { !x in num: same(x) = x. }
+    { !x in num: same(x) = -(-x). }
+    { !x in num: negated(same(x)) = (0-x). }
     same(1)= 1.
     same(same(-1))= negated(negated(-1)).
 
