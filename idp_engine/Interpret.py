@@ -346,6 +346,7 @@ def interpret(self, problem):
     # This method is called by AAggregate.interpret !
     if not self.quantees:
         return Expression.interpret(self, problem)
+    self.check(len(self.sub_exprs) == 1, "Internal error")
 
     # type inference
     inferred = self.sub_exprs[0].type_inference()

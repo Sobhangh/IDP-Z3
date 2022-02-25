@@ -197,10 +197,10 @@ class Theory(object):
                 instantiables = defin.get_instantiables(for_explain=True)
                 defin.add_def_constraints(instantiables, self, def_constraints)
 
-            todo = chain(self.constraints, chain(*def_constraints.values()))
-            for constraint in todo:
+            for constraint in chain([c.interpret(self) for c in self.constraints],
+                                    chain(*def_constraints.values())):
                 p = constraint.reified(self)
-                self.expl_reifs[p] = (constraint.original.interpret(self).translate(self), constraint)
+                self.expl_reifs[p] = (constraint.translate(self), constraint)
                 self._reif.add(Implies(p, self.expl_reifs[p][0]))
 
         return self._reif
