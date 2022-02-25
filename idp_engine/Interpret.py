@@ -346,7 +346,6 @@ def interpret(self, problem):
     # This method is called by AAggregate.interpret !
     if not self.quantees:
         return Expression.interpret(self, problem)
-    self.check(len(self.sub_exprs) == 1, "Internal error")
 
     # type inference
     inferred = self.sub_exprs[0].type_inference()
@@ -360,7 +359,6 @@ def interpret(self, problem):
             q.sub_exprs = [inferred[var.name]]
 
     forms = self.sub_exprs
-    assert len(forms)==1
     new_quantees = []
     for q in self.quantees:
         domain = q.sub_exprs[0]

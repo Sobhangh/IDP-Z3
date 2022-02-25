@@ -1,0 +1,13 @@
+vocabulary {
+    type Component := {A, B, C, D}
+    p: Component -> Int
+}
+theory {
+    {!c in Component: p(c)=1.}
+}
+
+procedure main() {
+    T = Theory(T)
+    pretty_print(T.expand(max=1))
+    print(T.explain())
+}
