@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### IDP-Z3
 * fix #187: `Internal error` with `explain()`
+* fix #188: `Incorrect solver result during explain inference`
+
 
 ## [0.9.2] - 2022-02-10
 

@@ -777,8 +777,7 @@ class Theory(object):
 
         result = solver.check([z3_form for z3_form, (_, expr) in ps.items() if
                                     not (expr and expr.code in self.ignored_laws)])
-        assert result == unsat, ("Incorrect solver result during explain inference. "
-                                 "This may be due to floating point imprecision.")
+        assert result == unsat, ("Theory is satisfiable: nothing to explain.")
         unsatcore = solver.unsat_core()
 
         solver.pop()
