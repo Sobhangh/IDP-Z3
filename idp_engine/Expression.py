@@ -1123,7 +1123,6 @@ class AppliedSymbol(Expression):
         if self.symbol.decl not in level_symbols or self.in_head:
             return self
         else:
-            self.in_head = True
             if DEF_SEMANTICS == Semantics.WELLFOUNDED:
                 op = ('>' if pos_justification else '≥') \
                     if polarity else ('≤' if pos_justification else '<')
