@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
+## unreleased yet
+
+### IDP-Z3
+* fix #187: `Internal error` with `explain()`
+* fix #188: `Incorrect solver result during explain inference`
+
+
 ## [0.9.2] - 2022-02-10
 
 Highlights of the breaking changes:

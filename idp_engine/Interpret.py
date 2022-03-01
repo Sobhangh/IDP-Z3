@@ -360,7 +360,6 @@ def interpret(self, problem):
             q.sub_exprs = [inferred[var.name]]
 
     forms = self.sub_exprs
-    assert len(forms)==1
     new_quantees = []
     for q in self.quantees:
         domain = q.sub_exprs[0]

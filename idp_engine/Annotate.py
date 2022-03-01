@@ -246,7 +246,7 @@ def get_instantiables(self, for_explain=False):
             all_bodies = OR(bodies)
             if not inductive:
                 if out:  # already contains reverse implications
-                    out.append(RIMPLIES([head, all_bodies], self.annotations))
+                    out.append(IMPLIES([head, all_bodies], self.annotations))
                 else:
                     out = [EQUIV([head, all_bodies], self.annotations)]
             else:

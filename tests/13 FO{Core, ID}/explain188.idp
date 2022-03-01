@@ -1,0 +1,15 @@
+vocabulary {
+    p, q, r: () -> Bool
+}
+theory {
+    {p() <- q().
+     p() <- r().}
+    p().
+    ~q().
+    ~r().
+}
+procedure main() {
+    T = Theory(T)
+    pretty_print(T.expand(max=1))
+    print(T.explain())
+}
