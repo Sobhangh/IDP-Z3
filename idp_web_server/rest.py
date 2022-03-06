@@ -46,6 +46,8 @@ from .IO import Output, metaJSON
 
 from typing import Dict
 
+import re
+
 if with_profiling:
     from pyinstrument import Profiler
 
@@ -242,24 +244,46 @@ class eval(Resource):
                 method = args['method']
                 out = {}
                 if method == "checkCode":
-                    idpModel = IDP.from_str(args['code'])
-                    if args['symbol'] != "":  # check only that sentence
-                        newTheory = (str(idpModel.vocabulary)
-                                     + "theory {\n"
-                                     + args['symbol']
-                                     + "\n}\n"
-                                     )
-                        idpModel = IDP.from_str(newTheory)
-                    # remove enumerations of functions/predicates
-                    for block in list(idpModel.theories.values()) + list(idpModel.structures.values()):
-                        block.interpretations = {k:v
-                            for k,v in block.interpretations.items()
-                            if v.is_type_enumeration == True}
-                    assert len(idpModel.theories) == 1 and len(idpModel.structures)<=1, \
-                        "Can't check code containing more than 1 theory or structure."
-                    state = State(idpModel)  # don't use cache.  May raise an error
-                    next(state.expand(max=1, timeout=0))
-                    out = {"result": "ok"}
+                    # idpModel = IDP.from_str(args['code'])
+                    # if args['symbol'] != "":  # check only that sentence
+                    #     newTheory = (str(idpModel.vocabulary)
+                    #                  + "theory {\n"
+                    #                  + args['symbol']
+                    #                  + "\n}\n"
+                    #                  )
+                    #     idpModel = IDP.from_str(newTheory)
+                    # # remove enumerations of functions/predicates
+                    # for block in list(idpModel.theories.values()) + list(idpModel.structures.values()):
+                    #     block.interpretations = {k:v
+                    #         for k,v in block.interpretations.items()
+                    #         if v.is_type_enumeration == True}
+                    # assert len(idpModel.theories) == 1 and len(idpModel.structures)<=1, \
+                    #     "Can't check code containing more than 1 theory or structure."
+                    # state = State(idpModel)  # don't use cache.  May raise an error
+                    # next(state.expand(max=1, timeout=0))
+                    # out = {"result": "ok"}
+
+                    # We need to run the AST.py linter
+                    import subprocess
+                    # Save the code to /tmp/ding.idp
+                    with open('/tmp/ding.idp', 'w') as fp:
+                        fp.write(args['code'])
+
+                    output = subprocess.run("python ~/Downloads/Masterproef/IDP-Z3-main_new/AST.py /tmp/ding.idp", shell=True, capture_output=True)
+                    lint = output.stdout.decode()
+
+                    # msgs = re.findall(r'[Warning|Error] : line (\d+) - col (\d+) => (\w+)$', lint)
+                    msgs = re.findall(r'(Warning|Error) : line (\d+) - col (\d+) => (.*)', lint)
+                    errors = []
+                    for msg in msgs:
+                        error = {'type': msg[0],
+                                 'line': msg[1],
+                                 'col': msg[2],
+                                 'details': msg[3]
+                                 }
+                        errors.append(error)
+                    print(errors)
+                    out = errors
                 else:
                     state = State.make(idpOf(args['code']),
                                        args['previous_active'],
