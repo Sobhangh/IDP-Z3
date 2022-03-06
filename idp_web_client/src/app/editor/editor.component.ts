@@ -56,7 +56,7 @@ export class EditorComponent {
         const msg = msgs[i];
         let severity = null;
         if (msg['type'] === 'Warning') {
-            severity = monaco.MarkerSeverity.Info;
+            severity = monaco.MarkerSeverity.Warning;
         } else {
             severity = monaco.MarkerSeverity.Error;
         }
