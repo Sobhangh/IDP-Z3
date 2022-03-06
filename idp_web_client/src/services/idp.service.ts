@@ -704,5 +704,16 @@ procedure main() {
     this.doPropagation();
   }
 
-}
 
+
+  public async doSCA(): Promise<[]> {
+    const input = {
+      method: 'checkCode',
+      code: this.spec
+    };
+    const msgs = this.call_eval(this.meta, input);
+    //@ts-ignore
+    return await msgs;
+    // void this.doRelevance();
+  }
+}

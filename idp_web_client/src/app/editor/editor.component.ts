@@ -32,14 +32,44 @@ export class EditorComponent {
     this.idpService.editor.model.onDidChangeContent((event) => {
       // Do nothing if the change came from an executeEdits
       if (this.change) {
-          this.change = false;
-          return;
+        this.change = false;
+        return;
       } else if (this.textModeUnicode) {
-      // Whenever a user has typed, switch back to ASCII
-          this.textModeUnicode = false;
-          return;
+
+        // Whenever a user has typed, switch back to ASCII
+        this.textModeUnicode = false;
+        return
+
+      } else {
+        // Run the static code analysis.
+        this.idpService.doSCA().then((msgs) => {
+          console.log(msgs);
+          const marker_msgs = [];
+          for (let i = 0; i < msgs.length; i++) {
+            const msg = msgs[i];
+            let severity = null;
+            if (msg['type'] === 'Warning') {
+                severity = monaco.MarkerSeverity.Info;
+            } else {
+                severity = monaco.MarkerSeverity.Error;
+            }
+            const marker_msg = {
+                startLineNumber: msg['line'],
+                startColumn: msg['col'],
+                endLineNumber: msg['line'],
+                endColumn: msg['col'],
+                message: msg['details'],
+                severity: severity
+            };
+            marker_msgs.push(marker_msg);
+            console.log(msg);
+          }
+          const model = this.idpService.editor.getModel();
+          monaco.editor.setModelMarkers(model, 'owner', marker_msgs)
+        });
       }
     });
+
   }
 
   constructor(public idpService: IdpService, private messageService: MessageService, @Inject(DOCUMENT) document: Document) {
