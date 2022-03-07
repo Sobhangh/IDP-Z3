@@ -31,11 +31,6 @@ IDP-Z3 supports built-in and custom types.
 The built-in types are:  ``𝔹``, ``ℤ``, ``ℝ``, ``Date``, and ``Concept[signature]`` (where ``signature`` is any type signature, e.g. ``()->Bool``).
 The equivalent ASCII symbols are ``Bool``, ``Int``, and ``Real``.
 
-Boolean literals are ``true`` and ``false``.
-Number literals follow Python's conventions.
-Date literals follow ISO 8601 conventions, prefixed with ``#`` (``#yyyy-mm-dd``).
-``#TODAY`` is also a Date literal.
-
 The type ``Concept[signature]`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary with that signature.
 The constructors are the names of the symbol, prefixed with `````.
 

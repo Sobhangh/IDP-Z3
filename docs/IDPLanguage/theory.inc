@@ -31,8 +31,16 @@ Mathematical expressions and Terms
 
 A *term* is inductively defined as follows:
 
-Numeric literal
+Boolean, Numeric and Date literals
+
+    ``true`` and ``false`` are boolean terms.
+
     Numeric literals that follow the `Python conventions <https://docs.python.org/3/reference/lexical_analysis.html#numeric-literals>`_ are numerical terms of type ``Int`` or ``Real``.
+
+    Date literals are terms.  They follow ISO 8601 conventions, prefixed with ``#`` (i.e., ``#yyyy-mm-dd``).
+    ``#TODAY`` is also a Date literal representing today's date.
+    ``#TODAY(y, m, d)`` is a Date literal representing today shifted by ``y`` years, ``m`` months and ``d`` days,
+    where ``y``, ``m`` and ``d`` are integer literals (e.g., ``#TODAY(-18, 0, 0)`` is today 18 years ago).
 
 Constructor
     Each constructor of a type_ is a term having that type.

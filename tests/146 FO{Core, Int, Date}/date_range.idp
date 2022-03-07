@@ -5,6 +5,7 @@ vocabulary {
 
 theory {
     date() < date()+1.
+    #TODAY(0,0,-1) < #TODAY.
 }
 
 structure {

@@ -111,7 +111,8 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
-      Date: iso=/#\d{4}-\d{2}-\d{2}/ | iso='#TODAY';
+      Date: iso=/#\d{4}-\d{2}-\d{2}/
+          | iso='#TODAY' ( '(' y=INT ',' m=INT ',' d=INT ')' )?;
       Brackets: annotations=Annotations '(' f=Expression ')';
 
 
