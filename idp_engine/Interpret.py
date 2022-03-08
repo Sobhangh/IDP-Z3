@@ -318,7 +318,7 @@ Symbol.instantiate = instantiate
 # class Subtype ###########################################################
 
 def range(self):
-    range = [t for t in self.decl.range]
+    range = self.decl.range
     if self.out:  # x in Concept[T->T]
         range = [v for v in range
                  if v.decl.symbol.decl.arity == len(self.ins)
@@ -368,14 +368,14 @@ def interpret(self, problem):
         if not domain.decl.range:
             new_quantees.append(q)
         else:
-            if domain.code in problem.interpretations:
+            if domain.code in problem.interpretations:  # domain has an interpretation
                 enumeration = problem.interpretations[domain.code].enumeration
                 range = [t.args for t in enumeration.tuples.values()]
                 guard = None
-            elif type(domain.decl) == SymbolDeclaration:
+            elif type(domain.decl) == SymbolDeclaration:  # quantification over predicate
                 range = domain.decl.in_domain
                 guard = domain
-            elif isinstance(domain, Subtype):
+            elif isinstance(domain, Subtype):  # quantification over type / Concepts
                 range = [[t] for t in domain.range()]
                 guard = None
             else:  # SymbolExpr (e.g. $(`Color))

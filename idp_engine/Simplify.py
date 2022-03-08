@@ -35,7 +35,7 @@ from .Expression import (
     Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
 from .Parse import Symbol, Enumeration, Tuple, TypeDeclaration
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, INT, CONCEPT, ABS, RESERVED_SYMBOLS
+from .utils import BOOL, INT, DATE, CONCEPT, ABS, RESERVED_SYMBOLS
 
 
 # class Expression  ###########################################################
@@ -264,7 +264,8 @@ def update_arith(self, family, operands):
                 out //= e.py_value
             else:
                 out = function(out, e.py_value)
-        value = Number(number=str(out))
+        value = (Number(number=str(out)) if operands[0].type != DATE else
+                 Date.make(out))
         return self._change(value=value, sub_exprs=operands)
     return self._change(sub_exprs=operands)
 

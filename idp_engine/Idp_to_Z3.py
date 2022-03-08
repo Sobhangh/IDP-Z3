@@ -91,7 +91,7 @@ def translate(self, problem: "Theory"):
                     for e in c.range:
                         self.map[str(e)] = e
         else: # list of numbers
-            out = (IntSort(problem.ctx) if self.interpretation.enumeration.type == INT else
+            out = (IntSort(problem.ctx) if self.interpretation.enumeration.type in [INT, DATE] else
                    RealSort(problem.ctx))
         problem.z3[self.name] = out
     return out
@@ -408,7 +408,7 @@ Number.translate = translate
 def translate(self, problem: "Theory", vars={}):
     out = problem.z3.get(self.str, None)
     if out is None:
-        out = self.py_value
+        out = IntVal(self.py_value, problem.ctx)
         problem.z3[self.str] = self.py_value
     return out
 Date.translate = translate

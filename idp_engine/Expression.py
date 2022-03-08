@@ -1295,6 +1295,10 @@ class Date(Expression):
         self.py_value = int(self.date.toordinal())
         self.type = DATE
 
+    @classmethod
+    def make(cls, value):
+        return cls(iso=f"#{date.fromordinal(value).isoformat()}")
+
     def __str__(self): return f"#{self.date.isoformat()}"
 
     def is_reified(self): return False
