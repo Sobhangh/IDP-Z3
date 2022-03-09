@@ -194,7 +194,7 @@ class Theory(object):
             # get expanded def_constraints
             def_constraints = {}
             for defin in self.definitions:
-                instantiables = defin.get_instantiables(for_explain=True)
+                instantiables = defin.get_instantiables(self.interpretations, for_explain=True)
                 defin.add_def_constraints(instantiables, self, def_constraints)
 
             for constraint in chain([c.interpret(self) for c in self.constraints],

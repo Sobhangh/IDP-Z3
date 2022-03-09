@@ -22,6 +22,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 from itertools import chain
+from typing import Dict
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Type, Subtype,
                     SymbolDeclaration, Symbol,
@@ -193,7 +194,9 @@ def annotate(self, voc, q_vars):
     return self
 Definition.annotate = annotate
 
-def get_instantiables(self, for_explain=False):
+def get_instantiables(self,
+                      interpretations: Dict[str, SymbolInterpretation],
+                      for_explain=False):
     """ compute Definition.instantiables, with level-mapping if definition is inductive
 
     Uses implications instead of equivalence if `for_explain` is True
@@ -209,7 +212,7 @@ def get_instantiables(self, for_explain=False):
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.is_whole_domain = all(s.range()  # not None nor []
+        rule.is_whole_domain = all(s.extension(interpretations)[0]  # not None nor []
                                    for s in rule.definiendum.decl.sorts)
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,

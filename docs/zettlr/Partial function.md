@@ -5,7 +5,7 @@
 * [ ] align function names in TypeDeclaration, SymbolDeclaration, Type
     * they should look-up theory.interpretations[ ] !
     * [ ] extension(interpretations?) -> (superset, filter(expr))  (instead of range(); only for predicates or types)
-        * [ ]  change signature of range()
+        * [x]  change signature of range()
     * [ ] is_defined(expr, interpretations?) (instead of has_in_domain(expr))
 * [ ] filter model generation
     * [ ] domain(interpretations)
@@ -20,9 +20,9 @@ flowchart TD
 	SymbolDeclaration_has_in_domain --> Symbol_has_element;
 	SymbolDeclaration_has_in_range --> Symbol_has_element;
 	Enumeration_contains --> Symbol_has_element;
-	Definition_get_instantiables["Definition<br/>get_instantiables()"] --> Subtype_range["Subtype<br/>range()"];
-	Symbol_has_element --> Subtype_range;
-	SymbolDeclaration_interpret["SymbolDecl<br/>interpret()"] --> Subtype_range;
-	Constructor_interpret["Constructor<br/>interpret()"] --> Subtype_range;
-	AQuantification_interpret["AQuant<br/>interpret()"] --> Subtype_range;
+	Definition_get_instantiables["Definition<br/>get_instantiables()"] --> Subtype_extension["Subtype<br/>extension()"];
+	Symbol_has_element --> Subtype_extension;
+	SymbolDeclaration_interpret["SymbolDecl<br/>interpret()"] --> Subtype_extension;
+	Constructor_interpret["Constructor<br/>interpret()"] --> Subtype_extension;
+	AQuantification_interpret["AQuant<br/>interpret()"] --> Subtype_extension;
 ```

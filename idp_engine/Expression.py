@@ -532,7 +532,9 @@ class Symbol(Expression):
     def __repr__(self):
         return str(self)
 
-    def has_element(self, term: Expression) -> Expression:
+    def has_element(self, term: Expression,
+                    interpretations: Dict[str, "SymbolInterpretation"]
+                    ) -> Expression:
         """Returns an expression that says whether `term` is in the type denoted by `self`.
 
         Args:
@@ -541,7 +543,7 @@ class Symbol(Expression):
         Returns:
             Expression: whether `term` is in the type denoted by `self`.
         """
-        return self.decl.check_bounds(term)
+        return self.decl.check_bounds(term, interpretations)
 
 
 class Subtype(Symbol):
@@ -575,10 +577,13 @@ class Subtype(Symbol):
                     len(self.ins) == len(other.ins) and
                     all(s==o for s, o in zip(self.ins, other.ins)))))
 
-    def range():
+    def extension(self, interpretations:Dict[str, "SymbolInterpretation"]):
         pass  # monkey-patched
 
-    def has_element(self, term: Expression) -> Expression:
+    def has_element(self,
+                    term: Expression,
+                    interpretations: Dict[str, "SymbolInterpretation"]
+                    ) -> Expression:
         """Returns an Expression that says whether `term` is in the type denoted by `self`.
 
         Args:
@@ -588,10 +593,10 @@ class Subtype(Symbol):
             Expression: whether `term` `term` is in the type denoted by `self`.
         """
         if self.name == CONCEPT:
-            comparisons = [EQUALS([term, c]) for c in self.range()]
+            comparisons = [EQUALS([term, c]) for c in self.extension(interpretations)[0]]
             return OR(comparisons)
         else:
-            return self.decl.check_bounds(term)
+            return self.decl.check_bounds(term, interpretations)
 
 
 class AIfExpr(Expression):

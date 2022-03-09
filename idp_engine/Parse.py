@@ -357,13 +357,14 @@ class TypeDeclaration(ASTNode):
                        f"{self.enumeration}")
         return (f"type {self.name} := {{{enumeration}}}")
 
-    def check_bounds(self, var):
+    def check_bounds(self, var, interpretations: Dict[str, "SymbolInterpretation"]):
         if self.name == CONCEPT:
             comparisons = [EQUALS([var, UnappliedSymbol.construct(c)])
                           for c in self.constructors]
             return OR(comparisons)
         else:
-            return self.interpretation.enumeration.contains([var], False)
+            return self.interpretation.enumeration.contains([var], False,
+                                                            interpretations=interpretations)
 
 
 class SymbolDeclaration(ASTNode):
@@ -456,7 +457,8 @@ class SymbolDeclaration(ASTNode):
     def __repr__(self):
         return str(self)
 
-    def has_in_domain(self, args: List[Expression]) -> Expression:
+    def has_in_domain(self, args: List[Expression],
+                      interpretations: Dict[str, "SymbolInterpretation"]) -> Expression:
         """Returns an expression that says whether the `args` are in the domain of the symbol.
 
         Arguments:
@@ -467,14 +469,14 @@ class SymbolDeclaration(ASTNode):
         """
         assert len(self.sorts) == len(args), \
             f"Incorrect arity of {str(args)} for {self.name}"
-        return AND([typ.has_element(term)
+        return AND([typ.has_element(term, interpretations)
                    for typ, term in zip(self.sorts, args)])
 
 
-    def has_in_range(self, value: Expression) -> Expression:
+    def has_in_range(self, value: Expression, interpretations) -> Expression:
         """Returns an expression that says whether `value` is in the range of the symbol.
         """
-        return self.out.has_element(value)
+        return self.out.has_element(value, interpretations)
 
 Type = Union[TypeDeclaration, SymbolDeclaration]
 
@@ -803,7 +805,8 @@ class Enumeration(ASTNode):
     def __repr__(self):
         return ", ".join([repr(t) for t in self.tuples])
 
-    def contains(self, args, function, arity=None, rank=0, tuples=None):
+    def contains(self, args, function, arity=None, rank=0, tuples=None,
+                 interpretations: Dict[str, "SymbolInterpretation"]=None):
         """ returns an Expression that says whether Tuple args is in the enumeration """
 
         if arity is None:
@@ -822,7 +825,8 @@ class Enumeration(ASTNode):
         if args[rank].value is not None:
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
-                    return self.contains(args, function, arity, rank+1, list(tuples2))
+                    return self.contains(args, function, arity, rank+1, list(tuples2),
+                                         interpretations=interpretations)
             return FALSE
         else:
             if rank + 1 == arity:  # use OR
@@ -836,7 +840,8 @@ class Enumeration(ASTNode):
                 tuples = list(tuples2)
                 out = AIfExpr.make(
                     EQUALS([args[rank], tuples[0].args[rank]]),
-                    self.contains(args, function, arity, rank+1, tuples),
+                    self.contains(args, function, arity, rank+1, tuples,
+                                  interpretations=interpretations),
                     out)
             return out
 
@@ -862,7 +867,8 @@ class ConstructedFrom(Enumeration):
         self.tuples = None
         self.accessors = dict()
 
-    def contains(self, args, function, arity=None, rank=0, tuples=None):
+    def contains(self, args, function, arity=None, rank=0, tuples=None,
+                 interpretations: Dict[str, "SymbolInterpretation"]=None):
         """returns True if args belong to the type enumeration"""
         # args must satisfy the tester of one of the constructors
         assert len(args) == 1, f"Incorrect arity in {self.parent.name}{args}"
@@ -871,7 +877,7 @@ class ConstructedFrom(Enumeration):
                        f"Incorrect type of {args[0]} for {self.parent.name}")
             self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
                        f"Incorrect arity")
-            return AND([t.decl.out.has_element(e)
+            return AND([t.decl.out.has_element(e, interpretations)
                         for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
         out = [AppliedSymbol.construct(constructor.tester, args)
                 for constructor in self.constructors]
@@ -936,7 +942,8 @@ class Ranges(Enumeration):
                     self.check(False, f"Incorrect value {x.toI} for {self.type}")
         Enumeration.__init__(self, tuples=tuples)
 
-    def contains(self, args, function, arity=None, rank=0, tuples=None):
+    def contains(self, args, function, arity=None, rank=0, tuples=None,
+                 interpretations: Dict[str, "SymbolInterpretation"]=None):
         var = args[0]
         if not self.elements:
             return TRUE

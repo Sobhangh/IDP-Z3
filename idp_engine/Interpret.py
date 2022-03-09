@@ -37,6 +37,7 @@ This module monkey-patches the ASTNode class and sub-classes.
 
 import copy
 from itertools import product
+from typing import Dict, Tuple, List, Callable
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration,
@@ -78,8 +79,8 @@ TypeDeclaration.interpret = interpret
 
 def interpret(self, problem):
     assert all(isinstance(s, Subtype) for s in self.sorts), 'internal error'
-    self.in_domain = list(product(*[s.range() for s in self.sorts]))
-    self.range = self.out.range()
+    self.in_domain = list(product(*[s.extension(problem.interpretations)[0] for s in self.sorts]))
+    (self.range, _) = self.out.extension(problem.interpretations)
 
     # create instances
     if self.name not in RESERVED_SYMBOLS:
@@ -93,7 +94,7 @@ def interpret(self, problem):
     # add type constraints to problem.constraints
     if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
         for inst in self.instances.values():
-            domain = self.out.decl.check_bounds(inst.copy())
+            domain = self.out.decl.check_bounds(inst.copy(), problem.interpretations)
             if domain is not None:
                 domain.block = self.block
                 domain.is_type_constraint_for = self.name
@@ -112,7 +113,7 @@ def interpret(self, problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
-    self.instantiables = self.get_instantiables()
+    self.instantiables = self.get_instantiables(problem.interpretations)
     self.add_def_constraints(self.instantiables, problem, problem.def_constraints)
 Definition.interpret = interpret
 
@@ -152,7 +153,7 @@ def interpret(self, problem):
 
             if type(self.enumeration) == FunctionEnum:
                 args, value = t.args[:-1], t.args[-1]
-                self.check(self.symbol.decl.has_in_range(value).same_as(TRUE),
+                self.check(self.symbol.decl.has_in_range(value, problem.interpretations).same_as(TRUE),
                            f"{value} is not in the range of {self.symbol.name}")
             else:
                 args, value = t.args, TRUE
@@ -163,7 +164,7 @@ def interpret(self, problem):
                     "()")
             self.check(len(self.symbol.decl.sorts) == len(args),
                 f"Incorrect arity of {a} for {self.name}")
-            self.check(self.symbol.decl.has_in_domain(args).same_as(TRUE),
+            self.check(self.symbol.decl.has_in_domain(args, problem.interpretations).same_as(TRUE),
                         f"{a} is not in the domain of {self.symbol.name}")
 
             expr = AppliedSymbol.make(self.symbol, args)
@@ -211,7 +212,8 @@ def interpret(self, problem):
         self.range = [UnappliedSymbol.construct(self)]
     else:
         self.range = [AppliedSymbol.construct(self, e)
-                      for e in product(*[s.decl.out.range() for s in self.sorts])]
+                      for e in product(*[s.decl.out.extension(problem.interpretations)[0]
+                                         for s in self.sorts])]
     return self
 Constructor.interpret = interpret
 
@@ -317,10 +319,22 @@ Symbol.instantiate = instantiate
 
 # class Subtype ###########################################################
 
-def range(self):
-    range = self.decl.range
+def extension(self, interpretations: Dict[str, SymbolInterpretation]
+              ) -> tuple[list[Expression], Callable]:
+    """returns the extension of a Type, given some interpretations
+
+    Args:
+        interpretations (Dict[str, SymbolInterpretation]):
+        the known interpretations of types and symbols
+
+    Returns:
+        tuple[list[Expression], Callable]: a superset of the extension of self,
+        and a function that, given arguments, returns an Expression that says
+        whether the arguments are in the extension of self
+    """
+    out = self.decl.range
     if self.out:  # x in Concept[T->T]
-        range = [v for v in range
+        out = [v for v in out
                  if v.decl.symbol.decl.arity == len(self.ins)
                  and isinstance(v.decl.symbol.decl, SymbolDeclaration)
                  and v.decl.symbol.decl.out.name == self.out.name
@@ -328,9 +342,10 @@ def range(self):
                  and all(s == q
                          for s, q in zip(v.decl.symbol.decl.sorts,
                                          self.ins))]
-    return range
-Subtype.range = range
-
+    def filter(expr: Expression) -> Expression:
+        return TRUE
+    return (out, filter)
+Subtype.extension = extension
 
 # Class AQuantification  ######################################################
 
@@ -376,7 +391,7 @@ def interpret(self, problem):
                 range = domain.decl.in_domain
                 guard = domain
             elif isinstance(domain, Subtype):  # quantification over type / Concepts
-                range = [[t] for t in domain.range()]
+                range = [[t] for t in domain.extension(problem.interpretations)[0]]
                 guard = None
             else:  # SymbolExpr (e.g. $(`Color))
                 range = [[t] for t in domain.decl.range] #TODO1 decl.enumeration.tuples
@@ -451,14 +466,14 @@ def interpret(self, problem):
                 if interpretation.default is not None:
                     simpler = TRUE
                 else:
-                    simpler = interpretation.enumeration.contains(sub_exprs, True)
+                    simpler = interpretation.enumeration.contains(sub_exprs, True, interpretations=problem.interpretations)
                 if 'not' in self.is_enumerated:
                     simpler = NOT(simpler)
                 simpler.annotations = self.annotations
         elif self.in_enumeration:
             # re-create original Applied Symbol
             core = AppliedSymbol.make(self.symbol, sub_exprs).copy()
-            simpler = self.in_enumeration.contains([core], False)
+            simpler = self.in_enumeration.contains([core], False, interpretations=problem.interpretations)
             if 'not' in self.is_enumeration:
                 simpler = NOT(simpler)
             simpler.annotations = self.annotations
