@@ -1,6 +1,6 @@
 ## TODO
 * [ ] rename
-	* [ ] Subtype to Type
+	* [X] Subtype to Type
 	* [ ] problem to Theory
 * [ ] align function names in TypeDeclaration, SymbolDeclaration, Type
     * they should look-up theory.interpretations[ ] !

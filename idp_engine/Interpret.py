@@ -45,7 +45,7 @@ from .Parse import (Import, TypeDeclaration,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
 from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
-                    AQuantification, Subtype, FORALL, IMPLIES, AND, AAggregate,
+                    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
@@ -78,7 +78,7 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self, problem):
-    assert all(isinstance(s, Subtype) for s in self.sorts), 'internal error'
+    assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
     self.in_domain = list(product(*[s.extension(problem.interpretations)[0] for s in self.sorts]))
     (self.range, _) = self.out.extension(problem.interpretations)
 
@@ -317,7 +317,7 @@ def instantiate(self, e0, e1, problem=None):
 Symbol.instantiate = instantiate
 
 
-# class Subtype ###########################################################
+# class Type ###########################################################
 
 def extension(self, interpretations: Dict[str, SymbolInterpretation]
               ) -> tuple[list[Expression], Callable]:
@@ -345,7 +345,7 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation]
     def filter(expr: Expression) -> Expression:
         return TRUE
     return (out, filter)
-Subtype.extension = extension
+Type.extension = extension
 
 # Class AQuantification  ######################################################
 
@@ -390,7 +390,7 @@ def interpret(self, problem):
             elif type(domain.decl) == SymbolDeclaration:  # quantification over predicate
                 range = domain.decl.in_domain
                 guard = domain
-            elif isinstance(domain, Subtype):  # quantification over type / Concepts
+            elif isinstance(domain, Type):  # quantification over type / Concepts
                 range = [[t] for t in domain.extension(problem.interpretations)[0]]
                 guard = None
             else:  # SymbolExpr (e.g. $(`Color))

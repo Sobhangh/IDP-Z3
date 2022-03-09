@@ -24,7 +24,7 @@ from copy import copy
 from itertools import chain
 from typing import Dict
 
-from .Parse import (Vocabulary, Import, TypeDeclaration, Type, Subtype,
+from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration, Type,
                     SymbolDeclaration, Symbol,
                     TheoryBlock, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
@@ -65,8 +65,7 @@ def annotate(self, idp):
                                +[Constructor(name=f"`{s.name}")
                                  for s in temp.values()
                                  if s.name not in RESERVED_SYMBOLS
-                                 and (type(s) == SymbolDeclaration
-                                      or type(s) in Type.__args__)])
+                                 and type(s) in Declaration.__args__])
     self.declarations = list(temp.values())
 
     # annotate declarations
@@ -135,7 +134,7 @@ def annotate(self, voc, q_vars):
 Symbol.annotate = annotate
 
 
-# Class Subtype  #######################################################
+# Class Type  #######################################################
 
 def annotate(self, voc, q_vars={}):
     Symbol.annotate(self, voc, q_vars)
@@ -143,7 +142,7 @@ def annotate(self, voc, q_vars={}):
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
         self.out = self.out.annotate(voc, q_vars)
     return self
-Subtype.annotate = annotate
+Type.annotate = annotate
 
 
 # Class TheoryBlock  #######################################################
@@ -418,13 +417,13 @@ def annotate(self, voc):
         self.check(a.type in voc.symbol_decls,
                    f"Unknown type: {a.type}" )
         a.decl = SymbolDeclaration(annotations='', name=a.accessor,
-                                   sorts=[Subtype(name=self.type)],
-                                   out=Subtype(name=a.type))
+                                   sorts=[Type(name=self.type)],
+                                   out=Type(name=a.type))
         a.decl.annotate(voc)
     self.tester = SymbolDeclaration(annotations='',
                                     name=Symbol(name=f"is_{self.name}"),
-                                    sorts=[Subtype(name=self.type)],
-                                    out=Subtype(name=BOOL))
+                                    sorts=[Type(name=self.type)],
+                                    out=Type(name=BOOL))
     self.tester.annotate(voc)
 Constructor.annotate = annotate
 
@@ -651,8 +650,8 @@ def annotate(self, voc, q_vars):
                     symbol_decl = SymbolDeclaration.make(
                         "_"+self.str, # name `_ *`
                         len(q_vars),  # arity
-                        [Subtype(name=v.sort.code) for v in q_vars.values()],
-                        Subtype(name=self.type)).annotate(voc)    # output_domain
+                        [Type(name=v.sort.code) for v in q_vars.values()],
+                        Type(name=self.type)).annotate(voc)    # output_domain
                     to_create = True
                 symbol = Symbol(name=symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
