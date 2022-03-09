@@ -30,7 +30,8 @@ __all__ = ["ASTNode", "Expression", "Constructor", "AIfExpr", "Quantee", "AQuant
 
 import copy
 from collections import ChainMap
-from datetime import date
+from datetime import datetime, date
+from dateutil.relativedelta import *
 from fractions import Fraction
 from re import findall
 from sys import intern
@@ -1275,8 +1276,15 @@ class Date(Expression):
 
     def __init__(self, **kwargs):
         self.iso = kwargs.pop('iso')
-        self.date = (date.today() if self.iso == '#TODAY' else
+
+        dt = (date.today() if self.iso == '#TODAY' else
                      date.fromisoformat(self.iso[1:]))
+        if 'y' in kwargs:
+            y = int(kwargs.pop('y'))
+            m = int(kwargs.pop('m'))
+            d = int(kwargs.pop('d'))
+            dt = dt + relativedelta(years=y, months=m, days=d)
+        self.date = dt
 
         super().__init__()
 
@@ -1284,8 +1292,12 @@ class Date(Expression):
         self.variables = set()
         self.value = self
 
-        self.py_value = self.date.toordinal()
+        self.py_value = int(self.date.toordinal())
         self.type = DATE
+
+    @classmethod
+    def make(cls, value):
+        return cls(iso=f"#{date.fromordinal(value).isoformat()}")
 
     def __str__(self): return f"#{self.date.isoformat()}"
 
