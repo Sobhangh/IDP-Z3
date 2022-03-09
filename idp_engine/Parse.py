@@ -365,9 +365,6 @@ class TypeDeclaration(ASTNode):
         else:
             return self.interpretation.enumeration.contains([var], False)
 
-    def is_subset_of(self, other):
-        return self == other
-
 
 class SymbolDeclaration(ASTNode):
     """The class of AST nodes representing an entry in the vocabulary,
@@ -387,9 +384,9 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Subtype]): the types of the arguments
+        sorts (List[Symbol]): the types of the arguments
 
-        out (Subtype): the type of the symbol
+        out (Symbol): the type of the symbol
 
         type (string): name of the Z3 type of an instance of the symbol
 
@@ -458,10 +455,6 @@ class SymbolDeclaration(ASTNode):
 
     def __repr__(self):
         return str(self)
-
-    def is_subset_of(self, other):
-        return (self.arity == 1 and self.type == BOOL
-                and self.sorts[0].decl == other)
 
     def has_in_domain(self, args: List[Expression]) -> Expression:
         """Returns an expression that says whether the `args` are in the domain of the symbol.

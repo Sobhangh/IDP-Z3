@@ -1,0 +1,28 @@
+## TODO
+* [ ] rename
+	* [ ] Subtype to Type
+	* [ ] problem to Theory
+* [ ] align function names in TypeDeclaration, SymbolDeclaration, Type
+    * they should look-up theory.interpretations[ ] !
+    * [ ] extension(interpretations?) -> (superset, filter(expr))  (instead of range(); only for predicates or types)
+        * [ ]  change signature of range()
+    * [ ] is_defined(expr, interpretations?) (instead of has_in_domain(expr))
+* [ ] filter model generation
+    * [ ] domain(interpretations)
+
+## Call tree
+
+```mermaid
+flowchart TD
+	Symbol_has_element["Symbol<br/>has_element()"] --> TypeDecl_check_bounds["TypeDecl<br/>check_bounds()"] --> Enumeration_contains["Enumeration<br/>contains()"];
+	SymbolInterpretation_interpret["SymbolInterp<br/>interpret()"] --> SymbolDeclaration_has_in_domain["SymbolDecl<br/>has_in_domain()"];
+	SymbolInterpretation_interpret --> SymbolDeclaration_has_in_range["SymbolDecl<br/>has_in_range()"];
+	SymbolDeclaration_has_in_domain --> Symbol_has_element;
+	SymbolDeclaration_has_in_range --> Symbol_has_element;
+	Enumeration_contains --> Symbol_has_element;
+	Definition_get_instantiables["Definition<br/>get_instantiables()"] --> Subtype_range["Subtype<br/>range()"];
+	Symbol_has_element --> Subtype_range;
+	SymbolDeclaration_interpret["SymbolDecl<br/>interpret()"] --> Subtype_range;
+	Constructor_interpret["Constructor<br/>interpret()"] --> Subtype_range;
+	AQuantification_interpret["AQuant<br/>interpret()"] --> Subtype_range;
+```
