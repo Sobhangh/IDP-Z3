@@ -4,7 +4,7 @@
 	* [ ] problem to Theory
 * [ ] align function names in TypeDeclaration, SymbolDeclaration, Type
     * they should look-up theory.interpretations[ ] !
-    * [ ] extension(interpretations, extensions) -> (superset, filter(expr))  (instead of range(); only for predicates or types)
+    * [x] extension(interpretations, extensions) -> (superset, filter(expr))  (instead of range(); only for predicates or types)
         * [x]  change signature of range()
     * [ ] is_defined(expr, interpretations?) (instead of has_in_domain(expr))
 * [ ] filter model generation
@@ -14,6 +14,10 @@
 - [x] type.extension is a list of list
 - [x] use function for filter in interpret
 - [x] remove TypeDeclaration.range
+- [x] remove SymbolDeclaration.in_domain
+- [ ] allow predicate in signature
+- [ ] allow predicate*S* in signature
+- [ ] use interpretations in extensions (beware of circularity !)
 
 ## Call tree
 

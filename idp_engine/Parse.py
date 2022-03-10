@@ -391,8 +391,6 @@ class SymbolDeclaration(ASTNode):
 
         type (string): name of the Z3 type of an instance of the symbol
 
-        in_domain (List): the list of possible tuples of arguments
-
         instances (Dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of
             arguments to its parsed AST
@@ -435,8 +433,7 @@ class SymbolDeclaration(ASTNode):
         self.optimizable: bool = True
 
         self.type = None  # a string
-        self.in_domain = None  # all possible arguments
-        self.range = None  # all possible values
+        self.range = None  # all possible values.  Used in get_range and IO.py
         self.instances = None  # {string: AppliedSymbol} not starting with '_'
         self.block: Optional[Block] = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default

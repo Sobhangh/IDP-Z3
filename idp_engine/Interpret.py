@@ -87,12 +87,20 @@ TypeDeclaration.interpret = interpret
 def interpret(self, problem):
     assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
 
+    symbol = Symbol(name=self.name)
+    symbol.decl = self
+    symbol.type = symbol.decl.type
+
+    # determine the extension, i.e., (superset, filter)
     extensions = [s.extension(problem.interpretations, problem.extensions)
                   for s in self.sorts]
+    filter = (None if self.out.decl.name != BOOL else  # no filter for functions
+              lambda args: AppliedSymbol.make(symbol, args))
     if any(e[0] is None for e in extensions):
-        self.in_domain = []
+        superset = None
     else:
-        self.in_domain = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
+        superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
+    problem.extensions[self.name] = (superset, filter)
 
     r = self.out.extension(problem.interpretations, problem.extensions)
     if r[0] is None:
@@ -101,10 +109,10 @@ def interpret(self, problem):
         self.range = [e[0] for e in r[0]]
 
     # create instances
-    if self.name not in RESERVED_SYMBOLS:
-        self.instances = {}
-        for arg in self.in_domain:
-            expr = AppliedSymbol.make(Symbol(name=self.name), arg)
+    self.instances = {}
+    if self.name not in RESERVED_SYMBOLS and superset:
+        for arg in superset:
+            expr = AppliedSymbol.make(symbol, arg)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
             problem.assignments.assert__(expr, None, S.UNKNOWN)
@@ -447,11 +455,6 @@ def interpret(self, problem):
             tuples = problem.interpretations[domain.code].enumeration.tuples
             if tuples is not None:
                 superset, filter = [t.args for t in tuples.values()], None
-        elif isinstance(domain.decl, SymbolDeclaration):  # quantification over predicate
-            # self.check(domain.decl.in_domain,
-            #            f"can't quantify over predicate with infinite domain")
-            superset = domain.decl.in_domain
-            filter = lambda args: AppliedSymbol.make(domain, args)
         elif isinstance(domain, Type):  # quantification over type / Concepts
             (superset, filter) = domain.extension(problem.interpretations,
                                         problem.extensions)
