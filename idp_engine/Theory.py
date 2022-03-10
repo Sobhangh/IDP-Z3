@@ -134,8 +134,8 @@ class Theory(object):
         self.constraints: OrderedSet = OrderedSet()
         self.assignments: Assignments = Assignments()
         self.def_constraints: Dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
-        self.interpretations: Dict[str, SymbolInterpretation] = {}
-        self.extensions: Dict[str, Extension] = {}
+        self.interpretations: Dict[str, SymbolInterpretation] = {}  # interpretations given by user
+        self.extensions: Dict[str, Extension] = {}  # computed extension of types and predicates
         self.name: str = ''
 
         self._contraintz: Optional[List[BoolRef]] = None

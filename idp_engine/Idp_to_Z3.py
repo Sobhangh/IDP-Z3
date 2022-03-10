@@ -87,7 +87,7 @@ def translate(self, problem: "Theory"):
                     problem.z3[a.decl.name] = out.__dict__[a.accessor.name]
                 if not c.sorts:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
-                else:
+                elif c.range:
                     for e in c.range:
                         self.map[str(e)] = e
         else: # list of numbers

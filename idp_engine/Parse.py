@@ -978,16 +978,19 @@ class IntRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, elements=[])
         self.type = INT
+        self.tuples = None
 
 class RealRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, elements=[])
         self.type = REAL
+        self.tuples = None
 
 class DateRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, elements=[])
         self.type = DATE
+        self.tuples = None
 
 ################################ Display  ###############################
 

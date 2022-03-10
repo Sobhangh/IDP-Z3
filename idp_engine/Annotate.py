@@ -212,7 +212,7 @@ def get_instantiables(self,
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.is_whole_domain = all(s.extension(interpretations, extensions)[0]  # not None nor []
+        rule.is_whole_domain = all(s.extension(interpretations, extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
@@ -381,8 +381,9 @@ SymbolInterpretation.annotate = annotate
 # Class Enumeration  #######################################################
 
 def annotate(self, voc):
-    for t in self.tuples:
-        t.annotate(voc)
+    if self.tuples:
+        for t in self.tuples:
+            t.annotate(voc)
 Enumeration.annotate = annotate
 
 

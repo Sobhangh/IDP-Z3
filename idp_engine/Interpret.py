@@ -68,9 +68,21 @@ def interpret(self, problem):
         self.constructors = self.interpretation.enumeration.constructors
     self.translate(problem)
     if self.constructors:
-        self.range = sum([c.interpret(problem).range for c in self.constructors], [])
+        ranges = [c.interpret(problem).range for c in self.constructors]
+        if any(r is None for r in ranges):
+            self.range = []
+            problem.extensions[self.name] = (None, lambda x: TRUE)
+        else:
+            self.range = sum(ranges, [])
+            problem.extensions[self.name] = (self.range, lambda x: TRUE)
     elif self.interpretation.enumeration:  # range declaration
-        self.range = [t.args[0] for t in self.interpretation.enumeration.tuples]
+        tuples = self.interpretation.enumeration.tuples
+        if tuples is None:
+            self.range = []
+            problem.extensions[self.name] = (None, lambda x: TRUE)
+        else:
+            self.range = [t.args[0] for t in tuples]
+            problem.extensions[self.name] = (self.range, lambda x: TRUE)
 
 TypeDeclaration.interpret = interpret
 
@@ -79,8 +91,17 @@ TypeDeclaration.interpret = interpret
 
 def interpret(self, problem):
     assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
-    self.in_domain = list(product(*[s.extension(problem.interpretations, problem.extensions)[0] for s in self.sorts]))
-    (self.range, _) = self.out.extension(problem.interpretations, problem.extensions)
+    extensions = [s.extension(problem.interpretations, problem.extensions)
+                  for s in self.sorts]
+    if any(e[0] is None for e in extensions):
+        self.in_domain = []
+    else:
+        self.in_domain = list(product(*(e[0] for e in extensions)))
+    r = self.out.extension(problem.interpretations, problem.extensions)
+    if r[0] is None:
+        self.range = []
+    else:
+        (self.range, _) = r
 
     # create instances
     if self.name not in RESERVED_SYMBOLS:
@@ -202,6 +223,9 @@ def interpret(self, problem):
     self.tuples = OrderedSet()
     for c in self.constructors:
         c.interpret(problem)
+        if c.range is None:
+            self.tuples = None
+            return
         self.tuples.extend([Tuple(args=[e]) for e in c.range])
 ConstructedFrom.interpret = interpret
 
@@ -213,10 +237,13 @@ def interpret(self, problem):
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
     else:
-        self.range = [AppliedSymbol.construct(self, e)
-                      for e in product(*[s.decl.out.extension(problem.interpretations,
-                                                              problem.extensions)[0]
-                                         for s in self.sorts])]
+        extensions = [s.decl.out.extension(problem.interpretations, problem.extensions)
+                      for s in self.sorts]
+        if any(e[0] is None for e in extensions):
+            self.range = None
+        else:
+            self.range = [AppliedSymbol.construct(self, e)
+                          for e in product(*[e[0] for e in extensions])]
     return self
 Constructor.interpret = interpret
 
