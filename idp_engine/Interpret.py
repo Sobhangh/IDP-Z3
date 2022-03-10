@@ -74,7 +74,8 @@ def interpret(self, problem):
             problem.extensions[self.name] = (None, lambda x: TRUE)
         else:
             self.range = sum(ranges, [])
-            problem.extensions[self.name] = (self.range, lambda x: TRUE)
+            problem.extensions[self.name] = ([[t] for t in self.range],
+                                              lambda x: TRUE)
     elif self.interpretation.enumeration:  # range declaration
         tuples = self.interpretation.enumeration.tuples
         if tuples is None:
@@ -82,7 +83,8 @@ def interpret(self, problem):
             problem.extensions[self.name] = (None, lambda x: TRUE)
         else:
             self.range = [t.args[0] for t in tuples]
-            problem.extensions[self.name] = (self.range, lambda x: TRUE)
+            problem.extensions[self.name] = ([[t] for t in self.range],
+                                             lambda x: TRUE)
 
 TypeDeclaration.interpret = interpret
 
@@ -96,12 +98,12 @@ def interpret(self, problem):
     if any(e[0] is None for e in extensions):
         self.in_domain = []
     else:
-        self.in_domain = list(product(*(e[0] for e in extensions)))
+        self.in_domain = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
     r = self.out.extension(problem.interpretations, problem.extensions)
     if r[0] is None:
         self.range = []
     else:
-        (self.range, _) = r
+        self.range = [e[0] for e in r[0]]
 
     # create instances
     if self.name not in RESERVED_SYMBOLS:
@@ -242,8 +244,8 @@ def interpret(self, problem):
         if any(e[0] is None for e in extensions):
             self.range = None
         else:
-            self.range = [AppliedSymbol.construct(self, e)
-                          for e in product(*[e[0] for e in extensions])]
+            self.range = [AppliedSymbol.construct(self, es)
+                          for es in product(*[[ee[0] for ee in e[0]] for e in extensions])]
     return self
 Constructor.interpret = interpret
 
@@ -366,7 +368,7 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation],
     if self.code not in extensions:
         out = self.decl.range
         if self.out:  # x in Concept[T->T]
-            out = [v for v in out
+            out = [[v] for v in out
                     if v.decl.symbol.decl.arity == len(self.ins)
                     and isinstance(v.decl.symbol.decl, SymbolDeclaration)
                     and v.decl.symbol.decl.out.name == self.out.name
@@ -460,8 +462,8 @@ def interpret(self, problem):
             filter = domain
         elif isinstance(domain, Type):  # quantification over type / Concepts
             if domain.decl.range:
-                superset = [[t] for t in domain.extension(problem.interpretations,
-                                                          problem.extensions)[0]]
+                superset = domain.extension(problem.interpretations,
+                                            problem.extensions)[0]
                 filter = None
         elif isinstance(domain, SymbolExpr):  # SymbolExpr (e.g. $(`Color))
             if domain.decl.range:

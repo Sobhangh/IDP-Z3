@@ -11,7 +11,7 @@
     * [ ] domain(interpretations)
 
 - [x] represent empty vs infinite superset
-- [ ] type.range is a list of list
+- [x] type.extension is a list of list
 - [ ] remove TypeDeclaration.range
 
 ## Call tree

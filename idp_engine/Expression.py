@@ -598,7 +598,7 @@ class Type(Symbol):
             Expression: whether `term` `term` is in the type denoted by `self`.
         """
         if self.name == CONCEPT:
-            comparisons = [EQUALS([term, c])
+            comparisons = [EQUALS([term, c[0]])
                            for c in self.extension(interpretations, extensions)[0]]
             return OR(comparisons)
         else:
