@@ -349,6 +349,39 @@ Type.extension = extension
 
 # Class AQuantification  ######################################################
 
+def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expression]
+                ) -> Expression:
+    """add `filter(args)` to `expr` quantified by `q`
+
+    Example: `_add_filter('∀', TRUE, filter, [1])` returns `filter([1]) => TRUE`
+
+    Args:
+        q: the type of quantification
+        expr: the quantified expression
+        filter: a function that returns an Expression for some arguments
+        args:the arguments to be applied to filter
+
+    Returns:
+        Expression: `expr` extended with appropriate filter
+    """
+    if filter:  # adds `filter(val) =>` in front of expression
+        applied = AppliedSymbol.make(filter, args)
+        if q == '∀':
+            out = IMPLIES([applied, expr])
+        elif q == '∃':
+            out = AND([applied, expr])
+        else:  # aggregate
+            if isinstance(expr, AIfExpr):  # cardinality
+                # if a then b else 0 -> if (applied & a) then b else 0
+                arg1 = AND([applied,
+                                    expr.sub_exprs[0]])
+                out = AIfExpr.make(arg1, expr.sub_exprs[1],
+                                    expr.sub_exprs[2])
+            else:  # sum
+                out = AIfExpr.make(applied, expr, Number(number="0"))
+        return out
+    return expr
+
 def interpret(self, problem):
     """apply information in the problem and its vocabulary
 
@@ -380,47 +413,42 @@ def interpret(self, problem):
         domain = q.sub_exprs[0]
         self.check(domain.decl.out.type == BOOL,
                     f"{domain} is not a type or predicate")
-        if not domain.decl.range:
-            new_quantees.append(q)
-        else:
-            if domain.code in problem.interpretations:  # domain has an interpretation
-                enumeration = problem.interpretations[domain.code].enumeration
-                range = [t.args for t in enumeration.tuples.values()]
-                guard = None
-            elif type(domain.decl) == SymbolDeclaration:  # quantification over predicate
-                range = domain.decl.in_domain
-                guard = domain
-            elif isinstance(domain, Type):  # quantification over type / Concepts
-                range = [[t] for t in domain.extension(problem.interpretations)[0]]
-                guard = None
-            else:  # SymbolExpr (e.g. $(`Color))
-                range = [[t] for t in domain.decl.range] #TODO1 decl.enumeration.tuples
-                guard = None
 
+        superset, filter = None, None
+        if domain.code in problem.interpretations:  # domain has an interpretation
+            enumeration = problem.interpretations[domain.code].enumeration
+            if domain.decl.range:
+                superset = [t.args for t in enumeration.tuples.values()]
+                filter = None
+        elif isinstance(domain.decl, SymbolDeclaration):  # quantification over predicate
+            # self.check(domain.decl.in_domain,
+            #            f"can't quantify over predicate with infinite domain")
+            superset = domain.decl.in_domain
+            filter = domain
+        elif isinstance(domain, Type):  # quantification over type / Concepts
+            if domain.decl.range:
+                superset = [[t] for t in domain.extension(problem.interpretations)[0]]
+                filter = None
+        elif isinstance(domain, SymbolExpr):  # SymbolExpr (e.g. $(`Color))
+            if domain.decl.range:
+                superset = [[t] for t in domain.decl.range] #TODO1 decl.enumeration.tuples
+                filter = None
+        else:
+            assert False
+
+        if superset is None:
+            new_quantees.append(q)
+            forms = [_add_filter(self.q, f, filter, q.vars) for f in forms]
+        else:
 
             for vars in q.vars:
                 self.check(domain.decl.arity == len(vars),
                             f"Incorrect arity of {domain}")
                 out = []
                 for f in forms:
-                    for val in range:
+                    for val in superset:
                         new_f = f.instantiate(vars, val, problem)
-                        if guard:  # adds `guard(val) =>` in front of expression
-                            applied = AppliedSymbol.make(guard, val)
-                            if self.q == '∀':
-                                new_f = IMPLIES([applied, new_f])
-                            elif self.q == '∃':
-                                new_f = AND([applied, new_f])
-                            else:  # aggregate
-                                if isinstance(new_f, AIfExpr):  # cardinality
-                                    # if a then b else 0 -> if (applied & a) then b else 0
-                                    arg1 = AND([applied,
-                                                        new_f.sub_exprs[0]])
-                                    new_f = AIfExpr.make(arg1, new_f.sub_exprs[1],
-                                                        new_f.sub_exprs[2])
-                                else:  # sum
-                                    new_f = AIfExpr.make(applied, new_f, Number(number="0"))
-                        out.append(new_f)
+                        out.append(_add_filter(self.q, new_f, filter, val))
                 forms = out
 
     if new_quantees:
