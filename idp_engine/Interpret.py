@@ -94,12 +94,14 @@ def interpret(self, problem):
     # determine the extension, i.e., (superset, filter)
     extensions = [s.extension(problem.interpretations, problem.extensions)
                   for s in self.sorts]
-    filter = (None if self.out.decl.name != BOOL else  # no filter for functions
-              lambda args: AppliedSymbol.make(symbol, args))
     if any(e[0] is None for e in extensions):
-        superset = None
+        superset, filters = None, []
     else:
         superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
+        filters = [e[1] for e in extensions if e[1] is not None]
+    if self.out.decl.name == BOOL:
+        filters.append(lambda args: AppliedSymbol.make(symbol, args))
+    filter = (lambda args: AND([f(args) for f in filters])) if filters else None
     problem.extensions[self.name] = (superset, filter)
 
     r = self.out.extension(problem.interpretations, problem.extensions)
@@ -247,6 +249,8 @@ def interpret(self, problem):
         if any(e[0] is None for e in extensions):
             self.range = None
         else:
+            self.check(all(e[1] is None for e in extensions),  # no filter in the extension
+                       f"Type signature of constructor {self.name} must have a given interpretation")
             self.range = [AppliedSymbol.construct(self, es)
                           for es in product(*[[ee[0] for ee in e[0]] for e in extensions])]
     return self

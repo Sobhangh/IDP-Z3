@@ -15,9 +15,11 @@
 - [x] use function for filter in interpret
 - [x] remove TypeDeclaration.range
 - [x] remove SymbolDeclaration.in_domain
+- [x] proper product of filter
+- [ ] use interpretations in extensions (beware of circularity !)
 - [ ] allow predicate in signature
 - [ ] allow predicate*S* in signature
-- [ ] use interpretations in extensions (beware of circularity !)
+- [ ] improve check_bounds, has_element
 
 ## Call tree
 
