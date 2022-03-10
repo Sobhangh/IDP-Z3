@@ -268,6 +268,7 @@ class Theory(object):
         # apply the enumerations and definitions
 
         self.assignments = Assignments()
+        self.extensions = {}  # reset the cache
 
         for decl in self.declarations.values():
             decl.interpret(self)

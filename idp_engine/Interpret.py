@@ -336,19 +336,21 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation],
         and a function that, given arguments, returns an Expression that says
         whether the arguments are in the extension of self
     """
-    out = self.decl.range
-    if self.out:  # x in Concept[T->T]
-        out = [v for v in out
-                 if v.decl.symbol.decl.arity == len(self.ins)
-                 and isinstance(v.decl.symbol.decl, SymbolDeclaration)
-                 and v.decl.symbol.decl.out.name == self.out.name
-                 and len(v.decl.symbol.decl.sorts) == len(self.ins)
-                 and all(s == q
-                         for s, q in zip(v.decl.symbol.decl.sorts,
-                                         self.ins))]
-    def filter(expr: Expression) -> Expression:
-        return TRUE
-    return (out, filter)
+    if self.code not in extensions:
+        out = self.decl.range
+        if self.out:  # x in Concept[T->T]
+            out = [v for v in out
+                    if v.decl.symbol.decl.arity == len(self.ins)
+                    and isinstance(v.decl.symbol.decl, SymbolDeclaration)
+                    and v.decl.symbol.decl.out.name == self.out.name
+                    and len(v.decl.symbol.decl.sorts) == len(self.ins)
+                    and all(s == q
+                            for s, q in zip(v.decl.symbol.decl.sorts,
+                                            self.ins))]
+        def filter(expr: Expression) -> Expression:
+            return TRUE
+        extensions[self.code] = (out, filter)
+    return extensions[self.code]
 Type.extension = extension
 
 # Class AQuantification  ######################################################
