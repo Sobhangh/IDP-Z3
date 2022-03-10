@@ -12,6 +12,7 @@
 
 - [x] represent empty vs infinite superset
 - [x] type.extension is a list of list
+- [x] use function for filter in interpret
 - [ ] remove TypeDeclaration.range
 
 ## Call tree

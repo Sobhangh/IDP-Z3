@@ -508,7 +508,7 @@ class Expression(ASTNode):
                     .annotate1())  # update .variables
 
 Extension = tuple[Optional[list[list[Expression]]],  # None if the extension is infinite (e.g., Int)
-                  Callable]
+                  Optional[Callable]]  # None if filtering is not required
 
 class Symbol(Expression):
     """Represents a Symbol.  Handles synonyms.

@@ -71,20 +71,18 @@ def interpret(self, problem):
         ranges = [c.interpret(problem).range for c in self.constructors]
         if any(r is None for r in ranges):
             self.range = []
-            problem.extensions[self.name] = (None, lambda x: TRUE)
+            problem.extensions[self.name] = (None, None)
         else:
             self.range = sum(ranges, [])
-            problem.extensions[self.name] = ([[t] for t in self.range],
-                                              lambda x: TRUE)
+            problem.extensions[self.name] = ([[t] for t in self.range], None)
     elif self.interpretation.enumeration:  # range declaration
         tuples = self.interpretation.enumeration.tuples
         if tuples is None:
             self.range = []
-            problem.extensions[self.name] = (None, lambda x: TRUE)
+            problem.extensions[self.name] = (None, None)
         else:
             self.range = [t.args[0] for t in tuples]
-            problem.extensions[self.name] = ([[t] for t in self.range],
-                                             lambda x: TRUE)
+            problem.extensions[self.name] = ([[t] for t in self.range], None)
 
 TypeDeclaration.interpret = interpret
 
@@ -376,9 +374,7 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation],
                     and all(s == q
                             for s, q in zip(v.decl.symbol.decl.sorts,
                                             self.ins))]
-        def filter(expr: Expression) -> Expression:
-            return TRUE
-        extensions[self.code] = (out, filter)
+        extensions[self.code] = (out, None)
     return extensions[self.code]
 Type.extension = extension
 
@@ -400,7 +396,7 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
         Expression: `expr` extended with appropriate filter
     """
     if filter:  # adds `filter(val) =>` in front of expression
-        applied = AppliedSymbol.make(filter, args)
+        applied = filter(args)
         if q == '∀':
             out = IMPLIES([applied, expr])
         elif q == '∃':
@@ -443,7 +439,7 @@ def interpret(self, problem):
             q.sub_exprs = [inferred[var.name]]
 
     forms = self.sub_exprs
-    new_quantees = []
+    new_quantees, instantiated = [], False
     for q in self.quantees:
         domain = q.sub_exprs[0]
         self.check(domain.decl.out.type == BOOL,
@@ -459,12 +455,10 @@ def interpret(self, problem):
             # self.check(domain.decl.in_domain,
             #            f"can't quantify over predicate with infinite domain")
             superset = domain.decl.in_domain
-            filter = domain
+            filter = lambda args: AppliedSymbol.make(domain, args)
         elif isinstance(domain, Type):  # quantification over type / Concepts
-            if domain.decl.range:
-                superset = domain.extension(problem.interpretations,
-                                            problem.extensions)[0]
-                filter = None
+            (superset, filter) = domain.extension(problem.interpretations,
+                                        problem.extensions)
         elif isinstance(domain, SymbolExpr):  # SymbolExpr (e.g. $(`Color))
             if domain.decl.range:
                 superset = [[t] for t in domain.decl.range] #TODO1 decl.enumeration.tuples
@@ -476,7 +470,6 @@ def interpret(self, problem):
             new_quantees.append(q)
             forms = [_add_filter(self.q, f, filter, q.vars) for f in forms]
         else:
-
             for vars in q.vars:
                 self.check(domain.decl.arity == len(vars),
                             f"Incorrect arity of {domain}")
@@ -484,10 +477,11 @@ def interpret(self, problem):
                 for f in forms:
                     for val in superset:
                         new_f = f.instantiate(vars, val, problem)
+                        instantiated = True
                         out.append(_add_filter(self.q, new_f, filter, val))
                 forms = out
 
-    if new_quantees:
+    if not instantiated:
         forms = [f.interpret(problem) if problem else f for f in forms]
     self.quantees = new_quantees
     return self.update_exprs(forms)
