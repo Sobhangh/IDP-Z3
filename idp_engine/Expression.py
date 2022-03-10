@@ -36,7 +36,7 @@ from fractions import Fraction
 from re import findall
 from sys import intern
 from textx import get_location
-from typing import Optional, List, Tuple, Dict, Set, Any
+from typing import Optional, List, Tuple, Dict, Set, Any, Callable
 
 from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS, \
     IDPZ3Error, DEF_SEMANTICS, Semantics
@@ -507,6 +507,7 @@ class Expression(ASTNode):
                                    for e in self.sub_exprs))
                     .annotate1())  # update .variables
 
+Extension = tuple[list[Expression], Callable]
 
 class Symbol(Expression):
     """Represents a Symbol.  Handles synonyms.
@@ -533,7 +534,8 @@ class Symbol(Expression):
         return str(self)
 
     def has_element(self, term: Expression,
-                    interpretations: Dict[str, "SymbolInterpretation"]
+                    interpretations: Dict[str, "SymbolInterpretation"],
+                    extensions: Dict[str, Extension]
                     ) -> Expression:
         """Returns an expression that says whether `term` is in the type denoted by `self`.
 
@@ -543,7 +545,7 @@ class Symbol(Expression):
         Returns:
             Expression: whether `term` is in the type denoted by `self`.
         """
-        return self.decl.check_bounds(term, interpretations)
+        return self.decl.check_bounds(term, interpretations, extensions)
 
 
 class Type(Symbol):
@@ -577,12 +579,14 @@ class Type(Symbol):
                     len(self.ins) == len(other.ins) and
                     all(s==o for s, o in zip(self.ins, other.ins)))))
 
-    def extension(self, interpretations:Dict[str, "SymbolInterpretation"]):
+    def extension(self, interpretations: Dict[str, "SymbolInterpretation"],
+                  extensions: Dict[str, Extension]):
         pass  # monkey-patched
 
     def has_element(self,
                     term: Expression,
-                    interpretations: Dict[str, "SymbolInterpretation"]
+                    interpretations: Dict[str, "SymbolInterpretation"],
+                    extensions: Dict[str, Extension]
                     ) -> Expression:
         """Returns an Expression that says whether `term` is in the type denoted by `self`.
 
@@ -593,10 +597,11 @@ class Type(Symbol):
             Expression: whether `term` `term` is in the type denoted by `self`.
         """
         if self.name == CONCEPT:
-            comparisons = [EQUALS([term, c]) for c in self.extension(interpretations)[0]]
+            comparisons = [EQUALS([term, c])
+                           for c in self.extension(interpretations, extensions)[0]]
             return OR(comparisons)
         else:
-            return self.decl.check_bounds(term, interpretations)
+            return self.decl.check_bounds(term, interpretations, extensions)
 
 
 class AIfExpr(Expression):

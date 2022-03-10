@@ -31,7 +31,7 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, An
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol,
-                         EQUALS, NOT)
+                         EQUALS, NOT, Extension)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
@@ -135,6 +135,7 @@ class Theory(object):
         self.assignments: Assignments = Assignments()
         self.def_constraints: Dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
         self.interpretations: Dict[str, SymbolInterpretation] = {}
+        self.extensions: Dict[str, Extension] = {}
         self.name: str = ''
 
         self._contraintz: Optional[List[BoolRef]] = None
@@ -194,7 +195,7 @@ class Theory(object):
             # get expanded def_constraints
             def_constraints = {}
             for defin in self.definitions:
-                instantiables = defin.get_instantiables(self.interpretations, for_explain=True)
+                instantiables = defin.get_instantiables(self.interpretations, self.extensions, for_explain=True)
                 defin.add_def_constraints(instantiables, self, def_constraints)
 
             for constraint in chain([c.interpret(self) for c in self.constraints],

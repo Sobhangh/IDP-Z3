@@ -44,7 +44,7 @@ from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, Sy
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
-                         Number, Brackets, Date,
+                         Number, Brackets, Date, Extension,
                          Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
@@ -357,14 +357,17 @@ class TypeDeclaration(ASTNode):
                        f"{self.enumeration}")
         return (f"type {self.name} := {{{enumeration}}}")
 
-    def check_bounds(self, var, interpretations: Dict[str, "SymbolInterpretation"]):
+    def check_bounds(self, var,
+                     interpretations: Dict[str, "SymbolInterpretation"],
+                     extensions: Dict[str, Extension]
+                     ) -> Expression:
         if self.name == CONCEPT:
             comparisons = [EQUALS([var, UnappliedSymbol.construct(c)])
                           for c in self.constructors]
             return OR(comparisons)
         else:
             return self.interpretation.enumeration.contains([var], False,
-                                                            interpretations=interpretations)
+                    interpretations=interpretations, extensions=extensions)
 
 
 class SymbolDeclaration(ASTNode):
@@ -458,7 +461,9 @@ class SymbolDeclaration(ASTNode):
         return str(self)
 
     def has_in_domain(self, args: List[Expression],
-                      interpretations: Dict[str, "SymbolInterpretation"]) -> Expression:
+                      interpretations: Dict[str, "SymbolInterpretation"],
+                      extensions: Dict[str, Extension]
+                      ) -> Expression:
         """Returns an expression that says whether the `args` are in the domain of the symbol.
 
         Arguments:
@@ -469,14 +474,17 @@ class SymbolDeclaration(ASTNode):
         """
         assert len(self.sorts) == len(args), \
             f"Incorrect arity of {str(args)} for {self.name}"
-        return AND([typ.has_element(term, interpretations)
+        return AND([typ.has_element(term, interpretations, extensions)
                    for typ, term in zip(self.sorts, args)])
 
 
-    def has_in_range(self, value: Expression, interpretations) -> Expression:
+    def has_in_range(self, value: Expression,
+                     interpretations: Dict[str, "SymbolInterpretation"],
+                     extensions: Dict[str, Extension]
+                     ) -> Expression:
         """Returns an expression that says whether `value` is in the range of the symbol.
         """
-        return self.out.has_element(value, interpretations)
+        return self.out.has_element(value, interpretations, extensions)
 
 Declaration = Union[TypeDeclaration, SymbolDeclaration]
 
@@ -806,7 +814,9 @@ class Enumeration(ASTNode):
         return ", ".join([repr(t) for t in self.tuples])
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Dict[str, "SymbolInterpretation"]=None):
+                 interpretations: Dict[str, "SymbolInterpretation"]=None,
+                 extensions: Dict[str, Extension]=None
+                 ) -> Expression:
         """ returns an Expression that says whether Tuple args is in the enumeration """
 
         if arity is None:
@@ -826,7 +836,7 @@ class Enumeration(ASTNode):
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
                     return self.contains(args, function, arity, rank+1, list(tuples2),
-                                         interpretations=interpretations)
+                                interpretations=interpretations, extensions=extensions)
             return FALSE
         else:
             if rank + 1 == arity:  # use OR
@@ -841,7 +851,7 @@ class Enumeration(ASTNode):
                 out = AIfExpr.make(
                     EQUALS([args[rank], tuples[0].args[rank]]),
                     self.contains(args, function, arity, rank+1, tuples,
-                                  interpretations=interpretations),
+                            interpretations=interpretations, extensions=extensions),
                     out)
             return out
 
@@ -868,7 +878,9 @@ class ConstructedFrom(Enumeration):
         self.accessors = dict()
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Dict[str, "SymbolInterpretation"]=None):
+                 interpretations: Dict[str, "SymbolInterpretation"]=None,
+                 extensions: Dict[str, Extension]=None
+                 ) -> Expression:
         """returns True if args belong to the type enumeration"""
         # args must satisfy the tester of one of the constructors
         assert len(args) == 1, f"Incorrect arity in {self.parent.name}{args}"
@@ -877,7 +889,7 @@ class ConstructedFrom(Enumeration):
                        f"Incorrect type of {args[0]} for {self.parent.name}")
             self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
                        f"Incorrect arity")
-            return AND([t.decl.out.has_element(e, interpretations)
+            return AND([t.decl.out.has_element(e, interpretations, extensions)
                         for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
         out = [AppliedSymbol.construct(constructor.tester, args)
                 for constructor in self.constructors]
@@ -943,7 +955,9 @@ class Ranges(Enumeration):
         Enumeration.__init__(self, tuples=tuples)
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Dict[str, "SymbolInterpretation"]=None):
+                 interpretations: Dict[str, "SymbolInterpretation"]=None,
+                 extensions: Dict[str, Extension]=None
+                 ) -> Expression:
         var = args[0]
         if not self.elements:
             return TRUE

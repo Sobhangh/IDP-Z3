@@ -34,7 +34,7 @@ from .Expression import (Expression, Constructor, AIfExpr, AQuantification, Quan
                          Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR,
-                         IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS)
+                         IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
@@ -195,6 +195,7 @@ Definition.annotate = annotate
 
 def get_instantiables(self,
                       interpretations: Dict[str, SymbolInterpretation],
+                      extensions: Dict[str, Extension],
                       for_explain=False):
     """ compute Definition.instantiables, with level-mapping if definition is inductive
 
@@ -211,7 +212,7 @@ def get_instantiables(self,
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.is_whole_domain = all(s.extension(interpretations)[0]  # not None nor []
+        rule.is_whole_domain = all(s.extension(interpretations, extensions)[0]  # not None nor []
                                    for s in rule.definiendum.decl.sorts)
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
