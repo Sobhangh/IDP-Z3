@@ -323,8 +323,6 @@ class TypeDeclaration(ASTNode):
 
         constructors ([Constructor]): list of constructors in the enumeration
 
-        range ([Expression]): list of expressions of that type
-
         interpretation (SymbolInterpretation): the symbol interpretation
 
         map (Dict[string, Expression]): a mapping from code to Expression in range
@@ -343,7 +341,6 @@ class TypeDeclaration(ASTNode):
         self.type = (self.name if type(enumeration) != Ranges else
                      enumeration.type)  # INT or REAL or DATE
 
-        self.range = None
         self.map = {}  # {String: constructor}
 
         self.interpretation = (None if enumeration is None else

@@ -70,20 +70,15 @@ def interpret(self, problem):
     if self.constructors:
         ranges = [c.interpret(problem).range for c in self.constructors]
         if any(r is None for r in ranges):
-            self.range = []
             problem.extensions[self.name] = (None, None)
         else:
-            self.range = sum(ranges, [])
-            problem.extensions[self.name] = ([[t] for t in self.range], None)
+            problem.extensions[self.name] = ([[t] for r in ranges for t in r], None)
     elif self.interpretation.enumeration:  # range declaration
         tuples = self.interpretation.enumeration.tuples
         if tuples is None:
-            self.range = []
             problem.extensions[self.name] = (None, None)
         else:
-            self.range = [t.args[0] for t in tuples]
-            problem.extensions[self.name] = ([[t] for t in self.range], None)
-
+            problem.extensions[self.name] = ([[t.args[0]] for t in tuples], None)
 TypeDeclaration.interpret = interpret
 
 
@@ -91,12 +86,14 @@ TypeDeclaration.interpret = interpret
 
 def interpret(self, problem):
     assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
+
     extensions = [s.extension(problem.interpretations, problem.extensions)
                   for s in self.sorts]
     if any(e[0] is None for e in extensions):
         self.in_domain = []
     else:
         self.in_domain = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
+
     r = self.out.extension(problem.interpretations, problem.extensions)
     if r[0] is None:
         self.range = []
@@ -233,7 +230,7 @@ ConstructedFrom.interpret = interpret
 # class Constructor  ###########################################################
 
 def interpret(self, problem):
-    self.range = []
+    assert all(isinstance(s.decl.out, Type) for s in self.sorts), 'internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
     else:
@@ -364,16 +361,16 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation],
         whether the arguments are in the extension of self
     """
     if self.code not in extensions:
-        out = self.decl.range
-        if self.out:  # x in Concept[T->T]
-            out = [[v] for v in out
-                    if v.decl.symbol.decl.arity == len(self.ins)
-                    and isinstance(v.decl.symbol.decl, SymbolDeclaration)
-                    and v.decl.symbol.decl.out.name == self.out.name
-                    and len(v.decl.symbol.decl.sorts) == len(self.ins)
-                    and all(s == q
-                            for s, q in zip(v.decl.symbol.decl.sorts,
-                                            self.ins))]
+        self.check(self.name == CONCEPT, "internal error")
+        assert self.out, "internal error"  # Concept[T->T]
+        out = [v for v in extensions[CONCEPT][0]
+                if v[0].decl.symbol.decl.arity == len(self.ins)
+                and isinstance(v[0].decl.symbol.decl, SymbolDeclaration)
+                and v[0].decl.symbol.decl.out.name == self.out.name
+                and len(v[0].decl.symbol.decl.sorts) == len(self.ins)
+                and all(s == q
+                        for s, q in zip(v[0].decl.symbol.decl.sorts,
+                                        self.ins))]
         extensions[self.code] = (out, None)
     return extensions[self.code]
 Type.extension = extension
@@ -447,10 +444,9 @@ def interpret(self, problem):
 
         superset, filter = None, None
         if domain.code in problem.interpretations:  # domain has an interpretation
-            enumeration = problem.interpretations[domain.code].enumeration
-            if domain.decl.range:
-                superset = [t.args for t in enumeration.tuples.values()]
-                filter = None
+            tuples = problem.interpretations[domain.code].enumeration.tuples
+            if tuples is not None:
+                superset, filter = [t.args for t in tuples.values()], None
         elif isinstance(domain.decl, SymbolDeclaration):  # quantification over predicate
             # self.check(domain.decl.in_domain,
             #            f"can't quantify over predicate with infinite domain")
@@ -460,9 +456,8 @@ def interpret(self, problem):
             (superset, filter) = domain.extension(problem.interpretations,
                                         problem.extensions)
         elif isinstance(domain, SymbolExpr):  # SymbolExpr (e.g. $(`Color))
-            if domain.decl.range:
-                superset = [[t] for t in domain.decl.range] #TODO1 decl.enumeration.tuples
-                filter = None
+            assert domain.decl.name in problem.extensions, "internal error"
+            (superset, filter) = problem.extensions[domain.decl.name]
         else:
             assert False
 
