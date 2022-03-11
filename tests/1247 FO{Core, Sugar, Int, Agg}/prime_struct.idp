@@ -1,0 +1,17 @@
+vocabulary V {
+    prime : ℤ → 𝔹
+    total: () -> Int
+}
+
+theory T:V {
+    total() = sum(lambda x in prime: x).
+}
+
+structure S:V {
+    prime := {1,2,3}.
+}
+
+procedure main() {
+pretty_print(Theory(T, S).formula())
+    pretty_print(model_expand(T, S))
+}
