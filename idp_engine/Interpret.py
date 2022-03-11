@@ -62,11 +62,14 @@ Import.interpret = interpret
 # class TypeDeclaration  ###########################################################
 
 def interpret(self, problem):
-    if self.name in problem.interpretations:
-        problem.interpretations[self.name].interpret(problem)
-    if self.interpretation:
-        self.constructors = self.interpretation.enumeration.constructors
+    interpretation = problem.interpretations.get(self.name, None)
+    if interpretation is not None:  # excludes Bool, Concept
+        interpretation.enumeration.interpret(problem)
+        self.interpretation = interpretation
+        self.constructors = interpretation.enumeration.constructors
     self.translate(problem)
+
+    # update problem.extensions
     if self.constructors:
         ranges = [c.interpret(problem).range for c in self.constructors]
         if any(r is None for r in ranges):
@@ -172,13 +175,20 @@ Definition.add_def_constraints = add_def_constraints
 
 def interpret(self, problem):
     status = S.DEFAULT if self.block.name == DEFAULT else S.STRUCTURE
-    if self.is_type_enumeration:
-        self.enumeration.interpret(problem)
-        self.symbol.decl.interpretation = self
-    elif not self.name in [GOAL_SYMBOL, EXPAND]:
+    assert not self.is_type_enumeration, "Internal error"
+    if not self.name in [GOAL_SYMBOL, EXPAND]:
+        # update problem.extensions
+        if type(self.enumeration) != FunctionEnum:
+            extension = [t.args for t in self.enumeration.tuples]
+            problem.extensions[self.symbol.name] = (extension, None)
+        elif self.default is None:
+            extension = [t.args[:-1] for t in self.enumeration.tuples]
+            problem.extensions[self.symbol.name] = (extension, None)
+
         # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
 
+            # check that the values are in the range
             if type(self.enumeration) == FunctionEnum:
                 args, value = t.args[:-1], t.args[-1]
                 self.check(self.symbol.decl.has_in_range(value,
@@ -191,20 +201,25 @@ def interpret(self, problem):
             a = (str(args) if 1<len(args) else
                     str(args[0]) if len(args)==1 else
                     "()")
-            self.check(len(self.symbol.decl.sorts) == len(args),
-                f"Incorrect arity of {a} for {self.name}")
+            self.check(len(args) == self.symbol.decl.arity,
+                       f"Incorrect arity of {a} for {self.name}")
             self.check(self.symbol.decl.has_in_domain(args,
                             problem.interpretations, problem.extensions).same_as(TRUE),
-                        f"{a} is not in the domain of {self.symbol.name}")
+                       f"{a} is not in the domain of {self.symbol.name}")
 
+            # check duplicates
             expr = AppliedSymbol.make(self.symbol, args)
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == S.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
+
+            # add to problem.assignments
             e = problem.assignments.assert__(expr, value, status)
             if (status == S.DEFAULT  # for proper display in IC
                 and type(self.enumeration) == FunctionEnum):
                 problem.assignments.assert__(e.formula(), TRUE, status)
+
+        # fill the default value in problem.assignments
         if self.default is not None:
             for code, expr in self.symbol.decl.instances.items():
                 if (code not in problem.assignments
@@ -451,22 +466,18 @@ def interpret(self, problem):
     new_quantees, instantiated = [], False
     for q in self.quantees:
         domain = q.sub_exprs[0]
-        self.check(domain.decl.out.type == BOOL,
-                    f"{domain} is not a type or predicate")
 
         superset, filter = None, None
-        if domain.code in problem.interpretations:  # domain has an interpretation
-            tuples = problem.interpretations[domain.code].enumeration.tuples
-            if tuples is not None:
-                superset, filter = [t.args for t in tuples.values()], None
-        elif isinstance(domain, Type):  # quantification over type / Concepts
+        if isinstance(domain, Type):  # quantification over type / Concepts
             (superset, filter) = domain.extension(problem.interpretations,
                                         problem.extensions)
         elif isinstance(domain, SymbolExpr):  # SymbolExpr (e.g. $(`Color))
+            self.check(domain.decl.out.type == BOOL,
+                        f"{domain} is not a type or predicate")
             assert domain.decl.name in problem.extensions, "internal error"
             (superset, filter) = problem.extensions[domain.decl.name]
         else:
-            assert False
+            assert False, "Internal error"
 
         if superset is None:
             new_quantees.append(q)
