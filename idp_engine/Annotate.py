@@ -119,6 +119,8 @@ def annotate(self, voc):
     for s in chain(self.sorts, [self.out]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
                    f"`Concept` must be qualified with a type signature in {self}")
+    self.base_type = (None if self.out.name != BOOL or self.arity != 1 else
+                      self.sorts[0].decl.base_type)
     return self
 SymbolDeclaration.annotate = annotate
 
@@ -167,7 +169,7 @@ TheoryBlock.annotate = annotate
 
 def annotate(self, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
-    self.set_level_symbols()
+    self.set_level_symbols(voc)
 
     # create common variables, and rename vars in rule
     self.canonicals = {}

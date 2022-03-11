@@ -104,10 +104,10 @@ def translate(self, problem: "Theory"):
     out = problem.z3.get(self.name, None)
     if out is None:
         if len(self.sorts) == 0:
-            out = Const(self.name, self.out.translate(problem))
+            out = Const(self.name, self.out.decl.base_type.translate(problem))
         else:
-            types = ( [x.translate(problem) for x in self.sorts]
-                    + [self.out.translate(problem)])
+            types = ( [x.decl.base_type.translate(problem) for x in self.sorts]
+                    + [self.out.decl.base_type.translate(problem)])
             out = Function(self.name, types)
         problem.z3[self.name] = out
     return out

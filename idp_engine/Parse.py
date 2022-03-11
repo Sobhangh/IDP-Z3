@@ -76,9 +76,9 @@ def str_to_IDP(atom, val_string):
         d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
              date.fromisoformat(val_string[1:]))
         out = Date(iso=f"#{d.isoformat()}")
-    elif (hasattr(atom.decl.out.decl, 'map')
-          and val_string in atom.decl.out.decl.map):  # constructor
-        out = atom.decl.out.decl.map[val_string]
+    elif (hasattr(atom.decl.out.decl.base_type, 'map')
+          and val_string in atom.decl.out.decl.base_type.map):  # constructor
+        out = atom.decl.out.decl.base_type.map[val_string]
     elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
         # deconstruct val_string
         m = match(r"(?P<function>\w+)\s?\((?P<args>(?P<arg>\w+(,\s?)?)+)\)",
@@ -321,6 +321,8 @@ class TypeDeclaration(ASTNode):
 
         type (string): Z3 type of an element of the type; same as `name`
 
+        base_type : self
+
         constructors ([Constructor]): list of constructors in the enumeration
 
         interpretation (SymbolInterpretation): the symbol interpretation
@@ -340,6 +342,7 @@ class TypeDeclaration(ASTNode):
         self.out = Symbol(name=BOOL)
         self.type = (self.name if type(enumeration) != Ranges else
                      enumeration.type)  # INT or REAL or DATE
+        self.base_type = self
 
         self.map = {}  # {String: constructor}
 
@@ -354,16 +357,18 @@ class TypeDeclaration(ASTNode):
                        f"{self.enumeration}")
         return (f"type {self.name} := {{{enumeration}}}")
 
-    def check_bounds(self, var,
+    def check_bounds(self, term: Expression,
                      interpretations: Dict[str, "SymbolInterpretation"],
                      extensions: Dict[str, Extension]
                      ) -> Expression:
+        """returns an Expression that is TRUE when `term` is in the type
+        """
         if self.name == CONCEPT:
-            comparisons = [EQUALS([var, UnappliedSymbol.construct(c)])
+            comparisons = [EQUALS([term, UnappliedSymbol.construct(c)])
                           for c in self.constructors]
             return OR(comparisons)
         else:
-            return self.interpretation.enumeration.contains([var], False,
+            return self.interpretation.enumeration.contains([term], False,
                     interpretations=interpretations, extensions=extensions)
 
 
@@ -390,6 +395,8 @@ class SymbolDeclaration(ASTNode):
         out (Symbol): the type of the symbol
 
         type (string): name of the Z3 type of an instance of the symbol
+
+        base_type (TypeDeclaration): base type of the unary predicate (None otherwise)
 
         instances (Dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of
@@ -433,6 +440,7 @@ class SymbolDeclaration(ASTNode):
         self.optimizable: bool = True
 
         self.type = None  # a string
+        self.base_type = None
         self.range = None  # all possible values.  Used in get_range and IO.py
         self.instances = None  # {string: AppliedSymbol} not starting with '_'
         self.block: Optional[Block] = None  # vocabulary where it is declared
@@ -458,7 +466,7 @@ class SymbolDeclaration(ASTNode):
                       interpretations: Dict[str, "SymbolInterpretation"],
                       extensions: Dict[str, Extension]
                       ) -> Expression:
-        """Returns an expression that says whether the `args` are in the domain of the symbol.
+        """Returns an expression that is TRUE when `args` are in the domain of the symbol.
 
         Arguments:
             args (List[Expression]): the list of arguments to be checked, e.g. `[1, 2]`
@@ -471,7 +479,6 @@ class SymbolDeclaration(ASTNode):
         return AND([typ.has_element(term, interpretations, extensions)
                    for typ, term in zip(self.sorts, args)])
 
-
     def has_in_range(self, value: Expression,
                      interpretations: Dict[str, "SymbolInterpretation"],
                      extensions: Dict[str, Extension]
@@ -479,6 +486,15 @@ class SymbolDeclaration(ASTNode):
         """Returns an expression that says whether `value` is in the range of the symbol.
         """
         return self.out.has_element(value, interpretations, extensions)
+
+    def check_bounds(self, term: Expression,
+                     interpretations: Dict[str, "SymbolInterpretation"],
+                     extensions: Dict[str, Extension]
+                     ) -> Expression:
+        """returns an Expression that is TRUE when `term` satisfies the predicate
+        """
+        assert self.type == BOOL, "Internal error"
+        return TRUE #TODO
 
 Declaration = Union[TypeDeclaration, SymbolDeclaration]
 
@@ -597,7 +613,7 @@ class Definition(ASTNode):
             self.inst_def_level -= 1
             return out
 
-    def set_level_symbols(self):
+    def set_level_symbols(self, voc):
         """Calculates which symbols in the definition are recursively defined,
            creates a corresponding level mapping symbol,
            and stores these in self.level_symbols.
@@ -622,9 +638,12 @@ class Definition(ASTNode):
             key = r.definiendum.symbol.decl
             if key not in symbs or key in self.level_symbols:
                 continue
+
+            real = Type(name=REAL)
+            real.decl = voc.symbol_decls[REAL]
             symbdec = SymbolDeclaration.make(
                 "_"+str(self.id)+"lvl_"+key.name,
-                key.arity, key.sorts, Type(name=REAL))
+                key.arity, key.sorts, real)
             self.level_symbols[key] = Symbol(name=symbdec.name)
             self.level_symbols[key].decl = symbdec
 

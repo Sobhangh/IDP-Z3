@@ -1,0 +1,23 @@
+vocabulary {
+	type LivingBeing := { Cat, Dog, Frog, Alice, Bob, Tom }
+	animal, person : LivingBeing → Bool
+	married : person → Bool
+	spouse: married → married
+	affair : married * person → Bool
+	age : LivingBeing → Int
+}
+theory {
+	animal := { Cat, Dog, Frog }. // identifier-creating !
+	person := { Alice, Bob, Tom }.
+	spouse := { Alice → Bob, Bob → Alice }.
+	//TODO affair(Bob, Cat). // domain error !
+
+! x in married: age(spouse(x))>20.
+//TODO ? (x,y) in affair: true.
+}
+
+
+procedure main() {
+pretty_print(Theory(T).formula())
+    pretty_print(model_expand(T))
+}

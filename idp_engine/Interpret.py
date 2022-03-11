@@ -48,6 +48,7 @@ from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number, Extension)
+from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND)
 
@@ -404,11 +405,11 @@ Type.extension = extension
 
 # Class AQuantification  ######################################################
 
-def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expression]
-                ) -> Expression:
+def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expression],
+                theory: Theory) -> Expression:
     """add `filter(args)` to `expr` quantified by `q`
 
-    Example: `_add_filter('∀', TRUE, filter, [1])` returns `filter([1]) => TRUE`
+    Example: `_add_filter('∀', TRUE, filter, [1], theory)` returns `filter([1]) => TRUE`
 
     Args:
         q: the type of quantification
@@ -420,7 +421,7 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
         Expression: `expr` extended with appropriate filter
     """
     if filter:  # adds `filter(val) =>` in front of expression
-        applied = filter(args)
+        applied = filter(args).interpret(theory)
         if q == '∀':
             out = IMPLIES([applied, expr])
         elif q == '∃':
@@ -481,7 +482,7 @@ def interpret(self, problem):
 
         if superset is None:
             new_quantees.append(q)
-            forms = [_add_filter(self.q, f, filter, q.vars) for f in forms]
+            forms = [_add_filter(self.q, f, filter, q.vars, problem) for f in forms]
         else:
             for vars in q.vars:
                 self.check(domain.decl.arity == len(vars),
@@ -491,7 +492,7 @@ def interpret(self, problem):
                     for val in superset:
                         new_f = f.instantiate(vars, val, problem)
                         instantiated = True
-                        out.append(_add_filter(self.q, new_f, filter, val))
+                        out.append(_add_filter(self.q, new_f, filter, val, problem))
                 forms = out
 
     if not instantiated:

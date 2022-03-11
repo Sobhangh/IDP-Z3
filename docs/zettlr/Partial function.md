@@ -18,6 +18,9 @@
 - [x] proper product of filter
 - [x] use interpretations in extensions (beware of circularity !)
 - [ ] allow predicate in signature
+	- [x] SymbolDeclaration.translate(): need to find the type of a unary predicate
+	- [ ] SymbolDeclaration.check_bounds()
+	- [ ] n-ary quantification in LivingBeing
 - [ ] allow predicate*S* in signature
 - [ ] improve check_bounds, has_element
 
