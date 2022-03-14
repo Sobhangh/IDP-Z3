@@ -155,17 +155,17 @@ Quantified formulas
     In the first form above, the type of each variable is inferred from their use in |phi|.
 
 
-"is (not) enumerated"
-    ``f(a,b) is enumerated`` and ``f(a,b) is not enumerated`` are sentences,
+"is enumerated"
+    ``f(a,b) is enumerated`` is a sentence,
     where ``f`` is a function defined by an enumeration and applied to arguments ``a`` and ``b``.
     Its truth value reflects whether ``(a,b)`` is enumerated in ``f``'s enumeration.
     If the enumeration has a default value, every tuple of arguments is enumerated.
 
-"(not) in {1,2,3,4}"
-    ``f(args) in enum`` and ``f(args) not in enum`` are sentences, where
+"in {1,2,3,4}"
+    ``f(args) in enum`` is a sentence, where
     ``f`` is a function applied to arguments ``args``
     and ``enum`` is an enumeration.
-    This can also be written using Unicode: ``f() ∈ {1,2,3}`` or ``f() ∉ {1,2,3}``.
+    This can also be written using Unicode: ``f() ∈ {1,2,3}``.
 
 if .. then .. else ..
     ``if t_1 then t_2 else t_3`` is a sentence when |t1|, |t2| and |t3| are sentences.
