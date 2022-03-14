@@ -9,9 +9,12 @@ And(p == pos(1, 1),
     position(1) == pos(0, 0),
     position(2) == pos(0, 0),
     ForAll(c!0,
-           And((position(0) == c!0) == (c!0 == pos(0, 0)),
-               (position(1) == c!0) == (c!0 == pos(0, 0)),
-               (position(2) == c!0) == (c!0 == pos(0, 0)))))
+           And(Or(Not(is(pos, c!0)),
+                  (position(0) == c!0) == (c!0 == pos(0, 0))),
+               Or(Not(is(pos, c!0)),
+                  (position(1) == c!0) == (c!0 == pos(0, 0))),
+               Or(Not(is(pos, c!0)),
+                  (position(2) == c!0) == (c!0 == pos(0, 0))))))
 
 Model 1
 ==========

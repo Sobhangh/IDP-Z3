@@ -43,7 +43,7 @@ from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration,
                     SymbolDeclaration, Symbol, SymbolInterpretation,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
-                    Definition)
+                    Definition, Ranges, ConstructedFrom)
 from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
@@ -64,25 +64,21 @@ Import.interpret = interpret
 
 def interpret(self, problem):
     interpretation = problem.interpretations.get(self.name, None)
-    if interpretation is not None:  # excludes Bool, Concept
-        interpretation.enumeration.interpret(problem)
+    if self.name not in [BOOL, CONCEPT]:
+        enum = interpretation.enumeration.interpret(problem)
         self.interpretation = interpretation
-        self.constructors = interpretation.enumeration.constructors
+        self.constructors = enum.constructors
     self.translate(problem)
 
-    # update problem.extensions
     if self.constructors:
         ranges = [c.interpret(problem).range for c in self.constructors]
-        if any(r is None for r in ranges):
-            problem.extensions[self.name] = (None, None)
-        else:
-            problem.extensions[self.name] = ([[t] for r in ranges for t in r], None)
-    elif self.interpretation.enumeration:  # range declaration
-        tuples = self.interpretation.enumeration.tuples
-        if tuples is None:
-            problem.extensions[self.name] = (None, None)
-        else:
-            problem.extensions[self.name] = ([[t.args[0]] for t in tuples], None)
+
+    # update problem.extensions
+    if self.name in [BOOL, CONCEPT]:
+        ext = ([[t] for r in ranges for t in r], None)
+    else:
+        ext = enum.extensionE(problem.interpretations, problem.extensions)
+    problem.extensions[self.name] = ext
 TypeDeclaration.interpret = interpret
 
 
@@ -236,7 +232,7 @@ SymbolInterpretation.interpret = interpret
 # class Enumeration  ###########################################################
 
 def interpret(self, problem):
-    pass
+    return self
 Enumeration.interpret = interpret
 
 
@@ -248,8 +244,9 @@ def interpret(self, problem):
         c.interpret(problem)
         if c.range is None:
             self.tuples = None
-            return
+            return self
         self.tuples.extend([Tuple(args=[e]) for e in c.range])
+    return self
 ConstructedFrom.interpret = interpret
 
 
@@ -482,7 +479,8 @@ def interpret(self, problem):
 
         if superset is None:
             new_quantees.append(q)
-            forms = [_add_filter(self.q, f, filter, q.vars, problem) for f in forms]
+            for vars in q.vars:
+                forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
         else:
             for vars in q.vars:
                 self.check(domain.decl.arity == len(vars),

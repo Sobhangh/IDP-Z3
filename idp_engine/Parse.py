@@ -368,8 +368,16 @@ class TypeDeclaration(ASTNode):
                           for c in self.constructors]
             return OR(comparisons)
         else:
-            return self.interpretation.enumeration.contains([term], False,
-                    interpretations=interpretations, extensions=extensions)
+            (superset, filter) = extensions[self.name]
+            if filter is not None:  # it is enough to filter it.  Perf significantly degrades if superset is also used.
+                out = filter([term])
+            elif superset is not None:
+                # superset.sort(key=lambda t: str(t))
+                comparisons = [EQUALS([term, t[0]]) for t in superset]
+                out = OR(comparisons)
+            else:
+                out = TRUE
+            return out
 
 
 class SymbolDeclaration(ASTNode):
@@ -494,6 +502,7 @@ class SymbolDeclaration(ASTNode):
         """returns an Expression that is TRUE when `term` satisfies the predicate
         """
         assert self.type == BOOL, "Internal error"
+        (superset, filter) = extensions[self.name]
         return TRUE #TODO
 
 Declaration = Union[TypeDeclaration, SymbolDeclaration]
@@ -868,11 +877,20 @@ class Enumeration(ASTNode):
                     out)
             return out
 
+    def extensionE(self,
+                 interpretations: Dict[str, "SymbolInterpretation"]=None,
+                 extensions: Dict[str, Extension]=None):
+        ranges = [c.range for c in self.constructors]
+        return ([[t] for r in ranges for t in r], None)
+
+
 class FunctionEnum(Enumeration):
     pass
 
+
 class CSVEnumeration(Enumeration):
     pass
+
 
 class ConstructedFrom(Enumeration):
     """Represents a 'constructed from' enumeration of constructors
@@ -908,6 +926,24 @@ class ConstructedFrom(Enumeration):
                 for constructor in self.constructors]
         return OR(out)
 
+    def extensionE(self,
+                 interpretations: Dict[str, "SymbolInterpretation"]=None,
+                 extensions: Dict[str, Extension]=None):
+        def filter(args):
+            if type(args[0]) != Variable and type(args[0].decl) == Constructor:  # try to simplify it
+                self.check(self.parent.name == args[0].decl.type,
+                        f"Incorrect type of {args[0]} for {self.parent.name}")
+                self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
+                        f"Incorrect arity")
+                return AND([t.decl.out.has_element(e, interpretations, extensions)
+                            for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
+            out = [AppliedSymbol.construct(constructor.tester, args)
+                    for constructor in self.constructors]
+            return OR(out)  # return of filter()
+        return (([t.args for t in self.tuples], filter) if self.tuples else
+                (None, filter))
+
+
 class Tuple(ASTNode):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
@@ -919,6 +955,7 @@ class Tuple(ASTNode):
     def __repr__(self):
         return self.code
 
+
 class FunctionTuple(Tuple):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
@@ -928,8 +965,10 @@ class FunctionTuple(Tuple):
         self.args.append(self.value)
         self.code = intern(",".join([str(a) for a in self.args]))
 
+
 class CSVTuple(Tuple):
     pass
+
 
 class Ranges(Enumeration):
     def __init__(self, **kwargs):
@@ -987,11 +1026,32 @@ class Ranges(Enumeration):
             sub_exprs.append(e)
         return OR(sub_exprs)
 
+    def extensionE(self, interpretations=None, extensions=None):
+        if not self.elements:
+            return(None, None)
+        if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
+            return ([t.args for t in self.tuples], None)
+        def filter(args):
+            sub_exprs = []
+            for x in self.elements:
+                if x.toI is None:
+                    e = EQUALS([args[0], x.fromI])
+                else:
+                    e = AComparison.make('≤', [x.fromI, args[0], x.toI])
+                sub_exprs.append(e)
+            return OR(sub_exprs)
+        return([[t.args[0]] for t in self.tuples], filter)
+
+
 class IntRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, elements=[])
         self.type = INT
         self.tuples = None
+
+    def extensionE(self, interpretations=None, extensions=None):
+        return (None, None)
+
 
 class RealRange(Ranges):
     def __init__(self):
@@ -999,11 +1059,19 @@ class RealRange(Ranges):
         self.type = REAL
         self.tuples = None
 
+    def extensionE(self, interpretations=None, extensions=None):
+        return (None, None)
+
+
 class DateRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, elements=[])
         self.type = DATE
         self.tuples = None
+
+    def extensionE(self, interpretations=None, extensions=None):
+        return (None, None)
+
 
 ################################ Display  ###############################
 

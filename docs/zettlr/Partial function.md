@@ -28,7 +28,7 @@
 
 ```mermaid
 flowchart TD
-	Symbol_has_element["Symbol<br/>has_element()"] --> TypeDecl_check_bounds["TypeDecl<br/>check_bounds()"] --> Enumeration_contains["Enumeration<br/>contains()"];
+	Symbol_has_element["Symbol<br/>has_element()"] --> TypeDecl_check_bounds["TypeDecl<br/>check_bounds()"];
 	SymbolInterpretation_interpret["SymbolInterp<br/>interpret()"] --> SymbolDeclaration_has_in_domain["SymbolDecl<br/>has_in_domain()"];
 	SymbolInterpretation_interpret --> SymbolDeclaration_has_in_range["SymbolDecl<br/>has_in_range()"];
 	SymbolDeclaration_has_in_domain --> Symbol_has_element;
@@ -39,4 +39,6 @@ flowchart TD
 	SymbolDeclaration_interpret["SymbolDecl<br/>interpret()"] --> Subtype_extension;
 	Constructor_interpret["Constructor<br/>interpret()"] --> Subtype_extension;
 	AQuantification_interpret["AQuant<br/>interpret()"] --> Subtype_extension;
+	AppliedSymbol_interpret[AppliedSymbol<br/>interpret] --> Enumeration_contains;
+	TypeDeclaration_interpret[TypeDeclaration<br/>interpret] --> Enumeration_extensionE[Enumeration<br/>extensionE] --> Symbol_has_element;
 ```
