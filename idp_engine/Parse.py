@@ -369,12 +369,13 @@ class TypeDeclaration(ASTNode):
             return OR(comparisons)
         else:
             (superset, filter) = extensions[self.name]
-            if filter is not None:  # it is enough to filter it.  Perf significantly degrades if superset is also used.
-                out = filter([term])
-            elif superset is not None:
+            if superset is not None:
                 # superset.sort(key=lambda t: str(t))
                 comparisons = [EQUALS([term, t[0]]) for t in superset]
-                out = OR(comparisons)
+                out = (OR(comparisons) if filter is None else
+                       AND([filter([term]), OR(comparisons)]))
+            elif filter is not None:
+                out = filter([term])
             else:
                 out = TRUE
             return out
@@ -1040,7 +1041,7 @@ class Ranges(Enumeration):
                     e = AComparison.make('≤', [x.fromI, args[0], x.toI])
                 sub_exprs.append(e)
             return OR(sub_exprs)
-        return([[t.args[0]] for t in self.tuples], filter)
+        return(None, filter)
 
 
 class IntRange(Ranges):
