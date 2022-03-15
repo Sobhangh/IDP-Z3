@@ -19,8 +19,10 @@
 - [x] use interpretations in extensions (beware of circularity !)
 - [ ] allow predicate in signature
 	- [x] SymbolDeclaration.translate(): need to find the type of a unary predicate
-	- [ ] SymbolDeclaration.check_bounds()
-	- [ ] n-ary quantification in LivingBeing
+	- [x] SymbolDeclaration.check_bounds()
+	- [x] n-ary quantification in LivingBeing
+	- [ ] interpretation also defines the domain
+	- [ ] use extension in model expand / propagate
 - [ ] allow predicate*S* in signature
 - [ ] improve check_bounds, has_element
 

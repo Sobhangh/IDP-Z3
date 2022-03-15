@@ -13,7 +13,8 @@ theory {
 	//TODO affair(Bob, Cat). // domain error !
 
 ! x in married: age(spouse(x))>20.
-//TODO ? (x,y) in affair: true.
+! (x,y) in affair: x=y.
+? (x,y) in affair: true.
 }
 
 

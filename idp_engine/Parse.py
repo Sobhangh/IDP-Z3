@@ -504,7 +504,16 @@ class SymbolDeclaration(ASTNode):
         """
         assert self.type == BOOL, "Internal error"
         (superset, filter) = extensions[self.name]
-        return TRUE #TODO
+        if superset is not None:
+            # superset.sort(key=lambda t: str(t))
+            comparisons = [EQUALS([term, t[0]]) for t in superset]
+            out = (OR(comparisons) if filter is None else
+                    AND([filter([term]), OR(comparisons)]))
+        elif filter is not None:
+            out = filter([term])
+        else:
+            out = TRUE
+        return out
 
 Declaration = Union[TypeDeclaration, SymbolDeclaration]
 

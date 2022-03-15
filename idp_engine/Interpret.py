@@ -47,7 +47,7 @@ from .Parse import (Import, TypeDeclaration,
 from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
-                    Variable, TRUE, Number, Extension)
+                    Variable, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND)
@@ -95,13 +95,16 @@ def interpret(self, problem):
     extensions = [s.extension(problem.interpretations, problem.extensions)
                   for s in self.sorts]
     if any(e[0] is None for e in extensions):
-        superset, filters = None, []
+        superset = None
     else:
         superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
-        filters = [e[1] for e in extensions if e[1] is not None]
-    if self.out.decl.name == BOOL:
-        filters.append(lambda args: AppliedSymbol.make(symbol, args))
-    filter = (lambda args: AND([f(args) for f in filters])) if filters else None
+    filters = [e[1] for e in extensions]
+    def filter(args):
+        out = AND([f([t]) if f is not None else TRUE
+                   for f, t in zip(filters, args)])
+        if self.out.decl.name == BOOL:
+            out = AND([out, AppliedSymbol.make(symbol, args)])
+        return out
     problem.extensions[self.name] = (superset, filter)
 
     r = self.out.extension(problem.interpretations, problem.extensions)
@@ -188,9 +191,12 @@ def interpret(self, problem):
             # check that the values are in the range
             if type(self.enumeration) == FunctionEnum:
                 args, value = t.args[:-1], t.args[-1]
-                self.check(self.symbol.decl.has_in_range(value,
-                            problem.interpretations, problem.extensions).same_as(TRUE),
+                condition = self.symbol.decl.has_in_range(value,
+                            problem.interpretations, problem.extensions)
+                self.check(not condition.same_as(FALSE),
                            f"{value} is not in the range of {self.symbol.name}")
+                if not condition.same_as(TRUE):
+                    problem.constraints.append(condition)
             else:
                 args, value = t.args, TRUE
 
@@ -200,9 +206,12 @@ def interpret(self, problem):
                     "()")
             self.check(len(args) == self.symbol.decl.arity,
                        f"Incorrect arity of {a} for {self.name}")
-            self.check(self.symbol.decl.has_in_domain(args,
-                            problem.interpretations, problem.extensions).same_as(TRUE),
+            condition = self.symbol.decl.has_in_domain(args,
+                            problem.interpretations, problem.extensions)
+            self.check(not condition.same_as(FALSE),
                        f"{a} is not in the domain of {self.symbol.name}")
+            if not condition.same_as(TRUE):
+                problem.constraints.append(condition)
 
             # check duplicates
             expr = AppliedSymbol.make(self.symbol, args)
