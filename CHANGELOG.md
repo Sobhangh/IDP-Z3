@@ -8,11 +8,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 This release has new package dependencies: please run `poetry install` to update.
 
+Breaking changes:
+* now use `¬f(x) is enumerated` and `¬f(x) in {...}` (instead of `f(x) is not enumerated` and `f(x) not in {...}`)
+
 ### IDP-Z3
+* (breaking) #186: negation of `is enumerated` and `in {...}`
 * fix #120: Enumerate predicate over infinite domain
 * fix #187: `Internal error` with `explain()`
 * fix #188: `Incorrect solver result during explain inference`
 * MR !214: support for `#TODAY(y,m,d)`
+* MR !217: Unary predicates in type signature
 
 
 ## [0.9.2] - 2022-02-10

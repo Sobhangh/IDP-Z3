@@ -6,7 +6,7 @@ vocabulary V {
 
 theory T:V {
     { p() <- c() ∈ {red, blue}.
-      p() <- c() ∉ {blue,green}.}
+      p() <- ~c() ∈ {blue,green}.}
 }
 
 procedure main() {

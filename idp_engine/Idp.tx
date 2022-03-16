@@ -105,8 +105,8 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
       AppliedSymbol: annotations=Annotations
               symbol=SymbolExpr
               '(' sub_exprs*=Expression[','] ')'
-              ( is_enumerated=/is\s+(not\s+)?enumerated/
-              | is_enumeration=/(not\s+)?in|∈|(∉)/ in_enumeration=Enumeration)?;
+              ( is_enumerated=/is\s+enumerated/
+              | is_enumeration=/in|∈/ in_enumeration=Enumeration)?;
         SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
