@@ -106,8 +106,8 @@ Model 1
 ==========
 animal := {Cat, Dog, Frog}.
 person := {Alice, Bob, Tom}.
-married := {Cat, Dog, Frog, Alice, Bob}.
-spouse := {Cat->Alice, Dog->Alice, Frog->Alice, Alice->Bob, Bob->Alice, Tom->Alice}.
+married := {Alice, Bob}.
+spouse := {Alice->Bob, Bob->Alice}.
 affair := {(Alice,Alice)}.
 age := {Cat->21, Dog->21, Frog->21, Alice->21, Bob->21, Tom->21}.
 

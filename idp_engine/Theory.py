@@ -453,18 +453,37 @@ class Theory(object):
         for q in todo:
             assert (self.extended or not q.is_reified(),
                     "Reified atom should only appear in case of extended theories")
-            if complete or q.is_reified():
-                val1 = model.eval(q.reified(self), model_completion=complete)
-            else:
-                val1 = model.eval(q.translate(self), model_completion=complete)
-            val = str_to_IDP(q, str(val1))
-            if val is not None:
-                if q.is_assignment() and val == FALSE:
-                    tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
-                           else S.CONSEQUENCE)
+
+            # determine if the expression is defined
+            if type(q) == AppliedSymbol:
+                if all(type(T.decl) == TypeDeclaration for T in q.decl.sorts):
+                    defined = True
                 else:
-                    tag = S.EXPANDED
-                ass.assert__(q, val, tag)
+                    in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
+                    if in_domain.same_as(TRUE):
+                        defined = True
+                    elif in_domain.same_as(FALSE):
+                        defined = False
+                    else:
+                        defined = model.eval(in_domain.translate(self))
+            else:
+                defined = True
+
+            if not defined:
+                ass[q.code].relevant = False  #TODO .defined = False
+            else:
+                if complete or q.is_reified():
+                    val1 = model.eval(q.reified(self), model_completion=complete)
+                else:
+                    val1 = model.eval(q.translate(self), model_completion=complete)
+                val = str_to_IDP(q, str(val1))
+                if val is not None:
+                    if q.is_assignment() and val == FALSE:
+                        tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
+                            else S.CONSEQUENCE)
+                    else:
+                        tag = S.EXPANDED
+                    ass.assert__(q, val, tag)
         return ass
 
     def _add_assignment(self, solver: Solver) -> None:

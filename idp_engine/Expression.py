@@ -538,7 +538,7 @@ class Symbol(Expression):
                     interpretations: Dict[str, "SymbolInterpretation"],
                     extensions: Dict[str, Extension]
                     ) -> Expression:
-        """Returns an expression that says whether `term` is in the type denoted by `self`.
+        """Returns an expression that says whether `term` is in the type/predicate denoted by `self`.
 
         Args:
             term (Expression): the argument to be checked
@@ -546,6 +546,7 @@ class Symbol(Expression):
         Returns:
             Expression: whether `term` is in the type denoted by `self`.
         """
+        self.check(self.decl.out.name == BOOL, "internal error")
         return self.decl.check_bounds(term, interpretations, extensions)
 
 
@@ -589,7 +590,7 @@ class Type(Symbol):
                     interpretations: Dict[str, "SymbolInterpretation"],
                     extensions: Dict[str, Extension]
                     ) -> Expression:
-        """Returns an Expression that says whether `term` is in the type denoted by `self`.
+        """Returns an Expression that says whether `term` is in the type/predicate denoted by `self`.
 
         Args:
             term (Expression): the argument to be checked
@@ -602,6 +603,7 @@ class Type(Symbol):
                            for c in self.extension(interpretations, extensions)[0]]
             return OR(comparisons)
         else:
+            self.check(self.decl.out.name == BOOL, "internal error")
             return self.decl.check_bounds(term, interpretations, extensions)
 
 

@@ -22,9 +22,10 @@
 	- [x] SymbolDeclaration.check_bounds()
 	- [x] n-ary quantification in LivingBeing
 	- [ ] interpretation also defines the domain
-	- [ ] use extension in model expand / propagate
-- [ ] allow predicate*S* in signature
+	- [x] use extension in model expand / propagate
+	- [ ] exclude similar models (using .defined)
 - [ ] improve check_bounds, has_element
+- [ ] IC: z3 sort expected
 
 ## Call tree
 
@@ -43,4 +44,5 @@ flowchart TD
 	AQuantification_interpret["AQuant<br/>interpret()"] --> Subtype_extension;
 	AppliedSymbol_interpret[AppliedSymbol<br/>interpret] --> Enumeration_contains;
 	TypeDeclaration_interpret[TypeDeclaration<br/>interpret] --> Enumeration_extensionE[Enumeration<br/>extensionE] --> Symbol_has_element;
+	SymbolDeclaration_interpret --> TypeDecl_check_bounds -.-> Subtype_extension;
 ```
