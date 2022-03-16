@@ -455,19 +455,15 @@ class Theory(object):
                     "Reified atom should only appear in case of extended theories")
 
             # determine if the expression is defined
+            defined = True
             if type(q) == AppliedSymbol:
-                if all(type(T.decl) == TypeDeclaration for T in q.decl.sorts):
-                    defined = True
-                else:
+                if any(type(T.decl) != TypeDeclaration for T in q.decl.sorts):
                     in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
-                    if in_domain.same_as(TRUE):
-                        defined = True
-                    elif in_domain.same_as(FALSE):
+                    if in_domain.same_as(FALSE):
                         defined = False
-                    else:
+                    elif not in_domain.same_as(TRUE):
                         defined = model.eval(in_domain.translate(self))
-            else:
-                defined = True
+                    # else: defined = True
 
             if not defined:
                 ass[q.code].relevant = False  #TODO .defined = False
@@ -478,7 +474,7 @@ class Theory(object):
                     val1 = model.eval(q.translate(self), model_completion=complete)
                 val = str_to_IDP(q, str(val1))
                 if val is not None:
-                    if q.is_assignment() and val == FALSE:  #TODO Explain why
+                    if q.is_assignment() and val == FALSE:  # consequence of the TRUE assignment
                         tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
                             else S.CONSEQUENCE)
                     else:
