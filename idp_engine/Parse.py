@@ -535,7 +535,7 @@ class TheoryBlock(ASTNode):
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
 
         self.declarations = {}
-        self.def_constraints = {}  # {(Declaration, Definition): list[Expression]}
+        self.def_constraints = {}  # {(Declaration, Definition): List[Expression]}
         self.assignments = Assignments()
 
         self.constraints = OrderedSet()
@@ -559,11 +559,11 @@ class Definition(ASTNode):
         rules ([Rule]):
             set of rules for the definition, e.g., `!x: p(x) <- q(x)`
 
-        canonicals (Dict[Declaration, list[Rule]]):
+        canonicals (Dict[Declaration, List[Rule]]):
             normalized rule for each defined symbol,
             e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
 
-        instantiables (Dict[Declaration], list[Expression]):
+        instantiables (Dict[Declaration], List[Expression]):
             list of instantiable expressions for each symbol,
             e.g., `p($p!1$) <=> q($p!1$)`
 

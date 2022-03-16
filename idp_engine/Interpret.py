@@ -154,13 +154,13 @@ def add_def_constraints(self, instantiables, problem, result):
     The `instantiables` (of the definition) are expanded in `problem`.
 
     Args:
-        instantiables (Dict[SymbolDeclaration, list[Expression]]):
+        instantiables (Dict[SymbolDeclaration, List[Expression]]):
             the constraints without the quantification
 
         problem (Theory):
             contains the structure for the expansion/interpretation of the constraints
 
-        result (Dict[SymbolDeclaration, Definition, list[Expression]]):
+        result (Dict[SymbolDeclaration, Definition, List[Expression]]):
             a mapping from (Symbol, Definition) to the list of constraints
     """
     for decl, bodies in instantiables.items():
@@ -390,7 +390,7 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation],
         the known interpretations of types and symbols
 
     Returns:
-        tuple[list[Expression], Callable]: a superset of the extension of self,
+        Extension: a superset of the extension of self,
         and a function that, given arguments, returns an Expression that says
         whether the arguments are in the extension of self
     """

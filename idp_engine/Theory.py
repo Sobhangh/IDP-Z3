@@ -69,7 +69,7 @@ class Theory(object):
         interpretations (Dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
-        def_constraints (Dict[SymbolDeclaration, Definition], list[Expression]):
+        def_constraints (Dict[SymbolDeclaration, Definition], List[Expression]):
             A mapping of defined symbol to the whole-domain constraints
             equivalent to its definition.
 
@@ -478,7 +478,7 @@ class Theory(object):
                     val1 = model.eval(q.translate(self), model_completion=complete)
                 val = str_to_IDP(q, str(val1))
                 if val is not None:
-                    if q.is_assignment() and val == FALSE:
+                    if q.is_assignment() and val == FALSE:  #TODO Explain why
                         tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
                             else S.CONSEQUENCE)
                     else:
