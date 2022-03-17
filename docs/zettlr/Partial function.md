@@ -21,8 +21,9 @@
 	- [x] SymbolDeclaration.translate(): need to find the type of a unary predicate
 	- [x] SymbolDeclaration.check_bounds()
 	- [x] n-ary quantification in LivingBeing
-	- [ ] interpretation also defines the domain
-	- [x] use extension in model expand / propagate
+	- [x] interpretation also defines the domain
+	- [x] use extension in model expand
+	- [ ] use extension in propagate
 	- [ ] exclude similar models (using .defined)
 - [ ] improve check_bounds, has_element
 - [ ] IC: z3 sort expected

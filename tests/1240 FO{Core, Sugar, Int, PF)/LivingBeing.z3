@@ -100,7 +100,8 @@ And(Not(person(Cat)),
        spouse(Tom) == Bob,
        spouse(Tom) == Tom),
     married(Bob),
-    married(Alice))
+    married(Alice),
+    Not(married(Tom)))
 
 Model 1
 ==========

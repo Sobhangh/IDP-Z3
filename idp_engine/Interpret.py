@@ -46,7 +46,7 @@ from .Parse import (Import, TypeDeclaration,
                     Definition, Ranges, ConstructedFrom)
 from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
-                    NOT, AppliedSymbol, UnappliedSymbol,
+                    NOT, AppliedSymbol, UnappliedSymbol, Quantee,
                     Variable, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
@@ -177,6 +177,7 @@ def interpret(self, problem):
     status = S.DEFAULT if self.block.name == DEFAULT else S.STRUCTURE
     assert not self.is_type_enumeration, "Internal error"
     if not self.name in [GOAL_SYMBOL, EXPAND]:
+        decl = self.symbol.decl
         # update problem.extensions
         if type(self.enumeration) != FunctionEnum:
             extension = [t.args for t in self.enumeration.tuples]
@@ -191,7 +192,7 @@ def interpret(self, problem):
             # check that the values are in the range
             if type(self.enumeration) == FunctionEnum:
                 args, value = t.args[:-1], t.args[-1]
-                condition = self.symbol.decl.has_in_range(value,
+                condition = decl.has_in_range(value,
                             problem.interpretations, problem.extensions)
                 self.check(not condition.same_as(FALSE),
                            f"{value} is not in the range of {self.symbol.name}")
@@ -204,9 +205,9 @@ def interpret(self, problem):
             a = (str(args) if 1<len(args) else
                     str(args[0]) if len(args)==1 else
                     "()")
-            self.check(len(args) == self.symbol.decl.arity,
+            self.check(len(args) == decl.arity,
                        f"Incorrect arity of {a} for {self.name}")
-            condition = self.symbol.decl.has_in_domain(args,
+            condition = decl.has_in_domain(args,
                             problem.interpretations, problem.extensions)
             self.check(not condition.same_as(FALSE),
                        f"{a} is not in the domain of {self.symbol.name}")
@@ -227,7 +228,7 @@ def interpret(self, problem):
 
         # fill the default value in problem.assignments
         if self.default is not None:
-            for code, expr in self.symbol.decl.instances.items():
+            for code, expr in decl.instances.items():
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
                     e = problem.assignments.assert__(expr, self.default, status)
@@ -235,6 +236,16 @@ def interpret(self, problem):
                         and type(self.enumeration) == FunctionEnum
                         and self.default.type != BOOL):
                         problem.assignments.assert__(e.formula(), TRUE, status)
+        elif any(type(s.decl) != TypeDeclaration for s in decl.sorts):  #TODO always ?
+            # add condition that the interpretation is total over the domain
+            # ! x in dom(f): enum.contains(x)
+            q_vars = { f"${sort.decl.name}!{str(i)}$":
+                       Variable(name=f"${sort.decl.name}!{str(i)}$", sort=sort)
+                       for i, sort in enumerate(decl.sorts)}
+            quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
+            expr = self.enumeration.contains(list(q_vars.values()), True)
+            constraint = FORALL(quantees, expr).interpret(problem)
+            problem.constraints.append(constraint)
 SymbolInterpretation.interpret = interpret
 
 
