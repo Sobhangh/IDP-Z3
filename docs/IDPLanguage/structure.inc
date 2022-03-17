@@ -13,8 +13,18 @@ Structure
 A *structure* specifies the interpretation of some type_, predicate_\ s and function_\ s.
 If the names are omitted, the structure is named S, for vocabulary V.
 
-A structure is a set of symbol interpretations of the form ``<symbol> := <interpretation>.``,
-e.g., ``P := {1..9}``, where the interpretation can be:
+A structure is a set of symbol interpretations of the form :
+
+* (partial) ``<symbol> :⊇ <interpretation>.``, e.g., ``P :⊇ {A->1}``,
+
+* (total) ``<symbol> := <interpretation>.``, e.g., ``P := {1..9}``.
+
+A partial interpretation is a set of tuples in the domain of the symbol,
+and their associated value, e.g., ``{ (1,2)->3, (4, 5)->6 }``.
+The set of tuples may not fully cover the domain.
+
+A total interpretation takes one of these forms:
+
 
 for nullary predicates (propositions)
     ``true`` or ``false``

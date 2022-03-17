@@ -347,7 +347,7 @@ class TypeDeclaration(ASTNode):
         self.map = {}  # {String: constructor}
 
         self.interpretation = (None if enumeration is None else
-            SymbolInterpretation(name=Symbol(name=self.name),
+            SymbolInterpretation(name=Symbol(name=self.name), sign=':=',
                                  enumeration=enumeration, default=None))
 
     def __str__(self):
@@ -778,9 +778,14 @@ class SymbolInterpretation(ASTNode):
     """
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
+        self.sign = kwargs.pop('sign')
         self.enumeration = kwargs.pop('enumeration')
         self.default = kwargs.pop('default')
 
+        self.sign = ':⊇' if self.sign == ':>=' else self.sign
+        self.check(self.sign == ':=' or
+                   (type(self.enumeration) == FunctionEnum and self.default is None),
+                   "':⊇' can only be used with a functional enumeration ('→') without else clause")
         if not self.enumeration:
             self.enumeration = Enumeration(tuples=[])
 

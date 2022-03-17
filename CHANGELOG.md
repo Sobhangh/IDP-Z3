@@ -9,15 +9,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 This release has new package dependencies: please run `poetry install` to update.
 
 Breaking changes:
-* now use `¬f(x) is enumerated` and `¬f(x) in {...}` (instead of `f(x) is not enumerated` and `f(x) not in {...}`)
+* FO[Sugar] now use `¬f(x) is enumerated` and `¬f(x) in {...}` (instead of `f(x) is not enumerated` and `f(x) not in {...}`)
+* FO[Sugar] partial interpretations must use `:>=` instead of `:=`.
 
 ### IDP-Z3
-* (breaking) #186: negation of `is enumerated` and `in {...}`
-* fix #120: Enumerate predicate over infinite domain
+* (breaking) #186: FO[Sugar] negation of `is enumerated` and `in {...}`
+* fix #120: FO[Infinite] Enumerate predicate over infinite domain
 * fix #187: `Internal error` with `explain()`
 * fix #188: `Incorrect solver result during explain inference`
-* MR !214: support for `#TODAY(y,m,d)`
-* MR !217: Unary predicates in type signature
+* MR !214: FO[Int] support for `#TODAY(y,m,d)`
+* MR !217: FO[PF] Unary predicates in type signature (+ partial interpretetations)
 
 
 ## [0.9.2] - 2022-02-10
