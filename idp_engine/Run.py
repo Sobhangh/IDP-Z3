@@ -56,7 +56,7 @@ def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
 
 def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
                  max: int = 10,
-                 timeout: int = 10,
+                 timeout_seconds: int = 10,
                  complete: bool = False,
                  extended: bool = False,
                  sort: bool = False
@@ -74,14 +74,14 @@ def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
 
     - ``More models may be available.  Change the max argument to see them.``
 
-    - ``More models may be available.  Change the timeout argument to see them.``
+    - ``More models may be available.  Change the timeout_seconds argument to see them.``
 
-    - ``More models may be available.  Change the max and timeout arguments to see them.``
+    - ``More models may be available.  Change the max and timeout_seconds arguments to see them.``
 
     Args:
         theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
         max (int, optional): max number of models. Defaults to 10.
-        timeout (int, optional): timeout in seconds. Defaults to 10.
+        timeout_seconds (int, optional): timeout_seconds in seconds. Defaults to 10.
         complete (bool, optional): True to obtain complete structures. Defaults to False.
         extended (bool, optional): use `True` when the truth value of
                 inequalities and quantified formula is of interest
@@ -92,7 +92,7 @@ def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
         str
     """
     problem = Theory(*theories, extended=extended)
-    ms = list(problem.expand(max=max, timeout=timeout, complete=complete))
+    ms = list(problem.expand(max=max, timeout_seconds=timeout_seconds, complete=complete))
     if isinstance(ms[-1], str):
         ms, last = ms[:-1], ms[-1]
     else:
@@ -138,7 +138,7 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
 
 def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
                    goal_string: str = "",
-                   timeout: int = 20,
+                   timeout_seconds: int = 20,
                    max_rows: int = 50,
                    first_hit: bool = True,
                    verify: bool = False
@@ -149,7 +149,7 @@ def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
         theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
         goal_string (str, optional): the last column of the table.
             Must be a predicate application defined in the theory, e.g. ``eligible()``.
-        timeout (int, optional): maximum duration in seconds. Defaults to 20.
+        timeout_seconds (int, optional): maximum duration in seconds. Defaults to 20.
         max_rows (int, optional): maximum number of rows. Defaults to 50.
         first_hit (bool, optional): requested hit-policy. Defaults to True.
         verify (bool, optional): request verification of table completeness.  Defaults to False
@@ -158,7 +158,7 @@ def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
         a textual representation of each rule
     """
     problem = Theory(*theories, extended=True)
-    for model in problem.decision_table(goal_string, timeout, max_rows,
+    for model in problem.decision_table(goal_string, timeout_seconds, max_rows,
                                         first_hit, verify):
         row = f'{NEWL}∧ '.join(str(a) for a in model
             if a.sentence.code != goal_string)

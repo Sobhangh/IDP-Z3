@@ -258,7 +258,7 @@ class eval(Resource):
                     assert len(idpModel.theories) == 1 and len(idpModel.structures)<=1, \
                         "Can't check code containing more than 1 theory or structure."
                     state = State(idpModel)  # don't use cache.  May raise an error
-                    next(state.expand(max=1, timeout=0))
+                    next(state.expand(max=1, timeout_seconds=0))
                     out = {"result": "ok"}
                 else:
                     state = State.make(idpOf(args['code']),
@@ -279,7 +279,7 @@ class eval(Resource):
                         state.determine_relevance()
                         out = Output(state).fill(state)
                     elif method == "modelexpand":
-                        generator = state.expand(max=1, timeout=0, complete=False)
+                        generator = state.expand(max=1, timeout_seconds=0, complete=False)
                         # TODO: this copying is not needed?
                         out = copy(state)
                         out.assignments = copy(out.assignments)
