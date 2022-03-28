@@ -119,6 +119,5 @@ structure S:V {
 procedure main () {
     pretty_print(Theory(T, S).optimize("Length(1)").propagate().assignments)
     pretty_print(minimize(T, S, term="Length(1)"))
-    pretty_print(maximize(T, S, term="Angle(1)"))
     pretty_print(Theory(T,S).expand(max=1, complete=True))
 }
