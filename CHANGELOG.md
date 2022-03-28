@@ -10,9 +10,11 @@ This release has new package dependencies: please run `poetry install` to update
 
 Breaking changes:
 * now use `¬f(x) is enumerated` and `¬f(x) in {...}` (instead of `f(x) is not enumerated` and `f(x) not in {...}`)
+* `timeout` parameter in API is now `timeout_seconds`
 
 ### IDP-Z3
 * (breaking) #186: negation of `is enumerated` and `in {...}`
+* (breaking) !218: `timeout` parameter in API is now `timeout_seconds`
 * fix #187: `Internal error` with `explain()`
 * fix #188: `Incorrect solver result during explain inference`
 * MR !214: support for `#TODAY(y,m,d)`
