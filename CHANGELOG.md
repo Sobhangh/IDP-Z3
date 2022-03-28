@@ -15,6 +15,7 @@ Breaking changes:
 ### IDP-Z3
 * (breaking) #186: negation of `is enumerated` and `in {...}`
 * (breaking) !218: `timeout` parameter in API is now `timeout_seconds`
+* fix #55: add `minimize` and `maximize` functions in `main` block
 * fix #187: `Internal error` with `explain()`
 * fix #188: `Incorrect solver result during explain inference`
 * MR !214: support for `#TODAY(y,m,d)`
