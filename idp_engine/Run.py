@@ -135,6 +135,33 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
     else:
         yield from problem._propagate(tag=S.CONSEQUENCE)
 
+def maximize(*theories: Union[TheoryBlock, Structure, Theory],
+             term: str
+             ) -> Iterator[str]:
+    """Returns the list of assignments that are true in any model that maximizes `term`.
+
+    Args:
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
+        term (str): a string representing a term
+
+    Yields:
+        str
+    """
+    return Theory(*theories).optimize(term, minimize=False).propagate()
+
+def minimize(*theories: Union[TheoryBlock, Structure, Theory],
+             term: str
+             ) -> Iterator[str]:
+    """Returns the list of assignments that are true in any model that minimizes `term`.
+
+    Args:
+        theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
+        term (str): a string representing a term
+
+    Yields:
+        str
+    """
+    return Theory(*theories).optimize(term, minimize=True).propagate()
 
 def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
                    goal_string: str = "",
@@ -238,6 +265,8 @@ def execute(self: IDP) -> None:
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand
     mylocals['model_propagate'] = model_propagate
+    mylocals['minimize'] = minimize
+    mylocals['maximize'] = maximize
     mylocals['decision_table'] = decision_table
     mylocals['determine_relevance'] = determine_relevance
     mylocals['pretty_print'] = pretty_print
