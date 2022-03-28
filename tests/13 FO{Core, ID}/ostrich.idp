@@ -1,0 +1,20 @@
+vocabulary {
+    type Animal := {Coco, Skippy}
+    Fly, Bird, AbFly, Ostrich, AbOstrich, SuperOstrich, YoungSuperOstrich, Parrot: Animal -> Bool
+}
+theory {
+    { !x: Fly(x) <- Bird(x) & ~AbFly(x).
+      !x: AbFly(x) <- Ostrich(x) & ~AbOstrich(x).
+      !x: AbOstrich(x) <- SuperOstrich(x).
+      !x: AbFly(x) <- YoungSuperOstrich(x).
+      !x: Bird(x) <- Ostrich(x).
+      !x: Bird(x) <- Parrot(x).
+      !x: Ostrich(x) <- SuperOstrich(x).
+      !x: SuperOstrich(x) <- YoungSuperOstrich(x).
+      Parrot(Coco).
+      YoungSuperOstrich(Skippy).
+    }
+}
+procedure main() {
+    pretty_print(model_expand(T))
+}
