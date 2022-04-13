@@ -304,7 +304,8 @@ def _propagate_inner(self, tag, solver, todo):
     if res1 == sat:
         model = solver.model()
         valqs = [(model.eval(q.reified(self)), q) for q in todo.values()]
-        for val1, q in valqs:
+        while valqs:
+            (val1, q) = valqs.pop()
             if str(val1) == str(q.reified(self)):
                 continue  # irrelevant
             solver.push()
@@ -316,6 +317,11 @@ def _propagate_inner(self, tag, solver, todo):
             if res2 == unsat:
                 val = str_to_IDP(q, str(val1))
                 yield self.assignments.assert__(q, val, tag)
+            # else:  # not faster with this code!
+            #     valqs = [ (val1, q)
+            #         for (val1, q) in valqs
+            #         if str(val1) == str(model.eval(q.reified(self)))
+            #     ]
 
         yield "No more consequences."
     elif res1 == unsat:
