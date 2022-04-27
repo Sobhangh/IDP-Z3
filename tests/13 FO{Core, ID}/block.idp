@@ -1,0 +1,15 @@
+vocabulary {
+    type Block := {B1, B2, B3}
+    green: Block -> Bool
+    right: Block * Block -> Bool // Y is on the right of X
+}
+theory {
+    { right(B1, B2).
+      right(B2, B3).
+    }
+    ~green(B1) & green(B3).
+    ?b1, b2: right(b1, b2) & green(b2) & ~green(b1).
+}
+procedure main() {
+    pretty_print(model_expand(T))
+}

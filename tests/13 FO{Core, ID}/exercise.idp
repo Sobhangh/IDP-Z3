@@ -1,0 +1,15 @@
+vocabulary {
+    P, Q, R, S, T: () -> Bool
+}
+theory {
+    {R().
+     P() <- ~R() | Q().
+     Q() <- P().
+     S() <- ~R().
+     S() <- P().
+     T() <- ~S().
+    }
+}
+procedure main() {
+    pretty_print(model_expand(T))
+}

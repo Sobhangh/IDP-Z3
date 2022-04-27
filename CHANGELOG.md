@@ -11,9 +11,14 @@ This release has new package dependencies: please run `poetry install` to update
 Breaking changes:
 * FO[Sugar] now use `¬f(x) is enumerated` and `¬f(x) in {...}` (instead of `f(x) is not enumerated` and `f(x) not in {...}`)
 * FO[Sugar] partial interpretations must use `:>=` instead of `:=`.
+* `timeout` parameter in API is now `timeout_seconds`
 
 ### IDP-Z3
 * (breaking) #186: FO[Sugar] negation of `is enumerated` and `in {...}`
+* (breaking) !218: `timeout` parameter in API is now `timeout_seconds`
+* fix #55: add `minimize` and `maximize` func
+
+### IDP-Z3tions in `main` block
 * fix #120: FO[Infinite] Enumerate predicate over infinite domain
 * fix #187: `Internal error` with `explain()`
 * fix #188: `Incorrect solver result during explain inference`

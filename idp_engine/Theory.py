@@ -541,13 +541,13 @@ class Theory(object):
 
     def expand(self,
                max: int = 10,
-               timeout: int = 10,
+               timeout_seconds: int = 10,
                complete: bool = False
                ) -> Iterator[Union[Assignments, str]]:
         """Generates a list of models of the theory that are expansion of the known assignments.
 
         The result is limited to ``max`` models (10 by default), or unlimited if ``max`` is 0.
-        The search for new models is stopped when processing exceeds ``timeout`` (in seconds) (unless it is 0).
+        The search for new models is stopped when processing exceeds ``timeout_seconds`` (in seconds) (unless it is 0).
         The models can be asked to be complete or partial (i.e., in which "don't care" terms are not specified).
 
         The string message can be one of the following:
@@ -556,13 +556,13 @@ class Theory(object):
 
         - ``More models may be available.  Change the max argument to see them.``
 
-        - ``More models may be available.  Change the timeout argument to see them.``
+        - ``More models may be available.  Change the timeout_seconds argument to see them.``
 
-        - ``More models may be available.  Change the max and timeout arguments to see them.``
+        - ``More models may be available.  Change the max and timeout_seconds arguments to see them.``
 
         Args:
             max (int, optional): maximum number of models. Defaults to 10.
-            timeout (int, optional): timeout in seconds.  Defaults to 10.
+            timeout_seconds (int, optional): timeout_seconds in seconds.  Defaults to 10.
             complete (bool, optional): ``True`` for complete models. Defaults to False.
 
         Yields:
@@ -593,7 +593,7 @@ class Theory(object):
         count, ass = 0, {}
         start = time.process_time()
         while ((max <= 0 or count < max) and
-               (timeout <= 0 or time.process_time()-start < timeout)):
+               (timeout_seconds <= 0 or time.process_time()-start < timeout_seconds)):
             # exclude ass
             different = []
             for a in ass.values():
@@ -615,12 +615,12 @@ class Theory(object):
         solver.pop()
 
         maxed = (0 < max <= count)
-        timeouted = (0 < timeout <= time.process_time()-start)
-        # if interrupted by the timeout
+        timeouted = (0 < timeout_seconds <= time.process_time()-start)
+        # if interrupted by the timeout_seconds
         if maxed or timeouted:
-            param = ("max and timeout arguments" if maxed and timeouted else
+            param = ("max and timeout_seconds arguments" if maxed and timeouted else
                      "max argument" if maxed else
-                     "timeout argument")
+                     "timeout_seconds argument")
             yield f"{NEWL}More models may be available.  Change the {param} to see them."
         elif 0 < count:
             yield f"{NEWL}No more models."
@@ -894,7 +894,7 @@ class Theory(object):
 
     def decision_table(self,
                        goal_string: str = "",
-                       timeout: int = 20,
+                       timeout_seconds: int = 20,
                        max_rows: int = 50,
                        first_hit: bool = True,
                        verify: bool = False
@@ -906,7 +906,7 @@ class Theory(object):
 
         Args:
             goal_string (str, optional): the last column of the table.
-            timeout (int, optional): maximum duration in seconds. Defaults to 20.
+            timeout_seconds (int, optional): maximum duration in seconds. Defaults to 20.
             max_rows (int, optional): maximum number of rows. Defaults to 50.
             first_hit (bool, optional): requested hit-policy. Defaults to True.
             verify (bool, optional): request verification of table completeness.  Defaults to False
@@ -914,7 +914,7 @@ class Theory(object):
         Returns:
             list(list(Assignment)): the non-empty cells of the decision table  for ``goal_string``, given ``self``.
         """
-        max_time = time.time()+timeout  # 20 seconds max
+        max_time = time.time()+timeout_seconds  # 20 seconds max
         assert self.extended == True, \
             "The problem must be created with 'extended=True' for decision_table."
 

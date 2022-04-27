@@ -90,6 +90,7 @@ The equivalent ASCII-only encoding is shown on the right.
         pretty_print(model_check    (T,S))
         pretty_print(model_expand   (T,S))
         pretty_print(model_propagate(T,S))
+        pretty_print(minimize(T,S, term="cost()"))
     }
 
 See also the :ref:`built-in functions`.

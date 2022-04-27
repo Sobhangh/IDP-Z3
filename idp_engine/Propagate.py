@@ -303,7 +303,8 @@ def _propagate_inner(self, tag, solver, todo):
     if res1 == sat:
         model = solver.model()
         valqs = [(model.eval(q.reified(self)), q) for q in todo.values()]
-        for val1, q in valqs:
+        while valqs:
+            (val1, q) = valqs.pop()
             if str(val1) == str(q.reified(self)):
                 continue  # irrelevant
 

@@ -1,0 +1,17 @@
+vocabulary V {
+    p : () → 𝔹
+}
+
+theory T:V {
+    {
+      p() <- ~p().
+    }
+}
+
+structure S:V {
+
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S))
+}

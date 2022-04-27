@@ -1,0 +1,14 @@
+vocabulary {
+    type num := {0..4}
+    odd, even: (num) → Bool
+}
+
+theory {
+	{ even(0).
+      !n : even(n) <- n>0 & odd(n-1).
+      !n : odd(n) <- n>0 & even(n-1).}
+}
+
+procedure main() {
+    pretty_print(model_expand(T))
+}
