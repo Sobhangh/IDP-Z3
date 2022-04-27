@@ -634,6 +634,9 @@ class Theory(object):
         """Updates the Theory so that the value of term in the ``assignments`` property
         is the optimal value that is compatible with the Theory.
 
+        Chain it with a call to `expand` to obtain a model,
+        or to `propagate` to propagate the optimal value.
+
         Args:
             term (str): e.g., ``"Length(1)"``
             minimize (bool): ``True`` to minimize ``term``, ``False`` to maximize it

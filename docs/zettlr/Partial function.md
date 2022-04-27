@@ -25,7 +25,7 @@
 	- [x] use extension in model expand
 	- [x] use extension in propagate
 	- [x] exclude similar models
-- [ ] take ":>=" into account (several places)
+- [ ] take ":>=" into account (for predicates)
 - [ ] improve check_bounds, has_element
 - [x] IC: z3 sort expected
 
