@@ -544,7 +544,7 @@ class Symbol(Expression):
         return self.decl.check_bounds(term)
 
 
-class Subtype(Symbol):
+class Type(Symbol):
     """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
 
     Inherits from Symbol
@@ -629,7 +629,7 @@ class Quantee(Expression):
     Attributes:
         vars (List[List[Variable]]): the (tuples of) variables being quantified
 
-        subtype (Subtype, Optional): a literal Subtype to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
+        subtype (Type, Optional): a literal Type to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
 
         sort (SymbolExpr, Optional): a dereferencing expression, e.g.,. `$(i)`.
 
@@ -1214,7 +1214,7 @@ class Variable(Expression):
         self.name = kwargs.pop('name')
         sort = kwargs.pop('sort') if 'sort' in kwargs else None
         self.sort = sort
-        assert sort is None or isinstance(sort, Subtype) or isinstance(sort, Symbol)
+        assert sort is None or isinstance(sort, Type) or isinstance(sort, Symbol)
 
         super().__init__()
 

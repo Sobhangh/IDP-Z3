@@ -44,7 +44,7 @@ from .Parse import (Import, TypeDeclaration,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
                     Definition)
 from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
-                    AQuantification, Subtype, FORALL, IMPLIES, AND, AAggregate,
+                    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol,
                     Variable, TRUE, Number)
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
@@ -77,7 +77,7 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self, problem):
-    assert all(isinstance(s, Subtype) for s in self.sorts), 'internal error'
+    assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
     self.in_domain = list(product(*[s.range() for s in self.sorts]))
     self.range = self.out.range()
 
@@ -315,7 +315,7 @@ def instantiate(self, e0, e1, problem=None):
 Symbol.instantiate = instantiate
 
 
-# class Subtype ###########################################################
+# class Type ###########################################################
 
 def range(self):
     range = self.decl.range
@@ -329,7 +329,7 @@ def range(self):
                          for s, q in zip(v.decl.symbol.decl.sorts,
                                          self.ins))]
     return range
-Subtype.range = range
+Type.range = range
 
 
 # Class AQuantification  ######################################################
@@ -375,7 +375,7 @@ def interpret(self, problem):
             elif type(domain.decl) == SymbolDeclaration:  # quantification over predicate
                 range = domain.decl.in_domain
                 guard = domain
-            elif isinstance(domain, Subtype):  # quantification over type / Concepts
+            elif isinstance(domain, Type):  # quantification over type / Concepts
                 range = [[t] for t in domain.range()]
                 guard = None
             else:  # SymbolExpr (e.g. $(`Color))

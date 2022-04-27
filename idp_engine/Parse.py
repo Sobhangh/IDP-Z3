@@ -39,7 +39,7 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         Expression, AIfExpr, AQuantification, Subtype, Quantee,
+                         Expression, AIfExpr, AQuantification, Type, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -231,7 +231,7 @@ class Vocabulary(ASTNode):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
         self.idp = None  # parent object
-        self.symbol_decls: Dict[str, Type] = {}
+        self.symbol_decls: Dict[str, Declaration] = {}
 
         self.name = 'V' if not self.name else self.name
         self.voc = self
@@ -262,16 +262,16 @@ class Vocabulary(ASTNode):
                 name=CONCEPT,
                 constructors=[]),
             SymbolDeclaration(annotations='', name=Symbol(name=GOAL_SYMBOL),
-                              sorts=[Subtype(name=CONCEPT, ins=[],
-                                             out=Subtype(name=BOOL))],
-                              out=Subtype(name=BOOL)),
+                              sorts=[Type(name=CONCEPT, ins=[],
+                                             out=Type(name=BOOL))],
+                              out=Type(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
-                              sorts=[Subtype(name=CONCEPT, ins=[],
-                                             out=Subtype(name=BOOL))],
-                              out=Subtype(name=BOOL)),
+                              sorts=[Type(name=CONCEPT, ins=[],
+                                             out=Type(name=BOOL))],
+                              out=Type(name=BOOL)),
             SymbolDeclaration(annotations='', name=Symbol(name=ABS),
-                                sorts=[Subtype(name=INT)],
-                                out=Subtype(name=INT)),
+                                sorts=[Type(name=INT)],
+                                out=Type(name=INT)),
             ] + self.declarations
 
     def __str__(self):
@@ -387,9 +387,9 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Subtype]): the types of the arguments
+        sorts (List[Type]): the types of the arguments
 
-        out (Subtype): the type of the symbol
+        out (Type): the type of the symbol
 
         type (string): name of the Z3 type of an instance of the symbol
 
@@ -483,7 +483,7 @@ class SymbolDeclaration(ASTNode):
         """
         return self.out.has_element(value)
 
-Type = Union[TypeDeclaration, SymbolDeclaration]
+Declaration = Union[TypeDeclaration, SymbolDeclaration]
 
 
 ################################ TheoryBlock  ###############################
@@ -627,7 +627,7 @@ class Definition(ASTNode):
                 continue
             symbdec = SymbolDeclaration.make(
                 "_"+str(self.id)+"lvl_"+key.name,
-                key.arity, key.sorts, Subtype(name=REAL))
+                key.arity, key.sorts, Type(name=REAL))
             self.level_symbols[key] = Symbol(name=symbdec.name)
             self.level_symbols[key].decl = symbdec
 
@@ -1133,7 +1133,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Import,
-                                         TypeDeclaration, Accessor, Subtype,
+                                         TypeDeclaration, Accessor, Type,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
 

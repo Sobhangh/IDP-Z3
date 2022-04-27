@@ -28,7 +28,7 @@ import sys
 from typing import List
 
 from .Expression import (
-    Constructor, Expression, AIfExpr, AQuantification, Quantee, Subtype,
+    Constructor, Expression, AIfExpr, AQuantification, Quantee, Type,
     Operator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
@@ -59,7 +59,7 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
             self.simpler = simpler
     assert (self.value is None
                or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
-                                       Number, Date, Subtype]), \
+                                       Number, Date, Type]), \
             f"Incorrect value in _change: {self.value}"
 
     # reset derived attributes

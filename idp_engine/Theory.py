@@ -32,7 +32,7 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, An
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol,
                          EQUALS, NOT)
-from .Parse import (TypeDeclaration, Type, SymbolDeclaration, Symbol,
+from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
@@ -60,7 +60,7 @@ class Theory(object):
         extended (Bool): True when the truth value of inequalities
             and quantified formula is of interest (e.g. in the Interactive Consultant)
 
-        declarations (Dict[str, Type]): the list of type and symbol declarations
+        declarations (Dict[str, Declaration]): the list of type and symbol declarations
 
         constraints (OrderedSet): a set of assertions.
 
@@ -129,7 +129,7 @@ class Theory(object):
 
         self.extended: Optional[bool] = extended
 
-        self.declarations: Dict[str, Type] = {}
+        self.declarations: Dict[str, Declaration] = {}
         self.definitions: List[Definition] = []
         self.constraints: OrderedSet = OrderedSet()
         self.assignments: Assignments = Assignments()
