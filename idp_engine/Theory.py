@@ -463,6 +463,8 @@ class Theory(object):
                         defined = False
                     elif not in_domain.same_as(TRUE):
                         defined = model.eval(in_domain.translate(self))
+                        if str(defined) == str(in_domain):
+                            defined = True
                     # else: defined = True
 
             a = ass[q.code]
