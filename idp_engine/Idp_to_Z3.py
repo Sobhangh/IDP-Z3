@@ -368,7 +368,7 @@ def reified(self, problem: "Theory", vars={}) -> DatatypeRef:
     out = problem.z3.get(str, None)
     if out is None:
         sort = (BoolSort(problem.ctx) if self.in_enumeration or self.is_enumerated else
-                self.decl.out.decl.translate(problem))
+                self.decl.out.decl.base_type.translate(problem))
         out = Const(str, sort)
         problem.z3[str] = out
     return out

@@ -27,7 +27,7 @@
 	- [x] exclude similar models
 - [ ] take ":>=" into account (several places)
 - [ ] improve check_bounds, has_element
-- [ ] IC: z3 sort expected
+- [x] IC: z3 sort expected
 
 ## Call tree
 
