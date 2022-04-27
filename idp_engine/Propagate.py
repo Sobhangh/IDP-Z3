@@ -37,7 +37,7 @@ from .Assignments import Status as S, Assignments
 from .Expression import (Expression, AQuantification,
                     ADisjunction, AConjunction, AppliedSymbol,
                     AComparison, AUnary, Brackets, TRUE, FALSE)
-from .Parse import str_to_IDP
+from .Parse import str_to_IDP, TypeDeclaration
 from .Theory import Theory
 from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
 
@@ -293,7 +293,6 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
         yield "No more consequences."
 Theory._batch_propagate = _batch_propagate
 
-
 def _propagate_inner(self, tag, solver, todo):
     for q in todo.values():
         solver.add(q.reified(self) == q.translate(self))
@@ -307,15 +306,17 @@ def _propagate_inner(self, tag, solver, todo):
         for val1, q in valqs:
             if str(val1) == str(q.reified(self)):
                 continue  # irrelevant
-            solver.push()
-            solver.add(Not(q.reified(self) == val1))
-            res2 = solver.check()
-            solver.pop()
 
-            assert res2 != unknown, "Incorrect solver behavior"
-            if res2 == unsat:
-                val = str_to_IDP(q, str(val1))
-                yield self.assignments.assert__(q, val, tag)
+            if self._is_defined(model, q):
+                solver.push()
+                solver.add(Not(q.reified(self) == val1))
+                res2 = solver.check()
+                solver.pop()
+
+                assert res2 != unknown, "Incorrect solver behavior"
+                if res2 == unsat:
+                    val = str_to_IDP(q, str(val1))
+                    yield self.assignments.assert__(q, val, tag)
 
         yield "No more consequences."
     elif res1 == unsat:
@@ -323,7 +324,6 @@ def _propagate_inner(self, tag, solver, todo):
         yield str(solver.sexpr())
     else:
         assert False, "Incorrect solver behavior"
-
 Theory._propagate_inner = _propagate_inner
 
 

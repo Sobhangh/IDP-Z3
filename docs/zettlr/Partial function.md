@@ -23,7 +23,7 @@
 	- [x] n-ary quantification in LivingBeing
 	- [x] interpretation also defines the domain
 	- [x] use extension in model expand
-	- [ ] use extension in propagate
+	- [x] use extension in propagate
 	- [x] exclude similar models
 - [ ] take ":>=" into account (several places)
 - [ ] improve check_bounds, has_element
