@@ -24,7 +24,7 @@
 	- [x] interpretation also defines the domain
 	- [x] use extension in model expand
 	- [ ] use extension in propagate
-	- [ ] exclude similar models (using .defined)
+	- [x] exclude similar models
 - [ ] take ":>=" into account (several places)
 - [ ] improve check_bounds, has_element
 - [ ] IC: z3 sort expected

@@ -465,8 +465,9 @@ class Theory(object):
                         defined = model.eval(in_domain.translate(self))
                     # else: defined = True
 
+            a = ass[q.code]
             if not defined:
-                ass[q.code].relevant = False  #TODO .defined = False
+                a.value, a.tag, a.relevant = None, S.UNKNOWN, False
             else:
                 if complete or q.is_reified():
                     val1 = model.eval(q.reified(self), model_completion=complete)
@@ -480,6 +481,8 @@ class Theory(object):
                     else:
                         tag = S.EXPANDED
                     ass.assert__(q, val, tag)
+                else:
+                    a.value, a.tag, a.relevant = None, S.UNKNOWN, False
         return ass
 
     def _add_assignment(self, solver: Solver) -> None:
