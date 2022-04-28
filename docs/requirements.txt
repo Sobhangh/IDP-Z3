@@ -8,8 +8,8 @@ pycallgraph2
 python-dateutil
 pyyaml
 readthedocs-sphinx-ext==2.1.4
-Sphinx==3.5.4
-sphinxcontrib-mermaid==0.6.3
+Sphinx==4.2.0
+sphinxcontrib-mermaid==0.7.1
 git+https://github.com/sphinx-contrib/video.git
 sphinxcontrib-youtube
 sphinx-rtd-theme==0.5.2
