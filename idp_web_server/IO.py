@@ -165,7 +165,7 @@ class Output(object):
                               "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT, DATE]:
                     symbol = {"typ": FROM.get(typ, typ), "value": ""}  # default
-                elif symb.out.decl.enumeration: # ranges
+                elif symb.out.decl.enumeration and symb.out.decl.enumeration.tuples: # ranges
                     typ, enum = symb.out.decl.type, symb.out.decl.enumeration
                     symbol = {"typ": FROM.get(typ, typ), "value": "",
                               "values": [str(v) for v in enum.tuples]}
