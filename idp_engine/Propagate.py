@@ -223,7 +223,8 @@ def _directional_todo(self, removed_choices={}, added_choices=[]):
         for a in removed_choices.values():
             todo[a.sentence.code] = a.sentence
         for a in self.previous_assignments.values():
-            if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
+            if (a.status in [S.CONSEQUENCE, S.ENV_CONSQ]
+                or a.is_certainly_undefined):
                 todo[a.sentence.code] = a.sentence
 
     if added_choices:
@@ -308,7 +309,9 @@ def _propagate_inner(self, tag, solver, todo):
             if str(val1) == str(q.reified(self)):
                 continue  # irrelevant
 
-            if self._is_defined(model, q):
+            is_certainly_undefined = self._is_undefined(solver, q)
+            self.assignments[q.code].is_certainly_undefined = is_certainly_undefined
+            if not is_certainly_undefined:
                 solver.push()
                 solver.add(Not(q.reified(self) == val1))
                 res2 = solver.check()

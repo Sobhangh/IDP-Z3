@@ -147,7 +147,8 @@ def determine_relevance(self: Theory) -> Theory:
     to_add, rank = reachable, 1
     while to_add:
         for q in to_add:
-            if q.code in self.assignments:
+            if (q.code in self.assignments
+                and not self.assignments[q.code].is_certainly_undefined):
                 self.assignments[q.code].relevant = True
             # for s in q.collect_symbols(co_constraints=False):
             #     if s not in relevants:

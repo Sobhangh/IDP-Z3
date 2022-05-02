@@ -452,12 +452,31 @@ class Theory(object):
                 in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
                 if in_domain.same_as(FALSE):
                     defined = False
-                elif not in_domain.same_as(TRUE):
+                elif in_domain.same_as(TRUE):
+                    defined = True
+                else:
                     defined = model.eval(in_domain.translate(self))
                     if str(defined) == str(in_domain):
                         defined = True  #TODO dubious. Why not False ?
-                # else: defined = True
         return defined
+
+    def _is_undefined(self, solver, q):
+        # determine if the expression is certainly undefined
+        result = False
+        if type(q) == AppliedSymbol:
+            if any(type(T.decl) != TypeDeclaration for T in q.decl.sorts):
+                in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
+                if in_domain.same_as(FALSE):
+                    result = True
+                elif in_domain.same_as(TRUE):
+                    result = False
+                else:
+                    solver.push()
+                    solver.add(in_domain.translate(self))
+                    res = solver.check()
+                    solver.pop()
+                    result = res == unsat
+        return result
 
     def _from_model(self,
                     solver: Solver,

@@ -66,6 +66,8 @@ class Assignment(object):
 
         status (Status, optional): qualifies how the value was obtained
 
+        is_certainly_undefined (bool): True for functions applied to arguments certainly outside of its domain
+
         relevant (bool, optional): states whether the sentence is relevant
 
         symbol_decl (SymbolDeclaration): declaration of the symbol under which
@@ -77,6 +79,7 @@ class Assignment(object):
         self.sentence: Expression = sentence
         self.value: Optional[Expression] = value
         self.status: Optional[Status] = status
+        self.is_certainly_undefined = False
         self.relevant: Optional[bool] = relevant
 
         # First symbol in the sentence, preferably not starting with '_':

@@ -28,7 +28,8 @@
 - [ ] take ":>=" into account (for predicates)
 - [x] improve contains_element, has_element
 - [x] IC: z3 sort expected
-- [x] listbox for partial function: IO_type
+- [x] listbox for partial function
+- [x] relevance in IC
 
 ## Call tree
 
