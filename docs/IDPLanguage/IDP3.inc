@@ -28,12 +28,14 @@ Partial functions
 Syntax changes
     The syntax of quantifications and aggregates has slightly change.
     IDP-Z3 does not support qualified quantifications, e.g. ``!2 x[color]: p(x).``. (p. 11 of the IDP3 manual).
+    Such statements can be implemented in IDP-Z3 using cardinality constraints instead.
 
 if .. then .. else ..
     IDP-Z3 supports `if .. then .. else ..` terms and sentences.
 
 Structure
-    IDP-Z3 supports partial interpretations using the `:>=` sign.
+    IDP-Z3 supports partial interpretations of functions using the `:>=` sign.
+    (It currently does not support partial interpretations of predicates)
 
 To improve performance, do not quantify over the value of a function.
 Use ``p(f(x))`` instead of ``?y: f(x)=y & p(y)``.
