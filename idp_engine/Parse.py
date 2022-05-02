@@ -782,12 +782,13 @@ class SymbolInterpretation(ASTNode):
         self.enumeration = kwargs.pop('enumeration')
         self.default = kwargs.pop('default')
 
+        if not self.enumeration:
+            self.enumeration = Enumeration(tuples=[])
+
         self.sign = ':⊇' if self.sign == ':>=' else self.sign
         self.check(self.sign == ':=' or
                    (type(self.enumeration) == FunctionEnum and self.default is None),
                    "':⊇' can only be used with a functional enumeration ('→') without else clause")
-        if not self.enumeration:
-            self.enumeration = Enumeration(tuples=[])
 
         self.symbol = None
         self.is_type_enumeration = None

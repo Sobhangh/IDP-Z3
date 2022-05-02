@@ -371,6 +371,10 @@ def annotate(self, block):
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
+    self.check(not(self.symbol.decl.out.decl.base_type.name == BOOL
+                   and type(self.enumeration) == FunctionEnum),
+        f"Can't use function enumeration for predicates '{self.name}' (yet)")
+
     # predicate enumeration have FALSE default
     if type(self.enumeration) != FunctionEnum and self.default is None:
         self.default = FALSE
