@@ -69,6 +69,9 @@ class Theory(object):
         interpretations (Dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
+        extensions (Dict[string, Extension]):
+            Extension of types and predicates
+
         def_constraints (Dict[SymbolDeclaration, Definition], List[Expression]):
             A mapping of defined symbol to the whole-domain constraints
             equivalent to its definition.

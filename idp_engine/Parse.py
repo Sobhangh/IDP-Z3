@@ -357,7 +357,7 @@ class TypeDeclaration(ASTNode):
                        f"{self.enumeration}")
         return (f"type {self.name} := {{{enumeration}}}")
 
-    def check_bounds(self, term: Expression,
+    def contains_element(self, term: Expression,
                      interpretations: Dict[str, "SymbolInterpretation"],
                      extensions: Dict[str, Extension]
                      ) -> Expression:
@@ -496,7 +496,7 @@ class SymbolDeclaration(ASTNode):
         """
         return self.out.has_element(value, interpretations, extensions)
 
-    def check_bounds(self, term: Expression,
+    def contains_element(self, term: Expression,
                      interpretations: Dict[str, "SymbolInterpretation"],
                      extensions: Dict[str, Extension]
                      ) -> Expression:
@@ -894,14 +894,29 @@ class Enumeration(ASTNode):
             return out
 
     def extensionE(self,
-                 interpretations: Dict[str, "SymbolInterpretation"]=None,
-                 extensions: Dict[str, Extension]=None):
+                   interpretations: Dict[str, "SymbolInterpretation"]=None,
+                   extensions: Dict[str, Extension]=None
+                  ) -> Extension:
+        """computes the extension of an enumeration, i.e., a set of tuples and a filter
+
+        Args:
+            interpretations (Dict[str, &quot;SymbolInterpretation&quot;], optional): _description_. Defaults to None.
+            extensions (Dict[str, Extension], optional): _description_. Defaults to None.
+
+        Returns:
+            Extension: _description_
+        """
         ranges = [c.range for c in self.constructors]
         return ([[t] for r in ranges for t in r], None)
 
 
 class FunctionEnum(Enumeration):
-    pass
+    def extensionE(self,
+                   interpretations: Dict[str, "SymbolInterpretation"]=None,
+                   extensions: Dict[str, Extension]=None
+                  ) -> Extension:
+        self.check(False,
+                   f"Can't use function enumeration for type declaration or quantification")
 
 
 class CSVEnumeration(Enumeration):
@@ -943,8 +958,9 @@ class ConstructedFrom(Enumeration):
         return OR(out)
 
     def extensionE(self,
-                 interpretations: Dict[str, "SymbolInterpretation"]=None,
-                 extensions: Dict[str, Extension]=None):
+                   interpretations: Dict[str, "SymbolInterpretation"]=None,
+                   extensions: Dict[str, Extension]=None
+                  ) -> Extension:
         def filter(args):
             if type(args[0]) != Variable and type(args[0].decl) == Constructor:  # try to simplify it
                 self.check(self.parent.name == args[0].decl.type,
@@ -1042,7 +1058,10 @@ class Ranges(Enumeration):
             sub_exprs.append(e)
         return OR(sub_exprs)
 
-    def extensionE(self, interpretations=None, extensions=None):
+    def extensionE(self,
+                   interpretations: Dict[str, "SymbolInterpretation"]=None,
+                   extensions: Dict[str, Extension]=None
+                  ) -> Extension:
         if not self.elements:
             return(None, None)
         if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
@@ -1065,7 +1084,10 @@ class IntRange(Ranges):
         self.type = INT
         self.tuples = None
 
-    def extensionE(self, interpretations=None, extensions=None):
+    def extensionE(self,
+                   interpretations: Dict[str, "SymbolInterpretation"]=None,
+                   extensions: Dict[str, Extension]=None
+                  ) -> Extension:
         return (None, None)
 
 
@@ -1075,7 +1097,10 @@ class RealRange(Ranges):
         self.type = REAL
         self.tuples = None
 
-    def extensionE(self, interpretations=None, extensions=None):
+    def extensionE(self,
+                   interpretations: Dict[str, "SymbolInterpretation"]=None,
+                   extensions: Dict[str, Extension]=None
+                  ) -> Extension:
         return (None, None)
 
 
@@ -1085,7 +1110,10 @@ class DateRange(Ranges):
         self.type = DATE
         self.tuples = None
 
-    def extensionE(self, interpretations=None, extensions=None):
+    def extensionE(self,
+                   interpretations: Dict[str, "SymbolInterpretation"]=None,
+                   extensions: Dict[str, Extension]=None
+                  ) -> Extension:
         return (None, None)
 
 

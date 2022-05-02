@@ -215,7 +215,7 @@ classDiagram
     Constructor       o-- UnappliedSymbol
 
     class TypeDeclaration {
-        check_bounds(expr)
+        contains_element(expr)
     }
     class SymbolDeclaration {
         has_in_domain(args)

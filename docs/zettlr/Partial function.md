@@ -19,21 +19,21 @@
 - [x] use interpretations in extensions (beware of circularity !)
 - [ ] allow predicate in signature
 	- [x] SymbolDeclaration.translate(): need to find the type of a unary predicate
-	- [x] SymbolDeclaration.check_bounds()
+	- [x] SymbolDeclaration.contains_element()
 	- [x] n-ary quantification in LivingBeing
 	- [x] interpretation also defines the domain
 	- [x] use extension in model expand
 	- [x] use extension in propagate
 	- [x] exclude similar models
 - [ ] take ":>=" into account (for predicates)
-- [ ] improve check_bounds, has_element
+- [x] improve contains_element, has_element
 - [x] IC: z3 sort expected
 
 ## Call tree
 
 ```mermaid
 flowchart TD
-	Symbol_has_element["Symbol<br/>has_element()"] --> TypeDecl_check_bounds["TypeDecl<br/>check_bounds()"];
+	Symbol_has_element["Symbol<br/>has_element()"] --> TypeDecl_check_bounds["TypeDecl<br/>contains_element()"];
 	SymbolInterpretation_interpret["SymbolInterp<br/>interpret()"] --> SymbolDeclaration_has_in_domain["SymbolDecl<br/>has_in_domain()"];
 	SymbolInterpretation_interpret --> SymbolDeclaration_has_in_range["SymbolDecl<br/>has_in_range()"];
 	SymbolDeclaration_has_in_domain --> Symbol_has_element;

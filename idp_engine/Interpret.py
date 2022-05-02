@@ -91,27 +91,29 @@ def interpret(self, problem):
     symbol.decl = self
     symbol.type = symbol.decl.type
 
-    # determine the extension, i.e., (superset, filter)
     extensions = [s.extension(problem.interpretations, problem.extensions)
-                  for s in self.sorts]
+                for s in self.sorts]
     if any(e[0] is None for e in extensions):
         superset = None
     else:
         superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
-    filters = [e[1] for e in extensions]
-    def filter(args):
-        out = AND([f([t]) if f is not None else TRUE
-                   for f, t in zip(filters, args)])
-        if self.out.decl.name == BOOL:
-            out = AND([out, AppliedSymbol.make(symbol, args)])
-        return out
-    problem.extensions[self.name] = (superset, filter)
 
-    r = self.out.extension(problem.interpretations, problem.extensions)
-    if r[0] is None:
+    # determine the extension, i.e., (superset, filter)
+    if symbol.decl.out.decl.name == BOOL:
+        filters = [e[1] for e in extensions]
+        def filter(args):
+            out = AND([f([t]) if f is not None else TRUE
+                    for f, t in zip(filters, args)])
+            if self.out.decl.name == BOOL:
+                out = AND([out, AppliedSymbol.make(symbol, args)])
+            return out
+        problem.extensions[self.name] = (superset, filter)
+
+    (range, _) = self.out.extension(problem.interpretations, problem.extensions)
+    if range is None:
         self.range = []
     else:
-        self.range = [e[0] for e in r[0]]
+        self.range = [e[0] for e in range]
 
     # create instances
     self.instances = {}
@@ -125,7 +127,7 @@ def interpret(self, problem):
     # add type constraints to problem.constraints
     if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
         for inst in self.instances.values():
-            domain = self.out.decl.check_bounds(inst.copy(), problem.interpretations, problem.extensions)
+            domain = self.out.decl.contains_element(inst.copy(), problem.interpretations, problem.extensions)
             if domain is not None:
                 domain.block = self.block
                 domain.is_type_constraint_for = self.name
@@ -179,11 +181,8 @@ def interpret(self, problem):
     if not self.name in [GOAL_SYMBOL, EXPAND]:
         decl = self.symbol.decl
         # update problem.extensions
-        if type(self.enumeration) != FunctionEnum:
+        if self.symbol.decl.out.decl.name == BOOL:  # predicate
             extension = [t.args for t in self.enumeration.tuples]
-            problem.extensions[self.symbol.name] = (extension, None)
-        elif self.default is None:
-            extension = [t.args[:-1] for t in self.enumeration.tuples]
             problem.extensions[self.symbol.name] = (extension, None)
 
         # update problem.assignments with data from enumeration
@@ -394,7 +393,10 @@ Symbol.instantiate = instantiate
 def extension(self, interpretations: Dict[str, SymbolInterpretation],
               extensions: Dict[str, Extension]
               ) -> Extension:
-    """returns the extension of a Type, given some interpretations
+    """returns the extension of a Type, given some interpretations.
+
+    Normally, the extension is already in `extensions`.
+    However, for Concept[T->T], an additional filtering is applied.
 
     Args:
         interpretations (Dict[str, SymbolInterpretation]):

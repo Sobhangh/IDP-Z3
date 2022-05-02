@@ -547,7 +547,7 @@ class Symbol(Expression):
             Expression: whether `term` is in the type denoted by `self`.
         """
         self.check(self.decl.out.name == BOOL, "internal error")
-        return self.decl.check_bounds(term, interpretations, extensions)
+        return self.decl.contains_element(term, interpretations, extensions)
 
 
 class Type(Symbol):
@@ -604,7 +604,7 @@ class Type(Symbol):
             return OR(comparisons)
         else:
             self.check(self.decl.out.name == BOOL, "internal error")
-            return self.decl.check_bounds(term, interpretations, extensions)
+            return self.decl.contains_element(term, interpretations, extensions)
 
 
 class AIfExpr(Expression):
