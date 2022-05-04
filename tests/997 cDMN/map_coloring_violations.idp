@@ -3,9 +3,8 @@
 vocabulary {
 	type Country_t := { Belgium, France, Luxembourg, Netherlands, Germany, Denmark }
 	type Color_t := { Green, Red, Yellow }
-	type Number_t := { 0..10000 }
 	Color:(Country_t)→ Color_t
-	Violations: ()→Number_t
+	Violations: ()→Int
 	Country_borders_Country:(Country_t ⨯ Country_t) → Bool
 }
 theory {

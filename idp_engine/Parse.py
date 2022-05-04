@@ -1064,7 +1064,7 @@ class Ranges(Enumeration):
                   ) -> Extension:
         if not self.elements:
             return(None, None)
-        if self.tuples and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
+        if self.tuples: # and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
             return ([t.args for t in self.tuples], None)
         def filter(args):
             sub_exprs = []
