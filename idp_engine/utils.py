@@ -21,6 +21,7 @@
 
 from collections import ChainMap
 from collections.abc import Iterable
+from datetime import datetime
 from json import JSONEncoder
 import time
 from enum import Enum, auto
@@ -84,7 +85,7 @@ start = time.process_time()
 
 def log(action):
     global start
-    print("*** ", action, round(time.process_time()-start, 3))
+    print("*** ", action, datetime.now().strftime("%H:%M:%S"), round(time.process_time()-start, 3))
     start = time.process_time()
 
 
