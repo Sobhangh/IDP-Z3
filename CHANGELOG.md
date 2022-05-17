@@ -18,6 +18,7 @@ Breaking changes:
 * fix #55: add `minimize` and `maximize` functions in `main` block
 * fix #187: `Internal error` with `explain()`
 * fix #188: `Incorrect solver result during explain inference`
+* fix #194: `Decision table returns whether timeout was reached`
 * MR !214: support for `#TODAY(y,m,d)`
 
 
