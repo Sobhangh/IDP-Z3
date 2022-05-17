@@ -185,8 +185,9 @@ def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
         a textual representation of each rule
     """
     problem = Theory(*theories, extended=True)
-    for model in problem.decision_table(goal_string, timeout_seconds, max_rows,
-                                        first_hit, verify):
+    models, timeout_hit = problem.decision_table(goal_string, timeout_seconds,
+                                                 max_rows, first_hit, verify)
+    for model in models:
         row = f'{NEWL}∧ '.join(str(a) for a in model
             if a.sentence.code != goal_string)
         has_goal = model[-1].sentence.code == goal_string
@@ -194,6 +195,8 @@ def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
               f"⇒ {str(model[-1]) if has_goal else '?'}"))
         yield("")
     yield "end of decision table"
+    if timeout_hit:
+        yield "Timeout was reached."
 
 def determine_relevance(*theories: Union[TheoryBlock, Structure, Theory]) -> Iterator[str]:
     """Generates a list of questions that are relevant,
