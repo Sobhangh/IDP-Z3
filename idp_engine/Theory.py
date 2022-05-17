@@ -874,7 +874,7 @@ class Theory(object):
                        max_rows: int = 50,
                        first_hit: bool = True,
                        verify: bool = False
-                       ) -> List[List[Assignment]]:
+                       ) -> (List[List[Assignment]], bool):
         """Experimental.  Returns the rows for a decision table that defines ``goal_string``.
 
         ``goal_string`` must be a predicate application defined in the theory.
@@ -889,6 +889,7 @@ class Theory(object):
 
         Returns:
             list(list(Assignment)): the non-empty cells of the decision table  for ``goal_string``, given ``self``.
+            bool: whether or not the timeout limit was reached.
         """
         timeout_hit = False
         max_time = time.time()+timeout_seconds  # 20 seconds max
