@@ -196,7 +196,7 @@ def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
         yield("")
     yield "end of decision table"
     if timeout_hit:
-        yield "Timeout was reached."
+        yield "**** Timeout was reached. ****"
 
 def determine_relevance(*theories: Union[TheoryBlock, Structure, Theory]) -> Iterator[str]:
     """Generates a list of questions that are relevant,
