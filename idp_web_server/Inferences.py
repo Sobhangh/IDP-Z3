@@ -51,8 +51,10 @@ def explain(state, consequence=None):
 def abstract(state, given_json):
     timeout_seconds, max_rows = 20, 50
     max_time = time.time()+timeout_seconds
-    models = state.decision_table(goal_string="", timeout_seconds=timeout_seconds,
-                                  max_rows=max_rows,first_hit=False)
+    models, timeout = state.decision_table(goal_string="",
+                                           timeout_seconds=timeout_seconds,
+                                           max_rows=max_rows,
+                                           first_hit=False)
 
     # detect symbols with assignments
     table, active_symbol = {}, {}
