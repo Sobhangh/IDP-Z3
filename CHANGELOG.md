@@ -15,13 +15,16 @@ Breaking changes:
 
 ### IDP-Z3
 * (breaking) #186: FO[Sugar] negation of `is enumerated` and `in {...}`
+* (breaking) !217: FO[PF] Unary predicates in type signature (+ partial interpretetations)
 * (breaking) !218: `timeout` parameter in API is now `timeout_seconds`
 * fix #55: add `minimize` and `maximize` functions in `main` block
 * fix #120: FO[Infinite] Enumerate predicate over infinite domain
 * fix #187: `Internal error` with `explain()`
-* fix #188: `Incorrect solver result during explain inference`
-* MR !214: FO[Int] support for `#TODAY(y,m,d)`
-* (breaking) MR !217: FO[PF] Unary predicates in type signature (+ partial interpretetations)
+* fix #188: Incorrect solver result during explain inference
+* fix #194: Decision table returns whether timeout was reached
+* fix #195: add version flag to CLI
+* MR !214: support for `#TODAY(y,m,d)`
+* MR !225: allow `--no-dev` install in poetry
 
 
 ## [0.9.2] - 2022-02-10

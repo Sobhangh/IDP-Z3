@@ -1,3 +1,4 @@
+#
 # Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
 #
 # This file is part of Interactive_Consultant.
@@ -923,7 +924,7 @@ class Theory(object):
                        max_rows: int = 50,
                        first_hit: bool = True,
                        verify: bool = False
-                       ) -> List[List[Assignment]]:
+                       ) -> (List[List[Assignment]], bool):
         """Experimental.  Returns the rows for a decision table that defines ``goal_string``.
 
         ``goal_string`` must be a predicate application defined in the theory.
@@ -938,7 +939,9 @@ class Theory(object):
 
         Returns:
             list(list(Assignment)): the non-empty cells of the decision table  for ``goal_string``, given ``self``.
+            bool: whether or not the timeout limit was reached.
         """
+        timeout_hit = False
         max_time = time.time()+timeout_seconds  # 20 seconds max
         assert self.extended == True, \
             "The problem must be created with 'extended=True' for decision_table."
@@ -1025,6 +1028,8 @@ class Theory(object):
             solver.add(modelZ3)
 
             count +=1
+        if time.time() > max_time:
+            timeout_hit = True
 
         if verify:
             def verify_models(known, models, goal_string):
@@ -1117,10 +1122,12 @@ class Theory(object):
                         new = new[0].negate()
                         models[i-1] = [new, models[i-1][1]]
                         del models[i]
+            if time.time() > max_time:
+                timeout_hit = True
             if verify:
                 verify_models(known, models, goal_string)
 
-        return models
+        return (models, timeout_hit)
 
     def _first_propagate(self, solver):
         """monkey-patched"""
