@@ -1,17 +1,17 @@
-weight() -> 80
+weight() -> 80.0
 No more consequences.
 ['Male', 'Female']
 
 bmi() -> 0.003125
 riskLevel() -> Low
-weight() -> 80
+weight() -> 80.0
 No more consequences.
 
 bmi() -> 0.003125
 ? BMILevel()
 ? sex()
 riskLevel() -> Low
-weight() -> 80
+weight() -> 80.0
 weight() = 80
 Not riskLevel() = Increased
 Not BMILevel() = Overweight

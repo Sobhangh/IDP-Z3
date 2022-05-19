@@ -94,8 +94,10 @@ def str_to_IDP(atom, val_string):
                 for a in args]
 
         out = AppliedSymbol.construct(constructor, args)
-    else:  # a fraction
-        out = Number(number=str(eval(val_string.replace('?', ''))))
+    elif atom.type == REAL:
+        out = Number(number=str(float(eval(val_string.replace('?', '')))))
+    else:  # an Int
+        out = Number(number=str(eval(val_string)))
     return out
 
 

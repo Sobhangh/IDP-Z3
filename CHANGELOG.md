@@ -20,6 +20,7 @@ Breaking changes:
 * fix #188: Incorrect solver result during explain inference
 * fix #194: Decision table returns whether timeout was reached
 * fix #195: add version flag to CLI
+* fix *196: Can't change default real value
 * MR !214: support for `#TODAY(y,m,d)`
 * MR !225: allow `--no-dev` install in poetry
 
