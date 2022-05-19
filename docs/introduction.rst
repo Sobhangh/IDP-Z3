@@ -49,6 +49,7 @@ Installation using poetry
     * run :code:`poetry env use 3.9`
     * replace :code:`python3` by :code:`python3.9` in the commands below
 * Run :code:`poetry install`
+   * Run :code:`poetry install --no-dev` if you do not plan to contribute to IDP-Z3 development
 
 To launch the Interactive Consultant web server:
 

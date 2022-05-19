@@ -19,6 +19,7 @@ Contributors (alphabetical):  Bram Aerts, Ingmar Dasseville, Jo Devriendt, Marc 
     * run `poetry env use 3.9`
     * replace `python3` by `python3.9` in every command below
 * Run `poetry install`
+    * use `poetry install --no-dev` if you do not plan to contribute to IDP_Z3 development.
 
 
 # Get started

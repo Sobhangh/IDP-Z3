@@ -21,6 +21,7 @@ Breaking changes:
 * fix #194: Decision table returns whether timeout was reached
 * fix #195: add version flag to CLI
 * MR !214: support for `#TODAY(y,m,d)`
+* MR !225: allow `--no-dev` install in poetry
 
 
 ## [0.9.2] - 2022-02-10
