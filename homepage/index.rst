@@ -9,7 +9,7 @@ Once the knowledge of a problem domain is encoded in FO(.), the engine can perfo
 
 IDP-Z3 is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium, and made available under the `GNU LGPL v3 License <https://www.gnu.org/licenses/lgpl-3.0.txt>`_.
 It uses the `Microsoft Z3 solver <https://github.com/Z3Prover/z3>`_ as back-end to perform the reasoning tasks.
-(The previous version of the reasoning engine, `IDP3 <https://dtai.cs.kuleuven.be/drupal/software/idp>`_, used minisat)
+(The previous version of the reasoning engine, `IDP3 <https://wms.cs.kuleuven.be/dtai/pages/software/idp/idp>`_, used minisat)
 
 Projects
 --------
