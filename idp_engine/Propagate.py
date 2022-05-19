@@ -310,7 +310,8 @@ def _propagate_inner(self, tag, solver, todo):
                 continue  # irrelevant
 
             is_certainly_undefined = self._is_undefined(solver, q)
-            self.assignments[q.code].is_certainly_undefined = is_certainly_undefined
+            if q.code in self.assignments:
+                self.assignments[q.code].is_certainly_undefined = is_certainly_undefined
             if not is_certainly_undefined:
                 solver.push()
                 solver.add(Not(q.reified(self) == val1))
