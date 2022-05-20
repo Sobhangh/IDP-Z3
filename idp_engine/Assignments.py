@@ -232,7 +232,6 @@ class Assignments(dict):
         Most symbols are printed as `name := {(val1, ..., val} -> valx, ...}.`
         with two exceptions:
             1. Nullary symbols are printed as `name := value.`
-            2. Predicates without True atoms are printed as `name := {}.`
         """
         out = {}
         nullary = set()
@@ -240,7 +239,7 @@ class Assignments(dict):
             if (a.value is not None and not a.sentence.is_reified()):
                 # If an atom is false, add an empty list to the dict to take
                 # into account exception 2.
-                if (a.value == FALSE):
+                if a.value == FALSE and a.symbol_decl.arity != 0:
                     if a.symbol_decl.name not in out:
                         out[a.symbol_decl.name] = []
                     continue
