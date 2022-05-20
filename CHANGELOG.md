@@ -24,6 +24,9 @@ Breaking changes:
 * MR !214: support for `#TODAY(y,m,d)`
 * MR !225: allow `--no-dev` install in poetry
 
+### IDP-Z3
+* fix #169: IC: need to better handle rationals
+
 
 ## [0.9.2] - 2022-02-10
 

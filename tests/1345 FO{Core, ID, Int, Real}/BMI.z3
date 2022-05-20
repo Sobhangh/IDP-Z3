@@ -2,12 +2,12 @@ weight() -> 80.0
 No more consequences.
 ['Male', 'Female']
 
-bmi() -> 0.003125
+bmi() -> 1/320
 riskLevel() -> Low
 weight() -> 80.0
 No more consequences.
 
-bmi() -> 0.003125
+bmi() -> 1/320
 ? BMILevel()
 ? sex()
 riskLevel() -> Low

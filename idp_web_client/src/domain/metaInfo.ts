@@ -11,7 +11,8 @@ export class CurrentAssignment {
   normal: boolean;
 
   typ = null;
-  value = null;
+  value = null;   // internal value; may be a ratio that needs conversion
+  value2: String = null;  // displayed string
   values: SelectItem[] = null;
 
   relevant = true;

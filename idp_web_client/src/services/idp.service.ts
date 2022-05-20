@@ -414,6 +414,14 @@ procedure main() {
           }
           val.assignment.unknown = 'unknown' in info && info['unknown'];
           val.assignment.value = 'value' in info ? info['value'] : null;
+          val.assignment.value2 = String(val.assignment.value);
+          if (val.assignment.value2 != null && val.assignment.value2.includes('/') && 4<val.assignment.value2.length) {
+            const m = val.assignment.value2.match(/(.*)\/(.*)/);
+            if (m) {
+              console.log(val.assignment.value2, m[1], m[2])
+              val.assignment.value2 = String((+m[1])/(+m[2]))
+            }
+          }
         }
       }
     }

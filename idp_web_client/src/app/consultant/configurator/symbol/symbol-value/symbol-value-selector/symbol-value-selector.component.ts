@@ -39,7 +39,7 @@ export class SymbolValueSelectorComponent implements OnInit {
     }
   }
   update(info: ValueInfo, event) {
-    if (info.assignment.value !== event.target.value) {
+    if (info.assignment.value2 !==event.target.value) {
       info.assignment.value = event.target.value;
       info.assignment.status = 'GIVEN';
       this.idpService.meta.atomConsistency(this.info.assignment);

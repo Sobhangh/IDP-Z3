@@ -95,7 +95,8 @@ def str_to_IDP(atom, val_string):
 
         out = AppliedSymbol.construct(constructor, args)
     elif atom.type == REAL:
-        out = Number(number=str(float(eval(val_string.replace('?', '')))))
+        out = Number(number= val_string if '/' in val_string else
+                     str(float(eval(val_string.replace('?', '')))))
     else:  # an Int
         out = Number(number=str(eval(val_string)))
     return out

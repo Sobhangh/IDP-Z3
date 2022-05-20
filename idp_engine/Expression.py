@@ -1246,12 +1246,8 @@ class Number(Expression):
             self.py_value = Fraction(self.number)
             self.type = REAL
         elif '.' in self.number:
-            v = (self.number if not self.number.endswith('?') else
-                 self.number[:-1])
-            if "e" in v:
-                self.py_value = float(eval(v))
-            else:
-                self.py_value = Fraction(v)
+            self.py_value = Fraction(self.number if not self.number.endswith('?') else
+                                     self.number[:-1])
             self.type = REAL
         else:
             self.py_value = int(self.number)
