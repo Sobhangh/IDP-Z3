@@ -130,11 +130,10 @@ def interpret(self, problem):
                 range_condition = self.out.decl.contains_element(expr.copy(),
                                     problem.interpretations, problem.extensions)
                 constraint = IMPLIES([filter(args), range_condition])
-                if constraint is not None:
-                    constraint.block = self.block
-                    constraint.is_type_constraint_for = self.name
-                    constraint.annotations['reading'] = f"Possible values for {expr}"
-                    problem.constraints.append(constraint)
+                constraint.block = self.block
+                constraint.is_type_constraint_for = self.name
+                constraint.annotations['reading'] = f"Possible values for {expr}"
+                problem.constraints.append(constraint)
 SymbolDeclaration.interpret = interpret
 
 
