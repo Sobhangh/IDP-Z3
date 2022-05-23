@@ -91,6 +91,7 @@ def interpret(self, problem):
     symbol.decl = self
     symbol.type = symbol.decl.type
 
+    # determine the extension, i.e., (superset, filter)
     extensions = [s.extension(problem.interpretations, problem.extensions)
                 for s in self.sorts]
     if any(e[0] is None for e in extensions):
@@ -98,15 +99,15 @@ def interpret(self, problem):
     else:
         superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
 
-    # determine the extension, i.e., (superset, filter)
-    if symbol.decl.out.decl.name == BOOL:
-        filters = [e[1] for e in extensions]
-        def filter(args):
-            out = AND([f([t]) if f is not None else TRUE
+    filters = [e[1] for e in extensions]
+    def filter(args):
+        out = AND([f([t.copy()]) if f is not None else TRUE
                     for f, t in zip(filters, args)])
-            if self.out.decl.name == BOOL:
-                out = AND([out, AppliedSymbol.make(symbol, args)])
-            return out
+        if self.out.decl.name == BOOL:
+            out = AND([out, AppliedSymbol.make(symbol, args).copy()])
+        return out
+
+    if self.out.decl.name == BOOL:
         problem.extensions[self.name] = (superset, filter)
 
     (range, _) = self.out.extension(problem.interpretations, problem.extensions)
@@ -115,24 +116,25 @@ def interpret(self, problem):
     else:
         self.range = [e[0] for e in range]
 
-    # create instances
+    # create instances in problem.assignments + type constraints
     self.instances = {}
     if self.name not in RESERVED_SYMBOLS and superset:
-        for arg in superset:
-            expr = AppliedSymbol.make(symbol, arg)
+        for args in superset:
+            expr = AppliedSymbol.make(symbol, args)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
             problem.assignments.assert__(expr, None, S.UNKNOWN)
-
-    # add type constraints to problem.constraints
-    if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
-        for inst in self.instances.values():
-            domain = self.out.decl.contains_element(inst.copy(), problem.interpretations, problem.extensions)
-            if domain is not None:
-                domain.block = self.block
-                domain.is_type_constraint_for = self.name
-                domain.annotations['reading'] = "Possible values for " + str(inst)
-                problem.constraints.append(domain)
+            if self.out.decl.name != BOOL:
+                # add type constraints to problem.constraints
+                # ! (x,y) in domain: range(f(x,y))
+                range_condition = self.out.decl.contains_element(expr.copy(),
+                                    problem.interpretations, problem.extensions)
+                constraint = IMPLIES([filter(args), range_condition])
+                if constraint is not None:
+                    constraint.block = self.block
+                    constraint.is_type_constraint_for = self.name
+                    constraint.annotations['reading'] = f"Possible values for {expr}"
+                    problem.constraints.append(constraint)
 SymbolDeclaration.interpret = interpret
 
 
