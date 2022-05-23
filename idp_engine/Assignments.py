@@ -237,8 +237,7 @@ class Assignments(dict):
         nullary = set()
         for a in self.values():
             if (a.value is not None and not a.sentence.is_reified()):
-                # If an atom is false, add an empty list to the dict to take
-                # into account exception 2.
+                # make sure we have an entry for `a` in `out`
                 if a.value == FALSE and a.symbol_decl.arity != 0:
                     if a.symbol_decl.name not in out:
                         out[a.symbol_decl.name] = []
