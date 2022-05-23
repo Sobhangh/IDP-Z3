@@ -94,7 +94,7 @@ def str_to_IDP(atom, val_string):
                 for a in args]
 
         out = AppliedSymbol.construct(constructor, args)
-    elif atom.type == REAL:
+    elif atom.type == REAL:  # Z3 adds a '?' when the real number is rounded
         out = Number(number= val_string if '/' in val_string else
                      str(float(eval(val_string.replace('?', '')))))
     else:  # an Int
