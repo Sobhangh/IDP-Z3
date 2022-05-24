@@ -230,8 +230,8 @@ class Assignments(dict):
         """ Print the assignments in the same format as a model.
 
         Most symbols are printed as `name := {(val1, ..., val} -> valx, ...}.`
-        with two exceptions:
-            1. Nullary symbols are printed as `name := value.`
+        with the exception of nullary symbols, which are printed as
+        `name := value`.
         """
         out = {}
         nullary = set()
