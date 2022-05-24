@@ -450,8 +450,8 @@ class Theory(object):
         ass = copy(self.assignments)
         model = solver.model()
         for q in todo:
-            assert (self.extended or not q.is_reified(),
-                    "Reified atom should only appear in case of extended theories")
+            assert self.extended or not q.is_reified(), \
+                    "Reified atom should only appear in case of extended theories"
             if complete or q.is_reified():
                 val1 = model.eval(q.reified(self), model_completion=complete)
             else:
