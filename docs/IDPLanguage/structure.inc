@@ -13,15 +13,18 @@ Structure
 A *structure* specifies the interpretation of some type_, predicate_\ s and function_\ s.
 If the names are omitted, the structure is named S, for vocabulary V.
 
-The interpretation of a symbol may be partial or total.
-A total interpretation fully specifies the interpretation of the symbol;
-a partial interpretation does not.
-
 A structure is a set of symbol interpretations of the form :
 
 * ``<symbol> := <total interpretation>.``, e.g., ``P := {1..9}``,
 
 * ``<symbol> :⊇ <partial interpretation>.``, e.g., ``P :⊇ {A->1}``.
+
+A total interpretation fully specifies the interpretation of the symbol;
+a partial interpretation does not.
+
+An error occurs when the domain of the symbol is already known by enumeration,
+and its total interpretation does not cover the domain.
+If the domain of the symbol is not known, it is inferred from the total interpretation.
 
 A total interpretation takes one of these forms:
 
