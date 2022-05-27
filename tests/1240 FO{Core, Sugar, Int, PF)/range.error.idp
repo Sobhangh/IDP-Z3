@@ -3,21 +3,16 @@ vocabulary {
 	animal, person : LivingBeing → Bool
 	married : person → Bool
 	spouse: married → married
-	affair : married * person → Bool
-	age : LivingBeing → Int
 }
 theory {
 	animal := { Cat, Dog, Frog }.
 	person := { Alice, Bob, Tom }.
-	spouse := { Alice → Bob, Bob → Alice }.
-
-	! x in married: age(spouse(x))>20.
-	! (x,y) in affair: x=y.
-	? (x,y) in affair: true.
+    married := {Tom}.
+	spouse := { Tom → Alice }.
 }
 
 
 procedure main() {
-	pretty_print(Theory(T).formula())
+    pretty_print(Theory(T).formula())
     pretty_print(model_expand(T, max=1))
 }
