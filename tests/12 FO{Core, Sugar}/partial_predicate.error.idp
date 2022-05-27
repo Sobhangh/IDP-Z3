@@ -1,0 +1,20 @@
+vocabulary V {
+    type color := {red, blue, green}
+    c: color -> Bool
+    count: ()->ℤ
+}
+
+theory T:V {
+  count()=#{x in c: true}.
+}
+
+structure S:V {
+    c :>= {red->false}.
+}
+
+procedure main() {
+    Th = Theory(T, S)
+    print(Th.sexpr())
+    pretty_print(model_expand(T, S))
+}
+

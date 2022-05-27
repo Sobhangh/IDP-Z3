@@ -1,0 +1,18 @@
+vocabulary {
+	type LivingBeing := { Cat, Dog, Frog, Alice, Bob, Tom }
+	animal, person : LivingBeing → Bool
+	married : person → Bool
+	spouse: married → married
+}
+theory {
+	animal := { Cat, Dog, Frog }.
+	person := { Alice, Bob, Tom }.
+    married := {Tom}.
+	spouse := { Alice → Tom }.
+}
+
+
+procedure main() {
+	pretty_print(Theory(T).formula())
+    pretty_print(model_expand(T, max=1))
+}

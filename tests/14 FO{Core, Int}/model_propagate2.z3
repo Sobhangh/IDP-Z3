@@ -28,7 +28,7 @@ theory  {
                'reading': 'p',
                'relevant': True,
                'status': 'UNKNOWN',
-               'typ': 'Int',
+               'typ': 'T',
                'value': '',
                'values': ['1', '2', '3', '4', '5']},
        'p() < 3': {'environmental': False,

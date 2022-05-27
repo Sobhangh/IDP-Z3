@@ -55,26 +55,46 @@ The ``RGB`` constructor takes 3 arguments of type ``Byte``.
 ``R``, ``G`` and ``B`` are accessor functions: when given a Color2 term constructed with RGB, they return the associated Byte.
 (When given a Color2 not constructed with RGB, they may raise an error)
 
+
 .. _function:
 .. index:: function
 
 Functions
 +++++++++
 
-The functions with name ``myFunc1``, ``myFunc2``, input types ``T1``, ``T2``, ``T3`` and output type ``T``, are declared by:
+The functions with name ``myFunc1``, ``myFunc2``, input domains ``p1``, ``p2``, ``p3`` and output range ``p``, are declared by:
 
 .. code::
 
-    myFunc1, myFunc2 : T1 ⨯ T2 ⨯ T3 → T
+    myFunc1, myFunc2 : p1 ⨯ p2 ⨯ p3 → p
 
 Their name should not start with a capital letter, by convention.
 The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
 
-The input and output types of myFunc1 can be sets of concepts with a specific type signature, indicated in brackets.
-For example, T1 can be `Concept[TT1 -> TT2]` to denote the concepts with type signature `TT1 -> TT2`.
+The domains and ranges must be one of the following:
+
+* a previously-declared type
+* a previously-declared unary predicate
+* ``Concept[<signature>]`` to denote the set of concepts with a particular signature, e.g. ``Concept[Person -> Bool]``.
+
+The functions must be total over their domain.
+
+The type of each argument can be directly read in the signature when it is a type or set of concepts,
+or obtained by looking up the type of the argument of the unary predicate otherwise.
 
 
-IDP-Z3 does not support partial functions.
+.. _predicate:
+.. index:: predicate
+
+Predicates
+++++++++++
+
+A predicate is a function whose range is ``Bool``.
+
+There is a built-in predicate ``T: T → 𝔹`` for each type T (``T(x)`` is ``true`` for any ``x`` in ``T``).
+
+A unary predicate is always interpreted as a subset of a type.
+
 
 .. _built-in functions:
 
@@ -85,25 +105,6 @@ The following functions are built-in:
 
 * ``abs: Int → Int`` (or ``abs: Float → Float``) yields the absolute value of an integer (or float) expression;
 
-.. _predicate:
-.. index:: predicate
-
-Predicates
-++++++++++
-
-The predicates with name ``myPred1``, ``myPred2`` and argument types ``T1``, ``T2``, ``T3`` are declared by:
-
-.. code::
-
-    myPred1, myPred2 : T1 ⨯ T2 ⨯ T3 → 𝔹
-
-Their name should not start with a capital letter, by convention.
-The ASCII equivalent of ``→`` is ``->``, and of ``𝔹`` is ``Bool``.
-
-The input and output types of myPred1 can be sets of concepts with a specific type signature, indicated in brackets.
-For example, T1 can be `Concept[TT1 -> TT2]` to denote the concepts with type signature `TT1 -> TT2`.
-
-There is a built-in predicate ``T: T → 𝔹`` for each type T (``T(x)`` is ``true`` for any ``x`` in ``T``).
 
 .. _constant:
 .. index:: constant, proposition

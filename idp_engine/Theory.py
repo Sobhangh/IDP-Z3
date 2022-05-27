@@ -32,7 +32,7 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, An
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol,
-                         EQUALS, NOT)
+                         EQUALS, NOT, Extension)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
@@ -70,7 +70,10 @@ class Theory(object):
         interpretations (Dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
-        def_constraints (Dict[SymbolDeclaration, Definition], list[Expression]):
+        extensions (Dict[string, Extension]):
+            Extension of types and predicates
+
+        def_constraints (Dict[SymbolDeclaration, Definition], List[Expression]):
             A mapping of defined symbol to the whole-domain constraints
             equivalent to its definition.
 
@@ -135,7 +138,8 @@ class Theory(object):
         self.constraints: OrderedSet = OrderedSet()
         self.assignments: Assignments = Assignments()
         self.def_constraints: Dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
-        self.interpretations: Dict[str, SymbolInterpretation] = {}
+        self.interpretations: Dict[str, SymbolInterpretation] = {}  # interpretations given by user
+        self.extensions: Dict[str, Extension] = {}  # computed extension of types and predicates
         self.name: str = ''
 
         self._contraintz: Optional[List[BoolRef]] = None
@@ -195,7 +199,7 @@ class Theory(object):
             # get expanded def_constraints
             def_constraints = {}
             for defin in self.definitions:
-                instantiables = defin.get_instantiables(for_explain=True)
+                instantiables = defin.get_instantiables(self.interpretations, self.extensions, for_explain=True)
                 defin.add_def_constraints(instantiables, self, def_constraints)
 
             for constraint in chain([c.interpret(self) for c in self.constraints],
@@ -268,6 +272,7 @@ class Theory(object):
         # apply the enumerations and definitions
 
         self.assignments = Assignments()
+        self.extensions = {}  # reset the cache
 
         for decl in self.declarations.values():
             decl.interpret(self)
@@ -439,6 +444,41 @@ class Theory(object):
         s.add(self.formula())
         return s.sexpr()
 
+
+    def _is_defined(self, model, q):
+        # determine if the expression is defined
+        defined = True
+        if type(q) == AppliedSymbol:
+            if any(type(T.decl) != TypeDeclaration for T in q.decl.sorts):
+                in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
+                if in_domain.same_as(FALSE):
+                    defined = False
+                elif in_domain.same_as(TRUE):
+                    defined = True
+                else:
+                    defined = model.eval(in_domain.translate(self))
+                    if str(defined) == str(in_domain):
+                        defined = True  #TODO dubious. Why not False ?
+        return defined
+
+    def _is_undefined(self, solver, q):
+        # determine if the expression is certainly undefined
+        result = False
+        if type(q) == AppliedSymbol:
+            if any(type(T.decl) != TypeDeclaration for T in q.decl.sorts):
+                in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
+                if in_domain.same_as(FALSE):
+                    result = True
+                elif in_domain.same_as(TRUE):
+                    result = False
+                else:
+                    solver.push()
+                    solver.add(in_domain.translate(self))
+                    res = solver.check()
+                    solver.pop()
+                    result = res == unsat
+        return result
+
     def _from_model(self,
                     solver: Solver,
                     todo: List[Expression],
@@ -452,18 +492,25 @@ class Theory(object):
         for q in todo:
             assert self.extended or not q.is_reified(), \
                     "Reified atom should only appear in case of extended theories"
-            if complete or q.is_reified():
-                val1 = model.eval(q.reified(self), model_completion=complete)
+
+            a = ass[q.code]
+            if not self._is_defined(model, q):
+                a.value, a.tag, a.relevant = None, S.UNKNOWN, False
             else:
-                val1 = model.eval(q.translate(self), model_completion=complete)
-            val = str_to_IDP(q, str(val1))
-            if val is not None:
-                if q.is_assignment() and val == FALSE:
-                    tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
-                           else S.CONSEQUENCE)
+                if complete or q.is_reified():
+                    val1 = model.eval(q.reified(self), model_completion=complete)
                 else:
-                    tag = S.EXPANDED
-                ass.assert__(q, val, tag)
+                    val1 = model.eval(q.translate(self), model_completion=complete)
+                val = str_to_IDP(q, str(val1))
+                if val is not None:
+                    if q.is_assignment() and val == FALSE:  # consequence of the TRUE assignment
+                        tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'
+                            else S.CONSEQUENCE)
+                    else:
+                        tag = S.EXPANDED
+                    ass.assert__(q, val, tag)
+                else:
+                    a.value, a.tag, a.relevant = None, S.UNKNOWN, False
         return ass
 
     def _add_assignment(self, solver: Solver) -> None:
@@ -609,6 +656,9 @@ class Theory(object):
                  ) -> "Theory":
         """Updates the Theory so that the value of term in the ``assignments`` property
         is the optimal value that is compatible with the Theory.
+
+        Chain it with a call to `expand` to obtain a model,
+        or to `propagate` to propagate the optimal value.
 
         Args:
             term (str): e.g., ``"Length(1)"``

@@ -136,7 +136,7 @@ display {
                        'reading': 'Sides',
                        'relevant': True,
                        'status': 'UNIVERSAL',
-                       'typ': 'Int',
+                       'typ': 'sides',
                        'value': '3',
                        'values': ['3']},
            'Sides() = 3': {'environmental': False,

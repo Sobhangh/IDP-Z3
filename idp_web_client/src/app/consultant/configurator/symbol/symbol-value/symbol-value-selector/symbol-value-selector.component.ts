@@ -86,10 +86,13 @@ export class SymbolValueSelectorComponent implements OnInit {
       } else {
         return reading.split('=')[1];
       }
-    } else if (this.info.assignment.typ !== 'Bool') {
-      return reading.split('(')[1].replace(')', '') + ' :\xa0';
     } else {
-      return reading.split('(')[1].replace(')', '');
+      var out = /\w*\((.*)\)/.exec(reading)[1];
+      if (this.info.assignment.typ !== 'Bool') {
+        return out + ' :\xa0';
+      } else {
+        return out;
+      }
     }
   }
 }

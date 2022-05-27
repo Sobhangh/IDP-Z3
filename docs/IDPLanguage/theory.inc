@@ -35,7 +35,8 @@ Boolean, Numeric and Date literals
 
     ``true`` and ``false`` are boolean terms.
 
-    Numeric literals that follow the `Python conventions <https://docs.python.org/3/reference/lexical_analysis.html#numeric-literals>`_ are numerical terms of type ``Int`` or ``Real``.
+    Numeric literals that follow the `Python conventions <https://docs.python.org/3/reference/lexical_analysis.html#numeric-literals>`_
+    are numerical terms of type ``Int`` or ``Real``.
 
     Date literals are terms.  They follow ISO 8601 conventions, prefixed with ``#`` (i.e., ``#yyyy-mm-dd``).
     ``#TODAY`` is also a Date literal representing today's date.
@@ -46,17 +47,26 @@ Constructor
     Each constructor of a type_ is a term having that type.
 
 Variable
-    a variable is a term. Its type_ is derived from the `quantifier expression`_ that declares it (see below).
+    A variable is a term. Its type_ is derived from the `quantifier expression`_ that declares it (see below).
 
 .. _function application:
 
 Function application
     ``F(t_1, t_2,.., t_n)`` is a term, when ``F`` is a function_ symbol of arity |n|, and |t1,tn| are terms.
-    Each term must be of the appropriate type_, as defined in the function declaration in the vocabulary.
-    The resulting type of the function application is also defined in the function declaration.
+    Each term must be of the appropriate type_, and in the domain of the function,
+    as defined in the function declaration in the vocabulary.
+    The resulting type and range of the function application is also defined in the function declaration.
     If the arity of ``F`` is 0, i.e., if ``F`` is a constant_, then ``F()`` is a term.
 
-    ``$(s)(t_1, t_2,.., t_n)`` is a term, when ``s`` is an expression of type Concept that denotes a function of arity |n|, and |t1,tn| are terms.
+    .. warning::
+        The knowledge engineer must use appropriate if-then-else guards
+        to ensure that the value of a function outside of its domain
+        has no influence on the truth value of a statement.
+
+        For example: ``if y = 0 then 0 else x/y``.
+
+    ``$(s)(t_1, t_2,.., t_n)`` is a term, when ``s`` is an expression of type Concept
+    that denotes a function of arity |n|, and |t1,tn| are terms.
 
     Please note that there are built-in function_\ s (see :ref:`built-in functions`).
 
@@ -64,7 +74,8 @@ Negation
     -|t| is a numerical term, when |t| is a numerical term.
 
 Arithmetic
-    ``t_1 ꕕ t_2`` is a numerical term, when |t1|, |t2| are two numerical terms, and ``ꕕ`` is one of the following math operators ``+, -, * (or ⨯), /, ^, %``.
+    ``t_1 ꕕ t_2`` is a numerical term, when |t1|, |t2| are two numerical terms,
+    and ``ꕕ`` is one of the following math operators ``+, -, * (or ⨯), /, ^, %``.
     Mathematical operators can be chained as customary (e.g. ``x+y+z``).
     The usual order of binding is used.
 

@@ -28,6 +28,6 @@ theory {
                                                                                'reading': 'Start_Dt_Dwelling_For_Social_Rent',
                                                                                'relevant': False,
                                                                                'status': 'UNKNOWN',
-                                                                               'typ': 'Int',
+                                                                               'typ': 'date',
                                                                                'value': '',
                                                                                'values': ['2015', '2016']}}}

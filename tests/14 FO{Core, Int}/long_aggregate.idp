@@ -1,0 +1,16 @@
+vocabulary V {
+    type T := {1..25}
+    f: T -> T
+}
+
+theory T:V {
+    0<#{x in T: 0<f(x)}.
+}
+
+structure S:V {
+
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S))
+}

@@ -3,15 +3,13 @@
 vocabulary {
 	type Bus_t := { Big, Small }
 	type Size_t := { 30..40 }
-	type Price_t := { 0..4000 }
-	type Kid_t := { 0..300 }
 	type Amount_t := { 0..10 }
-	Price:(Bus_t)→ Price_t
+	Price:(Bus_t)→ Int
 	Size:(Bus_t)→ Size_t
 	Amount:(Bus_t)→ Amount_t
-	Kids:(Bus_t)→ Kid_t
-	TotalPrice: ()→Price_t
-	Kids_amount: ()→Kid_t
+	Kids:(Bus_t)→ Int
+	TotalPrice: ()→Int
+	Kids_amount: ()→Int
 }
 theory {
 	//Amount of Kids

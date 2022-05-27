@@ -87,7 +87,7 @@ def translate(self, problem: "Theory"):
                     problem.z3[a.decl.name] = out.__dict__[a.accessor.name]
                 if not c.sorts:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
-                else:
+                elif c.range:
                     for e in c.range:
                         self.map[str(e)] = e
         else: # list of numbers
@@ -104,10 +104,10 @@ def translate(self, problem: "Theory"):
     out = problem.z3.get(self.name, None)
     if out is None:
         if len(self.sorts) == 0:
-            out = Const(self.name, self.out.translate(problem))
+            out = Const(self.name, self.out.decl.base_type.translate(problem))
         else:
-            types = ( [x.translate(problem) for x in self.sorts]
-                    + [self.out.translate(problem)])
+            types = ( [x.decl.base_type.translate(problem) for x in self.sorts]
+                    + [self.out.decl.base_type.translate(problem)])
             out = Function(self.name, types)
         problem.z3[self.name] = out
     return out
@@ -368,7 +368,7 @@ def reified(self, problem: "Theory", vars={}) -> DatatypeRef:
     out = problem.z3.get(str, None)
     if out is None:
         sort = (BoolSort(problem.ctx) if self.in_enumeration or self.is_enumerated else
-                self.decl.out.decl.translate(problem))
+                self.decl.out.decl.base_type.translate(problem))
         out = Const(str, sort)
         problem.z3[str] = out
     return out

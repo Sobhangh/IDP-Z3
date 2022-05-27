@@ -22,6 +22,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 from itertools import chain
+from typing import Dict
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration, Type,
                     SymbolDeclaration, Symbol,
@@ -33,7 +34,7 @@ from .Expression import (Expression, Constructor, AIfExpr, AQuantification, Quan
                          Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
                          FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR,
-                         IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS)
+                         IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
@@ -64,8 +65,7 @@ def annotate(self, idp):
                                +[Constructor(name=f"`{s.name}")
                                  for s in temp.values()
                                  if s.name not in RESERVED_SYMBOLS
-                                 and (type(s) == SymbolDeclaration
-                                      or type(s) in Declaration.__args__)])
+                                 and type(s) in Declaration.__args__])
     self.declarations = list(temp.values())
 
     # annotate declarations
@@ -119,6 +119,8 @@ def annotate(self, voc):
     for s in chain(self.sorts, [self.out]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
                    f"`Concept` must be qualified with a type signature in {self}")
+    self.base_type = (None if self.out.name != BOOL or self.arity != 1 else
+                      self.sorts[0].decl.base_type)
     return self
 SymbolDeclaration.annotate = annotate
 
@@ -167,7 +169,7 @@ TheoryBlock.annotate = annotate
 
 def annotate(self, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
-    self.set_level_symbols()
+    self.set_level_symbols(voc)
 
     # create common variables, and rename vars in rule
     self.canonicals = {}
@@ -193,7 +195,10 @@ def annotate(self, voc, q_vars):
     return self
 Definition.annotate = annotate
 
-def get_instantiables(self, for_explain=False):
+def get_instantiables(self,
+                      interpretations: Dict[str, SymbolInterpretation],
+                      extensions: Dict[str, Extension],
+                      for_explain=False):
     """ compute Definition.instantiables, with level-mapping if definition is inductive
 
     Uses implications instead of equivalence if `for_explain` is True
@@ -209,7 +214,7 @@ def get_instantiables(self, for_explain=False):
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.is_whole_domain = all(s.range()  # not None nor []
+        rule.is_whole_domain = all(s.extension(interpretations, extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
         if not rule.is_whole_domain:
             self.check(rule.definiendum.symbol.decl not in self.level_symbols,
@@ -360,14 +365,20 @@ def annotate(self, block):
 
     self.enumeration.annotate(voc)
 
-    # predicate enumeration have FALSE default
-    if type(self.enumeration) != FunctionEnum and self.default is None:
-        self.default = FALSE
     self.check(self.is_type_enumeration
-                or all(s.name not in [INT, REAL, DATE]  # finite domain
+                or all(s.name not in [INT, REAL, DATE]  # finite domain #TODO
                         for s in self.symbol.decl.sorts)
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
+
+    self.check(not(self.symbol.decl.out.decl.base_type.name == BOOL
+                   and type(self.enumeration) == FunctionEnum),
+        f"Can't use function enumeration for predicates '{self.name}' (yet)")
+
+    # predicate enumeration have FALSE default
+    if type(self.enumeration) != FunctionEnum and self.default is None:
+        self.default = FALSE
+
     if self.default is not None:
         self.default = self.default.annotate(voc, {})
         self.check(self.default.value is not None,
@@ -378,8 +389,9 @@ SymbolInterpretation.annotate = annotate
 # Class Enumeration  #######################################################
 
 def annotate(self, voc):
-    for t in self.tuples:
-        t.annotate(voc)
+    if self.tuples:
+        for t in self.tuples:
+            t.annotate(voc)
 Enumeration.annotate = annotate
 
 

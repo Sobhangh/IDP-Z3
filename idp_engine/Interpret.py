@@ -37,16 +37,18 @@ This module monkey-patches the ASTNode class and sub-classes.
 
 import copy
 from itertools import product
+from typing import Dict, Tuple, List, Callable
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration,
                     SymbolDeclaration, Symbol, SymbolInterpretation,
                     FunctionEnum, Enumeration, Tuple, ConstructedFrom,
-                    Definition)
+                    Definition, Ranges, ConstructedFrom)
 from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
-                    NOT, AppliedSymbol, UnappliedSymbol,
-                    Variable, TRUE, Number)
+                    NOT, AppliedSymbol, UnappliedSymbol, Quantee,
+                    Variable, TRUE, FALSE, Number, Extension)
+from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND)
 
@@ -61,16 +63,22 @@ Import.interpret = interpret
 # class TypeDeclaration  ###########################################################
 
 def interpret(self, problem):
-    if self.name in problem.interpretations:
-        problem.interpretations[self.name].interpret(problem)
-    if self.interpretation:
-        self.constructors = self.interpretation.enumeration.constructors
+    interpretation = problem.interpretations.get(self.name, None)
+    if self.name not in [BOOL, CONCEPT]:
+        enum = interpretation.enumeration.interpret(problem)
+        self.interpretation = interpretation
+        self.constructors = enum.constructors
     self.translate(problem)
-    if self.constructors:
-        self.range = sum([c.interpret(problem).range for c in self.constructors], [])
-    elif self.interpretation.enumeration:  # range declaration
-        self.range = [t.args[0] for t in self.interpretation.enumeration.tuples]
 
+    if self.constructors:
+        ranges = [c.interpret(problem).range for c in self.constructors]
+
+    # update problem.extensions
+    if self.name in [BOOL, CONCEPT]:
+        ext = ([[t] for r in ranges for t in r], None)
+    else:
+        ext = enum.extensionE(problem.interpretations, problem.extensions)
+    problem.extensions[self.name] = ext
 TypeDeclaration.interpret = interpret
 
 
@@ -78,27 +86,54 @@ TypeDeclaration.interpret = interpret
 
 def interpret(self, problem):
     assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
-    self.in_domain = list(product(*[s.range() for s in self.sorts]))
-    self.range = self.out.range()
 
-    # create instances
-    if self.name not in RESERVED_SYMBOLS:
-        self.instances = {}
-        for arg in self.in_domain:
-            expr = AppliedSymbol.make(Symbol(name=self.name), arg)
+    symbol = Symbol(name=self.name)
+    symbol.decl = self
+    symbol.type = symbol.decl.type
+
+    # determine the extension, i.e., (superset, filter)
+    extensions = [s.extension(problem.interpretations, problem.extensions)
+                for s in self.sorts]
+    if any(e[0] is None for e in extensions):
+        superset = None
+    else:
+        superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
+
+    filters = [e[1] for e in extensions]
+    def filter(args):
+        out = AND([f([t.copy()]) if f is not None else TRUE
+                    for f, t in zip(filters, args)])
+        if self.out.decl.name == BOOL:
+            out = AND([out, AppliedSymbol.make(symbol, args).copy()])
+        return out
+
+    if self.out.decl.name == BOOL:
+        problem.extensions[self.name] = (superset, filter)
+
+    (range, _) = self.out.extension(problem.interpretations, problem.extensions)
+    if range is None:
+        self.range = []
+    else:
+        self.range = [e[0] for e in range]
+
+    # create instances in problem.assignments + type constraints
+    self.instances = {}
+    if self.name not in RESERVED_SYMBOLS and superset:
+        for args in superset:
+            expr = AppliedSymbol.make(symbol, args)
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
             problem.assignments.assert__(expr, None, S.UNKNOWN)
-
-    # add type constraints to problem.constraints
-    if self.out.decl.name != BOOL and self.name not in RESERVED_SYMBOLS:
-        for inst in self.instances.values():
-            domain = self.out.decl.check_bounds(inst.copy())
-            if domain is not None:
-                domain.block = self.block
-                domain.is_type_constraint_for = self.name
-                domain.annotations['reading'] = "Possible values for " + str(inst)
-                problem.constraints.append(domain)
+            if self.out.decl.name != BOOL:
+                # add type constraints to problem.constraints
+                # ! (x,y) in domain: range(f(x,y))
+                range_condition = self.out.decl.contains_element(expr.copy(),
+                                    problem.interpretations, problem.extensions)
+                constraint = IMPLIES([filter(args), range_condition])
+                constraint.block = self.block
+                constraint.is_type_constraint_for = self.name
+                constraint.annotations['reading'] = f"Possible values for {expr}"
+                problem.constraints.append(constraint)
 SymbolDeclaration.interpret = interpret
 
 
@@ -112,7 +147,7 @@ def interpret(self, problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
-    self.instantiables = self.get_instantiables()
+    self.instantiables = self.get_instantiables(problem.interpretations, problem.extensions)
     self.add_def_constraints(self.instantiables, problem, problem.def_constraints)
 Definition.interpret = interpret
 
@@ -122,13 +157,13 @@ def add_def_constraints(self, instantiables, problem, result):
     The `instantiables` (of the definition) are expanded in `problem`.
 
     Args:
-        instantiables (Dict[SymbolDeclaration, list[Expression]]):
+        instantiables (Dict[SymbolDeclaration, List[Expression]]):
             the constraints without the quantification
 
         problem (Theory):
             contains the structure for the expansion/interpretation of the constraints
 
-        result (Dict[SymbolDeclaration, Definition, list[Expression]]):
+        result (Dict[SymbolDeclaration, Definition, List[Expression]]):
             a mapping from (Symbol, Definition) to the list of constraints
     """
     for decl, bodies in instantiables.items():
@@ -143,17 +178,26 @@ Definition.add_def_constraints = add_def_constraints
 
 def interpret(self, problem):
     status = S.DEFAULT if self.block.name == DEFAULT else S.STRUCTURE
-    if self.is_type_enumeration:
-        self.enumeration.interpret(problem)
-        self.symbol.decl.interpretation = self
-    elif not self.name in [GOAL_SYMBOL, EXPAND]:
+    assert not self.is_type_enumeration, "Internal error"
+    if not self.name in [GOAL_SYMBOL, EXPAND]:
+        decl = self.symbol.decl
+        # update problem.extensions
+        if self.symbol.decl.out.decl.name == BOOL:  # predicate
+            extension = [t.args for t in self.enumeration.tuples]
+            problem.extensions[self.symbol.name] = (extension, None)
+
         # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
 
+            # check that the values are in the range
             if type(self.enumeration) == FunctionEnum:
                 args, value = t.args[:-1], t.args[-1]
-                self.check(self.symbol.decl.has_in_range(value).same_as(TRUE),
+                condition = decl.has_in_range(value,
+                            problem.interpretations, problem.extensions)
+                self.check(not condition.same_as(FALSE),
                            f"{value} is not in the range of {self.symbol.name}")
+                if not condition.same_as(TRUE):
+                    problem.constraints.append(condition)
             else:
                 args, value = t.args, TRUE
 
@@ -161,21 +205,30 @@ def interpret(self, problem):
             a = (str(args) if 1<len(args) else
                     str(args[0]) if len(args)==1 else
                     "()")
-            self.check(len(self.symbol.decl.sorts) == len(args),
-                f"Incorrect arity of {a} for {self.name}")
-            self.check(self.symbol.decl.has_in_domain(args).same_as(TRUE),
-                        f"{a} is not in the domain of {self.symbol.name}")
+            self.check(len(args) == decl.arity,
+                       f"Incorrect arity of {a} for {self.name}")
+            condition = decl.has_in_domain(args,
+                            problem.interpretations, problem.extensions)
+            self.check(not condition.same_as(FALSE),
+                       f"{a} is not in the domain of {self.symbol.name}")
+            if not condition.same_as(TRUE):
+                problem.constraints.append(condition)
 
+            # check duplicates
             expr = AppliedSymbol.make(self.symbol, args)
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == S.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")
+
+            # add to problem.assignments
             e = problem.assignments.assert__(expr, value, status)
             if (status == S.DEFAULT  # for proper display in IC
                 and type(self.enumeration) == FunctionEnum):
                 problem.assignments.assert__(e.formula(), TRUE, status)
+
+        # fill the default value in problem.assignments
         if self.default is not None:
-            for code, expr in self.symbol.decl.instances.items():
+            for code, expr in decl.instances.items():
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
                     e = problem.assignments.assert__(expr, self.default, status)
@@ -183,13 +236,23 @@ def interpret(self, problem):
                         and type(self.enumeration) == FunctionEnum
                         and self.default.type != BOOL):
                         problem.assignments.assert__(e.formula(), TRUE, status)
+        elif self.sign == ':=':
+            # add condition that the interpretation is total over the domain
+            # ! x in dom(f): enum.contains(x)
+            q_vars = { f"${sort.decl.name}!{str(i)}$":
+                       Variable(name=f"${sort.decl.name}!{str(i)}$", sort=sort)
+                       for i, sort in enumerate(decl.sorts)}
+            quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
+            expr = self.enumeration.contains(list(q_vars.values()), True)
+            constraint = FORALL(quantees, expr).interpret(problem)
+            problem.constraints.append(constraint)
 SymbolInterpretation.interpret = interpret
 
 
 # class Enumeration  ###########################################################
 
 def interpret(self, problem):
-    pass
+    return self
 Enumeration.interpret = interpret
 
 
@@ -199,19 +262,30 @@ def interpret(self, problem):
     self.tuples = OrderedSet()
     for c in self.constructors:
         c.interpret(problem)
+        if c.range is None:
+            self.tuples = None
+            return self
         self.tuples.extend([Tuple(args=[e]) for e in c.range])
+    return self
 ConstructedFrom.interpret = interpret
 
 
 # class Constructor  ###########################################################
 
 def interpret(self, problem):
-    self.range = []
+    assert all(isinstance(s.decl.out, Type) for s in self.sorts), 'internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
     else:
-        self.range = [AppliedSymbol.construct(self, e)
-                      for e in product(*[s.decl.out.range() for s in self.sorts])]
+        extensions = [s.decl.out.extension(problem.interpretations, problem.extensions)
+                      for s in self.sorts]
+        if any(e[0] is None for e in extensions):
+            self.range = None
+        else:
+            self.check(all(e[1] is None for e in extensions),  # no filter in the extension
+                       f"Type signature of constructor {self.name} must have a given interpretation")
+            self.range = [AppliedSymbol.construct(self, es)
+                          for es in product(*[[ee[0] for ee in e[0]] for e in extensions])]
     return self
 Constructor.interpret = interpret
 
@@ -317,22 +391,72 @@ Symbol.instantiate = instantiate
 
 # class Type ###########################################################
 
-def range(self):
-    range = self.decl.range
-    if self.out:  # x in Concept[T->T]
-        range = [v for v in range
-                 if v.decl.symbol.decl.arity == len(self.ins)
-                 and isinstance(v.decl.symbol.decl, SymbolDeclaration)
-                 and v.decl.symbol.decl.out.name == self.out.name
-                 and len(v.decl.symbol.decl.sorts) == len(self.ins)
-                 and all(s == q
-                         for s, q in zip(v.decl.symbol.decl.sorts,
-                                         self.ins))]
-    return range
-Type.range = range
+def extension(self, interpretations: Dict[str, SymbolInterpretation],
+              extensions: Dict[str, Extension]
+              ) -> Extension:
+    """returns the extension of a Type, given some interpretations.
 
+    Normally, the extension is already in `extensions`.
+    However, for Concept[T->T], an additional filtering is applied.
+
+    Args:
+        interpretations (Dict[str, SymbolInterpretation]):
+        the known interpretations of types and symbols
+
+    Returns:
+        Extension: a superset of the extension of self,
+        and a function that, given arguments, returns an Expression that says
+        whether the arguments are in the extension of self
+    """
+    if self.code not in extensions:
+        self.check(self.name == CONCEPT, "internal error")
+        assert self.out, "internal error"  # Concept[T->T]
+        out = [v for v in extensions[CONCEPT][0]
+                if v[0].decl.symbol.decl.arity == len(self.ins)
+                and isinstance(v[0].decl.symbol.decl, SymbolDeclaration)
+                and v[0].decl.symbol.decl.out.name == self.out.name
+                and len(v[0].decl.symbol.decl.sorts) == len(self.ins)
+                and all(s == q
+                        for s, q in zip(v[0].decl.symbol.decl.sorts,
+                                        self.ins))]
+        extensions[self.code] = (out, None)
+    return extensions[self.code]
+Type.extension = extension
 
 # Class AQuantification  ######################################################
+
+def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expression],
+                theory: Theory) -> Expression:
+    """add `filter(args)` to `expr` quantified by `q`
+
+    Example: `_add_filter('∀', TRUE, filter, [1], theory)` returns `filter([1]) => TRUE`
+
+    Args:
+        q: the type of quantification
+        expr: the quantified expression
+        filter: a function that returns an Expression for some arguments
+        args:the arguments to be applied to filter
+
+    Returns:
+        Expression: `expr` extended with appropriate filter
+    """
+    if filter:  # adds `filter(val) =>` in front of expression
+        applied = filter(args).interpret(theory)
+        if q == '∀':
+            out = IMPLIES([applied, expr])
+        elif q == '∃':
+            out = AND([applied, expr])
+        else:  # aggregate
+            if isinstance(expr, AIfExpr):  # cardinality
+                # if a then b else 0 -> if (applied & a) then b else 0
+                arg1 = AND([applied,
+                                    expr.sub_exprs[0]])
+                out = AIfExpr.make(arg1, expr.sub_exprs[1],
+                                    expr.sub_exprs[2])
+            else:  # sum
+                out = AIfExpr.make(applied, expr, Number(number="0"))
+        return out
+    return expr
 
 def interpret(self, problem):
     """apply information in the problem and its vocabulary
@@ -360,55 +484,39 @@ def interpret(self, problem):
             q.sub_exprs = [inferred[var.name]]
 
     forms = self.sub_exprs
-    new_quantees = []
+    new_quantees, instantiated = [], False
     for q in self.quantees:
         domain = q.sub_exprs[0]
-        self.check(domain.decl.out.type == BOOL,
-                    f"{domain} is not a type or predicate")
-        if not domain.decl.range:
-            new_quantees.append(q)
+
+        superset, filter = None, None
+        if isinstance(domain, Type):  # quantification over type / Concepts
+            (superset, filter) = domain.extension(problem.interpretations,
+                                        problem.extensions)
+        elif isinstance(domain, SymbolExpr):  # SymbolExpr (e.g. $(`Color))
+            self.check(domain.decl.out.type == BOOL,
+                        f"{domain} is not a type or predicate")
+            assert domain.decl.name in problem.extensions, "internal error"
+            (superset, filter) = problem.extensions[domain.decl.name]
         else:
-            if domain.code in problem.interpretations:  # domain has an interpretation
-                enumeration = problem.interpretations[domain.code].enumeration
-                range = [t.args for t in enumeration.tuples.values()]
-                guard = None
-            elif type(domain.decl) == SymbolDeclaration:  # quantification over predicate
-                range = domain.decl.in_domain
-                guard = domain
-            elif isinstance(domain, Type):  # quantification over type / Concepts
-                range = [[t] for t in domain.range()]
-                guard = None
-            else:  # SymbolExpr (e.g. $(`Color))
-                range = [[t] for t in domain.decl.range] #TODO1 decl.enumeration.tuples
-                guard = None
+            assert False, "Internal error"
 
-
+        if superset is None:
+            new_quantees.append(q)
+            for vars in q.vars:
+                forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
+        else:
             for vars in q.vars:
                 self.check(domain.decl.arity == len(vars),
                             f"Incorrect arity of {domain}")
                 out = []
                 for f in forms:
-                    for val in range:
+                    for val in superset:
                         new_f = f.instantiate(vars, val, problem)
-                        if guard:  # adds `guard(val) =>` in front of expression
-                            applied = AppliedSymbol.make(guard, val)
-                            if self.q == '∀':
-                                new_f = IMPLIES([applied, new_f])
-                            elif self.q == '∃':
-                                new_f = AND([applied, new_f])
-                            else:  # aggregate
-                                if isinstance(new_f, AIfExpr):  # cardinality
-                                    # if a then b else 0 -> if (applied & a) then b else 0
-                                    arg1 = AND([applied,
-                                                        new_f.sub_exprs[0]])
-                                    new_f = AIfExpr.make(arg1, new_f.sub_exprs[1],
-                                                        new_f.sub_exprs[2])
-                                else:  # sum
-                                    new_f = AIfExpr.make(applied, new_f, Number(number="0"))
-                        out.append(new_f)
+                        instantiated = True
+                        out.append(_add_filter(self.q, new_f, filter, val, problem))
                 forms = out
 
-    if new_quantees:
+    if not instantiated:
         forms = [f.interpret(problem) if problem else f for f in forms]
     self.quantees = new_quantees
     return self.update_exprs(forms)
@@ -451,14 +559,16 @@ def interpret(self, problem):
                 if interpretation.default is not None:
                     simpler = TRUE
                 else:
-                    simpler = interpretation.enumeration.contains(sub_exprs, True)
+                    simpler = interpretation.enumeration.contains(sub_exprs, True,
+                        interpretations=problem.interpretations, extensions=problem.extensions)
                 if 'not' in self.is_enumerated:
                     simpler = NOT(simpler)
                 simpler.annotations = self.annotations
         elif self.in_enumeration:
             # re-create original Applied Symbol
             core = AppliedSymbol.make(self.symbol, sub_exprs).copy()
-            simpler = self.in_enumeration.contains([core], False)
+            simpler = self.in_enumeration.contains([core], False,
+                        interpretations=problem.interpretations, extensions=problem.extensions)
             if 'not' in self.is_enumeration:
                 simpler = NOT(simpler)
             simpler.annotations = self.annotations

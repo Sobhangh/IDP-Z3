@@ -80,6 +80,10 @@
         <p-button (click)="type('≥')" styleClass="ui-button-secondary type" label="≥">
         </p-button>
     </div>
+    <div pTooltip="Superset (:>=)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type(':⊇')" styleClass="ui-button-secondary type" label=":⊇">
+        </p-button>
+    </div>
     <div *ngIf="!textModeUnicode" style="display: inline-block; margin: 5px;">
         <div pTooltip="Convert to Unicode" style="display:inline-block; margin: 5px;">
             <p-button (click)="switchTextMode('unicode')" styleClass="ui-button-secondary type" label="Prettify">

@@ -123,7 +123,7 @@ theory {
     ~(Length(Sides()) is enumerated) => Length(Sides())=4.
 }
 structure {
-    Length := {1->1, 2->2, 3->3}.
+    Length :>= {1->1, 2->2, 3->3}.
 }
 
 display {
@@ -396,7 +396,7 @@ display {
                        'reading': 'Sides',
                        'relevant': True,
                        'status': 'UNIVERSAL',
-                       'typ': 'Int',
+                       'typ': 'sides',
                        'value': '4',
                        'values': ['4']},
            'Sides() = 3': {'environmental': False,
@@ -511,7 +511,7 @@ display {
                              'reading': 'Vertices',
                              'relevant': True,
                              'status': 'UNIVERSAL',
-                             'typ': 'Int',
+                             'typ': 'sides',
                              'value': '4',
                              'values': ['4']},
               'Vertices() = 3': {'environmental': False,

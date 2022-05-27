@@ -13,8 +13,20 @@ Structure
 A *structure* specifies the interpretation of some type_, predicate_\ s and function_\ s.
 If the names are omitted, the structure is named S, for vocabulary V.
 
-A structure is a set of symbol interpretations of the form ``<symbol> := <interpretation>.``,
-e.g., ``P := {1..9}``, where the interpretation can be:
+A structure is a set of symbol interpretations of the form :
+
+* ``<symbol> := <total interpretation>.``, e.g., ``P := {1..9}``,
+
+* ``<symbol> :⊇ <partial interpretation>.``, e.g., ``P :⊇ {A->1}``.
+
+A total interpretation fully specifies the interpretation of the symbol;
+a partial interpretation does not.
+
+An error occurs when the domain of the symbol is already known by enumeration,
+and its total interpretation does not cover the domain.
+If the domain of the symbol is not known, it is inferred from the total interpretation.
+
+A total interpretation takes one of these forms:
 
 for nullary predicates (propositions)
     ``true`` or ``false``
@@ -44,14 +56,22 @@ for nullary functions:
 
 for n-ary functions:
     a set of tuples and their associated values,
+    e.g., ``{ (1,2)->3, (4, 5)->6 }``.
+    The interpretation may be followed by ``else <default>``,
+    where ``<default>`` is a default value (a rigid term),
+    i.e., a value for the non-enumerated tuples, if any.
+
+
+A partial interpretation takes one of these forms:
+
+for n-ary functions:
+    a set of tuples and their associated values,
     e.g., ``{ (1,2)->3, (4, 5)->6 }``
 
 Additional  notes:
 
-* the interpretation of a predicate is specified by the set of the tuples that make the predicate true; any other tuple makes it false.
-
-* the interpretation of a function may be followed by ``else <default>``, where ``<default>`` is a default value (a rigid term), i.e., a value for the non-enumerated tuples, if any.
-
+* the set of tuples in the interpretation of a predicate is exactly
+  the set of tuples that make the predicate true; any other tuple makes it false.
 * parenthesis around a tuple can be omitted when the arity is 1, e.g., ``{1-2, 3->4}``
 
 * the interpretation of a predicate may be specified using the CSV format, with one tuple per line, e.g., :
@@ -64,6 +84,7 @@ Additional  notes:
     5 6
     }
 
-* The interpretation of ``goal_string`` is used to compute relevance relative to goals (see the ``determine_relevance`` method in the :ref:`Theory class <Theory_class>`).
+* The interpretation of ``goal_string`` is used to compute relevance relative to goals
+  (see the ``determine_relevance`` method in the :ref:`Theory class <Theory_class>`).
 
 * The tuples of an interpretation can be given in any order.

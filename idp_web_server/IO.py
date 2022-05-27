@@ -160,11 +160,14 @@ class Output(object):
                 if typ == BOOL:
                     symbol = {"typ": "Bool"}
                 elif 0 < len(symb.range):
-                    typ = symb.out.decl.type
-                    symbol = {"typ": FROM.get(typ, typ), "value": "",
+                    symbol = {"typ": typ, "value": "",
                               "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT, DATE]:
                     symbol = {"typ": FROM.get(typ, typ), "value": ""}  # default
+                elif symb.out.decl.enumeration and symb.out.decl.enumeration.tuples: # ranges
+                    typ, enum = symb.out.decl.type, symb.out.decl.enumeration
+                    symbol = {"typ": FROM.get(typ, typ), "value": "",
+                              "values": [str(v) for v in enum.tuples]}
                 else:
                     assert False, "dead code"
                     symbol = None
@@ -221,7 +224,7 @@ class Output(object):
                             s[key]["value"] = True if value.same_as(TRUE) else \
                                              False if value.same_as(FALSE) else \
                                              str(value)
-                        if 0 < len(symb.range) and atom.type != BOOL:
+                        if ((0 < len(symb.range) or hasattr(symb.out.decl, 'enumeration')) and atom.type != BOOL):
                             # allow display of the value in drop box
                             s[key]["values"] = [s[key]["value"]]
                     else:
