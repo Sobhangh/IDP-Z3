@@ -18,6 +18,7 @@ Breaking changes:
 * fix #55: add `minimize` and `maximize` functions in `main` block
 * fix #187: `Internal error` with `explain()`
 * fix #188: Incorrect solver result during explain inference
+* fix #190: presentation of false propositions in models
 * fix #194: Decision table returns whether timeout was reached
 * fix #195: add version flag to CLI
 * fix *196: Can't change default real value

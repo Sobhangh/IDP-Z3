@@ -1,10 +1,10 @@
 
 Model 1
 ==========
-P := {}.
-Q := {}.
+P := false.
+Q := false.
 R := true.
-S := {}.
+S := false.
 T := true.
 
 

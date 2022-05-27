@@ -10,13 +10,13 @@ No more models.
 Model 1
 ==========
 p := true.
-q := true.
+q := false.
 
 
 Model 2
 ==========
 p := true.
-q := {}.
+q := true.
 
 
 No more models.
