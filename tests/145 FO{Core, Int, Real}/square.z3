@@ -72,7 +72,7 @@ theory {
                          'relevant': True,
                          'status': 'UNIVERSAL',
                          'typ': 'Real',
-                         'value': '2.6666666666666665'},
+                         'value': '8/3'},
             'Height() = 8.0 / 3': {'environmental': False,
                                    'is_assignment': True,
                                    'normal': False,

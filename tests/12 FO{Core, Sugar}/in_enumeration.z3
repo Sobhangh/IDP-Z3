@@ -5,31 +5,31 @@ And(Or(Not(p), Or(Color == blue, Color == red)),
 Model 1
 ==========
 Color := blue.
-p := true.
+p := false.
 
 
 Model 2
 ==========
 Color := blue.
-p := {}.
+p := true.
 
 
 Model 3
 ==========
 Color := green.
-p := {}.
+p := false.
 
 
 Model 4
 ==========
 Color := red.
-p := true.
+p := false.
 
 
 Model 5
 ==========
 Color := red.
-p := {}.
+p := true.
 
 
 No more models.

@@ -219,7 +219,7 @@ class Output(object):
                 if key in s:
                     if value is not None:
                         if type(value) == Number:
-                            s[key]["value"] = str(eval(str(value).replace('?', '')))
+                            s[key]["value"] = str(value)
                         else:
                             s[key]["value"] = True if value.same_as(TRUE) else \
                                              False if value.same_as(FALSE) else \

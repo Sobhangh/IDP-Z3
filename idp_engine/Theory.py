@@ -490,8 +490,8 @@ class Theory(object):
         ass = copy(self.assignments)
         model = solver.model()
         for q in todo:
-            assert (self.extended or not q.is_reified(),
-                    "Reified atom should only appear in case of extended theories")
+            assert self.extended or not q.is_reified(), \
+                    "Reified atom should only appear in case of extended theories"
 
             a = ass[q.code]
             if not self._is_defined(model, q):
