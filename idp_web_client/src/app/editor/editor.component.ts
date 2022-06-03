@@ -19,43 +19,16 @@ export class EditorComponent {
 
   private lintTimeout = null;
 
-  private runLint(idpService, monaco) {
-    idpService.lint().then((msgs) => {
-      const marker_msgs = [];
-      for (let i = 0; i < msgs.length; i++) {
-        const msg = msgs[i];
-        let severity = null;
-        if (msg['type'] === 'Warning') {
-            severity = monaco.MarkerSeverity.Info;
-        } else {
-            severity = monaco.MarkerSeverity.Error;
-        }
-        const marker_msg = {
-            startLineNumber: msg['line'],
-            startColumn: msg['colStart'],
-            endLineNumber: msg['line'],
-            endColumn: msg['colEnd'],
-            message: msg['details'],
-            severity: severity
-        };
-        marker_msgs.push(marker_msg);
-      }
-      const model = idpService.editor.getModel();
-      monaco.editor.setModelMarkers(model, 'owner', marker_msgs);
-    });
-
-  }
-
   public onInitEditor(editor: any) {
     this.idpService.editor = editor;
-    const idpService = this.idpService
+    const idpService = this.idpService;
 
     this.idpService.editor.addCommand([monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S], function() {
       if (idpService.IDE) {
         idpService.run();
       } else {
-        idpService.header.display = false
-        idpService.appRef.tick()
+        idpService.header.display = false;
+        idpService.appRef.tick();
       }
     });
     this.idpService.editor.model.onDidChangeContent((event) => {
@@ -68,15 +41,38 @@ export class EditorComponent {
         this.textModeUnicode = false;
         return;
       } else {
-        // Run the FOLint linter tool, but only after x seconds.
-        if (this.lintTimeout) {
-            window.clearTimeout(this.lintTimeout);
-        }
-        this.lintTimeout = setTimeout(this.runLint, 800, this.idpService, monaco);
-        return;
+        // Run the static code analysis after 1 second of no inputs.
+        clearTimeout(this.lintTimeout);
+        this.lintTimeout = setTimeout(() => this.doSCA(idpService), 1000);
       }
     });
 
+  }
+
+  public doSCA(idpService) {
+    idpService.doSCA().then((msgs) => {
+      const marker_msgs = [];
+      for (let i = 0; i < msgs.length; i++) {
+        const msg = msgs[i];
+        let severity = null;
+        if (msg['type'] === 'Warning') {
+            severity = monaco.MarkerSeverity.Info;
+        } else {
+            severity = monaco.MarkerSeverity.Error;
+        }
+        const marker_msg = {
+            startLineNumber: msg['line'],
+            startColumn: msg['col'],
+            endLineNumber: msg['line'],
+            endColumn: msg['col'],
+            message: msg['details'],
+            severity: severity
+        };
+        marker_msgs.push(marker_msg);
+      }
+      const model = idpService.editor.getModel();
+      monaco.editor.setModelMarkers(model, 'owner', marker_msgs);
+    });
   }
 
   constructor(public idpService: IdpService, private messageService: MessageService, @Inject(DOCUMENT) document: Document) {
