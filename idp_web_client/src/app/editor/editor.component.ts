@@ -17,6 +17,35 @@ export class EditorComponent {
   private change = false;
   textModeUnicode = false;
 
+  private lintTimeout = null;
+
+  private runLint(idpService, monaco) {
+    idpService.lint().then((msgs) => {
+      const marker_msgs = [];
+      for (let i = 0; i < msgs.length; i++) {
+        const msg = msgs[i];
+        let severity = null;
+        if (msg['type'] === 'Warning') {
+            severity = monaco.MarkerSeverity.Info;
+        } else {
+            severity = monaco.MarkerSeverity.Error;
+        }
+        const marker_msg = {
+            startLineNumber: msg['line'],
+            startColumn: msg['colStart'],
+            endLineNumber: msg['line'],
+            endColumn: msg['colEnd'],
+            message: msg['details'],
+            severity: severity
+        };
+        marker_msgs.push(marker_msg);
+      }
+      const model = idpService.editor.getModel();
+      monaco.editor.setModelMarkers(model, 'owner', marker_msgs);
+    });
+
+  }
+
   public onInitEditor(editor: any) {
     this.idpService.editor = editor;
     const idpService = this.idpService
@@ -35,38 +64,16 @@ export class EditorComponent {
         this.change = false;
         return;
       } else if (this.textModeUnicode) {
-
         // Whenever a user has typed, switch back to ASCII
         this.textModeUnicode = false;
-        return
-
+        return;
       } else {
-        // Run the FOLint linter tool.
-        this.idpService.lint().then((msgs) => {
-          console.log(msgs);
-          const marker_msgs = [];
-          for (let i = 0; i < msgs.length; i++) {
-            const msg = msgs[i];
-            let severity = null;
-            if (msg['type'] === 'Warning') {
-                severity = monaco.MarkerSeverity.Info;
-            } else {
-                severity = monaco.MarkerSeverity.Error;
-            }
-            const marker_msg = {
-                startLineNumber: msg['line'],
-                startColumn: msg['colStart'],
-                endLineNumber: msg['line'],
-                endColumn: msg['colEnd'],
-                message: msg['details'],
-                severity: severity
-            };
-            marker_msgs.push(marker_msg);
-            console.log(msg);
-          }
-          const model = this.idpService.editor.getModel();
-          monaco.editor.setModelMarkers(model, 'owner', marker_msgs)
-        });
+        // Run the FOLint linter tool, but only after x seconds.
+        if (this.lintTimeout) {
+            window.clearTimeout(this.lintTimeout);
+        }
+        this.lintTimeout = setTimeout(this.runLint, 800, this.idpService, monaco);
+        return;
       }
     });
 
