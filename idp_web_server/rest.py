@@ -289,7 +289,6 @@ class eval(Resource):
                         errors.append(error)
                     print(errors)
                     out = errors
-
                 else:
                     state = State.make(idpOf(args['code']),
                                        args['previous_active'],
