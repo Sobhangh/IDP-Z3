@@ -46,6 +46,8 @@ from .IO import Output, metaJSON
 
 from typing import Dict
 
+import re
+
 if with_profiling:
     from pyinstrument import Profiler
 
@@ -260,6 +262,34 @@ class eval(Resource):
                     state = State(idpModel)  # don't use cache.  May raise an error
                     next(state.expand(max=1, timeout_seconds=0))
                     out = {"result": "ok"}
+
+                elif method == "lint":
+                    # We want to run FOLint, the FO(.) linter.
+                    # TODO: import the linter directly, but this requires an
+                    # update to FOLint. For now, we use subprocess.
+                    import subprocess
+                    # Save the code to /tmp/ding.idp
+                    with open('/tmp/ding.idp', 'w') as fp:
+                        fp.write(args['code'])
+
+                    output = subprocess.run("folint /tmp/ding.idp", shell=True,
+                                            capture_output=True)
+                    lint = output.stdout.decode()
+
+                    # Match all the errors and format them in a nice dict.
+                    msgs = re.findall(r'(Warning|Error): line (\d+) - colStart (\d+) - colEnd (\d+) => (.*)', lint)
+                    errors = []
+                    for msg in msgs:
+                        error = {'type': msg[0],
+                                 'line': msg[1],
+                                 'colStart': msg[2],
+                                 'colEnd': msg[3],
+                                 'details': msg[4]
+                                 }
+                        errors.append(error)
+                    print(errors)
+                    out = errors
+
                 else:
                     state = State.make(idpOf(args['code']),
                                        args['previous_active'],

@@ -714,9 +714,9 @@ procedure main() {
 
 
 
-  public async doSCA(): Promise<[]> {
+  public async lint(): Promise<[]> {
     const input = {
-      method: 'checkCode',
+      method: 'lint',
       code: this.spec
     };
     const msgs = this.call_eval(this.meta, input);

@@ -41,8 +41,8 @@ export class EditorComponent {
         return
 
       } else {
-        // Run the static code analysis.
-        this.idpService.doSCA().then((msgs) => {
+        // Run the FOLint linter tool.
+        this.idpService.lint().then((msgs) => {
           console.log(msgs);
           const marker_msgs = [];
           for (let i = 0; i < msgs.length; i++) {
@@ -55,9 +55,9 @@ export class EditorComponent {
             }
             const marker_msg = {
                 startLineNumber: msg['line'],
-                startColumn: msg['col'],
+                startColumn: msg['colStart'],
                 endLineNumber: msg['line'],
-                endColumn: msg['col'],
+                endColumn: msg['colEnd'],
                 message: msg['details'],
                 severity: severity
             };
