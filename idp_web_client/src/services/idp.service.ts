@@ -87,21 +87,31 @@ export class IdpService {
     return JSON.stringify(lawIds);
   }
 
-  public call(url, call: Object): Observable<Object> {
-    this.openCalls++;
-    const out = this.http.post<Object>(url, call).pipe(share());
-    out.subscribe(x => this.openCalls--, err => {
-      console.log(err);
-      this.messageService.add({severity: 'error', summary: 'Error', detail: err.statusText});
-      this.openCalls--;
-      return err;
-    });
+  public call(url, call: Object, spinner: boolean = true): Observable<Object> {
+    let out = null;
+    if (spinner) {
+      this.openCalls++;
+      out = this.http.post<Object>(url, call).pipe(share());
+      out.subscribe(x => this.openCalls--, err => {
+        console.log(err);
+        this.messageService.add({severity: 'error', summary: 'Error', detail: err.statusText});
+        return err;
+      });
+    } else {  // Don't increment the spinner counter and don't decrement it afterwards.
+      out = this.http.post<Object>(url, call).pipe(share());
+      out.subscribe(x => this.openCalls, err => {
+        console.log(err);
+        this.messageService.add({severity: 'error', summary: 'Error', detail: err.statusText});
+        return err;
+      });
+
+    }
     return out;
   }
 
-  public async call_eval(meta: MetaInfo, input: Object, extra: string = ''): Promise<object|string> {
+  public async call_eval(meta: MetaInfo, input: Object, extra: string = '', spinner: boolean = true): Promise<object|string> {
     input['code'] = this.spec;
-    return this.call(AppSettings.IDP_URL, input).pipe(map(x => {
+    return this.call(AppSettings.IDP_URL, input, spinner).pipe(map(x => {
       if (typeof x === 'string') {
         console.log('Error: ' + x);
         this.messageService.add({severity: 'error', summary: 'Error', detail: x});
@@ -713,13 +723,12 @@ procedure main() {
   }
 
 
-
   public async lint(): Promise<[]> {
     const input = {
       method: 'lint',
       code: this.spec
     };
-    const msgs = this.call_eval(this.meta, input);
+    const msgs = this.call_eval(this.meta, input, '', false);
     //@ts-ignore
     return await msgs;
     // void this.doRelevance();
