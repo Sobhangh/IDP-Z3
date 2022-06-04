@@ -268,11 +268,10 @@ class eval(Resource):
                     # TODO: import the linter directly, but this requires an
                     # update to FOLint. For now, we use subprocess.
                     import subprocess
-                    # Save the code to /tmp/ding.idp
-                    with open('/tmp/ding.idp', 'w') as fp:
+                    with open('/tmp/lint.idp', 'w') as fp:
                         fp.write(args['code'])
 
-                    output = subprocess.run("folint /tmp/ding.idp", shell=True,
+                    output = subprocess.run("folint /tmp/lint.idp", shell=True,
                                             capture_output=True)
                     lint = output.stdout.decode()
 
@@ -287,7 +286,6 @@ class eval(Resource):
                                  'details': msg[4]
                                  }
                         errors.append(error)
-                    print(errors)
                     out = errors
                 else:
                     state = State.make(idpOf(args['code']),
