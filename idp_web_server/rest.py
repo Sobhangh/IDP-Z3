@@ -48,6 +48,8 @@ from typing import Dict
 
 import re
 
+from folint.SCA import lint_fo
+
 if with_profiling:
     from pyinstrument import Profiler
 
@@ -264,16 +266,8 @@ class eval(Resource):
                     out = {"result": "ok"}
 
                 elif method == "lint":
-                    # We want to run FOLint, the FO(.) linter.
-                    # TODO: import the linter directly, but this requires an
-                    # update to FOLint. For now, we use subprocess.
-                    import subprocess
-                    with open('/tmp/lint.idp', 'w') as fp:
-                        fp.write(args['code'])
-
-                    output = subprocess.run("folint /tmp/lint.idp", shell=True,
-                                            capture_output=True)
-                    lint = output.stdout.decode()
+                    # Run FOLint, the FO(.) linter.
+                    lint = lint_fo(args['code'])
 
                     # Match all the errors and format them in a nice dict.
                     msgs = re.findall(r'(Warning|Error): line (\d+) - colStart (\d+) - colEnd (\d+) => (.*)', lint)

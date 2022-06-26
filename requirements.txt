@@ -17,4 +17,4 @@ sphinx_rtd_theme
 textx==2.3
 z3-solver
 markupsafe==2.0.1 # Can be removed later: https://github.com/pallets/markupsafe/issues/284
-folint==0.0.2
+folint==1.0.0
