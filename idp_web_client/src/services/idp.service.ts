@@ -95,11 +95,12 @@ export class IdpService {
       out.subscribe(x => this.openCalls--, err => {
         console.log(err);
         this.messageService.add({severity: 'error', summary: 'Error', detail: err.statusText});
+        this.openCalls--;
         return err;
       });
     } else {  // Don't increment the spinner counter and don't decrement it afterwards.
       out = this.http.post<Object>(url, call).pipe(share());
-      out.subscribe(x => this.openCalls, err => {
+      out.subscribe(x => null, err => {
         console.log(err);
         this.messageService.add({severity: 'error', summary: 'Error', detail: err.statusText});
         return err;
