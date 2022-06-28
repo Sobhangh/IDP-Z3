@@ -48,7 +48,7 @@ from typing import Dict
 
 import re
 
-from folint.SCA import lint_fo
+from folint.folint.SCA import lint_fo
 
 if with_profiling:
     from pyinstrument import Profiler

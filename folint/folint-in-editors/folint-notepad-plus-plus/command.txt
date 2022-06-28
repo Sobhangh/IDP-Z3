@@ -1,0 +1,4 @@
+NPP_SAVE
+cd "$(FULL_CURRENT_PATH)"
+env_set PYTHONIOENCODING=utf-8
+python -u -m pylint "$(FULL_CURRENT_PATH)"
