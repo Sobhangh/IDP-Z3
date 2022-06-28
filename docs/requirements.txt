@@ -16,4 +16,3 @@ sphinx-rtd-theme==0.5.2
 recommonmark==0.6.0
 textx
 z3-solver
-folint==1.0.0
