@@ -17,30 +17,65 @@ export class EditorComponent {
   private change = false;
   textModeUnicode = false;
 
+  private lintTimeout = null;
+
+  private doLint(idpService) {
+    idpService.lint().then((msgs) => {
+      const marker_msgs = [];
+      for (let i = 0; i < msgs.length; i++) {
+        const msg = msgs[i];
+        let severity = null;
+        if (msg['type'] === 'Warning') {
+            severity = monaco.MarkerSeverity.Warning;
+        } else {
+            severity = monaco.MarkerSeverity.Error;
+        }
+        const marker_msg = {
+            startLineNumber: msg['line'],
+            startColumn: msg['colStart'],
+            endLineNumber: msg['line'],
+            endColumn: msg['colEnd'],
+            message: msg['details'],
+            severity: severity
+        };
+        marker_msgs.push(marker_msg);
+      }
+      const model = idpService.editor.getModel();
+      monaco.editor.setModelMarkers(model, 'owner', marker_msgs);
+    });
+  }
+
   public onInitEditor(editor: any) {
     this.idpService.editor = editor;
-    const idpService = this.idpService
+    const idpService = this.idpService;
 
     this.idpService.editor.addCommand([monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S], function() {
       if (idpService.IDE) {
         idpService.run();
       } else {
-        idpService.header.display = false
-        idpService.appRef.tick()
+        idpService.header.display = false;
+        idpService.appRef.tick();
       }
     });
     this.idpService.editor.model.onDidChangeContent((event) => {
       // Do nothing if the change came from an executeEdits
       if (this.change) {
-          this.change = false;
-          return;
+        this.change = false;
+        return;
       } else if (this.textModeUnicode) {
-      // Whenever a user has typed, switch back to ASCII
-          this.textModeUnicode = false;
-          return;
+        // Whenever a user has typed, switch back to ASCII
+        this.textModeUnicode = false;
+        return;
+
+      } else {
+        // Run the static code analysis after 1 second of no inputs.
+        clearTimeout(this.lintTimeout);
+        this.lintTimeout = setTimeout(() => this.doLint(idpService), 1000);
       }
     });
+
   }
+
 
   constructor(public idpService: IdpService, private messageService: MessageService, @Inject(DOCUMENT) document: Document) {
 

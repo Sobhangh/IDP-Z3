@@ -1,0 +1,166 @@
+IDP:
+    Shebang?
+    ( vocabularies=Vocabulary
+    | theories=TheoryBlock
+    | structures=Structure
+    | procedures=Procedure
+    | displays=Display) *
+;
+
+Comment:
+  /\/\/.*$/
+;
+
+Shebang: '#!' /.*$/;
+
+Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
+  Declaration: TypeDeclaration | SymbolDeclaration | Import;
+
+    Import: 'import' (name=ID);
+
+    TypeDeclaration:
+      /type[ \t]/
+      name=ID
+      (':=' ( enumeration=Ranges
+            | enumeration=Enumeration
+            | enumeration=ConstructedFrom))?;
+
+    SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
+          ( '(' sorts*=Subtype[/[*⨯]/] ')' | sorts*=Subtype[/[*⨯]/] )
+          ('->' | '→') out=Subtype;
+      Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
+
+  Annotations: ('[' annotations*=/[^\]]*/ ']')*;
+
+TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
+             ( definitions=Definition*
+               constraints=Axiom*
+               interpretations=SymbolInterpretation*
+             )* '}';
+
+  Definition: annotations=Annotations '{' rules*=Rule '}';
+  Rule: annotations=Annotations
+        (('!'|'∀') quantees+=Quantee[','] ':' )*
+        definiendum=AppliedSymbol
+        ('=' out=SumMinus)?
+        (('<-'|'←') body=Expression)? '.' ;
+      Quantee: ( vars+=Variable[','] ( ('in' | '∈') (subtype=Subtype | sort=SymbolExpr) )?
+               | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Subtype | sort=SymbolExpr) )?);
+          Variable: name=/`?[^\d\W]\w*\b/;
+          VarTuple: '(' vars+=Variable[','] ')';
+          Subtype: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
+            ( '['
+              ( '(' ins*=Subtype[/[*⨯]/] ')' | ins*=Subtype[/[*⨯]/] )
+              ('->' | '→') out=Subtype
+              ']'
+            )?;
+
+  Axiom: annotations=Annotations expr=Expression '.';
+
+    Expression:     AQuantification | RImplication;
+    RImplication:   ARImplication   | Equivalence;
+    Equivalence:    AEquivalence    | Implication;
+    Implication:    AImplication    | Disjunction;
+    Disjunction:    ADisjunction    | Conjunction;
+    Conjunction:    AConjunction    | Comparison;
+    Comparison:     AComparison     | SumMinus;
+    SumMinus:       ASumMinus       | MultDiv;
+    MultDiv:        AMultDiv        | Power;
+    Power:          APower          | Unary;
+    Unary:          AUnary          | Aggregate;
+    Aggregate:      AAggregate      | IfExpr;
+    IfExpr:         AIfExpr         | Base;
+
+
+    AQuantification: annotations=Annotations q=Quantor quantees+=Quantee[','] ':' f=Expression;
+      Quantor: '∀' | '!' | '∃' | '?' ;
+    ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
+    AEquivalence:  sub_exprs=Implication (operator=EquivalenceOp  sub_exprs=Implication)+;
+    AImplication:  sub_exprs=Disjunction (operator=ImplicationOp  sub_exprs=Disjunction)+;
+    ADisjunction:  sub_exprs=Conjunction (operator=DisjunctionOp  sub_exprs=Conjunction)+;
+    AConjunction:  sub_exprs=Comparison  (operator=ConjunctionOp  sub_exprs=Comparison )+;
+    AComparison:   annotations=Annotations
+                   sub_exprs=SumMinus    (operator=ComparisonOp   sub_exprs=SumMinus   )+;
+    ASumMinus:     sub_exprs=MultDiv     (operator=SumMinusOp     sub_exprs=MultDiv    )+;
+    AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
+    APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
+    AUnary: !INT !IDPFLOAT               (operators+=UnaryOperator  f=Aggregate);
+    AAggregate: !Date ( aggtype=/#|card/ '{' quantees*=Quantee[',']  ':' f=Expression '}'
+                | aggtype=/sum|min|max/ '(' 'lambda' quantees*=Quantee[',']  ':' f=Expression ')');
+    AIfExpr: 'if' if_f=Expression 'then' then_f=Expression 'else' else_f=Expression;
+
+    RImplicationOp: '<=' | '⇐';
+    EquivalenceOp: '<=>' | '⇔';
+    ImplicationOp:  '=>' | '⇒';
+    DisjunctionOp:   '|' | '∨';
+    ConjunctionOp:   '&' | '∧';
+    ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' ;
+    SumMinusOp:      '+' | '-';
+    MultDivOp:       '⨯' | '*' | '/' | '%';
+    UnaryOperator:   '-' | '~' | '¬';
+
+
+    Base:  AQuantification | AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
+
+      AppliedSymbol: annotations=Annotations
+              symbol=SymbolExpr
+              '(' sub_exprs*=Expression[','] ')'
+              ( is_enumerated=/is\s+(not\s+)?enumerated/
+              | is_enumeration=/(not\s+)?in|∈|(∉)/ in_enumeration=Enumeration)?;
+        SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
+      UnappliedSymbol: s=Symbol;
+      Number: number=IDPFLOAT | number=INT;
+        IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
+      Date: iso=/#\d{4}-\d{2}-\d{2}/ | iso='#TODAY';
+      Brackets: annotations=Annotations '(' f=Expression ')';
+
+
+Structure: 'structure' name=ID? (':' vocab_name=ID)?
+           '{' interpretations*=SymbolInterpretation '}';
+  SymbolInterpretation: name=UnappliedSymbol ':='
+                        ( enumeration=FunctionEnum ('else' default=Identifier)?
+                        | enumeration=Ranges
+                        | enumeration=Enumeration
+                        | enumeration=CSVEnumeration
+                        | enumeration=ConstructedFrom
+                        | default=Identifier
+                        ) '.';
+  FunctionEnum: '{' tuples+=FunctionTuple[','] '}';
+  FunctionTuple: ( args=Identifier | '(' args*=Identifier[','] ')' )?
+                  ('->' | '→') value=Identifier;
+  Ranges: '{' elements+=RangeElement[','] '}';
+      RangeElement:   (fromI=Number ('..' toI=Number)?)
+                    | (fromI=Date   ('..' toI=Date  )?) ;
+  Enumeration: '{' tuples*=Tuple[','] '}';
+  Tuple:  ( args=Identifier | '(' args*=Identifier[','] ')' );
+  CSVEnumeration[noskipws]: /\s*/ '{' /\n/ tuples*=CSVTuple[/\n/] / */ '}';
+  CSVTuple[noskipws]:  args*=Identifier[/([\t ]*,[\t ]*|[\t ]+)/];
+
+  ConstructedFrom: constructed=/constructed\s+from/?
+                   '{' constructors*=Constructor[',']  '}';
+    Constructor: name=UnappliedSymbol ('(' args+=Accessor[','] ')' )?;
+    Accessor: (accessor=UnappliedSymbol ':')? type=UnappliedSymbol;
+
+  Identifier: AppliedSymbol | UnappliedSymbol | Number | Date;
+
+Goal: 'goal' name=ID;
+
+View: 'view' viewType=ViewType;
+  ViewType: 'normal' | 'expanded';
+
+Display: 'display' '{' (constraints=Expression '.' | interpretations=SymbolInterpretation)* '}';
+
+Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}';
+
+  PyStatement: PyAssignment | Call1 ;
+  PyAssignment: var=ID '=' val=PyExpr;
+  PyExpr: !PyAssignment (String | Call1 | Number | PyList);
+
+  Call1: name=ID ( par='(' ( args+=PyExpr[','] (',' kwargs+=PyAssignment[','])?
+                     | kwargs*=PyAssignment[',']) ')'
+                 )?
+        ('.' post=PyExpr)?;
+  String: literal=/f?"(\.|[^"])*"/;
+  PyList: '[' elements*=PyExpr[','] ']';
+
+
