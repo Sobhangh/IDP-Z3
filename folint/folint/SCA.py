@@ -106,55 +106,52 @@ def extra_check(file, detections):
     consistence_help = False
     unicode_symbols = ['⨯', '→', '𝔹', 'ℤ', 'ℝ', '∀', '∃', '∈', '∉', '←', '∧',
                        '∨', '¬', '⇒', '⇔', '⇐', '≤', '≠', '≥']
-    ascii_symbols = ['*', '->', 'Bool', 'Int', 'Real', '!', '?', ' in ',
+    ascii_symbols = ['*', '->', ' Bool ', ' Int ', ' Real ', '!', '?', ' in ',
                      ' not in ', '<-', '&', '|', '~', '=>', '<=>', '<=', '=<',
                      '~=', '>=']
-    lineNumber = 1
-    help_lines = []
-    duplicate_check = 0
-    for line in file.split('\n'):
+    for line_number, line in enumerate(file.split('\n'), start=1):
         # Ignore annotations.
         if line.strip().startswith('['):
             continue
 
         # Some symbols should not have a space in front.
         for match in re.finditer(r'\s,\s?', line):
-            detections.append((lineNumber, match.span()[0], match.span()[1],
+            detections.append((line_number, match.span()[0], match.span()[1],
                                "Style: no space in front of a comma",
                                "Warning"))
 
         # Some symbols should have a space in front.
-        for match in re.finditer(r'\w[*|⨯|>|→|⇒|⇔|≤|≠|≥|=|∉|∈]', line):
+        for match in re.finditer(r'[\w\)\d][*⨯><→⇒⇔≤≠≥=∉∈∧∨&|]', line):
             symbol = match.group()[1]
-            detections.append((lineNumber, match.span()[0], match.span()[1],
+            detections.append((line_number, match.span()[0], match.span()[1],
                                f"Style: space in front of '{symbol}'",
                                "Warning"))
 
         # Some symbols should be followed by a space.
-        for match in re.finditer(r'[,|*|⨯|>|→|⇒|⇔|≤|≠|≥|=|∉|∈]\w', line):
+        for match in re.finditer(r'[,*⨯><→⇒⇔≤≠≥=∉∈][\w\d]', line):
             symbol = match.group()[0]
-            detections.append((lineNumber, match.span()[0], match.span()[1],
+            detections.append((line_number, match.span()[0], match.span()[1],
                                f"Style: space after '{symbol}'",
                                "Warning"))
 
         # Some symbols should not be followed by a space.
-        for match in re.finditer(r'[~|¬|!|∀|?|∃]\s', line):
+        for match in re.finditer(r'[~¬!∀?∃]\s', line):
             symbol = match.group()[0]
-            detections.append((lineNumber, match.span()[0], match.span()[1],
+            detections.append((line_number, match.span()[0], match.span()[1],
                                f"Style: no space allowed after '{symbol}'",
                                "Warning"))
 
         # Comments on separate lines
         for match in re.finditer(pattern2, line):
             if len(line[0:match.span()[0]].strip()) != 0:
-                detections.append((lineNumber, match.span()[0],
+                detections.append((line_number, match.span()[0],
                                    match.span()[1],
                                    "Style: comment should be on separate line",
                                    "Warning"))
 
         # Don't allow multiple rules on the same line.
-        if line.count('.') > 1:
-            detections.append((lineNumber, 0, len(line),
+        if line.count('. ') > 1:
+            detections.append((line_number, 0, len(line),
                                "Style: use new line for new rule",
                                "Warning"))
 
@@ -164,7 +161,7 @@ def extra_check(file, detections):
                         "display"]
             if not(len(line.strip()) == 0
                    or any(word in line for word in keywords)):
-                detections.append((lineNumber, 0, 4,
+                detections.append((line_number, 0, 4,
                                    "Style: incorrect indentation", "Warning"))
 
         # Consistent use of unicode or ASCII
@@ -178,40 +175,20 @@ def extra_check(file, detections):
         else:
             if (any(symbol in line for symbol in unicode_symbols) and
                     any(symbol in line for symbol in ascii_symbols)):
-                print('a')
-                detections.append((lineNumber, 0, 4,
+                detections.append((line_number, 0, 4,
                                    "Style: don't mix unicode and ASCII",
                                    "Warning"))
             elif (any(symbol in line for symbol in unicode_symbols) and
                     consistence == "ASCII"):
-                print('b')
-                detections.append((lineNumber, 0, 4,
+                detections.append((line_number, 0, 4,
                                    "Style: don't mix unicode and ASCII",
                                    "Warning"))
             elif (any(symbol in line for symbol in ascii_symbols) and
                     consistence == "unicode"):
-                print('c')
-                detections.append((lineNumber, 0, 4,
+                detections.append((line_number, 0, 4,
                                    "Style: don't mix unicode and ASCII",
                                    "Warning"))
 
-        # Don't duplicate rules or lines.
-        # Duplicates in struc and voc are already detected by IDP.
-        test_keywords = ["theory", "procedure"]
-        if (any(word in line for word in test_keywords) and
-                duplicate_check == 0):
-            help_lines.append(line)
-            duplicate_check = 1
-        elif (duplicate_check == 1 and len(line.strip()) != 0):
-            if (line in help_lines):
-                detections.append((lineNumber, 0, len(line),
-                                   "Style: duplicate line", "Warning"))
-            else:
-                help_lines.append(line)
-        if ('}' in line and duplicate_check == 1):
-            duplicate_check = 0
-            help_lines = []
-        lineNumber += 1
     return detections
 
 
