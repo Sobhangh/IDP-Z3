@@ -42,7 +42,7 @@ from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, RESERVED
 
 #help functies voor SCA
 #####################################################
-def typeSymbol_to_String(type1):    # zet type symbol om in str
+def type_symbol_to_str(type1):    # zet type symbol om in str
     if type1 == "ℤ":
         return "Int"
     if type1 == "𝔹":
@@ -1002,8 +1002,8 @@ class AComparison(Operator):
         """
         type1 = self.sub_exprs[0].get_type() #get type van linker lid
         type2 = self.sub_exprs[1].get_type() #get type van rechter lid
-        type1 = typeSymbol_to_String(type1)  #type symbool omzetten naar string
-        type2 = typeSymbol_to_String(type2)  #type symbool omzetten naar string
+        type1 = type_symbol_to_str(type1)  #type symbool omzetten naar string
+        type2 = type_symbol_to_str(type2)  #type symbool omzetten naar string
 
         if type1 != type2:   #comparison van 2 verschillende types, categorieen (2),(3) en (4)
             if type1 is None:     #type linkerlid niet kunnen bepalen
@@ -1036,12 +1036,12 @@ class ASumMinus(Operator):
                 break
 
             lijst = ["Int","Real","Bool"]
-            if not(typeSymbol_to_String(self.sub_exprs[i-1].get_type()) in lijst):
-                fouten.append((self,f"Wrong type '{typeSymbol_to_String(self.sub_exprs[i-1].get_type())}' used in sum or difference ","Error"))
+            if not(type_symbol_to_str(self.sub_exprs[i-1].get_type()) in lijst):
+                fouten.append((self,f"Wrong type '{type_symbol_to_str(self.sub_exprs[i-1].get_type())}' used in sum or difference ","Error"))
 
             if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():        #optelling of aftrekking van elementen van verschillende types
-                type1 = typeSymbol_to_String(self.sub_exprs[i-1].get_type())
-                type2 = typeSymbol_to_String(self.sub_exprs[i].get_type())
+                type1 = type_symbol_to_str(self.sub_exprs[i-1].get_type())
+                type2 = type_symbol_to_str(self.sub_exprs[i].get_type())
                 if ((type1=="Int" and type2=="Real") or (type1=="Real" and type2=="Int")):      #types Int en Real mogen met elkaar opgeteld of afgetrokken worden
                     continue
                 else:
@@ -1060,7 +1060,7 @@ class ASumMinus(Operator):
         else :  #elementen van versschillende types
             lijst = ["Int","Real"]
             for i in self.sub_exprs:
-                if typeSymbol_to_String(i.get_type()) in lijst:
+                if type_symbol_to_str(i.get_type()) in lijst:
                     continue
                 else:
                     return None
@@ -1077,11 +1077,11 @@ class AMultDiv(Operator):
                 fouten.append((self,f"Multiplication or division of two elements of type Bool","Error"))
             lijst = ["Int","Real","Bool"]
             # multi/div only possible with "Int","Real" and "Bool"
-            if not(typeSymbol_to_String(self.sub_exprs[i-1].get_type()) in lijst):
-                fouten.append((self.sub_exprs[i-1],f"Wrong type '{typeSymbol_to_String(self.sub_exprs[i-1].get_type())}' used in multiplication or divison ","Error"))
+            if not(type_symbol_to_str(self.sub_exprs[i-1].get_type()) in lijst):
+                fouten.append((self.sub_exprs[i-1],f"Wrong type '{type_symbol_to_str(self.sub_exprs[i-1].get_type())}' used in multiplication or divison ","Error"))
             if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():        #vermenigvuldigen of delen van elementen van verschillende types
-                type1 = typeSymbol_to_String(self.sub_exprs[i-1].get_type())
-                type2 = typeSymbol_to_String(self.sub_exprs[i].get_type())
+                type1 = type_symbol_to_str(self.sub_exprs[i-1].get_type())
+                type2 = type_symbol_to_str(self.sub_exprs[i].get_type())
                 if ((type1=="Int" and type2=="Real") or (type1=="Real" and type2=="Int")):      #vermenigvuldigen of delen tss met int en Real mag
                     continue
                 else:
@@ -1099,7 +1099,7 @@ class AMultDiv(Operator):
         else :  #elementen van versschillende types
             lijst = ["Int","Real"]
             for i in self.sub_exprs:
-                if typeSymbol_to_String(i.get_type()) in lijst:
+                if type_symbol_to_str(i.get_type()) in lijst:
                     continue
                 else:
                     return None
@@ -1389,21 +1389,33 @@ class AppliedSymbol(Expression):
         else :
             #check als argumenten van het juiste type zijn
             for i in range(self.decl.arity):
-                if self.decl.sorts[i].type != self.sub_exprs[i].get_type():
-                    if self.sub_exprs[i].get_type() is None:
-                        if isinstance(self.sub_exprs[i],(ASumMinus, AMultDiv)):
-                            fouten.append((self,f"Argument of Unknown type, type of {self.sub_exprs[i]} is unknown (formule with different types)","Warning"))
+                expected_type = self.decl.sorts[i].type
+                found_type = ''
+                # We make a distinction here between normal types and partial
+                # functions.
+                if isinstance(self.sub_exprs[i].sort.decl.sorts[i], Subtype):
+                    # In the case of a partial function, the type is actually
+                    # the argument.
+                    found_type = str(self.sub_exprs[i].sort.decl.sorts[i])
+                else:
+                    # Otherwise, it's just the type.
+                    found_type = self.sub_exprs[i].get_type()
+
+                if expected_type != found_type:
+                    if not found_type:
+                        if isinstance(self.sub_exprs[i], (ASumMinus, AMultDiv)):
+                            fouten.append((self, f"Argument of Unknown type, type of {self.sub_exprs[i]} is unknown (formula with different types)","Warning"))
                         else:
-                            fouten.append((self,f"Argument of Unknown type, type of {self.sub_exprs[i]} is unknown (probably untyped quantifier)","Warning"))
+                            fouten.append((self, f"Argument of Unknown type, type of {self.sub_exprs[i]} is unknown (probably untyped quantifier)","Warning"))
                     else :
-                        fouten.append((self,f"Argument of wrong type: expected type '{typeSymbol_to_String(self.decl.sorts[i].type)}' but given type '{typeSymbol_to_String(self.sub_exprs[i].get_type())}'","Error"))
+                        fouten.append((self, f"Argument of wrong type: expected type '{type_symbol_to_str(expected_type)}' but given type '{type_symbol_to_str(found_type)}'","Error"))
                     break #so only 1 error message
 
         # check if elementen in enumeratie are of correct type, vb Lijn() in {Belgie}. expected type Kleur, Belgie is of type Land
         if self.is_enumeration =='in':
             for i in self.in_enumeration.tuples :
                 if self.decl.type != i.args[0].get_type():
-                    fouten.append((i.args[0],f"Element of wrong type : expected type= {typeSymbol_to_String(self.decl.type)} but given type= {typeSymbol_to_String(i.args[0].get_type())}","Error"))
+                    fouten.append((i.args[0],f"Element of wrong type : expected type= {type_symbol_to_str(self.decl.type)} but given type= {type_symbol_to_str(i.args[0].get_type())}","Error"))
                     break
 
         for sub in self.sub_exprs:
