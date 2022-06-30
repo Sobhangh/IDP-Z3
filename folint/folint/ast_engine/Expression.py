@@ -140,7 +140,8 @@ class ASTNode(object):
         print(spaties*" "+type(self).__name__+": ",self)
 
     def SCA_Check(self,detections):
-        print("SCA check:"+type(self).__name__+": ",self)
+        return
+        # print("SCA check:"+type(self).__name__+": ",self)
 
 
 class Annotations(ASTNode):
@@ -1386,13 +1387,18 @@ class AppliedSymbol(Expression):
                     detections.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
             else:
                 detections.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
-        else :
-            #check als argumenten van het juiste type zijn
+        else:
+            # For each argument, find the expected type and the found type.
+            # We make a distinction between normal types, partial functions and
+            # constructors.
             for i in range(self.decl.arity):
-                expected_type = self.decl.sorts[i].type
-                found_type = ''
-                # We make a distinction here between normal types and partial
-                # functions.
+                if isinstance(self.decl, Constructor):
+                    # Constructors.
+                    expected_type = self.decl.sorts[i].decl.type
+                else:
+                    # Normal types, partial functions.
+                    expected_type = self.decl.sorts[i].decl.sorts[i].type
+
                 if hasattr(self.sub_exprs[i], 'sort') and isinstance(self.sub_exprs[i].sort.decl.sorts[i], Subtype):
                     # In the case of a partial function, the type is actually
                     # the argument.
