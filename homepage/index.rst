@@ -24,8 +24,16 @@ IDP-Z3 is also used commercially for:
 
 Additionally, IDP-Z3 is also used in private projects by companies such as Saint-Gobain and Flanders Make.
 These projects use a data-poor, knowledge-rich approach to Artificial Intelligence to leverage the knowledge of the experts in their fields.
-
 Our partners particularly appreciate the ease of encoding this knowledge in FO(·): its expressivity removes a long-standing barrier in the use of Knowledge Base systems.
+
+We are always interest in collaborating with you to see how we can get the most out of IDP-Z3 within your company.
+
+    KU Leuven has been our research partner as of the start of our commercial activities.
+    Since then, the DTAI research group has supported us along the way in providing academic background to some of our developments, and even developing innovative solutions for our clients together.
+    Our collaboration is fruitful for all parties involved: we, at Intelli-Select, get to present our clients with unseen industry solutions pushing the envelope of what's possible or imaginable further than what's currently available in the market; and at the same time, we provide new research questions and potential applications to the amazingly brilliant people at KU Leuven for further investigation.
+    So far it has been a pleasure and we are looking forward to continue working with the professional and highly skilled team at KU Leuven.
+    
+    -- Bart Coppens, Intelli-Select
 
 Get in touch?
 -------------
