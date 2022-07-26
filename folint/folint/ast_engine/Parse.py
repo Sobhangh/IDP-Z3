@@ -938,12 +938,19 @@ class SymbolInterpretation(ASTNode):
                             if str(t.args[i]) not in opties[i]:
                                 detections.append((t.args[i],f"Element of wrong type","Error"))  # element of wrong type used in predicate
 
-        if isinstance(self.enumeration,FunctionEnum):     #als functie
-            out_type = self.symbol.decl.out                                                 #out type functie
-            out_type_waardes = str(out_type.decl.enumeration).replace(" ", "").split(',')   #waardes out type
+        if isinstance(self.enumeration,FunctionEnum):     # Symbol is function
+            out_type = self.symbol.decl.out   # Get output type of function
+            out_type_waardes = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
+            if (out_type_waardes[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
+                out_type_waardes = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
+
             opties = []
-            for i in self.symbol.decl.sorts:    #get alle waarde van argument types
-                opties.append(str(i.decl.enumeration).replace(" ", "").split(','))
+            for i in self.symbol.decl.sorts:    # Get all values of the argument types
+                in_type_waardes = str(i.decl.enumeration).replace(" ", "").split(',')
+                if (in_type_waardes[0] != 'None'): # Type interpretation in Vocabulary
+                    opties.append(in_type_waardes)
+                else:                              # Type interpretation in Structure
+                    opties.append(str(self.parent.interpretations[i.str].enumeration).replace(" ", "").split(','))
 
             # bereken alle mogelijke combinaties
             newlist = []
