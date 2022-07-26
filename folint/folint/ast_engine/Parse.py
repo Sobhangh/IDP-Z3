@@ -918,47 +918,53 @@ class SymbolInterpretation(ASTNode):
         self.enumeration.printAST(spaties+5)
 
     def SCA_Check(self,detections):
-        #check de gedefinieerde functies, predicaten, constanten en proposities
-        if (not(isinstance(self.enumeration,(Ranges,FunctionEnum))) and not(self.is_type_enumeration)):   #als predicaat, const of boolean
-            if self.symbol.decl.arity==0: #const en boolean
-                out_type = self.symbol.decl.out                                                 #out type functie
-                if hasattr(out_type.decl,'enumeration'):      #als type geen built-in type is
-                    out_type_waardes = str(out_type.decl.enumeration).replace(" ", "").split(',')   #waardes out type
-                    if self.default.str not in out_type_waardes:
-                        detections.append((self.default,f"Element of wrong type","Error"))  # element of wrong type used for const
-            else :
-                opties = []
-                for i in self.symbol.decl.sorts:    #get alle waarde van argument types
-                    opties.append(str(i.decl.enumeration).replace(" ", "").split(','))
+        # Check the defined functions, predicates, constants and propositions
+        if (not(isinstance(self.enumeration,(Ranges,FunctionEnum))) and not(self.is_type_enumeration)):   # Symbol is predicate, constant or boolean
+            if self.symbol.decl.arity==0: # Symbol is constant or boolean
+                out_type = self.symbol.decl.out             # Get output type
+                if hasattr(out_type.decl,'enumeration'):    # Output type is no built-in type
+                    out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
+                    if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
+                        out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
+                    if self.default.str not in out_type_values:
+                        detections.append((self.default,f"Element of wrong type","Error"))  # Element of wrong type used
+            else : # Symbol is predicate
+                options = []
+                for i in self.symbol.decl.sorts:    # Get all values of the argument types
+                    in_type_values = str(i.decl.enumeration).replace(" ", "").split(',')
+                    if (in_type_values[0] != 'None'):   # Type interpretation in Vocabulary
+                        options.append(in_type_values)
+                    else:                               # Type interpretation in Structure
+                        options.append(str(self.parent.interpretations[i.str].enumeration).replace(" ", "").split(','))
                 for t in self.enumeration.tuples:
-                    if len(t.args) > self.symbol.decl.arity:    #als te veel input elementen
+                    if len(t.args) > self.symbol.decl.arity:    # Given to much input elements
                         detections.append((t.args[0],f"To much input elements, expected {self.symbol.decl.arity}","Error"))
                     else :
-                        for i in range(0,len(t.args),1):  #get elements
-                            if str(t.args[i]) not in opties[i]:
-                                detections.append((t.args[i],f"Element of wrong type","Error"))  # element of wrong type used in predicate
+                        for i in range(0,len(t.args),1):  # Get elements
+                            if str(t.args[i]) not in options[i]:
+                                detections.append((t.args[i],f"Element of wrong type","Error"))  # Element of wrong type used in predicate
 
         if isinstance(self.enumeration,FunctionEnum):     # Symbol is function
             out_type = self.symbol.decl.out   # Get output type of function
-            out_type_waardes = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
-            if (out_type_waardes[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
-                out_type_waardes = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
+            out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
+            if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
+                out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
 
-            opties = []
+            options = []
             for i in self.symbol.decl.sorts:    # Get all values of the argument types
-                in_type_waardes = str(i.decl.enumeration).replace(" ", "").split(',')
-                if (in_type_waardes[0] != 'None'): # Type interpretation in Vocabulary
-                    opties.append(in_type_waardes)
+                in_type_values = str(i.decl.enumeration).replace(" ", "").split(',')
+                if (in_type_values[0] != 'None'): # Type interpretation in Vocabulary
+                    options.append(in_type_values)
                 else:                              # Type interpretation in Structure
-                    opties.append(str(self.parent.interpretations[i.str].enumeration).replace(" ", "").split(','))
+                    options.append(str(self.parent.interpretations[i.str].enumeration).replace(" ", "").split(','))
 
-            # bereken alle mogelijke combinaties
-            newlist = []
-            oudlist = opties[0]
-            for i in range(1,len(opties)):
-                newlist = []
-                for a in oudlist:
-                    for b in opties[i]:
+            # Determine all possible combinations
+            new_list = []
+            old_list = options[0]
+            for i in range(1,len(options)):
+                new_list = []
+                for a in old_list:
+                    for b in options[i]:
                         hulp_element = []
                         if isinstance(a,list):
                             for c in a:
@@ -966,33 +972,33 @@ class SymbolInterpretation(ASTNode):
                         else :
                             hulp_element.append(a)
                         hulp_element.append(b)
-                        newlist.append(hulp_element)
-                oudlist = newlist
+                        new_list.append(hulp_element)
+                old_list = new_list
 
-            mogelijkheden = oudlist
+            possibilities = old_list
             duplicates = []
             for t in self.enumeration.tuples:
-                if str(t.value) not in out_type_waardes:  # als output element van verkeerd type
+                if str(t.value) not in out_type_values:  # Used an output element of wrong type
                     detections.append((t.value,f"Output element of wrong type, {str(t.value)}","Error"))
                 elements = []
-                for i in range(0,len(t.args)-1,1):  #get input elements
-                    if (i < len(opties) and (str(t.args[i]) not in opties[i])) :
-                        detections.append((t.args[i],f"Element of wrong type, {str(t.args[i])}","Error"))  # element of wrong type used
+                for i in range(0,len(t.args)-1,1):  # Get input elements
+                    if (i < len(options) and (str(t.args[i]) not in options[i])) :
+                        detections.append((t.args[i],f"Element of wrong type, {str(t.args[i])}","Error"))  # Element of wrong type used
                     elements.append(str(t.args[i]))
-                if len(t.args) > self.symbol.decl.arity+1:    #als te veel input elementen
+                if len(t.args) > self.symbol.decl.arity+1:    # Given to much input elements
                     detections.append((t.args[0],f"To much input elements, expected {self.symbol.decl.arity}","Error"))
-                elif elements in mogelijkheden:   #als mogelijkheid geldig is
-                    mogelijkheden.remove(elements) #verwijder uit lijst om duplicates te vermijden
-                    duplicates.append(elements) #voeg de al gebruikt mogelijkheden toe
-                elif (self.symbol.decl.arity == 1 and elements[0] in mogelijkheden): #als func met 1arg
-                    mogelijkheden.remove(elements[0]) #verwijder uit lijst om duplicates te vermijden
-                    duplicates.append(elements[0]) #voeg de al gebruikt mogelijkheden toe
-                elif (elements in duplicates or elements[0] in duplicates): # als duplicates
-                        detections.append((t.args[0],f"Wrong input elements, duplicate","Error"))  #duplicate
+                elif elements in possibilities:     # Valid possiblity
+                    possibilities.remove(elements)  # Remove used possibility out of list
+                    duplicates.append(elements)     # Add used possibility to list to detect duplicates
+                elif (self.symbol.decl.arity == 1 and elements[0] in possibilities): # Function with 1 input element, valid possibility
+                    possibilities.remove(elements[0])   # Remove used possibility out of list
+                    duplicates.append(elements[0])      # Add used possibility to list to detect duplicates
+                elif (elements in duplicates or elements[0] in duplicates): # Duplicate
+                        detections.append((t.args[0],f"Wrong input elements, duplicate","Error"))
 
-            if (len(mogelijkheden) > 0 and self.symbol.decl.arity == 1): #als functie niet voledig
-                    detections.append((self,f"Function not total defined, missing {mogelijkheden}","Error"))
-            elif len(mogelijkheden) > 0: #als functie niet volledig
+            if (len(possibilities) > 0 and self.symbol.decl.arity == 1): # Function not totally defined
+                    detections.append((self,f"Function not total defined, missing {possibilities}","Error"))
+            elif len(possibilities) > 0: # Function not totally defined
                 detections.append((self,f"Function not total defined, missing elements","Error"))
 
 
