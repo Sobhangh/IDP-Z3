@@ -1,0 +1,15 @@
+vocabulary V {
+    type Tijdstip := {nacht,ochtend,middag,avond}
+    type Moment := constructed from {moment(tijd: Tijdstip)}
+    type Dienst := constructed from {dienst(mom: Moment)}
+}
+
+theory T:V {
+}
+
+structure S:V {
+}
+
+procedure main() {
+    pretty_print(model_expand(T,S,max=1))
+}
