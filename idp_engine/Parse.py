@@ -797,7 +797,35 @@ class SymbolInterpretation(ASTNode):
         self.is_type_enumeration = None
 
     def interpret_application(self, theory, rank, applied, args, tuples=None):
-        """ returns the interpretation of self applied to args """
+        """returns an expression equivalent to `self.symbol` applied to `args`,
+        simplified by the interpretation of `self.symbol`.
+
+        This is a recursive function.
+
+        Example: assume `f:={(1,2)->A, (1, 3)->B, (2,1)->C}` and `args=[g(1),2)].
+        The returned expression is:
+        ```
+        if g(1) = 1 then A
+        else if g(1)=2 then f(g(1),2)
+        else f(g(1),2)
+        ```
+
+        Args:
+            theory (Theory): not used
+
+            rank (Int): iteration number (from 0)
+
+            applied (AppliedSymbol): template to create new AppliedSymbol
+                (ex: `g(1),a()`, before interpretation)
+
+            args (List(Expression)): interpreted arguments applied to the symbol (ex: `g(1),2`)
+
+            tuples (OrderedSet[Tuple], optional): relevant tuples for this iteration.
+                Initialized with `[[1,2,A], [1,3,B], [2,1,C]]`
+
+        Returns:
+            Expression: Grounded interpretation of self.symbol applied to args
+        """
         tuples = list(self.enumeration.tuples) if tuples == None else tuples
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
