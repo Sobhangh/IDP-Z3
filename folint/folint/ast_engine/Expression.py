@@ -1001,28 +1001,30 @@ class AComparison(Operator):
                 and self.sub_exprs[1].value is not None
 
     def SCA_Check(self,detections):
-        """ types vergelijken : 4 categorieen
-            (1) Dezelfde types
-            (2) Niet dezelfde types maar mogen vergeleken worden
-            (3) Niet dezelfde types en mogen NIET vergeleken worden maar kunnen toch vergeleken worden (warning)
-            (4) Niet dezelfde types en mogen NIET vergeleken worden en kunnen NIET vergeleken worden (error)
+        """ Compare types: 4 categories
+            (1) Both are the same type
+            (2) They are different, but can be compared (e.g. Int <> Real)
+            (3) Cannot be compared, but are allowed by IDP-Z3. This also
+            happens when a numerical type is interpreted in the structure (warning)
+            (4) Cannot be compared at all. (error)
         """
-        type1 = self.sub_exprs[0].get_type() #get type van linker lid
-        type2 = self.sub_exprs[1].get_type() #get type van rechter lid
-        type1 = type_symbol_to_str(type1)  #type symbool omzetten naar string
-        type2 = type_symbol_to_str(type2)  #type symbool omzetten naar string
+        # Get types and convert to String.
+        type1 = self.sub_exprs[0].get_type()
+        type2 = self.sub_exprs[1].get_type()
+        type1 = type_symbol_to_str(type1)
+        type2 = type_symbol_to_str(type2)
 
-        if type1 != type2:   #comparison van 2 verschillende types, categorieen (2),(3) en (4)
-            if type1 is None:     #type linkerlid niet kunnen bepalen
+        if type1 != type2:  # Cat 2, 3 and 4
+            if type1 is None:
                 detections.append((self.sub_exprs[0],f"Could not determine the type of {self.sub_exprs[0]} ","Warning"))
-            elif type2 is None:   #type rechterlid niet kunnen bepalen
+            elif type2 is None:
                 detections.append((self.sub_exprs[1],f"Could not determine the type of {self.sub_exprs[1]} ","Warning"))
-            else:                   #zowel linker- als rechterlid type zijn bepaald maar toch verschillend
-                cat = typesVergelijken(type1,type2) #kijk welke types met elkaar vergeleken mogen worden
+            else:
+                cat = typesVergelijken(type1,type2)
                 if cat == 3:  #cat(3) WARNING
-                    detections.append((self,f"Comparison of 2 diffent types: {type1} and {type2}","Warning"))
+                    detections.append((self,f"Comparison of 2 possibly incompatible types: {type1} and {type2}","Warning"))
                 if cat == 4:  #cat(4) ERROR
-                    detections.append((self,f"Comparison of 2 diffent types: {type1} and {type2}","Error"))
+                    detections.append((self,f"Comparison of 2 incompatble types: {type1} and {type2}","Error"))
         if (type1 is None and type2 is None):   #beide types zijn unknown
             detections.append((self.sub_exprs[0],f"Comparison of 2 unknown types: {type1} and {type2}","Warning"))
 
@@ -1038,17 +1040,21 @@ class ASumMinus(Operator):
 
     def SCA_Check(self, detections):
         for i in range(0,len(self.sub_exprs)):
-            if (self.sub_exprs[i].get_type()=="𝔹" and self.sub_exprs[i-1].get_type()=="𝔹"):   #optelling of aftrekking van booleans met elkaar
-                detections.append((self,f"Sum or difference of two elements of type Bool","Error"))
+            l_type = self.sub_exprs[i].get_type()
+            r_type = self.sub_exprs[i-1].get_type()
+            if l_type is None or r_type is None:
+                continue
+            if (l_type == "𝔹" and r_type == "𝔹"):
+                detections.append((self,f"Cannot sum or subtract Bools","Error"))
                 break
 
             lijst = ["Int","Real","Bool"]
-            if not(type_symbol_to_str(self.sub_exprs[i-1].get_type()) in lijst):
+            if not(type_symbol_to_str(r_type) in lijst):
                 detections.append((self,f"Wrong type '{type_symbol_to_str(self.sub_exprs[i-1].get_type())}' used in sum or difference ","Error"))
 
-            if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():        #optelling of aftrekking van elementen van verschillende types
-                type1 = type_symbol_to_str(self.sub_exprs[i-1].get_type())
-                type2 = type_symbol_to_str(self.sub_exprs[i].get_type())
+            if r_type != l_type:
+                type1 = type_symbol_to_str(r_type)
+                type2 = type_symbol_to_str(l_type)
                 if ((type1=="Int" and type2=="Real") or (type1=="Real" and type2=="Int")):      #types Int en Real mogen met elkaar opgeteld of afgetrokken worden
                     continue
                 else:
@@ -1083,9 +1089,10 @@ class AMultDiv(Operator):
             if (self.sub_exprs[i].get_type()=="𝔹" and self.sub_exprs[i-1].get_type()=="𝔹"):
                 detections.append((self,f"Multiplication or division of two elements of type Bool","Error"))
             lijst = ["Int","Real","Bool"]
-            # multi/div only possible with "Int","Real" and "Bool"
+            # multi/div only possible with "Int","Real" and "Bool" or numerical
+            # subtypes.
             if not(type_symbol_to_str(self.sub_exprs[i-1].get_type()) in lijst):
-                detections.append((self.sub_exprs[i-1],f"Wrong type '{type_symbol_to_str(self.sub_exprs[i-1].get_type())}' used in multiplication or divison ","Error"))
+                detections.append((self.sub_exprs[i-1],f"Type '{type_symbol_to_str(self.sub_exprs[i-1].get_type())}' might not be allowed in multiplication or divison ","Warning"))
             if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():        #vermenigvuldigen of delen van elementen van verschillende types
                 type1 = type_symbol_to_str(self.sub_exprs[i-1].get_type())
                 type2 = type_symbol_to_str(self.sub_exprs[i].get_type())
