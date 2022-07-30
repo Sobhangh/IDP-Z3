@@ -135,7 +135,7 @@ def extra_check(file, detections):
                                "Warning"))
 
         # Some symbols should not be followed by a space.
-        for match in re.finditer(r'[~¬]\s', line):
+        for match in re.finditer(r'[~¬]s', line):
             symbol = match.group()[0]
             detections.append((line_number, match.span()[0], match.span()[1],
                                f"Style: no space allowed after '{symbol}'",
@@ -156,7 +156,7 @@ def extra_check(file, detections):
                                "Warning"))
 
         # Correct use of indentation
-        if not(line.startswith('\t') or line.startswith('    ')):
+        if not(line.startswith('\t') or line.startswith('    ') or line.startswith('//')):
             keywords = ["vocabulary", "structure", "theory", "procedure", "}",
                         "display"]
             if not(len(line.strip()) == 0
@@ -233,6 +233,7 @@ def lint_fo(idp_file, timing=True, print_ast=False):
         output_str += f"Error: line {0} - colStart {0} - colEnd {0} => Key Error {e2}\n"
 
     except Exception as e:
+        raise e
         output_str += str(e) + '\n'
         output_str += "\n---------- Syntax Error ----------\n"
         try:
