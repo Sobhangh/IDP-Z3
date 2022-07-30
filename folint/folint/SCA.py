@@ -109,7 +109,22 @@ def extra_check(file, detections):
     ascii_symbols = ['*', '->', ' Bool ', ' Int ', ' Real ', '!', '?', ' in ',
                      ' not in ', '<-', '&', '|', '~', '=>', '<=>', '<=', '=<',
                      '~=', '>=']
+    cur_block = None
     for line_number, line in enumerate(file.split('\n'), start=1):
+        # Set the current block.
+        if 'ocabulary' in line:
+            cur_block = 'voc'
+        elif 'tructure' in line:
+            cur_block = 'struct'
+        elif 'heory' in line:
+            cur_block = 'theory'
+        elif 'rocedure' in line:
+            cur_block = 'main'
+
+        if cur_block == 'main':
+            # Don't perform style checks on the main.
+            continue
+
         # Ignore annotations.
         if line.strip().startswith('['):
             continue
@@ -233,7 +248,6 @@ def lint_fo(idp_file, timing=True, print_ast=False):
         output_str += f"Error: line {0} - colStart {0} - colEnd {0} => Key Error {e2}\n"
 
     except Exception as e:
-        raise e
         output_str += str(e) + '\n'
         output_str += "\n---------- Syntax Error ----------\n"
         try:
