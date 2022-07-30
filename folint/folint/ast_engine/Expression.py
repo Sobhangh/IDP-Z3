@@ -822,12 +822,15 @@ class AQuantification(Expression):
 
     def SCA_Check(self, detections):
         vars = set()
-        for q in self.quantees: #get all variable in quantification
+        # First, get all variables in quantification. (E.g. 'x' for !x in Type)
+        for q in self.quantees:
             for q2 in q.vars:
                 vars.add(q2[0].str)
-        if self.f.variables != vars: # unused variables, te veel variable in quantee, als te weining var wordt parse error ergens anders opgevangen
-            set3 = vars - self.f.variables
-            while len(set3) > 0:      #alle variable in quantification die niet gebruikt worden zoeken
+        if self.f.variables != vars:
+            # Detect unused variables.
+            set3 = vars - set(self.f.variables)
+            while len(set3) > 0:
+                # Search all unused variables.
                 a = set3.pop()
                 for q in self.quantees:
                     for q2 in q.vars:
@@ -835,19 +838,22 @@ class AQuantification(Expression):
                             detections.append((q2[0],f"Unused variable {q2[0].str}","Warning"))
                             break
 
-        if self.q == '∀': #if universele quantor
+        if self.q == '∀':
+            # Check for a common mistake.
             if (isinstance(self.f, AConjunction) or isinstance(self.f,Brackets) and isinstance(self.f.f,AConjunction)):
                 detections.append((self.f,f"Common mistake, use an implication after a universal quantor instead of a conjuction ","Warning"))
-        if self.q == '∃': #if existentiele quantor
+        if self.q == '∃':
+            # Check for a common mistake.
             if (isinstance(self.f, AImplication) or isinstance(self.f,Brackets) and isinstance(self.f.f,AImplication)):
                 detections.append((self.f,f"Common mistake, use a conjuction after an existential quantor instead of an implication ","Warning"))
-        if isinstance(self.f, AEquivalence): # check if variable only occurring on one side of an equivalence
+        if isinstance(self.f, AEquivalence):
+            # Check for variables only occurring on one side of an equivalence.
             links = self.f.sub_exprs[0]
             rechts = self.f.sub_exprs[1]
-            if links.variables != vars:   #check if all vars in linkerdeel van AEquivalence
+            if links.variables != vars:   #check if all vars in left part van AEquivalence
                 set3 = vars - links.variables
                 detections.append((self.f,f"Common mistake, variable {set3.pop()} only occuring on one side of equivalence","Warning"))
-            elif rechts.variables != vars:    #check if all vars in rechterdeel van AEquivalence
+            elif rechts.variables != vars:    #check if all vars in right part van AEquivalence
                 set3 = vars - links.variables
                 detections.append((self.f,f"Common mistake, variable {set3.pop()} only occuring on one side of equivalence","Warning"))
 
