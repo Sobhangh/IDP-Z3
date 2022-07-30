@@ -135,7 +135,7 @@ def extra_check(file, detections):
                                "Warning"))
 
         # Some symbols should not be followed by a space.
-        for match in re.finditer(r'[~¬!∀?∃]\s', line):
+        for match in re.finditer(r'[~¬]\s', line):
             symbol = match.group()[0]
             detections.append((line_number, match.span()[0], match.span()[1],
                                f"Style: no space allowed after '{symbol}'",
