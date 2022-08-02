@@ -1393,10 +1393,10 @@ class AppliedSymbol(Expression):
             sub.printAST(spaties+5)
 
     def SCA_Check(self,detections):
-        #check op juiste aantal argumenten
+        # Check for the correct number of arguments.
         if self.decl.arity != len(self.sub_exprs):
             if self.code != str(self.original):
-                if abs(self.decl.arity - len(self.sub_exprs))!=1: #voor rules in definities
+                if abs(self.decl.arity - len(self.sub_exprs))!=1:  # For definitions
                     detections.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
             else:
                 detections.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
@@ -1405,6 +1405,8 @@ class AppliedSymbol(Expression):
             # We make a distinction between normal types, partial functions and
             # constructors.
             for i in range(self.decl.arity):
+                expected_type = None
+                found_type = None
                 if isinstance(self.decl, Constructor):
                     # Constructors.
                     expected_type = self.decl.sorts[i].decl.type
@@ -1412,8 +1414,10 @@ class AppliedSymbol(Expression):
                     # Normal types, partial functions.
                     expected_type = self.decl.sorts[i].decl.sorts[i].type
 
-                if hasattr(self.sub_exprs[i], 'sort') and isinstance(self.sub_exprs[i].sort.decl.sorts[i], Subtype):
-                    # In the case of a partial function, the type is actually
+                if (hasattr(self.sub_exprs[i], 'sort') and
+                     self.sub_exprs[i].sort and
+                     isinstance(self.sub_exprs[i].sort.decl.sorts[i], Subtype)):
+                    # In the case of a partial function interpretation, the type is actually
                     # the argument.
                     found_type = str(self.sub_exprs[i].sort.decl.sorts[i])
                 else:
@@ -1423,9 +1427,9 @@ class AppliedSymbol(Expression):
                 if expected_type != found_type:
                     if not found_type:
                         if isinstance(self.sub_exprs[i], (ASumMinus, AMultDiv)):
-                            detections.append((self, f"Argument of Unknown type, type of {self.sub_exprs[i]} is unknown (formula with different types)","Warning"))
+                            detections.append((self, f"Could not derive type of {self.sub_exprs[i]} (formula with different types)","Warning"))
                         else:
-                            detections.append((self, f"Argument of Unknown type, type of {self.sub_exprs[i]} is unknown (probably untyped quantifier)","Warning"))
+                            detections.append((self, f"Could not derive type of {self.sub_exprs[i]}","Warning"))
                     else :
                         detections.append((self, f"Argument of wrong type: expected type '{type_symbol_to_str(expected_type)}' but given type '{type_symbol_to_str(found_type)}'","Error"))
                     break #so only 1 error message
