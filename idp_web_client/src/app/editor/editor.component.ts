@@ -99,6 +99,7 @@ export class EditorComponent {
 
     // Switch the text mode.
     this.textModeUnicode = !this.textModeUnicode;
+    this.doLint(this.idpService);
   }
 
   private unicodeToAscii(lines) {
