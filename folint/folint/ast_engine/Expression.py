@@ -42,7 +42,7 @@ from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, RESERVED
 
 #help functies voor SCA
 #####################################################
-def typeSymbol_to_String(type1):    # zet type symbol om in str
+def type_symbol_to_str(type1):    # zet type symbol om in str
     if type1 == "ℤ":
         return "Int"
     if type1 == "𝔹":
@@ -139,8 +139,9 @@ class ASTNode(object):
     def printAST(self,spaties):
         print(spaties*" "+type(self).__name__+": ",self)
 
-    def SCA_Check(self,fouten):
-        print("SCA check:"+type(self).__name__+": ",self)
+    def SCA_Check(self,detections):
+        return
+        # print("SCA check:"+type(self).__name__+": ",self)
 
 
 class Annotations(ASTNode):
@@ -558,9 +559,9 @@ class Expression(ASTNode):
         for sub in self.sub_exprs:
             sub.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         for sub in self.sub_exprs:
-            sub.SCA_Check(fouten)
+            sub.SCA_Check(detections)
 
 
 class Symbol(Expression):
@@ -812,46 +813,52 @@ class AQuantification(Expression):
             q.collect_symbols(symbols, co_constraints)
         return symbols
 
-    def printAST(self,spaties):
+    def printAST(self, spaties):
         print(spaties*" "+type(self).__name__+": ",self)
         for q in self.quantees:
             q.printAST(spaties+5)
         for sub in self.sub_exprs:
             sub.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self, detections):
         vars = set()
-        for q in self.quantees: #get all variable in quantification
+        # First, get all variables in quantification. (E.g. 'x' for !x in Type)
+        for q in self.quantees:
             for q2 in q.vars:
                 vars.add(q2[0].str)
-        if self.f.variables != vars: # unused variables, te veel variable in quantee, als te weining var wordt parse error ergens anders opgevangen
-            set3 = vars - self.f.variables
-            while len(set3) > 0:      #alle variable in quantification die niet gebruikt worden zoeken
+        if self.f.variables != vars:
+            # Detect unused variables.
+            set3 = vars - set(self.f.variables)
+            while len(set3) > 0:
+                # Search all unused variables.
                 a = set3.pop()
                 for q in self.quantees:
                     for q2 in q.vars:
                         if q2[0].str == a:
-                            fouten.append((q2[0],f"Unused variable {q2[0].str}","Warning"))
+                            detections.append((q2[0],f"Unused variable {q2[0].str}","Warning"))
                             break
 
-        if self.q == '∀': #if universele quantor
+        if self.q == '∀':
+            # Check for a common mistake.
             if (isinstance(self.f, AConjunction) or isinstance(self.f,Brackets) and isinstance(self.f.f,AConjunction)):
-                fouten.append((self.f,f"Common mistake, use an implication after a universal quantor instead of a conjuction ","Warning"))
-        if self.q == '∃': #if existentiele quantor
+                detections.append((self.f,f"Common mistake, use an implication after a universal quantor instead of a conjuction ","Warning"))
+        if self.q == '∃':
+            # Check for a common mistake.
             if (isinstance(self.f, AImplication) or isinstance(self.f,Brackets) and isinstance(self.f.f,AImplication)):
-                fouten.append((self.f,f"Common mistake, use a conjuction after an existential quantor instead of an implication ","Warning"))
-        if isinstance(self.f, AEquivalence): # check if variable only occurring on one side of an equivalence
+                detections.append((self.f,f"Common mistake, use a conjuction after an existential quantor instead of an implication ","Warning"))
+        if isinstance(self.f, AEquivalence):
+            # Check for variables only occurring on one side of an equivalence.
             links = self.f.sub_exprs[0]
             rechts = self.f.sub_exprs[1]
-            if links.variables != vars:   #check if all vars in linkerdeel van AEquivalence
+            if links.variables != vars:   #check if all vars in left part van AEquivalence
                 set3 = vars - links.variables
-                fouten.append((self.f,f"Common mistake, variable {set3.pop()} only occuring on one side of equivalence","Warning"))
-            elif rechts.variables != vars:    #check if all vars in rechterdeel van AEquivalence
+                detections.append((self.f,f"Common mistake, variable {set3.pop()} only occuring on one side of equivalence","Warning"))
+            elif rechts.variables != vars:    #check if all vars in right part van AEquivalence
                 set3 = vars - links.variables
-                fouten.append((self.f,f"Common mistake, variable {set3.pop()} only occuring on one side of equivalence","Warning"))
+                detections.append((self.f,f"Common mistake, variable {set3.pop()} only occuring on one side of equivalence","Warning"))
 
         for sub in self.sub_exprs:
-            sub.SCA_Check(fouten)
+            sub.SCA_Check(detections)
 
 
 def FORALL(qs, expr, annotations=None):
@@ -918,7 +925,7 @@ class Operator(Expression):
         return Expression.collect_nested_symbols(self, symbols,
                 is_nested if self.operator[0] in ['∧','∨','⇒','⇐','⇔'] else True)
 
-    def getType(self):
+    def get_type(self):
         return self.type    #return type of Operator and subclasses (in 'str')
 
 
@@ -993,35 +1000,37 @@ class AComparison(Operator):
                         for e in self.sub_exprs[0].sub_exprs) \
                 and self.sub_exprs[1].value is not None
 
-    def SCA_Check(self,fouten):
-        """ types vergelijken : 4 categorieen
-            (1) Dezelfde types
-            (2) Niet dezelfde types maar mogen vergeleken worden
-            (3) Niet dezelfde types en mogen NIET vergeleken worden maar kunnen toch vergeleken worden (warning)
-            (4) Niet dezelfde types en mogen NIET vergeleken worden en kunnen NIET vergeleken worden (error)
+    def SCA_Check(self,detections):
+        """ Compare types: 4 categories
+            (1) Both are the same type
+            (2) They are different, but can be compared (e.g. Int <> Real)
+            (3) Cannot be compared, but are allowed by IDP-Z3. This also
+            happens when a numerical type is interpreted in the structure (warning)
+            (4) Cannot be compared at all. (error)
         """
-        type1 = self.sub_exprs[0].getType() #get type van linker lid
-        type2 = self.sub_exprs[1].getType() #get type van rechter lid
-        type1 = typeSymbol_to_String(type1)  #type symbool omzetten naar string
-        type2 = typeSymbol_to_String(type2)  #type symbool omzetten naar string
+        # Get types and convert to String.
+        type1 = self.sub_exprs[0].get_type()
+        type2 = self.sub_exprs[1].get_type()
+        type1 = type_symbol_to_str(type1)
+        type2 = type_symbol_to_str(type2)
 
-        if type1 != type2:   #comparison van 2 verschillende types, categorieen (2),(3) en (4)
-            if type1 is None:     #type linkerlid niet kunnen bepalen
-                fouten.append((self.sub_exprs[0],f"Could not determine the type of {self.sub_exprs[0]} ","Warning"))
-            elif type2 is None:   #type rechterlid niet kunnen bepalen
-                fouten.append((self.sub_exprs[1],f"Could not determine the type of {self.sub_exprs[1]} ","Warning"))
-            else:                   #zowel linker- als rechterlid type zijn bepaald maar toch verschillend
-                cat = typesVergelijken(type1,type2) #kijk welke types met elkaar vergeleken mogen worden
+        if type1 != type2:  # Cat 2, 3 and 4
+            if type1 is None:
+                detections.append((self.sub_exprs[0],f"Could not determine the type of {self.sub_exprs[0]} ","Warning"))
+            elif type2 is None:
+                detections.append((self.sub_exprs[1],f"Could not determine the type of {self.sub_exprs[1]} ","Warning"))
+            else:
+                cat = typesVergelijken(type1,type2)
                 if cat == 3:  #cat(3) WARNING
-                    fouten.append((self,f"Comparison of 2 diffent types: {type1} and {type2}","Warning"))
+                    detections.append((self,f"Comparison of 2 possibly incompatible types: {type1} and {type2}","Warning"))
                 if cat == 4:  #cat(4) ERROR
-                    fouten.append((self,f"Comparison of 2 diffent types: {type1} and {type2}","Error"))
+                    detections.append((self,f"Comparison of 2 incompatble types: {type1} and {type2}","Error"))
         if (type1 is None and type2 is None):   #beide types zijn unknown
-            fouten.append((self.sub_exprs[0],f"Comparison of 2 unknown types: {type1} and {type2}","Warning"))
+            detections.append((self.sub_exprs[0],f"Comparison of 2 unknown types: {type1} and {type2}","Warning"))
 
         #SCA check voor kind nodes
         for sub in self.sub_exprs:
-            sub.SCA_Check(fouten)
+            sub.SCA_Check(detections)
 
 def EQUALS(exprs):
     return AComparison.make('=',exprs)
@@ -1029,38 +1038,42 @@ def EQUALS(exprs):
 class ASumMinus(Operator):
     PRECEDENCE = 90
 
-    def SCA_Check(self, fouten):
+    def SCA_Check(self, detections):
         for i in range(0,len(self.sub_exprs)):
-            if (self.sub_exprs[i].getType()=="𝔹" and self.sub_exprs[i-1].getType()=="𝔹"):   #optelling of aftrekking van booleans met elkaar
-                fouten.append((self,f"Sum or difference of two elements of type Bool","Error"))
+            l_type = self.sub_exprs[i].get_type()
+            r_type = self.sub_exprs[i-1].get_type()
+            if l_type is None or r_type is None:
+                continue
+            if (l_type == "𝔹" and r_type == "𝔹"):
+                detections.append((self,f"Cannot sum or subtract Bools","Error"))
                 break
 
             lijst = ["Int","Real","Bool"]
-            if not(typeSymbol_to_String(self.sub_exprs[i-1].getType()) in lijst):
-                fouten.append((self,f"Wrong type '{typeSymbol_to_String(self.sub_exprs[i-1].getType())}' used in sum or difference ","Error"))
+            if not(type_symbol_to_str(r_type) in lijst):
+                detections.append((self,f"Wrong type '{type_symbol_to_str(self.sub_exprs[i-1].get_type())}' used in sum or difference ","Error"))
 
-            if self.sub_exprs[i].getType() != self.sub_exprs[0].getType():        #optelling of aftrekking van elementen van verschillende types
-                type1 = typeSymbol_to_String(self.sub_exprs[i-1].getType())
-                type2 = typeSymbol_to_String(self.sub_exprs[i].getType())
+            if r_type != l_type:
+                type1 = type_symbol_to_str(r_type)
+                type2 = type_symbol_to_str(l_type)
                 if ((type1=="Int" and type2=="Real") or (type1=="Real" and type2=="Int")):      #types Int en Real mogen met elkaar opgeteld of afgetrokken worden
                     continue
                 else:
-                    fouten.append((self,f"Sum or difference of elements with possible incompatible types: {type1} and {type2}","Warning"))
+                    detections.append((self,f"Sum or difference of elements with possible incompatible types: {type1} and {type2}","Warning"))
                     break
 
-        return super().SCA_Check(fouten)
+        return super().SCA_Check(detections)
 
-    def getType(self):
+    def get_type(self):
         help = 0
         for i in range(0,len(self.sub_exprs)):
-            if self.sub_exprs[i].getType() != self.sub_exprs[0].getType():
+            if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():
                 help = help + 1
         if help == 0: # als alle elementen van hetzelfde type zijn return dit type
-            return self.sub_exprs[0].getType()
+            return self.sub_exprs[0].get_type()
         else :  #elementen van versschillende types
             lijst = ["Int","Real"]
             for i in self.sub_exprs:
-                if typeSymbol_to_String(i.getType()) in lijst:
+                if type_symbol_to_str(i.get_type()) in lijst:
                     continue
                 else:
                     return None
@@ -1070,36 +1083,37 @@ class ASumMinus(Operator):
 class AMultDiv(Operator):
     PRECEDENCE = 100
 
-    def SCA_Check(self, fouten):
+    def SCA_Check(self, detections):
         for i in range(0,len(self.sub_exprs)):
             # multi/div of 2 "Bool" is not possible (error)
-            if (self.sub_exprs[i].getType()=="𝔹" and self.sub_exprs[i-1].getType()=="𝔹"):
-                fouten.append((self,f"Multiplication or division of two elements of type Bool","Error"))
+            if (self.sub_exprs[i].get_type()=="𝔹" and self.sub_exprs[i-1].get_type()=="𝔹"):
+                detections.append((self,f"Multiplication or division of two elements of type Bool","Error"))
             lijst = ["Int","Real","Bool"]
-            # multi/div only possible with "Int","Real" and "Bool"
-            if not(typeSymbol_to_String(self.sub_exprs[i-1].getType()) in lijst):
-                fouten.append((self.sub_exprs[i-1],f"Wrong type '{typeSymbol_to_String(self.sub_exprs[i-1].getType())}' used in multiplication or divison ","Error"))
-            if self.sub_exprs[i].getType() != self.sub_exprs[0].getType():        #vermenigvuldigen of delen van elementen van verschillende types
-                type1 = typeSymbol_to_String(self.sub_exprs[i-1].getType())
-                type2 = typeSymbol_to_String(self.sub_exprs[i].getType())
+            # multi/div only possible with "Int","Real" and "Bool" or numerical
+            # subtypes.
+            if not(type_symbol_to_str(self.sub_exprs[i-1].get_type()) in lijst):
+                detections.append((self.sub_exprs[i-1],f"Type '{type_symbol_to_str(self.sub_exprs[i-1].get_type())}' might not be allowed in multiplication or divison ","Warning"))
+            if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():        #vermenigvuldigen of delen van elementen van verschillende types
+                type1 = type_symbol_to_str(self.sub_exprs[i-1].get_type())
+                type2 = type_symbol_to_str(self.sub_exprs[i].get_type())
                 if ((type1=="Int" and type2=="Real") or (type1=="Real" and type2=="Int")):      #vermenigvuldigen of delen tss met int en Real mag
                     continue
                 else:
-                    fouten.append((self,f"Multiplication or division of elements with possible incompatible types: {type1} and {type2}","Warning"))
+                    detections.append((self,f"Multiplication or division of elements with possible incompatible types: {type1} and {type2}","Warning"))
                     break
-        return super().SCA_Check(fouten)
+        return super().SCA_Check(detections)
 
-    def getType(self):
+    def get_type(self):
         help = 0
         for i in range(0,len(self.sub_exprs)):
-            if self.sub_exprs[i].getType() != self.sub_exprs[0].getType():
+            if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():
                 help = help + 1
         if help == 0: # als alle elementen van hetzelfde type zijn return dit type, anders return None
-            return self.sub_exprs[0].getType()
+            return self.sub_exprs[0].get_type()
         else :  #elementen van versschillende types
             lijst = ["Int","Real"]
             for i in self.sub_exprs:
-                if typeSymbol_to_String(i.getType()) in lijst:
+                if type_symbol_to_str(i.get_type()) in lijst:
                     continue
                 else:
                     return None
@@ -1145,16 +1159,16 @@ class AUnary(Expression):
         for sub in self.sub_exprs:
             sub.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         # style regel: Gebruik van haakjes bij een negated in-statement
         if (isinstance(self.f, AppliedSymbol) and self.f.is_enumeration=='in'):
             if hasattr(self,"parent"):
-                fouten.append((self,f"Style guide check, place brackets around negated in-statement ","Warning"))
+                detections.append((self,f"Style guide check, place brackets around negated in-statement ","Warning"))
 
         for sub in self.sub_exprs:
-            sub.SCA_Check(fouten)
+            sub.SCA_Check(detections)
 
-    def getType(self):
+    def get_type(self):
         return self.type
 
 def NOT(expr):
@@ -1205,7 +1219,7 @@ class AAggregate(Expression):
     def collect_nested_symbols(self, symbols, is_nested):
         return Expression.collect_nested_symbols(self, symbols, True)
 
-    def getType(self):
+    def get_type(self):
         # return "Int"        #Sum zou altijd Int moeten zijn
         return self.type    #return type of AAggregate (in 'str')
 
@@ -1378,40 +1392,66 @@ class AppliedSymbol(Expression):
         for sub in self.sub_exprs:
             sub.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
-        #check op juiste aantal argumenten
+    def SCA_Check(self,detections):
+        # Check for the correct number of arguments.
         if self.decl.arity != len(self.sub_exprs):
             if self.code != str(self.original):
-                if abs(self.decl.arity - len(self.sub_exprs))!=1: #voor rules in definities
-                    fouten.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
+                if abs(self.decl.arity - len(self.sub_exprs))!=1:  # For definitions
+                    detections.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
             else:
-                fouten.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
-        else :
-            #check als argumenten van het juiste type zijn
+                detections.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
+        else:
+            # For each argument, find the expected type and the found type.
+            # We make a distinction between normal types, partial functions and
+            # constructors.
             for i in range(self.decl.arity):
-                if self.decl.sorts[i].type != self.sub_exprs[i].getType():
-                    if self.sub_exprs[i].getType() is None:
-                        if isinstance(self.sub_exprs[i],(ASumMinus, AMultDiv)):
-                            fouten.append((self,f"Argument of Unknown type, type of {self.sub_exprs[i]} is unknown (formule with different types)","Warning"))
+                expected_type = None
+                found_type = None
+                if isinstance(self.decl, Constructor):
+                    # Constructors.
+                    expected_type = self.decl.sorts[i].decl.type
+                else:
+                    # Normal types, partial functions.
+                    expected_type = self.decl.sorts[i].decl.sorts[i].type
+
+                if (hasattr(self.sub_exprs[i], 'sort') and
+                     self.sub_exprs[i].sort and
+                     isinstance(self.sub_exprs[i].sort.decl.sorts[i], Subtype)):
+                    # In the case of a partial function interpretation, the type is actually
+                    # the argument.
+                    found_type = str(self.sub_exprs[i].sort.decl.sorts[i])
+                else:
+                    # Otherwise, it's just the type.
+                    found_type = self.sub_exprs[i].get_type()
+
+                if expected_type != found_type:
+                    if not found_type:
+                        if isinstance(self.sub_exprs[i], (ASumMinus, AMultDiv)):
+                            detections.append((self, f"Could not derive type of {self.sub_exprs[i]} (formula with different types)","Warning"))
                         else:
-                            fouten.append((self,f"Argument of Unknown type, type of {self.sub_exprs[i]} is unknown (probably untyped quantifier)","Warning"))
+                            detections.append((self, f"Could not derive type of {self.sub_exprs[i]}","Warning"))
                     else :
-                        fouten.append((self,f"Argument of wrong type : expected type= {typeSymbol_to_String(self.decl.sorts[i].type)} but given type= {typeSymbol_to_String(self.sub_exprs[i].getType())}","Error"))
+                        detections.append((self, f"Argument of wrong type: expected type '{type_symbol_to_str(expected_type)}' but given type '{type_symbol_to_str(found_type)}'","Error"))
                     break #so only 1 error message
 
         # check if elementen in enumeratie are of correct type, vb Lijn() in {Belgie}. expected type Kleur, Belgie is of type Land
         if self.is_enumeration =='in':
             for i in self.in_enumeration.tuples :
-                if self.decl.type != i.args[0].getType():
-                    fouten.append((i.args[0],f"Element of wrong type : expected type= {typeSymbol_to_String(self.decl.type)} but given type= {typeSymbol_to_String(i.args[0].getType())}","Error"))
+                if self.decl.type != i.args[0].get_type():
+                    detections.append((i.args[0],f"Element of wrong type : expected type= {type_symbol_to_str(self.decl.type)} but given type= {type_symbol_to_str(i.args[0].get_type())}","Error"))
                     break
 
         for sub in self.sub_exprs:
-            sub.SCA_Check(fouten)
+            sub.SCA_Check(detections)
 
-    def getType(self):
-        return self.decl.out.decl.type     #geeft specifieker type terug (als 'str') (vb. bij type Getal := {0..2} -> type Int )
-        #return self.type    #geeft type terug (als 'str')
+    def get_type(self):
+        """
+        Return the type of the symbol.
+        Constructors are handled differently here.
+        """
+        if isinstance(self.decl, Constructor):
+            return self.decl.type
+        return self.decl.out.decl.type
 
 class SymbolExpr(Expression):
     def __init__(self, **kwargs):
@@ -1462,7 +1502,7 @@ class UnappliedSymbol(Expression):
 
     def is_reified(self): return False
 
-    def getType(self):
+    def get_type(self):
         return self.decl.type          #geeft type terug (als 'str')
 
 TRUEC = Constructor(name='true')
@@ -1499,7 +1539,7 @@ class Variable(Expression):
 
     def annotate1(self): return self
 
-    def getType(self):
+    def get_type(self):
         if self.sort is None:
             return self.sort        #return None als self.sort onbekend is
         return self.sort.type       #returns specifieker type of Variable (als 'str')
@@ -1541,7 +1581,7 @@ class Number(Expression):
         self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
         return Number(number=str(float(self.py_value)))
 
-    def getType(self):
+    def get_type(self):
         return self.type    #return type of number
 
 ZERO = Number(number='0')
@@ -1568,7 +1608,7 @@ class Date(Expression):
 
     def is_reified(self): return False
 
-    def getType(self):
+    def get_type(self):
         return self.type    #return type of date
 
 
@@ -1589,11 +1629,11 @@ class Brackets(Expression):
     def __str__(self): return f"({self.sub_exprs[0].str})"
     def __str1__(self): return str(self)
 
-    def SCA_Check(self, fouten):
+    def SCA_Check(self, detections):
         # style regel: Vermijd onnodige haakje
         if isinstance(self.f,Brackets):
-            fouten.append((self,f"Style guide, redundant brackets","Warning"))
-        return super().SCA_Check(fouten)
+            detections.append((self,f"Style guide, redundant brackets","Warning"))
+        return super().SCA_Check(detections)
 
-    def getType(self):
-        return self.f.getType()     #return type van regel tussen haakjes
+    def get_type(self):
+        return self.f.get_type()     #return type van regel tussen haakjes

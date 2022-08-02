@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Various bugs related to contructed types
+- Disabled the extra style checks for the procedure
+- Removed style rule "No space after quantifier"
+- Bug where unused or untyped variables would cause the program to crash
+- Comments outside the IDP blocks don't throw warnings anymore
+- In the structure, symbols no longer throw errors when their types are also defined in the structure.
+- Increased verbosity of some warnings and errors
 
 ## [1.0.1] - 2022-06-27
 ### Fixed

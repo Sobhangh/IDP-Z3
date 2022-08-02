@@ -339,9 +339,9 @@ class Vocabulary(ASTNode):
         for i in self.declarations:
             i.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         for i in self.declarations:
-            i.SCA_Check(fouten)
+            i.SCA_Check(detections)
 
 
 class Import(ASTNode):
@@ -423,10 +423,10 @@ class TypeDeclaration(ASTNode):
         if self.interpretation is not None:
             self.interpretation.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         # style guide check : capital letter for type
         if self.name[0].islower():
-            fouten.append((self,f"Style guide check, type name should start with a capital letter ","Warning"))
+            detections.append((self,f"Style guide check, type name should start with a capital letter ","Warning"))
 
         # check if type has interpretation, if not check if in structures the type has given an interpretation
         if (self.interpretation is None and not(builtIn_type(self.name))):
@@ -437,7 +437,7 @@ class TypeDeclaration(ASTNode):
             for s in structs :
                 if s.vocab_name == self.block.name:
                     if not(self.name in s.interpretations):
-                        fouten.append((self,f"Expected an interpretation for type {self.name} in Vocabulary {self.block.name} or Structures {list} ","Error"))
+                        detections.append((self,f"Expected an interpretation for type {self.name} in Vocabulary {self.block.name} or Structures {list} ","Error"))
                         break
 
 
@@ -561,10 +561,10 @@ class SymbolDeclaration(ASTNode):
             i.printAST(spaties+5)
         self.out.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         # style regel: func/pred namen met een kleine letter
         if self.name[0].isupper():
-            fouten.append((self,f"Style guide check, predicate/function name should start with a lower letter ","Warning"))
+            detections.append((self,f"Style guide check, predicate/function name should start with a lower letter ","Warning"))
 
 
 Type = Union[TypeDeclaration, SymbolDeclaration]
@@ -610,11 +610,11 @@ class TheoryBlock(ASTNode):
         for d in self.definitions:
             d.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         for c in self.constraints:
-            c.SCA_Check(fouten)
+            c.SCA_Check(detections)
         for d in self.definitions:
-            d.SCA_Check(fouten)
+            d.SCA_Check(detections)
 
 
 class Definition(ASTNode):
@@ -747,9 +747,9 @@ class Definition(ASTNode):
         for r in self.rules:
             r.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         for r in self.rules:
-            r.SCA_Check(fouten)
+            r.SCA_Check(detections)
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):
@@ -809,11 +809,11 @@ class Rule(ASTNode):
         self.definiendum.printAST(spaties+5)
         self.body.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         for q in self.quantees:
-            q.SCA_Check(fouten)
-        self.definiendum.SCA_Check(fouten)
-        self.body.SCA_Check(fouten)
+            q.SCA_Check(detections)
+        self.definiendum.SCA_Check(detections)
+        self.body.SCA_Check(detections)
 
 
 # Expressions : see Expression.py
@@ -848,9 +848,9 @@ class Structure(ASTNode):
         for i in self.interpretations:
             self.interpretations[i].printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         for i in self.interpretations:
-            self.interpretations[i].SCA_Check(fouten)
+            self.interpretations[i].SCA_Check(detections)
 
 
 class SymbolInterpretation(ASTNode):
@@ -917,41 +917,54 @@ class SymbolInterpretation(ASTNode):
         print(spaties*" "+type(self).__name__+": ",self.name)
         self.enumeration.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
-        #check de gedefinieerde functies, predicaten, constanten en proposities
-        if (not(isinstance(self.enumeration,(Ranges,FunctionEnum))) and not(self.is_type_enumeration)):   #als predicaat, const of boolean
-            if self.symbol.decl.arity==0: #const en boolean
-                out_type = self.symbol.decl.out                                                 #out type functie
-                if hasattr(out_type.decl,'enumeration'):      #als type geen built-in type is
-                    out_type_waardes = str(out_type.decl.enumeration).replace(" ", "").split(',')   #waardes out type
-                    if self.default.str not in out_type_waardes:
-                        fouten.append((self.default,f"Element of wrong type","Error"))  # element of wrong type used for const
-            else :
-                opties = []
-                for i in self.symbol.decl.sorts:    #get alle waarde van argument types
-                    opties.append(str(i.decl.enumeration).replace(" ", "").split(','))
+    def SCA_Check(self,detections):
+        # Check the defined functions, predicates, constants and propositions
+        if (not(isinstance(self.enumeration,(Ranges,FunctionEnum))) and not(self.is_type_enumeration)):   # Symbol is predicate, constant or boolean
+            if self.symbol.decl.arity==0: # Symbol is constant or boolean
+                out_type = self.symbol.decl.out             # Get output type
+                if hasattr(out_type.decl,'enumeration'):    # Output type is no built-in type
+                    out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
+                    if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
+                        out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
+                    if self.default.str not in out_type_values:
+                        detections.append((self.default,f"Element of wrong type","Error"))  # Element of wrong type used
+            else : # Symbol is predicate
+                options = []
+                for i in self.symbol.decl.sorts:    # Get all values of the argument types
+                    in_type_values = str(i.decl.enumeration).replace(" ", "").split(',')
+                    if (in_type_values[0] != 'None'):   # Type interpretation in Vocabulary
+                        options.append(in_type_values)
+                    else:                               # Type interpretation in Structure
+                        options.append(str(self.parent.interpretations[i.str].enumeration).replace(" ", "").split(','))
                 for t in self.enumeration.tuples:
-                    if len(t.args) > self.symbol.decl.arity:    #als te veel input elementen
-                        fouten.append((t.args[0],f"To much input elements, expected {self.symbol.decl.arity}","Error"))
+                    if len(t.args) > self.symbol.decl.arity:    # Given to much input elements
+                        detections.append((t.args[0],f"To much input elements, expected {self.symbol.decl.arity}","Error"))
                     else :
-                        for i in range(0,len(t.args),1):  #get elements
-                            if str(t.args[i]) not in opties[i]:
-                                fouten.append((t.args[i],f"Element of wrong type","Error"))  # element of wrong type used in predicate
+                        for i in range(0,len(t.args),1):  # Get elements
+                            if str(t.args[i]) not in options[i]:
+                                detections.append((t.args[i],f"Element of wrong type","Error"))  # Element of wrong type used in predicate
 
-        if isinstance(self.enumeration,FunctionEnum):     #als functie
-            out_type = self.symbol.decl.out                                                 #out type functie
-            out_type_waardes = str(out_type.decl.enumeration).replace(" ", "").split(',')   #waardes out type
-            opties = []
-            for i in self.symbol.decl.sorts:    #get alle waarde van argument types
-                opties.append(str(i.decl.enumeration).replace(" ", "").split(','))
+        if isinstance(self.enumeration,FunctionEnum):     # Symbol is function
+            out_type = self.symbol.decl.out   # Get output type of function
+            out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
+            if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
+                out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
 
-            # bereken alle mogelijke combinaties
-            newlist = []
-            oudlist = opties[0]
-            for i in range(1,len(opties)):
-                newlist = []
-                for a in oudlist:
-                    for b in opties[i]:
+            options = []
+            for i in self.symbol.decl.sorts:    # Get all values of the argument types
+                in_type_values = str(i.decl.enumeration).replace(" ", "").split(',')
+                if (in_type_values[0] != 'None'): # Type interpretation in Vocabulary
+                    options.append(in_type_values)
+                else:                              # Type interpretation in Structure
+                    options.append(str(self.parent.interpretations[i.str].enumeration).replace(" ", "").split(','))
+
+            # Determine all possible combinations
+            new_list = []
+            old_list = options[0]
+            for i in range(1,len(options)):
+                new_list = []
+                for a in old_list:
+                    for b in options[i]:
                         hulp_element = []
                         if isinstance(a,list):
                             for c in a:
@@ -959,34 +972,34 @@ class SymbolInterpretation(ASTNode):
                         else :
                             hulp_element.append(a)
                         hulp_element.append(b)
-                        newlist.append(hulp_element)
-                oudlist = newlist
+                        new_list.append(hulp_element)
+                old_list = new_list
 
-            mogelijkheden = oudlist
+            possibilities = old_list
             duplicates = []
             for t in self.enumeration.tuples:
-                if str(t.value) not in out_type_waardes:  # als output element van verkeerd type
-                    fouten.append((t.value,f"Output element of wrong type, {str(t.value)}","Error"))
+                if str(t.value) not in out_type_values:  # Used an output element of wrong type
+                    detections.append((t.value,f"Output element of wrong type, {str(t.value)}","Error"))
                 elements = []
-                for i in range(0,len(t.args)-1,1):  #get input elements
-                    if (i < len(opties) and (str(t.args[i]) not in opties[i])) :
-                        fouten.append((t.args[i],f"Element of wrong type, {str(t.args[i])}","Error"))  # element of wrong type used
+                for i in range(0,len(t.args)-1,1):  # Get input elements
+                    if (i < len(options) and (str(t.args[i]) not in options[i])) :
+                        detections.append((t.args[i],f"Element of wrong type, {str(t.args[i])}","Error"))  # Element of wrong type used
                     elements.append(str(t.args[i]))
-                if len(t.args) > self.symbol.decl.arity+1:    #als te veel input elementen
-                    fouten.append((t.args[0],f"To much input elements, expected {self.symbol.decl.arity}","Error"))
-                elif elements in mogelijkheden:   #als mogelijkheid geldig is
-                    mogelijkheden.remove(elements) #verwijder uit lijst om duplicates te vermijden
-                    duplicates.append(elements) #voeg de al gebruikt mogelijkheden toe
-                elif (self.symbol.decl.arity == 1 and elements[0] in mogelijkheden): #als func met 1arg
-                    mogelijkheden.remove(elements[0]) #verwijder uit lijst om duplicates te vermijden
-                    duplicates.append(elements[0]) #voeg de al gebruikt mogelijkheden toe
-                elif (elements in duplicates or elements[0] in duplicates): # als duplicates
-                        fouten.append((t.args[0],f"Wrong input elements, duplicate","Error"))  #duplicate
+                if len(t.args) > self.symbol.decl.arity+1:    # Given to much input elements
+                    detections.append((t.args[0],f"To much input elements, expected {self.symbol.decl.arity}","Error"))
+                elif elements in possibilities:     # Valid possiblity
+                    possibilities.remove(elements)  # Remove used possibility out of list
+                    duplicates.append(elements)     # Add used possibility to list to detect duplicates
+                elif (self.symbol.decl.arity == 1 and elements[0] in possibilities): # Function with 1 input element, valid possibility
+                    possibilities.remove(elements[0])   # Remove used possibility out of list
+                    duplicates.append(elements[0])      # Add used possibility to list to detect duplicates
+                elif (elements in duplicates or elements[0] in duplicates): # Duplicate
+                        detections.append((t.args[0],f"Wrong input elements, duplicate","Error"))
 
-            if (len(mogelijkheden) > 0 and self.symbol.decl.arity == 1): #als functie niet voledig
-                    fouten.append((self,f"Function not total defined, missing {mogelijkheden}","Error"))
-            elif len(mogelijkheden) > 0: #als functie niet volledig
-                fouten.append((self,f"Function not total defined, missing elements","Error"))
+            if (len(possibilities) > 0 and self.symbol.decl.arity == 1): # Function not totally defined
+                    detections.append((self,f"Function not total defined, missing {possibilities}","Error"))
+            elif len(possibilities) > 0: # Function not totally defined
+                detections.append((self,f"Function not total defined, missing elements","Error"))
 
 
 class Enumeration(ASTNode):
@@ -1298,9 +1311,9 @@ class Procedure(ASTNode):
         for a in self.pystatements:
             a.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         for a in self.pystatements:
-            a.SCA_Check(fouten)
+            a.SCA_Check(detections)
 
 
 class Call1(ASTNode):
@@ -1324,24 +1337,24 @@ class Call1(ASTNode):
         for a in self.args:
             a.printAST(spaties+5)
 
-    def SCA_Check(self,fouten):
+    def SCA_Check(self,detections):
         lijst_inferenties = ["model_check","model_expand","model_propagate"]
         if self.name in lijst_inferenties:
             if self.parent.name != "pretty_print":    #check if pretty_print is used
-                fouten.append((self,f"No pretty_print used!","Warning"))
+                detections.append((self,f"No pretty_print used!","Warning"))
         if self.name == "model_check":  #check if correct amount of arguments used by model_check
             if (len(self.args) > 2 or len(self.args) == 0):
-                fouten.append((self,f"Wrong number of arguments for model_check: given {len(self.args)} <-> expected {1} or {2}","Error"))
+                detections.append((self,f"Wrong number of arguments for model_check: given {len(self.args)} <-> expected {1} or {2}","Error"))
             else :
                 a = self.parent
                 while not(isinstance(a,IDP)):   #zoek IDP node in parent
                     a = a.parent
                 for i in self.args:
                     if not(a.blockNameCheck(i)):   #check of block naam bestaat
-                        fouten.append((i,f"Block {i} does not exist!","Error"))
+                        detections.append((i,f"Block {i} does not exist!","Error"))
 
         for a in self.args:
-            a.SCA_Check(fouten)
+            a.SCA_Check(detections)
 
 class String(ASTNode):
     def __init__(self, **kwargs):
