@@ -11,6 +11,9 @@ IDP-Z3 is developed by the Knowledge Representation group at KU Leuven in Leuven
 It uses the `Microsoft Z3 solver <https://github.com/Z3Prover/z3>`_ as back-end to perform the reasoning tasks.
 (The previous version of the reasoning engine, `IDP3 <https://wms.cs.kuleuven.be/dtai/pages/software/idp/idp>`_, used minisat)
 
+The IDP-Z3 engine is available for experimentation through its `online IDE <https://interactive-consultant.IDP-Z3.be/IDE>`_.
+Its documentation is available `online <https://docs.idp-z3.be/en/stable/introduction.html>`_, including a guide on how to install the IDP-Z3 system for use offline.
+
 Projects
 --------
 The IDP-Z3 reasoning engine is currently deployed in the following open-source projects:
@@ -26,17 +29,18 @@ Additionally, IDP-Z3 is also used in private projects by companies such as Saint
 These projects use a data-poor, knowledge-rich approach to Artificial Intelligence to leverage the knowledge of the experts in their fields.
 Our partners particularly appreciate the ease of encoding this knowledge in FO(·): its expressivity removes a long-standing barrier in the use of Knowledge Base systems.
 
+Get in touch?
+-------------
 We are always interest in collaborating with you to see how we can get the most out of IDP-Z3 within your company.
+
+Feel free to contact us `by mail <mailto:krr@kuleuven.be>`_.
+
+Testimonial
+-----------
 
     KU Leuven has been our research partner as of the start of our commercial activities.
     Since then, the DTAI research group has supported us along the way in providing academic background to some of our developments, and even developing innovative solutions for our clients together.
     Our collaboration is fruitful for all parties involved: we, at Intelli-Select, get to present our clients with unseen industry solutions pushing the envelope of what's possible or imaginable further than what's currently available in the market; and at the same time, we provide new research questions and potential applications to the amazingly brilliant people at KU Leuven for further investigation.
     So far it has been a pleasure and we are looking forward to continue working with the professional and highly skilled team at KU Leuven.
-    
-    -- Bart Coppens, Intelli-Select
 
-Get in touch?
--------------
-The IDP-Z3 engine is available for experimentation through its `online IDE <https://interactive-consultant.IDP-Z3.be/IDE>`_.
-Its documentation is available `online <https://docs.idp-z3.be/en/stable/introduction.html>`_, including a guide on how to install the IDP-Z3 system for use offline.
-For further support or other inquiries, you can contact us `by mail <mailto:krr@kuleuven.be>`_.
+    -- Bart Coppens, Intelli-Select
