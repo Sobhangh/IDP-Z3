@@ -1003,7 +1003,7 @@ class ConstructedFrom(Enumeration):
             out = [AppliedSymbol.construct(constructor.tester, args)
                     for constructor in self.constructors]
             return OR(out)  # return of filter()
-        return (([t.args for t in self.tuples], filter) if self.tuples else
+        return (([t.args for t in self.tuples], None) if self.tuples else
                 (None, filter))
 
 
