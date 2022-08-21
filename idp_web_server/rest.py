@@ -43,6 +43,7 @@ from idp_engine.Parse import TypeDeclaration
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
+from .HTMLgen import *
 
 from typing import Dict
 
@@ -375,13 +376,14 @@ def serve_docs_file(path):
 
     return send_from_directory(docs_file_dir, path)
 
+
 @app.route('/htmx', methods=['GET'])
 def serve_htmx():
     return send_from_directory(static_file_dir, 'htmx.html')
 
 @app.route('/htmx/file/open', methods=['POST'])
 def file_open():
-    return "<p>ok</p>"
+    return render(p("ok"))
 
 
 api.add_resource(HelloWorld, '/test')
