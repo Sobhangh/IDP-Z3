@@ -400,14 +400,21 @@ def file_open():
     print(tabs)
     return render(
         div(classes="row", i=
-            [div(classes="col s12", i=
+            [ div(classes="col", i=
                 ul(classes="tabs", i=
-                   [li(classes="tab col s3", i=
+                   [li(classes="tab col", i=
                        a(tab, href=f"#{hash(tab)}",
                          classes="active" if i==0 else None))
                     for i, tab in enumerate(tabs.values())]))
-            ] + [div(tab, id=hash(tab), classes="col s12")
-                 for tab in tabs.values()]
+            ] +
+            [ div(id=hash(tab), classes="col s12", i=
+                ul(classes="collection", i=
+                    [ li(str(a.sentence), classes="collection-item")
+                      for a in state.assignments.values()
+                      if a.symbol_decl.heading == tab
+                    ])
+              )
+              for tab in tabs.values()]
         )
     )
 
