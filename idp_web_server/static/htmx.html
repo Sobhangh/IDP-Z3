@@ -12,6 +12,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
+  <script>
+    htmx.onLoad(function(target) {
+      // initialize tabs in materialize, if any
+      target = document.querySelector('.tabs');
+      if (target !== null) {
+        M.Tabs.init(target, {});
+      }
+    });
+  </script>
+
 </head>
 <body>
   <div id="screen">

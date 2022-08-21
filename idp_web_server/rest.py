@@ -383,8 +383,33 @@ def serve_htmx():
 
 @app.route('/htmx/file/open', methods=['POST'])
 def file_open():
-    data = request.form
-    return render(p(f"file: {data['File']}"))
+    path = os.path.join(examples_file_dir, request.form['File'])
+    with open(path, mode='r', encoding='utf-8') as f:
+        code = f.read()
+    idp = idpOf(code)
+    state = State.make(idp, "{}", "{}", "[]")
+    # ensure the stateful solvers are initialized
+    _ = state.solver
+    _ = state.optimize_solver
+    _ = state.solver_reified
+    _ = state.optimize_solver_reified
+    tabs = dict()
+    for decl in state.assignments.symbols.values():
+        if decl.heading not in tabs:
+            tabs[decl.heading] = decl.heading
+    print(tabs)
+    return render(
+        div(classes="row", i=
+            [div(classes="col s12", i=
+                ul(classes="tabs", i=
+                   [li(classes="tab col s3", i=
+                       a(tab, href=f"#{hash(tab)}",
+                         classes="active" if i==0 else None))
+                    for i, tab in enumerate(tabs.values())]))
+            ] + [div(tab, id=hash(tab), classes="col s12")
+                 for tab in tabs.values()]
+        )
+    )
 
 
 api.add_resource(HelloWorld, '/test')

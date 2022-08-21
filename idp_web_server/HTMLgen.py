@@ -51,12 +51,13 @@ def tag(name: str,
 
     yield f"<{name}"
     for k,v in kwargs.items():
-        k = k.replace("classes", "class")
-        if type(v) == bool:
-            if v:
-                yield f' {k}'
-        else:
-                yield f' {k}="{v}"'
+        if v is not None:
+            k = k.replace("classes", "class")
+            if type(v) == bool:
+                if v:
+                    yield f' {k}'
+            else:
+                    yield f' {k}="{v}"'
 
     if body is None:
         yield "/>"
@@ -71,9 +72,21 @@ def tag(name: str,
         yield f"</{name}>"
 
 
+def a(body=None, **kwargs):
+    yield from tag("a", body, **kwargs)
+
+
 def div(body=None, **kwargs):
     yield from tag("div", body, **kwargs)
 
 
+def li(body=None, **kwargs):
+    yield from tag("li", body, **kwargs)
+
+
 def p(body=None, **kwargs):
     yield from tag("p", body, **kwargs)
+
+
+def ul(body=None, **kwargs):
+    yield from tag("ul", body, **kwargs)
