@@ -36,7 +36,7 @@ We are always interest in collaborating with you to see how we can get the most 
 Feel free to contact us `by mail <mailto:krr@kuleuven.be>`_.
 
 Testimonial
------------
+~~~~~~~~~~~
 
     KU Leuven has been our research partner as of the start of our commercial activities.
     Since then, the DTAI research group has supported us along the way in providing academic background to some of our developments, and even developing innovative solutions for our clients together.
