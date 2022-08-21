@@ -32,7 +32,7 @@ import time
 import traceback
 from z3 import set_option
 
-from flask import Flask, g, send_from_directory  # g is required for pyinstrument
+from flask import Flask, g, send_from_directory, request  # g is required for pyinstrument
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
@@ -383,7 +383,8 @@ def serve_htmx():
 
 @app.route('/htmx/file/open', methods=['POST'])
 def file_open():
-    return render(p("ok"))
+    data = request.form
+    return render(p(f"file: {data['File']}"))
 
 
 api.add_resource(HelloWorld, '/test')
