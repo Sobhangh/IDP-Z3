@@ -375,6 +375,14 @@ def serve_docs_file(path):
 
     return send_from_directory(docs_file_dir, path)
 
+@app.route('/htmx', methods=['GET'])
+def serve_htmx():
+    return send_from_directory(static_file_dir, 'htmx.html')
+
+@app.route('/htmx/file/open', methods=['POST'])
+def file_open():
+    return "<p>ok</p>"
+
 
 api.add_resource(HelloWorld, '/test')
 if with_png:
