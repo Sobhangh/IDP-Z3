@@ -3,6 +3,11 @@ Interactive Consultant
 The interactive consultant tool enables experts to encode their knowledge of a specific problem domain in FO(·).
 From the resulting knowledge base, a web tool is automatically created that helps end users find solutions for specific problems within that knowledge domain.
 
+.. figure:: ./_static/IC.png
+   :alt: diagram displaying Interactive Consultant's usage
+   :width: 60%
+   :align: center
+
 Demo
 ----
 

@@ -7,6 +7,11 @@ FO(·) (aka FO-dot) is First Order logic, with various extensions to make it mor
 
 Once the knowledge of a problem domain is encoded in FO(·), the engine can perform a variety of reasoning tasks: find relevant questions to solve a particular problem, derive consequences from new information, explain how it derived these consequences, find a solution that minimizes a cost function, ...
 
+.. figure:: ./_static/IDP-Z3.png
+   :alt: diagram of IDP-Z3's functionality
+   :width: 40%
+   :align: center
+
 IDP-Z3 is developed by the Knowledge Representation group at KU Leuven in Leuven, Belgium, and made available under the `GNU LGPL v3 License <https://www.gnu.org/licenses/lgpl-3.0.txt>`_.
 It uses the `Microsoft Z3 solver <https://github.com/Z3Prover/z3>`_ as back-end to perform the reasoning tasks.
 (The previous version of the reasoning engine, `IDP3 <https://wms.cs.kuleuven.be/dtai/pages/software/idp/idp>`_, used minisat)
