@@ -7,7 +7,7 @@ Awards
 * Aerts B., Vandevelde, S., & Vennekens, J. (2020). **Tackling the DMN challenges with cDMN: A tight integration of DMN and constraint reasoning**. In International Joint Conference on Rules and Reasoning. Best Paper Award at RuleML+RR 2020
 * Denecker, et al. (2001). **Ultimate Well-Founded and Stable Semantics for Logic Programs with Aggregates.** ICLP 2001, 20-Year Test of Time Award at ICLP 2021
 * Denecker M. (2000) **Extending classical logic with inductive definitions.** ICCL2020. 20 Year Test of Time Award at ICLP 2020
-* Dasseville et al. (2016)**Combining DMN and the Knowledge Base Paradigm for Flexible Decision Enactment**, Winner of RuleML 2016 Challenge
+* Dasseville et al. (2016) **Combining DMN and the Knowledge Base Paradigm for Flexible Decision Enactment**, Winner of RuleML 2016 Challenge
 
 Core technology
 ---------------
@@ -24,6 +24,7 @@ Interactive Consultant
 Applications
 ------------
 
+* Jordens J., Vandevelde S., Van Doninck B., Witters M., Vennekens J. (2022). **Adhesives Selection via an Interactive, User-friendly System based on Symbolic AI.** Procedia CIRP Vol.109, Presented 28 Mar 2022
 * Vandevelde S., Callewaert B., Vennekens J. (2022). **Context-Aware Verification of DMN.** Proceedings of the 55th Hawaii International Conference on System Sciences, 5 Jan 2022.
 * Deryck M., Coppens B.J., Comenda N., Vennekens J. (2021). **Logical Reasoning application with NLP interface to construct the Knowledge Base.** (736-738). Presented at the BNAIC2021, Esch-sur-Alzette, Luxembourg, 10 Nov 2021-12 Nov 2021
 * Deryck M., Vennekens J., Comenda N., Coppens B. (2021). **Combining Logic and Natural Language Processing to Support Investment Management.** In: KR2021 proceedings. Presented at the 18th International Conference on Principles of Knowledge Representation and Reasoning, Hanoi, 03 Nov 202
