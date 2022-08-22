@@ -16,11 +16,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This module contains functions to generate HTML
+This module contains functions to generate HTML conveniently and efficiently.
 
-Example:
-> print(render(p("Hello world)))
-<p>Hello world</p>
+Examples:
+
+>>> print(render(p("text")))
+<p>text</p>
+
+>>> print(render(p("text", classes="s12"))) # notice the use of `classes`, not `class`
+<p class="s12">text</p>
+
+>>> print(render(p("text", classes=None)))
+<p>text</p>
+
+>>> print(render(ul(li("text", selected=True))))
+<ul><li selected>text</li></ul>
+
+>>> print(render(ul(li("text", selected=False))))
+<ul><li>text</li></ul>
+
+>>> print(render(ul([li("item 1"), li("item 2")])))
+<ul><li>item 1</li><li>item 2</li></ul>
+
+The inner html can be specified using the `i` parameter:
+
+>>> print(render(ul(classes="s12", i=[li("item 1"), li("item 2")])))
+<ul class="s12"><li>item 1</li><li>item 2</li></ul>
+
 """
 
 from typing import Iterator, List, Optional, Union
@@ -34,12 +56,12 @@ def tag(name: str,
         body: Optional[Union[Iterator[str], List[Iterator[str]]]] = None,
         **kwargs
         ) -> Iterator[str]:
-    """creates a generator of strings, to be rendered as a HTML tag
+    """returns a generator of strings, to be rendered as a HTML tag
 
     Args:
-        name (str): name of the tab
-        body (Iterator[str]): body of the tag (possibly a list of iterators)
-        kwargs (Dict[str, Union[str, bool, Iterator[str]]]): attributes of the tag
+        name : name of the tab
+        body : body of the tag (possibly a list of string generator), or None
+        kwargs : attributes of the tag
             The `i` attributes, if present, is actually the innerHtml of the tag
 
     Yields:
@@ -90,3 +112,7 @@ def p(body=None, **kwargs):
 
 def ul(body=None, **kwargs):
     yield from tag("ul", body, **kwargs)
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
