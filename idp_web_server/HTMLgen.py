@@ -40,6 +40,9 @@ Examples:
 >>> print(render(p("text", classes=None)))
 <p>text</p>
 
+>>> print(render(br(id="1")))
+<br id="1">
+
 >>> print(render(ul(li("text", selected=True))))
 <ul><li selected>text</li></ul>
 
@@ -83,24 +86,17 @@ def render(gen: Tag) -> str:
     return ''.join(gen)
 
 
-def tag(name: str,
-        body: Optional[Union[str, Tag, List[Union[str, Tag]]]] = None,
-        **kwargs
-        ) -> Tag:
-    """returns a generator of strings, to be rendered as a HTML tag
+def solo_tag(name: str, ** kwargs) -> Tag:
+    """returns a tag without body, e.g. `<br id="1">`
 
     Args:
         name : name of the tag
-        body : body of the tag (possibly a list of string generator), or None
-        kwargs (Dict[str, Optional[Union[str, bool, List[Tag]]]]): attributes of the tag
+        kwargs (Dict[str, Optional[Union[str, bool]]]): attributes of the tag
             The `i` attributes, if present, is actually the innerHtml of the tag
 
     Yields:
         Tag: a string iterator to be rendered
     """
-    if 'i' in kwargs:
-        body = kwargs['i']
-        del kwargs['i']
 
     kwargs = { k.replace("classes", "class"): v
                for k, v in kwargs.items()
@@ -114,6 +110,28 @@ def tag(name: str,
                 attrs += f' {k}="{v}"'
 
     yield f"<{name}{attrs}>{_cr}"
+
+
+def tag(name: str,
+        body: Optional[Union[str, Tag, List[Union[str, Tag]]]] = None,
+        **kwargs
+        ) -> Tag:
+    """returns a generator of strings, to be rendered as a HTML tag
+
+    Args:
+        name : name of the tag
+        body : body of the tag, or None
+        kwargs (Dict[str, Optional[Union[str, bool]]]): attributes of the tag
+            The `i` attributes, if present, is actually the innerHtml of the tag
+
+    Yields:
+        Tag: a string iterator to be rendered
+    """
+    if 'i' in kwargs:
+        body = kwargs['i']
+        del kwargs['i']
+
+    yield from solo_tag(name, **kwargs)
 
     if body is not None:
         if type(body) == str:  # body is a str
@@ -133,6 +151,10 @@ def tag(name: str,
 
 def a(body=None, **kwargs):
     yield from tag("a", body, **kwargs)
+
+
+def br(**kwargs):
+    yield from solo_tag("br", **kwargs)
 
 
 def div(body=None, **kwargs):
