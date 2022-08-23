@@ -18,6 +18,17 @@
 """
 This module contains functions to generate HTML conveniently and efficiently.
 
+It is an alternative to templating engine, like Jinja.
+
+Pros:
+* use familiar python syntax
+* use efficient concatenation techniques
+
+Cons:
+* the resulting string has no indentation, making it less readable
+* need to use `classes` tag attribute (instead of `class`, due to python parser)
+
+
 Examples:
 
 >>> print(render(p("text")))
@@ -47,25 +58,26 @@ The inner html can be specified using the `i` parameter:
 
 from typing import Iterator, List, Optional, Union
 
+Tag = Iterator[str]
 
-def render(gen: Iterator[str]) -> str:
+def render(gen: Tag) -> str:
     return ''.join(gen)
 
 
 def tag(name: str,
-        body: Optional[Union[Iterator[str], List[Iterator[str]]]] = None,
+        body: Optional[Union[Tag, List[Tag]]] = None,
         **kwargs
-        ) -> Iterator[str]:
+        ) -> Tag:
     """returns a generator of strings, to be rendered as a HTML tag
 
     Args:
         name : name of the tab
         body : body of the tag (possibly a list of string generator), or None
-        kwargs : attributes of the tag
+        kwargs (Dict[str, Optional[Union[str, bool, List[Tag]]]]): attributes of the tag
             The `i` attributes, if present, is actually the innerHtml of the tag
 
     Yields:
-        Iterator[str]: a string iterator to be rendered
+        Tag: a string iterator to be rendered
     """
     if 'i' in kwargs:
         body = kwargs['i']
@@ -93,6 +105,7 @@ def tag(name: str,
 
         yield f"</{name}>"
 
+# in alphabetic order
 
 def a(body=None, **kwargs):
     yield from tag("a", body, **kwargs)
@@ -112,6 +125,7 @@ def p(body=None, **kwargs):
 
 def ul(body=None, **kwargs):
     yield from tag("ul", body, **kwargs)
+
 
 if __name__ == "__main__":
     import doctest
