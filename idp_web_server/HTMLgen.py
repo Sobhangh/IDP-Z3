@@ -23,9 +23,9 @@ It is an alternative to templating engine, like Jinja.
 Pros:
 * use familiar python syntax
 * use efficient concatenation techniques
+* optional indentation
 
 Cons:
-* the resulting string has no indentation, making it less readable
 * need to use `classes` tag attribute (instead of `class`, due to python parser)
 
 
@@ -46,32 +46,51 @@ Examples:
 >>> print(render(ul(li("text", selected=False))))
 <ul><li>text</li></ul>
 
->>> print(render(ul([li("item 1"), li("item 2")])))
-<ul><li>item 1</li><li>item 2</li></ul>
+>>> print(render(div(["text", span("item 1"), span("item 2")])))
+<div>text<span>item 1</span><span>item 2</span></div>
 
 The inner html can be specified using the `i` parameter:
 
 >>> print(render(ul(classes="s12", i=[li("item 1"), li("item 2")])))
 <ul class="s12"><li>item 1</li><li>item 2</li></ul>
 
+Set `indent` to `True` below to obtain HTML with tag indentation, e.g.,
+
+<ul>
+  <li>
+    text
+  </li>
+</ul>.
+
 """
+
+indent = False
+
 
 from typing import Iterator, List, Optional, Union
 
 Tag = Iterator[str]
+
+if indent:
+    _tab = "  "
+    _cr = "\n"
+else:
+    _tab = ""
+    _cr = ""
+
 
 def render(gen: Tag) -> str:
     return ''.join(gen)
 
 
 def tag(name: str,
-        body: Optional[Union[Tag, List[Tag]]] = None,
+        body: Optional[Union[str, Tag, List[Union[str, Tag]]]] = None,
         **kwargs
         ) -> Tag:
     """returns a generator of strings, to be rendered as a HTML tag
 
     Args:
-        name : name of the tab
+        name : name of the tag
         body : body of the tag (possibly a list of string generator), or None
         kwargs (Dict[str, Optional[Union[str, bool, List[Tag]]]]): attributes of the tag
             The `i` attributes, if present, is actually the innerHtml of the tag
@@ -83,27 +102,32 @@ def tag(name: str,
         body = kwargs['i']
         del kwargs['i']
 
-    yield f"<{name}"
+    kwargs = { k.replace("classes", "class"): v
+               for k, v in kwargs.items()
+               if v is not None and (type(v) != bool or v)}
+
+    attrs = ""
     for k,v in kwargs.items():
-        if v is not None:
-            k = k.replace("classes", "class")
-            if type(v) == bool:
-                if v:
-                    yield f' {k}'
-            else:
-                    yield f' {k}="{v}"'
+        if type(v) == bool:
+                attrs += f' {k}'
+        else:
+                attrs += f' {k}="{v}"'
 
-    if body is None:
-        yield "/>"
-    else:
-        yield ">"
-        try:
+    yield f"<{name}{attrs}>{_cr}"
+
+    if body is not None:
+        if type(body) == str:  # body is a str
+            yield f"{_tab}{body}{_cr}"
+        else:
             for b in body:
-                yield from b
-        except:
-            yield from body
+                if type(b) == str:  # body is a Tag
+                    yield f"{_tab}{b}"
+                else:  # body is a List[Tag]
+                    for b1 in b:
+                        yield f"{_tab}{b1}"
 
-        yield f"</{name}>"
+    yield f"</{name}>{_cr}"
+
 
 # in alphabetic order
 
@@ -121,6 +145,10 @@ def li(body=None, **kwargs):
 
 def p(body=None, **kwargs):
     yield from tag("p", body, **kwargs)
+
+
+def span(body=None, **kwargs):
+    yield from tag("span", body, **kwargs)
 
 
 def ul(body=None, **kwargs):
