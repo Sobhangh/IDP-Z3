@@ -393,11 +393,12 @@ def file_open():
     _ = state.optimize_solver
     _ = state.solver_reified
     _ = state.optimize_solver_reified
+
     tabs = dict()
     for decl in state.assignments.symbols.values():
         if decl.heading not in tabs:
             tabs[decl.heading] = decl.heading
-    print(tabs)
+
     return render(
         div(classes="row", i=
             [ div(classes="col", i=

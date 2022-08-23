@@ -18,7 +18,7 @@
 """
 This module contains functions to generate HTML conveniently and efficiently.
 
-It is an alternative to templating engine, like Jinja.
+It is an alternative to templating engines, like Jinja.
 
 Pros:
 * use familiar python syntax
@@ -52,16 +52,16 @@ Examples:
 >>> print(render(div(["text", span("item 1"), span("item 2")])))
 <div>text<span>item 1</span><span>item 2</span></div>
 
-The inner html can be specified using the `i` parameter:
+The inner html can also be specified using the `i` parameter:
 
 >>> print(render(ul(classes="s12", i=[li("item 1"), li("item 2")])))
 <ul class="s12"><li>item 1</li><li>item 2</li></ul>
 
-Set `indent` to `True` below to obtain HTML with tag indentation, e.g.,
+Set global variable `indent` to `True` below to obtain HTML with tag indentation, e.g.,
 
 <ul>
   <li>
-    text
+    item 1
   </li>
 </ul>.
 
@@ -116,7 +116,7 @@ def tag(name: str,
         body: Optional[Union[str, Tag, List[Union[str, Tag]]]] = None,
         **kwargs
         ) -> Tag:
-    """returns a generator of strings, to be rendered as a HTML tag
+    """returns a generator of strings, to be rendered as a HTML tag of type `name`
 
     Args:
         name : name of the tag
