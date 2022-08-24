@@ -28,14 +28,20 @@ Pros:
 Cons:
 * need to use `classes` tag attribute (instead of `class`, due to python parser)
 
+
 Tutorial:
+---------
 
 A tag is created by calling a function of the appropriate name:
 
 >>> print(render(p("text")))
 <p>text</p>
 
+
 Tag attributes are specified using named arguments:
+
+>>> print(render(br(id="1")))
+<br id="1">
 
 >>> print(render(p("text", classes="s12"))) # notice the use of `classes`
 <p class="s12">text</p>
@@ -49,19 +55,19 @@ Tag attributes are specified using named arguments:
 >>> print(render(ul(li("text", selected=False))))
 <ul><li>text</li></ul>
 
->>> print(render(br(id="1")))
-<br id="1">
 
 The innerHTML can be a list:
 
 >>> print(render(div(["text", span("item 1"), span("item 2")])))
 <div>text<span>item 1</span><span>item 2</span></div>
 
+
 The innerHTML can also be specified using the `i` parameter,
 after the other attributes, to match the order of rendering:
 
 >>> print(render(ul(classes="s12", i=[li("item 1"), li("item 2")])))
 <ul class="s12"><li>item 1</li><li>item 2</li></ul>
+
 
 For debugging your code, you can set global variable `indent` to `True`
 in the code below to obtain HTML with tag indentation, e.g.,
