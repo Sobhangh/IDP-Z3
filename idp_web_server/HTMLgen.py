@@ -18,7 +18,8 @@
 """
 This module contains functions to generate HTML conveniently and efficiently.
 
-It is an alternative to templating engines, like Jinja.
+It is an alternative to templating engines, like Jinja,
+e.g., for use with [htmx](https://htmx.org/).
 
 Pros:
 * use familiar python syntax
@@ -26,7 +27,8 @@ Pros:
 * optional indentation
 
 Cons:
-* need to use `classes` tag attribute (instead of `class`, due to python parser)
+* the name of some tag attributes is changed
+(e.g., `classes` instead of `class`, due to Python parser)
 
 
 Tutorial:
@@ -43,17 +45,24 @@ Tag attributes are specified using named arguments:
 >>> print(render(br(id="1")))
 <br id="1">
 
->>> print(render(p("text", classes="s12"))) # notice the use of `classes`
-<p class="s12">text</p>
-
->>> print(render(p("text", classes=None)))
-<p>text</p>
+>>> print(render(br(id=None)))
+<br>
 
 >>> print(render(ul(li("text", selected=True))))
 <ul><li selected>text</li></ul>
 
 >>> print(render(ul(li("text", selected=False))))
 <ul><li>text</li></ul>
+
+
+Some tag attributes are changed: you must use `classes` instead of `class`,
+and `_` instead of `-`.
+
+>>> print(render(p("text", classes="s12")))
+<p class="s12">text</p>
+
+>>> print(render(button("Click me", hx_post="/clicked", hx_swap="outerHTML")))
+<button hx-post="/clicked" hx-swap="outerHTML">Click me</button>
 
 
 The innerHTML can be a list:
@@ -111,7 +120,7 @@ def solo_tag(name: str, ** kwargs) -> Tag:
         Tag: a string iterator to be rendered
     """
 
-    kwargs = { k.replace("classes", "class"): v
+    kwargs = { k.replace("classes", "class").replace("_", "-"): v
                for k, v in kwargs.items()
                if v is not None and (type(v) != bool or v)}
 
@@ -168,6 +177,9 @@ def a(body=None, **kwargs):
 
 def br(**kwargs):
     yield from solo_tag("br", **kwargs)
+
+def button(body=None, **kwargs):
+    yield from tag("button", body, **kwargs)
 
 
 def div(body=None, **kwargs):
