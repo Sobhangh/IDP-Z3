@@ -15,9 +15,9 @@ Contributors (alphabetical):  Bram Aerts, Ingmar Dasseville, Jo Devriendt, Marc 
     * after that, logout and login if requested, to update `$PATH`
 * Use git to clone https://gitlab.com/krr/IDP-Z3 to a directory on your machine, e.g., IDP-Z3
 * Open a terminal in that IDP-Z3 directory
-* If you have several versions of python3, and want to run on a particular one, e.g., 3.9:
-    * run `poetry env use 3.9`
-    * replace `python3` by `python3.9` in every command below
+* If you have several versions of python3, and want to run on a particular one, e.g., 3.10:
+    * run `poetry env use 3.10`
+    * replace `python3` by `python3.10` in every command below
 * Run `poetry install`
     * use `poetry install --no-dev` if you do not plan to contribute to IDP_Z3 development.
 
