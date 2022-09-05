@@ -91,8 +91,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
             }
           }, {
             label: 'Save...', command: () => {
-              console.log(this.idpService.spec);
-              var dataURI = "data:" + "theory.idp" + ";utf-8," + this.idpService.spec;
+              var dataURI = "data:" + "theory.idp" + ";utf-8," + this.idpService.spec.replace('\n', '\n\r');
               var a = document.createElement("a");
               // ... set a.href and a.download
               a.href = dataURI;
@@ -228,8 +227,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
             }
           }, {
             label: 'Save...', command: () => {
-              console.log(this.idpService.spec);
-              var dataURI = "data:" + "theory.idp" + ";utf-8," + this.idpService.spec;
+              var dataURI = "data:" + "theory.idp" + ";utf-8," + this.idpService.spec.replace('\n', '\n\r');
               var a = document.createElement("a");
               // ... set a.href and a.download
               a.href = dataURI;
