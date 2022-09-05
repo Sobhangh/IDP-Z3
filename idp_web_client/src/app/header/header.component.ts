@@ -100,6 +100,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
               // Then click the link:
               var clickEvent = new MouseEvent("click", { "view": window, "bubbles": true, "cancelable": false});
               a.dispatchEvent(clickEvent);
+              a.remove();
               this.showFileSave = true;
             }
           }]
@@ -236,6 +237,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
               // Then click the link:
               var clickEvent = new MouseEvent("click", { "view": window, "bubbles": true, "cancelable": false});
               a.dispatchEvent(clickEvent);
+              a.remove();
               this.showFileSave = true;
             }
           }]
