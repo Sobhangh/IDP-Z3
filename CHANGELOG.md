@@ -34,8 +34,10 @@ Breaking changes:
 * MR !225: allow `--no-dev` install in poetry
 * MR !228: Integrate FOLint linter into the editors
 
-### IDP-Z3
+### Interactive Consultant and Web IDE
 * fix #169: IC: need to better handle rationals
+* fix #205: could not run Web IDE on Windows
+* MR !236: Add "File / Share..." button to IC and Web IDE
 
 
 ## [0.9.2] - 2022-02-10
