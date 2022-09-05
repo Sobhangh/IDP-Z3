@@ -400,13 +400,11 @@ def file_open():
             tabs[decl.heading] = decl.heading
 
     return render(
-        div(classes="row", i=
-            [ div(classes="col", i=
-                ul(classes="tabs", i=
-                   [li(classes="tab col", i=
-                       a(tab, href=f"#{hash(tab)}",
-                         classes="active" if i==0 else None))
-                    for i, tab in enumerate(tabs.values())]))
+        div([ ul(classes="tabs", i=
+                [li(classes="tab col s3", i=
+                    a(tab, href=f"#{hash(tab)}",
+                        classes="active" if i==0 else None))
+                for i, tab in enumerate(tabs.values())])
             ] +
             [ div(id=hash(tab), classes="col s12", i=
                 ul(classes="collection", i=
