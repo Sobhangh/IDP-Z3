@@ -4,9 +4,9 @@ test:
         - apt update
         - apt -y install python3.10 python3-pip git
         - python3.10 install-poetry.py
-        - poetry install
-        - poetry run coverage run test.py generate pipeline api
-        - poetry run coverage report
+        - ~/.local/share/pypoetry/venv/bin/poetry install
+        - ~/.local/share/pypoetry/venv/bin/poetry run coverage run test.py generate pipeline api
+        - ~/.local/share/pypoetry/venv/bin/poetry run coverage report
 
 pages:
   image: ubuntu
@@ -15,8 +15,8 @@ pages:
     - apt update
     - apt -y install python3.10 python3-pip git
     - python3.10 install-poetry.py
-    - poetry install
-    - poetry run sphinx-build homepage public
+    - ~/.local/share/pypoetry/venv/bin/poetry install
+    - ~/.local/share/pypoetry/venv/bin/poetry run sphinx-build homepage public
   artifacts:
     paths:
     - public
