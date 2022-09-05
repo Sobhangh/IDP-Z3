@@ -58,6 +58,10 @@
   </ul>
 </p-dialog>
 
+<p-dialog header="File / Save..." [(visible)]="showFileSave">
+        <p>The project has been downloaded in the "Downloads" folder.</p>
+</p-dialog>
+
 <p-dialog header="Abstract models" [(visible)]="showExpansions"
           modal="modal"
           styleClass="ui-dialog abstract"  [contentStyle]="{'max-height':'100%'}">
