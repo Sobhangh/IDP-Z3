@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## unreleased yet
 
+This release uses the poetry 1.2.  If you use poetry, you need to update it.
+
+> curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
+> curl -sSL https://install.python-poetry.org | python3 -
+
 This release has new package dependencies: please run `poetry install` to update.
 
 Breaking changes:
