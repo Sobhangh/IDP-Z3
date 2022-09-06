@@ -5,12 +5,25 @@
   <meta charset="utf-8">
   <title></title>
 
-  <!-- htmx -->
-  <script src="https://unpkg.com/htmx.org@1.8.0" integrity="sha384-cZuAZ+ZbwkNRnrKi05G/fjBX+azI9DNOkNYysZ0I/X5ZFgsmMiBXgDZof30F5ofc" crossorigin="anonymous"></script>
-
   <!-- Materialize -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+</head>
+<body>
+  <div id="screen">
+    <h4>Interactive Consultant</h4>
+    <p class="flow-text">Choose an app:</p>
+    <ul class="collection">
+      <li class="collection-item"><a href="/htmx/file/open/specification.idp">Covid</a></li>
+      <li class="collection-item"><a href="/htmx/file/open/polygon.idp">Polygon</a></li>
+      <li class="collection-item"><a href="/htmx/file/open/simple_registratie.idp">Simple Registration</a></li>
+      <li class="collection-item"><a href="/htmx/file/open/registratie.idp">Registration</a></li>
+    </ul>
+  </div>
+
+  <!-- htmx -->
+  <script src="https://unpkg.com/htmx.org@1.8.0" integrity="sha384-cZuAZ+ZbwkNRnrKi05G/fjBX+azI9DNOkNYysZ0I/X5ZFgsmMiBXgDZof30F5ofc" crossorigin="anonymous"></script>
 
   <script>
     htmx.onLoad(function(target) {
@@ -21,16 +34,5 @@
       }
     });
   </script>
-
-</head>
-<body>
-  <div id="screen">
-    <ul class="collection">
-      <li class="collection-item"><a hx-push-url="true" href="/htmx/file/open/specification.idp">Covid</a></li>
-      <li class="collection-item"><a hx-push-url="true" href="/htmx/file/open/polygon.idp">Polygon</a></li>
-      <li class="collection-item"><a hx-push-url="true" href="/htmx/file/open/simple_registratie.idp">Simple Registration</a></li>
-      <li class="collection-item"><a hx-push-url="true" href="/htmx/file/open/registratie.idp">Registration</a></li>
-    </ul>
-  </div>
 </body>
 </html>

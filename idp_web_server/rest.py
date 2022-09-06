@@ -379,10 +379,28 @@ def serve_docs_file(path):
 
 @app.route('/htmx', methods=['GET'])
 def serve_htmx():
+    """ returns the mobile welcome page """
     return send_from_directory(static_file_dir, 'htmx.html')
+
+
+def wrap(screen):
+    """returns the `htmx.html` file with the unique `<div>` tag replaced by `screen` """
+
+    path = os.path.join(static_file_dir, 'htmx.html')
+    with open(path, mode='r', encoding='utf-8') as f:
+        content = f.read()
+
+    begin = content.find("<div")
+    assert begin != -1, "begin marker not found !"
+    end = content.find("</div>")
+    assert end != -1, "end marker not found !"
+
+    return content[:begin] + screen + content[end+len("</div>"):]
+
 
 @app.route('/htmx/file/open/<path:path>', methods=['GET'])
 def file_open(path):
+    """ returns a Single Page Application with FO(.) theory at `path` """
     path = os.path.join(examples_file_dir, path)
     with open(path, mode='r', encoding='utf-8') as f:
         code = f.read()
@@ -399,7 +417,7 @@ def file_open(path):
         if decl.heading not in tabs:
             tabs[decl.heading] = decl.heading
 
-    return render(
+    return wrap(render(
         div([ ul(classes="tabs", i=
                 [li(classes="tab col s3", i=
                     a(tab, href=f"#{hash(tab)}",
@@ -415,7 +433,7 @@ def file_open(path):
               )
               for tab in tabs.values()]
         )
-    )
+    ))
 
 
 api.add_resource(HelloWorld, '/test')
