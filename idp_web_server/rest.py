@@ -381,9 +381,9 @@ def serve_docs_file(path):
 def serve_htmx():
     return send_from_directory(static_file_dir, 'htmx.html')
 
-@app.route('/htmx/file/open', methods=['POST'])
-def file_open():
-    path = os.path.join(examples_file_dir, request.form['File'])
+@app.route('/htmx/file/open/<path:path>', methods=['GET'])
+def file_open(path):
+    path = os.path.join(examples_file_dir, path)
     with open(path, mode='r', encoding='utf-8') as f:
         code = f.read()
     idp = idpOf(code)

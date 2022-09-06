@@ -26,10 +26,10 @@
 <body>
   <div id="screen">
     <ul class="collection">
-      <li class="collection-item" hx-post="/htmx/file/open" hx-trigger="click" hx-target="#screen" hx-vals='{"File": "specification.idp"}'     >Covid</li>
-      <li class="collection-item" hx-post="/htmx/file/open" hx-trigger="click" hx-target="#screen" hx-vals='{"File": "polygon.idp"}'           >Polygon</li>
-      <li class="collection-item" hx-post="/htmx/file/open" hx-trigger="click" hx-target="#screen" hx-vals='{"File": "simple_registratie.idp"}'>Simple Registration</li>
-      <li class="collection-item" hx-post="/htmx/file/open" hx-trigger="click" hx-target="#screen" hx-vals='{"File": "registratie.idp"}'       >Registration</li>
+      <li class="collection-item"><a hx-push-url="true" href="/htmx/file/open/specification.idp">Covid</a></li>
+      <li class="collection-item"><a hx-push-url="true" href="/htmx/file/open/polygon.idp">Polygon</a></li>
+      <li class="collection-item"><a hx-push-url="true" href="/htmx/file/open/simple_registratie.idp">Simple Registration</a></li>
+      <li class="collection-item"><a hx-push-url="true" href="/htmx/file/open/registratie.idp">Registration</a></li>
     </ul>
   </div>
 </body>
