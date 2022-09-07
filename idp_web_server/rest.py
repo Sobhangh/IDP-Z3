@@ -43,7 +43,7 @@ from idp_engine.Parse import TypeDeclaration
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
-from .HTMLgen import *
+from .HtmXgen import *
 
 from typing import Dict
 
