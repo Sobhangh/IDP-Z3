@@ -70,6 +70,11 @@ The innerHTML can be a list:
 >>> print(render(div(["text", span("item 1"), span("item 2")])))
 <div>text<span>item 1</span><span>item 2</span></div>
 
+The innerHTML can also be a list of lists:
+
+>>> print(render(div(["text", [span(f"item {i}") for i in [1,2]]])))
+<div>text<span>item 1</span><span>item 2</span></div>
+
 
 The innerHTML can also be specified using the `i` parameter,
 after the other attributes, to match the order of rendering:
@@ -135,7 +140,7 @@ def solo_tag(name: str, ** kwargs) -> Tag:
 
 
 def tag(name: str,
-        body: Optional[Union[str, Tag, List[Union[str, Tag]]]] = None,
+        body: Optional[Union[str, Tag, List[Union[str, Tag, List[Tag]]]]] = None,
         **kwargs
         ) -> Tag:
     """returns a generator of strings, to be rendered as a HTML tag of type `name`
@@ -162,9 +167,13 @@ def tag(name: str,
             for b in body:
                 if type(b) == str:  # body is a Tag
                     yield f"{_tab}{b}"
-                else:  # body is a List[Tag]
+                else:
                     for b1 in b:
-                        yield f"{_tab}{b1}"
+                        if type(b1) == str:  # body is a List[Tag]
+                            yield f"{_tab}{b1}"
+                        else:
+                            for b2 in b1:  # body is a List[List[Tag]]
+                                yield f"{_tab}{b2}"
 
     yield f"</{name}>{_cr}"
 
