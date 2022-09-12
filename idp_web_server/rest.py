@@ -43,6 +43,7 @@ from idp_engine.Parse import TypeDeclaration
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
+from .htmx import file_openX, wrap
 from .HtmXgen import *
 
 from typing import Dict
@@ -383,21 +384,6 @@ def serve_htmx():
     return send_from_directory(static_file_dir, 'htmx.html')
 
 
-def wrap(screen):
-    """returns the `htmx.html` file with the unique `<div>` tag replaced by `screen` """
-
-    path = os.path.join(static_file_dir, 'htmx.html')
-    with open(path, mode='r', encoding='utf-8') as f:
-        content = f.read()
-
-    begin = content.find("<div")
-    assert begin != -1, "begin marker not found !"
-    end = content.find("</div>")
-    assert end != -1, "end marker not found !"
-
-    return content[:begin] + screen + content[end+len("</div>"):]
-
-
 @app.route('/htmx/file/open/<path:path>', methods=['GET'])
 def file_open(path):
     """ returns a Single Page Application with FO(.) theory at `path` """
@@ -405,41 +391,7 @@ def file_open(path):
     with open(path, mode='r', encoding='utf-8') as f:
         code = f.read()
     idp = idpOf(code)
-    state = State.make(idp, "{}", "{}", "[]")
-    # ensure the stateful solvers are initialized
-    _ = state.solver
-    _ = state.optimize_solver
-    _ = state.solver_reified
-    _ = state.optimize_solver_reified
-
-    tabs = dict()
-    for decl in state.assignments.symbols.values():
-        if decl.heading not in tabs:
-            tabs[decl.heading] = decl.heading
-
-    return wrap(render(
-        div(cl="container", i=
-            div(cl="row", i=
-                div(cl="col s12 m6 push-m3", i=[
-                    ul(cl="tabs", i=
-                        [li(cl="tab col s3", i=
-                            a(tab, href=f"#{hash(tab)}",
-                                cl="active" if i==0 else None))
-                        for i, tab in enumerate(tabs.values())])
-                    , [ div(id=hash(tab), i=
-                            ul(cl="collection", i=[
-                                li(str(a.sentence), cl="collection-item")
-                                for a in state.assignments.values()
-                                if a.symbol_decl.heading == tab
-                                ])
-                            )
-                        for tab in tabs.values()
-                        ]
-                    ])
-                )
-            )
-        )
-    )
+    return wrap(static_file_dir, file_openX(idp))
 
 
 api.add_resource(HelloWorld, '/test')
