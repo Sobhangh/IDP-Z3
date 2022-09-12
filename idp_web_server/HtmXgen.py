@@ -84,13 +84,20 @@ after the other attributes, to match the order of rendering:
 
 
 For debugging your code, you can set global variable `indent` to `True`
-in the code below to obtain HTML with tag indentation, e.g.,
+in the code below (or call `indent_it(True)`)
+to obtain HTML with tag indentation, e.g.,
 
-<ul>
-  <li>
+>>> indent_it(True); print(render(div(classes="s12", i=["text", span("item 1"), span("item 2")])))
+<div class="s12">
+  text
+  <span>
     item 1
-  </li>
-</ul>.
+  </span>
+  <span>
+    item 2
+  </span>
+</div>
+<BLANKLINE>
 
 """
 
@@ -101,13 +108,12 @@ from typing import Iterator, List, Optional, Union
 
 Tag = Iterator[str]
 
-if indent:
-    _tab = "  "
-    _cr = "\n"
-else:
-    _tab = ""
-    _cr = ""
+_tab = "  "
+_cr = "\n"
 
+def indent_it(value):
+    global indent
+    indent = value
 
 def render(gen: Tag) -> str:
     return ''.join(gen)
@@ -136,7 +142,7 @@ def solo_tag(name: str, ** kwargs) -> Tag:
         else:
                 attrs += f' {k}="{v}"'
 
-    yield f"<{name}{attrs}>{_cr}"
+    yield f"<{name}{attrs}>{_cr if indent else ''}"
 
 
 def tag(name: str,
@@ -162,20 +168,20 @@ def tag(name: str,
 
     if body is not None:
         if type(body) == str:  # body is a str
-            yield f"{_tab}{body}{_cr}"
+            yield (f"{_tab}{body}{_cr}" if indent else body)
         else:
             for b in body:
                 if type(b) == str:  # body is a Tag
-                    yield f"{_tab}{b}"
+                    yield (f"{_tab}{b}{_cr}" if indent else b)
                 else:
                     for b1 in b:
                         if type(b1) == str:  # body is a List[Tag]
-                            yield f"{_tab}{b1}"
+                            yield (f"{_tab}{b1}" if indent else b1)
                         else:
                             for b2 in b1:  # body is a List[List[Tag]]
-                                yield f"{_tab}{b2}"
+                                yield (f"{_tab}{b2}" if indent else b2)
 
-    yield f"</{name}>{_cr}"
+    yield f"</{name}>{_cr if indent else ''}"
 
 
 # in alphabetic order
