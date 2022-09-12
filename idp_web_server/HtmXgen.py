@@ -28,7 +28,7 @@ Pros:
 
 Cons:
 * the name of some tag attributes is changed
-(e.g., `classes` instead of `class`, due to Python parser)
+(e.g., `cl` instead of `class`, due to Python parser)
 
 
 Tutorial:
@@ -55,10 +55,10 @@ Tag attributes are specified using named arguments:
 <ul><li>text</li></ul>
 
 
-Some tag attributes are changed: you must use `classes` instead of `class`,
+Some tag attributes are changed: you must use `cl` instead of `class`,
 and `_` instead of `-`.
 
->>> print(render(p("text", classes="s12")))
+>>> print(render(p("text", cl="s12")))
 <p class="s12">text</p>
 
 >>> print(render(button("Click me", hx_post="/clicked", hx_swap="outerHTML")))
@@ -79,7 +79,7 @@ The innerHTML can also be a list of lists:
 The innerHTML can also be specified using the `i` parameter,
 after the other attributes, to match the order of rendering:
 
->>> print(render(ul(classes="s12", i=[li("item 1"), li("item 2")])))
+>>> print(render(ul(cl="s12", i=[li("item 1"), li("item 2")])))
 <ul class="s12"><li>item 1</li><li>item 2</li></ul>
 
 
@@ -87,7 +87,7 @@ For debugging your code, you can set global variable `indent` to `True`
 in the code below (or call `indent_it(True)`)
 to obtain HTML with tag indentation, e.g.,
 
->>> indent_it(True); print(render(div(classes="s12", i=["text", span("item 1"), span("item 2")])))
+>>> indent_it(True); print(render(div(cl="s12", i=["text", span("item 1"), span("item 2")])))
 <div class="s12">
   text
   <span>
@@ -131,7 +131,7 @@ def solo_tag(name: str, ** kwargs) -> Tag:
         Tag: a string iterator to be rendered
     """
 
-    kwargs = { k.replace("classes", "class").replace("_", "-"): v
+    kwargs = { k.replace("cl", "class").replace("_", "-"): v
                for k, v in kwargs.items()
                if v is not None and (type(v) != bool or v)}
 

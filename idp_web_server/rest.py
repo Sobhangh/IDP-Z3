@@ -418,17 +418,17 @@ def file_open(path):
             tabs[decl.heading] = decl.heading
 
     return wrap(render(
-        div(classes="container", i=
-            div(classes="row", i=
-                div(classes="col s12 m6 push-m3", i=[
-                    ul(classes="tabs", i=
-                        [li(classes="tab col s3", i=
+        div(cl="container", i=
+            div(cl="row", i=
+                div(cl="col s12 m6 push-m3", i=[
+                    ul(cl="tabs", i=
+                        [li(cl="tab col s3", i=
                             a(tab, href=f"#{hash(tab)}",
-                                classes="active" if i==0 else None))
+                                cl="active" if i==0 else None))
                         for i, tab in enumerate(tabs.values())])
                     , [ div(id=hash(tab), i=
-                            ul(classes="collection", i=[
-                                li(str(a.sentence), classes="collection-item")
+                            ul(cl="collection", i=[
+                                li(str(a.sentence), cl="collection-item")
                                 for a in state.assignments.values()
                                 if a.symbol_decl.heading == tab
                                 ])
