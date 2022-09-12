@@ -58,8 +58,8 @@ Tag attributes are specified using named arguments:
 Some tag attributes are changed: you must use `cl` instead of `class`,
 and `_` instead of `-`.
 
->>> print(render(p("text", cl="s12")))
-<p class="s12">text</p>
+>>> print(render(p("text", cl="s12", hx_get="url")))
+<p class="s12" hx-get="url">text</p>
 
 >>> print(render(button("Click me", hx_post="/clicked", hx_swap="outerHTML")))
 <button hx-post="/clicked" hx-swap="outerHTML">Click me</button>
