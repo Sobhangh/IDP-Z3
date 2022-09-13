@@ -36,7 +36,10 @@
       if (target !== null) {
         M.Tabs.init(target, {'swipeable': true});
       }
-    });
+      // initialize collapsibles
+      var elems = document.querySelectorAll('.collapsible');
+      var instances = M.Collapsible.init(elems);
+      });
   </script>
 </body>
 </html>

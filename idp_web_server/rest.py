@@ -43,7 +43,7 @@ from idp_engine.Parse import TypeDeclaration
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
-from .htmx import file_openX, wrap
+from .htmx import stateX, wrap
 from .HtmXgen import *
 
 from typing import Dict
@@ -391,7 +391,8 @@ def file_open(path):
     with open(path, mode='r', encoding='utf-8') as f:
         code = f.read()
     idp = idpOf(code)
-    return wrap(static_file_dir, file_openX(idp))
+    state = State.make(idp, "{}", "{}", "[]")
+    return wrap(static_file_dir, stateX(state))
 
 
 api.add_resource(HelloWorld, '/test')

@@ -36,8 +36,18 @@ def wrap(static_file_dir, screen):
     return content[:begin] + screen + content[end+len("</div>"):]
 
 
-def file_openX(idp):
-    state = State.make(idp, "{}", "{}", "[]")
+def ass_head(ass):
+    """generator for the head of an assignment"""
+    yield str(ass.sentence)
+
+
+def ass_body(ass):
+    """generator for the body of an assignment"""
+    yield "ok"
+
+
+def stateX(state):
+    """generator for the state"""
     # ensure the stateful solvers are initialized
     _ = state.solver
     _ = state.optimize_solver
@@ -59,8 +69,11 @@ def file_openX(idp):
                                 cl="active" if i==0 else None))
                         for i, tab in enumerate(tabs.values())])
                     , [ div(id=hash(tab), i=
-                            ul(cl="collection", i=[
-                                li(str(a.sentence), cl="collection-item")
+                            ul(cl="collapsible", i=[
+                                li(i=[
+                                    div(ass_head(a), cl="collapsible-header"),
+                                    div(ass_body(a), cl="collapsible-body")
+                                ])
                                 for a in state.assignments.values()
                                 if a.symbol_decl.heading == tab
                                 ])
