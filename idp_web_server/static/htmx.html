@@ -36,10 +36,28 @@
       if (target !== null) {
         M.Tabs.init(target, {'swipeable': true});
       }
+
       // initialize collapsibles
       var elems = document.querySelectorAll('.collapsible');
       var instances = M.Collapsible.init(elems);
+
+      // increase height of carousel for swipeable tabs
+      // https://github.com/Dogfalo/materialize/issues/4159
+      let maxHeight = 0;
+      const carouselItems = document.querySelectorAll('.collapsible');
+      let currentItemHeight;
+      carouselItems.forEach(item => {
+          currentItemHeight = getComputedStyle(item).height;
+          currentItemHeight = currentItemHeight.substring(0, currentItemHeight.indexOf('px')); // just removing the 'px' at the end
+          if(+currentItemHeight > +maxHeight)
+              maxHeight = currentItemHeight;
       });
+      tabs = document.querySelector('.tabs-content');
+      if (tabs) {
+        tabs.style.height = String(+maxHeight+100)+'px';  // 100px to accomodate opening of collapsible
+      };
+
+    });
   </script>
 </body>
 </html>

@@ -119,11 +119,11 @@ def render(gen: Tag) -> str:
     return ''.join(gen)
 
 
-def solo_tag(name: str, ** kwargs) -> Tag:
+def solo_tag(tag_name: str, ** kwargs) -> Tag:
     """returns a tag without body, e.g. `<br id="1">`
 
     Args:
-        name : name of the tag
+        tag_name : name of the tag
         kwargs (Dict[str, Optional[Union[str, bool]]]): attributes of the tag
             The `i` attributes, if present, is actually the innerHtml of the tag
 
@@ -142,17 +142,17 @@ def solo_tag(name: str, ** kwargs) -> Tag:
         else:
                 attrs += f' {k}="{v}"'
 
-    yield f"<{name}{attrs}>{_cr if indent else ''}"
+    yield f"<{tag_name}{attrs}>{_cr if indent else ''}"
 
 
-def tag(name: str,
+def tag(tag_name: str,
         body: Optional[Union[str, Tag, List[Union[str, Tag, List[Tag]]]]] = None,
         **kwargs
         ) -> Tag:
     """returns a generator of strings, to be rendered as a HTML tag of type `name`
 
     Args:
-        name : name of the tag
+        tag_name : name of the tag
         body : body of the tag, or None
         kwargs (Dict[str, Optional[Union[str, bool]]]): attributes of the tag
             The `i` attributes, if present, is actually the innerHtml of the tag
@@ -164,7 +164,7 @@ def tag(name: str,
         body = kwargs['i']
         del kwargs['i']
 
-    yield from solo_tag(name, **kwargs)
+    yield from solo_tag(tag_name, **kwargs)
 
     if body is not None:
         if type(body) == str:  # body is a str
@@ -181,7 +181,7 @@ def tag(name: str,
                             for b2 in b1:  # body is a List[List[Tag]]
                                 yield (f"{_tab}{b2}" if indent else b2)
 
-    yield f"</{name}>{_cr if indent else ''}"
+    yield f"</{tag_name}>{_cr if indent else ''}"
 
 
 # in alphabetic order
@@ -199,6 +199,14 @@ def button(body=None, **kwargs):
 
 def div(body=None, **kwargs):
     yield from tag("div", body, **kwargs)
+
+
+def input(body=None, **kwargs):
+    yield from tag("input", body, **kwargs)
+
+
+def label(body=None, **kwargs):
+    yield from tag("label", body, **kwargs)
 
 
 def li(body=None, **kwargs):

@@ -17,6 +17,8 @@
 
 import os
 
+from idp_engine.utils import BOOL, INT, REAL, DATE
+
 from .HtmXgen import *
 from .State import State
 
@@ -43,7 +45,17 @@ def ass_head(ass):
 
 def ass_body(ass):
     """generator for the body of an assignment"""
-    yield "ok"
+    if ass.sentence.type == BOOL:
+        yield   [label([
+                    input(name=str(ass.sentence), type="radio"),
+                    span("yes")
+                ]),
+                label([
+                    input(name=str(ass.sentence), type="radio"),
+                    span("no")
+                ])]
+    else:
+        yield "ok"
 
 
 def stateX(state):
@@ -76,6 +88,7 @@ def stateX(state):
                                 ])
                                 for a in state.assignments.values()
                                 if a.symbol_decl.heading == tab
+                                and not a.sentence.is_assignment()
                                 ])
                             )
                         for tab in tabs.values()
