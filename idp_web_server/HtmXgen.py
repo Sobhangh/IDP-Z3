@@ -56,7 +56,7 @@ Tag attributes are specified using named arguments:
 
 
 Some tag attributes are changed: you must use `cl` instead of `class`,
-and `_` instead of `-`.
+`for_` instead of `for`, and `_` instead of `-`.
 
 >>> print(render(p("text", cl="s12", hx_get="url")))
 <p class="s12" hx-get="url">text</p>
@@ -131,7 +131,7 @@ def solo_tag(tag_name: str, ** kwargs) -> Tag:
         Tag: a string iterator to be rendered
     """
 
-    kwargs = { k.replace("cl", "class").replace("_", "-"): v
+    kwargs = { k.replace("cl", "class").replace("for_", "for").replace("_", "-"): v
                for k, v in kwargs.items()
                if v is not None and (type(v) != bool or v)}
 
@@ -199,6 +199,10 @@ def button(body=None, **kwargs):
 
 def div(body=None, **kwargs):
     yield from tag("div", body, **kwargs)
+
+
+def form(body=None, **kwargs):
+    yield from tag("form", body, **kwargs)
 
 
 def input(body=None, **kwargs):
