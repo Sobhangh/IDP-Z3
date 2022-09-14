@@ -395,6 +395,22 @@ def file_open(path):
     return wrap(static_file_dir, stateX(state))
 
 
+def get_idp(request):
+    referer = request.headers.get('Referer')
+    path = referer[referer.index('file/open/') + 10:]
+    path = os.path.join(examples_file_dir, path)
+    with open(path, mode='r', encoding='utf-8') as f:
+        code = f.read()
+    return idpOf(code)
+
+@app.route('/htmx/state/post', methods=['POST'])
+def state_post():
+    idp = get_idp(request)
+    state = State.make(idp, "{}", "{}", "[]")
+    for k, v in request.form.items():
+        state.assert_(k, v)
+    return stateX(state)
+
 api.add_resource(HelloWorld, '/test')
 if with_png:
     api.add_resource(metaWithGraph, '/meta')

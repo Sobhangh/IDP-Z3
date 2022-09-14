@@ -18,24 +18,25 @@
 import os
 
 from idp_engine.utils import BOOL, INT, REAL, DATE
+from idp_engine.Expression import TRUE, FALSE
 
 from .HtmXgen import *
 from .State import State
 
 
 def wrap(static_file_dir, screen):
-    """returns the `htmx.html` file with the unique `<div>` tag replaced by `screen` """
+    """returns the `htmx.html` file with the unique non-indented`<div>` tag replaced by `screen` """
 
     path = os.path.join(static_file_dir, 'htmx.html')
     with open(path, mode='r', encoding='utf-8') as f:
         content = f.read()
 
-    begin = content.find("<div")
+    begin = content.find("\n<div")
     assert begin != -1, "begin marker not found !"
-    end = content.find("</div>")
+    end = content.find("\n</div>")
     assert end != -1, "end marker not found !"
 
-    return content[:begin] + screen + content[end+len("</div>"):]
+    return content[:begin] + screen + content[end+len("\n</div>"):]
 
 
 def ass_head(ass):
@@ -48,13 +49,15 @@ def ass_body(ass):
     if ass.sentence.type == BOOL:
         yield   [label([
                     input(name=str(ass.sentence), type="radio", value="true",
-                          hx_trigger="click delay:50ms", hx_post="state/put"),
+                          checked=(ass.value and ass.value.same_as(TRUE)),
+                          hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
                     span("yes", style="color: black;")
                 ]),
                 span("&nbsp;&nbsp;&nbsp;&nbsp;"),
                 label([
                     input(name=str(ass.sentence), type="radio", value="false",
-                          hx_trigger="click delay:50ms", hx_post="state/put"),
+                          checked=(ass.value and ass.value.same_as(FALSE)),
+                          hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
                     span("no", style="color: black;")
                 ])]
     else:
@@ -75,9 +78,9 @@ def stateX(state):
             tabs[decl.heading] = decl.heading
 
     return render(
-        div(cl="container", i=
+        div(cl="container", id="container", i=
             div(cl="row", i=
-                form(
+                form(hx_target="#container", hx_swap="outerHTML", i=
                     div(cl="col s12 m6 push-m3", i=[
                         ul(cl="tabs", i=
                             [li(cl="tab col s3", i=
