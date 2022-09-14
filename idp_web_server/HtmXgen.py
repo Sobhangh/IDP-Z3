@@ -205,8 +205,8 @@ def form(body=None, **kwargs):
     yield from tag("form", body, **kwargs)
 
 
-def input(body=None, **kwargs):
-    yield from tag("input", body, **kwargs)
+def input(**kwargs):
+    yield from solo_tag("input", **kwargs)
 
 
 def label(body=None, **kwargs):

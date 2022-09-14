@@ -49,12 +49,13 @@ def ass_body(ass):
         yield   [label([
                     input(name=str(ass.sentence), type="radio", value="true",
                           hx_trigger="click delay:50ms", hx_post="state/put"),
-                    span("yes")
+                    span("yes", style="color: black;")
                 ]),
+                span("&nbsp;&nbsp;&nbsp;&nbsp;"),
                 label([
                     input(name=str(ass.sentence), type="radio", value="false",
                           hx_trigger="click delay:50ms", hx_post="state/put"),
-                    span("no")
+                    span("no", style="color: black;")
                 ])]
     else:
         yield "ok"
