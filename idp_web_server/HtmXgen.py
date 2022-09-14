@@ -28,7 +28,7 @@ Pros:
 
 Cons:
 * the name of some tag attributes is changed
-(e.g., `cl` instead of `class`, due to Python parser)
+(e.g., `class_` instead of `class`, due to Python parser)
 
 
 Tutorial:
@@ -55,10 +55,10 @@ Tag attributes are specified using named arguments:
 <ul><li>text</li></ul>
 
 
-Some tag attributes are changed: you must use `cl` instead of `class`,
+Some tag attributes are changed: you must use `class_` instead of `class`,
 `for_` instead of `for`, and `_` instead of `-`.
 
->>> print(render(p("text", cl="s12", hx_get="url")))
+>>> print(render(p("text", class_="s12", hx_get="url")))
 <p class="s12" hx-get="url">text</p>
 
 >>> print(render(button("Click me", hx_post="/clicked", hx_swap="outerHTML")))
@@ -79,7 +79,7 @@ The innerHTML can also be a list of lists:
 The innerHTML can also be specified using the `i` parameter,
 after the other attributes, to match the order of rendering:
 
->>> print(render(ul(cl="s12", i=[li("item 1"), li("item 2")])))
+>>> print(render(ul(class_="s12", i=[li("item 1"), li("item 2")])))
 <ul class="s12"><li>item 1</li><li>item 2</li></ul>
 
 
@@ -87,7 +87,7 @@ For debugging your code, you can set global variable `indent` to `True`
 in the code below (or call `indent_it(True)`)
 to obtain HTML with tag indentation, e.g.,
 
->>> indent_it(True); print(render(div(cl="s12", i=["text", span("item 1"), span("item 2")])))
+>>> indent_it(True); print(render(div(class_="s12", i=["text", span("item 1"), span("item 2")])))
 <div class="s12">
   text
   <span>
@@ -131,7 +131,7 @@ def solo_tag(tag_name: str, ** kwargs) -> Tag:
         Tag: a string iterator to be rendered
     """
 
-    kwargs = { k.replace("cl", "class").replace("for_", "for").replace("_", "-"): v
+    kwargs = { k.replace("class_", "class").replace("for_", "for").replace("_", "-"): v
                for k, v in kwargs.items()
                if v is not None and (type(v) != bool or v)}
 
@@ -203,6 +203,10 @@ def div(body=None, **kwargs):
 
 def form(body=None, **kwargs):
     yield from tag("form", body, **kwargs)
+
+
+def i(body=None, **kwargs):
+    yield from tag("i", body, **kwargs)
 
 
 def input(**kwargs):

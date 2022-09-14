@@ -41,6 +41,11 @@ def wrap(static_file_dir, screen):
 
 def ass_head(ass):
     """generator for the head of an assignment"""
+    if ass.sentence.type == BOOL:
+        if ass.value and ass.value.same_as(TRUE):
+            yield i("check", class_="material-icons")
+        elif ass.value and ass.value.same_as(FALSE):
+            yield i("clear", class_="material-icons")
     yield str(ass.sentence)
 
 
@@ -78,21 +83,21 @@ def stateX(state):
             tabs[decl.heading] = decl.heading
 
     return render(
-        div(cl="container", id="container", i=
-            div(cl="row", i=
+        div(class_="container", id="container", i=
+            div(class_="row", i=
                 form(hx_target="#container", hx_swap="outerHTML", i=
-                    div(cl="col s12 m6 push-m3", i=[
-                        ul(cl="tabs", i=
-                            [li(cl="tab col s3", i=
+                    div(class_="col s12 m6 push-m3", i=[
+                        ul(class_="tabs", i=
+                            [li(class_="tab col s3", i=
                                 a(tab, href=f"#{hash(tab)}",
-                                    cl="active" if i==0 else None))
+                                    class_="active" if i==0 else None))
                             for i, tab in enumerate(tabs.values())])
                         , [ div(id=hash(tab), i=
-                                ul(cl="collapsible", i=[
+                                ul(class_="collapsible", i=[
                                     li(i=[
-                                        div(ass_head(a), cl="collapsible-header"),
-                                        div(ass_body(a), cl="collapsible-body")
-                                    ])
+                                        div(ass_head(a), class_="collapsible-header"),
+                                        div(ass_body(a), class_="collapsible-body")
+                                        ])
                                     for a in state.assignments.values()
                                     if a.symbol_decl.heading == tab
                                     and not a.sentence.is_assignment()
