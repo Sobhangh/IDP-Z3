@@ -47,13 +47,13 @@ def ass_body(ass):
     """generator for the body of an assignment"""
     if ass.sentence.type == BOOL:
         yield   [label([
-                    input(name=str(ass.sentence), type="radio",
-                          hx_trigger="click", hx_post="state/put"),
+                    input(name=str(ass.sentence), type="radio", value="true",
+                          hx_trigger="click delay:50ms", hx_post="state/put"),
                     span("yes")
                 ]),
                 label([
-                    input(name=str(ass.sentence), type="radio",
-                          hx_trigger="click", hx_post="state/put"),
+                    input(name=str(ass.sentence), type="radio", value="false",
+                          hx_trigger="click delay:50ms", hx_post="state/put"),
                     span("no")
                 ])]
     else:

@@ -57,6 +57,18 @@
         tabs.style.height = String(+maxHeight+100)+'px';  // 100px to accomodate opening of collapsible
       };
 
+      document.querySelectorAll('input[type="radio"]').forEach(x => x.addEventListener('click',function(){
+        if(! this.value0 || this.value0 == 0){
+          this.checked = true;
+          document.querySelectorAll('input[type="radio"][name="'+this.name+'"]').forEach(x=>x.value0=0);
+          this.value0 = 1;
+        } else {
+          this.checked = false;
+          document.querySelectorAll('input[type="radio"][name="'+this.name+'"]').forEach(x=>x.value0=0);
+          this.value0 = 0;
+        }
+      }))
+
     });
   </script>
 </body>
