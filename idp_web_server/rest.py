@@ -39,6 +39,7 @@ from flask_restful import Resource, Api, reqparse
 from idp_engine import IDP
 from idp_engine.utils import log, RUN_FILE
 
+from idp_engine.Assignments import Status as S
 from idp_engine.Parse import TypeDeclaration
 from .State import State
 from .Inferences import explain, abstract
@@ -409,6 +410,16 @@ def state_post():
     state = State.make(idp, "{}", "{}", "[]")
     for k, v in request.form.items():
         state.assert_(k, v)
+        if state.environment and k in state.environment.assignments:
+            state.environment.assert_(k,v)
+
+    # perform propagation
+    if state.environment is not None:  # if there is a decision vocabulary
+        state.environment.propagate(tag=S.ENV_CONSQ)
+        state.assignments.update(state.environment.assignments)
+        state._formula = None
+    state.propagate(tag=S.CONSEQUENCE)
+    # TODO relevance
     return stateX(state)
 
 api.add_resource(HelloWorld, '/test')

@@ -17,8 +17,9 @@
 
 import os
 
-from idp_engine.utils import BOOL, INT, REAL, DATE
+from idp_engine.Assignments import Status as S
 from idp_engine.Expression import TRUE, FALSE
+from idp_engine.utils import BOOL, INT, REAL, DATE
 
 from .HtmXgen import *
 from .State import State
@@ -52,19 +53,22 @@ def ass_head(ass):
 def ass_body(ass):
     """generator for the body of an assignment"""
     if ass.sentence.type == BOOL:
-        yield   [label([
-                    input(name=str(ass.sentence), type="checkbox", value="true",
-                          checked=(ass.value and ass.value.same_as(TRUE)),
-                          hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
-                    span("yes", style="color: black;")
-                ]),
-                span("&nbsp;&nbsp;&nbsp;&nbsp;"),
-                label([
-                    input(name=str(ass.sentence), type="checkbox", value="false",
-                          checked=(ass.value and ass.value.same_as(FALSE)),
-                          hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
-                    span("no", style="color: black;")
-                ])]
+        if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
+            yield   [label([
+                        input(name=str(ass.sentence), type="checkbox", value="true",
+                            checked=(ass.value and ass.value.same_as(TRUE)),
+                            hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
+                        span("yes", style="color: black;")
+                    ]),
+                    span("&nbsp;&nbsp;&nbsp;&nbsp;"),
+                    label([
+                        input(name=str(ass.sentence), type="checkbox", value="false",
+                            checked=(ass.value and ass.value.same_as(FALSE)),
+                            hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
+                        span("no", style="color: black;")
+                    ])]
+        else:
+            yield "Consequence"
     else:
         yield "ok"
 
