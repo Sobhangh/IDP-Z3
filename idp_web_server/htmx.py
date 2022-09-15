@@ -89,8 +89,7 @@ def stateX(state):
                     div(class_="col s12 m6 push-m3", i=[
                         ul(class_="tabs", i=
                             [li(class_="tab col s3", i=
-                                a(tab, href=f"#{hash(tab)}",
-                                    class_="active" if i==0 else None))
+                                a(tab, href=f"#{hash(tab)}", id=f"#{hash(tab)}"))
                             for i, tab in enumerate(tabs.values())])
                         , [ div(id=hash(tab), i=
                                 ul(class_="collapsible", i=[
