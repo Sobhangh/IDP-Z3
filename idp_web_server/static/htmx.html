@@ -32,6 +32,7 @@
   <script src="https://unpkg.com/htmx.org@1.8.0" integrity="sha384-cZuAZ+ZbwkNRnrKi05G/fjBX+azI9DNOkNYysZ0I/X5ZFgsmMiBXgDZof30F5ofc" crossorigin="anonymous"></script>
 
   <script>
+
     // hack to keep the current tab selected
     var active_tab
     htmx.on("htmx:beforeSwap", function(evt){
@@ -81,20 +82,17 @@
       var elems = document.querySelectorAll('.collapsible');
       var instances = M.Collapsible.init(elems, {onOpenEnd: tabs_height, onCloseEnd: tabs_height});
 
-      // allow user to deselect radio buttons
-      document.querySelectorAll('input[type="radio"]').forEach(x => x.addEventListener('click',function(){
-        if(! this.value0 || this.value0 == 0){
-          this.checked = true;
-          document.querySelectorAll('input[type="radio"][name="'+this.name+'"]').forEach(x=>x.value0=0);
-          this.value0 = 1;
-        } else {
-          this.checked = false;
-          document.querySelectorAll('input[type="radio"][name="'+this.name+'"]').forEach(x=>x.value0=0);
-          this.value0 = 0;
-        }
-      }))
-
     });
+
+    // checkboxes are like radio-buttons
+    document.body.addEventListener('click', (evt) => {
+      target = evt.target
+      if (target.tagName.toLowerCase() === 'input'
+          && target.checked == true) { // if checked, reset the others
+            document.querySelectorAll('[type="checkbox"][name="'+target.name+'"]').forEach(x => x.checked=false)
+            target.checked = true;
+          }
+    })
   </script>
 </body>
 </html>
