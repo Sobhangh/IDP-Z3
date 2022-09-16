@@ -95,9 +95,9 @@ def stateX(state):
                     div(class_="col s12 m6 push-m3", i=[
                         ul(class_="tabs", i=
                             [li(class_="tab col s3", i=
-                                a(tab, href=f"#{hash(tab)}", id=f"#{hash(tab)}"))
+                                a(tab, href=f"#tab-{i}", id=f"#tab-{i}"))
                             for i, tab in enumerate(tabs.values())])
-                        , [ div(id=hash(tab), i=
+                        , [ div(id=f"tab-{i}", i=
                                 ul(class_="collapsible", i=[
                                     li(i=[
                                         div(ass_head(a), class_="collapsible-header" +
@@ -110,7 +110,7 @@ def stateX(state):
                                     and not a.sentence.is_assignment()
                                     ])
                                 )
-                            for tab in tabs.values()
+                            for i, tab in enumerate(tabs.values())
                             ]
                         ])
                     )
