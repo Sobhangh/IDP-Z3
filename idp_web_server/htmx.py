@@ -48,12 +48,14 @@ def ass_head(ass):
         elif ass.value and ass.value.same_as(FALSE):
             yield i("clear", class_="material-icons")
     yield str(ass.sentence)
+    if ass.status not in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
+        yield a(i("info", class_="material-icons"))
 
 
 def ass_body(ass):
     """generator for the body of an assignment"""
-    if ass.sentence.type == BOOL:
-        if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
+    if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
+        if ass.sentence.type == BOOL:
             yield   [label([
                         input(name=str(ass.sentence), type="checkbox", value="true",
                             checked=(ass.value and ass.value.same_as(TRUE)),
@@ -68,9 +70,9 @@ def ass_body(ass):
                         span("no", style="color: black;")
                     ])]
         else:
-            yield "Consequence"
+            yield "TODO"
     else:
-        yield "ok"
+        yield "(consequence)"  # not shown
 
 
 def stateX(state):
@@ -98,7 +100,9 @@ def stateX(state):
                         , [ div(id=hash(tab), i=
                                 ul(class_="collapsible", i=[
                                     li(i=[
-                                        div(ass_head(a), class_="collapsible-header"),
+                                        div(ass_head(a), class_="collapsible-header" +
+                                            ("" if a.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] else
+                                             " dont-unfold")),
                                         div(ass_body(a), class_="collapsible-body")
                                         ])
                                     for a in state.assignments.values()
