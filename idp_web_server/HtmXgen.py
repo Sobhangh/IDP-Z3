@@ -19,12 +19,12 @@
 This module contains functions to generate HTML conveniently and efficiently.
 
 It is an alternative to templating engines, like Jinja,
-e.g., for use with [htmx](https://htmx.org/).
+for use with, e.g., [htmx](https://htmx.org/).
 
 Pros:
 * use familiar python syntax
 * use efficient concatenation techniques
-* optional indentation
+* optional automatic indentation
 
 Cons:
 * the name of some tag attributes is changed
@@ -34,7 +34,7 @@ Cons:
 Tutorial:
 ---------
 
-A tag is created by calling a function of the appropriate name:
+A tag is created by calling a function of the corresponding name:
 
 >>> print(render(p("text")))
 <p>text</p>
@@ -120,7 +120,7 @@ def render(gen: Tag) -> str:
 
 
 def solo_tag(tag_name: str, ** kwargs) -> Tag:
-    """returns a tag without body, e.g. `<br id="1">`
+    """returns a tag without innerHTML, e.g. `<br id="1">`
 
     Args:
         tag_name : name of the tag
@@ -146,14 +146,14 @@ def solo_tag(tag_name: str, ** kwargs) -> Tag:
 
 
 def tag(tag_name: str,
-        body: Optional[Union[str, Tag, List[Union[str, Tag, List[Tag]]]]] = None,
+        inner: Optional[Union[str, Tag, List[Union[str, Tag, List[Tag]]]]] = None,
         **kwargs
         ) -> Tag:
     """returns a generator of strings, to be rendered as a HTML tag of type `name`
 
     Args:
         tag_name : name of the tag
-        body : body of the tag, or None
+        inner : innerHTML of the tag, or None
         kwargs (Dict[str, Optional[Union[str, bool]]]): attributes of the tag
             The `i` attributes, if present, is actually the innerHtml of the tag
 
@@ -161,76 +161,81 @@ def tag(tag_name: str,
         Tag: a string iterator to be rendered
     """
     if 'i' in kwargs:
-        body = kwargs['i']
+        inner = kwargs['i']
         del kwargs['i']
 
     yield from solo_tag(tag_name, **kwargs)
 
-    if body is not None:
-        if type(body) == str:  # body is a str
-            yield (f"{_tab}{body}{_cr}" if indent else body)
+    if inner is not None:
+        if type(inner) == str:  # inner is a str
+            yield (f"{_tab}{inner}{_cr}" if indent else inner)
         else:
-            for b in body:
-                if type(b) == str:  # body is a Tag
-                    yield (f"{_tab}{b}{_cr}" if indent else b)
+            for i in inner:
+                if type(i) == str:  # inner is a Tag
+                    yield (f"{_tab}{i}{_cr}" if indent else i)
                 else:
-                    for b1 in b:
-                        if type(b1) == str:  # body is a List[Tag]
-                            yield (f"{_tab}{b1}" if indent else b1)
+                    for i1 in i:
+                        if type(i1) == str:  # inner is a List[Tag]
+                            yield (f"{_tab}{i1}" if indent else i1)
                         else:
-                            for b2 in b1:  # body is a List[List[Tag]]
-                                yield (f"{_tab}{b2}" if indent else b2)
+                            for i2 in i1:  # inner is a List[List[Tag]]
+                                yield (f"{_tab}{i2}" if indent else i2)
 
     yield f"</{tag_name}>{_cr if indent else ''}"
 
 
 # in alphabetic order
 
-def a(body=None, **kwargs):
-    yield from tag("a", body, **kwargs)
+def a(inner=None, **kwargs):
+    yield from tag("a", inner, **kwargs)
+
+
+def body(inner=None, **kwargs):
+    yield from tag("body", inner, **kwargs)
 
 
 def br(**kwargs):
     yield from solo_tag("br", **kwargs)
 
-def button(body=None, **kwargs):
-    yield from tag("button", body, **kwargs)
+
+def button(inner=None, **kwargs):
+    yield from tag("button", inner, **kwargs)
 
 
-def div(body=None, **kwargs):
-    yield from tag("div", body, **kwargs)
+def div(inner=None, **kwargs):
+    yield from tag("div", inner, **kwargs)
 
 
-def form(body=None, **kwargs):
-    yield from tag("form", body, **kwargs)
+def form(inner=None, **kwargs):
+    yield from tag("form", inner, **kwargs)
 
 
-def i(body=None, **kwargs):
-    yield from tag("i", body, **kwargs)
+def i(inner=None, **kwargs):
+    yield from tag("i", inner, **kwargs)
 
 
 def input(**kwargs):
     yield from solo_tag("input", **kwargs)
 
 
-def label(body=None, **kwargs):
-    yield from tag("label", body, **kwargs)
+def label(inner=None, **kwargs):
+    yield from tag("label", inner, **kwargs)
 
 
-def li(body=None, **kwargs):
-    yield from tag("li", body, **kwargs)
+def li(inner=None, **kwargs):
+    yield from tag("li", inner, **kwargs)
 
 
-def p(body=None, **kwargs):
-    yield from tag("p", body, **kwargs)
+def p(inner=None, **kwargs):
+    yield from tag("p", inner, **kwargs)
 
 
-def span(body=None, **kwargs):
-    yield from tag("span", body, **kwargs)
+def span(inner=None, **kwargs):
+    yield from tag("span", inner, **kwargs)
 
 
-def ul(body=None, **kwargs):
-    yield from tag("ul", body, **kwargs)
+def ul(inner=None, **kwargs):
+    yield from tag("ul", inner, **kwargs)
 
 
 if __name__ == "__main__":
