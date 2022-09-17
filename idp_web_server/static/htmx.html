@@ -44,30 +44,12 @@
 
   <script>
 
-    // hack to keep the current tab selected
-    var active_tab
-    htmx.on("htmx:beforeSwap", function(evt){
-      target = document.querySelector('.tabs');
-      if (target !== null) {
-        active_tab = document.querySelector('.active')
-      }
-    })
-
     htmx.onLoad(function(target) {
 
-      // initialize tabs in materialize, if any
+      // initialize tabs in materialize, if not done yet
       target = document.querySelector('.tabs');
-      if (target !== null) {
+      if (target !== null && document.querySelector('li.indicator') == null) {
         M.Tabs.init(target, {'swipeable': true});
-        if (active_tab) {
-          // select active_tab without CSS transition
-          var instance = M.Tabs.getInstance(target);
-          instance.options.duration = 0; instance._tabsCarousel.options.duration = 0;
-          instance.select(active_tab.id.substr(1))
-          setTimeout(() => {
-            instance.options.duration = 300; instance._tabsCarousel.options.duration = 200
-          }, 1000);
-        }
       }
 
       // increase height of carousel for swipeable tabs
@@ -93,7 +75,7 @@
       var elems = document.querySelectorAll('.collapsible');
       var instances = M.Collapsible.init(elems, {onOpenEnd: tabs_height, onCloseEnd: tabs_height});
 
-      // modal buttons
+      // initialize modal buttons
       var elems = document.querySelectorAll('.modal');
       var instances = M.Modal.init(elems, {});
 
@@ -111,7 +93,7 @@
 
     });
 
-    // checkboxes are like radio-buttons
+    // checkboxes behave like radio-buttons
     document.body.addEventListener('click', (evt) => {
       target = evt.target
       if (target.tagName.toLowerCase() === 'input'

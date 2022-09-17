@@ -420,7 +420,7 @@ def state_post():
         state._formula = None
     state.propagate(tag=S.CONSEQUENCE)
     # TODO relevance
-    return stateX(state)
+    return stateX(state, update=True)
 
 api.add_resource(HelloWorld, '/test')
 if with_png:

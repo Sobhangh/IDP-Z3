@@ -75,46 +75,50 @@ def ass_body(ass):
         yield "(consequence)"  # not shown
 
 
-def stateX(state):
+def stateX(state, update=False):
     """generator for the state"""
-    # ensure the stateful solvers are initialized
-    _ = state.solver
-    _ = state.optimize_solver
-    _ = state.solver_reified
-    _ = state.optimize_solver_reified
 
     tabs = dict()
     for decl in state.assignments.symbols.values():
         if decl.heading not in tabs:
             tabs[decl.heading] = decl.heading
 
-    return render(
-        div(class_="container", id="container", i=
-            div(class_="row", i=
-                form(hx_target="#container", hx_swap="outerHTML", i=
-                    div(class_="col s12 m6 push-m3", i=[
-                        ul(class_="tabs", i=
-                            [li(class_="tab col s3", i=
-                                a(tab, href=f"#tab-{index}", id=f"#tab-{index}"))
-                            for index, tab in enumerate(tabs.values())])
-                        , [ div(id=f"tab-{index}", i=
-                                ul(class_="collapsible", i=[
-                                    li(i=[
-                                        div(ass_head(ass), class_="collapsible-header")
-                                        if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] else
-                                        div(ass_head(ass),
-                                            class_="collapsible-header dont-unfold modal-trigger", href="#modal1"),
-                                        div(ass_body(ass), class_="collapsible-body")
-                                        ])
-                                    for ass in state.assignments.values()
-                                    if ass.symbol_decl.heading == tab
-                                    and not ass.sentence.is_assignment()
+    def tabsX():
+        """ generates the content of the tabs """
+        for index, tab in enumerate(tabs.values()):
+            yield from div(id=f"tab-{index}", hx_swap_oob="innerHTML", i=
+                            ul(class_="collapsible", i=[
+                                li(i=[
+                                    div(ass_head(ass),
+                                        class_="collapsible-header")
+                                    if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] else
+                                    div(ass_head(ass),
+                                        class_="collapsible-header dont-unfold modal-trigger",
+                                        href="#modal1"),
+                                    div(ass_body(ass), class_="collapsible-body")
                                     ])
-                                )
-                            for index, tab in enumerate(tabs.values())
-                            ]
-                        ])
+                                for ass in state.assignments.values()
+                                if ass.symbol_decl.heading == tab
+                                and not ass.sentence.is_assignment()
+                                ])
+                            )
+
+    if update:  # only send the content of the tabs
+        return render(tabsX())
+    else:  # generate the container
+        return render(
+            div(class_="container", id="container", i=
+                div(class_="row", i=
+                    form(i=
+                        div(class_="col s12 m6 push-m3", i=[
+                            ul(class_="tabs", i=
+                                [li(class_="tab col s3", i=
+                                    a(tab, id=f"#tab-{index}",
+                                      href=f"#tab-{index}"))
+                                for index, tab in enumerate(tabs.values())])
+                            , tabsX()
+                            ])
+                        )
                     )
                 )
-            )
         )
