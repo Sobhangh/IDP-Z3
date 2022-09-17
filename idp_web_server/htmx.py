@@ -49,7 +49,7 @@ def ass_head(ass):
             yield i("clear", class_="material-icons")
     yield str(ass.sentence)
     if ass.status not in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
-        yield a(i("info", class_="material-icons"))
+        yield i("info", class_="material-icons")
 
 
 def ass_body(ass):
@@ -95,22 +95,23 @@ def stateX(state):
                     div(class_="col s12 m6 push-m3", i=[
                         ul(class_="tabs", i=
                             [li(class_="tab col s3", i=
-                                a(tab, href=f"#tab-{i}", id=f"#tab-{i}"))
-                            for i, tab in enumerate(tabs.values())])
-                        , [ div(id=f"tab-{i}", i=
+                                a(tab, href=f"#tab-{index}", id=f"#tab-{index}"))
+                            for index, tab in enumerate(tabs.values())])
+                        , [ div(id=f"tab-{index}", i=
                                 ul(class_="collapsible", i=[
                                     li(i=[
-                                        div(ass_head(a), class_="collapsible-header" +
-                                            ("" if a.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] else
-                                             " dont-unfold")),
-                                        div(ass_body(a), class_="collapsible-body")
+                                        div(ass_head(ass), class_="collapsible-header")
+                                        if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] else
+                                        div(ass_head(ass),
+                                            class_="collapsible-header dont-unfold modal-trigger", href="#modal1"),
+                                        div(ass_body(ass), class_="collapsible-body")
                                         ])
-                                    for a in state.assignments.values()
-                                    if a.symbol_decl.heading == tab
-                                    and not a.sentence.is_assignment()
+                                    for ass in state.assignments.values()
+                                    if ass.symbol_decl.heading == tab
+                                    and not ass.sentence.is_assignment()
                                     ])
                                 )
-                            for i, tab in enumerate(tabs.values())
+                            for index, tab in enumerate(tabs.values())
                             ]
                         ])
                     )

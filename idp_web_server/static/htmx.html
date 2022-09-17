@@ -28,6 +28,17 @@
     </div>
 </div>
 
+<!-- Modal Structure -->
+<div id="modal1" class="modal">
+  <div class="modal-content">
+    <h4>Modal Header</h4>
+    <p>A bunch of text</p>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+  </div>
+</div>
+
   <!-- htmx -->
   <script src="https://unpkg.com/htmx.org@1.8.0" integrity="sha384-cZuAZ+ZbwkNRnrKi05G/fjBX+azI9DNOkNYysZ0I/X5ZFgsmMiBXgDZof30F5ofc" crossorigin="anonymous"></script>
 
@@ -82,11 +93,22 @@
       var elems = document.querySelectorAll('.collapsible');
       var instances = M.Collapsible.init(elems, {onOpenEnd: tabs_height, onCloseEnd: tabs_height});
 
+      // modal buttons
+      var elems = document.querySelectorAll('.modal');
+      var instances = M.Modal.init(elems, {});
+
       // don't unfold consequences
-      // https://github.com/Dogfalo/materialize/issues/1996
+      // (https://github.com/Dogfalo/materialize/issues/1996 not working with modal)
       elems = document.querySelectorAll(".dont-unfold").forEach(el=> {
-        el.addEventListener("click", e => { e.stopPropagation(); })
+        el.addEventListener("click", e => { // re-collapse it immediately
+            setTimeout(() => {
+              elems = document.querySelectorAll(".collapsible-body").forEach(el=> {
+                  el.style.display="none";
+                })
+            }, 50 )
+        })
       })
+
     });
 
     // checkboxes are like radio-buttons
