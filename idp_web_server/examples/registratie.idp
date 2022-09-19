@@ -1,4 +1,4 @@
-vocabulary {
+vocabulary environment {
     type Location := {Flemish_Region, Walloon_Region, Brussels_Region}
     type Real_Estate_Type := {Residential, Residential_Building_Land, Other_Real_Estate}
     type Destination := {As_Family_Dwelling, For_Resale, Community_Purpose, Social_Housing, Social_Renting, Other_House, No_House}
@@ -42,6 +42,10 @@ vocabulary {
     start_dt_dwelling_for_social_rent : () → Year
     duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
 
+}
+
+vocabulary decision {
+    import environment
 
     type Registration_type := {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
     type Tax_Rate := {1, 2, 4, 6, 7, 10, 12}
@@ -51,7 +55,7 @@ vocabulary {
     tax_amount : () → ℝ
 }
 
-theory  {
+theory environment:environment {
     { professional_buyer() ←
         professional_declaration_filed()
         ∧ guarantee_satisfied()
@@ -59,6 +63,9 @@ theory  {
             ∨ ¬additional_security_required())
         ∧ resale() = Three_Or_More.
     }
+}
+
+theory decision:decision {
 
   [Tax rate legislation]
     {
@@ -161,7 +168,7 @@ theory  {
     tax_amount() = value() ⨯ tax_rate() / 100.
 
 }
-structure default {
+structure default:environment {
     region := Flemish_Region.
 }
 display {
