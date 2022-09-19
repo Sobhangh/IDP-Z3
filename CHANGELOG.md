@@ -30,6 +30,7 @@ Breaking changes:
 * fix #194: Decision table returns whether timeout was reached
 * fix #195: add version flag to CLI
 * fix #196: Can't change default real value
+* fix #202: Various IDE improvements
 * MR !214: support for `#TODAY(y,m,d)`
 * MR !225: allow `--no-dev` install in poetry
 * MR !228: Integrate FOLint linter into the editors
