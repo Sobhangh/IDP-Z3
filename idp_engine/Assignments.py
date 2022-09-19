@@ -263,7 +263,7 @@ class Assignments(dict):
         model_str = ""
         for k, a in out.items():
             if k in nullary:  # Exception 1.
-                model_str += f"{k} := {a[0][3:]}.{NEWL}"
+                model_str += f"{k} :={a[0][3:]}.{NEWL}"
             else:
                 model_str += f"{k} := {{{ ', '.join(s for s in a) }}}.{NEWL}"
         return model_str
