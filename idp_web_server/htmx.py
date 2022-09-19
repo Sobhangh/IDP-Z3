@@ -43,14 +43,23 @@ def wrap(static_file_dir, screen):
 
 def ass_head(ass):
     """generator for the head of an assignment"""
+    def info():
+        if ass.status not in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
+             yield i("info", class_="material-icons")
+
     if ass.sentence.type == BOOL:
-        if ass.value and ass.value.same_as(TRUE):
-            yield i("check", class_="material-icons")
-        elif ass.value and ass.value.same_as(FALSE):
-            yield i("clear", class_="material-icons")
-    yield ass.sentence.code
-    if ass.status not in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
-        yield i("info", class_="material-icons")
+        yield span([
+            i("check" if ass.value.same_as(TRUE) else "clear",
+              class_="material-icons") if ass.value is not None else "",
+            ass.sentence.code,
+            info()
+        ])
+    else:
+        yield span([
+            ass.sentence.code,
+            f" = {ass.value}" if ass.value else "",
+            info()
+        ])
 
 
 def ass_body(ass):
