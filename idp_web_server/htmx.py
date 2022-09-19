@@ -131,8 +131,10 @@ def stateX(state, update=False):
 
 def explainX(facts, laws):
     return div(id="modal1", class_="modal", hx_swap_oob="innerHTML", i=[
-               div(class_="modal_content", i=str(facts)),
-               div(class_="modal_footer", i=
+               div(class_="modal_content", i=[
+                   [div([ass_body(ass), ass.sentence.code]) for ass in facts],
+                   [p(law.annotations['reading']) for law in laws]]),
+                div(class_="modal_footer", i=
                    a("Close", href="#!",
-                     class_="modal-close waves-effect waves-green btn-flat"))
+                     class_="modal-close waves-effect waves-green btn-flat right"))
     ])

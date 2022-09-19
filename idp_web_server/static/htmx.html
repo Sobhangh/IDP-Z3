@@ -70,7 +70,9 @@
 
       // initialize modal buttons
       var elems = document.querySelectorAll('.modal');
-      var instances = M.Modal.init(elems, {});
+      if (elems && elems[0].M_Modal == null) {
+        var instances = M.Modal.init(elems, {});
+      }
 
       // don't unfold consequences
       // (https://github.com/Dogfalo/materialize/issues/1996 not working with modal)
@@ -80,7 +82,7 @@
               elems = document.querySelectorAll(".collapsible-body").forEach(el=> {
                   el.style.display="none";
                 })
-            }, 50 )
+            }, 500 )
         })
       })
 
