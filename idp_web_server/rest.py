@@ -442,7 +442,7 @@ def state_explain():
     _ = state.solver_reified
     (facts, laws) = state.explain(sentence)
 
-    return render(explainX(facts, laws))
+    return render(explainX(state, facts, laws))
 
 api.add_resource(HelloWorld, '/test')
 if with_png:

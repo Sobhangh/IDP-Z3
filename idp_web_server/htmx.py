@@ -115,8 +115,7 @@ def stateX(state, update=False):
         return render(
             div(class_="container", id="container", i=
                 div(class_="row", i=
-                    form(i=
-                        div(class_="col s12 m6 push-m3", i=[
+                    form(div(class_="col s12 m6 push-m3", i=[
                             ul(class_="tabs", i=
                                 [li(class_="tab col s3", i=
                                     a(tab, id=f"#tab-{index}",
@@ -129,12 +128,37 @@ def stateX(state, update=False):
                 )
         )
 
-def explainX(facts, laws):
+
+def ass_explain(ass, hidden=False):
+    """generator for the body of an assignment"""
+    if ass.sentence.type == BOOL:
+        yield   label( style="display: none" if hidden else None, i=[
+                    input(name=ass.sentence.code, type="checkbox",
+                          value="true" if ass.value.same_as(TRUE) else "false",
+                          checked="true", class_="modal-close",
+                          hx_trigger="click", hx_post="/htmx/state/post"),
+                    span(("" if ass.value.same_as(TRUE) else "Not ")+ass.sentence.code,
+                         style="color: black;")
+                ])
+    else:
+        yield "TODO " + ass.sentence.code + (" : hidden" if hidden else "False")
+
+
+def explainX(state, facts, laws):
+    """ generator for the modal """
     return div(id="modal1", class_="modal", hx_swap_oob="innerHTML", i=[
-               div(class_="modal_content", i=[
-                   [div([ass_body(ass), ass.sentence.code]) for ass in facts],
-                   [p(law.annotations['reading']) for law in laws]]),
+               div(class_="modal_content", i=
+                   form([
+                     p("This is a consequence of the following choices (which you can undo):"),
+                     [div([ass_explain(ass)]) for ass in facts],  # explaining facts
+                     [ass_explain(ass, hidden=True) for ass in state.assignments.values()
+                      if all(ass.sentence.code not in f.sentence.code for f in facts)
+                      and ass.status in [S.GIVEN, S.DEFAULT]],  # other facts
+                     p("Applicable laws:"),
+                     [p(law.annotations['reading']) for law in laws]])),
                 div(class_="modal_footer", i=
-                   a("Close", href="#!",
-                     class_="modal-close waves-effect waves-green btn-flat right"))
+                   a("Close", style="color: teal",
+                     class_="modal-close waves-effect waves-green btn-flat")),
+                span(i("clear", class_="material-icons", style="color: teal"),
+                     class_="modal-close", style="position: absolute; right: 0; top: 0")
     ])
