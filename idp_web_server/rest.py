@@ -30,6 +30,7 @@ import os
 import threading
 import time
 import traceback
+import urllib.parse
 from z3 import set_option
 
 from flask import Flask, g, send_from_directory, request  # g is required for pyinstrument
@@ -404,14 +405,18 @@ def get_idp(request):
         code = f.read()
     return idpOf(code)
 
-@app.route('/htmx/state/post', methods=['POST'])
-def state_post():
+def get_state(request):
     idp = get_idp(request)
     state = State.make(idp, "{}", "{}", "[]")
     for k, v in request.form.items():
         state.assert_(k, v)
         if state.environment and k in state.environment.assignments:
             state.environment.assert_(k,v)
+    return state
+
+@app.route('/htmx/state/post', methods=['POST'])
+def state_post():
+    state = get_state(request)
 
     # perform propagation
     if state.environment is not None:  # if there is a decision vocabulary
@@ -421,6 +426,15 @@ def state_post():
     state.propagate(tag=S.CONSEQUENCE)
     # TODO relevance
     return stateX(state, update=True)
+
+@app.route('/htmx/state/explain', methods=['POST'])
+def explain():
+    sentence = list(request.args.keys())[0]
+    state = get_state(request)
+    _ = state.solver_reified
+    (facts, laws) = state.explain(sentence)
+
+    return render(div(str(facts), id="modal1", hx_swap_oob="innerHTML"))
 
 api.add_resource(HelloWorld, '/test')
 if with_png:

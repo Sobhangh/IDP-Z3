@@ -16,6 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import urllib.parse
 
 from idp_engine.Assignments import Status as S
 from idp_engine.Expression import TRUE, FALSE
@@ -94,7 +95,12 @@ def stateX(state, update=False):
                                     if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] else
                                     div(ass_head(ass),
                                         class_="collapsible-header dont-unfold modal-trigger",
-                                        href="#modal1"),
+                                        href="#modal1", hx_trigger="click",
+                                        hx_post="/htmx/state/explain?" +
+                                            urllib.parse.urlencode(
+                                                {str(ass.sentence): str(ass.value)},
+                                                quote_via=urllib.parse.quote),
+                                        hx_swap="none"),
                                     div(ass_body(ass), class_="collapsible-body")
                                     ])
                                 for ass in state.assignments.values()
