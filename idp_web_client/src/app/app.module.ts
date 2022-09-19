@@ -69,6 +69,8 @@ export function monacoLoad() {
               // Keys
               // @ts-ignore
               [/\b(type) (?=\w)|\:=?|constructed from|\+|\.|\,|\(|\)|\{|\}|\*|;/, 'key'],
+              // @ts-ignore
+              [/(lambda)\b/, 'key'],
 
               // Built-in types
               // For some reason, Monaco's regex does not properly detect a leading \b (which we need to avoid highlighting e.g. ArtInt).
