@@ -41,7 +41,7 @@ from idp_engine import IDP
 from idp_engine.utils import log, RUN_FILE
 
 from idp_engine.Assignments import Status as S
-from idp_engine.Parse import TypeDeclaration
+from idp_engine.Parse import TypeDeclaration, str_to_IDP
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
@@ -409,9 +409,11 @@ def get_state(request):
     idp = get_idp(request)
     state = State.make(idp, "{}", "{}", "[]")
     for k, v in request.form.items():
-        state.assert_(k, v)
+        sentence = state.assignments[k].sentence
+        value = str_to_IDP(sentence, v)
+        state.assert_(k, value)
         if state.environment and k in state.environment.assignments:
-            state.environment.assert_(k,v)
+            state.environment.assert_(k, value)
     return state
 
 @app.route('/htmx/state/post', methods=['POST'])
@@ -429,7 +431,13 @@ def state_post():
 
 @app.route('/htmx/state/explain', methods=['POST'])
 def explainX():
-    sentence = list(request.args.keys())[0]
+    sentence, value = list(request.args.items())[0]
+    if value == "true":
+        pass
+    elif value == "false":
+        sentence = "~" + sentence
+    else:
+        sentence = sentence + " = " + value
     state = get_state(request)
     _ = state.solver_reified
     (facts, laws) = state.explain(sentence)
