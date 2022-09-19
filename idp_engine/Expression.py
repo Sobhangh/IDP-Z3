@@ -289,6 +289,8 @@ class Expression(ASTNode):
     def same_as(self, other):
         if self.str == other.str:
             return True
+        if self.__class__.__name__ == "Number" and other.__class__.__name__ == "Number":
+            return float(self.py_value) == float(other.py_value)
         if self.value is not None and self.value is not self:
             return self.value  .same_as(other)
         if self.simpler is not None:
