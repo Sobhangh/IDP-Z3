@@ -107,6 +107,13 @@ export function monacoLoad() {
          { token: 'annotation', foreground: '0022aa'},
      ]
    });
+
+
+   // Configure bracket behavior: highlight brackets and auto-close the bracket when opening one.
+   const config = {'surroundingPairs':[{'open':'{','close':'}'}, {'open': '(', 'close': ')'}, {'open': '[', 'close': ']'}],'autoClosingPairs':[{'open':'{','close':'}'}, {'open': '(', 'close': ')'}, {'open': '[', 'close': ']'}],'brackets':[['{','}'], ['(', ')'], ['[', ']']]};
+   // @ts-ignore
+   monaco.languages.setLanguageConfiguration('IDP', config)
+
  }
 
 const monacoConfig: NgxMonacoEditorConfig = {
