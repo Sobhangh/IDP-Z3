@@ -41,6 +41,7 @@ from idp_engine import IDP
 from idp_engine.utils import log, RUN_FILE
 
 from idp_engine.Assignments import Status as S
+from idp_engine.Expression import EQUALS
 from idp_engine.Parse import TypeDeclaration, str_to_IDP
 from .State import State
 from .Inferences import explain, abstract
@@ -431,15 +432,22 @@ def state_post():
 
 @app.route('/htmx/state/explain', methods=['POST'])
 def state_explain():
+    state = get_state(request)
+    _ = state.solver_reified
+
     sentence, value = list(request.args.items())[0]
     if value == "true":
         pass
     elif value == "false":
         sentence = "~" + sentence
     else:
+        if sentence + " = " + value not in state.assignments:  # create an entry
+            expr = state.assignments[sentence].sentence
+            val = str_to_IDP(expr, value)
+            to_explain = EQUALS([expr, val])
+            state.assignments.assert__(to_explain, None, None)
         sentence = sentence + " = " + value
-    state = get_state(request)
-    _ = state.solver_reified
+
     (facts, laws) = state.explain(sentence)
 
     return render(explainX(state, facts, laws))
