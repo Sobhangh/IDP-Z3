@@ -441,7 +441,8 @@ def state_explain():
     elif value == "false":
         sentence = "~" + sentence
     else:
-        if sentence + " = " + value not in state.assignments:  # create an entry
+        # create an entry in state.assignments if it does not occur in the theory
+        if sentence + " = " + value not in state.assignments:
             expr = state.assignments[sentence].sentence
             val = str_to_IDP(expr, value)
             to_explain = EQUALS([expr, val])
@@ -451,6 +452,14 @@ def state_explain():
     (facts, laws) = state.explain(sentence)
 
     return render(explainX(state, facts, laws))
+
+@app.route('/htmx/state/values', methods=['POST'])
+def state_values():
+    state = get_state(request)
+    sentence, index = list(request.args.items())[0]
+    values = state.get_range(sentence)
+    return render(div(id=index, hx_swap_oob="innerHTML",
+                      i=[p(v) for v in values]))
 
 api.add_resource(HelloWorld, '/test')
 if with_png:

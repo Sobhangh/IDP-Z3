@@ -41,7 +41,7 @@ def wrap(static_file_dir, screen):
     return content[:begin] + screen + content[end+len("\n</div>"):]
 
 
-def ass_head(ass):
+def ass_head(ass, id=None):
     """generator for the head of an assignment"""
     def info():
         if ass.status not in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
@@ -54,6 +54,10 @@ def ass_head(ass):
             ass.sentence.code,
             info()
         ])
+    elif 0 < len(ass.symbol_decl.range) and not ass.value:  # get possible values
+        yield span(hx_trigger="click", hx_swap="none",
+                   hx_post="/htmx/state/values?"+urllib.parse.urlencode({ass.sentence.code: id}),
+                   i=[ ass.sentence.code, info() ])
     else:
         yield span([
             ass.sentence.code,
@@ -99,7 +103,7 @@ def stateX(state, update=False):
             yield from div(id=f"tab-{index}", hx_swap_oob="innerHTML", i=
                             ul(class_="collapsible", i=[
                                 li(i=[
-                                    div(ass_head(ass),
+                                    div(ass_head(ass, f"tab-{index}-{index2}"),
                                         class_="collapsible-header")
                                     if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] else
                                     div(ass_head(ass),
@@ -110,9 +114,10 @@ def stateX(state, update=False):
                                                 {ass.sentence.code: str(ass.value)},
                                                 quote_via=urllib.parse.quote),
                                         hx_swap="none"),
-                                    div(ass_body(ass), class_="collapsible-body")
+                                    div(ass_body(ass), class_="collapsible-body",
+                                        id=f"tab-{index}-{index2}",)
                                     ])
-                                for ass in state.assignments.values()
+                                for index2, ass in enumerate(state.assignments.values())
                                 if ass.symbol_decl.heading == tab
                                 and not ass.sentence.is_assignment()
                                 and not ass.status == S.UNIVERSAL
