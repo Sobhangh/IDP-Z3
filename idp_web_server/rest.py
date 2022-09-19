@@ -45,7 +45,7 @@ from idp_engine.Parse import TypeDeclaration, str_to_IDP
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
-from .htmx import stateX, wrap
+from .htmx import stateX, explainX, wrap
 from .HtmXgen import *
 
 from typing import Dict
@@ -430,7 +430,7 @@ def state_post():
     return stateX(state, update=True)
 
 @app.route('/htmx/state/explain', methods=['POST'])
-def explainX():
+def state_explain():
     sentence, value = list(request.args.items())[0]
     if value == "true":
         pass
@@ -442,7 +442,7 @@ def explainX():
     _ = state.solver_reified
     (facts, laws) = state.explain(sentence)
 
-    return render(div(str(facts), id="modal1", hx_swap_oob="innerHTML"))
+    return render(explainX(facts, laws))
 
 api.add_resource(HelloWorld, '/test')
 if with_png:

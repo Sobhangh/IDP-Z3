@@ -128,3 +128,11 @@ def stateX(state, update=False):
                     )
                 )
         )
+
+def explainX(facts, laws):
+    return div(id="modal1", class_="modal", hx_swap_oob="innerHTML", i=[
+               div(class_="modal_content", i=str(facts)),
+               div(class_="modal_footer", i=
+                   a("Close", href="#!",
+                     class_="modal-close waves-effect waves-green btn-flat"))
+    ])
