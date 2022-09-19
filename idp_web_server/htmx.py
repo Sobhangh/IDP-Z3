@@ -106,6 +106,7 @@ def stateX(state, update=False):
                                 for ass in state.assignments.values()
                                 if ass.symbol_decl.heading == tab
                                 and not ass.sentence.is_assignment()
+                                and not ass.status == S.UNIVERSAL
                                 ])
                             )
 
