@@ -48,7 +48,7 @@ def ass_head(ass):
             yield i("check", class_="material-icons")
         elif ass.value and ass.value.same_as(FALSE):
             yield i("clear", class_="material-icons")
-    yield str(ass.sentence)
+    yield ass.sentence.code
     if ass.status not in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
         yield i("info", class_="material-icons")
 
@@ -58,14 +58,14 @@ def ass_body(ass):
     if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
         if ass.sentence.type == BOOL:
             yield   [label([
-                        input(name=str(ass.sentence), type="checkbox", value="true",
+                        input(name=ass.sentence.code, type="checkbox", value="true",
                             checked=(ass.value and ass.value.same_as(TRUE)),
                             hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
                         span("yes", style="color: black;")
                     ]),
                     span("&nbsp;&nbsp;&nbsp;&nbsp;"),
                     label([
-                        input(name=str(ass.sentence), type="checkbox", value="false",
+                        input(name=ass.sentence.code, type="checkbox", value="false",
                             checked=(ass.value and ass.value.same_as(FALSE)),
                             hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
                         span("no", style="color: black;")
@@ -98,7 +98,7 @@ def stateX(state, update=False):
                                         href="#modal1", hx_trigger="click",
                                         hx_post="/htmx/state/explain?" +
                                             urllib.parse.urlencode(
-                                                {str(ass.sentence): str(ass.value)},
+                                                {ass.sentence.code: str(ass.value)},
                                                 quote_via=urllib.parse.quote),
                                         hx_swap="none"),
                                     div(ass_body(ass), class_="collapsible-body")

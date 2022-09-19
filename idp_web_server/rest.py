@@ -428,7 +428,7 @@ def state_post():
     return stateX(state, update=True)
 
 @app.route('/htmx/state/explain', methods=['POST'])
-def explain():
+def explainX():
     sentence = list(request.args.keys())[0]
     state = get_state(request)
     _ = state.solver_reified
