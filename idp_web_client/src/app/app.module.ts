@@ -62,14 +62,33 @@ export function monacoLoad() {
   monaco.languages.setMonarchTokensProvider('IDP', {
       tokenizer: {
           root: [
+              // Block names
               // @ts-ignore
               [/vocabulary|theory|structure|display|procedure/, 'block'],
+
+              // Keys
               // @ts-ignore
               [/\b(type) (?=\w)|\:=?|constructed from|\+|\.|\,|\(|\)|\{|\}|\*|;/, 'key'],
               // @ts-ignore
-              [/(\b(Real|Int|Bool)\b)|(ℝ|𝔹|ℤ)/, 'builtin'],
+              [/(lambda)\b/, 'key'],
+
+              // Built-in types
+              // For some reason, Monaco's regex does not properly detect a leading \b (which we need to avoid highlighting e.g. ArtInt).
+              // Instead, we manually enumerate the possible leading characters for our types
+              // @ts-ignore
+              [/→(Real|Int|Bool)\b/, 'builtin'],
+              // @ts-ignore
+              [/>(Real|Int|Bool)\b/, 'builtin'],
+              // @ts-ignore
+              [/\s(Real|Int|Bool)\b/, 'builtin'],
+              // @ts-ignore
+              [/(ℝ|𝔹|ℤ)/, 'builtin'],
+
+              // Comments
               // @ts-ignore
               [/\/\/.*$/, 'comment'],
+
+              // Annotations
               // @ts-ignore
               [/\[[a-zA-Z 0-9:]+\]/, 'annotation'],
           ],
@@ -88,6 +107,13 @@ export function monacoLoad() {
          { token: 'annotation', foreground: '0022aa'},
      ]
    });
+
+
+   // Configure bracket behavior: highlight brackets and auto-close the bracket when opening one.
+   const config = {'surroundingPairs':[{'open':'{','close':'}'}, {'open': '(', 'close': ')'}, {'open': '[', 'close': ']'}],'autoClosingPairs':[{'open':'{','close':'}'}, {'open': '(', 'close': ')'}, {'open': '[', 'close': ']'}],'brackets':[['{','}'], ['(', ')'], ['[', ']']]};
+   // @ts-ignore
+   monaco.languages.setLanguageConfiguration('IDP', config)
+
  }
 
 const monacoConfig: NgxMonacoEditorConfig = {

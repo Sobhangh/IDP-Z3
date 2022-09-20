@@ -246,7 +246,7 @@ class Assignments(dict):
                         out[a.symbol_decl.name] = []
                     continue
 
-                c = ",".join(str(e) for e in a.sentence.sub_exprs)
+                c = ", ".join(str(e) for e in a.sentence.sub_exprs)
                 c = f"({c})" if 1 < len(a.sentence.sub_exprs) else c
                 if a.symbol_decl.arity == 0:
                     # Symbol is a proposition or constant.
@@ -257,13 +257,13 @@ class Assignments(dict):
                     c = f"{c}"
                 else:
                     # Symbol is a function.
-                    c = f"{c}->{str(a.value)}"
+                    c = f"{c} -> {str(a.value)}"
                 out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
 
         model_str = ""
         for k, a in out.items():
             if k in nullary:  # Exception 1.
-                model_str += f"{k} := {a[0][2:]}.{NEWL}"
+                model_str += f"{k} :={a[0][3:]}.{NEWL}"
             else:
                 model_str += f"{k} := {{{ ', '.join(s for s in a) }}}.{NEWL}"
         return model_str

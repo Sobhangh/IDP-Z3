@@ -109,9 +109,9 @@ Model 1
 animal := {Cat, Dog, Frog}.
 person := {Alice, Bob, Tom}.
 married := {Alice, Bob}.
-spouse := {Alice->Bob, Bob->Alice}.
-affair := {(Alice,Alice)}.
-age := {Cat->21, Dog->21, Frog->21, Alice->21, Bob->21, Tom->21}.
+spouse := {Alice -> Bob, Bob -> Alice}.
+affair := {(Alice, Alice)}.
+age := {Cat -> 21, Dog -> 21, Frog -> 21, Alice -> 21, Bob -> 21, Tom -> 21}.
 
 
 More models may be available.  Change the max argument to see them.
