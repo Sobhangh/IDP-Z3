@@ -11,6 +11,9 @@ theory T:V {
 	{ ∀f, i, r ∈ Concept[Time→𝔹]: ∀d ∈ 𝔹:
         fluent(f, d, i, r) ← $(f)(0)=d
                            ∧ (∀ t ∈ Time: $(f)(t+1) ⇔ ( $(i)(t) ∨ ( $(f)(t) ∧ ¬$(r)(t) ) )). }
+
+        !t in Time: (t = 1 | t = 2) <=> remove(t).
+        !t in Time: (t = 1 | t = 2) <=> put(t).
  }
 
 procedure main() {
