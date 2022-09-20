@@ -230,6 +230,22 @@ def p(inner=None, **kwargs):
     yield from tag("p", inner, **kwargs)
 
 
+def table(inner=None, **kwargs):
+    yield from tag("table", inner, **kwargs)
+
+
+def td(inner=None, **kwargs):
+    yield from tag("td", inner, **kwargs)
+
+
+def th(inner=None, **kwargs):
+    yield from tag("th", inner, **kwargs)
+
+
+def tr(inner=None, **kwargs):
+    yield from tag("tr", inner, **kwargs)
+
+
 def span(inner=None, **kwargs):
     yield from tag("span", inner, **kwargs)
 

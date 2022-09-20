@@ -46,7 +46,7 @@ from idp_engine.Parse import TypeDeclaration, str_to_IDP
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
-from .htmx import stateX, explainX, wrap
+from .htmx import stateX, valuesX, explainX, wrap
 from .HtmXgen import *
 
 from typing import Dict
@@ -410,6 +410,17 @@ def get_state(request):
     idp = get_idp(request)
     state = State.make(idp, "{}", "{}", "[]")
     for k, v in request.form.items():
+        if "=" in k:
+            terms = k.split(" = ")
+            if v == "true":
+                k, v = terms[0], terms[1]
+            else:  # (k1=v1) = false --> create an entry for (k1=v1)
+                k1, v1 = terms[0], terms[1]
+                expr = state.assignments[k1].sentence
+                val = str_to_IDP(expr, v1)
+                expr = EQUALS([expr, val])
+                state.assignments.assert__(expr, None, None)
+
         sentence = state.assignments[k].sentence
         value = str_to_IDP(sentence, v)
         state.assert_(k, value)
@@ -457,9 +468,8 @@ def state_explain():
 def state_values():
     state = get_state(request)
     sentence, index = list(request.args.items())[0]
-    values = state.get_range(sentence)
-    return render(div(id=index, hx_swap_oob="innerHTML",
-                      i=[p(v) for v in values]))
+    values = state.copy().get_range(sentence)
+    return render(valuesX(state, sentence, values, index))
 
 api.add_resource(HelloWorld, '/test')
 if with_png:

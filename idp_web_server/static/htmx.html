@@ -93,7 +93,15 @@
       target = evt.target
       if (target.tagName.toLowerCase() === 'input'
           && target.checked == true) { // if checked, reset the others
-            document.querySelectorAll('[type="checkbox"][name="'+target.name+'"]').forEach(x => x.checked=false)
+            if (target.name.includes(" = ") && target.value == "true") {
+              target2 = target.name.split(" = ")[0] + " = "
+            } else {
+              target2 = null
+            }
+            document.querySelectorAll('[type="checkbox"]').forEach(x => {
+              if (x.name == target.name) {x.checked=false}  // clear the negation
+              if (x.name.startsWith(target2) && x.value != 'false') {x.checked=false}
+            })
             target.checked = true;
           }
     })

@@ -54,10 +54,13 @@ def ass_head(ass, id=None):
             ass.sentence.code,
             info()
         ])
-    elif 0 < len(ass.symbol_decl.range) and not ass.value:  # get possible values
+    elif (0 < len(ass.symbol_decl.range)
+        and ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]):  # get possible values
         yield span(hx_trigger="click", hx_swap="none",
                    hx_post="/htmx/state/values?"+urllib.parse.urlencode({ass.sentence.code: id}),
-                   i=[ ass.sentence.code, info() ])
+                   i=[ass.sentence.code,
+                      f" = {ass.value}" if ass.value else "",
+                      info() ])
     else:
         yield span([
             ass.sentence.code,
@@ -66,9 +69,18 @@ def ass_head(ass, id=None):
         ])
 
 
-def ass_body(ass):
+def ass_body(ass, state):
     """generator for the body of an assignment"""
-    if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
+    if 0 < len(ass.symbol_decl.range):
+        yield div([input(name=ass.sentence.code, type="hidden",
+                            value=ass.value)
+                   if ass.status in [S.GIVEN, S.DEFAULT] else "",
+                    [input(name=a.sentence.code, type="hidden", value="false")
+                    for a in state.assignments.values()
+                    if a.status in [S.GIVEN, S.DEFAULT] and a.value.same_as(FALSE)
+                    and a.sentence.code.startswith(ass.sentence.code + " = ")]
+        ])
+    elif ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
         if ass.sentence.type == BOOL:
             yield   [label([
                         input(name=ass.sentence.code, type="checkbox", value="true",
@@ -84,7 +96,7 @@ def ass_body(ass):
                         span("no", style="color: black;")
                     ])]
         else:
-            yield "TODO"
+            yield ""
     else:
         yield "(consequence)"  # not shown
 
@@ -114,7 +126,7 @@ def stateX(state, update=False):
                                                 {ass.sentence.code: str(ass.value)},
                                                 quote_via=urllib.parse.quote),
                                         hx_swap="none"),
-                                    div(ass_body(ass), class_="collapsible-body",
+                                    div(ass_body(ass, state), class_="collapsible-body",
                                         id=f"tab-{index}-{index2}",)
                                     ])
                                 for index2, ass in enumerate(state.assignments.values())
@@ -145,7 +157,7 @@ def stateX(state, update=False):
 
 
 def ass_explain(ass, hidden=False):
-    """generator for the body of an assignment"""
+    """generator for the body of an assignment for explanation"""
     if ass.sentence.type == BOOL:
         yield   label( style="display: none" if hidden else None, i=[
                     input(name=ass.sentence.code, type="checkbox",
@@ -157,6 +169,31 @@ def ass_explain(ass, hidden=False):
                 ])
     else:
         yield "TODO " + ass.sentence.code + (" : hidden" if hidden else "False")
+
+
+def valuesX(state, sentence, values, index):
+
+    def d(inner, align="center"):
+        yield from td(inner,
+                      style=f"padding: 5px 5px; text-align: left; valign: top")
+
+    return div(id=index, hx_swap_oob="innerHTML", i=[
+        table(class_="highlight", i=[
+            tr([d('Yes'), d(""), d("No")]),
+            [tr(style="border-bottom: 0px", i=[
+                d(label([input(name=f"{sentence} = {v.code}", type="checkbox", value="true",
+                               checked=(str(state.assignments[sentence].value) == v.code),
+                               hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
+                          span("", style="valign: top")])),
+                d(v.code, "left"),
+                d(label([input(name=f"{sentence} = {v.code}", type="checkbox", value="false",
+                               checked=(f"{sentence} = {v.code}" in state.assignments
+                                        and state.assignments[f"{sentence} = {v.code}"].value is not None
+                                        and state.assignments[f"{sentence} = {v.code}"].value.same_as(FALSE)),
+                               hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
+                         span("", style="valign: top")]))])
+             for v in state.assignments[sentence].sentence.decl.range]])
+        ])
 
 
 def explainX(state, facts, laws):
