@@ -71,17 +71,8 @@ def ass_head(ass, id=None):
 
 def ass_body(ass, state):
     """generator for the body of an assignment"""
-    if 0 < len(ass.symbol_decl.range):
-        yield div([input(name=ass.sentence.code, type="hidden",
-                            value=ass.value)
-                   if ass.status in [S.GIVEN, S.DEFAULT] else "",
-                    [input(name=a.sentence.code, type="hidden", value="false")
-                    for a in state.assignments.values()
-                    if a.status in [S.GIVEN, S.DEFAULT] and a.value.same_as(FALSE)
-                    and a.sentence.code.startswith(ass.sentence.code + " = ")]
-        ])
-    elif ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
-        if ass.sentence.type == BOOL:
+    if ass.sentence.type == BOOL:
+        if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
             yield   [label([
                         input(name=ass.sentence.code, type="checkbox", value="true",
                             checked=(ass.value and ass.value.same_as(TRUE)),
@@ -97,8 +88,17 @@ def ass_body(ass, state):
                     ])]
         else:
             yield ""
+    elif 0 < len(ass.symbol_decl.range):
+        yield div([input(name=ass.sentence.code, type="hidden",
+                            value=ass.value)
+                   if ass.status in [S.GIVEN, S.DEFAULT] else "",
+                    [input(name=a.sentence.code, type="hidden", value="false")
+                    for a in state.assignments.values()
+                    if a.status in [S.GIVEN, S.DEFAULT] and a.value.same_as(FALSE)
+                    and a.sentence.code.startswith(ass.sentence.code + " = ")]
+        ])
     else:
-        yield "(consequence)"  # not shown
+        yield "TODO"  # not shown
 
 
 def stateX(state, update=False):
