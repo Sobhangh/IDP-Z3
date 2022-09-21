@@ -102,7 +102,7 @@ def ass_body(ass, state):
 
 
 def stateX(state, update=False):
-    """generator for the state"""
+    """generator of the tabs representing the state"""
 
     tabs = dict()
     for decl in state.assignments.symbols.values():
@@ -167,15 +167,36 @@ def ass_explain(ass, hidden=False):
                     span(("" if ass.value.same_as(TRUE) else "Not ")+ass.sentence.code,
                          style="color: black;")
                 ])
+    elif 0 < len(ass.symbol_decl.range):
+        yield   label( style="display: none" if hidden else None, i=[
+                    input(name=ass.sentence.code, type="checkbox",
+                          value=ass.value.code,
+                          checked="true", class_="modal-close",
+                          hx_trigger="click", hx_post="/htmx/state/post"),
+                    span(f"{ass.sentence.code} = {ass.value}",
+                         style="color: black;")
+                ])
     else:
         yield "TODO " + ass.sentence.code + (" : hidden" if hidden else "False")
 
 
 def valuesX(state, sentence, values, index):
+    """ generates the entry form for a term with an enumerated type """
 
     def d(inner, align="center"):
+        """ generates a custom td """
         yield from td(inner,
                       style=f"padding: 5px 5px; text-align: left; valign: top")
+
+    def ass(sentence, v):
+        """ returns the assignment `sentence = v` in state.assignments, if any """
+        return state.assignments.get(f"{sentence} = {v.code}", None)
+
+    def ass_is_false(sentence, v):
+        """ True if state.assignments[sentence = v] is false """
+        return (ass(sentence, v) is not None
+                and ass(sentence,v).value is not None
+                and ass(sentence, v).value.same_as(FALSE))
 
     return div(id=index, hx_swap_oob="innerHTML", i=[
         table(class_="highlight", i=[
@@ -184,12 +205,14 @@ def valuesX(state, sentence, values, index):
                 d(label([input(name=f"{sentence} = {v.code}", type="checkbox", value="true",
                                checked=(str(state.assignments[sentence].value) == v.code),
                                hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
-                          span("", style="valign: top")])),
+                          span("", style="valign: top")])
+                  if not ass_is_false(sentence,v) else ""),
                 d(v.code, "left"),
                 d(label([input(name=f"{sentence} = {v.code}", type="checkbox", value="false",
-                               checked=(f"{sentence} = {v.code}" in state.assignments
-                                        and state.assignments[f"{sentence} = {v.code}"].value is not None
-                                        and state.assignments[f"{sentence} = {v.code}"].value.same_as(FALSE)),
+                               checked=ass_is_false(sentence, v),
+                               disabled="true" if (ass_is_false(sentence, v)
+                                        and ass(sentence, v).status != S.GIVEN) else
+                                        None,
                                hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
                          span("", style="valign: top")]))])
              for v in state.assignments[sentence].sentence.decl.range]])
