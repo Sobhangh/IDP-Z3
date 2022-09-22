@@ -143,13 +143,15 @@ def stateX(state, update=False):
             div(class_="container", id="container", i=
                 div(class_="row", i=
                     form(div(class_="col s12 m6 push-m3", i=[
+                            div(class_="progress htmx-indicator", i=div(class_="indeterminate")),
                             ul(class_="tabs", i=
                                 [li(class_="tab col s3", i=
                                     a(tab, id=f"#tab-{index}",
                                       href=f"#tab-{index}"))
                                 for index, tab in enumerate(tabs.values())])
                             , tabsX()
-                            ])
+                            ]),
+                        hx_indicator=".progress"
                         )
                     )
                 )
