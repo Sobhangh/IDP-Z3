@@ -291,12 +291,12 @@ def rename_args(self, new_vars):
         output: '!nv: f(nv) <- nv=args & body(args)'
     """
     self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
-    vars = [var.name for q in self.quantees for vars in q.vars for var in vars]
+    vars = {var.name : var for q in self.quantees for vars in q.vars for var in vars}
     for i in range(len(self.definiendum.sub_exprs)):
         arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
         if type(arg) == Variable \
         and arg.name in vars and arg.name not in new_vars:
-            vars.remove(arg.name)
+            del vars[arg.name]
             self.body = self.body.instantiate([arg], [nv])
             self.out = (self.out.instantiate([arg], [nv]) if self.out else
                         self.out)
@@ -308,6 +308,8 @@ def rename_args(self, new_vars):
             self.body = AND([eq, self.body])
 
     self.check(not vars, f"Too many variables in head of rule: {self}")
+    for v in vars.values():
+        self.body = EXISTS([Quantee.make(v, v.sort)], self.body)
 
     self.definiendum.sub_exprs = list(new_vars.values())
     self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
