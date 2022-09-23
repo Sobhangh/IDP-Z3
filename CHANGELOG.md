@@ -38,6 +38,7 @@ Breaking changes:
 ### Interactive Consultant and Web IDE
 * fix #169: IC: need to better handle rationals
 * fix #205: could not run Web IDE on Windows
+* fix #207: error in environmental consequences
 * MR !236: Add "File / Share..." button to IC and Web IDE
 
 
