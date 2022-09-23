@@ -36,9 +36,10 @@ Our partners particularly appreciate the ease of encoding this knowledge in FO(Â
 
 Get in touch?
 -------------
-We are always interest in collaborating with you to see how we can get the most out of IDP-Z3 within your company.
 
-Feel free to contact us `by mail <mailto:krr@kuleuven.be>`_.
+Feel free to contact us `on matrix <https://matrix.to/#/#IDP-Z3:matrix.org>`_ or `by mail <mailto:krr@kuleuven.be>`_.
+
+We are always interested in collaborating with you to see how we can get the most out of IDP-Z3 within your company.
 
 Testimonial
 ~~~~~~~~~~~
