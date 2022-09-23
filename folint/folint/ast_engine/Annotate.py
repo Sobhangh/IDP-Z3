@@ -307,7 +307,6 @@ def rename_args(self, new_vars):
             eq = EQUALS([nv, arg])
             self.body = AND([eq, self.body])
 
-    self.check(not vars, f"Too many variables in head of rule: {self}")
     for v in vars.values():
         self.body = EXISTS([Quantee.make(v, v.sort)], self.body)
 
