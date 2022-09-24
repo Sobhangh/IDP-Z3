@@ -56,8 +56,9 @@ Tag attributes are specified using named arguments:
 <ul><li>text</li></ul>
 
 
-Some tag attributes are changed: you must use `class_` instead of `class`,
-`for_` instead of `for`, and `_` instead of `-`.
+Some tag attributes are changed: you must add `_` to tag (or attribute) names
+conflicting with Python reserved names, (e.g. `class_` instead of `class`),
+and you must use `_` instead of `-` in attribute names.
 
 >>> print(render(p("text", class_="s12", hx_get="url")))
 <p class="s12" hx-get="url">text</p>
@@ -109,6 +110,7 @@ indent = False
 
 
 from typing import Iterator, List, Optional, Union
+import re
 
 Tag = Iterator[str]
 Inner = Union[str, Tag, Iterator['Inner']]
@@ -136,7 +138,7 @@ def solo_tag(tag_name: str, ** kwargs) -> Tag:
         Tag: a string iterator to be rendered
     """
 
-    kwargs = { k.replace("class_", "class").replace("for_", "for").replace("_", "-"): v
+    kwargs = { re.sub("_$", "", k).replace("_", "-"): v
                for k, v in kwargs.items()
                if v is not None and (type(v) != bool or v)}
 
