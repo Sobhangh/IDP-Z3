@@ -153,7 +153,7 @@ def solo_tag(tag_name: str, ** kwargs) -> Tag:
 def _inner(inner: Inner):
     """ unfold the inner iterators """
     if type(inner) == str:  # inner is a str
-        yield (f"{_tab}{inner}{_cr}" if indent else inner)
+        yield (f"{_tab}{inner}" if indent else inner)
     else:
         for i in inner:
             yield from _inner(i)
@@ -181,7 +181,15 @@ def tag(tag_name: str,
     yield from solo_tag(tag_name, **kwargs)
 
     if inner is not None:
-        yield from _inner(inner)
+        if type(inner) == str:  # inner is a str
+            yield (f"{_tab}{inner}{_cr}" if indent else inner)
+        else:
+            for i in inner:
+                if type(i) == str:  # inner is a Tag
+                    yield (f"{_tab}{i}{_cr}" if indent else i)
+                else:
+                    for i1 in i:
+                        yield from _inner(i1)
 
     yield f"</{tag_name}>{_cr if indent else ''}"
 
