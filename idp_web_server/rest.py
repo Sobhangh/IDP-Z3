@@ -47,7 +47,7 @@ from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
 from .htmx import stateX, valuesX, explainX, wrap
-from .HtmXgen import *
+from htmx_gen import *
 
 from typing import Dict
 
