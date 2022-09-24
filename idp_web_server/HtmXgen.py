@@ -107,6 +107,7 @@ indent = False
 from typing import Iterator, List, Optional, Union
 
 Tag = Iterator[str]
+Inner = Union[str, Tag, Iterator['Inner']]
 
 _tab = "  "
 _cr = "\n"
@@ -145,8 +146,17 @@ def solo_tag(tag_name: str, ** kwargs) -> Tag:
     yield f"<{tag_name}{attrs}>{_cr if indent else ''}"
 
 
+def _inner(inner: Inner):
+    """ unfold the inner iterators """
+    if type(inner) == str:  # inner is a str
+        yield (f"{_tab}{inner}{_cr}" if indent else inner)
+    else:
+        for i in inner:
+            yield from _inner(i)
+
+
 def tag(tag_name: str,
-        inner: Optional[Union[str, Tag, List[Union[str, Tag, List[Tag]]]]] = None,
+        inner: Inner = None,
         **kwargs
         ) -> Tag:
     """returns a generator of strings, to be rendered as a HTML tag of type `name`
@@ -167,19 +177,7 @@ def tag(tag_name: str,
     yield from solo_tag(tag_name, **kwargs)
 
     if inner is not None:
-        if type(inner) == str:  # inner is a str
-            yield (f"{_tab}{inner}{_cr}" if indent else inner)
-        else:
-            for i in inner:
-                if type(i) == str:  # inner is a Tag
-                    yield (f"{_tab}{i}{_cr}" if indent else i)
-                else:
-                    for i1 in i:
-                        if type(i1) == str:  # inner is a List[Tag]
-                            yield (f"{_tab}{i1}" if indent else i1)
-                        else:
-                            for i2 in i1:  # inner is a List[List[Tag]]
-                                yield (f"{_tab}{i2}" if indent else i2)
+        yield from _inner(inner)
 
     yield f"</{tag_name}>{_cr if indent else ''}"
 
