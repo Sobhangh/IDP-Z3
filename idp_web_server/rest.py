@@ -393,27 +393,29 @@ def serve_htmx():
     return send_from_directory(static_file_dir, 'htmx.html')
 
 
-@app.route('/htmx/file/open/<path:path>', methods=['GET'])
-def file_open(path):
-    """ returns a Single Page Application with FO(.) theory at `path` """
+def get_idp(path):
     path = os.path.join(examples_file_dir, path)
     with open(path, mode='r', encoding='utf-8') as f:
         code = f.read()
     idp = idpOf(code)
+    if 'default' in idp.structures:  # ignore defaults
+        del idp.structures['default']
+    return idp
+
+
+@app.route('/htmx/file/open/<path:path>', methods=['GET'])
+def file_open(path):
+    """ returns a Single Page Application with FO(.) theory at `path` """
+    idp = get_idp(path)
     state = State.make(idp, "{}", "{}", "[]")
+
     return wrap(static_file_dir, stateX(state))
 
 
-def get_idp(request):
+def get_state(request):
     referer = request.headers.get('Referer')
     path = referer[referer.index('file/open/') + 10:]
-    path = os.path.join(examples_file_dir, path)
-    with open(path, mode='r', encoding='utf-8') as f:
-        code = f.read()
-    return idpOf(code)
-
-def get_state(request):
-    idp = get_idp(request)
+    idp = get_idp(path)
     state = State.make(idp, "{}", "{}", "[]")
     for k, v in request.form.items():
         if "=" in k:
