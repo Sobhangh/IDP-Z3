@@ -126,7 +126,7 @@ def stateX(state, update=False):
                                                 {ass.sentence.code: str(ass.value)},
                                                 quote_via=urllib.parse.quote),
                                         hx_swap="none"),
-                                    div(ass_body(ass, state), class_="collapsible-body",
+                                    div(ass_body(ass, state), class_="collapsible-body teal lighten-5",
                                         id=f"tab-{index}-{index2}",)
                                     ])
                                 for index2, ass in enumerate(state.assignments.values())
