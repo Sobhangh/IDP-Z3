@@ -131,7 +131,11 @@ def stateX(state, update=False):
                                     div(ass_head(ass, f"tab-{index}-{index2}"),
                                         class_="collapsible-header")
                                     if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] else
-                                    div(ass_head(ass),
+                                    div (ass_head(ass, f"tab-{index}-{index2}"),
+                                         class_="collapsible-header dont-unfold",
+                                         )
+                                    if state.environment is not None and ass.status == S.CONSEQUENCE else
+                                    div(ass_head(ass, f"tab-{index}-{index2}"),
                                         class_="collapsible-header dont-unfold modal-trigger",
                                         href="#modal1", hx_trigger="click",
                                         hx_post="/htmx/state/explain?" +
@@ -158,7 +162,7 @@ def stateX(state, update=False):
                     form(div(class_="col s12 m6 push-m3", i=[
                             div(class_="progress htmx-indicator", i=div(class_="indeterminate")),
                             ul(class_="tabs", i=
-                                [li(class_="tab col s3", i=
+                                [li(class_="tab", i=
                                     a(tab, id=f"#tab-{index}",
                                       href=f"#tab-{index}"))
                                 for index, tab in enumerate(tabs.values())])
