@@ -61,6 +61,12 @@ def ass_head(ass, id=None):
                    i=[ass.sentence.code,
                       f" = {ass.value}" if ass.value else "",
                       info() ])
+    elif ass.sentence.type in [INT, REAL]:
+        yield span([
+            ass.sentence.code,
+            f" = {float(ass.value.py_value)}" if ass.value else "",
+            info()
+        ])
     else:
         yield span([
             ass.sentence.code,
@@ -97,6 +103,13 @@ def ass_body(ass, state):
                     if a.status in [S.GIVEN, S.DEFAULT] and a.value.same_as(FALSE)
                     and a.sentence.code.startswith(ass.sentence.code + " = ")]
         ])
+    elif ass.sentence.type in [INT, REAL]:
+        if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
+            yield input(name=ass.sentence.code, type="number",
+                        value=str(float(ass.value.py_value)) if ass.value else None,
+                        hx_trigger="change", hx_post="/htmx/state/post")
+        else:
+            yield ""
     else:
         yield "TODO"  # not shown
 
@@ -178,6 +191,15 @@ def ass_explain(ass, hidden=False):
                     span(f"{ass.sentence.code} = {ass.value}",
                          style="color: black;")
                 ])
+    elif ass.sentence.type in [INT, REAL]:
+        yield   label( style="display: none" if hidden else None, i=[
+                    input(name=ass.sentence.code, type="checkbox",
+                          value=str(float(ass.value.py_value)),
+                          checked="true", class_="modal-close",
+                          hx_trigger="click", hx_post="/htmx/state/post"),
+                    span(f"{ass.sentence.code} = {ass.value}",
+                         style="color: black;")
+                ])
     else:
         yield "TODO " + ass.sentence.code + (" : hidden" if hidden else "False")
 
@@ -224,7 +246,7 @@ def valuesX(state, sentence, values, index):
 def explainX(state, facts, laws):
     """ generator for the modal """
     return div(id="modal1", class_="modal", hx_swap_oob="innerHTML", i=[
-               div(class_="modal_content", i=
+               div(class_="modal_content container", i=
                    form([
                      p("This is a consequence of the following choices (which you can undo):"),
                      [div([ass_explain(ass)]) for ass in facts],  # explaining facts
@@ -232,7 +254,7 @@ def explainX(state, facts, laws):
                       if all(ass.sentence.code not in f.sentence.code for f in facts)
                       and ass.status in [S.GIVEN, S.DEFAULT]],  # other facts
                      p("Applicable laws:"),
-                     [p(law.annotations['reading']) for law in laws]])),
+                     [p("* "+law.annotations['reading']) for law in laws]])),
                 div(class_="modal_footer", i=
                    a("Close", style="color: teal",
                      class_="modal-close waves-effect waves-green btn-flat")),

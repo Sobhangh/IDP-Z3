@@ -421,11 +421,12 @@ def get_state(request):
                 expr = EQUALS([expr, val])
                 state.assignments.assert__(expr, None, None)
 
-        sentence = state.assignments[k].sentence
-        value = str_to_IDP(sentence, v)
-        state.assert_(k, value)
-        if state.environment and k in state.environment.assignments:
-            state.environment.assert_(k, value)
+        if v:
+            sentence = state.assignments[k].sentence
+            value = str_to_IDP(sentence, v)
+            state.assert_(k, value)
+            if state.environment and k in state.environment.assignments:
+                state.environment.assert_(k, value)
     return state
 
 @app.route('/htmx/state/post', methods=['POST'])
