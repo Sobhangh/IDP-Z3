@@ -26,6 +26,10 @@ from htmx_gen import *
 from .State import State
 
 
+def sanitize(code):
+    return code.replace("()","").replace("_", " ")
+
+
 def wrap(static_file_dir, screen):
     """returns the `htmx.html` file with the unique non-indented`<div>` tag replaced by `screen` """
 
@@ -57,25 +61,25 @@ def ass_head(ass, state, id=None):
         yield span([
             i("check" if ass.value.same_as(TRUE) else "clear",
               class_="material-icons") if ass.value is not None else "",
-            ass.sentence.code,
+            sanitize(ass.sentence.code),
             info()
         ])
     elif (0 < len(ass.symbol_decl.range)
         and ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]) or is_env(state, ass):  # get possible values
         yield span(hx_trigger="click", hx_swap="none",
                    hx_post="/htmx/state/values?"+urllib.parse.urlencode({ass.sentence.code: id}),
-                   i=[ass.sentence.code,
+                   i=[sanitize(ass.sentence.code),
                       f" = {ass.value}" if ass.value else "",
                       info() ])
     elif ass.sentence.type in [INT, REAL]:
         yield span([
-            ass.sentence.code,
+            sanitize(ass.sentence.code),
             f" = {float(ass.value.py_value)}" if ass.value else "",
             info()
         ])
     else:
         yield span([
-            ass.sentence.code,
+            sanitize(ass.sentence.code),
             f" = {ass.value}" if ass.value else "",
             info()
         ])
@@ -199,7 +203,7 @@ def ass_explain(ass, hidden=False):
                           value="true" if ass.value.same_as(TRUE) else "false",
                           checked="true", class_="modal-close",
                           hx_trigger="click", hx_post="/htmx/state/post"),
-                    span(("" if ass.value.same_as(TRUE) else "Not ")+ass.sentence.code,
+                    span(("" if ass.value.same_as(TRUE) else "Not ")+sanitize(ass.sentence.code),
                          style="color: black;")
                 ])
     elif 0 < len(ass.symbol_decl.range):
@@ -208,7 +212,7 @@ def ass_explain(ass, hidden=False):
                           value=ass.value.code,
                           checked="true", class_="modal-close",
                           hx_trigger="click", hx_post="/htmx/state/post"),
-                    span(f"{ass.sentence.code} = {ass.value}",
+                    span(f"{sanitize(ass.sentence.code)} = {ass.value}",
                          style="color: black;")
                 ])
     elif ass.sentence.type in [INT, REAL]:
@@ -217,7 +221,7 @@ def ass_explain(ass, hidden=False):
                           value=str(float(ass.value.py_value)),
                           checked="true", class_="modal-close",
                           hx_trigger="click", hx_post="/htmx/state/post"),
-                    span(f"{ass.sentence.code} = {ass.value}",
+                    span(f"{sanitize(ass.sentence.code)} = {ass.value}",
                          style="color: black;")
                 ])
     else:
@@ -255,6 +259,7 @@ def valuesX(state, sentence, values, index):
                 d(label([input(name=f"{sentence} = {v.code}", type="checkbox", value="false",
                                checked=ass_is_false(sentence, v) or v.code not in values,
                                disabled="true" if v.code not in values
+                                        or len(values) == 1
                                         or(ass_is_false(sentence, v)
                                             and ass(sentence, v).status != S.GIVEN) else
                                         None,
