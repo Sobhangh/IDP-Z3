@@ -41,7 +41,13 @@ def wrap(static_file_dir, screen):
     return content[:begin] + screen + content[end+len("\n</div>"):]
 
 
-def ass_head(ass, id=None):
+def is_env(state, ass):
+    return (state.environment is not None
+            and ass.symbol_decl.block.name == 'environment'
+            and ass.status == S.CONSEQUENCE)
+
+
+def ass_head(ass, state, id=None):
     """generator for the head of an assignment"""
     def info():
         if ass.status not in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
@@ -55,7 +61,7 @@ def ass_head(ass, id=None):
             info()
         ])
     elif (0 < len(ass.symbol_decl.range)
-        and ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]):  # get possible values
+        and ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]) or is_env(state, ass):  # get possible values
         yield span(hx_trigger="click", hx_swap="none",
                    hx_post="/htmx/state/values?"+urllib.parse.urlencode({ass.sentence.code: id}),
                    i=[ass.sentence.code,
@@ -78,33 +84,46 @@ def ass_head(ass, id=None):
 def ass_body(ass, state):
     """generator for the body of an assignment"""
     if ass.sentence.type == BOOL:
+
+        def checkbox(val, checked):
+            yield from input(name=ass.sentence.code, type="checkbox",
+                             value=val, checked=checked,
+                        hx_trigger="click delay:50ms", hx_post="/htmx/state/post")
+
         if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
-            yield   [label([
-                        input(name=ass.sentence.code, type="checkbox", value="true",
-                            checked=(ass.value and ass.value.same_as(TRUE)),
-                            hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
+            left = checkbox("true", ass.value and ass.value.same_as(TRUE))
+            right = checkbox("false", ass.value and ass.value.same_as(FALSE))
+        elif is_env(state, ass):  # an environmental consequence to be confirmed
+            if ass.value.same_as(TRUE):
+                left = checkbox("true", checked=None)
+                right = i("info", class_="material-icons")
+            else:
+                left = i("info", class_="material-icons")
+                right = checkbox("false", checked=None)
+        else:
+            left = ""
+
+        if left:
+            yield [label([
+                        left,
                         span("yes", style="color: black;")
                     ]),
                     span("&nbsp;&nbsp;&nbsp;&nbsp;"),
                     label([
-                        input(name=ass.sentence.code, type="checkbox", value="false",
-                            checked=(ass.value and ass.value.same_as(FALSE)),
-                            hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
+                        right,
                         span("no", style="color: black;")
-                    ])]
-        else:
-            yield ""
+                ])]
     elif 0 < len(ass.symbol_decl.range):
         yield div([input(name=ass.sentence.code, type="hidden",
                             value=ass.value)
-                   if ass.status in [S.GIVEN, S.DEFAULT] else "",
+                if ass.status in [S.GIVEN, S.DEFAULT] else "",
                     [input(name=a.sentence.code, type="hidden", value="false")
                     for a in state.assignments.values()
                     if a.status in [S.GIVEN, S.DEFAULT] and a.value.same_as(FALSE)
                     and a.sentence.code.startswith(ass.sentence.code + " = ")]
         ])
     elif ass.sentence.type in [INT, REAL]:
-        if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
+        if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] or is_env(state, ass):
             yield input(name=ass.sentence.code, type="number",
                         value=str(float(ass.value.py_value)) if ass.value else None,
                         hx_trigger="change", hx_post="/htmx/state/post")
@@ -128,14 +147,11 @@ def stateX(state, update=False):
             yield from div(id=f"tab-{index}", hx_swap_oob="innerHTML", i=
                             ul(class_="collapsible", i=[
                                 li(i=[
-                                    div(ass_head(ass, f"tab-{index}-{index2}"),
+                                    div(ass_head(ass, state, f"tab-{index}-{index2}"),
                                         class_="collapsible-header")
-                                    if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] else
-                                    div (ass_head(ass, f"tab-{index}-{index2}"),
-                                         class_="collapsible-header dont-unfold",
-                                         )
-                                    if state.environment is not None and ass.status == S.CONSEQUENCE else
-                                    div(ass_head(ass, f"tab-{index}-{index2}"),
+                                    if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]
+                                    or is_env(state, ass) else
+                                    div(ass_head(ass, state, f"tab-{index}-{index2}"),
                                         class_="collapsible-header dont-unfold modal-trigger",
                                         href="#modal1", hx_trigger="click",
                                         hx_post="/htmx/state/explain?" +
@@ -234,12 +250,13 @@ def valuesX(state, sentence, values, index):
                                checked=(str(state.assignments[sentence].value) == v.code),
                                hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
                           span("", style="valign: top")])
-                  if not ass_is_false(sentence,v) else ""),
+                  if not ass_is_false(sentence,v) and v.code in values else ""),
                 d(v.code, "left"),
                 d(label([input(name=f"{sentence} = {v.code}", type="checkbox", value="false",
-                               checked=ass_is_false(sentence, v),
-                               disabled="true" if (ass_is_false(sentence, v)
-                                        and ass(sentence, v).status != S.GIVEN) else
+                               checked=ass_is_false(sentence, v) or v.code not in values,
+                               disabled="true" if v.code not in values
+                                        or(ass_is_false(sentence, v)
+                                            and ass(sentence, v).status != S.GIVEN) else
                                         None,
                                hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
                          span("", style="valign: top")]))])
