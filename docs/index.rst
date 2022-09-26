@@ -6,6 +6,8 @@
 Welcome to IDP-Z3's documentation!
 ==================================
 
+Feel free to contact us on `our Matrix channel <https://matrix.to/#/#IDP-Z3:matrix.org>`_ if you have any question on this documentation.
+
 .. toctree::
    :maxdepth: 3
    :caption: Contents:

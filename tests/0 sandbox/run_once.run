@@ -1,17 +1,17 @@
 vocabulary V {
-    type color constructed from {red, blue, green}
-    Color: color
-    opposite(color): color
+    type color := constructed from {red, blue, green}
+    Color: () -> color
+    opposite: color -> color
 }
 
 structure S:V {
-    opposite = {red, green; green, red}
+    opposite := {red -> green, green-> red}.
 }
 
 theory T:V {
-    opposite(Color) is enumerated.
+    opposite(Color()) is enumerated.
 }
 
 procedure main() {
-    print(Problem(T,S).formula())
+    print(Theory(T,S).formula())
 }

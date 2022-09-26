@@ -19,6 +19,7 @@ import {AppSettings} from '../../services/AppSettings';
 export class HeaderComponent implements OnInit, AfterViewInit {
   display = false;
   showFileShare = false;
+  showFileSave = false;
   showExpansions = false;
   showExplanation = false;
   URL = '';
@@ -87,8 +88,21 @@ export class HeaderComponent implements OnInit, AfterViewInit {
               page = page + (this.idpService.IDE ? 'IDE' : '');
               this.URL = page + '?' + encodeURIComponent((new CompressionService()).compressString(this.idpService.spec));
               this.showFileShare = true;
-          }
-        }]
+            }
+          }, {
+            label: 'Save...', command: () => {
+              var dataURI = "data:" + "theory.idp" + ";utf-8," + this.idpService.spec.replace('\n', '\n\r');
+              var a = document.createElement("a");
+              // ... set a.href and a.download
+              a.href = dataURI;
+              a['download'] = "theory.idp";
+              // Then click the link:
+              var clickEvent = new MouseEvent("click", { "view": window, "bubbles": true, "cancelable": false});
+              a.dispatchEvent(clickEvent);
+              a.remove();
+              this.showFileSave = true;
+            }
+          }]
         },
         {
           label: 'Edit',
@@ -210,8 +224,21 @@ export class HeaderComponent implements OnInit, AfterViewInit {
               page = page + (this.idpService.IDE ? 'IDE' : '');
               this.URL = page + '?' + encodeURIComponent((new CompressionService()).compressString(this.idpService.spec));
               this.showFileShare = true;
-          }
-        }]
+            }
+          }, {
+            label: 'Save...', command: () => {
+              var dataURI = "data:" + "theory.idp" + ";utf-8," + this.idpService.spec.replace('\n', '\n\r');
+              var a = document.createElement("a");
+              // ... set a.href and a.download
+              a.href = dataURI;
+              a['download'] = "theory.idp";
+              // Then click the link:
+              var clickEvent = new MouseEvent("click", { "view": window, "bubbles": true, "cancelable": false});
+              a.dispatchEvent(clickEvent);
+              a.remove();
+              this.showFileSave = true;
+            }
+          }]
         },
         {
           label: 'Run',

@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## unreleased yet
 
+This release uses the poetry 1.2.  If you use poetry, you need to update it.
+
+> curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
+> curl -sSL https://install.python-poetry.org | python3 -
+
 This release has new package dependencies: please run `poetry install` to update.
 
 Breaking changes:
@@ -25,12 +30,17 @@ Breaking changes:
 * fix #194: Decision table returns whether timeout was reached
 * fix #195: add version flag to CLI
 * fix #196: Can't change default real value
+* fix #202: Various IDE improvements
+* fix #208: Incorrect "Too many variables in head of rules of a definition"
 * MR !214: support for `#TODAY(y,m,d)`
 * MR !225: allow `--no-dev` install in poetry
 * MR !228: Integrate FOLint linter into the editors
 
-### IDP-Z3
+### Interactive Consultant and Web IDE
 * fix #169: IC: need to better handle rationals
+* fix #205: could not run Web IDE on Windows
+* fix #207: error in environmental consequences
+* MR !236: Add "File / Share..." button to IC and Web IDE
 
 
 ## [0.9.2] - 2022-02-10
