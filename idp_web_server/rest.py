@@ -24,6 +24,12 @@ To profile it, set with_profiling to True
 with_png = False
 with_profiling = False
 
+try:
+    import snoop # for debugging
+    snoop.install()
+except:
+    pass
+
 from contextlib import redirect_stdout
 from copy import copy
 import os
@@ -469,7 +475,14 @@ def state_explain():
 def state_values():
     state = get_state(request)
     sentence, index = list(request.args.items())[0]
-    values = state.copy().get_range(sentence)
+    state2 = state.copy()
+    values = state2.get_range(sentence)
+
+    # recover propagated values
+    for k,a in state2.assignments.items():
+        if (a.sentence.is_assignment
+            and a.sentence.code.startswith(sentence + " =")):
+            state.assignments[k] = a
     return render(valuesX(state, sentence, values, index))
 
 api.add_resource(HelloWorld, '/test')

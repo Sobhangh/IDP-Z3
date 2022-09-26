@@ -258,10 +258,9 @@ def valuesX(state, sentence, values, index):
                 d(v.code, "left"),
                 d(label([input(name=f"{sentence} = {v.code}", type="checkbox", value="false",
                                checked=ass_is_false(sentence, v) or v.code not in values,
-                               disabled="true" if v.code not in values
-                                        or len(values) == 1
-                                        or(ass_is_false(sentence, v)
-                                            and ass(sentence, v).status != S.GIVEN) else
+                               disabled="true" if (len(values) == 1 and v.code in values)
+                                            or (ass_is_false(sentence, v)
+                                                and ass(sentence, v).status != S.GIVEN) else
                                         None,
                                hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
                          span("", style="valign: top")]))])
