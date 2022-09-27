@@ -944,12 +944,19 @@ class SymbolInterpretation(ASTNode):
                             if str(t.args[i]) not in options[i]:
                                 detections.append((t.args[i],f"Element of wrong type","Error"))  # Element of wrong type used in predicate
 
-        if isinstance(self.enumeration,FunctionEnum):     # Symbol is function
+        if isinstance(self.enumeration, FunctionEnum):
             out_type = self.symbol.decl.out   # Get output type of function
-            out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
-            if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
-                out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
 
+            # Create a list containing the possible output values, left None if
+            # the output type is an infinite number range.
+            out_type_value = None
+            if out_type.name not in ['ℤ', 'ℝ']:
+                out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
+                if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
+                    out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
+
+            # Create a list containing all possible input arguments (to check
+            # the totality of the interpretation)
             options = []
             for i in self.symbol.decl.sorts:    # Get all values of the argument types
                 in_type_values = str(i.decl.enumeration).replace(" ", "").split(',')
@@ -978,8 +985,25 @@ class SymbolInterpretation(ASTNode):
             possibilities = old_list
             duplicates = []
             for t in self.enumeration.tuples:
-                if str(t.value) not in out_type_values:  # Used an output element of wrong type
-                    detections.append((t.value,f"Output element of wrong type, {str(t.value)}","Error"))
+                # Check if the output element is of correct type.
+                if out_type.name == 'ℝ':
+                    try:
+                        float(t.value)
+                    except:
+                        err_str = (f'Output element {str(t.value)} should be Real')
+                        detections.append((t.value, err_str, "Error"))
+
+                elif out_type.name == 'ℤ':
+                    try:
+                        int(t.value)
+                    except:
+                        err_str = (f'Output element {str(t.value)} should be Int')
+                        detections.append((t.value, err_str, "Error"))
+
+                else:
+                    if str(t.value) not in out_type_values:  # Used an output element of wrong type
+                        detections.append((t.value,f"Output element of wrong type, {str(t.value)}","Error"))
+
                 elements = []
                 for i in range(0,len(t.args)-1,1):  # Get input elements
                     if (i < len(options) and (str(t.args[i]) not in options[i])) :
@@ -1000,6 +1024,10 @@ class SymbolInterpretation(ASTNode):
                     detections.append((self,f"Function not total defined, missing {possibilities}","Error"))
             elif len(possibilities) > 0: # Function not totally defined
                 detections.append((self,f"Function not total defined, missing elements","Error"))
+
+        else:
+            # Symbol is a function mapping an ℝ or ℤ
+            pass
 
 
 class Enumeration(ASTNode):
