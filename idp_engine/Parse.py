@@ -796,7 +796,7 @@ class SymbolInterpretation(ASTNode):
         self.symbol = None
         self.is_type_enumeration = None
 
-    def interpret_application(self, theory, rank, applied, args, tuples=None):
+    def interpret_application(self, rank, applied, args, tuples=None):
         """returns an expression equivalent to `self.symbol` applied to `args`,
         simplified by the interpretation of `self.symbol`.
 
@@ -811,8 +811,6 @@ class SymbolInterpretation(ASTNode):
         ```
 
         Args:
-            theory (Theory): not used
-
             rank (Int): iteration number (from 0)
 
             applied (AppliedSymbol): template to create new AppliedSymbol
@@ -845,14 +843,14 @@ class SymbolInterpretation(ASTNode):
             if args[rank].value is not None:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
-                        out = self.interpret_application(theory, rank+1,
+                        out = self.interpret_application(rank+1,
                                         applied, args, list(tuples2))
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
                     out = AIfExpr.make(
                         EQUALS([args[rank], tuples[0].args[rank]]),
-                        self.interpret_application(theory, rank+1,
+                        self.interpret_application(rank+1,
                                                    applied, args, tuples),
                         out)
             return out

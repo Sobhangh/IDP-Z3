@@ -580,7 +580,7 @@ def interpret(self, problem):
             interpretation = problem.interpretations[self.decl.name]
             if interpretation.block.name != DEFAULT:
                 f = interpretation.interpret_application
-                value = f(problem, 0, self, sub_exprs)
+                value = f(0, self, sub_exprs)
         if (not self.in_head and not self.variables):
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
                               for defin in problem.definitions]
