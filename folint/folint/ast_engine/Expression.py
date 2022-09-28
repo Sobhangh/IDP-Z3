@@ -677,6 +677,9 @@ class AIfExpr(Expression):
     def collect_nested_symbols(self, symbols, is_nested):
         return Expression.collect_nested_symbols(self, symbols, True)
 
+    def get_type(self):
+        return self.then_f.type
+
 
 class Quantee(Expression):
     """represents the description of quantification, e.g., `x in T` or `(x,y) in P`
@@ -826,7 +829,7 @@ class AQuantification(Expression):
         for q in self.quantees:
             for q2 in q.vars:
                 vars.add(q2[0].str)
-        if self.f.variables != vars:
+        if self.f.variables != vars and self.f.variables is not None:
             # Detect unused variables.
             set3 = vars - set(self.f.variables)
             while len(set3) > 0:
@@ -850,10 +853,10 @@ class AQuantification(Expression):
             # Check for variables only occurring on one side of an equivalence.
             links = self.f.sub_exprs[0]
             rechts = self.f.sub_exprs[1]
-            if links.variables != vars:   #check if all vars in left part van AEquivalence
+            if len(links.variables) < len(vars):   #check if all vars in left part van AEquivalence
                 set3 = vars - links.variables
                 detections.append((self.f,f"Common mistake, variable {set3.pop()} only occuring on one side of equivalence","Warning"))
-            elif rechts.variables != vars:    #check if all vars in right part van AEquivalence
+            elif len(rechts.variables) < len(vars):    #check if all vars in right part van AEquivalence
                 set3 = vars - links.variables
                 detections.append((self.f,f"Common mistake, variable {set3.pop()} only occuring on one side of equivalence","Warning"))
 
@@ -1410,16 +1413,25 @@ class AppliedSymbol(Expression):
                 if isinstance(self.decl, Constructor):
                     # Constructors.
                     expected_type = self.decl.sorts[i].decl.type
+                elif len(self.decl.sorts[i].decl.sorts) == 1 and self.decl.sorts[i].decl.sorts[0].type == self.decl.sorts[i].type and self.decl.sorts[i].type != '𝔹':
+                    # Normal types
+                    expected_type = self.decl.sorts[i].type
                 else:
-                    # Normal types, partial functions.
+                    # Partial functions
+                    continue
                     expected_type = self.decl.sorts[i].decl.sorts[i].type
 
                 if (hasattr(self.sub_exprs[i], 'sort') and
                      self.sub_exprs[i].sort and
-                     isinstance(self.sub_exprs[i].sort.decl.sorts[i], Subtype)):
+                     len(self.sub_exprs[i].sort.decl.sorts) >= 1 and
+                     isinstance(self.sub_exprs[i].sort.decl.sorts[0], Subtype)):
                     # In the case of a partial function interpretation, the type is actually
                     # the argument.
-                    found_type = str(self.sub_exprs[i].sort.decl.sorts[i])
+                    # found_type = str(self.sub_exprs[i].sort.decl.sorts[i])
+                    continue
+                    found_type = self.sub_exprs[i].get_type()
+                elif not hasattr(self.sub_exprs[i], 'name'):
+                    continue
                 else:
                     # Otherwise, it's just the type.
                     found_type = self.sub_exprs[i].get_type()
