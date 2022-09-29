@@ -33,7 +33,7 @@ from .Expression import (Expression, Constructor, AIfExpr, AQuantification, Quan
                          ARImplication, AImplication, AEquivalence,
                          Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR,
+                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE,
                          IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
@@ -390,6 +390,16 @@ def annotate(self, block):
                              + (1 if type(self.enumeration) == FunctionEnum else 0)
                         for t in self.enumeration.tuples),
             f"Incorrect arity of tuples in Enumeration of {self.symbol}.  Please check use of ',' and ';'.")
+
+        if type(self.enumeration) == FunctionEnum:
+            #TODO default
+            self.enumeration.lookup = {','.join(str(a) for a in t.args[:-1]): t.args[-1]
+                            for t in self.enumeration.sorted_tuples}
+        else:
+            #TODO lookup to FALSE
+            self
+            self.enumeration.lookup = {t.code: TRUE
+                            for t in self.enumeration.sorted_tuples}
 SymbolInterpretation.annotate = annotate
 
 

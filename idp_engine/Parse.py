@@ -802,7 +802,7 @@ class SymbolInterpretation(ASTNode):
 
         This is a recursive function.
 
-        Example: assume `f:={(1,2)->A, (1, 3)->B, (2,1)->C}` and `args=[g(1),2)].
+        Example: assume `f:>={(1,2)->A, (1, 3)->B, (2,1)->C}` and `args=[g(1),2)].
         The returned expression is:
         ```
         if g(1) = 1 then A
@@ -824,8 +824,11 @@ class SymbolInterpretation(ASTNode):
         Returns:
             Expression: Grounded interpretation of self.symbol applied to args
         """
-        if tuples == None:
+        if tuples == None:  # first call
             tuples = self.enumeration.sorted_tuples
+            key = ",".join(str(a) for a in args)
+            if key in self.enumeration.lookup:
+                return self.enumeration.lookup[key]
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
@@ -865,13 +868,16 @@ class Enumeration(ASTNode):
 
         sorted_tuples: a sorted list of tuples
 
+        lookup: dictionary from arguments to values
+
         constructors (List[Constructor], optional): List of Constructor
     """
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
-        if not isinstance(self.tuples, OrderedSet):
-            self.sorted_tuples = sorted(self.tuples, key=lambda t: t.code)  # do not change dropdown order
-            self.tuples = OrderedSet(self.tuples)
+        self.sorted_tuples = sorted(self.tuples, key=lambda t: t.code)  # do not change dropdown order
+        self.tuples = OrderedSet(self.tuples)
+
+        self.lookup = {}
         if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
                for c in self.tuples):
             self.constructors = [Constructor(name=c.args[0].name)
