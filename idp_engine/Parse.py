@@ -894,9 +894,6 @@ class Enumeration(ASTNode):
             return TRUE
         if tuples is None:
             tuples = self.sorted_tuples
-            self.check(all(len(t.args)==arity+(1 if function else 0)
-                           for t in tuples),
-                "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'.")
 
         # constructs If-then-else recursively
         groups = groupby(tuples, key=lambda t: str(t.args[rank]))

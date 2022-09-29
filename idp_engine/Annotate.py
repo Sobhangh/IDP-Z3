@@ -384,6 +384,12 @@ def annotate(self, block):
         self.default = self.default.annotate(voc, {})
         self.check(self.default.value is not None,
             f"Default value for '{self.name}' must be ground: {self.default}")
+
+    if self.enumeration.tuples:
+        self.check(all(len(t.args) == self.symbol.decl.arity
+                             + (1 if type(self.enumeration) == FunctionEnum else 0)
+                        for t in self.enumeration.tuples),
+            f"Incorrect arity of tuples in Enumeration of {self.symbol}.  Please check use of ',' and ';'.")
 SymbolInterpretation.annotate = annotate
 
 
@@ -486,7 +492,7 @@ def annotate(self, idp):
     ]:
         symbol_decl = SymbolDeclaration(annotations='',
                                         name=Symbol(name=name),
-                                        sorts=[], out=out)
+                                        sorts=[out] if out else [], out=out)
         symbol_decl.annotate(self.voc)
 
     # annotate constraints and interpretations
