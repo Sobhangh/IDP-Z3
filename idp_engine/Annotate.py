@@ -353,18 +353,19 @@ def annotate(self, block):
     voc = block.voc
     self.block = block
     self.symbol = Symbol(name=self.name).annotate(voc, {})
+    enumeration = self.enumeration  # shorthand
 
     # create constructors if it is a type enumeration
     self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
-    if self.is_type_enumeration and self.enumeration.constructors:
+    if self.is_type_enumeration and enumeration.constructors:
         # create Constructors before annotating the tuples
-        for c in self.enumeration.constructors:
+        for c in enumeration.constructors:
             c.type = self.name
             self.check(c.name not in voc.symbol_decls,
                     f"duplicate '{c.name}' constructor for '{self.name}' symbol")
             voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
 
-    self.enumeration.annotate(voc)
+    enumeration.annotate(voc)
 
     self.check(self.is_type_enumeration
                 or all(s.name not in [INT, REAL, DATE]  # finite domain #TODO
@@ -373,11 +374,11 @@ def annotate(self, block):
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
     self.check(not(self.symbol.decl.out.decl.base_type.name == BOOL
-                   and type(self.enumeration) == FunctionEnum),
+                   and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
     # predicate enumeration have FALSE default
-    if type(self.enumeration) != FunctionEnum and self.default is None:
+    if type(enumeration) != FunctionEnum and self.default is None:
         self.default = FALSE
 
     if self.default is not None:
@@ -385,21 +386,20 @@ def annotate(self, block):
         self.check(self.default.value is not None,
             f"Default value for '{self.name}' must be ground: {self.default}")
 
-    if self.enumeration.tuples:
+    if enumeration.tuples:
         self.check(all(len(t.args) == self.symbol.decl.arity
-                             + (1 if type(self.enumeration) == FunctionEnum else 0)
-                        for t in self.enumeration.tuples),
+                             + (1 if type(enumeration) == FunctionEnum else 0)
+                        for t in enumeration.tuples),
             f"Incorrect arity of tuples in Enumeration of {self.symbol}.  Please check use of ',' and ';'.")
 
-        if type(self.enumeration) == FunctionEnum:
+        if type(enumeration) == FunctionEnum:
             #TODO default
-            self.enumeration.lookup = {','.join(str(a) for a in t.args[:-1]): t.args[-1]
-                            for t in self.enumeration.sorted_tuples}
+            enumeration.lookup = {','.join(str(a) for a in t.args[:-1]): t.args[-1]
+                                  for t in enumeration.sorted_tuples}
         else:
             #TODO lookup to FALSE
-            self
-            self.enumeration.lookup = {t.code: TRUE
-                            for t in self.enumeration.sorted_tuples}
+            enumeration.lookup = {t.code: TRUE
+                                  for t in enumeration.sorted_tuples}
 SymbolInterpretation.annotate = annotate
 
 
