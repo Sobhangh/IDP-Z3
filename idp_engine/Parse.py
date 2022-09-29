@@ -826,7 +826,7 @@ class SymbolInterpretation(ASTNode):
         """
         if tuples == None:  # first call
             tuples = self.enumeration.sorted_tuples
-            key = ",".join(str(a) for a in args)
+            key = ",".join(a.code for a in args)
             if key in self.enumeration.lookup:
                 return self.enumeration.lookup[key]
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value

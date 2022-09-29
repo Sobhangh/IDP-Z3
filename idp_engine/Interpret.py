@@ -186,6 +186,24 @@ def interpret(self, problem):
             extension = [t.args for t in self.enumeration.tuples]
             problem.extensions[self.symbol.name] = (extension, None)
 
+        enumeration = self.enumeration  # shorthand
+        self.check(all(len(t.args) == self.symbol.decl.arity
+                            + (1 if type(enumeration) == FunctionEnum else 0)
+                        for t in enumeration.tuples),
+            f"Incorrect arity of tuples in Enumeration of {self.symbol}.  Please check use of ',' and ';'.")
+
+        lookup = {}
+        if type(enumeration) == FunctionEnum:
+            lookup.update( (','.join(str(a) for a in t.args[:-1]), t.args[-1])
+                        for t in enumeration.sorted_tuples)
+        else:
+            if hasattr(self.symbol.decl, 'instances') and self.symbol.decl.instances:
+                lookup = { ",".join(str(a) for a in applied.sub_exprs): self.default
+                        for applied in self.symbol.decl.instances.values()}
+            lookup.update( (t.code, TRUE)
+                            for t in enumeration.sorted_tuples)
+        enumeration.lookup = lookup
+
         # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
 

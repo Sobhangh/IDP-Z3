@@ -385,21 +385,6 @@ def annotate(self, block):
         self.default = self.default.annotate(voc, {})
         self.check(self.default.value is not None,
             f"Default value for '{self.name}' must be ground: {self.default}")
-
-    if enumeration.tuples:
-        self.check(all(len(t.args) == self.symbol.decl.arity
-                             + (1 if type(enumeration) == FunctionEnum else 0)
-                        for t in enumeration.tuples),
-            f"Incorrect arity of tuples in Enumeration of {self.symbol}.  Please check use of ',' and ';'.")
-
-        if type(enumeration) == FunctionEnum:
-            #TODO default
-            enumeration.lookup = {','.join(str(a) for a in t.args[:-1]): t.args[-1]
-                                  for t in enumeration.sorted_tuples}
-        else:
-            #TODO lookup to FALSE
-            enumeration.lookup = {t.code: TRUE
-                                  for t in enumeration.sorted_tuples}
 SymbolInterpretation.annotate = annotate
 
 
