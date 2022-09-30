@@ -109,8 +109,11 @@ A variable may be declared with its type:
     var x ∈ T
 
 This is convenient for quantifications:
-the type of the variable can be omitted in quantifications;
+the type of the variable may be omitted in quantifications:
 its declared type will be assumed.
+
+The variables ``x1, x2, ...`` are implicitly declared with the same type as ``x``.
+(the variable in the declaration may not have a digital suffix)
 
 
 .. _built-in functions:

@@ -131,6 +131,8 @@ SymbolDeclaration.annotate = annotate
 def annotate(self, voc):
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
+    self.check(self.name == self.name.rstrip(string.digits),
+                f"Variable {self.name} cannot be declared with a digital suffix.")
     voc.symbol_decls[self.name] = self
     self.subtype.annotate(voc, {})
     return self
