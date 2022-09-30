@@ -366,16 +366,12 @@ Expression.substitute = substitute
 
 def instantiate(self, e0, e1, problem=None):
     """Recursively substitute Variable in e0 by e1 in a copy of self.
-
-    Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update .variables.
     """
     assert all(type(e) == Variable for e in e0), \
            f"Internal error: instantiate {e0}"
     if self.value:
         return self
-    if problem and all(e.name not in self.variables for e in e0):
-        return self.interpret(problem)
     out = copy.copy(self)  # shallow copy !
     out.annotations = copy.copy(out.annotations)
     out.variables = copy.copy(out.variables)
