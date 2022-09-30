@@ -22,10 +22,11 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 from copy import copy
 from itertools import chain
+import string
 from typing import Dict
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration, Type,
-                    SymbolDeclaration, Symbol,
+                    SymbolDeclaration, Symbol, VarDeclaration,
                     TheoryBlock, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
                     Tuple, ConstructedFrom, Display)
@@ -123,6 +124,17 @@ def annotate(self, voc):
                       self.sorts[0].decl.base_type)
     return self
 SymbolDeclaration.annotate = annotate
+
+
+# Class VarDeclaration  #######################################################
+
+def annotate(self, voc):
+    self.check(self.name not in voc.symbol_decls,
+                f"duplicate declaration in vocabulary: {self.name}")
+    voc.symbol_decls[self.name] = self
+    self.subtype.annotate(voc, {})
+    return self
+VarDeclaration.annotate = annotate
 
 
 # Class Symbol  #######################################################
@@ -547,10 +559,18 @@ def annotate(self, voc, q_vars):
         q.annotate(voc, q_vars)
         for vars in q.vars:
             for var in vars:
-                self.check(var.name not in voc.symbol_decls,
+                self.check(var.name not in voc.symbol_decls
+                           or type(voc.symbol_decls[var.name]) == VarDeclaration,
                     f"the quantified variable '{var.name}' cannot have"
                     f" the same name as another symbol")
                 var.sort = q.sub_exprs[0] if q.sub_exprs else None
+                var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
+                if var_decl:
+                    subtype = var_decl.subtype
+                    self.check(var.sort is None or var.sort.name == subtype.name,
+                               f"Ambiguous type for {var.name}: {var.sort.name if var.sort else ''} or {subtype.name} ?")
+                    if var.sort is None:
+                        q.sub_exprs = [subtype.annotate(voc, {})]
                 q_v[var.name] = var
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
@@ -745,14 +765,14 @@ Number.annotate = annotate
 # Class UnappliedSymbol  #######################################################
 
 def annotate(self, voc, q_vars):
+    if self.name in q_vars:  # ignore VarDeclaration
+        return q_vars[self.name]
     if self.name in voc.symbol_decls:
         self.decl = voc.symbol_decls[self.name]
         self.variables = {}
         self.check(type(self.decl) == Constructor,
                    f"{self} should be applied to arguments (or prefixed with a back-tick)")
         return self
-    if self.name in q_vars:
-        return q_vars[self.name]
     # elif self.name in voc.symbol_decls:  # in symbol_decls
     #     out = AppliedSymbol.make(self.s, self.sub_exprs)
     #     return out.annotate(voc, q_vars)

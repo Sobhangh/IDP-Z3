@@ -4,10 +4,11 @@ vocabulary {
     type color := {red, blue, green}
     p: () → Bool
     q: (color) → Bool
+    var c in color
 }
 theory {
     p() <=> ?c in color: c~=red.
-    ?c in color: q(c).
+    ?c: q(c).
 }
 display {
     view() = expanded.
@@ -62,11 +63,11 @@ display {
                   'relevant': True,
                   'status': 'UNKNOWN',
                   'typ': 'Bool'},
-       '∃c ∈ color : q(c)': {'environmental': False,
-                             'is_assignment': False,
-                             'normal': False,
-                             'reading': '∃c ∈ color : q(c)',
-                             'relevant': True,
-                             'status': 'UNIVERSAL',
-                             'typ': 'Bool',
-                             'value': True}}}
+       '∃c ∈ None : q(c)': {'environmental': False,
+                            'is_assignment': False,
+                            'normal': False,
+                            'reading': '∃c ∈ None : q(c)',
+                            'relevant': True,
+                            'status': 'UNIVERSAL',
+                            'typ': 'Bool',
+                            'value': True}}}

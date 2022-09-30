@@ -2,10 +2,11 @@ vocabulary {
     type color := {red, blue, green}
     p: () → Bool
     q: (color) → Bool
+    var c in color
 }
 theory {
     p() <=> ?c in color: c~=red.
-    ?c in color: q(c).
+    ?c: q(c).
 }
 display {
     view() = expanded.

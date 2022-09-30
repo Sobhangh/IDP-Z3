@@ -2,6 +2,7 @@ vocabulary {
     type Block := {B1, B2, B3}
     green: Block -> Bool
     right: Block * Block -> Bool // Y is on the right of X
+    var b in Block
 }
 theory {
     { right(B1, B2).

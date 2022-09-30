@@ -1,6 +1,7 @@
 vocabulary V {
     p : (𝔹) → 𝔹
     f : (𝔹) → 𝔹
+    var x in Bool
 }
 
 theory T:V {

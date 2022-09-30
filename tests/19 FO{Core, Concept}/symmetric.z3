@@ -5,6 +5,7 @@ vocabulary {
 	edge: (node ⨯ node) → Bool
 	symmetric: (Concept[node*node -> Bool]) → Bool
     Start: ()→node
+	var x in node
 }
 theory {
     edge(a,b).

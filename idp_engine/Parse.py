@@ -518,6 +518,19 @@ class SymbolDeclaration(ASTNode):
             out = TRUE
         return out
 
+class VarDeclaration(ASTNode):
+    """ represents a declaration of variable (IEP 24)
+
+    Attributes:
+        name (str): name of the variable
+
+        subtype (Type): type of the variable
+    """
+
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name').name
+        self.subtype = kwargs.pop('subtype')
+
 Declaration = Union[TypeDeclaration, SymbolDeclaration]
 
 
@@ -1305,7 +1318,7 @@ dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
-                                         Vocabulary, Import,
+                                         Vocabulary, Import, VarDeclaration,
                                          TypeDeclaration, Accessor, Type,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
