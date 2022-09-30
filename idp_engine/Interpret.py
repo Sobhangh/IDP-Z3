@@ -201,13 +201,13 @@ def interpret(self, problem):
             f"Incorrect arity of tuples in Enumeration of {self.symbol}.  Please check use of ',' and ';'.")
 
         lookup = {}
+        if hasattr(decl, 'instances') and decl.instances and self.default:
+            lookup = { ",".join(str(a) for a in applied.sub_exprs): self.default
+                    for applied in decl.instances.values()}
         if type(enumeration) == FunctionEnum:
             lookup.update( (','.join(str(a) for a in t.args[:-1]), t.args[-1])
                         for t in enumeration.sorted_tuples)
         else:
-            if hasattr(self.symbol.decl, 'instances') and self.symbol.decl.instances:
-                lookup = { ",".join(str(a) for a in applied.sub_exprs): self.default
-                        for applied in self.symbol.decl.instances.values()}
             lookup.update( (t.code, TRUE)
                             for t in enumeration.sorted_tuples)
         enumeration.lookup = lookup
