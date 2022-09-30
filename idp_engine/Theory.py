@@ -38,7 +38,6 @@ from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol,
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT, NOT_SATISFIABLE)
-from .Idp_to_Z3 import get_symbols_z
 
 
 class Propagation(Enum):
