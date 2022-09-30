@@ -315,6 +315,9 @@ class Theory(object):
         for es in self.def_constraints.values():
             for e in es:
                 e.co_constraints(self.co_constraints)
+        for c in self.co_constraints.values():
+            c.interpret(self)
+
         for s in list(questions.values()):
             if s.code not in self.assignments:
                 self.assignments.assert__(s, None, S.UNKNOWN)
