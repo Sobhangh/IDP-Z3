@@ -426,6 +426,9 @@ class SymbolDeclaration(ASTNode):
 
         optimizable (bool):
             whether this symbol should get optimize buttons in the IC
+
+        needs_interpretation (bool):
+            whether its interpretation must be sent to Z3
     """
 
     def __init__(self, **kwargs):
@@ -829,6 +832,9 @@ class SymbolInterpretation(ASTNode):
             key = ",".join(a.code for a in args)
             if key in self.enumeration.lookup:
                 return self.enumeration.lookup[key]
+        # in case of partial interpretation
+        return applied._change(sub_exprs=args)
+    """
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
@@ -857,6 +863,7 @@ class SymbolInterpretation(ASTNode):
                                                    applied, args, tuples),
                         out)
             return out
+    """
 
 
 class Enumeration(ASTNode):

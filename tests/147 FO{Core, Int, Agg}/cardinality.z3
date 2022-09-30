@@ -29,21 +29,18 @@ And(fleetOf(o1) == f1,
     _min(lambda x ∈ ConfigObj :  if   fleetOf(x) = f then weight(x) else 999)(f1),
     fleetMin(f2) ==
     _min(lambda x ∈ ConfigObj :  if   fleetOf(x) = f then weight(x) else 999)(f2),
-    Or(fleetOf(o1) == f1, fleetOf(o1) == f2),
-    Or(fleetOf(o2) == f1, fleetOf(o2) == f2),
-    Or(fleetOf(o3) == f1, fleetOf(o3) == f2),
-    Exists(c!0,
-           _min(lambda x ∈ ConfigObj : weight(x)) ==
-           weight(c!0)),
-    ForAll(c!1,
-           _min(lambda x ∈ ConfigObj : weight(x)) <=
-           weight(c!1)),
-    Exists(c!2,
-           _max(lambda x ∈ ConfigObj : weight(x)) ==
-           weight(c!2)),
-    ForAll(c!3,
-           _max(lambda x ∈ ConfigObj : weight(x)) >=
-           weight(c!3)),
+    Or(_min(lambda x ∈ ConfigObj : weight(x)) == weight(o1),
+       _min(lambda x ∈ ConfigObj : weight(x)) == weight(o2),
+       _min(lambda x ∈ ConfigObj : weight(x)) == weight(o3)),
+    _min(lambda x ∈ ConfigObj : weight(x)) <= weight(o1),
+    _min(lambda x ∈ ConfigObj : weight(x)) <= weight(o2),
+    _min(lambda x ∈ ConfigObj : weight(x)) <= weight(o3),
+    Or(_max(lambda x ∈ ConfigObj : weight(x)) == weight(o1),
+       _max(lambda x ∈ ConfigObj : weight(x)) == weight(o2),
+       _max(lambda x ∈ ConfigObj : weight(x)) == weight(o3)),
+    _max(lambda x ∈ ConfigObj : weight(x)) >= weight(o1),
+    _max(lambda x ∈ ConfigObj : weight(x)) >= weight(o2),
+    _max(lambda x ∈ ConfigObj : weight(x)) >= weight(o3),
     Or(_min(lambda x ∈ ConfigObj :  if   fleetOf(x) = f then weight(x) else 999)(f1) ==
        weight(o1),
        _min(lambda x ∈ ConfigObj :  if   fleetOf(x) = f then weight(x) else 999)(f1) ==
