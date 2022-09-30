@@ -1,6 +1,4 @@
-And(spouse(Alice) == Bob,
-    spouse(Bob) == Alice,
-    Or(Not(married(Alice)), 20 < age(Bob)),
+And(Or(Not(married(Alice)), 20 < age(Bob)),
     Or(Not(married(Bob)), 20 < age(Alice)),
     Or(Not(married(Tom)), 20 < age(spouse(Tom))),
     Not(And(married(Alice), affair(Alice, Bob))),

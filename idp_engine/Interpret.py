@@ -603,6 +603,8 @@ def interpret(self, problem):
             if interpretation.block.name != DEFAULT:
                 f = interpretation.interpret_application
                 value = f(0, self, sub_exprs)
+        elif self.decl.name in problem.interpretations:
+            self.decl.needs_interpretation = True
         if (not self.in_head and not self.variables):
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
                               for defin in problem.definitions]

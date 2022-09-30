@@ -79,8 +79,6 @@ class Theory(object):
 
         _constraintz (List(ExprRef), Optional): a list of assertions, co_constraints and definitions in Z3 form
 
-        _symbols (Set[str]): set of symbol name occurring in self._constraintz
-
         _formula (ExprRef, optional): the Z3 formula that represents
             the problem (assertions, co_constraints, definitions and assignments).
 
@@ -171,8 +169,9 @@ class Theory(object):
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
-                                and a.status in [S.STRUCTURE, S.UNIVERSAL]
-                                and a.symbol_decl.name in self._symbols]
+                                and (a.status == S.UNIVERSAL
+                                     or (a.status == S.STRUCTURE
+                                         and a.symbol_decl.needs_interpretation))]
             self._slvr.add(assignment_forms)
         return self._slvr
 
@@ -185,8 +184,9 @@ class Theory(object):
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
-                                and a.status in [S.STRUCTURE, S.UNIVERSAL]
-                                and a.symbol_decl.name in self._symbols]
+                                and (a.status == S.UNIVERSAL
+                                     or (a.status == S.STRUCTURE
+                                         and a.symbol_decl.needs_interpretation))]
             self._optmz.add(assignment_forms)
         return self._optmz
 
@@ -409,9 +409,6 @@ class Theory(object):
             self._constraintz += [s.translate(self)
                             for s in chain(*self.def_constraints.values())]
 
-            self._symbols = set()
-            for c in self._constraintz:
-                get_symbols_z(c, self._symbols)
         return self._constraintz
 
     def formula(self) -> BoolRef:
@@ -426,7 +423,7 @@ class Theory(object):
                 # occurring in the (potentially simplified) z3 constraints
                 all = ([a.formula().translate(self)
                         for a in self.assignments.values()
-                        if a.symbol_decl.name in self._symbols
+                        if (a.status != S.STRUCTURE or a.symbol_decl.needs_interpretation)
                         and a.value is not None
                         and a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]]
                         + self.constraintz())
