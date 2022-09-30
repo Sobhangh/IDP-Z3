@@ -107,7 +107,7 @@ def extra_check(file, detections):
     unicode_symbols = ['⨯', '→', '𝔹', 'ℤ', 'ℝ', '∀', '∃', '∈', '∉', '←', '∧',
                        '∨', '¬', '⇒', '⇔', '⇐', '≤', '≠', '≥']
     ascii_symbols = ['*', '->', ' Bool ', ' Int ', ' Real ', '!', '?', ' in ',
-                     ' not in ', '<-', '&', '|', '~', '=>', '<=>', '<=', '=<',
+                     '<-', '&', '|', '~', '=>', '<=>', '<=', '=<',
                      '~=', '>=']
     cur_block = None
     for line_number, line in enumerate(file.split('\n'), start=1):
@@ -179,7 +179,9 @@ def extra_check(file, detections):
                 detections.append((line_number, 0, 4,
                                    "Style: incorrect indentation", "Warning"))
 
-        # Consistent use of unicode or ASCII
+        # Consistent use of unicode or ASCII (if not a comment)
+        if re.match(pattern2, line.strip()):
+            continue
         if not(consistence_help):
             if any(symbol in line for symbol in unicode_symbols):
                 consistence = "unicode"

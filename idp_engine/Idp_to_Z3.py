@@ -40,23 +40,6 @@ from idp_engine.Expression import (Constructor, Expression, AIfExpr,
 from idp_engine.utils import (BOOL, INT, REAL, DATE,
                               GOAL_SYMBOL, RELEVANT, RESERVED_SYMBOLS)
 
-# general  #####################################################################
-
-def get_symbols_z(zexpr, symbols):
-    """adds the symbols in zexpr to symbols
-
-    Args:
-        zexpr (ExprRef): a Z3 expression
-        symbols (set(str)): set of symbol name
-    """
-    try:
-        symbols.add(zexpr.decl().name())
-    except Z3Exception:
-        pass
-    for child in zexpr.children():
-        get_symbols_z(child, symbols)
-
-
 # class TypeDeclaration  ###########################################################
 
 def translate(self, problem: "Theory"):

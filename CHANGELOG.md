@@ -18,6 +18,8 @@ Breaking changes:
 * FO[Sugar] partial function interpretations must use `:>=` instead of `:=`.
 * `timeout` parameter in API is now `timeout_seconds`
 
+Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde, WhereIsW4ldo.
+
 ### IDP-Z3
 * (breaking) #186: FO[Sugar] negation of `is enumerated` and `in {...}`
 * (breaking) !217: FO[PF] Unary predicates in type signature (+ partial interpretetations)
@@ -35,6 +37,7 @@ Breaking changes:
 * MR !214: support for `#TODAY(y,m,d)`
 * MR !225: allow `--no-dev` install in poetry
 * MR !228: Integrate FOLint linter into the editors
+* MR !243: Improve performance
 
 ### Interactive Consultant and Web IDE
 * fix #169: IC: need to better handle rationals

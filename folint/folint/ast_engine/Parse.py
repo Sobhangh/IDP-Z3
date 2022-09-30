@@ -880,9 +880,10 @@ class SymbolInterpretation(ASTNode):
         self.symbol = None
         self.is_type_enumeration = None
 
-    def interpret_application(self, theory, rank, applied, args, tuples=None):
+    def interpret_application(self, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """
-        tuples = list(self.enumeration.tuples) if tuples == None else tuples
+        if tuples == None:
+            tuples = self.enumeration.sorted_tuples
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
@@ -895,20 +896,19 @@ class SymbolInterpretation(ASTNode):
         else:  # constructs If-then-else recursively
             out = (self.default if self.default is not None else
                    applied._change(sub_exprs=args))
-            tuples.sort(key=lambda t: str(t.args[rank]))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
             if args[rank].value is not None:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
-                        out = self.interpret_application(theory, rank+1,
+                        out = self.interpret_application(rank+1,
                                         applied, args, list(tuples2))
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
                     out = AIfExpr.make(
                         EQUALS([args[rank], tuples[0].args[rank]]),
-                        self.interpret_application(theory, rank+1,
+                        self.interpret_application(rank+1,
                                                    applied, args, tuples),
                         out)
             return out
@@ -944,12 +944,19 @@ class SymbolInterpretation(ASTNode):
                             if str(t.args[i]) not in options[i]:
                                 detections.append((t.args[i],f"Element of wrong type","Error"))  # Element of wrong type used in predicate
 
-        if isinstance(self.enumeration,FunctionEnum):     # Symbol is function
+        if isinstance(self.enumeration, FunctionEnum):
             out_type = self.symbol.decl.out   # Get output type of function
-            out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
-            if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
-                out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
 
+            # Create a list containing the possible output values, left None if
+            # the output type is an infinite number range.
+            out_type_value = None
+            if out_type.name not in ['ℤ', 'ℝ']:
+                out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
+                if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
+                    out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
+
+            # Create a list containing all possible input arguments (to check
+            # the totality of the interpretation)
             options = []
             for i in self.symbol.decl.sorts:    # Get all values of the argument types
                 in_type_values = str(i.decl.enumeration).replace(" ", "").split(',')
@@ -978,8 +985,25 @@ class SymbolInterpretation(ASTNode):
             possibilities = old_list
             duplicates = []
             for t in self.enumeration.tuples:
-                if str(t.value) not in out_type_values:  # Used an output element of wrong type
-                    detections.append((t.value,f"Output element of wrong type, {str(t.value)}","Error"))
+                # Check if the output element is of correct type.
+                if out_type.name == 'ℝ':
+                    try:
+                        float(t.value)
+                    except:
+                        err_str = (f'Output element {str(t.value)} should be Real')
+                        detections.append((t.value, err_str, "Error"))
+
+                elif out_type.name == 'ℤ':
+                    try:
+                        int(t.value)
+                    except:
+                        err_str = (f'Output element {str(t.value)} should be Int')
+                        detections.append((t.value, err_str, "Error"))
+
+                else:
+                    if str(t.value) not in out_type_values:  # Used an output element of wrong type
+                        detections.append((t.value,f"Output element of wrong type, {str(t.value)}","Error"))
+
                 elements = []
                 for i in range(0,len(t.args)-1,1):  # Get input elements
                     if (i < len(options) and (str(t.args[i]) not in options[i])) :
@@ -1001,6 +1025,10 @@ class SymbolInterpretation(ASTNode):
             elif len(possibilities) > 0: # Function not totally defined
                 detections.append((self,f"Function not total defined, missing elements","Error"))
 
+        else:
+            # Symbol is a function mapping an ℝ or ℤ
+            pass
+
 
 class Enumeration(ASTNode):
     """Represents an enumeration of tuples of expressions.
@@ -1009,12 +1037,14 @@ class Enumeration(ASTNode):
     Attributes:
         tuples (OrderedSet[Tuple]): OrderedSet of Tuple of Expression
 
+        sorted_tuples: a sorted list of tuples
+
         constructors (List[Constructor], optional): List of Constructor
     """
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
         if not isinstance(self.tuples, OrderedSet):
-            # self.tuples.sort(key=lambda t: t.code) # do not change dropdown order
+            self.sorted_tuples = sorted(self.tuples, key=lambda t: t.code)  # do not change dropdown order
             self.tuples = OrderedSet(self.tuples)
         if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
                for c in self.tuples):
@@ -1034,13 +1064,9 @@ class Enumeration(ASTNode):
         if rank == arity:  # valid tuple
             return TRUE
         if tuples is None:
-            tuples = self.tuples
-            self.check(all(len(t.args)==arity+(1 if function else 0)
-                           for t in tuples),
-                "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'.")
+            tuples = self.sorted_tuples
 
         # constructs If-then-else recursively
-        tuples = sorted(list(tuples), key=lambda t: str(t.args[rank]))
         groups = groupby(tuples, key=lambda t: str(t.args[rank]))
         if args[rank].value is not None:
             for val, tuples2 in groups:  # try to resolve
