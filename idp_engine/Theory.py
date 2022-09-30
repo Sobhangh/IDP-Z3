@@ -275,6 +275,8 @@ class Theory(object):
         self.extensions = {}  # reset the cache
 
         for decl in self.declarations.values():
+            if type(decl) == SymbolDeclaration:  # reset it
+                decl.needs_interpretation = False
             decl.interpret(self)
 
         # remove RELEVANT constraints
@@ -283,21 +285,18 @@ class Theory(object):
                    and v.decl is not None
                    and v.decl.name == RELEVANT)])
 
-        # process enumerations, including GOAL_SYMBOL
-        for symbol_interpretation in self.interpretations.values():
-            if not symbol_interpretation.is_type_enumeration:
-                symbol_interpretation.interpret(self)
-            if symbol_interpretation.name == GOAL_SYMBOL:
-                # expand goal_symbol
-                for t in symbol_interpretation.enumeration.tuples:
-                    symbol = t.args[0]
-                    decl = self.declarations[symbol.name[1:]]
-                    assert decl.instances, f"goal {decl.name} must be instantiable."
-                    relevant = Symbol(name=RELEVANT)
-                    relevant.decl = self.declarations[RELEVANT]
-                    for i in decl.instances.values():
-                        constraint = AppliedSymbol.make(relevant, [i])
-                        self.constraints.append(constraint)
+        # expand goal_symbol
+        symbol_interpretation = self.interpretations.get(GOAL_SYMBOL, None)
+        if symbol_interpretation:
+            for t in symbol_interpretation.enumeration.tuples:
+                symbol = t.args[0]
+                decl = self.declarations[symbol.name[1:]]
+                assert decl.instances, f"goal {decl.name} must be instantiable."
+                relevant = Symbol(name=RELEVANT)
+                relevant.decl = self.declarations[RELEVANT]
+                for i in decl.instances.values():
+                    constraint = AppliedSymbol.make(relevant, [i])
+                    self.constraints.append(constraint)
 
         # expand whole-domain definitions
         for defin in self.definitions:

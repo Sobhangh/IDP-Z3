@@ -116,7 +116,7 @@ def interpret(self, problem):
     else:
         self.range = [e[0] for e in range]
 
-    # create instances in problem.assignments + type constraints
+    # create instances + empty assignment
     self.instances = {}
     if self.name not in RESERVED_SYMBOLS and superset:
         for args in superset:
@@ -124,17 +124,24 @@ def interpret(self, problem):
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
             problem.assignments.assert__(expr, None, S.UNKNOWN)
-            if self.out.decl.name != BOOL:
-                # add type constraints to problem.constraints
-                # ! (x,y) in domain: range(f(x,y))
-                range_condition = self.out.decl.contains_element(expr.copy(),
-                                    problem.interpretations, problem.extensions)
-                range_condition = range_condition.interpret(problem)
-                constraint = IMPLIES([filter(args), range_condition])
-                constraint.block = self.block
-                constraint.is_type_constraint_for = self.name
-                constraint.annotations['reading'] = f"Possible values for {expr}"
-                problem.constraints.append(constraint)
+
+    # interpret the enumeration
+    if self.name in problem.interpretations and self.name != GOAL_SYMBOL:
+        problem.interpretations[self.name].interpret(problem)
+
+    # create type constraints
+    if self.out.decl.name != BOOL:
+        for expr in self.instances.values():
+            # add type constraints to problem.constraints
+            # ! (x,y) in domain: range(f(x,y))
+            range_condition = self.out.decl.contains_element(expr.copy(),
+                                problem.interpretations, problem.extensions)
+            range_condition = range_condition.interpret(problem)
+            constraint = IMPLIES([filter(args), range_condition])
+            constraint.block = self.block
+            constraint.is_type_constraint_for = self.name
+            constraint.annotations['reading'] = f"Possible values for {expr}"
+            problem.constraints.append(constraint)
 SymbolDeclaration.interpret = interpret
 
 
