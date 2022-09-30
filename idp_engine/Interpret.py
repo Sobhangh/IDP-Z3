@@ -271,6 +271,7 @@ def interpret(self, problem):
             quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
             expr = self.enumeration.contains(list(q_vars.values()), True)
             constraint = FORALL(quantees, expr).interpret(problem)
+            constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
             problem.constraints.append(constraint)
 SymbolInterpretation.interpret = interpret
 

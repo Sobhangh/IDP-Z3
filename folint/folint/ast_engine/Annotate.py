@@ -672,6 +672,7 @@ def annotate(self, voc, q_vars):
                     coc = AND([coc1, coc2])
                     quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
                     applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
+                    applied.co_constraint.annotations['reading'] = f"Calculation of {self.code}"
                 return applied
         self.annotated = True
     return self
