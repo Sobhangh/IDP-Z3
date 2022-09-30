@@ -6,13 +6,14 @@ vocabulary {
 	symmetric: (Concept[node*node -> Bool]) → Bool
     Start: ()→node
 	var x in node
+	var `p in symmetric
 }
 theory {
     edge(a,b).
     !`p in Concept[node*node -> Bool]: !x: !y in node: $(`p)(x,y) => $(`p)(y,x).
     !`p in Concept[node*node -> Bool]: symmetric(`p)
 				=> (!x: !y in node: $(`p)(x,y) => $(`p)(y,x)).
-    !`p in symmetric: !x: !y in node: $(`p)(x,y) => $(`p)(y,x).
+    !`p, x: !y in node: $(`p)(x,y) => $(`p)(y,x).
 	symmetric := {`edge}.
 }
 display {
@@ -159,15 +160,13 @@ display {
                                                                                               'status': 'UNIVERSAL',
                                                                                               'typ': 'Bool',
                                                                                               'value': True},
-          '∀`p ∈ symmetric : ∀x ∈ None : ∀y ∈ node : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
-                                                                                  'is_assignment': False,
-                                                                                  'normal': False,
-                                                                                  'reading': '∀`p ∈ symmetric : ∀x ∈ '
-                                                                                             'None : ∀y ∈ node : '
-                                                                                             '$(`p)(x, y) ⇒ $(`p)(y, '
-                                                                                             'x)',
-                                                                                  'relevant': False,
-                                                                                  'status': 'UNIVERSAL',
-                                                                                  'typ': 'Bool',
-                                                                                  'value': True}},
+          '∀`p ∈ None,x ∈ None : ∀y ∈ node : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
+                                                                          'is_assignment': False,
+                                                                          'normal': False,
+                                                                          'reading': '∀`p ∈ None,x ∈ None : ∀y ∈ node '
+                                                                                     ': $(`p)(x, y) ⇒ $(`p)(y, x)',
+                                                                          'relevant': False,
+                                                                          'status': 'UNIVERSAL',
+                                                                          'typ': 'Bool',
+                                                                          'value': True}},
  'symmetric': {}}

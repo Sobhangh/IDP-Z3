@@ -567,8 +567,11 @@ def annotate(self, voc, q_vars):
                 var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
                 if var_decl:
                     subtype = var_decl.subtype
-                    self.check(var.sort is None or var.sort.name == subtype.name,
-                               f"Ambiguous type for {var.name}: {var.sort.name if var.sort else ''} or {subtype.name} ?")
+                    self.check(var.sort is None
+                               or var.sort.name == subtype.name
+                               or len(vars)==1,
+                        f"Ambiguous type for {var.name}: "
+                        f"{var.sort.name if var.sort else ''} or {subtype.name} ?")
                     if var.sort is None:
                         q.sub_exprs = [subtype.annotate(voc, {})]
                 q_v[var.name] = var
