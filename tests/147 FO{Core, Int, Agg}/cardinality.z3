@@ -1,7 +1,4 @@
-And(fleetOf(o1) == f1,
-    fleetOf(o2) == f1,
-    fleetOf(o3) == f2,
-    Vehicle(o2),
+And(Vehicle(o2),
     Vehicle(o3),
     2 ==
     If(Vehicle(o1), 1, 0) +
@@ -29,9 +26,6 @@ And(fleetOf(o1) == f1,
     _min(lambda x ∈ ConfigObj :  if   fleetOf(x) = f then weight(x) else 999)(f1),
     fleetMin(f2) ==
     _min(lambda x ∈ ConfigObj :  if   fleetOf(x) = f then weight(x) else 999)(f2),
-    Or(fleetOf(o1) == f1, fleetOf(o1) == f2),
-    Or(fleetOf(o2) == f1, fleetOf(o2) == f2),
-    Or(fleetOf(o3) == f1, fleetOf(o3) == f2),
     Exists(c!0,
            _min(lambda x ∈ ConfigObj : weight(x)) ==
            weight(c!0)),
