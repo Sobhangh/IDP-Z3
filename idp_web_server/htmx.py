@@ -150,7 +150,8 @@ def stateX(state, update=False):
         for index, tab in enumerate(tabs.values()):
             yield from div(id=f"tab-{index}", hx_swap_oob="innerHTML", i=
                             ul(class_="collapsible tab-content", i=[
-                                li([div(ass_head(ass, state, f"tab-{index}-{index2}"),
+                                li(style="color: black" if ass.relevant else "color: grey",i=[
+                                    div(ass_head(ass, state, f"tab-{index}-{index2}"),
                                         class_="collapsible-header")
                                     if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]
                                     or is_env(state, ass) else
@@ -200,7 +201,7 @@ def stateX(state, update=False):
                         if not given and not to_check and not consequences else "",
                         display("Your input:", given),
                         display("Please verify this information:", to_check),
-                        p("Consequences:"),
+                        p("Consequences:") if consequences else "",
                         ul(class_="collapsible", i=[
                             li([div(ass_head(ass, state, f"tab-Summary-{index2}"),
                                         class_="collapsible-header dont-unfold modal-trigger",
@@ -213,7 +214,7 @@ def stateX(state, update=False):
                                 div(ass_body(ass, state),
                                     class_="collapsible-body teal lighten-5",
                                     id=f"tab-Summary-{index2}")])
-                            for index2, ass in consequences])
+                            for index2, ass in consequences]) if consequences else ""
                             ])
                         )
 

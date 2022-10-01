@@ -447,7 +447,7 @@ def state_post():
         state.assignments.update(state.environment.assignments)
         state._formula = None
     state.propagate(tag=S.CONSEQUENCE)
-    # TODO relevance
+    state.determine_relevance()
     return stateX(state, update=True)
 
 @app.route('/htmx/state/explain', methods=['POST'])
