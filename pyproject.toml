@@ -21,7 +21,7 @@ python-dateutil = "^2.8.2"
 Flask="^1.1.1"
 Flask-Cors="^3.0.8"
 Flask-RESTful="^0.3.8"
-htmx-gen = "^1.0.0"
+fast-html = "^1.0.2"
 
 [tool.poetry.dev-dependencies]
 birdseye = "^0.8.4"

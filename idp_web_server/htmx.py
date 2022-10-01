@@ -90,7 +90,7 @@ def ass_body(ass, state):
     if ass.sentence.type == BOOL:
 
         def checkbox(val, checked):
-            yield from input(name=ass.sentence.code, type="checkbox",
+            yield from input_(name=ass.sentence.code, type="checkbox",
                              value=val, checked=checked,
                         hx_trigger="click delay:50ms", hx_post="/htmx/state/post")
 
@@ -118,17 +118,17 @@ def ass_body(ass, state):
                         span("no", style="color: black;")
                 ])]
     elif 0 < len(ass.symbol_decl.range):
-        yield div([input(name=ass.sentence.code, type="hidden",
+        yield div([input_(name=ass.sentence.code, type="hidden",
                             value=ass.value)
                 if ass.status in [S.GIVEN, S.DEFAULT] else "",
-                    [input(name=a.sentence.code, type="hidden", value="false")
+                    [input_(name=a.sentence.code, type="hidden", value="false")
                     for a in state.assignments.values()
                     if a.status in [S.GIVEN, S.DEFAULT] and a.value.same_as(FALSE)
                     and a.sentence.code.startswith(ass.sentence.code + " = ")]
         ])
     elif ass.sentence.type in [INT, REAL]:
         if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] or is_env(state, ass):
-            yield input(name=ass.sentence.code, type="number",
+            yield input_(name=ass.sentence.code, type="number",
                         value=str(float(ass.value.py_value)) if ass.value else None,
                         hx_trigger="change", hx_post="/htmx/state/post")
         else:
@@ -199,7 +199,7 @@ def ass_explain(ass, hidden=False):
     """generator for the body of an assignment for explanation"""
     if ass.sentence.type == BOOL:
         yield   label( style="display: none" if hidden else None, i=[
-                    input(name=ass.sentence.code, type="checkbox",
+                    input_(name=ass.sentence.code, type="checkbox",
                           value="true" if ass.value.same_as(TRUE) else "false",
                           checked="true", class_="modal-close",
                           hx_trigger="click", hx_post="/htmx/state/post"),
@@ -208,7 +208,7 @@ def ass_explain(ass, hidden=False):
                 ])
     elif 0 < len(ass.symbol_decl.range):
         yield   label( style="display: none" if hidden else None, i=[
-                    input(name=ass.sentence.code, type="checkbox",
+                    input_(name=ass.sentence.code, type="checkbox",
                           value=ass.value.code,
                           checked="true", class_="modal-close",
                           hx_trigger="click", hx_post="/htmx/state/post"),
@@ -217,7 +217,7 @@ def ass_explain(ass, hidden=False):
                 ])
     elif ass.sentence.type in [INT, REAL]:
         yield   label( style="display: none" if hidden else None, i=[
-                    input(name=ass.sentence.code, type="checkbox",
+                    input_(name=ass.sentence.code, type="checkbox",
                           value=str(float(ass.value.py_value)),
                           checked="true", class_="modal-close",
                           hx_trigger="click", hx_post="/htmx/state/post"),
@@ -250,13 +250,13 @@ def valuesX(state, sentence, values, index):
         table(class_="highlight", i=[
             tr([d('Yes'), d(""), d("No")]),
             [tr(style="border-bottom: 0px", i=[
-                d(label([input(name=f"{sentence} = {v.code}", type="checkbox", value="true",
+                d(label([input_(name=f"{sentence} = {v.code}", type="checkbox", value="true",
                                checked=(str(state.assignments[sentence].value) == v.code),
                                hx_trigger="click delay:50ms", hx_post="/htmx/state/post"),
                           span("", style="valign: top")])
                   if not ass_is_false(sentence,v) and v.code in values else ""),
                 d(v.code, "left"),
-                d(label([input(name=f"{sentence} = {v.code}", type="checkbox", value="false",
+                d(label([input_(name=f"{sentence} = {v.code}", type="checkbox", value="false",
                                checked=ass_is_false(sentence, v) or v.code not in values,
                                disabled="true" if (len(values) == 1 and v.code in values)
                                             or (ass_is_false(sentence, v)
