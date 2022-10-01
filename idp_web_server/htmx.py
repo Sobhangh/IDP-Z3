@@ -187,10 +187,10 @@ def stateX(state, update=False):
                             ul(class_="collapsible", i=[
                                 li([div(ass_head(ass, state, f"tab-Summary-{index2}"),
                                             class_="collapsible-header"),
-                                        div(ass_body(ass, state),
-                                            class_="collapsible-body teal lighten-5",
-                                            id=f"tab-Summary-{index2}",)
-                                ])
+                                    div(ass_body(ass, state),
+                                        class_="collapsible-body teal lighten-5",
+                                        id=f"tab-Summary-{index2}",)
+                                    ])
                                 for index2, ass in data
                             ])]
 
@@ -200,8 +200,21 @@ def stateX(state, update=False):
                         if not given and not to_check and not consequences else "",
                         display("Your input:", given),
                         display("Please verify this information:", to_check),
-                        display("Consequences:", consequences)
-                        ])
+                        p("Consequences:"),
+                        ul(class_="collapsible", i=[
+                            li([div(ass_head(ass, state, f"tab-Summary-{index2}"),
+                                        class_="collapsible-header dont-unfold modal-trigger",
+                                        href="#modal1", hx_trigger="click",
+                                        hx_post="/htmx/state/explain?" +
+                                            urllib.parse.urlencode(
+                                                {ass.sentence.code: str(ass.value)},
+                                                quote_via=urllib.parse.quote),
+                                        hx_swap="none"),
+                                div(ass_body(ass, state),
+                                    class_="collapsible-body teal lighten-5",
+                                    id=f"tab-Summary-{index2}")])
+                            for index2, ass in consequences])
+                            ])
                         )
 
     if update:  # only send the content of the tabs
