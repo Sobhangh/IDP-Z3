@@ -149,9 +149,8 @@ def stateX(state, update=False):
         """ generates the content of the tabs """
         for index, tab in enumerate(tabs.values()):
             yield from div(id=f"tab-{index}", hx_swap_oob="innerHTML", i=
-                            ul(class_="collapsible", i=[
-                                li(i=[
-                                    div(ass_head(ass, state, f"tab-{index}-{index2}"),
+                            ul(class_="collapsible tab-content", i=[
+                                li([div(ass_head(ass, state, f"tab-{index}-{index2}"),
                                         class_="collapsible-header")
                                     if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]
                                     or is_env(state, ass) else
@@ -165,13 +164,45 @@ def stateX(state, update=False):
                                         hx_swap="none"),
                                     div(ass_body(ass, state), class_="collapsible-body teal lighten-5",
                                         id=f"tab-{index}-{index2}",)
-                                    ])
+                                   ])
                                 for index2, ass in enumerate(state.assignments.values())
                                 if ass.symbol_decl.heading == tab
                                 and not ass.sentence.is_assignment()
                                 and not ass.status == S.UNIVERSAL
                                 ])
                             )
+        given = [(i, ass) for i, ass in enumerate(state.assignments.values())
+                if not ass.sentence.is_assignment()
+                and ass.status in [S.GIVEN, S.DEFAULT]]
+        to_check = [(i, ass) for i, ass in enumerate(state.assignments.values())
+                    if not ass.sentence.is_assignment()
+                    and is_env(state, ass)]
+        consequences = [(i, ass) for i, ass in enumerate(state.assignments.values())
+                        if not ass.sentence.is_assignment()
+                        and ass.status in [S.CONSEQUENCE, S.ENV_CONSQ]
+                        and not is_env(state, ass)]
+        def display(text, data):
+            if data:
+                yield from [p(text),
+                            ul(class_="collapsible", i=[
+                                li([div(ass_head(ass, state, f"tab-Summary-{index2}"),
+                                            class_="collapsible-header"),
+                                        div(ass_body(ass, state),
+                                            class_="collapsible-body teal lighten-5",
+                                            id=f"tab-Summary-{index2}",)
+                                ])
+                                for index2, ass in data
+                            ])]
+
+        yield from div(id="tab-Summary", hx_swap_oob="innerHTML", i=
+                    form(class_="tab-content", i=[
+                        p("(You have not entered any data yet)")
+                        if not given and not to_check and not consequences else "",
+                        display("Your input:", given),
+                        display("Please verify this information:", to_check),
+                        display("Consequences:", consequences)
+                        ])
+                        )
 
     if update:  # only send the content of the tabs
         return render(tabsX())
@@ -185,7 +216,10 @@ def stateX(state, update=False):
                                 [li(class_="tab", i=
                                     a(tab, id=f"#tab-{index}",
                                       href=f"#tab-{index}"))
-                                for index, tab in enumerate(tabs.values())])
+                                for index, tab in enumerate(tabs.values())]
+                                +[li(class_="tab", i=
+                                    a("Summary", id=f"#tab-Summary",
+                                      href=f"#tab-Summary"))])
                             , tabsX()
                             ]),
                         hx_indicator=".progress"
