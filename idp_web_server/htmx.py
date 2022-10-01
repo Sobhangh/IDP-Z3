@@ -22,7 +22,7 @@ from idp_engine.Assignments import Status as S
 from idp_engine.Expression import TRUE, FALSE
 from idp_engine.utils import BOOL, INT, REAL, DATE
 
-from htmx_gen import *
+from fast_html import *
 from .State import State
 
 
