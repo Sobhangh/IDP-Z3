@@ -583,7 +583,7 @@ class Theory(object):
 
         Args:
             max (int, optional): maximum number of models. Defaults to 10.
-            timeout_seconds (int, optional): timeout_seconds in seconds.  Defaults to 10.
+            timeout_seconds (int, optional): timeout_seconds seconds.  Defaults to 10.
             complete (bool, optional): ``True`` for complete models. Defaults to False.
 
         Yields:
@@ -652,8 +652,8 @@ class Theory(object):
                  term: str,
                  minimize: bool = True
                  ) -> "Theory":
-        """Updates the Theory so that the value of term in the ``assignments`` property
-        is the optimal value that is compatible with the Theory.
+        """Updates the value of `term` in the ``assignments`` property of `self`
+        to the optimal value that is compatible with the theory.
 
         Chain it with a call to `expand` to obtain a model,
         or to `propagate` to propagate the optimal value.
