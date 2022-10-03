@@ -34,7 +34,7 @@ from .Expression import (Expression, Constructor, AIfExpr, AQuantification, Quan
                          ARImplication, AImplication, AEquivalence,
                          Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR,
+                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE,
                          IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
@@ -367,18 +367,19 @@ def annotate(self, block):
     voc = block.voc
     self.block = block
     self.symbol = Symbol(name=self.name).annotate(voc, {})
+    enumeration = self.enumeration  # shorthand
 
     # create constructors if it is a type enumeration
     self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
-    if self.is_type_enumeration and self.enumeration.constructors:
+    if self.is_type_enumeration and enumeration.constructors:
         # create Constructors before annotating the tuples
-        for c in self.enumeration.constructors:
+        for c in enumeration.constructors:
             c.type = self.name
             self.check(c.name not in voc.symbol_decls,
                     f"duplicate '{c.name}' constructor for '{self.name}' symbol")
             voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
 
-    self.enumeration.annotate(voc)
+    enumeration.annotate(voc)
 
     self.check(self.is_type_enumeration
                 or all(s.name not in [INT, REAL, DATE]  # finite domain #TODO
@@ -387,11 +388,11 @@ def annotate(self, block):
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
     self.check(not(self.symbol.decl.out.decl.base_type.name == BOOL
-                   and type(self.enumeration) == FunctionEnum),
+                   and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
     # predicate enumeration have FALSE default
-    if type(self.enumeration) != FunctionEnum and self.default is None:
+    if type(enumeration) != FunctionEnum and self.default is None:
         self.default = FALSE
 
     if self.default is not None:
@@ -500,7 +501,7 @@ def annotate(self, idp):
     ]:
         symbol_decl = SymbolDeclaration(annotations='',
                                         name=Symbol(name=name),
-                                        sorts=[], out=out)
+                                        sorts=[out] if out else [], out=out)
         symbol_decl.annotate(self.voc)
 
     # annotate constraints and interpretations
@@ -702,6 +703,7 @@ def annotate(self, voc, q_vars):
                     coc = AND([coc1, coc2])
                     quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
                     applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
+                    applied.co_constraint.annotations['reading'] = f"Calculation of {self.code}"
                 return applied
         self.annotated = True
     return self

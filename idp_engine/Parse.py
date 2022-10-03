@@ -426,6 +426,9 @@ class SymbolDeclaration(ASTNode):
 
         optimizable (bool):
             whether this symbol should get optimize buttons in the IC
+
+        needs_interpretation (bool):
+            whether its interpretation must be sent to Z3
     """
 
     def __init__(self, **kwargs):
@@ -809,13 +812,13 @@ class SymbolInterpretation(ASTNode):
         self.symbol = None
         self.is_type_enumeration = None
 
-    def interpret_application(self, theory, rank, applied, args, tuples=None):
+    def interpret_application(self, rank, applied, args, tuples=None):
         """returns an expression equivalent to `self.symbol` applied to `args`,
         simplified by the interpretation of `self.symbol`.
 
         This is a recursive function.
 
-        Example: assume `f:={(1,2)->A, (1, 3)->B, (2,1)->C}` and `args=[g(1),2)].
+        Example: assume `f:>={(1,2)->A, (1, 3)->B, (2,1)->C}` and `args=[g(1),2)].
         The returned expression is:
         ```
         if g(1) = 1 then A
@@ -824,8 +827,6 @@ class SymbolInterpretation(ASTNode):
         ```
 
         Args:
-            theory (Theory): not used
-
             rank (Int): iteration number (from 0)
 
             applied (AppliedSymbol): template to create new AppliedSymbol
@@ -839,7 +840,14 @@ class SymbolInterpretation(ASTNode):
         Returns:
             Expression: Grounded interpretation of self.symbol applied to args
         """
-        tuples = list(self.enumeration.tuples) if tuples == None else tuples
+        if tuples == None:  # first call
+            tuples = self.enumeration.sorted_tuples
+            key = ",".join(a.code for a in args)
+            if key in self.enumeration.lookup:
+                return self.enumeration.lookup[key]
+        # in case of partial interpretation
+        return applied._change(sub_exprs=args)
+    """
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
@@ -852,23 +860,23 @@ class SymbolInterpretation(ASTNode):
         else:  # constructs If-then-else recursively
             out = (self.default if self.default is not None else
                    applied._change(sub_exprs=args))
-            tuples.sort(key=lambda t: str(t.args[rank]))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
             if args[rank].value is not None:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
-                        out = self.interpret_application(theory, rank+1,
+                        out = self.interpret_application(rank+1,
                                         applied, args, list(tuples2))
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
                     out = AIfExpr.make(
                         EQUALS([args[rank], tuples[0].args[rank]]),
-                        self.interpret_application(theory, rank+1,
+                        self.interpret_application(rank+1,
                                                    applied, args, tuples),
                         out)
             return out
+    """
 
 
 class Enumeration(ASTNode):
@@ -878,13 +886,18 @@ class Enumeration(ASTNode):
     Attributes:
         tuples (OrderedSet[Tuple]): OrderedSet of Tuple of Expression
 
+        sorted_tuples: a sorted list of tuples
+
+        lookup: dictionary from arguments to values
+
         constructors (List[Constructor], optional): List of Constructor
     """
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
-        if not isinstance(self.tuples, OrderedSet):
-            # self.tuples.sort(key=lambda t: t.code) # do not change dropdown order
-            self.tuples = OrderedSet(self.tuples)
+        self.sorted_tuples = sorted(self.tuples, key=lambda t: t.code)  # do not change dropdown order
+        self.tuples = OrderedSet(self.tuples)
+
+        self.lookup = {}
         if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
                for c in self.tuples):
             self.constructors = [Constructor(name=c.args[0].name)
@@ -906,13 +919,9 @@ class Enumeration(ASTNode):
         if rank == arity:  # valid tuple
             return TRUE
         if tuples is None:
-            tuples = self.tuples
-            self.check(all(len(t.args)==arity+(1 if function else 0)
-                           for t in tuples),
-                "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'.")
+            tuples = self.sorted_tuples
 
         # constructs If-then-else recursively
-        tuples = sorted(list(tuples), key=lambda t: str(t.args[rank]))
         groups = groupby(tuples, key=lambda t: str(t.args[rank]))
         if args[rank].value is not None:
             for val, tuples2 in groups:  # try to resolve

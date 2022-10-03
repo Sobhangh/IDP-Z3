@@ -880,9 +880,10 @@ class SymbolInterpretation(ASTNode):
         self.symbol = None
         self.is_type_enumeration = None
 
-    def interpret_application(self, theory, rank, applied, args, tuples=None):
+    def interpret_application(self, rank, applied, args, tuples=None):
         """ returns the interpretation of self applied to args """
-        tuples = list(self.enumeration.tuples) if tuples == None else tuples
+        if tuples == None:
+            tuples = self.enumeration.sorted_tuples
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
@@ -895,20 +896,19 @@ class SymbolInterpretation(ASTNode):
         else:  # constructs If-then-else recursively
             out = (self.default if self.default is not None else
                    applied._change(sub_exprs=args))
-            tuples.sort(key=lambda t: str(t.args[rank]))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
             if args[rank].value is not None:
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
-                        out = self.interpret_application(theory, rank+1,
+                        out = self.interpret_application(rank+1,
                                         applied, args, list(tuples2))
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
                     out = AIfExpr.make(
                         EQUALS([args[rank], tuples[0].args[rank]]),
-                        self.interpret_application(theory, rank+1,
+                        self.interpret_application(rank+1,
                                                    applied, args, tuples),
                         out)
             return out
@@ -1037,12 +1037,14 @@ class Enumeration(ASTNode):
     Attributes:
         tuples (OrderedSet[Tuple]): OrderedSet of Tuple of Expression
 
+        sorted_tuples: a sorted list of tuples
+
         constructors (List[Constructor], optional): List of Constructor
     """
     def __init__(self, **kwargs):
         self.tuples = kwargs.pop('tuples')
         if not isinstance(self.tuples, OrderedSet):
-            # self.tuples.sort(key=lambda t: t.code) # do not change dropdown order
+            self.sorted_tuples = sorted(self.tuples, key=lambda t: t.code)  # do not change dropdown order
             self.tuples = OrderedSet(self.tuples)
         if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
                for c in self.tuples):
@@ -1062,13 +1064,9 @@ class Enumeration(ASTNode):
         if rank == arity:  # valid tuple
             return TRUE
         if tuples is None:
-            tuples = self.tuples
-            self.check(all(len(t.args)==arity+(1 if function else 0)
-                           for t in tuples),
-                "Incorrect arity of tuples in Enumeration.  Please check use of ',' and ';'.")
+            tuples = self.sorted_tuples
 
         # constructs If-then-else recursively
-        tuples = sorted(list(tuples), key=lambda t: str(t.args[rank]))
         groups = groupby(tuples, key=lambda t: str(t.args[rank]))
         if args[rank].value is not None:
             for val, tuples2 in groups:  # try to resolve

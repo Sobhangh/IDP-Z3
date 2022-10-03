@@ -34,6 +34,11 @@ theory T4:V {
     Color() = blue.
     (f(B,B) is enumerated).
 }
+theory T5:V {
+    Color() = blue.
+    (f(B,B) is enumerated).
+    opposite(blue)=green.
+}
 
 procedure main() {
     print("T, S")
@@ -47,4 +52,6 @@ procedure main() {
     pretty_print(model_expand(T2, S, sort=True))
     print("T4, S2")
     pretty_print(model_expand(T4, S2, sort=True))
+    print("T5, S2")
+    pretty_print(model_expand(T5, S2, sort=True))
 }

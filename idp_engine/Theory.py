@@ -38,7 +38,6 @@ from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol,
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT, NOT_SATISFIABLE)
-from .Idp_to_Z3 import get_symbols_z
 
 
 class Propagation(Enum):
@@ -78,8 +77,6 @@ class Theory(object):
             equivalent to its definition.
 
         _constraintz (List(ExprRef), Optional): a list of assertions, co_constraints and definitions in Z3 form
-
-        _symbols (Set[str]): set of symbol name occurring in self._constraintz
 
         _formula (ExprRef, optional): the Z3 formula that represents
             the problem (assertions, co_constraints, definitions and assignments).
@@ -171,8 +168,9 @@ class Theory(object):
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
-                                and a.status in [S.STRUCTURE, S.UNIVERSAL]
-                                and a.symbol_decl.name in self._symbols]
+                                and (a.status == S.UNIVERSAL
+                                     or (a.status == S.STRUCTURE
+                                         and a.symbol_decl.needs_interpretation))]
             self._slvr.add(assignment_forms)
         return self._slvr
 
@@ -185,8 +183,9 @@ class Theory(object):
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
-                                and a.status in [S.STRUCTURE, S.UNIVERSAL]
-                                and a.symbol_decl.name in self._symbols]
+                                and (a.status == S.UNIVERSAL
+                                     or (a.status == S.STRUCTURE
+                                         and a.symbol_decl.needs_interpretation))]
             self._optmz.add(assignment_forms)
         return self._optmz
 
@@ -275,6 +274,8 @@ class Theory(object):
         self.extensions = {}  # reset the cache
 
         for decl in self.declarations.values():
+            if type(decl) == SymbolDeclaration:  # reset it
+                decl.needs_interpretation = False
             decl.interpret(self)
 
         # remove RELEVANT constraints
@@ -283,21 +284,18 @@ class Theory(object):
                    and v.decl is not None
                    and v.decl.name == RELEVANT)])
 
-        # process enumerations, including GOAL_SYMBOL
-        for symbol_interpretation in self.interpretations.values():
-            if not symbol_interpretation.is_type_enumeration:
-                symbol_interpretation.interpret(self)
-            if symbol_interpretation.name == GOAL_SYMBOL:
-                # expand goal_symbol
-                for t in symbol_interpretation.enumeration.tuples:
-                    symbol = t.args[0]
-                    decl = self.declarations[symbol.name[1:]]
-                    assert decl.instances, f"goal {decl.name} must be instantiable."
-                    relevant = Symbol(name=RELEVANT)
-                    relevant.decl = self.declarations[RELEVANT]
-                    for i in decl.instances.values():
-                        constraint = AppliedSymbol.make(relevant, [i])
-                        self.constraints.append(constraint)
+        # expand goal_symbol
+        symbol_interpretation = self.interpretations.get(GOAL_SYMBOL, None)
+        if symbol_interpretation:
+            for t in symbol_interpretation.enumeration.tuples:
+                symbol = t.args[0]
+                decl = self.declarations[symbol.name[1:]]
+                assert decl.instances, f"goal {decl.name} must be instantiable."
+                relevant = Symbol(name=RELEVANT)
+                relevant.decl = self.declarations[RELEVANT]
+                for i in decl.instances.values():
+                    constraint = AppliedSymbol.make(relevant, [i])
+                    self.constraints.append(constraint)
 
         # expand whole-domain definitions
         for defin in self.definitions:
@@ -315,6 +313,9 @@ class Theory(object):
         for es in self.def_constraints.values():
             for e in es:
                 e.co_constraints(self.co_constraints)
+        for c in self.co_constraints.values():
+            c.interpret(self)
+
         for s in list(questions.values()):
             if s.code not in self.assignments:
                 self.assignments.assert__(s, None, S.UNKNOWN)
@@ -407,9 +408,6 @@ class Theory(object):
             self._constraintz += [s.translate(self)
                             for s in chain(*self.def_constraints.values())]
 
-            self._symbols = set()
-            for c in self._constraintz:
-                get_symbols_z(c, self._symbols)
         return self._constraintz
 
     def formula(self) -> BoolRef:
@@ -424,7 +422,7 @@ class Theory(object):
                 # occurring in the (potentially simplified) z3 constraints
                 all = ([a.formula().translate(self)
                         for a in self.assignments.values()
-                        if a.symbol_decl.name in self._symbols
+                        if (a.status != S.STRUCTURE or a.symbol_decl.needs_interpretation)
                         and a.value is not None
                         and a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]]
                         + self.constraintz())
