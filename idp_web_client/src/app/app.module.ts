@@ -68,7 +68,7 @@ export function monacoLoad() {
 
               // Keys
               // @ts-ignore
-              [/\b(type) (?=\w)|\:=?|constructed from|\+|\.|\,|\(|\)|\{|\}|\*|;/, 'key'],
+              [/\b(type) (?=\w)|\:=?|constructed from|\+|\.|\,|\(|\)|\{|\}|\*|;|\b(var) /, 'key'],
               // @ts-ignore
               [/(lambda)\b/, 'key'],
 
