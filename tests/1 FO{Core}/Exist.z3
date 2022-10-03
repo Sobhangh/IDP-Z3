@@ -5,10 +5,13 @@ vocabulary {
     p: () → Bool
     q: (color) → Bool
     var c in color
+    c2: () -> Bool
 }
 theory {
     p() <=> ?c in color: c~=red.
     ?c: q(c).
+    !c1: ?c3:q(c3).
+    c2().
 }
 display {
     view() = expanded.
@@ -29,11 +32,25 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
+              'view': 'expanded'},
+             {'environmental': False,
+              'idpname': 'c2',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'proposition',
               'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
+ 'c2': {'c2()': {'environmental': False,
+                 'is_assignment': False,
+                 'normal': True,
+                 'reading': 'c2',
+                 'relevant': True,
+                 'status': 'UNIVERSAL',
+                 'typ': 'Bool',
+                 'value': True}},
  'p': {'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
@@ -63,6 +80,14 @@ display {
                   'relevant': True,
                   'status': 'UNKNOWN',
                   'typ': 'Bool'},
+       '∀c1 ∈ None : ∃c3 ∈ None : q(c3)': {'environmental': False,
+                                           'is_assignment': False,
+                                           'normal': False,
+                                           'reading': '∀c1 ∈ None : ∃c3 ∈ None : q(c3)',
+                                           'relevant': False,
+                                           'status': 'UNIVERSAL',
+                                           'typ': 'Bool',
+                                           'value': True},
        '∃c ∈ None : q(c)': {'environmental': False,
                             'is_assignment': False,
                             'normal': False,

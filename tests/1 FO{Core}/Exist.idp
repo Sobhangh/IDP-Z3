@@ -3,10 +3,13 @@ vocabulary {
     p: () → Bool
     q: (color) → Bool
     var c in color
+    c2: () -> Bool
 }
 theory {
     p() <=> ?c in color: c~=red.
     ?c: q(c).
+    !c1: ?c3:q(c3).
+    c2().
 }
 display {
     view() = expanded.

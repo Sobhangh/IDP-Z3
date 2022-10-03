@@ -781,6 +781,8 @@ def annotate(self, voc, q_vars):
     #     out = AppliedSymbol.make(self.s, self.sub_exprs)
     #     return out.annotate(voc, q_vars)
     # If this code is reached, an undefined symbol was present.
+    if self.name.rstrip(string.digits) in q_vars:  # after considering it as a declared symbol
+        return self
     self.check(False, f"Symbol not in vocabulary: {self}")
 UnappliedSymbol.annotate = annotate
 

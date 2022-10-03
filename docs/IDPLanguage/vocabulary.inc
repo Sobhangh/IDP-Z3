@@ -112,6 +112,8 @@ This is convenient for quantifications:
 the type of the variable may be omitted in quantifications:
 its declared type will be assumed.
 
+A quantification cannot use a declared variable to quantify over another type than the declared one.
+
 The variables ``x1, x2, ...`` are implicitly declared with the same type as ``x``.
 (the variable in the declaration may not have a digital suffix)
 
