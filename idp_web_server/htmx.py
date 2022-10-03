@@ -228,7 +228,7 @@ def stateX(state, update=False):
                             div(class_="progress htmx-indicator", i=div(class_="indeterminate")),
                             ul(class_="tabs", i=
                                 [li(class_="tab", i=
-                                    a(tab, id=f"#tab-{index}",
+                                    a(tab if tab else "Input", id=f"#tab-{index}",
                                       href=f"#tab-{index}"))
                                 for index, tab in enumerate(tabs.values())]
                                 +[li(class_="tab", i=
