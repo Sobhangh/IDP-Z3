@@ -7,7 +7,9 @@ Traceback (most recent call last):
   File "idp_engine/Theory.py", line ??, in __init__
     self.add(*theories)
   File "idp_engine/Theory.py", line ??, in add
-    symbol_interpretation.interpret(self)
+    decl.interpret(self)
+  File "idp_engine/Interpret.py", line ??, in interpret
+    problem.interpretations[self.name].interpret(problem)
   File "idp_engine/Interpret.py", line ??, in interpret
     self.check(not condition.same_as(FALSE),
   File "idp_engine/Expression.py", line ??, in check

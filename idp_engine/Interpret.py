@@ -116,7 +116,7 @@ def interpret(self, problem):
     else:
         self.range = [e[0] for e in range]
 
-    # create instances in problem.assignments + type constraints
+    # create instances + empty assignment
     self.instances = {}
     if self.name not in RESERVED_SYMBOLS and superset:
         for args in superset:
@@ -124,16 +124,24 @@ def interpret(self, problem):
             expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
             problem.assignments.assert__(expr, None, S.UNKNOWN)
-            if self.out.decl.name != BOOL:
-                # add type constraints to problem.constraints
-                # ! (x,y) in domain: range(f(x,y))
-                range_condition = self.out.decl.contains_element(expr.copy(),
-                                    problem.interpretations, problem.extensions)
-                constraint = IMPLIES([filter(args), range_condition])
-                constraint.block = self.block
-                constraint.is_type_constraint_for = self.name
-                constraint.annotations['reading'] = f"Possible values for {expr}"
-                problem.constraints.append(constraint)
+
+    # interpret the enumeration
+    if self.name in problem.interpretations and self.name != GOAL_SYMBOL:
+        problem.interpretations[self.name].interpret(problem)
+
+    # create type constraints
+    if self.out.decl.name != BOOL:
+        for expr in self.instances.values():
+            # add type constraints to problem.constraints
+            # ! (x,y) in domain: range(f(x,y))
+            range_condition = self.out.decl.contains_element(expr.copy(),
+                                problem.interpretations, problem.extensions)
+            range_condition = range_condition.interpret(problem)
+            constraint = IMPLIES([filter(args), range_condition])
+            constraint.block = self.block
+            constraint.is_type_constraint_for = self.name
+            constraint.annotations['reading'] = f"Possible values for {expr}"
+            problem.constraints.append(constraint)
 SymbolDeclaration.interpret = interpret
 
 
@@ -185,6 +193,24 @@ def interpret(self, problem):
         if self.symbol.decl.out.decl.name == BOOL:  # predicate
             extension = [t.args for t in self.enumeration.tuples]
             problem.extensions[self.symbol.name] = (extension, None)
+
+        enumeration = self.enumeration  # shorthand
+        self.check(all(len(t.args) == self.symbol.decl.arity
+                            + (1 if type(enumeration) == FunctionEnum else 0)
+                        for t in enumeration.tuples),
+            f"Incorrect arity of tuples in Enumeration of {self.symbol}.  Please check use of ',' and ';'.")
+
+        lookup = {}
+        if hasattr(decl, 'instances') and decl.instances and self.default:
+            lookup = { ",".join(str(a) for a in applied.sub_exprs): self.default
+                    for applied in decl.instances.values()}
+        if type(enumeration) == FunctionEnum:
+            lookup.update( (','.join(str(a) for a in t.args[:-1]), t.args[-1])
+                        for t in enumeration.sorted_tuples)
+        else:
+            lookup.update( (t.code, TRUE)
+                            for t in enumeration.sorted_tuples)
+        enumeration.lookup = lookup
 
         # update problem.assignments with data from enumeration
         for t in self.enumeration.tuples:
@@ -245,6 +271,7 @@ def interpret(self, problem):
             quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
             expr = self.enumeration.contains(list(q_vars.values()), True)
             constraint = FORALL(quantees, expr).interpret(problem)
+            constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
             problem.constraints.append(constraint)
 SymbolInterpretation.interpret = interpret
 
@@ -340,16 +367,12 @@ Expression.substitute = substitute
 
 def instantiate(self, e0, e1, problem=None):
     """Recursively substitute Variable in e0 by e1 in a copy of self.
-
-    Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update .variables.
     """
     assert all(type(e) == Variable for e in e0), \
            f"Internal error: instantiate {e0}"
     if self.value:
         return self
-    if problem and all(e.name not in self.variables for e in e0):
-        return self.interpret(problem)
     out = copy.copy(self)  # shallow copy !
     out.annotations = copy.copy(out.annotations)
     out.variables = copy.copy(out.variables)
@@ -580,7 +603,9 @@ def interpret(self, problem):
             interpretation = problem.interpretations[self.decl.name]
             if interpretation.block.name != DEFAULT:
                 f = interpretation.interpret_application
-                value = f(problem, 0, self, sub_exprs)
+                value = f(0, self, sub_exprs)
+        elif self.decl.name in problem.interpretations:
+            self.decl.needs_interpretation = True
         if (not self.in_head and not self.variables):
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
                               for defin in problem.definitions]

@@ -18,9 +18,8 @@ f := {(A, A) -> A, (A, B) -> A, (B, A) -> B, (B, B) -> B}.
 
 No more models.
 propagate
-And(f(A, A) == A,
-    f(A, B) == A,
-    f(B, A) == B,
+And(Color == blue,
+    opposite(blue) == blue,
     Or(f(B, B) == A, f(B, B) == B))
 T, S2
 No models.
@@ -54,3 +53,5 @@ f := {(A, A) -> A, (A, B) -> A, (B, A) -> B, (B, B) -> B}.
 
 
 No more models.
+T5, S2
+No models.
