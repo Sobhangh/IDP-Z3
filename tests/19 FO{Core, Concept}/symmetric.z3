@@ -6,14 +6,14 @@ vocabulary {
 	symmetric: (Concept[node*node -> Bool]) → Bool
     Start: ()→node
 	var x in node
-	var `p in symmetric
+	var `q in symmetric
 }
 theory {
     edge(a,b).
     !`p in Concept[node*node -> Bool]: !x: !y in node: $(`p)(x,y) => $(`p)(y,x).
     !`p in Concept[node*node -> Bool]: symmetric(`p)
 				=> (!x: !y in node: $(`p)(x,y) => $(`p)(y,x)).
-    !`p, x: !y in node: $(`p)(x,y) => $(`p)(y,x).
+    !`q, x: !y in node: $(`q)(x,y) => $(`q)(y,x).
 	symmetric := {`edge}.
 }
 display {
@@ -160,11 +160,11 @@ display {
                                                                                               'status': 'UNIVERSAL',
                                                                                               'typ': 'Bool',
                                                                                               'value': True},
-          '∀`p ∈ None,x ∈ None : ∀y ∈ node : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
+          '∀`q ∈ None,x ∈ None : ∀y ∈ node : $(`q)(x, y) ⇒ $(`q)(y, x)': {'environmental': False,
                                                                           'is_assignment': False,
                                                                           'normal': False,
-                                                                          'reading': '∀`p ∈ None,x ∈ None : ∀y ∈ node '
-                                                                                     ': $(`p)(x, y) ⇒ $(`p)(y, x)',
+                                                                          'reading': '∀`q ∈ None,x ∈ None : ∀y ∈ node '
+                                                                                     ': $(`q)(x, y) ⇒ $(`q)(y, x)',
                                                                           'relevant': False,
                                                                           'status': 'UNIVERSAL',
                                                                           'typ': 'Bool',

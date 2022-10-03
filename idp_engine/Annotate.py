@@ -570,10 +570,9 @@ def annotate(self, voc, q_vars):
                 if var_decl:
                     subtype = var_decl.subtype
                     self.check(var.sort is None
-                               or var.sort.name == subtype.name
-                               or len(vars)==1,
-                        f"Ambiguous type for {var.name}: "
-                        f"{var.sort.name if var.sort else ''} or {subtype.name} ?")
+                               or var.sort.name == subtype.name,
+                        f"Can't use declared {var.name} as a "
+                        f"{var.sort.name if var.sort else ''}")
                     if var.sort is None:
                         q.sub_exprs = [subtype.annotate(voc, {})]
                 q_v[var.name] = var
