@@ -14,7 +14,7 @@ Comment:
 Shebang: '#!' /.*$/;
 
 Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
-  Declaration: TypeDeclaration | SymbolDeclaration | Import;
+  Declaration: TypeDeclaration | SymbolDeclaration | VarDeclaration | Import;
 
     Import: 'import' (name=ID);
 
@@ -29,6 +29,8 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
           ( '(' sorts*=Subtype[/[*⨯]/] ')' | sorts*=Subtype[/[*⨯]/] )
           ('->' | '→') out=Subtype;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
+
+    VarDeclaration: 'var' name=Symbol ('in' | '∈') subtype=Subtype;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 

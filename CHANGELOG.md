@@ -39,6 +39,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde, WhereIsW4ldo.
 * MR !225: allow `--no-dev` install in poetry
 * MR !228: Integrate FOLint linter into the editors
 * MR !243: Improve performance
+* MR !244: Declaration of variables ([IEP24](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP%2024%20Variable%20declarations))
 
 ### Interactive Consultant and Web IDE
 * fix #169: IC: need to better handle rationals

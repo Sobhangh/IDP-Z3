@@ -4,6 +4,8 @@ vocabulary {
 	type node := {a,b,c}
 	edge: (node ⨯ node) → Bool
 	symmetric: Concept[node*node -> Bool] → Bool
+	var x in node
+	var y in node
 }
 theory {
     edge(a,b).

@@ -163,7 +163,8 @@ Quantified formulas
     For example, ``! x, y in Int: f(x,y)=f(y,x).``
 
     A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
-    In the first form above, the type of each variable is inferred from their use in |phi|.
+    In the first form above, the type of each variable is inferred
+    from their declaration or from their use in |phi|.
 
 
 "is enumerated"

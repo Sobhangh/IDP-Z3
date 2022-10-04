@@ -10,7 +10,7 @@ Vocabulary
         // here comes the vocabulary named V
     }
 
-The *vocabulary* block specifies the types, predicates, functions and constants used to describe the problem domain.
+The *vocabulary* block specifies the types, predicates, functions and variables used to describe the problem domain.
 If the name is omitted, the vocabulary is named V.
 
 Each declaration goes on a new line (or are space separated).
@@ -94,6 +94,28 @@ A predicate is a function whose range is ``Bool``.
 There is a built-in predicate ``T: T → 𝔹`` for each type T (``T(x)`` is ``true`` for any ``x`` in ``T``).
 
 A unary predicate is always interpreted as a subset of a type.
+
+
+.. _variable declaration:
+.. index:: variable declaration
+
+Variable Declarations
++++++++++++++++++++++
+
+A variable may be declared with its type:
+
+.. code::
+
+    var x ∈ T
+
+This is convenient for quantifications:
+the type of the variable may be omitted in quantifications:
+its declared type will be assumed.
+
+A quantification cannot use a declared variable to quantify over another type than the declared one.
+
+The variables ``x1, x2, ...`` are implicitly declared with the same type as ``x``.
+(the variable in the declaration may not have a digital suffix)
 
 
 .. _built-in functions:
