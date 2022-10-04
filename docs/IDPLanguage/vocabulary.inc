@@ -91,8 +91,6 @@ Predicates
 
 A predicate is a function whose range is ``Bool``.
 
-There is a built-in predicate ``T: T → 𝔹`` for each type T (``T(x)`` is ``true`` for any ``x`` in ``T``).
-
 A unary predicate is always interpreted as a subset of a type.
 
 

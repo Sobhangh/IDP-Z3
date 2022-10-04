@@ -32,6 +32,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde, WhereIsW4ldo.
 * fix #194: Decision table returns whether timeout was reached
 * fix #195: add version flag to CLI
 * fix #196: Can't change default real value
+* fix #199: remove the predicates of types
 * fix #202: Various IDE improvements
 * fix #204: improve API for minimizing model
 * fix #208: Incorrect "Too many variables in head of rules of a definition"
