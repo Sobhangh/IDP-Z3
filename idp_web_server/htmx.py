@@ -22,7 +22,8 @@ from idp_engine.Assignments import Status as S
 from idp_engine.Expression import TRUE, FALSE
 from idp_engine.utils import BOOL, INT, REAL, DATE
 
-from fast_html import *
+from fast_html import (table, render, div, form, ul, li, a, span, input_,
+                       label, p, i, tr)
 from .State import State
 
 
