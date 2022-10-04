@@ -566,6 +566,20 @@ class SymbolDeclaration(ASTNode):
         if self.name[0].isupper():
             detections.append((self,f"Style guide check, predicate/function name should start with a lower letter ","Warning"))
 
+class VarDeclaration(ASTNode):
+    """ represents a declaration of variable (IEP 24)
+
+    Attributes:
+        name (str): name of the variable
+
+        subtype (Type): type of the variable
+    """
+
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name').name
+        self.subtype = kwargs.pop('subtype')
+
+
 
 Type = Union[TypeDeclaration, SymbolDeclaration]
 
@@ -1416,7 +1430,7 @@ dslFile = path.join(path.dirname(__file__), 'Idp.tx')
 idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
-                                         Vocabulary, Import,
+                                         Vocabulary, Import, VarDeclaration,
                                          TypeDeclaration, Accessor, Subtype,
                                          SymbolDeclaration, Symbol,
                                          SymbolExpr,
