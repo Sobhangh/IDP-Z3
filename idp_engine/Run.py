@@ -81,7 +81,7 @@ def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
     Args:
         theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
         max (int, optional): max number of models. Defaults to 10.
-        timeout_seconds (int, optional): timeout_seconds in seconds. Defaults to 10.
+        timeout_seconds (int, optional): timeout_seconds seconds. Defaults to 10.
         complete (bool, optional): True to obtain complete structures. Defaults to False.
         extended (bool, optional): use `True` when the truth value of
                 inequalities and quantified formula is of interest
@@ -137,8 +137,8 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
 
 def maximize(*theories: Union[TheoryBlock, Structure, Theory],
              term: str
-             ) -> Iterator[str]:
-    """Returns the list of assignments that are true in any model that maximizes `term`.
+             ) -> Theory:
+    """Returns a model that maximizes `term`.
 
     Args:
         theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
@@ -147,12 +147,12 @@ def maximize(*theories: Union[TheoryBlock, Structure, Theory],
     Yields:
         str
     """
-    return Theory(*theories).optimize(term, minimize=False).propagate()
+    return next(Theory(*theories).optimize(term, minimize=False).expand())
 
 def minimize(*theories: Union[TheoryBlock, Structure, Theory],
              term: str
-             ) -> Iterator[str]:
-    """Returns the list of assignments that are true in any model that minimizes `term`.
+             ) -> Theory:
+    """Returns a model that minimizes `term`.
 
     Args:
         theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
@@ -161,7 +161,7 @@ def minimize(*theories: Union[TheoryBlock, Structure, Theory],
     Yields:
         str
     """
-    return Theory(*theories).optimize(term, minimize=True).propagate()
+    return next(Theory(*theories).optimize(term, minimize=True).expand())
 
 def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
                    goal_string: str = "",
