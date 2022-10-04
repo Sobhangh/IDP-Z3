@@ -521,7 +521,7 @@ def interpret(self, problem):
             assert domain.decl.name in problem.extensions, "internal error"
             (superset, filter) = problem.extensions[domain.decl.name]
         else:
-            assert False, "Internal error"
+            self.check(False, f"Can't resolve the domain of {str(q.vars)}")
 
         if superset is None:
             new_quantees.append(q)
