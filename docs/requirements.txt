@@ -2,6 +2,7 @@ click==7.1.2
 flask
 flask_restful
 flask_cors
+fast_html
 gunicorn
 myst-parser
 pycallgraph2

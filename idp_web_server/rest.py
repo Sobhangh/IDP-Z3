@@ -24,25 +24,36 @@ To profile it, set with_profiling to True
 with_png = False
 with_profiling = False
 
+try:
+    import snoop # for debugging
+    snoop.install()
+except:
+    pass
+
 from contextlib import redirect_stdout
 from copy import copy
 import os
 import threading
 import time
 import traceback
+import urllib.parse
 from z3 import set_option
 
-from flask import Flask, g, send_from_directory  # g is required for pyinstrument
+from flask import Flask, g, send_from_directory, request  # g is required for pyinstrument
 from flask_cors import CORS
 from flask_restful import Resource, Api, reqparse
 
 from idp_engine import IDP
 from idp_engine.utils import log, RUN_FILE
 
-from idp_engine.Parse import TypeDeclaration
+from idp_engine.Assignments import Status as S
+from idp_engine.Expression import EQUALS
+from idp_engine.Parse import TypeDeclaration, str_to_IDP
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
+from .htmx import stateX, valuesX, explainX, wrap
+from fast_html import *
 
 from typing import Dict
 
@@ -375,6 +386,101 @@ def serve_docs_file(path):
 
     return send_from_directory(docs_file_dir, path)
 
+
+@app.route('/htmx', methods=['GET'])
+def serve_htmx():
+    """ returns the mobile welcome page """
+    return send_from_directory(static_file_dir, 'htmx.html')
+
+
+def get_idp(path):
+    path = os.path.join(examples_file_dir, path)
+    with open(path, mode='r', encoding='utf-8') as f:
+        code = f.read()
+    idp = idpOf(code)
+    if 'default' in idp.structures:  # ignore defaults
+        del idp.structures['default']
+    return idp
+
+
+@app.route('/htmx/file/open/<path:path>', methods=['GET'])
+def file_open(path):
+    """ returns a Single Page Application with FO(.) theory at `path` """
+    idp = get_idp(path)
+    state = State.make(idp, "{}", "{}", "[]")
+
+    return wrap(static_file_dir, stateX(state))
+
+
+def get_state(request):
+    referer = request.headers.get('Referer')
+    path = referer[referer.index('file/open/') + 10:]
+    idp = get_idp(path)
+    state = State.make(idp, "{}", "{}", "[]")
+    for k, v in request.form.items():
+        if "=" in k:
+            terms = k.split(" = ")
+            if v == "true":
+                k, v = terms[0], terms[1]
+            else:  # (k1=v1) = false --> create an entry for (k1=v1)
+                k1, v1 = terms[0], terms[1]
+                expr = state.assignments[k1].sentence
+                val = str_to_IDP(expr, v1)
+                expr = EQUALS([expr, val])
+                state.assignments.assert__(expr, None, None)
+
+        if v:
+            sentence = state.assignments[k].sentence
+            value = str_to_IDP(sentence, v)
+            state.assert_(k, value)
+            if state.environment and k in state.environment.assignments:
+                state.environment.assert_(k, value)
+    return state
+
+@app.route('/htmx/state/post', methods=['POST'])
+def state_post():
+    state = get_state(request)
+
+    # perform propagation
+    if state.environment is not None:  # if there is a decision vocabulary
+        state.environment.propagate(tag=S.ENV_CONSQ)
+        state.assignments.update(state.environment.assignments)
+        state._formula = None
+    state.propagate(tag=S.CONSEQUENCE)
+    state.determine_relevance()
+    return stateX(state, update=True)
+
+@app.route('/htmx/state/explain', methods=['POST'])
+def state_explain():
+    state = get_state(request)
+    _ = state.solver_reified
+
+    sentence, value = list(request.args.items())[0]
+    if value == "true":
+        pass
+    elif value == "false":
+        sentence = "~" + sentence
+    else:
+        # create an entry in state.assignments if it does not occur in the theory
+        if sentence + " = " + value not in state.assignments:
+            expr = state.assignments[sentence].sentence
+            val = str_to_IDP(expr, value)
+            to_explain = EQUALS([expr, val])
+            state.assignments.assert__(to_explain, None, None)
+        sentence = sentence + " = " + value
+
+    (facts, laws) = state.explain(sentence)
+
+    return render(explainX(state, facts, laws))
+
+@app.route('/htmx/state/values', methods=['POST'])
+def state_values():
+    state = get_state(request)
+    sentence, index = list(request.args.items())[0]
+    state2 = state.copy()
+    values = state2.get_range(sentence)
+
+    return render(valuesX(state, sentence, values, index))
 
 api.add_resource(HelloWorld, '/test')
 if with_png:

@@ -68,9 +68,9 @@ theory environment:environment {
 theory decision:decision {
 
   [Tax rate legislation]
-    { 
+    {
         [1% tax for Heritage ∈ Flemish region]
-        tax_rate() = 1 ← registration_type() = Heritage 
+        tax_rate() = 1 ← registration_type() = Heritage
                          ∧ region() = Flemish_Region.
 
         // Correct amount is 1.5

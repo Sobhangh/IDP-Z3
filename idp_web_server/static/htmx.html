@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+
+  <!-- Materialize -->
+  <!-- https://materializecss.github.io/materialize/ -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@materializecss/materialize@1.1.0/dist/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <style>
+    .htmx-indicator{ opacity:0;  }
+    .htmx-request .htmx-indicator{ opacity:1 }
+    .htmx-request.htmx-indicator{ opacity:1 }
+  </style>
+</head>
+<body>
+<div id="container" class="container">
+    <div class="row">
+      <div class="col s12 m6 push-m3">
+        <h4>Interactive Consultant</h4>
+        <p class="flow-text">Choose an app:</p>
+        <ul class="collection">
+          <li class="collection-item"><a href="/htmx/file/open/specification.idp">Covid</a></li>
+          <li class="collection-item"><a href="/htmx/file/open/polygon.idp">Polygon</a></li>
+          <li class="collection-item"><a href="/htmx/file/open/simple_registratie.idp">Simple Registration</a></li>
+          <li class="collection-item"><a href="/htmx/file/open/registratie.idp">Registration</a></li>
+        </ul>
+      </div>
+    </div>
+</div>
+
+<!-- Modal Structure -->
+<div id="modal1" class="modal">
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@materializecss/materialize@1.1.0/dist/js/materialize.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.8.0" integrity="sha384-cZuAZ+ZbwkNRnrKi05G/fjBX+azI9DNOkNYysZ0I/X5ZFgsmMiBXgDZof30F5ofc" crossorigin="anonymous"></script>
+
+  <script>
+
+    htmx.onLoad(function(target) {
+
+      // initialize tabs in materialize, if not done yet
+      target = document.querySelector('.tabs');
+      if (target !== null && document.querySelector('li.indicator') == null) {
+        M.Tabs.init(target, {'swipeable': true});
+      }
+
+      // increase height of carousel for swipeable tabs
+      // https://github.com/Dogfalo/materialize/issues/4159
+      function tabs_height() {
+        let maxHeight = 0;
+        const carouselItems = document.querySelectorAll('.tab-content');
+        let currentItemHeight;
+        carouselItems.forEach(item => {
+            currentItemHeight = getComputedStyle(item).height;
+            currentItemHeight = currentItemHeight.substring(0, currentItemHeight.indexOf('px')); // just removing the 'px' at the end
+            if(+currentItemHeight > +maxHeight)
+                maxHeight = currentItemHeight;
+        });
+        tabs = document.querySelector('.tabs-content');
+        if (tabs) {
+          tabs.style.height = String(+maxHeight+5)+'px';
+        };
+      }
+      tabs_height();
+
+      // initialize collapsibles
+      var elems = document.querySelectorAll('.collapsible');
+      var instances = M.Collapsible.init(elems, {onOpenEnd: tabs_height, onCloseEnd: tabs_height});
+
+      // initialize modal buttons
+      var elems = document.querySelectorAll('.modal');
+      if (elems && elems[0].M_Modal == null) {
+        var instances = M.Modal.init(elems, {});
+      }
+
+      // don't unfold consequences
+      // (https://github.com/Dogfalo/materialize/issues/1996 not working with modal)
+      elems = document.querySelectorAll(".dont-unfold").forEach(el=> {
+        el.addEventListener("click", e => { // re-collapse it immediately
+            setTimeout(() => {
+              elems = document.querySelectorAll(".collapsible-body").forEach(el=> {
+                  el.style.display="none";
+                })
+            }, 500 )
+        })
+      })
+
+    });
+
+    // checkboxes behave like radio-buttons
+    document.body.addEventListener('click', (evt) => {
+      target = evt.target
+      if (target.tagName.toLowerCase() === 'input'
+          && target.checked == true) { // if checked, reset the others
+            if (target.name.includes(" = ") && target.value == "true") {
+              target2 = target.name.split(" = ")[0] + " = "
+            } else {
+              target2 = null
+            }
+            document.querySelectorAll('[type="checkbox"]').forEach(x => {
+              if (x.name == target.name) {x.checked=false}  // clear the negation
+              if (x.name.startsWith(target2) && x.value != 'false') {x.checked=false}
+            })
+            target.checked = true;
+          }
+    })
+  </script>
+</body>
+</html>

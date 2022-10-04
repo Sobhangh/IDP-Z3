@@ -2,6 +2,7 @@ click==7.0
 flask
 flask_restful
 flask_cors
+fast_html
 gunicorn
 pretty_errors
 pycallgraph2
