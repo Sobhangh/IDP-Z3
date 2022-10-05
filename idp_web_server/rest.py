@@ -52,7 +52,7 @@ from idp_engine.Parse import TypeDeclaration, str_to_IDP
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
-from .htmx import stateX, valuesX, explainX, wrap
+from .htmx import stateX, valuesX, explainX, wrap, render
 
 from typing import Dict
 

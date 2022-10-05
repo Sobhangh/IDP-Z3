@@ -70,9 +70,14 @@
       }
       tabs_height();
 
+      function uncollapse(elt) {
+        target = elt.children[0].children[0];
+        htmx.trigger(target, 'uncollapse', {})
+      }
+
       // initialize collapsibles
       var elems = document.querySelectorAll('.collapsible');
-      var instances = M.Collapsible.init(elems, {onOpenEnd: tabs_height, onCloseEnd: tabs_height});
+      var instances = M.Collapsible.init(elems, {onOpenStart: uncollapse, onOpenEnd: tabs_height, onCloseEnd: tabs_height});
 
       // initialize modal buttons
       var elems = document.querySelectorAll('.modal');

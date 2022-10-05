@@ -23,7 +23,7 @@ from idp_engine.Expression import TRUE, FALSE
 from idp_engine.utils import BOOL, INT, REAL, DATE
 
 from fast_html import (table, render, div, form, ul, li, a, span, input_,
-                       label, p, i, tr)
+                       label, p, i, tr, td)
 from .State import State
 
 
@@ -67,7 +67,7 @@ def ass_head(ass, state, id=None):
         ])
     elif (0 < len(ass.symbol_decl.range)
         and ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT]) or is_env(state, ass):  # get possible values
-        yield span(hx_trigger="click delay:50ms", hx_swap="none",
+        yield span(hx_trigger="uncollapse", hx_swap="none",
                    hx_post="/htmx/state/values?"+urllib.parse.urlencode({ass.sentence.code: id}),
                    i=[sanitize(ass.sentence.code),
                       f" = {ass.value}" if ass.value else "",
