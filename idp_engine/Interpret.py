@@ -437,7 +437,7 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation],
         out = [v for v in extensions[CONCEPT][0]
                 if v[0].decl.symbol.decl.arity == len(self.ins)
                 and isinstance(v[0].decl.symbol.decl, SymbolDeclaration)
-                and v[0].decl.symbol.decl.out.name == self.out.name
+                and v[0].decl.symbol.decl.out == self.out
                 and len(v[0].decl.symbol.decl.sorts) == len(self.ins)
                 and all(s == q
                         for s, q in zip(v[0].decl.symbol.decl.sorts,

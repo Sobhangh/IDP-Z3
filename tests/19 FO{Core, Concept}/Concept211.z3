@@ -1,7 +1,18 @@
 
 Model 1
 ==========
-S := `p.
+n := a.
+P := {a, b}.
+Q := `P.
+S := `Q.
+
+
+Model 2
+==========
+n := b.
+P := {a, b}.
+Q := `P.
+S := `Q.
 
 
 No more models.
