@@ -1,0 +1,13 @@
+vocabulary V {
+    type node := {a}
+    p: node -> Bool
+    S: () -> Concept[node -> Bool]
+
+}
+
+theory T:V {
+}
+
+procedure main() {
+    pretty_print(model_expand(T))
+}

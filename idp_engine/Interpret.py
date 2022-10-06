@@ -134,7 +134,7 @@ def interpret(self, problem):
         for expr in self.instances.values():
             # add type constraints to problem.constraints
             # ! (x,y) in domain: range(f(x,y))
-            range_condition = self.out.decl.contains_element(expr.copy(),
+            range_condition = self.out.has_element(expr.copy(),
                                 problem.interpretations, problem.extensions)
             range_condition = range_condition.interpret(problem)
             constraint = IMPLIES([filter(args), range_condition])
