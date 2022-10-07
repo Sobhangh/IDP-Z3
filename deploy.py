@@ -56,11 +56,6 @@ if update_statics:
     print("Copying to static folder ...")
     copy_tree('idp_web_client/dist/', './idp_web_server/static')
 
-    # Check if web-IDP-Z3 is on latest version and clean.
-    # branch = get('git rev-parse --abbrev-ref HEAD', cwd="idp_web_client")
-    # assert branch == b'main\n', \
-    #     "Cannot deploy: web-IDP-Z3 not in main branch !"
-
     # Verify we are on main branch.
     branch = get('git rev-parse --abbrev-ref HEAD')
     assert branch == b'main\n', \
@@ -84,6 +79,7 @@ if update_statics:
             tag_version = f"{major}.{minor}.{int(patch)+1}"
         else:
             raise IOError("Incorrect release type")
+        assert query_user(f"Release {tag_version} ? (Y/N)")
 
         # We also need to modify the pyproject.toml.
         with open("./pyproject.toml", "r") as fp:
@@ -94,7 +90,7 @@ if update_statics:
         with open("./pyproject.toml", "w") as fp:
             fp.write(pyproject)
 
-        _ = query_user("Update CHANGELOG now.  Ready ?(Y/N")
+        _ = query_user("Update CHANGELOG now.  Ready ?(Y/N)")
 
     # Add and commit.
     run("git add -A")
@@ -102,13 +98,11 @@ if update_statics:
     run("git push origin main")
 
     if new_tag:
-        # create tag in both projects
+        # create tag
         run(f"git tag {tag_version}")
-        # run(f"git -C idp_web_client tag {tag_version}")
 
         # Push tags.
         run(f"git push origin {tag_version}")
-        # run(f"git -C idp_web_client push origin {tag_version}")
 
         # Publish new version on Pypi.
         run("poetry install")

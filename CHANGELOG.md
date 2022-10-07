@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
-## unreleased yet
+## [0.10.0] - 2022-10-07
 
 This release uses the poetry 1.2.  If you use poetry, you need to update it.
 
@@ -33,21 +33,21 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde, WhereIsW4ldo.
 * fix #195: add version flag to CLI
 * fix #196: Can't change default real value
 * fix #199: remove the predicates of types
-* fix #202: Various IDE improvements
 * fix #204: improve API for minimizing model
 * fix #208: Incorrect "Too many variables in head of rules of a definition"
 * fix #211: Incorrect model for constant of type Concept
 * MR !214: support for `#TODAY(y,m,d)`
 * MR !225: allow `--no-dev` install in poetry
-* MR !228: Integrate FOLint linter into the editors
 * MR !243: Improve performance
 * MR !244: Declaration of variables ([IEP24](https://gitlab.com/krr/IDP-Z3/-/wikis/IEP%2024%20Variable%20declarations))
 
 ### Interactive Consultant and Web IDE
 * fix #169: IC: need to better handle rationals
+* fix #202: Various IDE improvements
 * fix #205: could not run Web IDE on Windows
 * fix #207: error in environmental consequences
-* MR !236: Add "File / Share..." button to IC and Web IDE
+* MR !228: Integrate FOLint linter into the editors
+* MR !236: Add "File / Save..." button to IC and Web IDE
 
 
 ## [0.9.2] - 2022-02-10
