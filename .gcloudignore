@@ -13,16 +13,20 @@
 .git
 .gitignore
 
-# Python pycache:
+# alphabetical order
 __pycache__/
-# Ignored by the build system
+bin
+build
+consultant
+htmlcov
+lib64
+lib
+idp_web_client/dist
+idp_web_client/node_modules
+
 /setup.cfg
 
 
-idp_web_client/dist
-idp_web_client/node_modules
 monkeytype.sqlite3
-bin
-lib64
 pyvenv.cfg
 .vscode

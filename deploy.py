@@ -107,7 +107,8 @@ if update_statics:
         # Publish new version on Pypi.
         run("poetry install")
         run("poetry build")
-        run("poetry publish")
+        print("Publishing to pypi (Username: krr)")
+        run("poetry publish --username krr")
         run("rm -rf ./dist")
 
     # if input("Deploy on Heroku ?") in "Yy":
@@ -116,9 +117,11 @@ if update_statics:
     if new_tag or query_user("Deploy to Google App Engine? (Y/n) "):
         print("Deploying to GAE")
 
-        # Push to google repository and deploy on GAE.
-        run("git push google main")
+        # Push to google repository
+        # run("git push google main")
         # run("git push google main", cwd='idp_web_client')
+
+        # deploy to GAE
         run(f"gcloud app deploy {'' if new_tag else '--no-promote'}")
 
         # update versions.list at https://gist.github.com/IDP-Z3/5d82c61fa39e8aa23da1642a2e2b420a
