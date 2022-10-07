@@ -1,0 +1,21 @@
+vocabulary V {
+    type node
+    n : () -> node
+    P : node -> Bool
+    Q: () -> Concept[node -> Bool]
+    S: () -> Concept[() -> Concept[node -> Bool]]
+
+}
+
+theory T:V {
+    !x: P(x).
+
+}
+
+structure S:V {
+    node := {a,b}.
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S))
+}

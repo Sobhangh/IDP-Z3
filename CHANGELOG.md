@@ -36,6 +36,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde, WhereIsW4ldo.
 * fix #202: Various IDE improvements
 * fix #204: improve API for minimizing model
 * fix #208: Incorrect "Too many variables in head of rules of a definition"
+* fix #211: Incorrect model for constant of type Concept
 * MR !214: support for `#TODAY(y,m,d)`
 * MR !225: allow `--no-dev` install in poetry
 * MR !228: Integrate FOLint linter into the editors

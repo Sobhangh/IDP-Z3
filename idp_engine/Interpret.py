@@ -134,7 +134,7 @@ def interpret(self, problem):
         for expr in self.instances.values():
             # add type constraints to problem.constraints
             # ! (x,y) in domain: range(f(x,y))
-            range_condition = self.out.decl.contains_element(expr.copy(),
+            range_condition = self.out.has_element(expr.copy(),
                                 problem.interpretations, problem.extensions)
             range_condition = range_condition.interpret(problem)
             constraint = IMPLIES([filter(args), range_condition])
@@ -437,7 +437,7 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation],
         out = [v for v in extensions[CONCEPT][0]
                 if v[0].decl.symbol.decl.arity == len(self.ins)
                 and isinstance(v[0].decl.symbol.decl, SymbolDeclaration)
-                and v[0].decl.symbol.decl.out.name == self.out.name
+                and v[0].decl.symbol.decl.out == self.out
                 and len(v[0].decl.symbol.decl.sorts) == len(self.ins)
                 and all(s == q
                         for s, q in zip(v[0].decl.symbol.decl.sorts,
