@@ -22,6 +22,13 @@ handlers:
     secure: always
     http_headers:
       Strict-Transport-Security: max-age=31536000; includeSubDomains
+  - url: /htmx
+    static_files: idp_web_server/static/htmx.html
+    require_matching_file: false
+    upload: idp_web_server/static/htmx.html
+    secure: always
+    http_headers:
+      Strict-Transport-Security: max-age=31536000; includeSubDomains
   - url: /examples/(.*)
     static_files: idp_web_server/examples/\1
     require_matching_file: false
