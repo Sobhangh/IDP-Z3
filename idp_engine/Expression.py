@@ -21,7 +21,7 @@
 (They are monkey-patched by other modules)
 
 """
-__all__ = ["ASTNode", "Expression", "Constructor", "AIfExpr", "Quantee", "AQuantification",
+__all__ = ["ASTNode", "Expression", "Constructor", "AIfExpr", "IF", "Quantee", "AQuantification",
            "Operator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
@@ -635,6 +635,10 @@ class AIfExpr(Expression):
 
     def collect_nested_symbols(self, symbols, is_nested):
         return Expression.collect_nested_symbols(self, symbols, True)
+
+
+def IF(IF, THEN, ELSE, annotations=None):
+    return AIfExpr.make(IF, THEN, ELSE)
 
 
 class Quantee(Expression):

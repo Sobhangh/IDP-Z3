@@ -41,7 +41,7 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         Expression, AIfExpr, AQuantification, Subtype, Quantee,
+                         Expression, AIfExpr, IF, AQuantification, Subtype, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -920,10 +920,8 @@ class SymbolInterpretation(ASTNode):
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
-                    out = AIfExpr.make(
-                        EQUALS([args[rank], tuples[0].args[rank]]),
-                        self.interpret_application(rank+1,
-                                                   applied, args, tuples),
+                    out = IF(EQUALS([args[rank], tuples[0].args[rank]]),
+                        self.interpret_application(rank+1, applied, args, tuples),
                         out)
             return out
 
@@ -1097,7 +1095,7 @@ class Enumeration(ASTNode):
             out = FALSE
             for val, tuples2 in groups:
                 tuples = list(tuples2)
-                out = AIfExpr.make(
+                out = IF(
                     EQUALS([args[rank], tuples[0].args[rank]]),
                     self.contains(args, function, arity, rank+1, tuples),
                     out)

@@ -21,7 +21,7 @@
 (They are monkey-patched by other modules)
 
 """
-__all__ = ["ASTNode", "Expression", "Constructor", "AIfExpr", "Quantee", "AQuantification",
+__all__ = ["ASTNode", "Expression", "Constructor", "AIfExpr", "IF", "Quantee", "AQuantification",
            "Operator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
@@ -679,6 +679,10 @@ class AIfExpr(Expression):
 
     def get_type(self):
         return self.then_f.type
+
+
+def IF(IF, THEN, ELSE, annotations=None):
+    return AIfExpr.make(IF, THEN, ELSE)
 
 
 class Quantee(Expression):
