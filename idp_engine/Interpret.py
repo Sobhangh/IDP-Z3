@@ -37,12 +37,12 @@ This module monkey-patches the ASTNode class and sub-classes.
 
 import copy
 from itertools import product
-from typing import Dict, Tuple, List, Callable
+from typing import Dict, List, Callable
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration,
                     SymbolDeclaration, Symbol, SymbolInterpretation,
-                    FunctionEnum, Enumeration, Tuple, ConstructedFrom,
+                    FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
                     Definition, Ranges, ConstructedFrom)
 from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
                     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
@@ -292,7 +292,7 @@ def interpret(self, problem):
         if c.range is None:
             self.tuples = None
             return self
-        self.tuples.extend([Tuple(args=[e]) for e in c.range])
+        self.tuples.extend([TupleIDP(args=[e]) for e in c.range])
     return self
 ConstructedFrom.interpret = interpret
 

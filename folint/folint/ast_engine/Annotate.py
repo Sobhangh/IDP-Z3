@@ -27,7 +27,7 @@ from .Parse import (Vocabulary, Import, TypeDeclaration, Type, Subtype,
                     SymbolDeclaration, Symbol, VarDeclaration,
                     TheoryBlock, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
-                    Tuple, ConstructedFrom, Display)
+                    TupleIDP, ConstructedFrom, Display)
 from .Expression import (Expression, Constructor, AIfExpr, AQuantification, Quantee,
                          ARImplication, AImplication, AEquivalence,
                          Operator, AComparison, AUnary, AAggregate,
@@ -402,13 +402,13 @@ def annotate(self, voc):
 Enumeration.annotate = annotate
 
 
-# Class Tuple  #######################################################
+# Class TupleIDP  #######################################################
 
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
     self.check(all(a.value is not None for a in self.args),
                 f"Tuple must be ground : ({self})")
-Tuple.annotate = annotate
+TupleIDP.annotate = annotate
 
 
 # Class ConstructedFrom  #######################################################

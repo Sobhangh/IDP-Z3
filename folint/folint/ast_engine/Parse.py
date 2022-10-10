@@ -23,7 +23,7 @@ Classes to parse an IDP-Z3 theory.
 __all__ = ["IDP", "Vocabulary", "Annotations", "Import",
            "TypeDeclaration",
            "SymbolDeclaration", "Symbol", "TheoryBlock", "Definition",
-           "Rule", "Structure", "Enumeration", "Tuple",
+           "Rule", "Structure", "Enumeration", "TupleIDP",
            "Display", "Procedure", ]
 
 from copy import copy
@@ -1049,7 +1049,7 @@ class Enumeration(ASTNode):
     Used for predicates, or types without n-ary constructors.
 
     Attributes:
-        tuples (OrderedSet[Tuple]): OrderedSet of Tuple of Expression
+        tuples (OrderedSet[TupleIDP]): OrderedSet of TupleIDP of Expression
 
         sorted_tuples: a sorted list of tuples
 
@@ -1118,7 +1118,7 @@ class ConstructedFrom(Enumeration):
     """Represents a 'constructed from' enumeration of constructors
 
     Attributes:
-        tuples (OrderedSet[Tuple]): OrderedSet of tuples of Expression
+        tuples (OrderedSet[TupleIDP]): OrderedSet of tuples of Expression
 
         constructors (List[Constructor]): List of Constructor
 
@@ -1145,7 +1145,7 @@ class ConstructedFrom(Enumeration):
                 for constructor in self.constructors]
         return OR(out)
 
-class Tuple(ASTNode):
+class TupleIDP(ASTNode):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
         self.code = intern(",".join([str(a) for a in self.args]))
@@ -1161,7 +1161,7 @@ class Tuple(ASTNode):
         for a in self.args:
             a.printAST(spaties+5)
 
-class FunctionTuple(Tuple):
+class FunctionTuple(TupleIDP):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
         if not isinstance(self.args, list):
@@ -1170,7 +1170,7 @@ class FunctionTuple(Tuple):
         self.args.append(self.value)
         self.code = intern(",".join([str(a) for a in self.args]))
 
-class CSVTuple(Tuple):
+class CSVTuple(TupleIDP):
     pass
 
 class Ranges(Enumeration):
@@ -1185,26 +1185,26 @@ class Ranges(Enumeration):
                 if x.fromI.type != self.type:
                     if self.type in [INT, REAL] and x.fromI.type in [INT, REAL]:
                         self.type = REAL  # convert to REAL
-                        tuples = [Tuple(args=[n.args[0].real()])
+                        tuples = [TupleIDP(args=[n.args[0].real()])
                                   for n in tuples]
                     else:
                         self.check(False,
                             f"incorrect value {x.fromI} for {self.type}")
 
                 if x.toI is None:
-                    tuples.append(Tuple(args=[x.fromI]))
+                    tuples.append(TupleIDP(args=[x.fromI]))
                 elif self.type == INT and x.fromI.type == INT and x.toI.type == INT:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                        tuples.append(Tuple(args=[Number(number=str(i))]))
+                        tuples.append(TupleIDP(args=[Number(number=str(i))]))
                 elif self.type == REAL and x.fromI.type == INT and x.toI.type == INT:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                        tuples.append(Tuple(args=[Number(number=str(float(i)))]))
+                        tuples.append(TupleIDP(args=[Number(number=str(float(i)))]))
                 elif self.type == REAL:
                     self.check(False, f"Can't have a range over real: {x.fromI}..{x.toI}")
                 elif self.type == DATE and x.fromI.type == DATE and x.toI.type == DATE:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         d = Date(iso=f"#{date.fromordinal(i).isoformat()}")
-                        tuples.append(Tuple(args=[d]))
+                        tuples.append(TupleIDP(args=[d]))
                 else:
                     self.check(False, f"Incorrect value {x.toI} for {self.type}")
         Enumeration.__init__(self, tuples=tuples)
@@ -1446,7 +1446,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
 
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
-                                         Tuple, FunctionTuple, CSVTuple,
+                                         TupleIDP, FunctionTuple, CSVTuple,
                                          ConstructedFrom, Constructor, Ranges,
                                          Display,
 
