@@ -629,7 +629,7 @@ class AIfExpr(Expression):
         return out.annotate1().simplify1()
 
     def __str1__(self):
-        return (f" if   {self.sub_exprs[AIfExpr.IF  ].str}"
+        return (f"if {self.sub_exprs[AIfExpr.IF  ].str}"
                 f" then {self.sub_exprs[AIfExpr.THEN].str}"
                 f" else {self.sub_exprs[AIfExpr.ELSE].str}")
 
