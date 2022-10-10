@@ -576,6 +576,7 @@ def annotate(self, voc, q_vars):
                         f"{var.sort.name if var.sort else ''}")
                     if var.sort is None:
                         q.sub_exprs = [subtype.annotate(voc, {})]
+                        var.sort = q.sub_exprs[0]
                 q_v[var.name] = var
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
