@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
+## Unreleased yet
+
+### IDP-Z3
+
+Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
+
+* fix #216: Internal error due to incorrect type constraint
+
+
 ## [0.10.0] - 2022-10-07
 
 This release uses the poetry 1.2.  If you use poetry, you need to update it.
