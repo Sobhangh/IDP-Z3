@@ -96,57 +96,60 @@ Aggregate over anonymous function
     ``t(v)`` can use the construct ``(if .. then .. else ..)`` to filter out unwanted ``v`` values.
 
 (if .. then .. else ..)
-    ``(if t_1 then t_2 else t_3)`` is a term when |t1| is a sentence, |t2| and |t3| are terms of the same type.
+    ``(if t_1 then t_2 else t_3)`` is a term when |t1| is a formula, |t2| and |t3| are terms of the same type.
 
 
+.. _formula:
 .. _sentence:
 .. _axiom:
-.. index:: sentence, axiom
+.. index:: formula, sentence, axiom
 
 Sentences and axioms
 +++++++++++++++++++++++++
 
 An *axiom* is a sentence followed by ``.``.
-A *sentence* is inductively defined as follows:
+A *sentence* is a well-formed formula without free variables
+(i.e., in which every variable appear in the scope of a quantifier that declares it).
+A *formula* is inductively defined as follows:
 
 true and false
-    ``true`` and ``false`` are sentences.
+    ``true`` and ``false`` are formulae.
 
 .. _predicate application:
 
 Predicate application
-    ``P(t_1, t_2,.., t_n)`` is a sentence, when ``P`` is a predicate_ symbol of arity |n|, and |t1,tn| are terms.
+    ``P(t_1, t_2,.., t_n)`` is a formula, when ``P`` is a predicate_ symbol of arity |n|, and |t1,tn| are terms.
     Each term must be of the appropriate type_, as defined in the predicate declaration.
-    If the arity of ``P`` is 0, i.e., if ``P`` is a proposition, then ``P()`` is a sentence.
+    If the arity of ``P`` is 0, i.e., if ``P`` is a proposition, then ``P()`` is a formula.
 
-    ``$(s)(t_1, t_2,.., t_n)`` is a sentence, when ``s`` is an expression of type Concept that denotes a predicate of arity |n|, and |t1,tn| are terms.
+    ``$(s)(t_1, t_2,.., t_n)`` is a formula, when ``s`` is an expression of type Concept that denotes a predicate of arity |n|, and |t1,tn| are terms.
 
 Comparison
-    ``t_1 ꕕ t_2`` is a sentence, when |t1|, |t2| are two numerical terms and ``ꕕ`` is one of the following comparison operators ``<, ≤, =, ≥, >, ≠`` (or,  using ascii characters: ``=<, >=, ~=``).
+    ``t_1 ꕕ t_2`` is a formula, when |t1|, |t2| are two numerical terms and ``ꕕ`` is one of the following comparison operators ``<, ≤, =, ≥, >, ≠`` (or,  using ascii characters: ``=<, >=, ~=``).
     Comparison operators can be chained as customary.
 
 Negation
-    ``¬ϕ`` is a sentence (or, using ascii characters: ``~ϕ``) when |phi| is a sentence.
+    ``¬ϕ`` is a formula (or, using ascii characters: ``~ϕ``) when |phi| is a formula.
 
 Logic connectives
-    ``ϕ_1 ꕕ ϕ_2`` is a sentence when ``ϕ_1, ϕ_2`` are two sentences and ``ꕕ`` is one of the following logic connectives ``∨,∧,⇒,⇐,⇔`` (or using ascii characters: ``|, \&, =>, <=, <=>`` respectively).
+    ``ϕ_1 ꕕ ϕ_2`` is a formula when ``ϕ_1, ϕ_2`` are two formulae and ``ꕕ`` is one of the following logic connectives ``∨,∧,⇒,⇐,⇔`` (or using ascii characters: ``|, \&, =>, <=, <=>`` respectively).
     Logic connectives can be chained as customary.
 
 Parenthesis
-    (|phi|) is a sentence when |phi| is a sentence.
+    (|phi|) is a formula when |phi| is a formula.
 
 .. _quantifier expression:
 .. index:: quantifier expression
 
 Enumeration
-    An enumeration (e.g. ``p := {1;2;3}``) is a sentence.
+    An enumeration (e.g. ``p := {1;2;3}``) is a formula.
     Enumerations follow the syntax described in `structure`_.
 
 Quantified formulas
-    *Quantified formulas* are sentences.
+    *Quantified formulas* are formulae.
     They have one of the following forms, where ``v_1, .., v_n`` are variables,
     ``p, p_1, .., p_n`` are types or predicates,
-    and |phi| is a sentence involving those variables:
+    and |phi| is a formula involving those variables:
 
     .. code::
 
@@ -162,25 +165,25 @@ Quantified formulas
     Ascii characters can also be used: ``?``, ``!``, respectively.
     For example, ``! x, y in Int: f(x,y)=f(y,x).``
 
-    A variable may only occur in the |phi| sentence of a quantifier declaring that variable.
+    A variable may only occur in the |phi| formula of a quantifier declaring that variable.
     In the first form above, the type of each variable is inferred
     from their declaration or from their use in |phi|.
 
 
 "is enumerated"
-    ``f(a,b) is enumerated`` is a sentence,
+    ``f(a,b) is enumerated`` is a formula,
     where ``f`` is a function defined by an enumeration and applied to arguments ``a`` and ``b``.
     Its truth value reflects whether ``(a,b)`` is enumerated in ``f``'s enumeration.
     If the enumeration has a default value, every tuple of arguments is enumerated.
 
 "in {1,2,3,4}"
-    ``f(args) in enum`` is a sentence, where
+    ``f(args) in enum`` is a formula, where
     ``f`` is a function applied to arguments ``args``
     and ``enum`` is an enumeration.
     This can also be written using Unicode: ``f() ∈ {1,2,3}``.
 
 if .. then .. else ..
-    ``if t_1 then t_2 else t_3`` is a sentence when |t1|, |t2| and |t3| are sentences.
+    ``if t_1 then t_2 else t_3`` is a formula when |t1|, |t2| and |t3| are formulae.
 
 
 .. _definition:
