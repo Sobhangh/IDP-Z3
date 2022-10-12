@@ -29,6 +29,10 @@ handlers:
     secure: always
     http_headers:
       Strict-Transport-Security: max-age=31536000; includeSubDomains
+  - url: /htmx/(.*)
+    script: auto
+    secure: always
+    redirect_http_response_code: '301'
   - url: /examples/(.*)
     static_files: idp_web_server/examples/\1
     require_matching_file: false
