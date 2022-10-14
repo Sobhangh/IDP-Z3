@@ -29,8 +29,8 @@ from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration, Type,
                     SymbolDeclaration, Symbol, VarDeclaration,
                     TheoryBlock, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
-                    Tuple, ConstructedFrom, Display)
-from .Expression import (Expression, Constructor, AIfExpr, AQuantification, Quantee,
+                    TupleIDP, ConstructedFrom, Display)
+from .Expression import (Expression, Constructor, AIfExpr, IF, AQuantification, Quantee,
                          ARImplication, AImplication, AEquivalence,
                          Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
@@ -88,6 +88,7 @@ Vocabulary.annotate = annotate
 # Class TypeDeclaration  #######################################################
 
 def annotate(self, voc):
+    self.voc = voc
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
@@ -190,9 +191,9 @@ def annotate(self, voc, q_vars):
     for r in self.rules:
         decl = voc.symbol_decls[r.definiendum.decl.name]
         if decl.name not in self.def_vars:
-            name = f"${decl.name}$"
-            q_v = {f"${decl.name}!{str(i)}$":
-                    Variable(name=f"${decl.name}!{str(i)}$", sort=sort)
+            name = f"{decl.name}_"
+            q_v = {f"{decl.name}{str(i)}_":
+                    Variable(name=f"{decl.name}{str(i)}_", sort=sort)
                     for i, sort in enumerate(decl.sorts)}
             if decl.out.name != BOOL:
                 q_v[name] = Variable(name=name, sort=decl.out)
@@ -411,13 +412,13 @@ def annotate(self, voc):
 Enumeration.annotate = annotate
 
 
-# Class Tuple  #######################################################
+# Class TupleIDP  #######################################################
 
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
     self.check(all(a.value is not None for a in self.args),
                 f"Tuple must be ground : ({self})")
-Tuple.annotate = annotate
+TupleIDP.annotate = annotate
 
 
 # Class ConstructedFrom  #######################################################
@@ -576,6 +577,7 @@ def annotate(self, voc, q_vars):
                         f"{var.sort.name if var.sort else ''}")
                     if var.sort is None:
                         q.sub_exprs = [subtype.annotate(voc, {})]
+                        var.sort = q.sub_exprs[0]
                 q_v[var.name] = var
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
@@ -667,9 +669,8 @@ def annotate(self, voc, q_vars):
     if not self.annotated:
         assert len(self.sub_exprs) == 1, "Internal error"
         if self.aggtype == "#":
-            self.sub_exprs = [AIfExpr.make(self.sub_exprs[0],
-                                          Number(number='1'),
-                                          Number(number='0'))]
+            self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
+                                 Number(number='0'))]
             self.type = INT
         else:
             self.type = self.sub_exprs[0].type

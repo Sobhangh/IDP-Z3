@@ -98,13 +98,13 @@ structure {
                               'typ': 'Amount_t',
                               'value': '',
                               'values': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']},
-            '∀Bus ∈ Bus_t : true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01': {'environmental': False,
+            '∀ Bus ∈ Bus_t: true ⇒ Amount(Bus) = ((Kids(Bus) - 01) - (Kids(Bus) - 01) % Size(Bus)) / Size(Bus) + 01': {'environmental': False,
                                                                                                                        'is_assignment': False,
                                                                                                                        'normal': False,
-                                                                                                                       'reading': '∀Bus '
+                                                                                                                       'reading': '∀ '
+                                                                                                                                  'Bus '
                                                                                                                                   '∈ '
-                                                                                                                                  'Bus_t '
-                                                                                                                                  ': '
+                                                                                                                                  'Bus_t: '
                                                                                                                                   'true '
                                                                                                                                   '⇒ '
                                                                                                                                   'Amount(Bus) '

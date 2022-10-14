@@ -1,10 +1,10 @@
   Not p()
-∧ Color() = ( if   p() then blue else green)
+∧ Color() = (if p() then blue else green)
 ∧ r()
 ∧ true
 ⇒ ?
 
-  Color() = ( if   p() then blue else green)
+  Color() = (if p() then blue else green)
 ∧ p()
 ∧ q()
 ∧ r()
@@ -12,7 +12,7 @@
 ⇒ ?
 
   Not r()
-∧ Color() = ( if   p() then blue else green)
+∧ Color() = (if p() then blue else green)
 ∧ p()
 ∧ q()
 ∧ true

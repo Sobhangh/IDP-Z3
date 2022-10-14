@@ -21,7 +21,7 @@
 (They are monkey-patched by other modules)
 
 """
-__all__ = ["ASTNode", "Expression", "Constructor", "AIfExpr", "Quantee", "AQuantification",
+__all__ = ["ASTNode", "Expression", "Constructor", "AIfExpr", "IF", "Quantee", "AQuantification",
            "Operator", "AImplication", "AEquivalence", "ARImplication",
            "ADisjunction", "AConjunction", "AComparison", "ASumMinus",
            "AMultDiv", "APower", "AUnary", "AAggregate", "AppliedSymbol",
@@ -629,12 +629,16 @@ class AIfExpr(Expression):
         return out.annotate1().simplify1()
 
     def __str1__(self):
-        return (f" if   {self.sub_exprs[AIfExpr.IF  ].str}"
+        return (f"if {self.sub_exprs[AIfExpr.IF  ].str}"
                 f" then {self.sub_exprs[AIfExpr.THEN].str}"
                 f" else {self.sub_exprs[AIfExpr.ELSE].str}")
 
     def collect_nested_symbols(self, symbols, is_nested):
         return Expression.collect_nested_symbols(self, symbols, True)
+
+
+def IF(IF, THEN, ELSE, annotations=None):
+    return AIfExpr.make(IF, THEN, ELSE)
 
 
 class Quantee(Expression):
@@ -691,8 +695,8 @@ class Quantee(Expression):
         signature = ("" if len(self.sub_exprs) <= 1 else
                      f"[{','.join(t.str for t in self.sub_exprs[1:-1])}->{self.sub_exprs[-1]}]"
         )
-        return (f"{','.join(str(v) for vs in self.vars for v in vs)} "
-                f"∈ {self.sub_exprs[0] if self.sub_exprs else None}"
+        return (f"{','.join(str(v) for vs in self.vars for v in vs)}"
+                f"{f' ∈ {self.sub_exprs[0]}' if self.sub_exprs else ''}"
                 f"{signature}")
 
 
@@ -742,7 +746,7 @@ class AQuantification(Expression):
     def __str1__(self):
         if self.quantees:  #TODO this is not correct in case of partial expansion
             vars = ','.join([f"{q}" for q in self.quantees])
-            return f"{self.q}{vars} : {self.sub_exprs[0].str}"
+            return f"{self.q} {vars}: {self.sub_exprs[0].str}"
         else:
             return self.sub_exprs[0].str
 
@@ -800,7 +804,7 @@ class Operator(Expression):
                 return TRUE
             if cls == ADisjunction:
                 return FALSE
-            raise "Internal error"
+            assert False, "Internal error"
         if len(operands) == 1:
             return operands[0]
         if isinstance(ops, str):
@@ -971,7 +975,7 @@ class AAggregate(Expression):
             out = ((f"{self.aggtype}(lambda {vars} : "
                     f"{self.sub_exprs[0].str}"
                     f")" ) if self.aggtype != "#" else
-                   (f"{self.aggtype}{{{vars} : "
+                   (f"{self.aggtype}{{{vars}: "
                     f"{self.sub_exprs[0].str}"
                     f"}}")
             )

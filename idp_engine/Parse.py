@@ -23,7 +23,7 @@ Classes to parse an IDP-Z3 theory.
 __all__ = ["IDP", "Vocabulary", "Annotations", "Import",
            "TypeDeclaration",
            "SymbolDeclaration", "Symbol", "TheoryBlock", "Definition",
-           "Rule", "Structure", "Enumeration", "Tuple",
+           "Rule", "Structure", "Enumeration", "TupleIDP",
            "Display", "Procedure", ]
 
 from copy import copy
@@ -39,7 +39,7 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         Expression, AIfExpr, AQuantification, Type, Quantee,
+                         Expression, AIfExpr, IF, AQuantification, Type, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -279,8 +279,8 @@ class Vocabulary(ASTNode):
 
     def __str__(self):
         return (f"vocabulary {{{NEWL}"
-                f"{NEWL.join(str(i) for i in self.declarations)}"
-                f"{NEWL}}}{NEWL}")
+                f"    {f'{NEWL}    '.join(str(i) for i in self.declarations)}"
+                f"{NEWL}}}{NEWL}").replace("    \n", "")
 
     def add_voc_to_block(self, block):
         """adds the enumerations in a vocabulary to a theory or structure block
@@ -356,9 +356,10 @@ class TypeDeclaration(ASTNode):
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
             return ''
-        enumeration = (f"{','.join(map(str, self.constructors))}" if self.constructors else
-                       f"{self.enumeration}")
-        return (f"type {self.name} := {{{enumeration}}}")
+        enumeration = (f"{{{','.join(map(str, self.constructors))}}}" if self.constructors else
+                       f"{self.enumeration}" if self.enumeration else
+                       "")
+        return (f"type {self.name} {'' if not enumeration else ':= ' + enumeration}")
 
     def contains_element(self, term: Expression,
                      interpretations: Dict[str, "SymbolInterpretation"],
@@ -472,7 +473,7 @@ class SymbolDeclaration(ASTNode):
         args = '⨯'.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
         return (f"{self.name}: "
                 f"{ '('+args+')' if args else '()'}"
-                f" -> {self.out.name}")
+                f" → {self.out.name}")
 
     def __repr__(self):
         return str(self)
@@ -533,6 +534,9 @@ class VarDeclaration(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
         self.subtype = kwargs.pop('subtype')
+
+    def __str__(self):
+        return f"var {self.name} ∈ {self.subtype}"
 
 Declaration = Union[TypeDeclaration, SymbolDeclaration]
 
@@ -717,9 +721,9 @@ class Rule(ASTNode):
             self.body = TRUE
 
     def __repr__(self):
-        return (f"Rule:∀{','.join(str(q) for q in self.quantees)}: "
+        return (f"∀ {','.join(str(q) for q in self.quantees)}: "
                 f"{self.definiendum} "
-                f"⇔{str(self.body)}")
+                f"← {str(self.body)}")
 
     def instantiate_definition(self, new_args, theory):
         """Create an instance of the definition for new_args, and interpret it for theory.
@@ -834,7 +838,7 @@ class SymbolInterpretation(ASTNode):
 
             args (List(Expression)): interpreted arguments applied to the symbol (ex: `g(1),2`)
 
-            tuples (OrderedSet[Tuple], optional): relevant tuples for this iteration.
+            tuples (OrderedSet[TupleIDP], optional): relevant tuples for this iteration.
                 Initialized with `[[1,2,A], [1,3,B], [2,1,C]]`
 
         Returns:
@@ -870,7 +874,7 @@ class SymbolInterpretation(ASTNode):
             else:
                 for val, tuples2 in groups:
                     tuples = list(tuples2)
-                    out = AIfExpr.make(
+                    out = IF(
                         EQUALS([args[rank], tuples[0].args[rank]]),
                         self.interpret_application(rank+1,
                                                    applied, args, tuples),
@@ -884,7 +888,7 @@ class Enumeration(ASTNode):
     Used for predicates, or types without n-ary constructors.
 
     Attributes:
-        tuples (OrderedSet[Tuple]): OrderedSet of Tuple of Expression
+        tuples (OrderedSet[TupleIDP]): OrderedSet of TupleIDP of Expression
 
         sorted_tuples: a sorted list of tuples
 
@@ -906,7 +910,8 @@ class Enumeration(ASTNode):
             self.constructors = None
 
     def __repr__(self):
-        return ", ".join([repr(t) for t in self.tuples])
+        return (f'{{{", ".join([repr(t) for t in self.tuples])}}}' if self.tuples else
+                f'{{{", ".join([repr(t) for t in self.constructors])}}}')
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
                  interpretations: Dict[str, "SymbolInterpretation"]=None,
@@ -939,8 +944,7 @@ class Enumeration(ASTNode):
             out = FALSE
             for val, tuples2 in groups:
                 tuples = list(tuples2)
-                out = AIfExpr.make(
-                    EQUALS([args[rank], tuples[0].args[rank]]),
+                out = IF(EQUALS([args[rank], tuples[0].args[rank]]),
                     self.contains(args, function, arity, rank+1, tuples,
                             interpretations=interpretations, extensions=extensions),
                     out)
@@ -980,7 +984,7 @@ class ConstructedFrom(Enumeration):
     """Represents a 'constructed from' enumeration of constructors
 
     Attributes:
-        tuples (OrderedSet[Tuple]): OrderedSet of tuples of Expression
+        tuples (OrderedSet[TupleIDP]): OrderedSet of tuples of Expression
 
         constructors (List[Constructor]): List of Constructor
 
@@ -1029,7 +1033,7 @@ class ConstructedFrom(Enumeration):
                 (None, filter))
 
 
-class Tuple(ASTNode):
+class TupleIDP(ASTNode):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
         self.code = intern(",".join([str(a) for a in self.args]))
@@ -1041,7 +1045,7 @@ class Tuple(ASTNode):
         return self.code
 
 
-class FunctionTuple(Tuple):
+class FunctionTuple(TupleIDP):
     def __init__(self, **kwargs):
         self.args = kwargs.pop('args')
         if not isinstance(self.args, list):
@@ -1051,7 +1055,7 @@ class FunctionTuple(Tuple):
         self.code = intern(",".join([str(a) for a in self.args]))
 
 
-class CSVTuple(Tuple):
+class CSVTuple(TupleIDP):
     pass
 
 
@@ -1067,26 +1071,26 @@ class Ranges(Enumeration):
                 if x.fromI.type != self.type:
                     if self.type in [INT, REAL] and x.fromI.type in [INT, REAL]:
                         self.type = REAL  # convert to REAL
-                        tuples = [Tuple(args=[n.args[0].real()])
+                        tuples = [TupleIDP(args=[n.args[0].real()])
                                   for n in tuples]
                     else:
                         self.check(False,
                             f"incorrect value {x.fromI} for {self.type}")
 
                 if x.toI is None:
-                    tuples.append(Tuple(args=[x.fromI]))
+                    tuples.append(TupleIDP(args=[x.fromI]))
                 elif self.type == INT and x.fromI.type == INT and x.toI.type == INT:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                        tuples.append(Tuple(args=[Number(number=str(i))]))
+                        tuples.append(TupleIDP(args=[Number(number=str(i))]))
                 elif self.type == REAL and x.fromI.type == INT and x.toI.type == INT:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
-                        tuples.append(Tuple(args=[Number(number=str(float(i)))]))
+                        tuples.append(TupleIDP(args=[Number(number=str(float(i)))]))
                 elif self.type == REAL:
                     self.check(False, f"Can't have a range over real: {x.fromI}..{x.toI}")
                 elif self.type == DATE and x.fromI.type == DATE and x.toI.type == DATE:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         d = Date(iso=f"#{date.fromordinal(i).isoformat()}")
-                        tuples.append(Tuple(args=[d]))
+                        tuples.append(TupleIDP(args=[d]))
                 else:
                     self.check(False, f"Incorrect value {x.toI} for {self.type}")
         Enumeration.__init__(self, tuples=tuples)
@@ -1343,7 +1347,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
 
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
-                                         Tuple, FunctionTuple, CSVTuple,
+                                         TupleIDP, FunctionTuple, CSVTuple,
                                          ConstructedFrom, Constructor, Ranges,
                                          Display,
 

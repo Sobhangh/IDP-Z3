@@ -170,30 +170,30 @@ structure {
                                'status': 'UNKNOWN',
                                'typ': 'Int',
                                'value': ''},
-            '∀Item ∈ Item_t : Item = Lettuce ⇒ Number(Item) = Number(Ketchup)': {'environmental': False,
+            '∀ Item ∈ Item_t: Item = Lettuce ⇒ Number(Item) = Number(Ketchup)': {'environmental': False,
                                                                                  'is_assignment': False,
                                                                                  'normal': False,
-                                                                                 'reading': '∀Item ∈ Item_t : Item = '
+                                                                                 'reading': '∀ Item ∈ Item_t: Item = '
                                                                                             'Lettuce ⇒ Number(Item) = '
                                                                                             'Number(Ketchup)',
                                                                                  'relevant': False,
                                                                                  'status': 'UNIVERSAL',
                                                                                  'typ': 'Bool',
                                                                                  'value': True},
-            '∀Item ∈ Item_t : Item = Pickles ⇒ Number(Item) = Number(Tomato)': {'environmental': False,
+            '∀ Item ∈ Item_t: Item = Pickles ⇒ Number(Item) = Number(Tomato)': {'environmental': False,
                                                                                 'is_assignment': False,
                                                                                 'normal': False,
-                                                                                'reading': '∀Item ∈ Item_t : Item = '
+                                                                                'reading': '∀ Item ∈ Item_t: Item = '
                                                                                            'Pickles ⇒ Number(Item) = '
                                                                                            'Number(Tomato)',
                                                                                 'relevant': False,
                                                                                 'status': 'UNIVERSAL',
                                                                                 'typ': 'Bool',
                                                                                 'value': True},
-            '∀Item ∈ Item_t : true ⇒ 01 ≤ Number(Item) ∧ Number(Item) ≤ 05': {'environmental': False,
+            '∀ Item ∈ Item_t: true ⇒ 01 ≤ Number(Item) ∧ Number(Item) ≤ 05': {'environmental': False,
                                                                               'is_assignment': False,
                                                                               'normal': False,
-                                                                              'reading': '∀Item ∈ Item_t : true ⇒ 01 ≤ '
+                                                                              'reading': '∀ Item ∈ Item_t: true ⇒ 01 ≤ '
                                                                                          'Number(Item) ∧ Number(Item) '
                                                                                          '≤ 05',
                                                                               'relevant': False,

@@ -30,7 +30,7 @@ from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
                 Or, Not, And, ForAll, Exists, Sum, If,
                 BoolVal, RatVal, IntVal)
 
-from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, Tuple
+from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, TupleIDP
 from idp_engine.Expression import (Constructor, Expression, AIfExpr,
                                    AQuantification, Operator, Symbol,
                                    ADisjunction, AConjunction, AComparison,
@@ -97,11 +97,11 @@ def translate(self, problem: "Theory"):
 SymbolDeclaration.translate = translate
 
 
-# class Tuple  ###########################################################
+# class TupleIDP  ###########################################################
 
 def translate(self, problem: "Theory"):
     return [arg.translate(problem) for arg in self.args]
-Tuple.translate = translate
+TupleIDP.translate = translate
 
 # class Constructor  ###########################################################
 

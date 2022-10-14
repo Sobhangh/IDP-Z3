@@ -33,7 +33,7 @@ from .Expression import (
     AConjunction, AComparison, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
     Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
-from .Parse import Symbol, Enumeration, Tuple, TypeDeclaration
+from .Parse import Symbol, Enumeration, TupleIDP, TypeDeclaration
 from .Assignments import Status as S, Assignment
 from .utils import BOOL, INT, DATE, CONCEPT, ABS, RESERVED_SYMBOLS
 
@@ -243,7 +243,7 @@ AComparison.update_exprs = update_exprs
 def as_set_condition(self):
     return ((None, None, None) if not self.is_assignment() else
             (self.sub_exprs[0], True,
-             Enumeration(tuples=[Tuple(args=[self.sub_exprs[1]])])))
+             Enumeration(tuples=[TupleIDP(args=[self.sub_exprs[1]])])))
 AComparison.as_set_condition = as_set_condition
 
 #############################################################

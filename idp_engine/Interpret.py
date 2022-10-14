@@ -37,14 +37,14 @@ This module monkey-patches the ASTNode class and sub-classes.
 
 import copy
 from itertools import product
-from typing import Dict, Tuple, List, Callable
+from typing import Dict, List, Callable
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration,
                     SymbolDeclaration, Symbol, SymbolInterpretation,
-                    FunctionEnum, Enumeration, Tuple, ConstructedFrom,
+                    FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
                     Definition, Ranges, ConstructedFrom)
-from .Expression import (AIfExpr, SymbolExpr, Expression, Constructor,
+from .Expression import (AIfExpr, IF, SymbolExpr, Expression, Constructor,
                     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
                     NOT, AppliedSymbol, UnappliedSymbol, Quantee,
                     Variable, TRUE, FALSE, Number, Extension)
@@ -292,7 +292,7 @@ def interpret(self, problem):
         if c.range is None:
             self.tuples = None
             return self
-        self.tuples.extend([Tuple(args=[e]) for e in c.range])
+        self.tuples.extend([TupleIDP(args=[e]) for e in c.range])
     return self
 ConstructedFrom.interpret = interpret
 
@@ -472,12 +472,10 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
         else:  # aggregate
             if isinstance(expr, AIfExpr):  # cardinality
                 # if a then b else 0 -> if (applied & a) then b else 0
-                arg1 = AND([applied,
-                                    expr.sub_exprs[0]])
-                out = AIfExpr.make(arg1, expr.sub_exprs[1],
-                                    expr.sub_exprs[2])
+                arg1 = AND([applied, expr.sub_exprs[0]])
+                out = IF(arg1, expr.sub_exprs[1], expr.sub_exprs[2])
             else:  # sum
-                out = AIfExpr.make(applied, expr, Number(number="0"))
+                out = IF(applied, expr, Number(number="0"))
         return out
     return expr
 

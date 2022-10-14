@@ -27,8 +27,8 @@ from .Parse import (Vocabulary, Import, TypeDeclaration, Type, Subtype,
                     SymbolDeclaration, Symbol, VarDeclaration,
                     TheoryBlock, Definition, Rule,
                     Structure, SymbolInterpretation, Enumeration, FunctionEnum,
-                    Tuple, ConstructedFrom, Display)
-from .Expression import (Expression, Constructor, AIfExpr, AQuantification, Quantee,
+                    TupleIDP, ConstructedFrom, Display)
+from .Expression import (Expression, Constructor, AIfExpr, IF, AQuantification, Quantee,
                          ARImplication, AImplication, AEquivalence,
                          Operator, AComparison, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Variable, Brackets,
@@ -402,13 +402,13 @@ def annotate(self, voc):
 Enumeration.annotate = annotate
 
 
-# Class Tuple  #######################################################
+# Class TupleIDP  #######################################################
 
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
     self.check(all(a.value is not None for a in self.args),
                 f"Tuple must be ground : ({self})")
-Tuple.annotate = annotate
+TupleIDP.annotate = annotate
 
 
 # Class ConstructedFrom  #######################################################
@@ -567,7 +567,7 @@ def annotate(self, voc, q_vars):
                         f"{var.sort.name if var.sort else ''}")
                     if var.sort is None:
                         q.sub_exprs = [subtype.annotate(voc, {})]
-
+                        var.sort = q.sub_exprs[0]
                 q_v[var.name] = var
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
@@ -659,9 +659,8 @@ def annotate(self, voc, q_vars):
     if not self.annotated:
         assert len(self.sub_exprs) == 1, "Internal error"
         if self.aggtype == "#":
-            self.sub_exprs = [AIfExpr.make(self.sub_exprs[0],
-                                          Number(number='1'),
-                                          Number(number='0'))]
+            self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
+                                 Number(number='0'))]
             self.type = INT
         else:
             self.type = self.sub_exprs[0].type

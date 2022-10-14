@@ -89,20 +89,20 @@ structure {
                           'typ': 'Fruit_t',
                           'value': 'Pear',
                           'values': ['Pear']},
-           '∀Monkey ∈ Monkey_t : Fruit(Monkey) = Pear ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
+           '∀ Monkey ∈ Monkey_t: Fruit(Monkey) = Pear ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
                                                                                   'is_assignment': False,
                                                                                   'normal': False,
-                                                                                  'reading': '∀Monkey ∈ Monkey_t : '
+                                                                                  'reading': '∀ Monkey ∈ Monkey_t: '
                                                                                              'Fruit(Monkey) = Pear ⇒ '
                                                                                              'Place(Monkey) ≠ Branch',
                                                                                   'relevant': False,
                                                                                   'status': 'UNIVERSAL',
                                                                                   'typ': 'Bool',
                                                                                   'value': True},
-           '∀Monkey ∈ Monkey_t : Monkey = Mike ⇒ Fruit(Monkey) ≠ Orange': {'environmental': False,
+           '∀ Monkey ∈ Monkey_t: Monkey = Mike ⇒ Fruit(Monkey) ≠ Orange': {'environmental': False,
                                                                            'is_assignment': False,
                                                                            'normal': False,
-                                                                           'reading': '∀Monkey ∈ Monkey_t : Monkey = '
+                                                                           'reading': '∀ Monkey ∈ Monkey_t: Monkey = '
                                                                                       'Mike ⇒ Fruit(Monkey) ≠ Orange',
                                                                            'relevant': False,
                                                                            'status': 'UNIVERSAL',
@@ -144,14 +144,14 @@ structure {
                           'typ': 'Place_t',
                           'value': 'Grass',
                           'values': ['Grass']},
-           '∀Monkey ∈ Monkey_t : Monkey = Anna ⇒ Place(Monkey) = Stream ∧ Fruit(Monkey) ≠ Pear': {'environmental': False,
+           '∀ Monkey ∈ Monkey_t: Monkey = Anna ⇒ Place(Monkey) = Stream ∧ Fruit(Monkey) ≠ Pear': {'environmental': False,
                                                                                                   'is_assignment': False,
                                                                                                   'normal': False,
-                                                                                                  'reading': '∀Monkey '
+                                                                                                  'reading': '∀ Monkey '
                                                                                                              '∈ '
-                                                                                                             'Monkey_t '
-                                                                                                             ': Monkey '
-                                                                                                             '= Anna ⇒ '
+                                                                                                             'Monkey_t: '
+                                                                                                             'Monkey = '
+                                                                                                             'Anna ⇒ '
                                                                                                              'Place(Monkey) '
                                                                                                              '= Stream '
                                                                                                              '∧ '
@@ -161,24 +161,24 @@ structure {
                                                                                                   'status': 'UNIVERSAL',
                                                                                                   'typ': 'Bool',
                                                                                                   'value': True},
-           '∀Monkey ∈ Monkey_t : Monkey = Harriet ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
+           '∀ Monkey ∈ Monkey_t: Monkey = Harriet ⇒ Place(Monkey) ≠ Branch': {'environmental': False,
                                                                               'is_assignment': False,
                                                                               'normal': False,
-                                                                              'reading': '∀Monkey ∈ Monkey_t : Monkey '
+                                                                              'reading': '∀ Monkey ∈ Monkey_t: Monkey '
                                                                                          '= Harriet ⇒ Place(Monkey) ≠ '
                                                                                          'Branch',
                                                                               'relevant': False,
                                                                               'status': 'UNIVERSAL',
                                                                               'typ': 'Bool',
                                                                               'value': True},
-           '∀Monkey ∈ Monkey_t : Monkey = Sam ⇒ Place(Monkey) = Grass ∧ Fruit(Monkey) ≠ Banana': {'environmental': False,
+           '∀ Monkey ∈ Monkey_t: Monkey = Sam ⇒ Place(Monkey) = Grass ∧ Fruit(Monkey) ≠ Banana': {'environmental': False,
                                                                                                   'is_assignment': False,
                                                                                                   'normal': False,
-                                                                                                  'reading': '∀Monkey '
+                                                                                                  'reading': '∀ Monkey '
                                                                                                              '∈ '
-                                                                                                             'Monkey_t '
-                                                                                                             ': Monkey '
-                                                                                                             '= Sam ⇒ '
+                                                                                                             'Monkey_t: '
+                                                                                                             'Monkey = '
+                                                                                                             'Sam ⇒ '
                                                                                                              'Place(Monkey) '
                                                                                                              '= Grass '
                                                                                                              '∧ '
@@ -188,27 +188,27 @@ structure {
                                                                                                   'status': 'UNIVERSAL',
                                                                                                   'typ': 'Bool',
                                                                                                   'value': True},
-           '∀Monkey ∈ Monkey_t : Place(Monkey) = Rock ⇒ Fruit(Monkey) = Apple': {'environmental': False,
+           '∀ Monkey ∈ Monkey_t: Place(Monkey) = Rock ⇒ Fruit(Monkey) = Apple': {'environmental': False,
                                                                                  'is_assignment': False,
                                                                                  'normal': False,
-                                                                                 'reading': '∀Monkey ∈ Monkey_t : '
+                                                                                 'reading': '∀ Monkey ∈ Monkey_t: '
                                                                                             'Place(Monkey) = Rock ⇒ '
                                                                                             'Fruit(Monkey) = Apple',
                                                                                  'relevant': False,
                                                                                  'status': 'UNIVERSAL',
                                                                                  'typ': 'Bool',
                                                                                  'value': True},
-           '∀m1 ∈ Monkey_t : ∀m2 ∈ Monkey_t : m2 ≠ m1 ⇒ Place(m1) ≠ Place(m2) ∧ Fruit(m1) ≠ Fruit(m2)': {'environmental': False,
+           '∀ m1 ∈ Monkey_t: ∀ m2 ∈ Monkey_t: m2 ≠ m1 ⇒ Place(m1) ≠ Place(m2) ∧ Fruit(m1) ≠ Fruit(m2)': {'environmental': False,
                                                                                                          'is_assignment': False,
                                                                                                          'normal': False,
-                                                                                                         'reading': '∀m1 '
+                                                                                                         'reading': '∀ '
+                                                                                                                    'm1 '
                                                                                                                     '∈ '
-                                                                                                                    'Monkey_t '
-                                                                                                                    ': '
-                                                                                                                    '∀m2 '
+                                                                                                                    'Monkey_t: '
+                                                                                                                    '∀ '
+                                                                                                                    'm2 '
                                                                                                                     '∈ '
-                                                                                                                    'Monkey_t '
-                                                                                                                    ': '
+                                                                                                                    'Monkey_t: '
                                                                                                                     'm2 '
                                                                                                                     '≠ '
                                                                                                                     'm1 '
