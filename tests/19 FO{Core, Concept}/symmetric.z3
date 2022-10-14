@@ -120,53 +120,48 @@ display {
                          'relevant': True,
                          'status': 'UNKNOWN',
                          'typ': 'Bool'},
-          '∀`p ∈ Concept[node*node->𝔹] : symmetric(`p) ⇒ (∀x ∈ None : ∀y ∈ node : $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
-                                                                                                                'is_assignment': False,
-                                                                                                                'normal': False,
-                                                                                                                'reading': '∀`p '
-                                                                                                                           '∈ '
-                                                                                                                           'Concept[node*node->𝔹] '
-                                                                                                                           ': '
-                                                                                                                           'symmetric(`p) '
-                                                                                                                           '⇒ '
-                                                                                                                           '(∀x '
-                                                                                                                           '∈ '
-                                                                                                                           'None '
-                                                                                                                           ': '
-                                                                                                                           '∀y '
-                                                                                                                           '∈ '
-                                                                                                                           'node '
-                                                                                                                           ': '
-                                                                                                                           '$(`p)(x, '
-                                                                                                                           'y) '
-                                                                                                                           '⇒ '
-                                                                                                                           '$(`p)(y, '
-                                                                                                                           'x))',
-                                                                                                                'relevant': False,
-                                                                                                                'status': 'UNIVERSAL',
-                                                                                                                'typ': 'Bool',
-                                                                                                                'value': True},
-          '∀`p ∈ Concept[node*node->𝔹] : ∀x ∈ None : ∀y ∈ node : $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
-                                                                                              'is_assignment': False,
-                                                                                              'normal': False,
-                                                                                              'reading': '∀`p ∈ '
-                                                                                                         'Concept[node*node->𝔹] '
-                                                                                                         ': ∀x ∈ None '
-                                                                                                         ': ∀y ∈ node '
-                                                                                                         ': $(`p)(x, '
-                                                                                                         'y) ⇒ '
-                                                                                                         '$(`p)(y, x)',
-                                                                                              'relevant': False,
-                                                                                              'status': 'UNIVERSAL',
-                                                                                              'typ': 'Bool',
-                                                                                              'value': True},
-          '∀`q ∈ None,x ∈ None : ∀y ∈ node : $(`q)(x, y) ⇒ $(`q)(y, x)': {'environmental': False,
-                                                                          'is_assignment': False,
-                                                                          'normal': False,
-                                                                          'reading': '∀`q ∈ None,x ∈ None : ∀y ∈ node '
-                                                                                     ': $(`q)(x, y) ⇒ $(`q)(y, x)',
-                                                                          'relevant': False,
-                                                                          'status': 'UNIVERSAL',
-                                                                          'typ': 'Bool',
-                                                                          'value': True}},
+          '∀ `p ∈ Concept[node*node->𝔹]: symmetric(`p) ⇒ (∀ x: ∀ y ∈ node: $(`p)(x, y) ⇒ $(`p)(y, x))': {'environmental': False,
+                                                                                                         'is_assignment': False,
+                                                                                                         'normal': False,
+                                                                                                         'reading': '∀ '
+                                                                                                                    '`p '
+                                                                                                                    '∈ '
+                                                                                                                    'Concept[node*node->𝔹]: '
+                                                                                                                    'symmetric(`p) '
+                                                                                                                    '⇒ '
+                                                                                                                    '(∀ '
+                                                                                                                    'x: '
+                                                                                                                    '∀ '
+                                                                                                                    'y '
+                                                                                                                    '∈ '
+                                                                                                                    'node: '
+                                                                                                                    '$(`p)(x, '
+                                                                                                                    'y) '
+                                                                                                                    '⇒ '
+                                                                                                                    '$(`p)(y, '
+                                                                                                                    'x))',
+                                                                                                         'relevant': False,
+                                                                                                         'status': 'UNIVERSAL',
+                                                                                                         'typ': 'Bool',
+                                                                                                         'value': True},
+          '∀ `p ∈ Concept[node*node->𝔹]: ∀ x: ∀ y ∈ node: $(`p)(x, y) ⇒ $(`p)(y, x)': {'environmental': False,
+                                                                                       'is_assignment': False,
+                                                                                       'normal': False,
+                                                                                       'reading': '∀ `p ∈ '
+                                                                                                  'Concept[node*node->𝔹]: '
+                                                                                                  '∀ x: ∀ y ∈ node: '
+                                                                                                  '$(`p)(x, y) ⇒ '
+                                                                                                  '$(`p)(y, x)',
+                                                                                       'relevant': False,
+                                                                                       'status': 'UNIVERSAL',
+                                                                                       'typ': 'Bool',
+                                                                                       'value': True},
+          '∀ `q,x: ∀ y ∈ node: $(`q)(x, y) ⇒ $(`q)(y, x)': {'environmental': False,
+                                                            'is_assignment': False,
+                                                            'normal': False,
+                                                            'reading': '∀ `q,x: ∀ y ∈ node: $(`q)(x, y) ⇒ $(`q)(y, x)',
+                                                            'relevant': False,
+                                                            'status': 'UNIVERSAL',
+                                                            'typ': 'Bool',
+                                                            'value': True}},
  'symmetric': {}}

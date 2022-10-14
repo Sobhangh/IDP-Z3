@@ -125,17 +125,17 @@ structure {
                                   'typ': 'Color_t',
                                   'value': '',
                                   'values': ['Green', 'Red', 'Yellow']},
-           '∀c1 ∈ Country_t : ∀c2 ∈ Country_t : c1 ≠ Luxembourg ∧ c2 ≠ Luxembourg ∧ Country_borders_Country(c1, c2) ⇒ Color(c1) ≠ Color(c2)': {'environmental': False,
+           '∀ c1 ∈ Country_t: ∀ c2 ∈ Country_t: c1 ≠ Luxembourg ∧ c2 ≠ Luxembourg ∧ Country_borders_Country(c1, c2) ⇒ Color(c1) ≠ Color(c2)': {'environmental': False,
                                                                                                                                                'is_assignment': False,
                                                                                                                                                'normal': False,
-                                                                                                                                               'reading': '∀c1 '
+                                                                                                                                               'reading': '∀ '
+                                                                                                                                                          'c1 '
                                                                                                                                                           '∈ '
-                                                                                                                                                          'Country_t '
-                                                                                                                                                          ': '
-                                                                                                                                                          '∀c2 '
+                                                                                                                                                          'Country_t: '
+                                                                                                                                                          '∀ '
+                                                                                                                                                          'c2 '
                                                                                                                                                           '∈ '
-                                                                                                                                                          'Country_t '
-                                                                                                                                                          ': '
+                                                                                                                                                          'Country_t: '
                                                                                                                                                           'c1 '
                                                                                                                                                           '≠ '
                                                                                                                                                           'Luxembourg '

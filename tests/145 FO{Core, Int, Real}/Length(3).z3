@@ -122,10 +122,10 @@ display {
                           'status': 'UNKNOWN',
                           'typ': 'Real',
                           'value': ''},
-            '∀n ∈ side : Length(n) = Length(1) ∨ Sides() < n': {'environmental': False,
+            '∀ n ∈ side: Length(n) = Length(1) ∨ Sides() < n': {'environmental': False,
                                                                 'is_assignment': False,
                                                                 'normal': False,
-                                                                'reading': '∀n ∈ side : Length(n) = Length(1) ∨ Sides '
+                                                                'reading': '∀ n ∈ side: Length(n) = Length(1) ∨ Sides '
                                                                            '< n',
                                                                 'relevant': True,
                                                                 'status': 'UNKNOWN',

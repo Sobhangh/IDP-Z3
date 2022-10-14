@@ -279,8 +279,8 @@ class Vocabulary(ASTNode):
 
     def __str__(self):
         return (f"vocabulary {{{NEWL}"
-                f"{NEWL.join(str(i) for i in self.declarations)}"
-                f"{NEWL}}}{NEWL}")
+                f"    {f'{NEWL}    '.join(str(i) for i in self.declarations)}"
+                f"{NEWL}}}{NEWL}").replace("    \n", "")
 
     def add_voc_to_block(self, block):
         """adds the enumerations in a vocabulary to a theory or structure block
@@ -356,9 +356,10 @@ class TypeDeclaration(ASTNode):
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
             return ''
-        enumeration = (f"{','.join(map(str, self.constructors))}" if self.constructors else
-                       f"{self.enumeration}")
-        return (f"type {self.name} := {{{enumeration}}}")
+        enumeration = (f"{{{','.join(map(str, self.constructors))}}}" if self.constructors else
+                       f"{self.enumeration}" if self.enumeration else
+                       "")
+        return (f"type {self.name} {'' if not enumeration else ':= ' + enumeration}")
 
     def contains_element(self, term: Expression,
                      interpretations: Dict[str, "SymbolInterpretation"],
@@ -472,7 +473,7 @@ class SymbolDeclaration(ASTNode):
         args = '⨯'.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
         return (f"{self.name}: "
                 f"{ '('+args+')' if args else '()'}"
-                f" -> {self.out.name}")
+                f" → {self.out.name}")
 
     def __repr__(self):
         return str(self)
@@ -533,6 +534,9 @@ class VarDeclaration(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name').name
         self.subtype = kwargs.pop('subtype')
+
+    def __str__(self):
+        return f"var {self.name} ∈ {self.subtype}"
 
 Declaration = Union[TypeDeclaration, SymbolDeclaration]
 
@@ -717,9 +721,9 @@ class Rule(ASTNode):
             self.body = TRUE
 
     def __repr__(self):
-        return (f"Rule:∀{','.join(str(q) for q in self.quantees)}: "
+        return (f"∀ {','.join(str(q) for q in self.quantees)}: "
                 f"{self.definiendum} "
-                f"⇔{str(self.body)}")
+                f"← {str(self.body)}")
 
     def instantiate_definition(self, new_args, theory):
         """Create an instance of the definition for new_args, and interpret it for theory.
@@ -906,7 +910,8 @@ class Enumeration(ASTNode):
             self.constructors = None
 
     def __repr__(self):
-        return ", ".join([repr(t) for t in self.tuples])
+        return (f'{{{", ".join([repr(t) for t in self.tuples])}}}' if self.tuples else
+                f'{{{", ".join([repr(t) for t in self.constructors])}}}')
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
                  interpretations: Dict[str, "SymbolInterpretation"]=None,

@@ -88,6 +88,7 @@ Vocabulary.annotate = annotate
 # Class TypeDeclaration  #######################################################
 
 def annotate(self, voc):
+    self.voc = voc
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
@@ -190,9 +191,9 @@ def annotate(self, voc, q_vars):
     for r in self.rules:
         decl = voc.symbol_decls[r.definiendum.decl.name]
         if decl.name not in self.def_vars:
-            name = f"${decl.name}$"
-            q_v = {f"${decl.name}!{str(i)}$":
-                    Variable(name=f"${decl.name}!{str(i)}$", sort=sort)
+            name = f"{decl.name}_"
+            q_v = {f"{decl.name}{str(i)}_":
+                    Variable(name=f"{decl.name}{str(i)}_", sort=sort)
                     for i, sort in enumerate(decl.sorts)}
             if decl.out.name != BOOL:
                 q_v[name] = Variable(name=name, sort=decl.out)
