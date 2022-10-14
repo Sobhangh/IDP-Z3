@@ -137,7 +137,7 @@ def interpret(self, problem):
             range_condition = self.out.has_element(expr.copy(),
                                 problem.interpretations, problem.extensions)
             range_condition = range_condition.interpret(problem)
-            constraint = IMPLIES([filter(args), range_condition])
+            constraint = IMPLIES([filter(expr.sub_exprs), range_condition])
             constraint.block = self.block
             constraint.is_type_constraint_for = self.name
             constraint.annotations['reading'] = f"Possible values for {expr}"
