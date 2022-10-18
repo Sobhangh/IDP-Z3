@@ -6,7 +6,7 @@
 IDP-Z3
 ======
 
-IDP-Z3 is used to perform reasoning on FO(:raw-html:`&#183`) knowledge bases.
+IDP-Z3 is used to perform reasoning on FO[:raw-html:`&#183`] knowledge bases.
 It can be invoked in 3 ways:
 
     - via a web interface, called webIDE.

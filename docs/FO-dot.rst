@@ -3,13 +3,17 @@
 .. role:: raw-html(raw)
    :format: html
 
-The FO(:raw-html:`&#183`) Language
+The FO[:raw-html:`&#183`] Language
 ==================================
 
 Overview
 --------
 
-The FO(:raw-html:`&#183`) (aka FO-dot) language is used to create knowledge bases.
+The FO[:raw-html:`&#183`] (aka FO-dot) language is used to create knowledge bases.
+It is described in the `FO-dot standard <https://fo-dot.readthedocs.io/en/latest/FO-dot.html>`_.
+This document presents the implementation in IDP-Z3.
+
+
 An FO-dot knowledge base is a text file containing the following blocks of code:
 
 vocabulary
