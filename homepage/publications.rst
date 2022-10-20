@@ -3,6 +3,7 @@ Selected Publications
 
 Awards
 ------
+* Simon Vandevelde, et al. (2022). **Interactive Feature Modeling with Background Knowledge for Validation and Configuration**, Best PhD Paper Award at ConfWS 2022
 * Simon Marynissen, et al. (2021). **On the relationship between Approximation Fixpoint Theory and Justification Theory**, Distinguished Paper Award at IJCAI 2021
 * Aerts B., Vandevelde, S., & Vennekens, J. (2020). **Tackling the DMN challenges with cDMN: A tight integration of DMN and constraint reasoning**. In International Joint Conference on Rules and Reasoning. Best Paper Award at RuleML+RR 2020
 * Denecker, et al. (2001). **Ultimate Well-Founded and Stable Semantics for Logic Programs with Aggregates.** ICLP 2001, 20-Year Test of Time Award at ICLP 2021
@@ -24,6 +25,8 @@ Interactive Consultant
 Applications
 ------------
 
+* Vandevelde S., Callewaert B., Vennekens J. (2022) **Interactive Feature Modeling with Background Knowledge for Validation and Configuration.**, In Proceedings of the 26th ACM International Systems and Software Product Line Conference - Volume B, 12 Sep 2022.
+* Vandevelde S., Jordens J., Van Doninck B., Witters M., Vennekens J. (2022). **Knowledge-Based Support for Adhesive Selection.** In: Logic Programming and Nonmonotonic Reasoning 2022, 29 August 2022
 * Jordens J., Vandevelde S., Van Doninck B., Witters M., Vennekens J. (2022). **Adhesives Selection via an Interactive, User-friendly System based on Symbolic AI.** Procedia CIRP Vol.109, Presented 28 Mar 2022
 * Vandevelde S., Callewaert B., Vennekens J. (2022). **Context-Aware Verification of DMN.** Proceedings of the 55th Hawaii International Conference on System Sciences, 5 Jan 2022.
 * Deryck M., Coppens B.J., Comenda N., Vennekens J. (2021). **Logical Reasoning application with NLP interface to construct the Knowledge Base.** (736-738). Presented at the BNAIC2021, Esch-sur-Alzette, Luxembourg, 10 Nov 2021-12 Nov 2021
