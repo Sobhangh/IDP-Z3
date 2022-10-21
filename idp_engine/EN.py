@@ -48,6 +48,7 @@ Definition.EN = EN
 
 
 def EN(self):
+    #TODO len(self.quantees) > self.definiendum.symbol.decl.arity
     vars = ','.join([f"{q}" for q in self.quantees])
     quant = f"for each {','.join(str(q) for q in self.quantees)}, " if vars else ""
     return (f"{quant}"
@@ -136,7 +137,8 @@ def EN(self) -> str:
     """returns a string containing the Theory in controlled English
     """
     constraints = '\n'.join(f"- {c.original.EN()}." for c in self.constraints.values()
-                            if not c.is_type_constraint_for).replace("  ", " ")
+                            if not c.is_type_constraint_for
+                            and (not type(c)==AppliedSymbol or c.symbol.name != "relevant")).replace("  ", " ")
     definitions = '\n'.join(f"- {d.EN()}" for d in self.definitions)
     return (constraints + "\n" + definitions)
 Theory.EN = EN

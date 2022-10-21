@@ -4,8 +4,8 @@
 - the number of edges is 3 is a sufficient condition for it is convex.
 - it is convex iff (for every n ∈ Side_Nr, it is true that angle n°n < 180).
 - it is equilateral iff (for every n ∈ Side_Nr, it is true that length n°n is length n°1 or length n°n is 0).
-- the number of edges is 3 is a sufficient condition for the subtype is right_triangle or the subtype is regular_triangle or the subtype is irregular.
-- the number of edges is 4 is a sufficient condition for the subtype is square or the subtype is rectangle or the subtype is irregular.
+- the subtype is right_triangle or the subtype is regular_triangle or the subtype is irregular is a necessary condition for the number of edges is 3.
+- the subtype is square or the subtype is rectangle or the subtype is irregular is a necessary condition for the number of edges is 4.
 - the subtype is square or the subtype is rectangle is a sufficient condition for the number of edges is 4.
 - the subtype is regular_triangle iff the number of edges is 3 and it is equilateral.
 - the subtype is regular_triangle iff the number of edges is 3 and (for every n ∈ Side_Nr, it is true that angle n°n is 60 or angle n°n is 0).

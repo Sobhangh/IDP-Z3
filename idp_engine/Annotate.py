@@ -630,9 +630,9 @@ AEquivalence.annotate1 = annotate1
 
 def annotate(self, voc, q_vars):
     # reverse the implication
-    self.sub_exprs.reverse()
-    out = AImplication(sub_exprs=self.sub_exprs,
+    out = AImplication(sub_exprs=list(reversed(list(self.sub_exprs))),
                         operator=['⇒']*len(self.operator))
+    out.original = self
     if hasattr(self, "block"):
         out.block = self.block
     return out.annotate(voc, q_vars)
