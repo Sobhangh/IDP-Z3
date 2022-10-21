@@ -26,6 +26,11 @@
         Run consultant
       </button>
       &nbsp;&nbsp;&nbsp;&nbsp;
+      <a class="header_button" (click)="this.showEnglish = true; this.idpService.getEnglish();"
+         title='View the theory in English'>
+        View in English
+      </a>
+      &nbsp;&nbsp;&nbsp;&nbsp;
       <a class="header_button" (click)="checkCode()"
          title='Check "well-guardedness" of each assertion (for paper on intensional objects)'>
         Check code

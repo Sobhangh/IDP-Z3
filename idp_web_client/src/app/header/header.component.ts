@@ -164,7 +164,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
               this.idpService.toggleIDE();
             }
           }, {
-            label: 'View in English', command: () => {
+            label: 'View theory in English', command: () => {
               this.showEnglish = true;
               this.idpService.getEnglish();
             }
@@ -251,8 +251,8 @@ export class HeaderComponent implements OnInit, AfterViewInit {
           command: () => {this.idpService.run(); }
         },
         {
-          label: 'Check code',
-          command: () => {this.idpService.checkCode(); }
+          label: 'View in English',
+          command: () => {this.showEnglish = true; this.idpService.getEnglish(); }
         },
         {
           label: 'View in IC',
