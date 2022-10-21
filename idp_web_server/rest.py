@@ -291,6 +291,8 @@ class eval(Resource):
                                  }
                         errors.append(error)
                     out = errors
+                elif method == "getEnglish":
+                    out = {'EN': idpOf(args['code']).EN()}
                 else:
                     state = State.make(idpOf(args['code']),
                                        args['previous_active'],
