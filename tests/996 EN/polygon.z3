@@ -21,3 +21,6 @@
 - for every x ∈ Side_Nr, it is true that angle n°x is not 180.
 - for every n ∈ Side_Nr, it is true that angle n°n is 0 iff the number of vertices < n.
 - for every n ∈ Side_Nr, it is true that length n°n is 0 iff the number of edges < n.
+- Definition:
+     it is big if the perimeter > 5.
+     it is big if length n°1 > 3.

@@ -23,6 +23,7 @@ Methods to show a Theory in plain English.
 
 from copy import copy
 
+from .Parse import Definition, Rule
 from .Expression import (ASTNode, AQuantification, AAggregate, Operator,
                          AComparison, AUnary, AppliedSymbol, Brackets)
 from .Theory import Theory
@@ -31,6 +32,22 @@ from .Theory import Theory
 def EN(self):
     return str(self)
 ASTNode.EN = EN
+
+
+def EN(self):
+    rules = '\n'.join(f"    {r.EN()}." for r in self.rules)
+    return "Definition:\n" + rules
+Definition.EN = EN
+
+
+def EN(self):
+    vars = ','.join([f"{q}" for q in self.quantees])
+    quant = f"for each {','.join(str(q) for q in self.quantees)}, " if vars else ""
+    return (f"{quant}"
+            f"{self.definiendum.EN()} "
+            f"{(' is ' + str(self.out.EN())) if self.out else ''}"
+            f" if {str(self.body.EN())}").replace("  ", " ")
+Rule.EN = EN
 
 
 def EN(self):
@@ -112,8 +129,9 @@ def EN(self) -> str:
     """returns a string containing the Theory in controlled English
     """
     constraints = '\n'.join(f"- {c.original.EN()}." for c in self.constraints.values()
-                            if not c.is_type_constraint_for)
-    return constraints.replace("  ", " ")
+                            if not c.is_type_constraint_for).replace("  ", " ")
+    definitions = '\n'.join(f"- {d.EN()}" for d in self.definitions)
+    return (constraints + "\n" + definitions)
 Theory.EN = EN
 
 

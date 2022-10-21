@@ -24,12 +24,17 @@ vocabulary {
     [EN:it is equilateral] equilateral : () → 𝔹
     [EN:the perimeter] perimeter: () → ℝ
 
+    [EN: it is big] big: () → 𝔹
+
     // base : () → ℝ
     // height: () → ℝ
     // surface:() → ℝ
 }
 
 theory {
+    { big() <- perimeter() > 5.
+      big() <- length(1) > 3.}
+
     [Definition of triangle]
     type()=triangle      ⇔ nr_of_sides()=3.
 
