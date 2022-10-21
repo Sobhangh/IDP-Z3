@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
+* fix #123: show Theory in plain English
 * fix #216: Internal error due to incorrect type constraint
 * fix #218: binary quantification over infinite domain
 * fix #219: declared variable in binary quantification
