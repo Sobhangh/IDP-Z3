@@ -59,9 +59,9 @@ vocabulary decision {
     type Registration_type := {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
     type Tax_Rate := {1, 2, 4, 6, 7, 10, 12}
 
-    registration_type : () → Registration_type
-    tax_rate : () → Tax_Rate
-    tax_amount : () → ℝ
+    [EN:the registration type] registration_type : () → Registration_type
+    [EN:the tax rate] tax_rate : () → Tax_Rate
+    [EN:the tax amount] tax_amount : () → ℝ
 }
 
 theory environment:environment {
@@ -131,7 +131,7 @@ theory decision:decision {
 
     [A Professional purchase is a non-public sale to a professional buyer for resale with a certification not older than 8 years]
     registration_type() = Professional_Purchase ⇒ professional_buyer()
-                                                  ∧ transaction_type()  ≠ Public_Sale
+                                                  ∧ transaction_type() ≠ Public_Sale
                                                   ∧ use() = For_Resale
                                                   ∧ certification_date_sale() = certification_date() + 8.
 

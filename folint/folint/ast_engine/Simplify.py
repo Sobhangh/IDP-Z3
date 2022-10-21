@@ -228,7 +228,7 @@ def update_exprs(self, new_exprs):
     operands1 = [e.value for e in operands]
     if all(e is not None for e in operands1):
         acc, acc1 = operands[0], operands1[0]
-        assert len(self.operator) == len(operands1[1:]), "Internal error"
+        assert len(self.operator) == len(operands1[1:]), "Internal error: missing operator"
         for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
             if op == "=":
                 if not acc1.same_as(expr1):
@@ -256,7 +256,7 @@ def update_arith(self, family, operands):
                 f"Incorrect numeric type in {self}")
         out = operands1[0].py_value
 
-        assert len(self.operator) == len(operands1[1:]), "Internal error"
+        assert len(self.operator) == len(operands1[1:]), "Internal error: missing operator"
         for op, e in zip(self.operator, operands1[1:]):
             function = Operator.MAP[op]
 

@@ -42,7 +42,7 @@ ASTNode.EN = EN
 
 
 def EN(self):
-    rules = '\n'.join(f"    {r.EN()}." for r in self.rules)
+    rules = '\n'.join(f"    {r.original.EN()}." for r in self.rules)
     return "Definition:\n" + rules
 Definition.EN = EN
 
