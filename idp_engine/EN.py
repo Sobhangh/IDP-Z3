@@ -21,8 +21,10 @@ Methods to show a Theory in plain English.
 
 """
 
+from copy import copy
+
 from .Expression import (ASTNode, AQuantification, AAggregate, Operator,
-                         AppliedSymbol, Brackets)
+                         AComparison, AUnary, AppliedSymbol, Brackets)
 from .Theory import Theory
 
 
@@ -60,6 +62,7 @@ Operator.EN_map =  {'∧': " and ",
                     '⇐': " is a necessary condition for ",
                     '⇔': " iff ",
                     "=": " is ",
+                    "≠": " is not ",
                     }
 
 def EN(self):
@@ -72,6 +75,19 @@ def EN(self):
         temp += f" {op} {parenthesis(precedence, self.sub_exprs[i])}"
     return temp
 Operator.EN = EN
+
+
+def EN(self):
+    if (type(self.sub_exprs[0]) == AComparison
+        and len(self.sub_exprs[0].sub_exprs) == 2
+        and self.sub_exprs[0].operator[0] == "="):
+        # ~(a=b)
+        print(self)
+        new_expr = copy(self.sub_exprs[0])
+        new_expr.operator[0] = "≠"
+        return new_expr.EN()
+    return f"{self.operator}({self.sub_exprs[0].EN()})"
+AUnary.EN = EN
 
 
 def EN(self):
