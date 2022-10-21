@@ -1,0 +1,119 @@
+vocabulary {
+
+    type Nr_of_sides := {3..4}
+    nr_of_sides, nr_of_vertices: () → Nr_of_sides
+
+
+    type Type := {triangle, quadrilateral}
+    type : () → Type
+
+    type Side_Nr := {1..4}
+    length, angle : (Side_Nr) → ℝ
+
+    type Subtype :=
+        { regular_triangle
+        , right_triangle
+        , rectangle
+        , square
+        , irregular}
+    subtype : () → Subtype
+
+    convex, equilateral : () → 𝔹
+    perimeter: () → ℝ
+
+    // base : () → ℝ
+    // height: () → ℝ
+    // surface:() → ℝ
+}
+
+theory {
+    [Definition of triangle]
+    type()=triangle      ⇔ nr_of_sides()=3.
+
+    [Definition of rectangle]
+    type()=quadrilateral ⇔ nr_of_sides()=4.
+
+    [There are as many vertices as there are sides]
+    (nr_of_vertices()=3 ⇔ nr_of_sides()=3) ∧
+    (nr_of_vertices()=4 ⇔ nr_of_sides()=4).
+
+    [All triangles are convex]
+    nr_of_sides()=3 ⇒ convex().
+
+    [Definition of convex]
+    convex() ⇔ [All angles are below 180°]
+               ∀n ∈ Side_Nr: angle(n)<180.
+
+    [Definition of equilateral]
+    equilateral() ⇔ [All sides have the same length]
+                    ∀n ∈ Side_Nr: length(n)=length(1) ∨ length(n)=0.
+
+    [A triangle is regular, right, or irregular]
+    subtype()=right_triangle ∨ subtype()=regular_triangle ∨ subtype()=irregular ⇐ nr_of_sides()=3.
+
+    [A quadrilateral is a square, a rectangle, or irregular]
+    subtype()=square ∨ subtype()=rectangle ∨ subtype()=irregular ⇐ nr_of_sides()=4.
+
+    [Squares and rectangles are quadrilaterals]
+    subtype()=square ∨ subtype()=rectangle ⇒ nr_of_sides()=4.
+
+    [A regular triangle is an equilateral triangle]
+    subtype()=regular_triangle ⇔ nr_of_sides()=3 ∧ equilateral().
+
+    [A regular triangle is a triangle where all angles are 60°]
+    subtype()=regular_triangle ⇔ nr_of_sides()=3 ∧
+                                 [All angles are 60°]
+                                 ∀n ∈ Side_Nr: angle(n)=60 ∨ angle(n)=0.
+
+    [A right triangle is a triangle with a 90° angle]
+    subtype()=right_triangle   ⇔ nr_of_sides()=3 ∧
+                                 [One angle is 90°]
+                                 ∃n ∈ Side_Nr: angle(n)=90.
+
+    [All angles are 90° in squares and rectangles]
+    nr_of_sides()=4 ∧ subtype()≠irregular ⇔
+            [All angles are 90°]
+            ∀n ∈ Side_Nr: angle(n)=90∨ angle(n)=0.
+
+    [In a rectangle, opposite Side_Nr have the same length, and adjacent sides have different lengths]
+    subtype()=rectangle ⇒ length(3)=length(1) ∧ length(2)=length(4) ∧ length(2)≠length(1).
+
+    [A square is an equilateral quadrilateral]
+    subtype()=square    ⇒ nr_of_sides()=4 ∧ equilateral().
+
+    [In a triangle, no Side_Nr is longer than the sum of the 2 other sides]
+    type()=triangle ⇒ ( length(1) ≤ length(2) + length(3))
+                    ∧  ( length(2) ≤ length(3) + length(1))
+                    ∧  ( length(3) ≤ length(1) + length(2)).
+
+    // General constraints
+
+    [The perimeter is the sum of the lengths of the sides]
+    perimeter() = sum(lambda n ∈ Side_Nr : length(n)).
+
+    [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
+    sum(lambda n in Side_Nr : angle(n)) = (nr_of_sides()-2)*180.
+
+    [Lengths are positive numbers]
+    ∀x ∈ Side_Nr: 0 ≤ length(x).
+
+    [Angles are positive numbers]
+    ∀x ∈ Side_Nr: 0 ≤ angle(x).
+
+    [Angles cannot be 180°]
+    ∀x ∈ Side_Nr: angle(x) ≠ 180.
+
+    [A polygon with N vertices has N angles]
+    ∀n ∈ Side_Nr: angle(n)=0 ⇔ nr_of_vertices()<n.
+
+    [A polygon with N sides has N lengths]
+    ∀n ∈ Side_Nr: length(n)=0 ⇔ nr_of_sides()<n.
+
+}
+structure default {
+    nr_of_sides:=3.
+}
+
+procedure main() {
+    print(Theory(T).EN())
+}

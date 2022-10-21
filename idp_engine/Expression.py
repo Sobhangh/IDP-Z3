@@ -96,6 +96,9 @@ class ASTNode(object):
     def interpret(self, problem: Any) -> "Expression":
         return self  # monkey-patched
 
+    def EN(self):
+        pass  # monkey-patched
+
 
 class Annotations(ASTNode):
     def __init__(self, **kwargs):
@@ -968,17 +971,17 @@ class AAggregate(Expression):
         self.q = ''
         super().__init__()
 
-
     def __str1__(self):
         if not self.annotated:
-            vars = "".join([f"{q}" for q in self.quantees])
-            out = ((f"{self.aggtype}(lambda {vars} : "
-                    f"{self.sub_exprs[0].str}"
-                    f")" ) if self.aggtype != "#" else
-                   (f"{self.aggtype}{{{vars}: "
-                    f"{self.sub_exprs[0].str}"
-                    f"}}")
-            )
+            vars = ",".join([f"{q}" for q in self.quantees])
+            if self.aggtype in ["sum", "min", "max"]:
+                out = (f"{self.aggtype}(lambda {vars} : "
+                        f"{self.sub_exprs[0].str}"
+                        f")" )
+            else:
+                out = (f"{self.aggtype}{{{vars} : "
+                       f"{self.sub_exprs[0].str}"
+                       f"}}")
         else:
             out = (f"{self.aggtype}{{"
                    f"{','.join(e.str for e in self.sub_exprs)}"

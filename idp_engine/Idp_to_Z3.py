@@ -210,23 +210,23 @@ AQuantification.translate1 = translate1
 # Class Operator  #######################################################
 
 Operator.MAP = {'∧': lambda x, y: And(x, y),
-                      '∨': lambda x, y: Or(x, y),
-                      '⇒': lambda x, y: Or(Not(x), y),
-                      '⇐': lambda x, y: Or(x, Not(y)),
-                      '⇔': lambda x, y: x == y,
-                      '+': lambda x, y: x + y,
-                      '-': lambda x, y: x - y,
-                      '⨯': lambda x, y: x * y,
-                      '/': lambda x, y: x / y,
-                      '%': lambda x, y: x % y,
-                      '^': lambda x, y: x ** y,
-                      '=': lambda x, y: x == y,
-                      '<': lambda x, y: x < y,
-                      '>': lambda x, y: x > y,
-                      '≤': lambda x, y: x <= y,
-                      '≥': lambda x, y: x >= y,
-                      '≠': lambda x, y: x != y
-                      }
+                '∨': lambda x, y: Or(x, y),
+                '⇒': lambda x, y: Or(Not(x), y),
+                '⇐': lambda x, y: Or(x, Not(y)),
+                '⇔': lambda x, y: x == y,
+                '+': lambda x, y: x + y,
+                '-': lambda x, y: x - y,
+                '⨯': lambda x, y: x * y,
+                '/': lambda x, y: x / y,
+                '%': lambda x, y: x % y,
+                '^': lambda x, y: x ** y,
+                '=': lambda x, y: x == y,
+                '<': lambda x, y: x < y,
+                '>': lambda x, y: x > y,
+                '≤': lambda x, y: x <= y,
+                '≥': lambda x, y: x >= y,
+                '≠': lambda x, y: x != y
+                }
 
 
 def translate1(self, problem: "Theory", vars={}):
