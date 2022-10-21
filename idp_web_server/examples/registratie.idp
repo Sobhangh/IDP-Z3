@@ -9,38 +9,47 @@ vocabulary environment {
     type Resale := {Less_Than_Three, Three_Or_More}
     type Seller := {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, Erkende_Sociale_Huisvestings_Mpy}
 
-    region : () → Location
+    [EN:the region] region : () → Location
 
 
     // for Social_Dwelling
-    buyer : () → Buyer_Type
+    [EN:the buyer] buyer : () → Buyer_Type
 
-    value: () → ℝ
+    [EN:the value of the real estate] value: () → ℝ
 
-    seller : () → Seller
+    [EN:the seller] seller : () → Seller
     mortgage_loan_allowance : () → 𝔹
 
     // for Heritage
-    type_of_real_estate : () → Real_Estate_Type
-    use : () → Destination
-    monument, heritage_investment, heritage_plan, additional_terms : () → 𝔹
+    [EN:the type of real estate] type_of_real_estate : () → Real_Estate_Type
+    [EN:the intended use] use : () → Destination
+    [EN:it is a monument] monument : () → 𝔹
+    [EN:it is an heritage investment] heritage_investment : () → 𝔹
+    [EN:it is part of an heritage plan] heritage_plan : () → 𝔹
+    [EN:additional terms are satisfied] additional_terms : () → 𝔹
 
     // For Professional_Purchase
-    professional_buyer, professional_declaration_filed, guarantee_satisfied : () → 𝔹
-    additional_security_required, additional_security_satisfied : () → 𝔹
-    resale : () → Resale
-    transaction_type : () → Transaction
-    certification_date_sale : () → Year
+    [EN:the buyer is professional] professional_buyer : () → 𝔹
+    [EN:a professional declaration has been filed] professional_declaration_filed : () → 𝔹
+    [EN:the guarantee is satisfied] guarantee_satisfied : () → 𝔹
+    [EN:additional security is required] additional_security_required : () → 𝔹
+    [EN:additional security is provided] additional_security_satisfied : () → 𝔹
+    [EN:the number of resales] resale : () → Resale
+    [EN:the transaction type] transaction_type : () → Transaction
+    [EN:the date of certification of the sale] certification_date_sale : () → Year
 
     // For Energy_Efficient_Dwelling
-    domicile_established, clean_purchase, first_ownership : () → 𝔹
-    causal_connection, energy_renovation_planned : () → 𝔹
-    term_energy_renovation : () → Year
-    certification_date : () → Year
+    [EN:it will be the domicile of the buyer] domicile_established : () → 𝔹
+    [EN:it is a clean purchase] clean_purchase : () → 𝔹
+    [EN:it is the first ownership of the buyer] first_ownership : () → 𝔹
+    [EN:there is a causal connection] causal_connection : () → 𝔹
+    [EN:energy-saving renovation is planned] energy_renovation_planned : () → 𝔹
+    [EN:the term of the energy-saving renovation] term_energy_renovation : () → Year
+    [EN:the date of certification] certification_date : () → Year
 
     // For Dwelling_For_Social_Renting
-    start_dt_dwelling_for_social_rent : () → Year
-    duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
+    [EN:the date the social renting starts] start_dt_dwelling_for_social_rent : () → Year
+    [EN:the duration of the agreement] duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
 
 }
 
