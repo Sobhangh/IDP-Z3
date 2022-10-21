@@ -1,11 +1,12 @@
 vocabulary {
 
     type Nr_of_sides := {3..4}
-    nr_of_sides, nr_of_vertices: () → Nr_of_sides
+    [EN:the number of edges] nr_of_sides: () → Nr_of_sides
+    [EN:the number of vertices] nr_of_vertices: () → Nr_of_sides
 
 
     type Type := {triangle, quadrilateral}
-    type : () → Type
+    [EN:the type] type : () → Type
 
     type Side_Nr := {1..4}
     length, angle : (Side_Nr) → ℝ
@@ -16,10 +17,11 @@ vocabulary {
         , rectangle
         , square
         , irregular}
-    subtype : () → Subtype
+    [EN:the subtype] subtype : () → Subtype
 
-    convex, equilateral : () → 𝔹
-    perimeter: () → ℝ
+    [EN:it is convex] convex : () → 𝔹
+    [EN:it is equilateral] equilateral : () → 𝔹
+    [EN:the perimeter] perimeter: () → ℝ
 
     // base : () → ℝ
     // height: () → ℝ

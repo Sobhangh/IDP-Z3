@@ -21,7 +21,8 @@ Methods to show a Theory in plain English.
 
 """
 
-from .Expression import ASTNode, AQuantification, AAggregate, Operator, Brackets
+from .Expression import (ASTNode, AQuantification, AAggregate, Operator,
+                         AppliedSymbol, Brackets)
 from .Theory import Theory
 
 
@@ -52,6 +53,7 @@ def EN(self):
                 f"{self.sub_exprs[0].EN()}")
 AAggregate.EN = EN
 
+
 Operator.EN_map =  {'∧': " and ",
                     '∨': " or ",
                     '⇒': " is a sufficient condition for ",
@@ -59,7 +61,6 @@ Operator.EN_map =  {'∧': " and ",
                     '⇔': " iff ",
                     "=": " is ",
                     }
-
 
 def EN(self):
     def parenthesis(precedence, x):
@@ -72,6 +73,16 @@ def EN(self):
     return temp
 Operator.EN = EN
 
+
+def EN(self):
+    en = self.symbol.decl.annotations.get('EN', None)
+    if en:
+        for i in reversed(range(len(self.sub_exprs))):
+            en = en.replace(f'${i}', "{self.sub_exprs[i].EN()}")
+        out = en.format(*self.sub_exprs)
+        return out
+    return str(self)
+AppliedSymbol.EN = EN
 
 def EN(self):
     return f"({self.sub_exprs[0].EN()})"
