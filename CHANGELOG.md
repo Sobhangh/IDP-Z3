@@ -10,8 +10,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
-* fix #123: show Theory in plain English
+* #123: show Theory in plain English
 * fix #216: Internal error due to incorrect type constraint
+
+### Interactive Consultant and Web IDE
+* #123 : show Theory in plain English
+
 
 
 ## [0.10.0] - 2022-10-07

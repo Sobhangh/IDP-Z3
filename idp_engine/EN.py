@@ -23,10 +23,17 @@ Methods to show a Theory in plain English.
 
 from copy import copy
 
+from .Parse import IDP
 from .Parse import Definition, Rule
 from .Expression import (ASTNode, AQuantification, AAggregate, Operator,
                          AComparison, AUnary, AppliedSymbol, Brackets)
 from .Theory import Theory
+
+
+def EN(self):
+    out = "\nTheory: \n".join(Theory(th).EN() for th in self.theories.values())
+    return "Theory: \n" + out
+IDP.EN = EN
 
 
 def EN(self):

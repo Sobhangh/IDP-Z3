@@ -20,6 +20,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   display = false;
   showFileShare = false;
   showFileSave = false;
+  showEnglish = false;
   showExpansions = false;
   showExplanation = false;
   URL = '';
@@ -161,6 +162,11 @@ export class HeaderComponent implements OnInit, AfterViewInit {
           }, {
             label: 'View in IDE', command: () => {
               this.idpService.toggleIDE();
+            }
+          }, {
+            label: 'View in English', command: () => {
+              this.showEnglish = true;
+              this.idpService.getEnglish();
             }
           }]
         },

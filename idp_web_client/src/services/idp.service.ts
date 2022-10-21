@@ -65,6 +65,7 @@ export class IdpService {
 
   public explanation = null;
   public explanationlaws = null;
+  public English = null;
 
   public onEmptyRelevance = new EventEmitter<boolean>();
 
@@ -572,6 +573,12 @@ procedure main() {
     }
   }
 
+  public async getEnglish() {
+    const input = {method: 'getEnglish', active: '', symbol: '',
+                  expanded: false};
+    const outp = await this.call_eval(this.meta, input);
+    this.English = outp['EN']
+  }
   // eval abstract
 
   public async abstract() {
