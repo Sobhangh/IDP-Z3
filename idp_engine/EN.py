@@ -82,7 +82,6 @@ def EN(self):
         and len(self.sub_exprs[0].sub_exprs) == 2
         and self.sub_exprs[0].operator[0] == "="):
         # ~(a=b)
-        print(self)
         new_expr = copy(self.sub_exprs[0])
         new_expr.operator[0] = "≠"
         return new_expr.EN()
@@ -93,12 +92,16 @@ AUnary.EN = EN
 def EN(self):
     en = self.symbol.decl.annotations.get('EN', None)
     if en:
-        for i in reversed(range(len(self.sub_exprs))):
-            en = en.replace(f'${i}', "{self.sub_exprs[i].EN()}")
-        out = en.format(*self.sub_exprs)
-        return out
-    return str(self)
+        out = en.format("", *(e.EN() for e in self.sub_exprs))
+    else:
+        out = f"{self.symbol}({', '.join([x.EN() for x in self.sub_exprs])})"
+    if self.in_enumeration:
+        enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
+    return (f"{out}"
+            f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
+            f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 AppliedSymbol.EN = EN
+
 
 def EN(self):
     return f"({self.sub_exprs[0].EN()})"

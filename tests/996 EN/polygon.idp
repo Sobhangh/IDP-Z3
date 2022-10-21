@@ -9,7 +9,8 @@ vocabulary {
     [EN:the type] type : () → Type
 
     type Side_Nr := {1..4}
-    length, angle : (Side_Nr) → ℝ
+    [EN:length n°{1}] length : (Side_Nr) → ℝ
+    [EN:angle n°{1}] angle : (Side_Nr) → ℝ
 
     type Subtype :=
         { regular_triangle
