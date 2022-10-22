@@ -140,7 +140,7 @@ def EN(self) -> str:
                             if not c.is_type_constraint_for
                             and (not type(c)==AppliedSymbol or c.symbol.name != "relevant")).replace("  ", " ")
     definitions = '\n'.join(f"- {d.EN()}" for d in self.definitions)
-    return (constraints + "\n" + definitions)
+    return (definitions + "\n" + constraints)
 Theory.EN = EN
 
 

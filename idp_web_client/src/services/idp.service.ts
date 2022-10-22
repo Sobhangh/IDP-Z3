@@ -574,7 +574,8 @@ procedure main() {
   }
 
   public async getEnglish() {
-    const input = {method: 'getEnglish', active: '', symbol: '',
+    const selection = this.editor.getModel().getValueInRange(this.editor.getSelection()).trim();
+    const input = {method: 'getEnglish', active: '', symbol: selection,
                   expanded: false};
     const outp = await this.call_eval(this.meta, input);
     this.English = outp['EN']

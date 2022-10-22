@@ -61,7 +61,7 @@ theory {
         ∨ subtype() = irregular.
 
     [Squares and rectangles are quadrilaterals]
-    subtype() = square ∨ subtype() = rectangle ⇒ nr_of_sides() = 4.
+    (subtype() = square ∨ subtype() = rectangle) ⇒ nr_of_sides() = 4.
 
     [A regular triangle is an equilateral triangle]
     subtype() = regular_triangle ⇔ nr_of_sides() = 3 ∧ equilateral().
