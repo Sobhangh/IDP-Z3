@@ -181,4 +181,9 @@ Long info
     ``[long:this is a long comment]`` specifies the long comment of the symbol.
     This comment is shown when the user clicks the info icon in the header of the symbol's box.
 
+English expression
+    ``[EN:{1} is a prime]`` specifies the English expression for ``prime: Int -> Bool``.
+    This information is used to generate the informal reading of a Theory.
+    The number between brackets represents a placeholder for the English reading of the nth argument.
+
 

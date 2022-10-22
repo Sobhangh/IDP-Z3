@@ -292,7 +292,17 @@ class eval(Resource):
                         errors.append(error)
                     out = errors
                 elif method == "getEnglish":
-                    out = {'EN': idpOf(args['code']).EN()}
+                    idpModel = IDP.from_str(args['code'])
+                    if args['symbol'] != "":  # check only that sentence
+                        voc = (idpModel.vocabularies['decision'] if len(idpModel.theories) == 2 else
+                               idpModel.vocabulary)
+                        newTheory = (str(voc)
+                                     + "theory {\n"
+                                     + args['symbol']
+                                     + "\n}\n"
+                                     )
+                        idpModel = IDP.from_str(newTheory)
+                    out = {'EN': idpModel.EN()}
                 else:
                     state = State.make(idpOf(args['code']),
                                        args['previous_active'],
