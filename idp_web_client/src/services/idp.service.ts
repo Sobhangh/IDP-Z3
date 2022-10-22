@@ -560,18 +560,7 @@ procedure main() {
     }
   }
 
-  // eval checkCode
-
-  public async checkCode() {
-    const selection = this.editor.getModel().getValueInRange(this.editor.getSelection()).trim();
-    const input = {method: 'checkCode', active: '', symbol: selection,
-                  expanded: false};
-    const outp = await this.call_eval(this.meta, input);
-
-    if (typeof outp !== 'string') { // no error
-      alert(outp["result"])
-    }
-  }
+  // eval getEnglish
 
   public async getEnglish() {
     const selection = this.editor.getModel().getValueInRange(this.editor.getSelection()).trim();

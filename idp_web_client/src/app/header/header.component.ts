@@ -340,10 +340,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     window['pckry'].layout();
   }
 
-  checkCode() {
-    this.idpService.checkCode();
-  }
-
   copyURL() {
     const selBox = document.createElement('textarea');
     selBox.style.position = 'fixed';

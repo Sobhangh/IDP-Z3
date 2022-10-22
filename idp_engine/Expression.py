@@ -1008,7 +1008,7 @@ class AppliedSymbol(Expression):
     """Represents a symbol applied to arguments
 
     Args:
-        symbol (Expression): the symbol to be applied to arguments
+        symbol (SymbolExpr): the symbol to be applied to arguments
 
         is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
 
