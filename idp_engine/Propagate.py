@@ -183,7 +183,7 @@ def _set_consequences_get_changed_choices(self):
     # clear consequences, as these might not be cleared by add_given when
     # running via CLI
     for a in self.assignments.values():
-        if a.status in [S.CONSEQUENCE]:
+        if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
             self.assignments.assert__(a.sentence, None, S.UNKNOWN)
 
     removed_choices = {a.sentence.code: a for a in self.previous_assignments.values()

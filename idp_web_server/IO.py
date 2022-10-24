@@ -128,11 +128,6 @@ def load_json(assignments, jsonstr: str, keep_defaults: bool):
                     if json_atom["value"] != '' and atom.status == S.UNKNOWN:
                         value = str_to_IDP(sentence, str(json_atom["value"]))
                         assignments.assert__(sentence, value, status)
-                        if json_atom["typ"] != "Bool":
-                            code = f"{sentence.code} = {str(value)}"
-                            if code in assignments:
-                                atom = assignments[code].sentence
-                                assignments.assert__(atom, TRUE, status)
 
 #################
 # response to client

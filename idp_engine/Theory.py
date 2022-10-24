@@ -764,7 +764,18 @@ class Theory(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
+        # consider every value in range
+        atoms = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
+        todos = {a.code: a for a in atoms}
+
+        # initialize the forbidden values
+        forbidden = set(str(e.sub_exprs[1]) for e in todos.values()
+                        if self.assignments[str(e)].status in [S.GIVEN]
+                        and self.assignments[str(e)].value.same_as(FALSE))
+
         #  remove current assignments to same term
+        backup = self.assignments
+        self.assignments = self.assignments.copy()
         removed = []
         if self.assignments[term].value:
             for k,a in self.assignments.items():
@@ -774,14 +785,6 @@ class Theory(object):
                     self.assert_(k, None, S.UNKNOWN)
                     removed.append(a)
 
-        # consider every value in range
-        atoms = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
-        todos = {a.code: a for a in atoms}
-
-        # deetermine the forbidden values
-        forbidden = set(str(e.sub_exprs[1]) for e in todos.values()
-                        if self.assignments[str(e)].status in [S.GIVEN]
-                        and self.assignments[str(e)].value.same_as(FALSE))
         for ass in self._propagate(given_todo=todos):
             if isinstance(ass, str):
                 continue
@@ -789,8 +792,7 @@ class Theory(object):
                 forbidden.add(str(ass.sentence.sub_exprs[1]))
 
         # restore the assignments
-        for a in removed:
-            self.assignments[a.sentence.code] = a
+        self.assignments = backup
 
         return [str(e.sub_exprs[1]) for e in todos.values()
                 if str(e.sub_exprs[1]) not in forbidden]
