@@ -25,14 +25,15 @@ from copy import copy
 
 from .Parse import IDP
 from .Parse import Definition, Rule
-from .Expression import (ASTNode, AIfExpr, AQuantification, AAggregate, Operator,
-                         AComparison, AUnary, AppliedSymbol, Brackets)
+from .Expression import (ASTNode, AIfExpr, Quantee, AQuantification, AAggregate,
+                         Operator, AComparison, AUnary, AppliedSymbol, Brackets)
 from .Theory import Theory
 
 
 def EN(self):
-    out = "\nTheory: \n".join(Theory(th).EN() for th in self.theories.values())
-    return "Theory: \n" + out
+    out = "\n".join(f'Theory {name}:\n{Theory(th).EN()}\n'
+                    for name, th in self.theories.items())
+    return out
 IDP.EN = EN
 
 
@@ -66,8 +67,18 @@ AIfExpr.EN = EN
 
 
 def EN(self):
+    signature = ("" if len(self.sub_exprs) <= 1 else
+                    f"[{','.join(t.EN() for t in self.sub_exprs[1:-1])}->{self.sub_exprs[-1].EN()}]"
+    )
+    return (f"{','.join(str(v) for vs in self.vars for v in vs)}"
+            f"{f' in {self.sub_exprs[0]}' if self.sub_exprs else ''}"
+            f"{signature}")
+Quantee.EN = EN
+
+
+def EN(self):
     self = self.original
-    vars = ','.join([f"{q}" for q in self.quantees])
+    vars = ','.join([f"{q.EN()}" for q in self.quantees])
     if self.q == '∀':
         return f"for every {vars}, it is true that {self.sub_exprs[0].EN()}"
     else:
@@ -77,7 +88,7 @@ AQuantification.EN = EN
 
 def EN(self):
     self = self.original
-    vars = ",".join([f"{q}" for q in self.quantees])
+    vars = ",".join([f"{q.EN()}" for q in self.quantees])
     if self.aggtype in ['sum', 'min', 'max']:
         return (f"the {self.aggtype} of "
                 f"{self.sub_exprs[0].EN()} "
@@ -92,7 +103,7 @@ Operator.EN_map =  {'∧': " and ",
                     '∨': " or ",
                     '⇒': " is a sufficient condition for ",
                     '⇐': " is a necessary condition for ",
-                    '⇔': " iff ",
+                    '⇔': " if and only if ",
                     "=": " is ",
                     "≠": " is not ",
                     }
@@ -147,12 +158,14 @@ Brackets.EN = EN
 def EN(self) -> str:
     """returns a string containing the Theory in controlled English
     """
-    constraints = '\n'.join(f"- {c.original.EN()}." for c in self.constraints.values()
+    constraints = '\n'.join(f"- {'['+c.annotations['reading']+']  ' if c.annotations['reading'] else ''}"
+                            f"{c.original.EN()}."
+                            for c in self.constraints.values()
                             if not c.is_type_constraint_for
                             and (not type(c)==AppliedSymbol or c.symbol.decl.name != "relevant")
                             ).replace("  ", " ")
     definitions = '\n'.join(f"- {d.EN()}" for d in self.definitions)
-    return (definitions + "\n" + constraints)
+    return (definitions + ("\n" if definitions else '') + constraints)
 Theory.EN = EN
 
 
