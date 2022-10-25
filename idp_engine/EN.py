@@ -109,6 +109,7 @@ Operator.EN_map =  {'∧': " and ",
                     }
 
 def EN(self):
+    self = self.original  # for reverse implication
     def parenthesis(precedence, x):
         return f"({x.EN()})" if type(x).PRECEDENCE <= precedence else f"{x.EN()}"
     precedence = type(self).PRECEDENCE
