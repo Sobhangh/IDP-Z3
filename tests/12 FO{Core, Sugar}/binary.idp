@@ -3,10 +3,13 @@ vocabulary {
 	edge: (node ⨯ node) → Bool
 	var x in node
 	var y in node
+    type Platform := {P1, P2, P3}
+    steel: Platform * Int -> Bool
 }
 theory {
 	0 < #{(x,y) in edge: true}.
         ! (x,y) in edge: true.
+    ! (p, t) in steel: 0 < t.
 }
 procedure main() {
 	print(Theory(T).formula())

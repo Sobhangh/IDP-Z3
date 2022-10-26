@@ -7,4 +7,5 @@ And(0 <
     If(edge(b, c), 1, 0) +
     If(edge(c, a), 1, 0) +
     If(edge(c, b), 1, 0) +
-    If(edge(c, c), 1, 0))
+    If(edge(c, c), 1, 0),
+    ForAll([c!0, c!1], Or(Not(steel(c!0, c!1)), 0 < c!1)))
