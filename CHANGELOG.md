@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 * fix #216: Internal error due to incorrect type constraint
+* fix #219: declared variable in binary quantification
 
 
 ## [0.10.0] - 2022-10-07

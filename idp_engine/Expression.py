@@ -674,6 +674,7 @@ class Quantee(Expression):
         self.arity = None
         for i, v in enumerate(self.vars):
             if hasattr(v, 'vars'):  # varTuple
+                self.check(1 < len(v.vars), f"Can't have singleton in binary quantification")
                 self.vars[i] = v.vars
                 self.arity = len(v.vars) if self.arity == None else self.arity
             else:

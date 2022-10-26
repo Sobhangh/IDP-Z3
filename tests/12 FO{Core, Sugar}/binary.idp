@@ -1,0 +1,13 @@
+vocabulary {
+	type node := {a,b,c}
+	edge: (node ⨯ node) → Bool
+	var x in node
+	var y in node
+}
+theory {
+	0 < #{(x,y) in edge: true}.
+        ! (x,y) in edge: true.
+}
+procedure main() {
+	print(Theory(T).formula())
+}
