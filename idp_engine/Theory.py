@@ -764,26 +764,38 @@ class Theory(object):
         range = termE.decl.range
         assert range, f"Can't determine range on infinite domains"
 
+        # consider every value in range
+        atoms = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
+        todos = {a.code: a for a in atoms}
+
+        # initialize the forbidden values
+        forbidden = set(str(e.sub_exprs[1]) for e in todos.values()
+                        if self.assignments[str(e)].status in [S.GIVEN]
+                        and self.assignments[str(e)].value.same_as(FALSE))
+
         #  remove current assignments to same term
+        backup = self.assignments
+        self.assignments = self.assignments.copy()
+        removed = []
         if self.assignments[term].value:
             for k,a in self.assignments.items():
                 if (a.sentence.is_assignment and
                         a.sentence.code.startswith(term) and
                         a.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]):
                     self.assert_(k, None, S.UNKNOWN)
+                    removed.append(a)
 
-        # consider every value in range
-        atoms = [Assignment(termE, val, S.UNKNOWN).formula() for val in range]
-        todos = {a.code: a for a in atoms}
-
-        forbidden = set()
         for ass in self._propagate(given_todo=todos):
             if isinstance(ass, str):
                 continue
             if ass.value.same_as(FALSE):
                 forbidden.add(str(ass.sentence.sub_exprs[1]))
 
-        return [str(e.sub_exprs[1]) for e in todos.values() if str(e.sub_exprs[1]) not in forbidden]
+        # restore the assignments
+        self.assignments = backup
+
+        return [str(e.sub_exprs[1]) for e in todos.values()
+                if str(e.sub_exprs[1]) not in forbidden]
 
     def explain(self,
                 consequence: Optional[str] = None
