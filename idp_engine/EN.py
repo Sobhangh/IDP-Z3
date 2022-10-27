@@ -28,6 +28,7 @@ from .Parse import Definition, Rule
 from .Expression import (ASTNode, AIfExpr, Quantee, AQuantification, AAggregate,
                          Operator, AComparison, AUnary, AppliedSymbol, Brackets)
 from .Theory import Theory
+from .utils import NEWL
 
 
 def EN(self):
@@ -159,7 +160,9 @@ Brackets.EN = EN
 def EN(self) -> str:
     """returns a string containing the Theory in controlled English
     """
-    constraints = '\n'.join(f"- {'['+c.annotations['reading']+']  ' if c.annotations['reading'] else ''}"
+    def annot(c):
+        return f"[{c.annotations['reading']}]{NEWL}    " if c.annotations['reading'] else ''
+    constraints = '\n'.join(f"- {annot(c)}"
                             f"{c.original.EN()}."
                             for c in self.constraints.values()
                             if not c.is_type_constraint_for
