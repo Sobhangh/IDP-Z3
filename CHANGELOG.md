@@ -17,8 +17,6 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 ### Interactive Consultant and Web IDE
 
 * fix #210: use latest grammar in folint
-
-### Interactive Consultant and Web IDE
 * fix #217: issue with dropdown in IC
 
 
