@@ -14,7 +14,7 @@ Comment:
 Shebang: '#!' /.*$/;
 
 Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
-  Declaration: TypeDeclaration | SymbolDeclaration | VarDeclaration | Import;
+  Declaration: TypeDeclaration | SymbolDeclaration | VarDeclaration |Import;
 
     Import: 'import' (name=ID);
 
@@ -26,11 +26,11 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=ConstructedFrom))?;
 
     SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
-          ( '(' sorts*=Subtype[/[*⨯]/] ')' | sorts*=Subtype[/[*⨯]/] )
-          ('->' | '→') out=Subtype;
+          ( '(' sorts*=Type[/[*⨯]/] ')' | sorts*=Type[/[*⨯]/] )
+          ('->' | '→') out=Type;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
 
-    VarDeclaration: 'var' name=Symbol ('in' | '∈') subtype=Subtype;
+    VarDeclaration: 'var' name=Symbol ('in' | '∈') subtype=Type;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
@@ -46,14 +46,14 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
         definiendum=AppliedSymbol
         ('=' out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
-      Quantee: ( vars+=Variable[','] ( ('in' | '∈') (subtype=Subtype | sort=SymbolExpr) )?
-               | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Subtype | sort=SymbolExpr) )?);
+      Quantee: ( vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
+               | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?);
           Variable: name=/`?[^\d\W]\w*\b/;
           VarTuple: '(' vars+=Variable[','] ')';
-          Subtype: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
+          Type: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
             ( '['
-              ( '(' ins*=Subtype[/[*⨯]/] ')' | ins*=Subtype[/[*⨯]/] )
-              ('->' | '→') out=Subtype
+              ( '(' ins*=Type[/[*⨯]/] ')' | ins*=Type[/[*⨯]/] )
+              ('->' | '→') out=Type
               ']'
             )?;
 
