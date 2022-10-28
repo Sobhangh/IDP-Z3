@@ -1,19 +1,24 @@
 vocabulary environment {
+    [EN:the number of participants]
     nr_of_participants: () → ℤ
 
     [short:Applies to all participants]
+    [EN:all participants have the Covid Safe ticket]
     have_Covid_Safe_Ticket: () → 𝔹
 
     [short:Applies to all participants]
+    [EN:all participants have masks]
     have_masks: () → 𝔹
 }
 vocabulary decision {
     import environment
 
     type Activity := {Outdoor_sport, Indoor_sport, Restaurant, Cinema, Theater, None}
+    [EN:the activity]
     activity: () → Activity
 
     [short:Hour of the day when the activity ends]
+    [EN:the time the activity ends]
     end_time: () → ℤ
 }
 theory environment:environment {

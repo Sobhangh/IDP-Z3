@@ -285,6 +285,7 @@ Definition.get_instantiables = get_instantiables
 # Class Rule  #######################################################
 
 def annotate(self, voc, q_vars):
+    self.original = copy(self)
     self.check(not self.definiendum.symbol.is_intentional(),
                 f"No support for intentional objects in the head of a rule: "
                 f"{self}")
@@ -633,9 +634,9 @@ AEquivalence.annotate1 = annotate1
 
 def annotate(self, voc, q_vars):
     # reverse the implication
-    self.sub_exprs.reverse()
-    out = AImplication(sub_exprs=self.sub_exprs,
+    out = AImplication(sub_exprs=list(reversed(list(self.sub_exprs))),
                         operator=['⇒']*len(self.operator))
+    out.original = self
     if hasattr(self, "block"):
         out.block = self.block
     return out.annotate(voc, q_vars)

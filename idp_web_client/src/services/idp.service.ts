@@ -65,6 +65,7 @@ export class IdpService {
 
   public explanation = null;
   public explanationlaws = null;
+  public English = null;
 
   public onEmptyRelevance = new EventEmitter<boolean>();
 
@@ -559,19 +560,15 @@ procedure main() {
     }
   }
 
-  // eval checkCode
+  // eval getEnglish
 
-  public async checkCode() {
+  public async getEnglish() {
     const selection = this.editor.getModel().getValueInRange(this.editor.getSelection()).trim();
-    const input = {method: 'checkCode', active: '', symbol: selection,
+    const input = {method: 'getEnglish', active: '', symbol: selection,
                   expanded: false};
     const outp = await this.call_eval(this.meta, input);
-
-    if (typeof outp !== 'string') { // no error
-      alert(outp["result"])
-    }
+    this.English = outp['EN']
   }
-
   // eval abstract
 
   public async abstract() {

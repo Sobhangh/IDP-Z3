@@ -255,27 +255,8 @@ class eval(Resource):
                 args = parser.parse_args()
                 method = args['method']
                 out = {}
-                if method == "checkCode":
-                    idpModel = IDP.from_str(args['code'])
-                    if args['symbol'] != "":  # check only that sentence
-                        newTheory = (str(idpModel.vocabulary)
-                                     + "theory {\n"
-                                     + args['symbol']
-                                     + "\n}\n"
-                                     )
-                        idpModel = IDP.from_str(newTheory)
-                    # remove enumerations of functions/predicates
-                    for block in list(idpModel.theories.values()) + list(idpModel.structures.values()):
-                        block.interpretations = {k:v
-                            for k,v in block.interpretations.items()
-                            if v.is_type_enumeration == True}
-                    assert len(idpModel.theories) == 1 and len(idpModel.structures)<=1, \
-                        "Can't check code containing more than 1 theory or structure."
-                    state = State(idpModel)  # don't use cache.  May raise an error
-                    next(state.expand(max=1, timeout_seconds=0))
-                    out = {"result": "ok"}
 
-                elif method == "lint":
+                if method == "lint":
                     # Run FOLint, the FO(.) linter.
                     lint = lint_fo(args['code'])
 
@@ -291,6 +272,18 @@ class eval(Resource):
                                  }
                         errors.append(error)
                     out = errors
+                elif method == "getEnglish":
+                    idpModel = IDP.from_str(args['code'])
+                    if args['symbol'] != "":  # check only that sentence
+                        voc = (idpModel.vocabularies['decision'] if len(idpModel.theories) == 2 else
+                               idpModel.vocabulary)
+                        newTheory = (str(voc)
+                                     + "theory {\n"
+                                     + args['symbol']
+                                     + "\n}\n"
+                                     )
+                        idpModel = IDP.from_str(newTheory)
+                    out = {'EN': idpModel.EN()}
                 else:
                     state = State.make(idpOf(args['code']),
                                        args['previous_active'],

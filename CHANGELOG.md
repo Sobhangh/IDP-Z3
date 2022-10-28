@@ -16,6 +16,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### Interactive Consultant and Web IDE
 
+* #123: show Theory in plain English
 * fix #210: use latest grammar in folint
 * fix #217: issue with dropdown in IC
 
