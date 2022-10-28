@@ -10,3 +10,4 @@ from .Theory import Propagation, Theory
 from .Propagate import Done
 from .Relevance import Done
 from .Assignments import Status, Assignment, Assignments
+from .EN import Done

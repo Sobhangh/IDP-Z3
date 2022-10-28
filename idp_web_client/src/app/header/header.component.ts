@@ -20,6 +20,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   display = false;
   showFileShare = false;
   showFileSave = false;
+  showEnglish = false;
   showExpansions = false;
   showExplanation = false;
   URL = '';
@@ -162,6 +163,11 @@ export class HeaderComponent implements OnInit, AfterViewInit {
             label: 'View in IDE', command: () => {
               this.idpService.toggleIDE();
             }
+          }, {
+            label: 'View theory in English', command: () => {
+              this.showEnglish = true;
+              this.idpService.getEnglish();
+            }
           }]
         },
         {
@@ -245,8 +251,8 @@ export class HeaderComponent implements OnInit, AfterViewInit {
           command: () => {this.idpService.run(); }
         },
         {
-          label: 'Check code',
-          command: () => {this.idpService.checkCode(); }
+          label: 'View in English',
+          command: () => {this.showEnglish = true; this.idpService.getEnglish(); }
         },
         {
           label: 'View in IC',
@@ -332,10 +338,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
   layout() {
     window['pckry'].layout();
-  }
-
-  checkCode() {
-    this.idpService.checkCode();
   }
 
   copyURL() {

@@ -723,6 +723,7 @@ class Rule(ASTNode):
     def __repr__(self):
         return (f"∀ {','.join(str(q) for q in self.quantees)}: "
                 f"{self.definiendum} "
+                f"{(' = ' + str(self.out)) if self.out else ''}"
                 f"← {str(self.body)}")
 
     def instantiate_definition(self, new_args, theory):

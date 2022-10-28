@@ -87,12 +87,12 @@ Returns:
 
 Arguments:
 
-* **method**: string containing the method to execute. Supported methods are: *checkCode*, *propagate*, *get_range*, *modelexpand*, *explain*, *minimize*, and *abstract*.
+* **method**: string containing the method to execute. Supported methods are: *getEnglish*, *propagate*, *get_range*, *modelexpand*, *explain*, *minimize*, and *abstract*.
 * **code**: the IDP code.
 * **active**: the active assignments, already input in the interface.
 * **previous_active**: the assignments after the last full propagation.
 * **ignore**: user-disabled laws to ignore.
-* **symbol**: the name of a symbol, only used for *minimize*, *explain* and *checkCode*.
+* **symbol**: the name of a symbol, only used for *minimize*, *explain*.
 * **value**: a value, only used for *explain*.
 * **field**: the applied symbol for which a range must be determined, only for *get_range*.
 * **minimize**: *true* for minimization, *false* for maximization.

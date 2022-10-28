@@ -9,38 +9,47 @@ vocabulary environment {
     type Resale := {Less_Than_Three, Three_Or_More}
     type Seller := {Vlaams_Woningfonds, Gelijksoortige_Rechtspersoon_EER, Mpy_Erkend_Door_VMSW, Vlaamse_Mpy_Voor_Sociaal_Wonen, Erkende_Sociale_Huisvestings_Mpy}
 
-    region : () → Location
+    [EN:the region] region : () → Location
 
 
     // for Social_Dwelling
-    buyer : () → Buyer_Type
+    [EN:the buyer] buyer : () → Buyer_Type
 
-    value: () → ℝ
+    [EN:the value of the real estate] value: () → ℝ
 
-    seller : () → Seller
+    [EN:the seller] seller : () → Seller
     mortgage_loan_allowance : () → 𝔹
 
     // for Heritage
-    type_of_real_estate : () → Real_Estate_Type
-    use : () → Destination
-    monument, heritage_investment, heritage_plan, additional_terms : () → 𝔹
+    [EN:the type of real estate] type_of_real_estate : () → Real_Estate_Type
+    [EN:the intended use] use : () → Destination
+    [EN:it is a monument] monument : () → 𝔹
+    [EN:it is an heritage investment] heritage_investment : () → 𝔹
+    [EN:it is part of an heritage plan] heritage_plan : () → 𝔹
+    [EN:additional terms are satisfied] additional_terms : () → 𝔹
 
     // For Professional_Purchase
-    professional_buyer, professional_declaration_filed, guarantee_satisfied : () → 𝔹
-    additional_security_required, additional_security_satisfied : () → 𝔹
-    resale : () → Resale
-    transaction_type : () → Transaction
-    certification_date_sale : () → Year
+    [EN:the buyer is professional] professional_buyer : () → 𝔹
+    [EN:a professional declaration has been filed] professional_declaration_filed : () → 𝔹
+    [EN:the guarantee is satisfied] guarantee_satisfied : () → 𝔹
+    [EN:additional security is required] additional_security_required : () → 𝔹
+    [EN:additional security is provided] additional_security_satisfied : () → 𝔹
+    [EN:the number of resales] resale : () → Resale
+    [EN:the transaction type] transaction_type : () → Transaction
+    [EN:the date of certification of the sale] certification_date_sale : () → Year
 
     // For Energy_Efficient_Dwelling
-    domicile_established, clean_purchase, first_ownership : () → 𝔹
-    causal_connection, energy_renovation_planned : () → 𝔹
-    term_energy_renovation : () → Year
-    certification_date : () → Year
+    [EN:it will be the domicile of the buyer] domicile_established : () → 𝔹
+    [EN:it is a clean purchase] clean_purchase : () → 𝔹
+    [EN:it is the first ownership of the buyer] first_ownership : () → 𝔹
+    [EN:there is a causal connection] causal_connection : () → 𝔹
+    [EN:energy-saving renovation is planned] energy_renovation_planned : () → 𝔹
+    [EN:the term of the energy-saving renovation] term_energy_renovation : () → Year
+    [EN:the date of certification] certification_date : () → Year
 
     // For Dwelling_For_Social_Renting
-    start_dt_dwelling_for_social_rent : () → Year
-    duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
+    [EN:the date the social renting starts] start_dt_dwelling_for_social_rent : () → Year
+    [EN:the duration of the agreement] duration_of_agreement : () → Agreement_Dwelling_For_Social_Renting
 
 }
 
@@ -50,9 +59,9 @@ vocabulary decision {
     type Registration_type := {Family_Dwelling, Social_Dwelling, Social_Purpose, Exchange_Unbuilt_Ground, Professional_Purchase, Energy_Efficient_Dwelling, Heritage, Dwelling_For_Social_Renting, Other}
     type Tax_Rate := {1, 2, 4, 6, 7, 10, 12}
 
-    registration_type : () → Registration_type
-    tax_rate : () → Tax_Rate
-    tax_amount : () → ℝ
+    [EN:the registration type] registration_type : () → Registration_type
+    [EN:the tax rate] tax_rate : () → Tax_Rate
+    [EN:the tax amount] tax_amount : () → ℝ
 }
 
 theory environment:environment {
@@ -105,66 +114,80 @@ theory decision:decision {
     // registration types currently only defined for Flanders.
     // When a choice is made for walonia or brussels, types can still be entered with a view to expandability
 
-    [An Heritage is a residential monument ∈ an heritage plan (with additional terms), used as family dwelling]
-    registration_type() = Heritage ⇒ type_of_real_estate() = Residential
-                                     ∧ monument()
-                                     ∧ use() = As_Family_Dwelling
-                                     ∧ heritage_investment()
-                                     ∧ heritage_plan()
-                                     ∧ additional_terms().
+    [An Heritage is a residential monument in an heritage plan (with additional terms), used as family dwelling]
+    ((type_of_real_estate() = Residential
+    ∧ monument()
+    ∧ use() = As_Family_Dwelling
+    ∧ heritage_investment()
+    ∧ heritage_plan()
+    ∧ additional_terms())
+    ⇐ (registration_type() = Heritage)).
 
     [A social dwelling is a residential real estate sold by Vlaamse_Mpy_Voor_Sociaal_Wonen or Erkende_Sociale_Huisvestings_Mpy to a natural person for social housing with a mortgage allowance]
-    registration_type() = Social_Dwelling ⇒ buyer() = Natural_Person
-                                            ∧ type_of_real_estate() = Residential
-                                            ∧ use() = Social_Housing
-                                            ∧ (seller() = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ seller() = Erkende_Sociale_Huisvestings_Mpy)
-                                            ∧ mortgage_loan_allowance().
+    ((buyer() = Natural_Person
+    ∧ type_of_real_estate() = Residential
+    ∧ use() = Social_Housing
+    ∧ (seller() = Vlaamse_Mpy_Voor_Sociaal_Wonen ∨ seller() = Erkende_Sociale_Huisvestings_Mpy)
+    ∧ mortgage_loan_allowance())
+    ⇐ (registration_type() = Social_Dwelling)).
 
     [A Professional purchase is a non-public sale to a professional buyer for resale with a certification not older than 8 years]
-    registration_type() = Professional_Purchase ⇒ professional_buyer()
-                                                  ∧ transaction_type()  ≠ Public_Sale
-                                                  ∧ use() = For_Resale
-                                                  ∧ certification_date_sale() = certification_date() + 8.
+    ((professional_buyer()
+    ∧ transaction_type() ≠ Public_Sale
+    ∧ use() = For_Resale
+    ∧ certification_date_sale() = certification_date() + 8)
+    ⇐ (registration_type() = Professional_Purchase)).
 
-    registration_type() = Energy_Efficient_Dwelling ⇒ type_of_real_estate() = Residential
-                                                      ∧ buyer() = Natural_Person
-                                                      ∧ domicile_established()
-                                                      ∧ clean_purchase()
-                                                      ∧ (first_ownership() ∨ causal_connection())
-                                                      ∧ energy_renovation_planned()
-                                                      ∧ term_energy_renovation() = certification_date() + 5.
+    [Rule for Energy Efficient Dwelling]
+    ((type_of_real_estate() = Residential
+    ∧ buyer() = Natural_Person
+    ∧ domicile_established()
+    ∧ clean_purchase()
+    ∧ (first_ownership() ∨ causal_connection())
+    ∧ energy_renovation_planned()
+    ∧ term_energy_renovation() = certification_date() + 5)
+    ⇐ (registration_type() = Energy_Efficient_Dwelling)).
 
     [A sale by the Vlaams Woning Fonds for community purpose is for social purpose.]
-    registration_type() = Social_Purpose ⇒ (seller() = Mpy_Erkend_Door_VMSW
-                                            ∨ seller() = Vlaams_Woningfonds
-                                            ∨ seller() = Gelijksoortige_Rechtspersoon_EER)
-                                           ∧ use() = Community_Purpose.
+    ((seller() in {Mpy_Erkend_Door_VMSW,
+                Vlaams_Woningfonds,
+                Gelijksoortige_Rechtspersoon_EER}
+    ∧ use() = Community_Purpose)
+    ⇐ (registration_type() = Social_Purpose)).
 
-    registration_type() = Exchange_Unbuilt_Ground ⇒ additional_terms()
-                                                    ∧ ¬monument().
+    [Rule for Exchange Unbuilt Ground]
+    ((additional_terms()
+    ∧ ¬monument())
+    ⇐ (registration_type() = Exchange_Unbuilt_Ground)).
 
-    registration_type() = Family_Dwelling ⇒ type_of_real_estate() = Residential
-                                            ∧ buyer() = Natural_Person
-                                            ∧ domicile_established()
-                                            ∧ clean_purchase()
-                                            ∧ (first_ownership() ∨ causal_connection())
-                                            ∧ (¬energy_renovation_planned() ∨ term_energy_renovation() ≠ certification_date() + 5).
+    [Rule for Family Dwelling]
+    ((type_of_real_estate() = Residential
+    ∧ buyer() = Natural_Person
+    ∧ domicile_established()
+    ∧ clean_purchase()
+    ∧ (first_ownership() ∨ causal_connection())
+    ∧ (¬energy_renovation_planned() ∨ term_energy_renovation() ≠ certification_date() + 5))
+    ⇐ (registration_type() = Family_Dwelling)).
 
-    registration_type() = Dwelling_For_Social_Renting ⇒ type_of_real_estate() = Residential
-                                                        ∧ use() = Social_Renting
-                                                        ∧ start_dt_dwelling_for_social_rent() = certification_date() + 3
-                                                        ∧ duration_of_agreement() = Less_Than_9_years.
+    [Rule for social renting]
+    ((type_of_real_estate() = Residential
+    ∧ use() = Social_Renting
+    ∧ start_dt_dwelling_for_social_rent() = certification_date() + 3
+    ∧ duration_of_agreement() = Less_Than_9_years)
+    ⇐ (registration_type() = Dwelling_For_Social_Renting)).
 
-    // @EXPLAIN: registration_type cannot be Other
-    registration_type() = Other ⇒ registration_type() ≠ Family_Dwelling
-                                  ∧ registration_type() ≠ Social_Dwelling
-                                  ∧ registration_type() ≠ Energy_Efficient_Dwelling
-                                  ∧ registration_type() ≠ Dwelling_For_Social_Renting
-                                  ∧ registration_type() ≠ Heritage
-                                  ∧ registration_type() ≠ Professional_Purchase
-                                  ∧ registration_type() ≠ Social_Purpose
-                                  ∧ registration_type() ≠ Exchange_Unbuilt_Ground.
+    [Other]
+    ((registration_type() ≠ Family_Dwelling
+    ∧ registration_type() ≠ Social_Dwelling
+    ∧ registration_type() ≠ Energy_Efficient_Dwelling
+    ∧ registration_type() ≠ Dwelling_For_Social_Renting
+    ∧ registration_type() ≠ Heritage
+    ∧ registration_type() ≠ Professional_Purchase
+    ∧ registration_type() ≠ Social_Purpose
+    ∧ registration_type() ≠ Exchange_Unbuilt_Ground)
+    ⇐ (registration_type() = Other)).
 
+    [Tax amount calculation]
     tax_amount() = value() ⨯ tax_rate() / 100.
 
 }
