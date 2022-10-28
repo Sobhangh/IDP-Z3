@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 * fix #216: Internal error due to incorrect type constraint
+* fix #220: Value added twice to predicate output
 
 ### Interactive Consultant and Web IDE
 * fix #217: issue with dropdown in IC
