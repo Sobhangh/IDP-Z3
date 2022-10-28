@@ -6,20 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased yet
 
-### IDP-Z3
-
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
-* #123: show Theory in plain English
+### IDP-Z3
+
 * fix #216: Internal error due to incorrect type constraint
 * fix #218: binary quantification over infinite domain
 * fix #219: declared variable in binary quantification
 
 ### Interactive Consultant and Web IDE
+
 * #123 : show Theory in plain English
-
-
-### Interactive Consultant and Web IDE
 * fix #217: issue with dropdown in IC
 
 
