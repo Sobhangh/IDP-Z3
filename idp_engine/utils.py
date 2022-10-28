@@ -24,6 +24,7 @@ from collections.abc import Iterable
 from datetime import datetime
 from json import JSONEncoder
 import time
+import tempfile
 from enum import Enum, auto
 
 
@@ -33,7 +34,7 @@ from enum import Enum, auto
 
 CO_CONSTR_RECURSION_DEPTH = 3
 MAX_QUANTIFIER_EXPANSION = 20
-RUN_FILE = "/tmp/IDP_Z3_run_log.txt"  # must be in /tmp folder for GAE
+RUN_FILE = tempfile.gettempdir() + "/IDP_Z3_run_log.txt"  # must be in /tmp folder for GAE
 
 class Semantics(Enum):
     """Semantics for inductive definitions"""

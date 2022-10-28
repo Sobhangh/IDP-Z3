@@ -12,10 +12,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 * #123: show Theory in plain English
 * fix #216: Internal error due to incorrect type constraint
-
-### Interactive Consultant and Web IDE
-* #123 : show Theory in plain English
-
+* fix #217: issue with dropdown in IC
 
 
 ## [0.10.0] - 2022-10-07
