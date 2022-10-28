@@ -258,7 +258,8 @@ class Assignments(dict):
                 else:
                     # Symbol is a function.
                     c = f"{c} -> {str(a.value)}"
-                out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
+                if c not in out.get(a.symbol_decl.name, []):
+                    out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
 
         model_str = ""
         for k, a in out.items():
