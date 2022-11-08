@@ -17,7 +17,6 @@ It uses the `Microsoft Z3 solver <https://github.com/Z3Prover/z3>`_ as back-end 
 (The previous version of the reasoning engine, `IDP3 <https://wms.cs.kuleuven.be/dtai/pages/software/idp/idp>`_, used minisat)
 
 The IDP-Z3 engine is available for experimentation through its `online IDE <https://interactive-consultant.IDP-Z3.be/IDE>`_.
-Its documentation is available `online <https://docs.idp-z3.be/en/stable/introduction.html>`_, including a guide on how to install the IDP-Z3 system for use offline.
 
 Projects
 --------
