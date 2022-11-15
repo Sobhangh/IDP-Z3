@@ -13,6 +13,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * #123: show Theory in plain English
 * fix #216: Internal error due to incorrect type constraint
 * fix #217: issue with dropdown in IC
+* fix #222: Min/max aggregate results in error
 
 
 ## [0.10.0] - 2022-10-07

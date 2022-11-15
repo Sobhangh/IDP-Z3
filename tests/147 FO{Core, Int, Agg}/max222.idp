@@ -1,0 +1,20 @@
+vocabulary V {
+        type Time := { 0..8 }
+        last: () → Time
+
+        done: Time -> Bool
+        finishTime: () -> Time
+}
+structure S:V {
+
+}
+
+theory T:V {
+
+
+finishTime() = max(lambda x in Time: x).
+}
+
+procedure main() {
+    pretty_print(model_expand(T,S,max=0))
+}
