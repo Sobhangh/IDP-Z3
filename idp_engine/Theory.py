@@ -767,7 +767,8 @@ class Theory(object):
 
         # initialize the forbidden values
         forbidden = set(str(e.sub_exprs[1]) for e in todos.values()
-                        if self.assignments[str(e)].status in [S.GIVEN]
+                        if str(e) in self.assignments
+                        and self.assignments[str(e)].status in [S.GIVEN]
                         and self.assignments[str(e)].value.same_as(FALSE))
 
         #  remove current assignments to same term
