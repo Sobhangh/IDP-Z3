@@ -243,7 +243,7 @@ class Assignments(dict):
                 # make sure we have an entry for `a` in `out`
                 if a.value == FALSE and a.symbol_decl.arity != 0:
                     if a.symbol_decl.name not in out:
-                        out[a.symbol_decl.name] = []
+                        out[a.symbol_decl.name] = {}
                     continue
 
                 c = ", ".join(str(e) for e in a.sentence.sub_exprs)
@@ -258,8 +258,10 @@ class Assignments(dict):
                 else:
                     # Symbol is a function.
                     c = f"{c} -> {str(a.value)}"
-                if c not in out.get(a.symbol_decl.name, []):
-                    out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
+                enum = out.get(a.symbol_decl.name, dict())
+                print(enum)
+                if c not in enum:
+                    enum[c] = c
 
         model_str = ""
         for k, a in out.items():
