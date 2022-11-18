@@ -37,5 +37,8 @@ Structure
     IDP-Z3 supports partial interpretations of functions using the `:>=` sign.
     (It currently does not support partial interpretations of predicates)
 
+Procedure blocks
+    IDP-Z3 only recognizes the `main()` block, written in Python (instead of in Lua).
+
 To improve performance, do not quantify over the value of a function.
 Use ``p(f(x))`` instead of ``?y: f(x)=y & p(y)``.
