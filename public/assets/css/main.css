@@ -12,7 +12,7 @@
 }
 
 /*===========================
-    01.COMMON css 
+    01.COMMON css
 ===========================*/
 html {
   scroll-behavior: smooth;
@@ -1199,8 +1199,8 @@ p {
 
 .about-section .about-content ul li {
   padding-left: 40px;
-  font-size: 20px;
-  font-weight: 600;
+  /*font-size: 20px;
+  font-weight: 300;*/
   color: #162447;
   margin-bottom: 25px;
   position: relative;
@@ -1368,7 +1368,7 @@ p {
   background-image: url("../img/footer/footer-bg.svg");
   background-size: cover;
   background-position: top right;
-  padding-top: 260px;
+  padding-top: 230px;
   margin-top: 100px;
 }
 
