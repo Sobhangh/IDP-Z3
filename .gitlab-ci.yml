@@ -9,12 +9,16 @@ test:
         - ~/.local/share/pypoetry/venv/bin/poetry run coverage report
 
 pages:
+  image: ubuntu
+  stage: deploy
   script:
-    - mkdir .public
-    - cp -r * .public
-    - mv .public public
+    - apt update
+    - apt -y install python3.10 python3-pip git
+    - python3.10 install-poetry.py
+    - ~/.local/share/pypoetry/venv/bin/poetry install
+    - ~/.local/share/pypoetry/venv/bin/poetry run sphinx-build homepage public
   artifacts:
     paths:
-      - public
+    - public
   only:
-    - main
+  - main
