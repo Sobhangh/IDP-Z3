@@ -14,6 +14,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * fix #216: Internal error due to incorrect type constraint
 * fix #217: issue with dropdown in IC
 * fix #221: Error in Min/max aggregate
+* fix #224: Error when quantifying over subset of constructed type with infinite domains
 
 
 ## [0.10.0] - 2022-10-07
