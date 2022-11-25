@@ -1,0 +1,16 @@
+vocabulary V {
+    type Platform := {P1, P2, P3}
+    type Time := {1..3}
+    Cool : Platform ⨯ Time → 𝔹
+    Oven : Platform ⨯ Time → 𝔹
+
+    max : () → Time
+}
+
+theory T:V {
+    max() = max(lambda p, t: if (Cool(p, t)) then t else 0).
+}
+
+procedure main() {
+    pretty_print(Theory(T).expand(max=1))
+}

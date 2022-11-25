@@ -15,6 +15,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * fix #217: issue with dropdown in IC
 * fix #221: Error in Min/max aggregate
 * fix #224: Error when quantifying over subset of constructed type with infinite domains
+* fix #225: Error in type inference for `min/max` aggregate
 
 
 ## [0.10.0] - 2022-10-07
