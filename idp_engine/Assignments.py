@@ -259,14 +259,14 @@ class Assignments(dict):
                     # Symbol is a function.
                     c = f"{c} -> {str(a.value)}"
                 enum = out.get(a.symbol_decl.name, dict())
-                print(enum)
                 if c not in enum:
                     enum[c] = c
+                    out[a.symbol_decl.name] = enum
 
         model_str = ""
         for k, a in out.items():
             if k in nullary:  # Exception 1.
-                model_str += f"{k} :={a[0][3:]}.{NEWL}"
+                model_str += f"{k} :={list(a)[0][3:]}.{NEWL}"
             else:
                 model_str += f"{k} := {{{ ', '.join(s for s in a) }}}.{NEWL}"
         return model_str
