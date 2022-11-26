@@ -193,7 +193,7 @@ def translate1(self, problem: "Theory", vars={}):
         for q in self.quantees:
             for vars in q.vars:
                 for v in vars:
-                    translated = FreshConst(v.sort.decl.translate(problem))
+                    translated = FreshConst(v.sort.decl.base_type.translate(problem))
                     finalvars[v.str] = translated
         forms = [f.translate(problem, finalvars) for f in self.sub_exprs]
 

@@ -5,6 +5,8 @@ vocabulary {
 	spouse: married → married
 	affair : married * person → Bool
 	age : LivingBeing → Int
+	type MarriageT := constructed from {marriage(A: LivingBeing, B: LivingBeing, date: Int)}
+	Marriage : MarriageT -> Bool
 }
 theory {
 	animal := { Cat, Dog, Frog }.
@@ -14,6 +16,7 @@ theory {
 	! x in married: age(spouse(x))>20.
 	! (x,y) in affair: x=y.
 	? (x,y) in affair: true.
+	!x in Marriage: married(A(x)).
 }
 
 

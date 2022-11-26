@@ -551,6 +551,8 @@ Expression.annotate1 = annotate1
 
 def annotate1(self):
     self.type = self.sub_exprs[AIfExpr.THEN].type
+    if not self.type:
+        self.type = self.sub_exprs[AIfExpr.ELSE].type
     return Expression.annotate1(self)
 AIfExpr.annotate1 = annotate1
 
@@ -681,6 +683,7 @@ def annotate(self, voc, q_vars):
                 # is replaced by `_*(y)` with the following co-constraint:
                 #     !y in T: ( ?x in type: term(x) = _*(y)
                 #                !x in type: term(x) =< _*(y).
+                self.check(self.type, f"Can't infer type of {self}")
                 name = "_" + self.str
                 if name in voc.symbol_decls:
                     symbol_decl = voc.symbol_decls[name]
