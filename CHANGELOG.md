@@ -13,6 +13,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * fix #216: Internal error due to incorrect type constraint
 * fix #218: binary quantification over infinite domain
 * fix #219: declared variable in binary quantification
+* fix #226: Failure of type inference over infinite domain
 
 ### Interactive Consultant and Web IDE
 
