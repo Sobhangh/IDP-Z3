@@ -1,4 +1,4 @@
-# issue 226
+// issue 226
 vocabulary V {
     type Platform := {P1, P2, P3}
     Oven : Platform ⨯ Int → 𝔹
