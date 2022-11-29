@@ -24,6 +24,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * #123: show Theory in plain English
 * fix #210: use latest grammar in folint
 * fix #217: issue with dropdown in IC
+* fix #227: respect spaces in IDE output
 
 
 ## [0.10.0] - 2022-10-07
