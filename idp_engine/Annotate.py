@@ -565,12 +565,15 @@ def annotate(self, voc, q_vars):
     for q in self.quantees:
         q.annotate(voc, q_vars)
         for vars in q.vars:
-            for var in vars:
+            for i, var in enumerate(vars):
                 self.check(var.name not in voc.symbol_decls
                            or type(voc.symbol_decls[var.name]) == VarDeclaration,
                     f"the quantified variable '{var.name}' cannot have"
                     f" the same name as another symbol")
-                var.sort = q.sub_exprs[0] if q.sub_exprs else None
+                if len(vars) == 1:
+                    var.sort = q.sub_exprs[0] if q.sub_exprs else None
+                else:  # VarTuple
+                    var.sort = q.sub_exprs[0].decl.sorts[i]
                 var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
                 if var_decl:
                     subtype = var_decl.subtype

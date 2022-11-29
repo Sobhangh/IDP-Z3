@@ -502,6 +502,7 @@ def interpret(self, problem):
             var = q.vars[0][0]
             self.check(var.name in inferred,
                         f"can't infer type of {var.name}")
+            var.sort = inferred[var.name]
             q.sub_exprs = [inferred[var.name]]
 
     forms = self.sub_exprs

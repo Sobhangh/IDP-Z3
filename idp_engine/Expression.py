@@ -353,7 +353,7 @@ class Expression(ASTNode):
         symbols = {} if symbols == None else symbols
         if self.is_type_constraint_for is None:  # ignore type constraints
             if (hasattr(self, 'decl') and self.decl
-                and type(self.decl) != Constructor
+                and self.decl.__class__.__name__ == "SymbolDeclaration"
                 and not self.decl.name in RESERVED_SYMBOLS):
                 symbols[self.decl.name] = self.decl
             for e in self.sub_exprs:
@@ -677,6 +677,7 @@ class Quantee(Expression):
         self.arity = None
         for i, v in enumerate(self.vars):
             if hasattr(v, 'vars'):  # varTuple
+                self.check(1 < len(v.vars), f"Can't have singleton in binary quantification")
                 self.vars[i] = v.vars
                 self.arity = len(v.vars) if self.arity == None else self.arity
             else:

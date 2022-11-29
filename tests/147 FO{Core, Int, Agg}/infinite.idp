@@ -1,0 +1,16 @@
+// issue 226
+vocabulary V {
+    type Platform := {P1, P2, P3}
+    Oven : Platform ⨯ Int → 𝔹
+}
+
+theory T:V {
+    ∀ t: #{p: Oven(p,t)} ≤ 2.
+}
+
+structure S:V {
+}
+
+procedure main() {
+    pretty_print(Theory(T, S).expand(max=1))
+}
