@@ -243,7 +243,7 @@ class Assignments(dict):
                 # make sure we have an entry for `a` in `out`
                 if a.value == FALSE and a.symbol_decl.arity != 0:
                     if a.symbol_decl.name not in out:
-                        out[a.symbol_decl.name] = []
+                        out[a.symbol_decl.name] = {}
                     continue
 
                 c = ", ".join(str(e) for e in a.sentence.sub_exprs)
@@ -258,12 +258,15 @@ class Assignments(dict):
                 else:
                     # Symbol is a function.
                     c = f"{c} -> {str(a.value)}"
-                out[a.symbol_decl.name] = out.get(a.symbol_decl.name, []) + [c]
+                enum = out.get(a.symbol_decl.name, dict())
+                if c not in enum:
+                    enum[c] = c
+                    out[a.symbol_decl.name] = enum
 
         model_str = ""
         for k, a in out.items():
             if k in nullary:  # Exception 1.
-                model_str += f"{k} :={a[0][3:]}.{NEWL}"
+                model_str += f"{k} :={list(a)[0][3:]}.{NEWL}"
             else:
                 model_str += f"{k} := {{{ ', '.join(s for s in a) }}}.{NEWL}"
         return model_str

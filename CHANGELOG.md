@@ -13,6 +13,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * fix #216: Internal error due to incorrect type constraint
 * fix #218: binary quantification over infinite domain
 * fix #219: declared variable in binary quantification
+* fix #220: Value added twice to predicate output
 * fix #221: Error in Min/max aggregate
 * fix #224: Error when quantifying over subset of constructed type with infinite domains
 * fix #225: Error in type inference for `min/max` aggregate
