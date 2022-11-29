@@ -20,11 +20,6 @@
 Classes to parse an IDP-Z3 theory.
 
 """
-__all__ = ["IDP", "Vocabulary", "Annotations", "Import",
-           "TypeDeclaration",
-           "SymbolDeclaration", "Symbol", "TheoryBlock", "Definition",
-           "Rule", "Structure", "Enumeration", "TupleIDP",
-           "Display", "Procedure", ]
 
 from copy import copy
 from datetime import date
