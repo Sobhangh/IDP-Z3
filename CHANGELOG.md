@@ -18,6 +18,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * fix #224: Error when quantifying over subset of constructed type with infinite domains
 * fix #225: Error in type inference for `min/max` aggregate
 * fix #226: Failure of type inference over infinite domain
+* #228: Expansion inference should better respect the `timeout_seconds` parameter
 
 ### Interactive Consultant and Web IDE
 
