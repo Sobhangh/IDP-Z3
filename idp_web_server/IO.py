@@ -60,8 +60,8 @@ def metaJSON(state):
                     d['shortinfo'] = decl.annotations['short']
                 if 'long' in decl.annotations:
                     d['longinfo'] = decl.annotations['long']
-                if 'Slider' in decl.annotations:
-                    d['slider'] = decl.annotations['Slider']
+                if 'slider' in decl.annotations:
+                    d['slider'] = decl.annotations['slider']
             symbols.append(d)
 
     optionalPropagation = state.idp.display.optionalPropagation
