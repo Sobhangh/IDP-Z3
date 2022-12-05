@@ -165,8 +165,11 @@ class Output(object):
 
                 if symb.name == key and 'reading' in symb.annotations:  #inherit reading
                     reading = symb.annotations['reading']
-                else:
+                elif 'reading' in atom.annotations:
                     reading = atom.annotations['reading']
+                else:
+                    reading = atom.str
+                    atom.annotations['reading'] = reading
 
                 if symbol:
                     symbol["status"] = ass.status.name
