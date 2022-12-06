@@ -28,7 +28,7 @@ from enum import Enum, auto
 from itertools import chain
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
 from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
-                is_and, BoolVal)
+                is_and, BoolVal, get_param)
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol,
@@ -572,6 +572,8 @@ class Theory(object):
 
         - ``No models.``
 
+        - ``No model found in xx seconds.  Models may be available.  Change the timeout_seconds argument to see them.``
+
         - ``More models may be available.  Change the max argument to see them.``
 
         - ``More models may be available.  Change the timeout_seconds argument to see them.``
@@ -602,6 +604,8 @@ class Theory(object):
             solver = self.solver
             solver.push()
             self._add_assignment(solver)
+        default_timeout = get_param("timeout")
+
         todo = OrderedSet(a.sentence for a in self.get_core_atoms([S.UNKNOWN]))
 
         for q in todo:
@@ -611,7 +615,10 @@ class Theory(object):
         count, ass = 0, {}
         start = time.process_time()
         while ((max <= 0 or count < max) and
-               (timeout_seconds <= 0 or time.process_time()-start < timeout_seconds)):
+               (timeout_seconds <= 0 or time.process_time() - start < timeout_seconds)):
+            if timeout_seconds:
+                remaining = timeout_seconds - (time.process_time() - start)
+                solver.set("timeout", int(remaining*1000+200))
             # exclude ass
             different = []
             for a in ass.values():
@@ -639,11 +646,15 @@ class Theory(object):
             param = ("max and timeout_seconds arguments" if maxed and timeouted else
                      "max argument" if maxed else
                      "timeout_seconds argument")
-            yield f"{NEWL}More models may be available.  Change the {param} to see them."
+            if count == 0:
+                yield f"{NEWL}No model found in {timeout_seconds} seconds.  Models may be available.  Change the {param} to see them."
+            else:
+                yield f"{NEWL}More models may be available.  Change the {param} to see them."
         elif 0 < count:
             yield f"{NEWL}No more models."
         else:
             yield "No models."
+        solver.set("timeout", int(default_timeout))
 
     def optimize(self,
                  term: str,
