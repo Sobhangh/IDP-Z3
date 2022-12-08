@@ -55,6 +55,8 @@ pre > code {
     min-height: 70px; } }
 
 @media (max-width: 64rem) {
+  .large-icon { font-size: 48px; }
+
   .buttons {
     min-height: 0px; } }
 
@@ -201,7 +203,7 @@ a.brand {
     padding-bottom: 20px; }
 
 .red {
-  background-color: #a72145;
+  background-color: #DD8A2E;
   color: white; }
   .red .highlight {
     background-color: #2e2459; }
@@ -217,7 +219,7 @@ a.brand {
       border-color: white; }
 
 .green {
-  background-color: #0b7261;
+  background-color: #52BDEC;
   color: white; }
   .green .highlight {
     background-color: #2e2459; }
@@ -235,29 +237,29 @@ a.brand {
 .white {
   color: black; }
   .white .highlight {
-    background-color: #ffc832; }
+    background-color: #DD8A2E; }
   .white a {
     color: #2a3439;
     text-decoration: underline; }
   .white .button.button-secondary {
-    background-color: #ffc832;
-    border-color: #ffc832;
+    background-color: #DD8A2E;
+    border-color: #DD8A2E;
     color: #2a3439;
     text-decoration: none; }
     .white .button.button-secondary:hover, .white .button.button-secondary:focus {
       border-color: #2a3439; }
 
 .purple {
-  background-color: #2e2459;
+  background-color: #116E8A;
   color: white; }
   .purple .highlight {
-    background-color: #a72145; }
+    background-color: #DD8A2E; }
   .purple a {
     color: white;
     text-decoration: underline; }
   .purple .button.button-secondary {
-    background-color: #a72145;
-    border-color: #a72145;
+    background-color: #DD8A2E;
+    border-color: #DD8A2E;
     color: white;
     text-decoration: none; }
     .purple .button.button-secondary:hover, .purple .button.button-secondary:focus {
