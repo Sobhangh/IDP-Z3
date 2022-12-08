@@ -25,6 +25,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * fix #210: use latest grammar in folint
 * fix #217: issue with dropdown in IC
 * fix #227: respect spaces in IDE output
+* fix #230: maximum recursion depth exceeded with inductive definition
 
 
 ## [0.10.0] - 2022-10-07
