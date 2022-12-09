@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<!-- saved from url=(0026)https://www.rust-lang.org/ -->
+<html lang="en-US" data-lt-installed="true"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>
+
+            IDP-Z3 tutorial
+
+        </title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="The reasoning engine for FO(.)">
+
+    <!-- styles -->
+    <link rel="stylesheet" href="./Rust Programming Language_files/solarized-dark.css">
+    <link rel="stylesheet" href="./Rust Programming Language_files/vendor_10880690442070639967.css">
+    <link rel="stylesheet" href="./Rust Programming Language_files/fonts_8049871103083011125.css">
+    <link rel="stylesheet" href="./Rust Programming Language_files/app_12453939130433631466.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+
+    <!-- Custom Highlight pack with: Rust, Markdown, TOML, Bash, JSON, YAML,
+         and plaintext. -->
+    <script src="./Rust Programming Language_files/highlight.pack.js" defer=""></script>
+    <script src="./Rust Programming Language_files/init.js" defer=""></script>
+  <style data-emotion="css"></style></head>
+  <body>
+    <nav class="flex flex-row justify-center justify-end-l items-center flex-wrap ph2 pl3-ns pr3-ns pb3">
+      <div class="brand flex-auto w-200 w-auto-l self-start tc tl-l">
+        <a href="https://www.idp-z3.be/" class="brand">
+          <img class="v-mid ml0-l" alt="Rust Logo" src="./assets/KU Leuven logo.png">
+        </a>
+      </div>
+
+      <ul class="nav list w-100 w-auto-l flex flex-none flex-row flex-wrap justify-center justify-end-l items-center pv2 ph0 ph4-ns">
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://gitlab.com/krr/IDP-Z3#installation">Install</a></li>
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://interactive-idp.gitlab.io/">Learn</a></li>
+        <li class="tc pv2 ph2 ph4-ns flex-20-s"><a href="https://interactive-consultant.idp-z3.be/">Playground</a></li>
+      </ul>
+
+</nav>
+
+    <main>
+<header class="mt3 mb6 w-100 mw-none ph3 mw8-m mw9-l center">
+  <div class="flex flex-column flex-row-l">
+    <div class="w-70-l mw8-l">
+      <h1>IDP-Z3 Tutorial</h1>
+      <h2 class="mt4 mb0 f2 f1-ns">
+        Let's build a knowledge base system together.
+      </h2>
+    </div>
+  </div>
+</header>
+
+<section id="language-values" class="green">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+    <header class="pb0">
+      <h2>
+        The case
+      </h2>
+      <div class="highlight"></div>
+    </header>
+    <div class="w-80 pv2 pv0-l mt4">
+      <p class="flex-grow-1 pb2">
+        A local handyman is an expert at hanging objects on walls.
+        Sometimes he uses a nail, sometimes he uses glue, sometimes he uses a screw.
+        Over the years, he has gathered the following knowledge:
+      </p>
+      <ul>
+        <li>Nails support weights up to 20kg, screws support up to 40kg and glue support only 15kg.</li>
+        <li>Nails and screws require drilling holes in the wall, but one cannot drill holes in tiles.</li>
+        <li>Glue is easiest, a nail takes slightly more effort, a screw is hardest.</li>
+      </ul>
+      <p>
+        We'll enter this knowledge in a knowledge base and build an intelligent applications based on it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="purple">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+    <header>
+      <h2>
+        The Knowledge Base
+      </h2>
+      <div class="highlight"></div>
+    </header>
+
+    <div class="w-80 pv2 pv0-l mt4">
+      <p class="flex-grow-1 pb2">
+        The knowledge of the handyman can be represented in FO(.) in a text file with two blocks:
+        a "vocabulary" block and a "theory" block.
+        The theory block contains the laws of the field in familiar math notation.
+      </p>
+      <pre>
+        <code>vocabulary {
+    type Method := {Nail, Glue, Screw}
+    type Wall := {Brick, Wood, Tile}
+
+    wall  : () → Wall
+    method: () → Method
+    hole : () → 𝔹
+    weight: () → ℤ
+    difficulty : () → ℤ
+  }
+  theory {
+    weight() > 0.
+    method() = Nail  ⇒ weight() ≤ 20.
+    method() = Screw ⇒ weight() ≤ 40.
+    method() = Glue  ⇒ weight() ≤ 15.
+
+    hole() ⇔ method() = Nail ∨ method() = Screw.
+    hole() ⇒ wall() ~= Tile.
+
+    { difficulty() = 1 ← method() = Glue.
+      difficulty() = 2 ← method() = Nail.
+      difficulty() = 3 ← method() = Screw.}
+  }</code>
+      </pre>
+      <div class="w-30">
+        <a class="button button-download ph4 mt0 w-100" href="https://fo-dot.readthedocs.io/en/latest/FO-dot.html">
+          More about FO(.)
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="white production">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center">
+    <header>
+      <h2>The Interactive Consultant</h2>
+      <div class="highlight"></div>
+    </header>
+    <div class="w-80 pv2 pv0-l mt4">
+      <p class="flex-grow-1 pb2">
+        To configure the Interactive Consultant for this knowledge base, follow these steps:
+      </p>
+      <ul>
+        <li><a href="https://interactive-consultant.idp-z3.be/" target="_blank">Open the Interactive Consultant</a>.
+          A default application is displayed.
+        </li>
+        <li>Select "Edit" in the menu to open the knowledge base of the default application.</li>
+        <li>Copy the knowledge base above, and paste it to replace the default knowledge base in the editor.</li>
+        <li>Click "Run Consultant"</li>
+      </ul>
+      <p class="flex-grow-1 pb2">
+        Congratulations ! You have now created an intelligent application ! <br>
+        You can now use it to enter what you know or want in your particular situation:
+        the display will be immediately updated with the consequences of your entry.
+        <ul>
+          <li>Select "Tile" as the type of wall: you'll see that the method must be glue, and that there won't be any hole.</li>
+          <li>Click on "Glue": a panel shows up to explain why the method must be "Glue"</li>
+          <li>Enter 100 for the weight: a panel shows up telling you that this is not possible, and why.</li>
+          <li>Retract the entry for the weight by clicking the checkbox in front of it.</li>
+          <li>Click the "Up" arrow next to the weight field: the maximum weight possible for a Tile wall is shown.</li>
+        </ul>
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="get-involved red">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center">
+    <header>
+      <h2>The web IDE</h2>
+      <div class="highlight"></div>
+    </header>
+    <div class="w-80 pv2 pv0-l mt4">
+      <p class="flex-grow-1 pb2">
+        The IDP-Z3 reasoning engine exposes an API that can be used to reason with the knowledge.
+        The online IDE allows you to experiment with it.
+        Follow these steps:
+      </p>
+      <ul>
+        <li>Choose "View / View in IDE" to open the online IDE.  A warning message warns you that a "main" block will be added.</li>
+        <li>Click "Ok" to dismiss the warning.
+          The online IDE appears, with the knowledge base on the left, and the output pane on the right.
+          The "main" block has a command to print up to 10 possible state of affairs, according to the theory.
+        </li>
+        <li>Select "Run" in the menu.  The output pane shows 10 possible state of affairs.</li>
+      </ul>
+      <p class="flex-grow-1 pb2">
+        To learn more:
+      </p>
+      <div class="w-30">
+        <a class="button button-download ph4 mt0 w-100" href="https://interactive-idp.gitlab.io/">
+          IDP-Z3 by Example
+        </a>
+        <a class="button button-download ph4 mt0 w-100" href="https://docs.idp-z3.be/en/stable/introduction.html">
+          IDP-Z3 Reference
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+    </main>
+    <footer>
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+    <div class="flex flex-column flex-row-ns pv0-l">
+      <div class="flex flex-column mw8 w-100 measure-wide-l pv2 pv5-m pv2-ns ph4-m ph4-l" id="get-help">
+        <h4>Documentation</h4>
+        <ul>
+          <li><a href="https://interactive-idp.gitlab.io/">Tutorial</a></li>
+          <li><a href="https://fo-dot.readthedocs.io/en/latest/FO-dot.html">FO(.) standard</a></li>
+          <li><a href="https://cdmn.readthedocs.io/en/latest/">cDMN</a></li>
+          <li><a href="https://docs.idp-z3.be/en/stable/introduction.html">IDP-Z3 Reference</a></li>
+          <li><a href="https://gitlab.com/krr/IDP-Z3/">Repository </a></li>
+        </ul>
+      </div>
+      <div class="flex flex-column mw8 w-100 measure-wide-l pv2 pv5-m pv2-ns ph4-m ph4-l">
+        <h4>Contact</h4>
+        <div class="flex flex-row flex-wrap">
+          <a href="https://matrix.to/#/#IDP-Z3:matrix.org">Matrix<img src="https://matrix.org/images/matrix-logo.svg" alt="matrix logo" title="Matrix"></a>
+          <a href="mail:krr@cs.kuleuven.be">E-mail<!--img class="pv2" src="./Rust Programming Language_files/youtube.svg" alt="youtube logo" title="YouTube"--></a>
+          <!--a href="https://discord.gg/rust-lang"><img src="./Rust Programming Language_files/discord.svg" alt="discord logo" title="Discord"></a>
+          <a href="https://github.com/rust-lang"><img src="./Rust Programming Language_files/github.svg" alt="github logo" title="GitHub"></a-->
+        </div>
+      </div>
+
+    </div>
+    <div>Icons made by <a href="https://www.flaticon.com/authors/icongeek26" title="Icongeek26">Icongeek26</a>,
+      <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> and
+      <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a>
+      from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+    </div>
+
+  </div>
+</footer>
+
+<script data-goatcounter="https://idp-z3.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body></html>
