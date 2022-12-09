@@ -268,11 +268,8 @@ class Expression(ASTNode):
         self.questions: Optional[OrderedSet] = None
         self.relevant: Optional[bool] = None
 
-    def copy(self):
-        " create a deep copy (except for rigid terms and variables) "
-        return deepcopy(self)
-
     def __deepcopy__(self, memo):
+        """ copies everyting but .original """
         if self.str in memo:
             return memo[self.str]
         if self.value == self:
@@ -854,7 +851,7 @@ class AEquivalence(Operator):
     # NOTE: also used to split rules into positive implication and negative implication. Please don't change.
     def split(self):
         posimpl = IMPLIES([self.sub_exprs[0], self.sub_exprs[1]])
-        negimpl = RIMPLIES([self.sub_exprs[0].copy(), self.sub_exprs[1].copy()])
+        negimpl = RIMPLIES(deepcopy([self.sub_exprs[0], self.sub_exprs[1]]))
         return AND([posimpl, negimpl])
 
     def split_equivalences(self):
@@ -988,8 +985,8 @@ class AAggregate(Expression):
                    f"}}")
         return out
 
-    def copy(self):
-        return AQuantification.copy(self)
+    def __deepcopy__(self, memo):
+        return AQuantification.__deepcopy__(self, memo)
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
@@ -1069,9 +1066,9 @@ class AppliedSymbol(Expression):
                 f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 
-    def copy(self):
-        out = Expression.copy(self)
-        out.symbol = out.symbol.copy()
+    def __deepcopy__(self, memo):
+        out = Expression.__deepcopy__(self, memo)
+        out.symbol = deepcopy(out.symbol)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):

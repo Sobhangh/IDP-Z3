@@ -35,7 +35,7 @@ This module monkey-patches the ASTNode class and sub-classes.
 
 """
 
-import copy
+from copy import copy, deepcopy
 from itertools import product
 from typing import Dict, List, Callable
 
@@ -101,10 +101,10 @@ def interpret(self, problem):
 
     filters = [e[1] for e in extensions]
     def filter(args):
-        out = AND([f([t.copy()]) if f is not None else TRUE
+        out = AND([f([deepcopy(t)]) if f is not None else TRUE
                     for f, t in zip(filters, args)])
         if self.out.decl.name == BOOL:
-            out = AND([out, AppliedSymbol.make(symbol, args).copy()])
+            out = AND([out, deepcopy(AppliedSymbol.make(symbol, args))])
         return out
 
     if self.out.decl.name == BOOL:
@@ -134,7 +134,7 @@ def interpret(self, problem):
         for expr in self.instances.values():
             # add type constraints to problem.constraints
             # ! (x,y) in domain: range(f(x,y))
-            range_condition = self.out.has_element(expr.copy(),
+            range_condition = self.out.has_element(deepcopy(expr),
                                 problem.interpretations, problem.extensions)
             range_condition = range_condition.interpret(problem)
             constraint = IMPLIES([filter(expr.sub_exprs), range_condition])
@@ -373,9 +373,9 @@ def instantiate(self, e0, e1, problem=None):
            f"Internal error: instantiate {e0}"
     if self.value:
         return self
-    out = copy.copy(self)  # shallow copy !
-    out.annotations = copy.copy(out.annotations)
-    out.variables = copy.copy(out.variables)
+    out = copy(self)  # shallow copy !
+    out.annotations = copy(out.annotations)
+    out.variables = copy(out.variables)
     return out.instantiate1(e0, e1, problem)
 Expression.instantiate = instantiate
 
@@ -588,7 +588,7 @@ def interpret(self, problem):
                 simpler.annotations = self.annotations
         elif self.in_enumeration:
             # re-create original Applied Symbol
-            core = AppliedSymbol.make(self.symbol, sub_exprs).copy()
+            core = deepcopy(AppliedSymbol.make(self.symbol, sub_exprs))
             simpler = self.in_enumeration.contains([core], False,
                         interpretations=problem.interpretations, extensions=problem.extensions)
             if 'not' in self.is_enumeration:

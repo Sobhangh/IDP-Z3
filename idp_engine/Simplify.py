@@ -24,6 +24,7 @@ This module monkey-patches the Expression class and sub-classes.
 
 """
 
+from copy import deepcopy
 import sys
 from typing import List
 
@@ -387,7 +388,7 @@ AppliedSymbol.update_exprs = update_exprs
 
 def as_set_condition(self):
     # determine core after substitutions
-    core = AppliedSymbol.make(self.symbol, self.sub_exprs).copy()
+    core = AppliedSymbol.make(self.symbol, deepcopy(self.sub_exprs))
 
     return ((None, None, None) if not self.in_enumeration else
             (core, 'not' not in self.is_enumeration, self.in_enumeration))
@@ -454,7 +455,7 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                         in_enumeration=Enumeration(tuples=new_tuples)
                     )
 
-                    core = AppliedSymbol.make(out.symbol, out.sub_exprs).copy()
+                    core = deepcopy(AppliedSymbol.make(out.symbol, out.sub_exprs))
                     out.simpler = out.in_enumeration.contains([core], False)
 
                     out = Assignment(out,

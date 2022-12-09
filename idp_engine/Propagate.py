@@ -385,7 +385,7 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
     solver = self.solver_reified
     solver.push()
 
-    todo = (given_todo.copy() if given_todo else
+    todo = (deepcopy(given_todo) if given_todo else
             {a.sentence.code: a.sentence
             for a in self.assignments.values()
             if a.status not in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
