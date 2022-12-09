@@ -41,7 +41,6 @@ theory {
                                      'relevant': True,
                                      'status': 'UNKNOWN',
                                      'typ': 'jaDes',
-                                     'value': '',
                                      'values': ['Design_230', 'Design_400HP']}},
  'LipLen': {'LipLen()': {'environmental': False,
                          'is_assignment': True,
@@ -50,5 +49,4 @@ theory {
                          'relevant': True,
                          'status': 'UNKNOWN',
                          'typ': 'lipLen',
-                         'value': '',
                          'values': ['Short', 'Standard']}}}
