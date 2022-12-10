@@ -1,0 +1,9 @@
+// issue #213
+vocabulary V {
+    p : () → 𝔹
+}
+theory T:V {
+}
+procedure main() {
+    pretty_print(model_expand(T))
+}

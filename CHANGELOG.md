@@ -10,6 +10,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 
+* fix #213: Expanding an empty theory results in 10 empty models
 * fix #216: Internal error due to incorrect type constraint
 * fix #218: binary quantification over infinite domain
 * fix #219: declared variable in binary quantification
