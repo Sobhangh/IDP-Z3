@@ -29,6 +29,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #217: issue with dropdown in IC
 * issue #227: respect spaces in IDE output
 * issue #230: maximum recursion depth exceeded with inductive definition
+* issue #231: Incorrect behavior when entering negative numbers
 * MR !270: add support for slider below numeric field
 
 

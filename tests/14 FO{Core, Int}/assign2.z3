@@ -61,5 +61,4 @@ display {
                'reading': 'y',
                'relevant': False,
                'status': 'UNKNOWN',
-               'typ': 'Int',
-               'value': ''}}}
+               'typ': 'Int'}}}

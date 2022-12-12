@@ -49,7 +49,6 @@ structure {
                                                  'relevant': True,
                                                  'status': 'UNKNOWN',
                                                  'typ': 'Advertised_Objectst_t',
-                                                 'value': '',
                                                  'values': ['Toys', 'Cars', 'Videogames']}},
  'Age': {'Age()': {'environmental': False,
                    'is_assignment': True,
@@ -57,5 +56,4 @@ structure {
                    'reading': 'Age',
                    'relevant': True,
                    'status': 'UNKNOWN',
-                   'typ': 'Int',
-                   'value': ''}}}
+                   'typ': 'Int'}}}
