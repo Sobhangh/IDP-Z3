@@ -10,23 +10,25 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 
-* fix #216: Internal error due to incorrect type constraint
-* fix #218: binary quantification over infinite domain
-* fix #219: declared variable in binary quantification
-* fix #220: Value added twice to predicate output
-* fix #221: Error in Min/max aggregate
-* fix #224: Error when quantifying over subset of constructed type with infinite domains
-* fix #225: Error in type inference for `min/max` aggregate
-* fix #226: Failure of type inference over infinite domain
-* #228: Expansion inference should better respect the `timeout_seconds` parameter
+* issue #216: Internal error due to incorrect type constraint
+* issue #218: binary quantification over infinite domain
+* issue #219: declared variable in binary quantification
+* issue #220: Value added twice to predicate output
+* issue #221: Error in Min/max aggregate
+* issue #224: Error when quantifying over subset of constructed type with infinite domains
+* issue #225: Error in type inference for `min/max` aggregate
+* issue #226: Failure of type inference over infinite domain
+* issue #228: Expansion inference should better respect the `timeout_seconds` parameter
+* issue #229: reading before quantor gives error in IC
 * MR !271: support for empty type
 
 ### Interactive Consultant and Web IDE
 
-* #123: show Theory in plain English
-* fix #210: use latest grammar in folint
-* fix #217: issue with dropdown in IC
-* fix #227: respect spaces in IDE output
+* issue #123: show Theory in plain English
+* issue #210: use latest grammar in folint
+* issue #217: issue with dropdown in IC
+* issue #227: respect spaces in IDE output
+* MR !270: add support for slider below numeric field
 
 
 ## [0.10.0] - 2022-10-07
