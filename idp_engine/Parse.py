@@ -21,7 +21,7 @@ Classes to parse an IDP-Z3 theory.
 
 """
 
-from copy import copy
+from copy import copy, deepcopy
 from datetime import date
 from enum import Enum
 from itertools import groupby
@@ -733,7 +733,7 @@ class Rule(ASTNode):
         """
 
         #TODO assert self.is_whole_domain == False
-        out = self.body.copy()  # in case there are no arguments
+        out = deepcopy(self.body)  # in case there are no arguments
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
         if self.definiendum.decl.type == BOOL:  # a predicate

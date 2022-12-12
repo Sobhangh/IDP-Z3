@@ -186,4 +186,10 @@ English expression
     This information is used to generate the informal reading of a Theory.
     The number between brackets represents a placeholder for the English reading of the nth argument.
 
+Slider
+    ``[slider: (a, b) in (0, 100)]`` displays as slider for a numeric value.
+    The slider has a maximum range of [0, 100] that is reduced to [a(), b()]
+    when the values of a() and b() are known
+    (``a`` and ``b`` are symbols in the vocabulary).
+
 

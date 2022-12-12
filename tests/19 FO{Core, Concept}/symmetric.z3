@@ -53,7 +53,6 @@ display {
                        'relevant': False,
                        'status': 'UNKNOWN',
                        'typ': 'node',
-                       'value': '',
                        'values': ['a', 'b', 'c']}},
  'edge': {'edge(a, a)': {'environmental': False,
                          'is_assignment': False,

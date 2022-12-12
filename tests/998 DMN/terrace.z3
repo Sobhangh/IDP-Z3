@@ -59,13 +59,11 @@ structure {
                                              'reading': 'Rain_Probability',
                                              'relevant': True,
                                              'status': 'UNKNOWN',
-                                             'typ': 'Int',
-                                             'value': ''}},
+                                             'typ': 'Int'}},
  'Temperature': {'Temperature()': {'environmental': False,
                                    'is_assignment': True,
                                    'normal': True,
                                    'reading': 'Temperature',
                                    'relevant': True,
                                    'status': 'UNKNOWN',
-                                   'typ': 'Int',
-                                   'value': ''}}}
+                                   'typ': 'Int'}}}

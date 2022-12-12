@@ -29,5 +29,4 @@ theory {
                                                                                'relevant': False,
                                                                                'status': 'UNKNOWN',
                                                                                'typ': 'date',
-                                                                               'value': '',
                                                                                'values': ['2015', '2016']}}}

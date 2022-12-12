@@ -24,6 +24,7 @@ This module monkey-patches the Expression class and sub-classes.
 
 """
 
+from copy import deepcopy
 import sys
 from typing import List
 
@@ -226,16 +227,20 @@ AConjunction.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
     operands1 = [e.value for e in operands]
-    if all(e is not None for e in operands1):
-        acc, acc1 = operands[0], operands1[0]
-        assert len(self.operator) == len(operands1[1:]), "Internal error"
-        for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
+    acc, acc1 = operands[0], operands1[0]
+    assert len(self.operator) == len(operands1[1:]), "Internal error"
+    for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
+        if acc1 is not None and expr1 is not None:
+            if op in ["<", ">"]:
+                if acc1.same_as(expr1):
+                    return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
             if op == "=":
                 if not acc1.same_as(expr1):
                     return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
             elif not (Operator.MAP[op]) (acc1.py_value, expr1.py_value):
                 return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
-            acc, acc1 = expr, expr1
+        acc, acc1 = expr, expr1
+    if all(e is not None for e in operands1):
         return self._change(value=TRUE, sub_exprs=operands)
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
@@ -383,7 +388,7 @@ AppliedSymbol.update_exprs = update_exprs
 
 def as_set_condition(self):
     # determine core after substitutions
-    core = AppliedSymbol.make(self.symbol, self.sub_exprs).copy()
+    core = AppliedSymbol.make(self.symbol, deepcopy(self.sub_exprs))
 
     return ((None, None, None) if not self.in_enumeration else
             (core, 'not' not in self.is_enumeration, self.in_enumeration))
@@ -450,7 +455,7 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                         in_enumeration=Enumeration(tuples=new_tuples)
                     )
 
-                    core = AppliedSymbol.make(out.symbol, out.sub_exprs).copy()
+                    core = deepcopy(AppliedSymbol.make(out.symbol, out.sub_exprs))
                     out.simpler = out.in_enumeration.contains([core], False)
 
                     out = Assignment(out,

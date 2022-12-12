@@ -60,8 +60,8 @@ def metaJSON(state):
                     d['shortinfo'] = decl.annotations['short']
                 if 'long' in decl.annotations:
                     d['longinfo'] = decl.annotations['long']
-                if 'Slider' in decl.annotations:
-                    d['slider'] = decl.annotations['Slider']
+                if 'slider' in decl.annotations:
+                    d['slider'] = decl.annotations['slider']
             symbols.append(d)
 
     optionalPropagation = state.idp.display.optionalPropagation
@@ -155,18 +155,21 @@ class Output(object):
                 if typ == BOOL:
                     symbol = {"typ": "Bool"}
                 elif 0 < len(symb.range):
-                    symbol = {"typ": typ, "value": "",
+                    symbol = {"typ": typ,
                               "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT, DATE]:
-                    symbol = {"typ": FROM.get(typ, typ), "value": ""}  # default
+                    symbol = {"typ": FROM.get(typ, typ), }
                 else:
                     assert False, "dead code"
                     symbol = None
 
                 if symb.name == key and 'reading' in symb.annotations:  #inherit reading
                     reading = symb.annotations['reading']
-                else:
+                elif 'reading' in atom.annotations:
                     reading = atom.annotations['reading']
+                else:
+                    reading = atom.str
+                    atom.annotations['reading'] = reading
 
                 if symbol:
                     symbol["status"] = ass.status.name

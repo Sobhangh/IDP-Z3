@@ -1,0 +1,22 @@
+vocabulary V {
+    type T := {}
+    p : T → 𝔹
+}
+
+theory T:V {
+    ! x in T: p(x).
+}
+
+theory T2:V {
+    ? x in T: p(x).
+}
+
+structure S:V {
+
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S))
+    pretty_print(model_expand(T2, S))
+}
+

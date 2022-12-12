@@ -23,7 +23,7 @@ Class to represent a collection of theory and structure blocks.
 """
 
 import time
-from copy import copy
+from copy import copy, deepcopy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
@@ -224,7 +224,7 @@ class Theory(object):
         """
         out = copy(self)
         out.assignments = self.assignments.copy()
-        out.constraints = OrderedSet(c.copy() for c in self.constraints)
+        out.constraints = OrderedSet(deepcopy(c) for c in self.constraints)
         out.def_constraints = {k:[e for e in v]  #TODO e.copy()
                                for k,v in self.def_constraints.items()}
         # copy() is called before making substitutions => invalidate derived fields
@@ -264,9 +264,9 @@ class Theory(object):
             if isinstance(block, TheoryBlock) or isinstance(block, Theory):
                 self.co_constraints = None
                 self.definitions += block.definitions
-                self.constraints.extend(v.copy() for v in block.constraints)
+                self.constraints.extend(deepcopy(v) for v in block.constraints)
                 self.def_constraints.update(
-                    {k:v.copy() for k,v in block.def_constraints.items()})
+                    {k:deepcopy(v) for k,v in block.def_constraints.items()})
 
         # apply the enumerations and definitions
 

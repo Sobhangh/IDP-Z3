@@ -1,0 +1,18 @@
+// issue 230
+vocabulary {
+    type Node := {A, B, C}
+    edge: Node * Node -> Bool  // the graph
+    next: Node -> Node
+    reachable_from_A: Node -> Bool
+}
+
+theory {
+    {   reachable_from_A(next(A)).
+        !n in Node: reachable_from_A(next(n)) <- reachable_from_A(n).
+    }
+    ! n in Node: edge(n, next(n)).
+    ! n in Node: reachable_from_A(n).
+}
+
+display {
+}

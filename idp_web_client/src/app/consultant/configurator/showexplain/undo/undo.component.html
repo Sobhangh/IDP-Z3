@@ -20,7 +20,7 @@
     <button title="Click to reset this entry"
       pButton icon="pi pi-check"
       [ngClass]="{'small': true, 'ui-button-warning' : true, 'ui-button-raised': true, 'ui-button-rounded': valueInfo.assignment.non_user_choice}"
-      [hidden] = "valueInfo.assignment.value == false"
+      [hidden] = "valueInfo.assignment.value === false"
       (click)="this.reset()"
     ></button>
     {{valueInfo.assignment.valueName}} = {{valueInfo.assignment.value}}

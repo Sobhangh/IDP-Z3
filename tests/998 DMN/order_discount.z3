@@ -49,13 +49,11 @@ structure {
                          'reading': 'amount',
                          'relevant': True,
                          'status': 'UNKNOWN',
-                         'typ': 'Int',
-                         'value': ''}},
+                         'typ': 'Int'}},
  'discount': {'discount()': {'environmental': False,
                              'is_assignment': True,
                              'normal': True,
                              'reading': 'discount',
                              'relevant': True,
                              'status': 'UNKNOWN',
-                             'typ': 'Int',
-                             'value': ''}}}
+                             'typ': 'Int'}}}

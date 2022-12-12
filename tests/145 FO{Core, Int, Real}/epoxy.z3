@@ -15,7 +15,7 @@ vocabulary {
     ECost:(t_epoxy)→ t_cost
     Min_Cost: ()→Real
     Max_Cost: ()→Real
-    [Slider: (Min_Cost, Max_Cost): (0.2, 1)]
+    [slider: (Min_Cost, Max_Cost) in (0.2, 1)]
     Cost:()→t_cost
 
     Min_Storage_T: ()→Real
@@ -23,9 +23,9 @@ vocabulary {
 
     ELowest_Storage_T: (t_epoxy)→ t_safe_low_storage_t
     EHighest_Storage_T: (t_epoxy)→ t_safe_high_storage_t
-    [Slider: (Min_Storage_T, ): (-25, 25)]
+    [slider: (Min_Storage_T, ) in (-25, 25)]
     Safe_Low_Storage_T: ()→t_safe_low_storage_t
-    [Slider: ( , Max_Storage_T): (-25, 25)]
+    [slider: ( , Max_Storage_T) in (-25, 25)]
     Safe_High_Storage_T: ()→t_safe_high_storage_t
 
 
@@ -187,7 +187,6 @@ display {
                      'relevant': True,
                      'status': 'UNKNOWN',
                      'typ': 't_cost',
-                     'value': '',
                      'values': ['0.539', '-1']},
           'Cost() = ECost(Epoxy())': {'environmental': False,
                                       'is_assignment': False,
@@ -207,7 +206,6 @@ display {
                               'relevant': True,
                               'status': 'UNKNOWN',
                               'typ': 't_cost',
-                              'value': '',
                               'values': ['0.539', '-1']},
            'ECost(Epoxy()) = -1': {'environmental': False,
                                    'is_assignment': False,
@@ -223,7 +221,6 @@ display {
                                            'relevant': True,
                                            'status': 'UNKNOWN',
                                            'typ': 't_safe_high_storage_t',
-                                           'value': '',
                                            'values': ['10', '25', '38']},
            'EHighest_Storage_T(Epoxy()) = -900': {'environmental': False,
                                                   'is_assignment': False,
@@ -251,7 +248,6 @@ display {
                                           'relevant': True,
                                           'status': 'UNKNOWN',
                                           'typ': 't_safe_low_storage_t',
-                                          'value': '',
                                           'values': ['0', '15', '16']},
            'ELowest_Storage_T(Epoxy()) = -900': {'environmental': False,
                                                  'is_assignment': False,
@@ -279,7 +275,6 @@ display {
                        'relevant': True,
                        'status': 'UNKNOWN',
                        'typ': 't_epoxy',
-                       'value': '',
                        'values': ['e1', 'e2', 'e3']}},
  'KnownCost': {'KnownCost()': {'environmental': False,
                                'is_assignment': False,
@@ -310,8 +305,7 @@ display {
                              'reading': 'Max_Cost',
                              'relevant': True,
                              'status': 'UNKNOWN',
-                             'typ': 'Real',
-                             'value': ''}},
+                             'typ': 'Real'}},
  'Max_Storage_T': {'Max_Storage_T()': {'environmental': False,
                                        'is_assignment': True,
                                        'normal': True,
@@ -326,8 +320,7 @@ display {
                              'reading': 'Min_Cost',
                              'relevant': True,
                              'status': 'UNKNOWN',
-                             'typ': 'Real',
-                             'value': ''},
+                             'typ': 'Real'},
               'Min_Cost() ≤ ECost(Epoxy()) ≤ Max_Cost()': {'environmental': False,
                                                            'is_assignment': False,
                                                            'normal': False,
@@ -341,8 +334,7 @@ display {
                                        'reading': 'Min_Storage_T',
                                        'relevant': True,
                                        'status': 'UNKNOWN',
-                                       'typ': 'Real',
-                                       'value': ''}},
+                                       'typ': 'Real'}},
  'Safe_High_Storage_T': {'Safe_High_Storage_T()': {'environmental': False,
                                                    'is_assignment': True,
                                                    'normal': True,
@@ -350,7 +342,6 @@ display {
                                                    'relevant': True,
                                                    'status': 'UNKNOWN',
                                                    'typ': 't_safe_high_storage_t',
-                                                   'value': '',
                                                    'values': ['10', '25', '38']},
                          'Safe_High_Storage_T() = EHighest_Storage_T(Epoxy())': {'environmental': False,
                                                                                  'is_assignment': False,
@@ -368,7 +359,6 @@ display {
                                                  'relevant': True,
                                                  'status': 'UNKNOWN',
                                                  'typ': 't_safe_low_storage_t',
-                                                 'value': '',
                                                  'values': ['0', '15', '16']},
                         'Safe_Low_Storage_T() = ELowest_Storage_T(Epoxy())': {'environmental': False,
                                                                               'is_assignment': False,
