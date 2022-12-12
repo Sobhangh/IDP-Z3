@@ -66,12 +66,21 @@
         Over the years, he has gathered the following knowledge:
       </p>
       <ul>
-        <li>Nails support weights up to 20kg, screws support up to 40kg and glue supports only 15kg.</li>
+        <li>Nails support weights up to 25kg, screws support up to 40kg and glue supports only 15kg.</li>
         <li>Nails and screws require drilling holes in the wall, but one cannot drill holes in tiles.</li>
         <li>Glue is easiest to use, a nail takes slightly more effort, a screw is hardest to use.</li>
       </ul>
       <p>
-        We'll enter this knowledge in a knowledge base and build an intelligent application based on it.
+        With this knowledge, he can answer questions such as:
+      </p>
+      <ul>
+        <li>Which method is easiest for hanging a 20kg weight on a brick wall?</li>
+        <li>There is a nail in my wall. How much weight will it support?</li>
+        <li>I want to hang a heavy object on my wooden wall, without knowing precisely how heavy it is. Which method will support the most weight?</li>
+        <li>Can we hang a 25kg object on a tile wall?</li>
+        <li>Where can I hang 20 kg ?</li>
+      </ul>
+        We'll enter this knowledge in an IDP-Z3 knowledge base and use the Interactive Consultant to obtain answers to these questions.
       </p>
     </div>
   </div>
@@ -91,31 +100,36 @@
         The knowledge of the handyman can be represented in FO(.) in a text file with two blocks:
         a "vocabulary" block and a "theory" block.
         The theory block contains the laws of the field in familiar math notation.
+        (The display block controls, well, the display)
       </p>
       <pre>
         <code>vocabulary {
-    type Method := {Nail, Glue, Screw}
-    type Wall := {Brick, Wood, Tile}
+  type Method := {Nail, Glue, Screw}
+  type Wall := {Brick, Wood, Tile}
 
-    wall  : () → Wall
-    method: () → Method
-    hole : () → 𝔹
-    weight: () → ℤ
-    difficulty : () → ℤ
-  }
-  theory {
-    weight() > 0.
-    method() = Nail  ⇒ weight() ≤ 20.
-    method() = Screw ⇒ weight() ≤ 40.
-    method() = Glue  ⇒ weight() ≤ 15.
+  wall  : () → Wall
+  method: () → Method
+  hole : () → 𝔹
+  weight: () → ℤ
+  difficulty : () → ℤ
+}
+theory {
+  weight() > 0.
+  method() = Nail  ⇒ weight() ≤ 25.
+  method() = Screw ⇒ weight() ≤ 40.
+  method() = Glue  ⇒ weight() ≤ 15.
 
-    hole() ⇔ method() = Nail ∨ method() = Screw.
-    hole() ⇒ wall() ~= Tile.
+  hole() ⇔ method() = Nail ∨ method() = Screw.
+  wall() = Tile ⇒ ¬hole().
 
-    { difficulty() = 1 ← method() = Glue.
-      difficulty() = 2 ← method() = Nail.
-      difficulty() = 3 ← method() = Screw.}
-  }</code>
+  { difficulty() = 1 ← method() = Glue.
+    difficulty() = 2 ← method() = Nail.
+    difficulty() = 3 ← method() = Screw.}
+  difficulty() ∈ {1, 2, 3}.
+}
+display {
+  view() = expanded.
+}</code>
       </pre>
       <div class="w-30">
         <a class="button button-download ph4 mt0 w-100" href="https://fo-dot.readthedocs.io/en/latest/FO-dot.html">
@@ -145,22 +159,76 @@
         <li>Click "Run Consultant"</li>
       </ul>
       <p class="flex-grow-1 pb2">
+        (or simply click
+        <a href="https://interactive-consultant.idp-z3.be/?G4ewxghgRgrgNhATgTwAQG8BQqeoC7IAOApqgLLF4AWIAJqgFwC8GAchAJZwA0qA4nBjFeAZTCJiAdwC%2B2XARKoA6hDhxGLdACFEHMAGteSkHV4AVLsVlyck1esaoAFAEpUgJMJl9m6gC2lGloGZzdPCmo6Hxo4UmDXD1RAVg3ATl2fSWIOAHMqPDjQ1EASQh9aDgAzUr14Akd4zyKcWRxqYhAUDDSM7Lx4lgAmAAYAOg6snPiAPlQhn38I2h7Udi4cQCXCVHTR7rdAEyJUXoBWYdw-ALoFsQlJVDWNrvjdgBZp49nAhYEhVfXOsZ3UAEZDpgoiAYvFACuEJzmCyW6kAFERQt5uFgXKRHXB2NQLCwxa6oAA10WIrmGPnQqBK5UqcAIC3%2BqEACYSIs7I-iCYjo46UipgKrIBa9RnM%2Bas2Gc3Dc6m01kAZiFrxZqBR4jRjQlZR5fPigAgiDD-Xi9Xgy6To6wlADOhAQaCwx2AHCkC2IAA9CBAAHa0Yi0YayQiIcDemASPycd3xW2of2UAgAfX9HHd3V8dGIcFjLrdnqcZhcLkwauOOCAA">
+          here
+        </a>).
+      </p>
+      <p class="flex-grow-1 pb2">
         Congratulations ! You have now created an intelligent application ! <br>
         You can now use it to enter what you know (or want) in your particular situation:
         the display will be immediately updated with the consequences of your entry.
+      </p>
+      <p>
+        <b>Which method is easiest for hanging a 20kg weight on a brick wall?</b>
         <ul>
-          <li>Select "Tile" as the type of wall: you'll see that the method must be glue, and that there won't be any hole.</li>
-          <li>Click on "Glue": a panel shows up to explain why the method must be "Glue"</li>
-          <li>Enter 100 for the weight: a panel shows up telling you that this is not possible, and why.</li>
-          <li>Retract the entry for the weight by clicking the checkbox in front of it.</li>
-          <li>Click the "Up" arrow next to the weight field: the maximum weight possible for a Tile wall is shown.</li>
+          <li>Set the "weight" to 20: you'll see that you cannot use glue.</li>
+          <li>Click on the downwards arrow next to "difficulty": the tool recommends "nails" as the easiest method, and says you'll need to drill a hole.</li>
+          <li>Click on the checkmark next to "hole" to obtain an explanation</li>
+        </ul>
+      </p>
+      <p>
+        <b>There is a nail in my wall. How much weight will it support?</b>
+        <ul>
+          <li>Choose "Reset / Full" in the menu to consider a new situation.</li>
+          <li>Select the "nail" method.</li>
+          <li>Click the upwards arrow next to "weight": you'll see that the maximum weight is 25 kg.</li>
+        </ul>
+      </p>
+      <p>
+        <b>Which method will support the most weight on a wooden wall?</b>
+        <ul>
+          <li>Choose "Reset / Full".</li>
+          <li>Select the "Wood" wall in the dropdown.</li>
+          <li>Click the upwards arrow next to "weight": you'll see that the maximum weight is 40 kg, for the "Screw" method.</li>
+        </ul>
+      </p>
+      </p>
+        <b>Can we hang a 25kg object on a tile wall?</b>
+        <ul>
+          <li>Choose "Reset / Full".</li>
+          <li>Set the weight to 25kg: "Tile" wall is not possible.</li>
+          <li>Click on the cross next to "Tile" to obtain an explanation.</li>
         </ul>
       </p>
     </div>
   </div>
 </section>
 
-<section class="get-involved red">
+<section id="maintain" class="red">
+  <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+    <header class="pb0">
+      <h2>
+        Maintaining the Knowledge Base
+      </h2>
+      <div class="highlight"></div>
+    </header>
+    <div class="w-80 pv2 pv0-l mt4">
+      <p class="flex-grow-1 pb2">
+        Ah, the handyman tells you that there is an exception to the rule about tiles:
+        it is possible to drill a hole if you have the adequate diamond drillbit.
+        Let's update the Knowledge Base accordingly.
+      </p>
+      <ul>
+        <li>Add "diamond_drill_bit: () → 𝔹" to the vocabulary</li>
+        <li>Replace the rule "wall() = Tile ⇒ ¬hole()." by "wall() = Tile ∧ ¬diamond_drill_bit() ⇒ ¬hole()."</li>
+        <li>Click "Run consultant": the form is updated.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="get-involved purple">
   <div class="w-100 mw-none ph3 mw8-m mw9-l center">
     <header>
       <h2>The web IDE</h2>
@@ -178,8 +246,15 @@
           The online IDE appears, with the knowledge base on the left, and the output pane on the right.
           The "main" block has a command to show the possible state of affairs, according to the theory.
         </li>
-        <li>Select "Run" in the menu.  The output pane shows 10 possible states of affairs.</li>
+        <li>Choose "Run" in the menu.  The output pane shows 10 possible states of affairs.</li>
       </ul>
+      <p>
+        <b>Where can I hang 20 kg ?</b>
+        <ul>
+          <li>Add the following sentence after line 11: "weight() = 20."</li>
+          <li>Choose "Run" in the menu.  The output pane lists 4 possibilities.</li>
+        </ul>
+      </p>
       <p class="flex-grow-1 pb2">
         To learn more:
       </p>
@@ -191,7 +266,12 @@
           IDP-Z3 Reference
         </a>
       </div>
-
+      <p>This example is inspired by a system developed for the Flanders Make Joining and Materials Lab.
+        The following video provides some more context.</p>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/hO8k_64b_Oc"
+              title="YouTube video player" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+          </iframe>
     </div>
   </div>
 </section>
