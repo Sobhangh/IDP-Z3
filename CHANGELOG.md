@@ -28,6 +28,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #210: use latest grammar in folint
 * issue #217: issue with dropdown in IC
 * issue #227: respect spaces in IDE output
+* issue #230: maximum recursion depth exceeded with inductive definition
 * MR !270: add support for slider below numeric field
 
 

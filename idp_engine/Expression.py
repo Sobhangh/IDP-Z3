@@ -22,7 +22,7 @@
 
 """
 
-import copy
+from copy import copy, deepcopy
 from collections import ChainMap
 from datetime import datetime, date
 from dateutil.relativedelta import *
@@ -266,19 +266,21 @@ class Expression(ASTNode):
         self.questions: Optional[OrderedSet] = None
         self.relevant: Optional[bool] = None
 
-    def copy(self):
-        " create a deep copy (except for rigid terms and variables) "
+    def __deepcopy__(self, memo):
+        """ copies everyting but .original """
+        if self.str in memo:
+            return memo[self.str]
         if self.value == self:
             return self
-        out = copy.copy(self)
-        out.sub_exprs = [e.copy() for e in out.sub_exprs]
-        out.variables = copy.copy(out.variables)
-        out.value = None if out.value is None else out.value.copy()
-        out.simpler = None if out.simpler is None else out.simpler.copy()
+        out = copy(self)
+        out.sub_exprs = [deepcopy(e, memo) for e in out.sub_exprs]
+        out.variables = deepcopy(out.variables, memo)
+        out.simpler = None if out.simpler is None else deepcopy(out.simpler, memo)
         out.co_constraint = (None if out.co_constraint is None
-                             else out.co_constraint.copy())
+                             else deepcopy(out.co_constraint, memo))
         if hasattr(self, 'questions'):
-            out.questions = copy.copy(self.questions)
+            out.questions = deepcopy(self.questions, memo)
+        memo[self.str] = out
         return out
 
     def same_as(self, other):
@@ -746,10 +748,10 @@ class AQuantification(Expression):
         else:
             return self.sub_exprs[0].str
 
-    def copy(self):
+    def __deecopy__(self, memo):
         # also called by AAgregate
-        out = Expression.copy(self)
-        out.quantees = [q.copy() for q in out.quantees]
+        out = Expression.__deecopy__(self, memo)
+        out.quantees = [deepcopy(q, memo) for q in out.quantees]
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -847,7 +849,7 @@ class AEquivalence(Operator):
     # NOTE: also used to split rules into positive implication and negative implication. Please don't change.
     def split(self):
         posimpl = IMPLIES([self.sub_exprs[0], self.sub_exprs[1]])
-        negimpl = RIMPLIES([self.sub_exprs[0].copy(), self.sub_exprs[1].copy()])
+        negimpl = RIMPLIES(deepcopy([self.sub_exprs[0], self.sub_exprs[1]]))
         return AND([posimpl, negimpl])
 
     def split_equivalences(self):
@@ -981,8 +983,8 @@ class AAggregate(Expression):
                    f"}}")
         return out
 
-    def copy(self):
-        return AQuantification.copy(self)
+    def __deepcopy__(self, memo):
+        return AQuantification.__deepcopy__(self, memo)
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
@@ -1062,9 +1064,9 @@ class AppliedSymbol(Expression):
                 f"{ ' '+self.is_enumerated if self.is_enumerated else ''}"
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 
-    def copy(self):
-        out = Expression.copy(self)
-        out.symbol = out.symbol.copy()
+    def __deepcopy__(self, memo):
+        out = Expression.__deepcopy__(self, memo)
+        out.symbol = deepcopy(out.symbol)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -1239,7 +1241,8 @@ class Variable(Expression):
 
     def __str1__(self): return self.name
 
-    def copy(self): return self
+    def __deepcopy__(self, memo):
+        return self
 
     def annotate1(self): return self
 

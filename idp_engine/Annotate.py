@@ -20,7 +20,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 """
 
-from copy import copy
+from copy import copy, deepcopy
 from itertools import chain
 import string
 from typing import Dict
@@ -259,7 +259,7 @@ def get_instantiables(self,
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
-                        new = new.copy().add_level_mapping(rule.parent.level_symbols,
+                        new = deepcopy(new).add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
                         out.append(RIMPLIES([head, new], r.annotations))
 
@@ -271,10 +271,10 @@ def get_instantiables(self,
                     out = [EQUIV([head, all_bodies], self.annotations)]
             else:
                 if not out:  # no reverse implication yet
-                    new = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
+                    new = deepcopy(all_bodies).add_level_mapping(rule.parent.level_symbols,
                                              rule.definiendum, False, False)
-                    out = [RIMPLIES([head.copy(), new], self.annotations)]
-                all_bodies = all_bodies.copy().add_level_mapping(rule.parent.level_symbols,
+                    out = [RIMPLIES([deepcopy(head), new], self.annotations)]
+                all_bodies = deepcopy(all_bodies).add_level_mapping(rule.parent.level_symbols,
                                         rule.definiendum, True, True)
                 out.append(IMPLIES([head, all_bodies], self.annotations))
             result[decl] = out
@@ -704,11 +704,11 @@ def annotate(self, voc, q_vars):
 
                 if to_create:
                     coc1 = EXISTS(self.quantees,
-                                EQUALS([applied.copy(), self.sub_exprs[0]]))
+                                EQUALS([deepcopy(applied), self.sub_exprs[0]]))
                     op = '≤' if self.aggtype == "min" else '≥'
-                    coc2 = FORALL(self.quantees.copy(),
+                    coc2 = FORALL(deepcopy(self.quantees),
                                 AComparison.make(op,
-                                        [applied.copy(), self.sub_exprs[0].copy()]))
+                                    deepcopy([applied, self.sub_exprs[0]])))
                     coc = AND([coc1, coc2])
                     quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
                     applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)

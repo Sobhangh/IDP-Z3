@@ -23,7 +23,7 @@ Classes to store assignments of values to questions
 """
 __all__ = ["Status", "Assignment", "Assignments"]
 
-from copy import copy
+from copy import copy, deepcopy
 from enum import Enum, auto
 from typing import Dict, Optional, Tuple
 from z3 import BoolRef
@@ -102,7 +102,7 @@ class Assignment(object):
     def copy(self, shallow: Optional[bool] =False) -> "Assignment":
         out = copy(self)
         if not shallow:
-            out.sentence = out.sentence.copy()
+            out.sentence = deepcopy(out.sentence)
         return out
 
     def __str__(self) -> str:
