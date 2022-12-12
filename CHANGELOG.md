@@ -19,6 +19,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * fix #225: Error in type inference for `min/max` aggregate
 * fix #226: Failure of type inference over infinite domain
 * #228: Expansion inference should better respect the `timeout_seconds` parameter
+* fix #229: reading before quantor gives error in IC
 
 ### Interactive Consultant and Web IDE
 
@@ -26,6 +27,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * fix #210: use latest grammar in folint
 * fix #217: issue with dropdown in IC
 * fix #227: respect spaces in IDE output
+* MR !270: add support for slider below numeric field
 
 
 ## [0.10.0] - 2022-10-07
