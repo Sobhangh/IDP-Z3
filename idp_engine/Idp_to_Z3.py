@@ -30,7 +30,7 @@ from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
                 Or, Not, And, ForAll, Exists, Sum, If,
                 BoolVal, RatVal, IntVal)
 
-from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, TupleIDP
+from idp_engine.Parse import TypeDeclaration, SymbolDeclaration, TupleIDP, Ranges, IntRange, RealRange, DateRange
 from idp_engine.Expression import (Constructor, Expression, AIfExpr,
                                    AQuantification, Operator, Symbol,
                                    ADisjunction, AConjunction, AComparison,
@@ -73,9 +73,11 @@ def translate(self, problem: "Theory"):
                 elif c.range:
                     for e in c.range:
                         self.map[str(e)] = e
-        else: # list of numbers
+        elif type(self.interpretation.enumeration) in [Ranges, IntRange, RealRange, DateRange]: # list of numbers
             out = (IntSort(problem.ctx) if self.interpretation.enumeration.type in [INT, DATE] else
                    RealSort(problem.ctx))
+        else:  # empty type --> don't care
+            out = IntSort(problem.ctx)
         problem.z3[self.name] = out
     return out
 TypeDeclaration.translate = translate

@@ -102,10 +102,10 @@ class Annotations(ASTNode):
         for s in annotations:
             p = s.split(':', 1)
             if len(p) == 2:
-                try:
-                    # Do we have a Slider?
-                    # The format of p[1] is as follows:
-                    # (lower_sym, upper_sym): (lower_bound, upper_bound)
+                if p[0] != 'slider':
+                    k, v = (p[0], p[1])
+                else:
+                    # slider:(lower_sym, upper_sym) in (lower_bound, upper_bound)
                     pat = r"\(((.*?), (.*?))\)"
                     arg = findall(pat, p[1])
                     l_symb = arg[0][1]
@@ -113,12 +113,10 @@ class Annotations(ASTNode):
                     l_bound = arg[1][1]
                     u_bound = arg[1][2]
                     slider_arg = {'lower_symbol': l_symb,
-                                  'upper_symbol': u_symb,
-                                  'lower_bound': l_bound,
-                                  'upper_bound': u_bound}
-                    k, v = (p[0], slider_arg)
-                except:  # could not parse the slider data
-                    k, v = (p[0], p[1])
+                                'upper_symbol': u_symb,
+                                'lower_bound': l_bound,
+                                'upper_bound': u_bound}
+                    k, v = ('slider', slider_arg)
             else:
                 k, v = ('reading', p[0])
             self.check(k not in self.annotations,

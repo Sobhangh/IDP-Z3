@@ -56,8 +56,8 @@ export class SymbolValueSliderComponent implements OnInit, AfterViewInit, DoChec
         this.upper_bound = this.symbolInfo.slider.upper_bound;
 
         // Fetch the value info's from the idpService.
-        if (this.upper_symb !== '') { this.upperValueInfo = this.idpService.getValueInfo(this.upper_symb, this.upper_symb); }
-        if (this.lower_symb !== '') { this.lowerValueInfo = this.idpService.getValueInfo(this.lower_symb, this.lower_symb); }
+        if (this.upper_symb !== '') { this.upperValueInfo = this.idpService.getValueInfo(this.upper_symb, this.upper_symb+'()'); }
+        if (this.lower_symb !== '') { this.lowerValueInfo = this.idpService.getValueInfo(this.lower_symb, this.lower_symb+'()'); console.log(this.lower_symb, this.lowerValueInfo)}
 
 
     }
