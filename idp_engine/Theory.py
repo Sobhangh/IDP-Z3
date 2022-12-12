@@ -632,7 +632,7 @@ class Theory(object):
                 count += 1
                 ass = self._from_model(solver, todo, complete)
                 yield ass
-                if not todo:  # empty theory
+                if not self.constraints and not self.definitions:  # empty theory
                     break
             else:
                 break

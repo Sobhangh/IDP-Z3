@@ -10,6 +10,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 
+* issue #213: Expanding an empty theory results in 10 empty models
 * issue #216: Internal error due to incorrect type constraint
 * issue #218: binary quantification over infinite domain
 * issue #219: declared variable in binary quantification
@@ -19,7 +20,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #225: Error in type inference for `min/max` aggregate
 * issue #226: Failure of type inference over infinite domain
 * issue #228: Expansion inference should better respect the `timeout_seconds` parameter
-* issue #229: reading before quantor gives error in IC
+* issue #229: colon ':' in reading before quantor gives error in IC
 * MR !271: support for empty type
 
 ### Interactive Consultant and Web IDE
