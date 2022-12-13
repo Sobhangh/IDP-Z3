@@ -10,7 +10,9 @@ test:
 
 pages:
   script:
-    - cp -r ./homepage/* public
+    - mkdir .public
+    - cp -r ./homepage/* .public
+    - mv .public public
   artifacts:
     paths:
       - public
