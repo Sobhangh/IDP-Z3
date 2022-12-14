@@ -110,7 +110,7 @@
       where the consequences are due to the environmental theory, which do not
       need to be verified. Here they are due to the regular theory on the user
       input, and hence need to be verified. -->
-      <ng-container *ngIf="assignment.value !== null">
+      <ng-container *ngIf="assignment.value">
         <button title='Click to confirm'
           pButton icon="pi pi-check"
           class="small ui-button-success"
@@ -123,7 +123,7 @@
         ></button>
       </ng-container>
 
-      <ng-container *ngIf="!assignment.value !== null">
+      <ng-container *ngIf="!assignment.value">
         <button title='Click to see an explanation'
           pButton icon="pi pi-check"
           class="small ui-button-success unexpected"
