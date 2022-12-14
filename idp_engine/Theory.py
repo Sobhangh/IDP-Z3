@@ -33,7 +33,7 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, An
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol,
                          EQUALS, NOT, Extension)
-from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol,
+from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol, SYMBOL,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
@@ -291,7 +291,7 @@ class Theory(object):
                 symbol = t.args[0]
                 decl = self.declarations[symbol.name[1:]]
                 assert decl.instances, f"goal {decl.name} must be instantiable."
-                relevant = Symbol(name=RELEVANT)
+                relevant = SYMBOL(RELEVANT)
                 relevant.decl = self.declarations[RELEVANT]
                 for i in decl.instances.values():
                     constraint = AppliedSymbol.make(relevant, [i])
@@ -943,7 +943,7 @@ class Theory(object):
                        max_rows: int = 50,
                        first_hit: bool = True,
                        verify: bool = False
-                       ) -> (List[List[Assignment]], bool):
+                       ) -> Tuple[List[List[Assignment]], bool]:
         """Experimental.  Returns the rows for a decision table that defines ``goal_string``.
 
         ``goal_string`` must be a predicate application defined in the theory.

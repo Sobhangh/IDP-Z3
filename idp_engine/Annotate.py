@@ -25,20 +25,20 @@ from itertools import chain
 import string
 from typing import Dict
 
-from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration, Type,
-                    SymbolDeclaration, Symbol, VarDeclaration,
-                    TheoryBlock, Definition, Rule,
-                    Structure, SymbolInterpretation, Enumeration, FunctionEnum,
-                    TupleIDP, ConstructedFrom, Display)
-from .Expression import (Expression, Constructor, AIfExpr, IF, AQuantification, Quantee,
-                         ARImplication, AImplication, AEquivalence,
-                         Operator, AComparison, AUnary, AAggregate,
-                         AppliedSymbol, UnappliedSymbol, Variable, Brackets,
-                         FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE,
-                         IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
+from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
+    SymbolDeclaration, VarDeclaration, TheoryBlock, Definition, Rule,
+    Structure, SymbolInterpretation, Enumeration, FunctionEnum,
+    TupleIDP, ConstructedFrom, Display)
+from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
+    Constructor, CONSTRUCTOR, AIfExpr, IF, AQuantification, Quantee,
+    ARImplication, AImplication, AEquivalence,
+    Operator, AComparison, AUnary, AAggregate,
+    AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
+    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, FALSE,
+    IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-                    OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
+    OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
 
 
 # Class Vocabulary  #######################################################
@@ -61,9 +61,9 @@ def annotate(self, idp):
             s.check(s.name not in temp or s.name in RESERVED_SYMBOLS,
                     f"Duplicate declaration of {s.name}")
             temp[s.name] = s
-    temp[CONCEPT].constructors=([Constructor(name=f"`{s}")
+    temp[CONCEPT].constructors=([CONSTRUCTOR(f"`{s}")
                                  for s in [BOOL, INT, REAL, DATE, CONCEPT]]
-                               +[Constructor(name=f"`{s.name}")
+                               +[CONSTRUCTOR(f"`{s.name}")
                                  for s in temp.values()
                                  if s.name not in RESERVED_SYMBOLS
                                  and type(s) in Declaration.__args__])
@@ -75,7 +75,7 @@ def annotate(self, idp):
 
     concepts = self.symbol_decls[CONCEPT]
     for constructor in concepts.constructors:
-        constructor.symbol = (Symbol(name=constructor.name[1:])
+        constructor.symbol = (SYMBOL(constructor.name[1:])
                                 .annotate(self, {}))
 
     # populate .map of CONCEPT
@@ -193,10 +193,10 @@ def annotate(self, voc, q_vars):
         if decl.name not in self.def_vars:
             name = f"{decl.name}_"
             q_v = {f"{decl.name}{str(i)}_":
-                    Variable(name=f"{decl.name}{str(i)}_", sort=sort)
+                    VARIABLE(f"{decl.name}{str(i)}_", sort)
                     for i, sort in enumerate(decl.sorts)}
             if decl.out.name != BOOL:
-                q_v[name] = Variable(name=name, sort=decl.out)
+                q_v[name] = VARIABLE(name, decl.out)
             self.def_vars[decl.name] = q_v
         new_rule = r.rename_args(self.def_vars[decl.name])
         self.canonicals.setdefault(decl, []).append(new_rule)
@@ -368,7 +368,7 @@ def annotate(self, block):
     """
     voc = block.voc
     self.block = block
-    self.symbol = Symbol(name=self.name).annotate(voc, {})
+    self.symbol = SYMBOL(self.name).annotate(voc, {})
     enumeration = self.enumeration  # shorthand
 
     # create constructors if it is a type enumeration
@@ -428,7 +428,7 @@ def annotate(self, voc):
     for c in self.constructors:
         for i, ts in enumerate(c.sorts):
             if ts.accessor is None:
-                ts.accessor = Symbol(name=f"{c.name}_{i}")
+                ts.accessor = SYMBOL(f"{c.name}_{i}")
             if ts.accessor.name in self.accessors:
                 self.check(self.accessors[ts.accessor.name] == i,
                            "Accessors used at incompatible indices")
@@ -445,13 +445,13 @@ def annotate(self, voc):
         self.check(a.type in voc.symbol_decls,
                    f"Unknown type: {a.type}" )
         a.decl = SymbolDeclaration(annotations='', name=a.accessor,
-                                   sorts=[Type(name=self.type)],
-                                   out=Type(name=a.type))
+                                   sorts=[TYPE(self.type)],
+                                   out=TYPE(a.type))
         a.decl.annotate(voc)
     self.tester = SymbolDeclaration(annotations='',
-                                    name=Symbol(name=f"is_{self.name}"),
-                                    sorts=[Type(name=self.type)],
-                                    out=Type(name=BOOL))
+                                    name=SYMBOL(f"is_{self.name}"),
+                                    sorts=[TYPE(self.type)],
+                                    out=TYPE(BOOL))
     self.tester.annotate(voc)
 Constructor.annotate = annotate
 
@@ -464,8 +464,8 @@ def annotate(self, idp):
     # add display predicates
 
     viewType = TypeDeclaration(name='_ViewType',
-        constructors=[Constructor(name='normal'),
-                        Constructor(name='expanded')])
+        constructors=[CONSTRUCTOR('normal'),
+                        CONSTRUCTOR('expanded')])
     viewType.annotate(self.voc)
 
     # Check the AST for any constructors that belong to open types.
@@ -486,23 +486,23 @@ def annotate(self, idp):
         open_type = TypeDeclaration(name=type_name,
                                     constructors=constructors)
         open_type.annotate(self.voc)
-        open_types[name] = Symbol(name=type_name)
+        open_types[name] = SYMBOL(type_name)
 
     for name, out in [
-        ('expand', Symbol(name=BOOL)),
-        ('hide', Symbol(name=BOOL)),
-        ('view', Symbol(name='_ViewType')),
-        ('moveSymbols', Symbol(name=BOOL)),
-        ('optionalPropagation', Symbol(name=BOOL)),
-        ('manualPropagation', Symbol(name=BOOL)),
-        ('optionalRelevance', Symbol(name=BOOL)),
-        ('manualRelevance', Symbol(name=BOOL)),
+        ('expand', SYMBOL(BOOL)),
+        ('hide', SYMBOL(BOOL)),
+        ('view', SYMBOL('_ViewType')),
+        ('moveSymbols', SYMBOL(BOOL)),
+        ('optionalPropagation', SYMBOL(BOOL)),
+        ('manualPropagation', SYMBOL(BOOL)),
+        ('optionalRelevance', SYMBOL(BOOL)),
+        ('manualRelevance', SYMBOL(BOOL)),
         ('unit', open_types['unit']),
         ('heading', open_types['heading']),
-        ('noOptimization', Symbol(name=BOOL))
+        ('noOptimization', SYMBOL(BOOL))
     ]:
         symbol_decl = SymbolDeclaration(annotations='',
-                                        name=Symbol(name=name),
+                                        name=SYMBOL(name),
                                         sorts=[out] if out else [], out=out)
         symbol_decl.annotate(self.voc)
 
@@ -637,7 +637,7 @@ AEquivalence.annotate1 = annotate1
 
 def annotate(self, voc, q_vars):
     # reverse the implication
-    out = AImplication(sub_exprs=list(reversed(list(self.sub_exprs))),
+    out = AImplication(None, sub_exprs=list(reversed(list(self.sub_exprs))),
                         operator=['⇒']*len(self.operator))
     out.original = self
     if hasattr(self, "block"):
@@ -695,10 +695,10 @@ def annotate(self, voc, q_vars):
                     symbol_decl = SymbolDeclaration.make(
                         "_"+self.str, # name `_ *`
                         len(q_vars),  # arity
-                        [Type(name=v.sort.code) for v in q_vars.values()],
-                        Type(name=self.type)).annotate(voc)    # output_domain
+                        [TYPE(v.sort.code) for v in q_vars.values()],
+                        TYPE(self.type)).annotate(voc)    # output_domain
                     to_create = True
-                symbol = Symbol(name=symbol_decl.name)
+                symbol = SYMBOL(symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
 

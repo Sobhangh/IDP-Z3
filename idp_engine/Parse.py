@@ -33,17 +33,17 @@ from typing import Dict, List, Union, Optional
 
 
 from .Assignments import Assignments
-from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         Expression, AIfExpr, IF, AQuantification, Type, Quantee,
-                         ARImplication, AEquivalence,
-                         AImplication, ADisjunction, AConjunction,
-                         AComparison, ASumMinus, AMultDiv, APower, AUnary,
-                         AAggregate, AppliedSymbol, UnappliedSymbol,
-                         Number, Brackets, Date, Extension,
-                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
+from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR, Accessor,
+    Symbol, SYMBOL, SymbolExpr, Expression, AIfExpr, IF, AQuantification,
+    Type, TYPE, Quantee, ARImplication, AEquivalence,
+    AImplication, ADisjunction, AConjunction,
+    AComparison, ASumMinus, AMultDiv, APower, AUnary,
+    AAggregate, AppliedSymbol, UnappliedSymbol,
+    Number, Brackets, Date, Extension,
+    Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
-                    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
-                    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
+    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
+    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
 
 
 def str_to_IDP(atom, val_string):
@@ -259,17 +259,17 @@ class Vocabulary(ASTNode):
             TypeDeclaration(
                 name=CONCEPT,
                 constructors=[]),
-            SymbolDeclaration(annotations='', name=Symbol(name=GOAL_SYMBOL),
-                              sorts=[Type(name=CONCEPT, ins=[],
-                                             out=Type(name=BOOL))],
-                              out=Type(name=BOOL)),
-            SymbolDeclaration(annotations='', name=Symbol(name=RELEVANT),
-                              sorts=[Type(name=CONCEPT, ins=[],
-                                             out=Type(name=BOOL))],
-                              out=Type(name=BOOL)),
-            SymbolDeclaration(annotations='', name=Symbol(name=ABS),
-                                sorts=[Type(name=INT)],
-                                out=Type(name=INT)),
+            SymbolDeclaration(annotations='', name=SYMBOL(GOAL_SYMBOL),
+                              sorts=[TYPE(CONCEPT, ins=[],
+                                             out=TYPE(BOOL))],
+                              out=TYPE(BOOL)),
+            SymbolDeclaration(annotations='', name=SYMBOL(RELEVANT),
+                              sorts=[TYPE(CONCEPT, ins=[],
+                                             out=TYPE(BOOL))],
+                              out=TYPE(BOOL)),
+            SymbolDeclaration(annotations='', name=SYMBOL(ABS),
+                                sorts=[TYPE(INT)],
+                                out=TYPE(INT)),
             ] + self.declarations
 
     def __str__(self):
@@ -336,8 +336,8 @@ class TypeDeclaration(ASTNode):
                             kwargs.pop('enumeration'))
 
         self.arity = 1
-        self.sorts = [Symbol(name=self.name)]
-        self.out = Symbol(name=BOOL)
+        self.sorts = [SYMBOL(self.name)]
+        self.out = SYMBOL(BOOL)
         self.type = (self.name if type(enumeration) != Ranges else
                      enumeration.type)  # INT or REAL or DATE
         self.base_type = self
@@ -345,7 +345,7 @@ class TypeDeclaration(ASTNode):
         self.map = {}  # {String: constructor}
 
         self.interpretation = (None if enumeration is None else
-            SymbolInterpretation(name=Symbol(name=self.name), sign=':=',
+            SymbolInterpretation(name=SYMBOL(self.name), sign=':=',
                                  enumeration=enumeration, default=None))
 
     def __str__(self):
@@ -441,7 +441,7 @@ class SymbolDeclaration(ASTNode):
         self.sorts = kwargs.pop('sorts')
         self.out = kwargs.pop('out')
         if self.out is None:
-            self.out = Symbol(name=BOOL)
+            self.out = SYMBOL(BOOL)
 
         self.arity = len(self.sorts)
         self.annotations = self.annotations.annotations if self.annotations else {}
@@ -676,12 +676,12 @@ class Definition(ASTNode):
             if key not in symbs or key in self.level_symbols:
                 continue
 
-            real = Type(name=REAL)
+            real = TYPE(REAL)
             real.decl = voc.symbol_decls[REAL]
             symbdec = SymbolDeclaration.make(
                 "_"+str(self.id)+"lvl_"+key.name,
                 key.arity, key.sorts, real)
-            self.level_symbols[key] = Symbol(name=symbdec.name)
+            self.level_symbols[key] = SYMBOL(symbdec.name)
             self.level_symbols[key].decl = symbdec
 
         for decl in self.level_symbols.keys():
@@ -900,7 +900,7 @@ class Enumeration(ASTNode):
         self.lookup = {}
         if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
                for c in self.tuples):
-            self.constructors = [Constructor(name=c.args[0].name)
+            self.constructors = [CONSTRUCTOR(c.args[0].name)
                                  for c in self.tuples]
         else:
             self.constructors = None

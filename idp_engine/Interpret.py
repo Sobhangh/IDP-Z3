@@ -40,14 +40,13 @@ from itertools import product
 from typing import Dict, List, Callable
 
 from .Assignments import Status as S
-from .Parse import (Import, TypeDeclaration,
-                    SymbolDeclaration, Symbol, SymbolInterpretation,
-                    FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
-                    Definition, Ranges, ConstructedFrom)
-from .Expression import (AIfExpr, IF, SymbolExpr, Expression, Constructor,
-                    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
-                    NOT, AppliedSymbol, UnappliedSymbol, Quantee,
-                    Variable, TRUE, FALSE, Number, Extension)
+from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
+    SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
+    Definition, ConstructedFrom)
+from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
+    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
+    NOT, AppliedSymbol, UnappliedSymbol, Quantee,
+    Variable, VARIABLE, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND)
@@ -87,7 +86,7 @@ TypeDeclaration.interpret = interpret
 def interpret(self, problem):
     assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
 
-    symbol = Symbol(name=self.name)
+    symbol = SYMBOL(self.name)
     symbol.decl = self
     symbol.type = symbol.decl.type
 
@@ -266,7 +265,7 @@ def interpret(self, problem):
             # add condition that the interpretation is total over the domain
             # ! x in dom(f): enum.contains(x)
             q_vars = { f"${sort.decl.name}!{str(i)}$":
-                       Variable(name=f"${sort.decl.name}!{str(i)}$", sort=sort)
+                       VARIABLE(f"${sort.decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
             quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
             expr = self.enumeration.contains(list(q_vars.values()), True)
