@@ -7,7 +7,7 @@ vocabulary {
 }
 
 theory {
-    { !cl ∈ color: ! cd ∈ code: codeOf(cl)=cd <- (cl=red & cd=a) | (cl=blue & cd=b). }
+    { !cl ∈ color: ! cd ∈ code: codeOf(cl)≜cd <- (cl=red & cd=a) | (cl=blue & cd=b). }
 }
 
 display {

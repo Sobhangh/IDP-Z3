@@ -12,10 +12,10 @@ The equivalent ASCII-only encoding is shown on the right.
 
     vocabulary V {
         type T
-        type T := {c1, c2, c3}
-        type T := constructed from {c1, c2(T1, f:T2)}
-        type T := {1,2,3}
-        type T := {1..3}
+        type T ≜ {c1, c2, c3}                     type T := {c1, c2, c3}
+        type T ≜ constructed from {c1, c2(T1, f:T2)}
+        type T ≜ {1,2,3}                          type T := {1,2,3}
+        type T ≜ {1..3}                           type T := {1..3}
         // built-in types: 𝔹, ℤ, ℝ, Date, Concept Bool, Int, Real, Date, Concept
 
         p : () → 𝔹                                p: () -> Bool
@@ -47,7 +47,7 @@ The equivalent ASCII-only encoding is shown on the right.
         if p1() then p2() else p3().
         f1() = if p() then f2() else f3().
 
-        p := {1,2,3}.
+        p ≜ {1,2,3}.                             p := {1,2,3}.
         p(#2020-01-01) is enumerated.
         p(#TODAY) is not enumerated.
 
@@ -55,6 +55,7 @@ The equivalent ASCII-only encoding is shown on the right.
           ∀x∈T: p1(x) ← p2(x).                    !x in T: p1(x) <- p2(x).
           f(1)=1.
           ∀x: f(x)=1 ← p(x).                      !x: f(x)=1 <- p(x).
+          ∀x: f(x)≜1 ← p(x).                      !x: f(x):=1 <- p(x).
         }
 
         [this is the intended meaning of the rule]
@@ -62,27 +63,27 @@ The equivalent ASCII-only encoding is shown on the right.
     }
 
     structure S:V {
-        p := false.
-        p := {1,2,3}.
-        p := {0..9, 100}.
-        p := {#2021-01-01}.
-        p := {(1,2), (3,4)}.
-        p := {
-        1 2
-        3 4
-        }.
+        p ≜ false.                               p := false.
+        p ≜ {1,2,3}.                             p := {1,2,3}.
+        p ≜ {0..9, 100}.                         p := {0..9, 100}.
+        p ≜ {#2021-01-01}.                       p := {#2021-01-01}.
+        p ≜ {(1,2), (3,4)}.                      p := {(1,2), (3,4)}.
+        p ≜ {                                    p := {
+        1 2                                       1 2
+        3 4                                       3 4
+        }.                                        }.
 
-        f := 1.
-        f := {→1} .                               f := {-> 1}.
-        f := {1→1, 2→2}.                          f := {1->1, 2->2}.
-        f := {(1,2)→3} else 2.                    f := {(1,2)->3} else 2.
-        f :⊇ {(1,2)→3}.                           f :>= {(1,2)->3}.
+        f ≜ 1.                                   f := 1.
+        f ≜ {→1} .                               f := {-> 1}.
+        f ≜ {1→1, 2→2}.                          f := {1->1, 2->2}.
+        f ≜ {(1,2)→3} else 2.                    f := {(1,2)->3} else 2.
+        f ⊇ {(1,2)→3}.                           f >> {(1,2)->3}.
     }
 
     display {
-        goal_symbol := {`p1, `p2}.
+        goal_symbol ≜ {`p1, `p2}.                goal_symbol := {`p1, `p2}.
         hide(`p).
-        expand := {`p}.
+        expand ≜ {`p}.                           expand := {`p}.
         view() = expanded.
         optionalPropagation().
     }

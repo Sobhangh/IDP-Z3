@@ -72,6 +72,10 @@
         <p-button (click)="type('≤')" styleClass="ui-button-secondary type" label="≤">
         </p-button>
     </div>
+    <div pTooltip="Definitional equality (:=)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('≜')" styleClass="ui-button-secondary type" label="≜">
+        </p-button>
+    </div>
     <div pTooltip="Different (~=)" style="display:inline-block; margin: 5px;">
         <p-button (click)="type('≠')" styleClass="ui-button-secondary type" label="≠">
         </p-button>
@@ -80,8 +84,8 @@
         <p-button (click)="type('≥')" styleClass="ui-button-secondary type" label="≥">
         </p-button>
     </div>
-    <div pTooltip="Superset (:>=)" style="display:inline-block; margin: 5px;">
-        <p-button (click)="type(':⊇')" styleClass="ui-button-secondary type" label=":⊇">
+    <div pTooltip="Superset (>>)" style="display:inline-block; margin: 5px;">
+        <p-button (click)="type('⊇')" styleClass="ui-button-secondary type" label="⊇">
         </p-button>
     </div>
     <div *ngIf="!textModeUnicode" style="display: inline-block; margin: 5px;">

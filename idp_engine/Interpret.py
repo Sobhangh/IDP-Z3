@@ -261,7 +261,7 @@ def interpret(self, problem):
                         and type(self.enumeration) == FunctionEnum
                         and self.default.type != BOOL):
                         problem.assignments.assert__(e.formula(), TRUE, status)
-        elif self.sign == ':=':
+        elif self.sign == '≜':
             # add condition that the interpretation is total over the domain
             # ! x in dom(f): enum.contains(x)
             q_vars = { f"${sort.decl.name}!{str(i)}$":

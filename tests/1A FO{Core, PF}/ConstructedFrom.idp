@@ -1,5 +1,5 @@
 vocabulary V {
-    type byte := {1,2}
+    type byte ≜ {1,2}
     type color
     Color: () -> color
     opposite: color → color
@@ -10,8 +10,8 @@ theory T:V {
 }
 
 structure S:V {
-    color := constructed from {red, blue, green, rgb(R: byte, byte)}.
-    opposite :⊇ {red-> green, (rgb(1,1))-> rgb(1,2)}.
+    color ≜ constructed from {red, blue, green, rgb(R: byte, byte)}.
+    opposite ⊇ {red-> green, (rgb(1,1))-> rgb(1,2)}.
 }
 
 procedure main() {

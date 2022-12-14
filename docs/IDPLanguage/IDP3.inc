@@ -34,7 +34,7 @@ if .. then .. else ..
     IDP-Z3 supports `if .. then .. else ..` terms and sentences.
 
 Structure
-    IDP-Z3 supports partial interpretations of functions using the `:>=` sign.
+    IDP-Z3 supports partial interpretations of functions using the `>>` sign.
     (It currently does not support partial interpretations of predicates)
 
 Procedure blocks
