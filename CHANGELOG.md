@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
-## Unreleased yet
+
+## [0.10.1] - 2022-12-14
 
 Breaking change:
 * MR !275: The symbol for partial interpretation is now `>>` or `⊇` (instead of `:>=` or `:⊇`).
