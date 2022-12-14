@@ -1,18 +1,18 @@
 vocabulary {
 
-    type Nr_of_sides := {3..4}
+    type Nr_of_sides ≜ {3..4}
     [EN:the number of edges] nr_of_sides: () → Nr_of_sides
     [EN:the number of vertices] nr_of_vertices: () → Nr_of_sides
 
 
-    type Type := {triangle, quadrilateral}
+    type Type ≜ {triangle, quadrilateral}
     [EN:the type] type : () → Type
 
-    type Side_Nr := {1..4}
+    type Side_Nr ≜ {1..4}
     [EN:length n°{1}] length : (Side_Nr) → ℝ
     [EN:angle n°{1}] angle : (Side_Nr) → ℝ
 
-    type Subtype :=
+    type Subtype ≜
         { regular_triangle
         , right_triangle
         , rectangle
@@ -120,7 +120,7 @@ theory {
 
 }
 structure default {
-    nr_of_sides := 3.
+    nr_of_sides ≜ 3.
 }
 display {
     view() = expanded.

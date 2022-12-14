@@ -1,5 +1,5 @@
 vocabulary {
-    type color := {red, blue, green}
+    type color ≜ {red, blue, green}
     p, q: () → Bool
     important: Concept[() → Bool] → Bool
     opposite: color → color
@@ -15,7 +15,7 @@ theory {
   !x in Concept[color->color]: $(x)(red) is enumerated.
 }
 structure S:V {
-  opposite :⊇ {red->blue}.
+  opposite >> {red->blue}.
 }
 procedure main() {
     pretty_print(Theory(T, S).formula())

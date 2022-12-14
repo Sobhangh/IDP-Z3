@@ -15,9 +15,11 @@ If the names are omitted, the structure is named S, for vocabulary V.
 
 A structure is a set of symbol interpretations of the form :
 
-* ``<symbol> := <total interpretation>.``, e.g., ``P := {1..9}``,
+* ``<symbol> ≜ <total interpretation>.``, e.g., ``P ≜ {1..9}``,
 
-* ``<symbol> :⊇ <partial interpretation>.``, e.g., ``P :⊇ {A->1}``.
+* ``<symbol> ⊇ <partial interpretation>.``, e.g., ``P ⊇ {A->1}``.
+
+(The ASCII equivalent of ``≜`` is ``:=``, and of ``⊇`` is ``>>``)
 
 A total interpretation fully specifies the interpretation of the symbol;
 a partial interpretation does not.

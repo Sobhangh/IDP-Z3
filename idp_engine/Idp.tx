@@ -21,7 +21,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
     TypeDeclaration:
       /type[ \t]/
       name=ID
-      (':=' ( enumeration=Ranges
+      (DefEqOp ( enumeration=Ranges
             | enumeration=Enumeration
             | enumeration=ConstructedFrom))?;
 
@@ -44,7 +44,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
   Rule: annotations=Annotations
         (('!'|'∀') quantees+=Quantee[','] ':' )*
         definiendum=AppliedSymbol
-        ('=' out=SumMinus)?
+        (('=' |DefEqOp) out=SumMinus)?
         (('<-'|'←') body=Expression)? '.' ;
       Quantee: ( vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
                | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?);
@@ -96,6 +96,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
     ImplicationOp:  '=>' | '⇒';
     DisjunctionOp:   '|' | '∨';
     ConjunctionOp:   '&' | '∧';
+    DefEqOp:        ':=' | '≜' ;
     ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' ;
     SumMinusOp:      '+' | '-';
     MultDivOp:       '⨯' | '*' | '/' | '%';
@@ -120,7 +121,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
 
 Structure: 'structure' name=ID? (':' vocab_name=ID)?
            '{' interpretations*=SymbolInterpretation '}';
-  SymbolInterpretation: name=UnappliedSymbol sign=/:(=|>=|⊇)/
+  SymbolInterpretation: name=UnappliedSymbol sign=/:=|>>|≜|⊇/
                         ( enumeration=FunctionEnum ('else' default=Identifier)?
                         | enumeration=Ranges
                         | enumeration=Enumeration

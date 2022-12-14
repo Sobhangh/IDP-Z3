@@ -13,7 +13,7 @@ vocabulary environment {
 vocabulary decision {
     import environment
 
-    type Activity := {Outdoor_sport, Indoor_sport, Restaurant, Cinema, Theater, None}
+    type Activity ≜ {Outdoor_sport, Indoor_sport, Restaurant, Cinema, Theater, None}
     [EN:the activity]
     activity: () → Activity
 

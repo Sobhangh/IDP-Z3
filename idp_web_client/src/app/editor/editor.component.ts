@@ -122,8 +122,9 @@ export class EditorComponent {
       line = line.replace(/⇒/g, '=>');
       line = line.replace(/⇐/g, '<=');
       line = line.replace(/≤/g, '=<');
-      line = line.replace(/:⊇/g, ':>=');
+      line = line.replace(/⊇/g, '>>');
       line = line.replace(/≥/g, '>=');
+      line = line.replace(/≜/g, ':=');
       line = line.replace(/≠/g, '~=');
       line = line.replace(/∀/g, '!');
       line = line.replace(/∃/g, '?');
@@ -161,9 +162,10 @@ export class EditorComponent {
       line = line.replace(/=>/g, '⇒');
       line = line.replace(/<=/g, '⇐');
       line = line.replace(/=</g, '≤');
-      line = line.replace(/:>=/g, ':⊇');
+      line = line.replace(/>>/g, '⊇');
       line = line.replace(/>=/g, '≥');
       line = line.replace(/¬=/g, '≠');
+      line = line.replace(/:=/g, '≜');
       line = line.replace(/~=/g, '≠');
       line = line.replace(/\!/g, '∀');
       line = line.replace(/\?/g, '∃');

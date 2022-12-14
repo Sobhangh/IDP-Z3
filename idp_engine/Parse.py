@@ -345,7 +345,7 @@ class TypeDeclaration(ASTNode):
         self.map = {}  # {String: constructor}
 
         self.interpretation = (None if enumeration is None else
-            SymbolInterpretation(name=SYMBOL(self.name), sign=':=',
+            SymbolInterpretation(name=SYMBOL(self.name), sign='≜',
                                  enumeration=enumeration, default=None))
 
     def __str__(self):
@@ -804,10 +804,11 @@ class SymbolInterpretation(ASTNode):
         if not self.enumeration:
             self.enumeration = Enumeration(tuples=[])
 
-        self.sign = ':⊇' if self.sign == ':>=' else self.sign
-        self.check(self.sign == ':=' or
+        self.sign = ('⊇' if self.sign == '>>' else
+                     '≜' if self.sign == ':=' else self.sign)
+        self.check(self.sign == '≜' or
                    (type(self.enumeration) == FunctionEnum and self.default is None),
-                   "':⊇' can only be used with a functional enumeration ('→') without else clause")
+                   "'⊇' can only be used with a functional enumeration ('→') without else clause")
 
         self.symbol = None
         self.is_type_enumeration = None
@@ -818,7 +819,7 @@ class SymbolInterpretation(ASTNode):
 
         This is a recursive function.
 
-        Example: assume `f:>={(1,2)->A, (1, 3)->B, (2,1)->C}` and `args=[g(1),2)].
+        Example: assume `f>>{(1,2)->A, (1, 3)->B, (2,1)->C}` and `args=[g(1),2)].
         The returned expression is:
         ```
         if g(1) = 1 then A

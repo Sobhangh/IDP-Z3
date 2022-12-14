@@ -7,7 +7,7 @@ vocabulary V {
 }
 
 structure S:V {
-    opposite :>= {red-> green, green-> red}.
+    opposite >> {red-> green, green-> red}.
 }
 
 theory T:V {

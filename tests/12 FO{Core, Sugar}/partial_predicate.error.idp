@@ -9,7 +9,7 @@ theory T:V {
 }
 
 structure S:V {
-    c :>= {red->false}.
+    c >> {red->false}.
 }
 
 procedure main() {

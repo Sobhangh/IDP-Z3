@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased yet
 
+Breaking change:
+* MR !275: The symbol for partial interpretation is now `>>` or `⊇` (instead of `:>=` or `:⊇`).
+
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
@@ -22,6 +25,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #228: Expansion inference should better respect the `timeout_seconds` parameter
 * issue #229: colon ':' in reading before quantor gives error in IC
 * MR !271: support for empty type
+* MR !275: allow `≜` for `:=`
 
 ### Interactive Consultant and Web IDE
 
@@ -32,6 +36,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #230: maximum recursion depth exceeded with inductive definition
 * issue #231: Incorrect behavior when entering negative numbers
 * MR !270: add support for slider below numeric field
+* MR !275: allow `≜` for `:=`
 
 
 ## [0.10.0] - 2022-10-07

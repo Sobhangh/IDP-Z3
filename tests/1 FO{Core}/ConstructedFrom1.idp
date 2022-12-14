@@ -1,6 +1,6 @@
 vocabulary V {
-    type byte := {t,u}
-    type color := constructed from {red, blue, green, rgb(R: byte, byte)}
+    type byte ≜ {t,u}
+    type color ≜ constructed from {red, blue, green, rgb(R: byte, byte)}
 }
 
 theory T:V {

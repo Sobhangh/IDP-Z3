@@ -8,8 +8,8 @@ vocabulary environment {
 vocabulary decision {
     import environment
 
-    type Registration_Type := {Social, Modest, Other}
-    type Tax_Rate := {1, 7, 10}
+    type Registration_Type ≜ {Social, Modest, Other}
+    type Tax_Rate ≜ {1, 7, 10}
 
     [EN:the tax rate] tax_rate : () → Tax_Rate
     [EN:the type of registration] registration_Type : () → Registration_Type
@@ -36,7 +36,7 @@ theory decision:decision {
 }
 
 display {
-    expand := {`tax_rate}.
-    goal_symbol := {`tax_rate, `registration_Type}.
+    expand ≜ {`tax_rate}.
+    goal_symbol ≜ {`tax_rate, `registration_Type}.
     view() = normal.
 }
