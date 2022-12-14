@@ -208,7 +208,7 @@ A definition consists of a set of rules, enclosed by ``{`` and ``}``.
 
 where P is a predicate_ symbol, F is a function_ symbol, |t|, |t1,tn| are terms that may contain the variables |v1,vn| and |phi| is a formula that may contain these variables.
 ``P(t_1, t_2,.., t_n)`` is called the *head* of the rule and |phi| the *body*.
-``<-`` can be used instead of ``←``.
+``<-`` can be used instead of ``←``, and ``≜`` instead of ``=``.
 If the body is ``true``, the left arrow and body of the rule can be omitted.
 
 

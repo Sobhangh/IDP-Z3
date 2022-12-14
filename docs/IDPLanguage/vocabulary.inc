@@ -39,8 +39,7 @@ Their name should be singular and capitalized, by convention.
 
 Their extension can be defined in a structure_, or directly in the vocabulary, by specifying:
 
-* a list of (ranges of) numeric literals, e.g., ``type someNumbers ≜ {0,1,2}`` or ``type byte ≜ {0..255}``
-(the ASCII equivalent of ``≜`` is ``:=``)
+* a list of (ranges of) numeric literals, e.g., ``type someNumbers ≜ {0,1,2}`` or ``type byte ≜ {0..255}``  (the ASCII equivalent of ``≜`` is ``:=``)
 
 * a list of (ranges of) dates, e.g., ``type dates ≜ {#2021-01-01, #2022-01-01}`` or ``type dates ≜ {#2021-01-01 .. #2022-01-01}``
 
