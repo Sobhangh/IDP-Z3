@@ -23,7 +23,7 @@ web client.
 import ast
 
 from idp_engine import Theory, Status
-from idp_engine.Expression import (TRUE, FALSE, Number)
+from idp_engine.Expression import (TRUE, FALSE, Number, Date)
 from idp_engine.Parse import str_to_IDP
 from idp_engine.Assignments import Status as S
 from idp_engine.utils import BOOL, INT, REAL, DATE
@@ -160,7 +160,10 @@ class Output(object):
                 if typ == BOOL:
                     symbol = {"typ": "Bool"}
                 elif 0 < len(symb.range):
-                    symbol = {"typ": typ,
+                    if (isinstance(symb.range[0], Number)
+                    or isinstance(symb.range[0], Date)):  # handle numeric ranges
+                        typ = symb.range[0].type
+                    symbol = {"typ": FROM.get(typ, typ),
                               "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT, DATE]:
                     symbol = {"typ": FROM.get(typ, typ), }

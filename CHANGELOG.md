@@ -31,6 +31,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #227: respect spaces in IDE output
 * issue #230: maximum recursion depth exceeded with inductive definition
 * issue #231: Incorrect behavior when entering negative numbers
+* issue #232: Should be able to minimize over a range
 * MR !270: add support for slider below numeric field
 
 

@@ -112,12 +112,13 @@
         <code>vocabulary {
   type Method := {Nail, Glue, Screw}
   type Wall := {Brick, Wood, Tile}
+  type Difficulty := {1..3}
 
   wall  : () → Wall
   method: () → Method
   hole : () → 𝔹
   weight: () → ℤ
-  difficulty : () → ℤ
+  difficulty : () → Difficulty
 }
 theory {
   weight() > 0.
@@ -131,7 +132,6 @@ theory {
   { difficulty() = 1 ← method() = Glue.
     difficulty() = 2 ← method() = Nail.
     difficulty() = 3 ← method() = Screw.}
-  difficulty() ∈ {1, 2, 3}.
 }
 display {
   view() = expanded.
@@ -166,7 +166,7 @@ display {
       </ul>
       <p class="flex-grow-1 pb2">
         (or simply click
-        <a href="https://interactive-consultant.idp-z3.be/?G4ewxghgRgrgNhATgTwAQG8BQqeoC7IAOApqgLLF4AWIAJqgFwC8GAchAJZwA0qA4nBjFeAZTCJiAdwC%2B2XARKoA6hDhxGLdACFEHMAGteSkHV4AVLsVlyck1esaoAFAEpUgJMJl9m6gC2lGloGZzdPCmo6Hxo4UmDXD1RAVg3ATl2fSWIOAHMqPDjQ1EASQh9aDgAzUr14Akd4zyKcWRxqYhAUDDSM7Lx4lgAmAAYAOg6snPiAPlQhn38I2h7Udi4cQCXCVHTR7rdAEyJUXoBWYdw-ALoFsQlJVDWNrvjdgBZp49nAhYEhVfXOsZ3UAEZDpgoiAYvFACuEJzmCyW6kAFERQt5uFgXKRHXB2NQLCwxa6oAA10WIrmGPnQqBK5UqcAIC3%2BqEACYSIs7I-iCYjo46UipgKrIBa9RnM%2Bas2Gc3Dc6m01kAZiFrxZqBR4jRjQlZR5fPigAgiDD-Xi9Xgy6To6wlADOhAQaCwx2AHCkC2IAA9CBAAHa0Yi0YayQiIcDemASPycd3xW2of2UAgAfX9HHd3V8dGIcFjLrdnqcZhcLkwauOOCAA">
+        <a href="http://localhost:5000/?G4ewxghgRgrgNhATgTwAQG9UChWoC7IAOApqgLLF4AWIAJqgFwC8GAchAJZwA0qA4nBjFeAZTCJiAdwC%2BOfEVIB1CHDiMW6AEKIOYANa9FIOrwAqXYrNwESqACIcAZo93wC6jAEYAdN4DMVnKSKmqMqAAUAJSogEmEqMqqcgC2lDS0DBHRcRTUdHI0cKQZUbGogKwbgJy7QcQcAOZUeMVZqIAkhHK0Ti5gbmhNpQ7OrnAEWLLUxCAoGNV1DSUAfKgADN7JqXQlLOxcuIBLhKiSNfV4JYAmRKgATACsq7gpubSbqGISkqj7h7Mn0ecALCtrB5PARCPYHI5zH6oTw3LD5ECFEqAFcJUPc0k9tmpABREqPWj2iLBeUluBxCT3MhXeqAANQViFFVnJMB1Bt1hsgnp5UIAEwlxQIJ-EExBJuBZXR6TwuPL56IFmJFqDFQwITz80rRGwFRMk3lksg6AGdCAg0Og5MAOFInsQAB6ECAAO1oxFoq2kQA">
           here
         </a>).
       </p>
