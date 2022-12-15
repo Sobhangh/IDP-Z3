@@ -239,28 +239,30 @@ class Assignments(dict):
         out = {}
         nullary = set()
         for a in self.values():
-            if (a.value is not None and type(a.sentence) == AppliedSymbol):
+            if type(a.sentence) == AppliedSymbol:
                 args = ", ".join(str(e) for e in a.sentence.sub_exprs)
                 args = f"({args})" if 1 < len(a.sentence.sub_exprs) else args
+
+                c = None
                 if a.symbol_decl.arity == 0:
                     # Symbol is a proposition or constant.
-                    c = f"{str(a.value)}"
+                    c = f"{str(a.value)}" if a.value is not None else "*"
                     nullary.add(a.symbol_decl.name)
                 elif a.value == FALSE:
                     # make sure we have an entry for `a` in `out`
                     if a.symbol_decl.name not in out:
                         out[a.symbol_decl.name] = {}
-                    continue  # don't add the entry
                 elif a.value == TRUE:
                     # Symbol is a predicate.
                     c = f"{args}"
-                else:
+                elif a.value is not None:
                     # Symbol is a function.
                     c = f"{args} -> {str(a.value)}"
 
-                enum = out.get(a.symbol_decl.name, dict())
-                enum[c] = c
-                out[a.symbol_decl.name] = enum
+                if c:
+                    enum = out.get(a.symbol_decl.name, dict())
+                    enum[c] = c
+                    out[a.symbol_decl.name] = enum
 
         model_str = ""
         for k, enum in out.items():

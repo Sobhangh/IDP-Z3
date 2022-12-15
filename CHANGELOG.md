@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
 
+## Unreleased yet
+
+Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
+
+### IDP-Z3
+
+### Interactive Consultant and Web IDE
+* issue #233: IDE should show irrelevant propositions in models
+
+
 ## [0.10.1] - 2022-12-14
 
 Breaking change:
