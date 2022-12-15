@@ -21,15 +21,22 @@
 Classes to store assignments of values to questions
 
 """
+from __future__ import annotations
+
 __all__ = ["Status", "Assignment", "Assignments"]
+
 
 from copy import copy, deepcopy
 from enum import Enum, auto
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, TYPE_CHECKING
 from z3 import BoolRef
 
 from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol
 from .utils import NEWL, BOOL
+
+if TYPE_CHECKING:
+    from .Parse import SymbolDeclaration, Enumeration
+    from .Theory import Theory
 
 
 class Status(Enum):
@@ -73,7 +80,9 @@ class Assignment(object):
         symbol_decl (SymbolDeclaration): declaration of the symbol under which
         it should be displayed in the IC.
     """
-    def __init__(self, sentence: Expression, value: Optional[Expression],
+    def __init__(self,
+                 sentence: Expression,
+                 value: Optional[Expression],
                  status: Optional[Status],
                  relevant: Optional[bool] = True):
         self.sentence: Expression = sentence
@@ -85,9 +94,9 @@ class Assignment(object):
         # First symbol in the sentence, preferably not starting with '_':
         # if no public symbol (not starting with '_') is found, the first
         # private one is used.
-        self.symbol_decl: "SymbolDeclaration" = None
+        self.symbol_decl: SymbolDeclaration = None
         default = None
-        self.symbols: Dict[str, "SymbolDeclaration"] = \
+        self.symbols: Dict[str, SymbolDeclaration] = \
             sentence.collect_symbols(co_constraints=False).values()
         for d in self.symbols:
             if not d.private:
@@ -99,7 +108,9 @@ class Assignment(object):
         if not self.symbol_decl:  # use the '_' symbol (to allow relevance computation)
             self.symbol_decl = default
 
-    def copy(self, shallow: Optional[bool] =False) -> "Assignment":
+    def copy(self,
+             shallow: Optional[bool] =False
+             ) -> Assignment:
         out = copy(self)
         if not shallow:
             out.sentence = deepcopy(out.sentence)
@@ -123,7 +134,7 @@ class Assignment(object):
     def __log__(self) -> Optional[Expression]:
         return self.value
 
-    def same_as(self, other:"Assignment") -> bool:
+    def same_as(self, other: Assignment) -> bool:
         """returns True if self has the same sentence and truth value as other.
 
         Args:
@@ -150,7 +161,7 @@ class Assignment(object):
             out = EQUALS([self.sentence, self.value])
         return out
 
-    def negate(self) -> "Assignment":
+    def negate(self) -> Assignment:
         """returns an Assignment for the same sentence, but an opposite truth value.
 
         Raises:
@@ -163,13 +174,13 @@ class Assignment(object):
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
 
-    def translate(self, problem: "Theory") -> BoolRef:
+    def translate(self, problem: Theory) -> BoolRef:
         return self.formula().translate(problem)
 
     def as_set_condition(self
              ) -> Tuple[Optional[AppliedSymbol],
                         Optional[bool],
-                        Optional["Enumeration"]]:
+                        Optional[Enumeration]]:
         """returns an equivalent set condition, or None
 
         Returns:
@@ -193,7 +204,7 @@ class Assignments(dict):
     """Contains a set of Assignment"""
     def __init__(self, *arg, **kw):
         super(Assignments, self).__init__(*arg, **kw)
-        self.symbols: Dict[str, "SymbolDeclaration"] = {}
+        self.symbols: Dict[str, SymbolDeclaration] = {}
         for a in self.values():
             if a.symbol_decl:
                 self.symbols[a.symbol_decl.name] = a.symbol_decl
