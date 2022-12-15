@@ -239,34 +239,33 @@ class Assignments(dict):
         out = {}
         nullary = set()
         for a in self.values():
-            if (a.value is not None and not a.sentence.is_reified()):
-                # make sure we have an entry for `a` in `out`
-                if a.value == FALSE and a.symbol_decl.arity != 0:
-                    if a.symbol_decl.name not in out:
-                        out[a.symbol_decl.name] = {}
-                    continue
-
-                c = ", ".join(str(e) for e in a.sentence.sub_exprs)
-                c = f"({c})" if 1 < len(a.sentence.sub_exprs) else c
+            if (a.value is not None and type(a.sentence) == AppliedSymbol):
+                args = ", ".join(str(e) for e in a.sentence.sub_exprs)
+                args = f"({args})" if 1 < len(a.sentence.sub_exprs) else args
                 if a.symbol_decl.arity == 0:
                     # Symbol is a proposition or constant.
-                    c = f"{c}"
+                    c = f"{str(a.value)}"
                     nullary.add(a.symbol_decl.name)
-                if a.value == TRUE and a.symbol_decl.arity > 0:
+                elif a.value == FALSE:
+                    # make sure we have an entry for `a` in `out`
+                    if a.symbol_decl.name not in out:
+                        out[a.symbol_decl.name] = {}
+                    continue  # don't add the entry
+                elif a.value == TRUE:
                     # Symbol is a predicate.
-                    c = f"{c}"
+                    c = f"{args}"
                 else:
                     # Symbol is a function.
-                    c = f"{c} -> {str(a.value)}"
+                    c = f"{args} -> {str(a.value)}"
+
                 enum = out.get(a.symbol_decl.name, dict())
-                if c not in enum:
-                    enum[c] = c
-                    out[a.symbol_decl.name] = enum
+                enum[c] = c
+                out[a.symbol_decl.name] = enum
 
         model_str = ""
-        for k, a in out.items():
-            if k in nullary:  # Exception 1.
-                model_str += f"{k} :={list(a)[0][3:]}.{NEWL}"
+        for k, enum in out.items():
+            if k in nullary:  # do not use {...}
+                model_str += f"{k} := {list(enum)[0]}.{NEWL}"
             else:
-                model_str += f"{k} := {{{ ', '.join(s for s in a) }}}.{NEWL}"
+                model_str += f"{k} := {{{ ', '.join(s for s in enum) }}}.{NEWL}"
         return model_str

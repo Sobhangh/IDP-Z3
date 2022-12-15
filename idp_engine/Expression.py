@@ -1262,8 +1262,6 @@ class UnappliedSymbol(Expression):
 
     def __str1__(self): return self.name
 
-    def is_reified(self): return False
-
 
 TRUEC = CONSTRUCTOR('true')
 FALSEC = CONSTRUCTOR('false')
@@ -1331,8 +1329,6 @@ class Number(Expression):
 
     def __str__(self): return self.number
 
-    def is_reified(self): return False
-
     def real(self):
         """converts the INT number to REAL"""
         self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
@@ -1372,8 +1368,6 @@ class Date(Expression):
         return cls(iso=f"#{date.fromordinal(value).isoformat()}")
 
     def __str__(self): return f"#{self.date.isoformat()}"
-
-    def is_reified(self): return False
 
 
 class Brackets(Expression):
