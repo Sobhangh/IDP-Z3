@@ -1,7 +1,7 @@
 Propagation of a() = 1:
-p := *.
+// p := *.
 a := 1.
-b := *.
+// b := *.
 
 
 Followed by propagation of p()=true:
@@ -17,7 +17,7 @@ b := 2.
 
 
 Followed by propagation of p()=?:
-p := *.
+// p := *.
 a := 2.
-b := *.
+// b := *.
 

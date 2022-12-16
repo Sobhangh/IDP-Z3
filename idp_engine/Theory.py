@@ -625,6 +625,8 @@ class Theory(object):
                 if a.status == S.EXPANDED:
                     q = a.sentence
                     different.append(q.translate(self) != a.value.translate(self))
+            if 0 < count and len(different) == 0:
+                break
             if different:
                 solver.add(Or(different))
 
@@ -632,8 +634,6 @@ class Theory(object):
                 count += 1
                 ass = self._from_model(solver, todo, complete)
                 yield ass
-                if not self.constraints and not self.definitions:  # empty theory
-                    break
             else:
                 break
 

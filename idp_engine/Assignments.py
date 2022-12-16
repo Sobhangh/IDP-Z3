@@ -278,7 +278,10 @@ class Assignments(dict):
         model_str = ""
         for k, enum in out.items():
             if k in nullary:  # do not use {...}
-                model_str += f"{k} := {list(enum)[0]}.{NEWL}"
+                val = f"{k} := {list(enum)[0]}.{NEWL}"
+                if "*" in val:
+                    val = f"// {val}"
             else:
-                model_str += f"{k} := {{{ ', '.join(s for s in enum) }}}.{NEWL}"
+                val = f"{k} := {{{ ', '.join(s for s in enum) }}}.{NEWL}"
+            model_str += val
         return model_str
