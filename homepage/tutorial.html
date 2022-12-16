@@ -110,31 +110,31 @@
       </p>
       <pre>
         <code>vocabulary {
-  type Method := {Nail, Glue, Screw}
-  type Wall := {Brick, Wood, Tile}
-  type Difficulty := {1..3}
+    type Method ≜ {Nail, Glue, Screw}
+    type Wall ≜ {Brick, Wood, Tile}
+    type Difficulty ≜ {1..3}
 
-  wall  : () → Wall
-  method: () → Method
-  hole : () → 𝔹
-  weight: () → ℤ
-  difficulty : () → Difficulty
+    wall  : () → Wall
+    method: () → Method
+    hole : () → 𝔹
+    weight: () → ℤ
+    difficulty : () → Difficulty
 }
 theory {
-  weight() > 0.
-  method() = Nail  ⇒ weight() ≤ 25.
-  method() = Screw ⇒ weight() ≤ 40.
-  method() = Glue  ⇒ weight() ≤ 15.
+    weight() > 0.
+    method() = Nail  ⇒ weight() ≤ 25.
+    method() = Screw ⇒ weight() ≤ 40.
+    method() = Glue  ⇒ weight() ≤ 15.
 
-  hole() ⇔ method() = Nail ∨ method() = Screw.
-  wall() = Tile ⇒ ¬hole().
+    hole() ⇔ method() = Nail ∨ method() = Screw.
+    wall() = Tile ⇒ ¬hole().
 
-  { difficulty() = 1 ← method() = Glue.
+    { difficulty() = 1 ← method() = Glue.
     difficulty() = 2 ← method() = Nail.
     difficulty() = 3 ← method() = Screw.}
 }
 display {
-  view() = expanded.
+    view() = expanded.
 }</code>
       </pre>
       <div class="w-30">
@@ -166,7 +166,7 @@ display {
       </ul>
       <p class="flex-grow-1 pb2">
         (or simply click
-        <a href="http://localhost:5000/?G4ewxghgRgrgNhATgTwAQG9UChWoC7IAOApqgLLF4AWIAJqgFwC8GAchAJZwA0qA4nBjFeAZTCJiAdwC%2BOfEVIB1CHDiMW6AEKIOYANa9FIOrwAqXYrNwESqACIcAZo93wC6jAEYAdN4DMVnKSKmqMqAAUAJSogEmEqMqqcgC2lDS0DBHRcRTUdHI0cKQZUbGogKwbgJy7QcQcAOZUeMVZqIAkhHK0Ti5gbmhNpQ7OrnAEWLLUxCAoGNV1DSUAfKgADN7JqXQlLOxcuIBLhKiSNfV4JYAmRKgATACsq7gpubSbqGISkqj7h7Mn0ecALCtrB5PARCPYHI5zH6oTw3LD5ECFEqAFcJUPc0k9tmpABREqPWj2iLBeUluBxCT3MhXeqAANQViFFVnJMB1Bt1hsgnp5UIAEwlxQIJ-EExBJuBZXR6TwuPL56IFmJFqDFQwITz80rRGwFRMk3lksg6AGdCAg0Og5MAOFInsQAB6ECAAO1oxFoq2kQA">
+        <a href="https://interactive-consultant.idp-z3.be/?G4ewxghgRgrgNhATgTwAQG9UChW9QF2QAcBTVAWRPwAsQATVQHSIMA5CASzgBpUBxOGCR4BlMIhIB3AL448hUqgDqEOHCYYAQonZgA1j0Uh6PACqcSMvAWJkAIuwBmDnfELr0ARgB0XgMyXZXAkVNVQALlQACgBKVEAkwiUQwNQAWypaOgiY%2BIp0%2BmTaODIs2ITAVg3ATl3kiRJ2AHNqfBKcwBJCZLpHZzBXNGaE%2BycXOEIsGRoSEBQMatqG-GyAPlQABi9ktJp6bIBeVDZOXEAlwlQa%2BsbswBMiVAAmAFY1qw2MndRRcQlUY9O5y9QAFlW6zydBe-EERxOs3OsSuHnuWAKICK2UAK4SpYEvfZqQAUROjNiDYrs3pIHnhgqoXmYip9UAAawokGJrZKYDqDbrDZAvDyoQAJhHjnoS%2BAISKTcGyuj0Xtc%2BQKtkKsWLUBKhoQXr5ZU95agiWISTIZB0AM5EBBodDJYDsSQvEgADyIEAAdnQSHQ1lIgA">
           here
         </a>).
       </p>
