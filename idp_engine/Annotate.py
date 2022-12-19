@@ -229,12 +229,12 @@ def get_instantiables(self,
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.is_whole_domain = all(s.extension(interpretations, extensions)[0] is not None
+        rule.has_finite_domain = all(s.extension(interpretations, extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
         inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
             and rule.definiendum.symbol.decl in rule.parent.level_symbols)
 
-        if rule.is_whole_domain or inductive:
+        if rule.has_finite_domain or inductive:
             if rule.out:
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
                                           rule.definiendum.sub_exprs[:-1])

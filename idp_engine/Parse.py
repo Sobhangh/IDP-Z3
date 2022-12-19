@@ -705,7 +705,7 @@ class Rule(ASTNode):
         self.definiendum = kwargs.pop('definiendum')
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
-        self.is_whole_domain = None  # Bool
+        self.has_finite_domain = None  # Bool
         self.block = None  # theory where it occurs
 
         self.annotations = self.annotations.annotations if self.annotations else {}
