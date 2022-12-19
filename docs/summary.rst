@@ -52,7 +52,7 @@ The equivalent ASCII-only encoding is shown on the right.
         p(#TODAY) is not enumerated.
 
         { p(1). }
-        { (co-inductive)
+        { (co-induction)
           ∀x∈T: p1(x) ← p2(x).                    !x in T: p1(x) <- p2(x).
           f(1)=1.
           ∀x: f(x)=1 ← p(x).                      !x: f(x)=1 <- p(x).
