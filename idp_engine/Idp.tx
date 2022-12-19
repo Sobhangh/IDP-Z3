@@ -40,22 +40,23 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
                interpretations=SymbolInterpretation*
              )* '}';
 
-  Definition: annotations=Annotations '{' rules*=Rule '}';
-  Rule: annotations=Annotations
-        (('!'|'∀') quantees+=Quantee[','] ':' )*
-        definiendum=AppliedSymbol
-        (('=' |DefEqOp) out=SumMinus)?
-        (('<-'|'←') body=Expression)? '.' ;
-      Quantee: ( vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
-               | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?);
-          Variable: name=/`?[^\d\W]\w*\b/;
-          VarTuple: '(' vars+=Variable[','] ')';
-          Type: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
-            ( '['
-              ( '(' ins*=Type[/[*⨯]/] ')' | ins*=Type[/[*⨯]/] )
-              ('->' | '→') out=Type
-              ']'
-            )?;
+  Definition: annotations=Annotations '{' mode=Mode rules*=Rule '}';
+    Mode: ('(' ('well-founded' | 'completion' | 'Kripke-Kleene' | 'co-induction') ')')?;
+    Rule: annotations=Annotations
+          (('!'|'∀') quantees+=Quantee[','] ':' )*
+          definiendum=AppliedSymbol
+          (('=' |DefEqOp) out=SumMinus)?
+          (('<-'|'←') body=Expression)? '.' ;
+        Quantee: ( vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
+                | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?);
+            Variable: name=/`?[^\d\W]\w*\b/;
+            VarTuple: '(' vars+=Variable[','] ')';
+            Type: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
+              ( '['
+                ( '(' ins*=Type[/[*⨯]/] ')' | ins*=Type[/[*⨯]/] )
+                ('->' | '→') out=Type
+                ']'
+              )?;
 
   Axiom: annotations=Annotations expr=Expression '.';
 

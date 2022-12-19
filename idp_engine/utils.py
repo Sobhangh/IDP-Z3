@@ -43,8 +43,6 @@ class Semantics(Enum):
     WELLFOUNDED = auto()
     COINDUCTION = auto()
 
-DEF_SEMANTICS = Semantics.WELLFOUNDED
-
 """
     String constants
 """

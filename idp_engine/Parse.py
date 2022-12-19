@@ -43,7 +43,8 @@ from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR, Accesso
     Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
     GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
-    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
+    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION,
+    Semantics as S)
 
 
 def str_to_IDP(atom, val_string):
@@ -603,12 +604,17 @@ class Definition(ASTNode):
     """
     definition_id = 0  # intentional static variable so that no two definitions get the same ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, parent, annotations, mode, rules):
         Definition.definition_id += 1
         self.id = Definition.definition_id
-        self.annotations = kwargs.pop('annotations')
-        self.annotations = self.annotations.annotations if self.annotations else {}
-        self.rules = kwargs.pop('rules')
+        self.mode = (S.COMPLETION if mode == "(completion)" else
+                     S.KRIPKEKLEENE if mode == "(Kripke-Kleene)" else
+                     S.COINDUCTION if mode == "(co-induction)" else
+                     S.WELLFOUNDED if (mode == "(well-founded)") or (mode is None) else
+                     mode)
+        assert type(self.mode) == S, f"Unsupported mode: {mode}"
+        self.annotations = annotations.annotations if annotations else {}
+        self.rules = rules
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.canonicals = {}
         self.instantiables = {}

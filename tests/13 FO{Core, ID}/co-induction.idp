@@ -1,0 +1,13 @@
+vocabulary V {
+    p : ℤ → 𝔹 // n is followed by an infinite sequence of numbers
+}
+
+theory T:V {
+    { (co-induction)
+        ∀x: p(x) ← ∃ y ∈ ℤ: y=x+1 ∧ p(y).
+    }
+    p(1).
+}
+procedure main(){
+    pretty_print(model_expand(T,max=1))
+}

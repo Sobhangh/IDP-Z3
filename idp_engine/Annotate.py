@@ -38,7 +38,7 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-    OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
+    OrderedSet, IDPZ3Error, Semantics)
 
 
 # Class Vocabulary  #######################################################
@@ -231,7 +231,7 @@ def get_instantiables(self,
         rule = rules[0]
         rule.has_finite_domain = all(s.extension(interpretations, extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
-        inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
+        inductive = (not rule.out and self.mode != Semantics.COMPLETION
             and rule.definiendum.symbol.decl in rule.parent.level_symbols)
 
         if rule.has_finite_domain or inductive:
@@ -257,7 +257,7 @@ def get_instantiables(self,
                     bodies.append(new)
                     if for_explain:
                         new = deepcopy(new).add_level_mapping(rule.parent.level_symbols,
-                                             rule.definiendum, False, False)
+                                             rule.definiendum, False, False, self.mode)
                         out.append(RIMPLIES([head, new], r.annotations))
 
             all_bodies = OR(bodies)
@@ -269,10 +269,10 @@ def get_instantiables(self,
             else:
                 if not out:  # no reverse implication yet
                     new = deepcopy(all_bodies).add_level_mapping(rule.parent.level_symbols,
-                                             rule.definiendum, False, False)
+                                             rule.definiendum, False, False, self.mode)
                     out = [RIMPLIES([deepcopy(head), new], self.annotations)]
                 all_bodies = deepcopy(all_bodies).add_level_mapping(rule.parent.level_symbols,
-                                        rule.definiendum, True, True)
+                                        rule.definiendum, True, True, self.mode)
                 out.append(IMPLIES([head, all_bodies], self.annotations))
             result[decl] = out
         else:

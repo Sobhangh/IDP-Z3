@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from .Parse import Declaration, SymbolDeclaration, SymbolInterpretation, Enumeration
 
 from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS, \
-    IDPZ3Error, DEF_SEMANTICS, Semantics
+    IDPZ3Error, Semantics
 
 
 class ASTNode(object):
@@ -508,7 +508,8 @@ class Expression(ASTNode):
                           level_symbols: Dict[SymbolDeclaration, Symbol],
                           head: AppliedSymbol,
                           pos_justification: bool,
-                          polarity: bool
+                          polarity: bool,
+                          mode: Semantics
                           ) -> Expression:
         """Returns an expression where level mapping atoms (e.g., lvl_p > lvl_q)
          are added to atoms containing recursive symbols.
@@ -524,7 +525,7 @@ class Expression(ASTNode):
             - polarity (Bool): whether the current expression occurs under
               negation.
         """
-        return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity)
+        return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity, mode)
                                    for e in self.sub_exprs))
                     .annotate1())  # update .variables
 
@@ -890,9 +891,9 @@ class Operator(Expression):
 class AImplication(Operator):
     PRECEDENCE = 50
 
-    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity),
-                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity)]
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
+        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity, mode),
+                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity, mode)]
         return self.update_exprs(sub_exprs).annotate1()
 
 def IMPLIES(exprs, annotations=None):
@@ -917,9 +918,9 @@ def EQUIV(exprs, annotations=None):
 class ARImplication(Operator):
     PRECEDENCE = 30
 
-    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
-        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity),
-                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity)]
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
+        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity, mode),
+                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity, mode)]
         return self.update_exprs(sub_exprs).annotate1()
 
 def RIMPLIES(exprs, annotations):
@@ -994,11 +995,12 @@ class AUnary(Expression):
     def __str1__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
-    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
         sub_exprs = (e.add_level_mapping(level_symbols, head,
                                          pos_justification,
                                          not polarity
-                                         if self.operator == '¬' else polarity)
+                                         if self.operator == '¬' else polarity,
+                                         mode)
                      for e in self.sub_exprs)
         return self.update_exprs(sub_exprs).annotate1()
 
@@ -1192,20 +1194,20 @@ class AppliedSymbol(Expression):
             constructor = CONSTRUCTOR(self.sub_exprs[0].name)
             constructors[symbol.name].append(constructor)
 
-    def add_level_mapping(self, level_symbols, head, pos_justification, polarity):
+    def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
         assert head.symbol.decl in level_symbols, \
                f"Internal error in level mapping: {self}"
         if self.symbol.decl not in level_symbols or self.in_head:
             return self
         else:
-            if DEF_SEMANTICS == Semantics.WELLFOUNDED:
+            if mode == Semantics.WELLFOUNDED:
                 op = ('>' if pos_justification else '≥') \
                     if polarity else ('≤' if pos_justification else '<')
-            elif DEF_SEMANTICS == Semantics.KRIPKEKLEENE:
+            elif mode == Semantics.KRIPKEKLEENE:
                 op = '>' if polarity else '≤'
             else:
-                assert DEF_SEMANTICS == Semantics.COINDUCTION, \
-                        f"Internal error: DEF_SEMANTICS"
+                assert mode == Semantics.COINDUCTION, \
+                        f"Internal error: {mode}"
                 op = ('≥' if pos_justification else '>') \
                     if polarity else ('<' if pos_justification else '≤')
             comp = AComparison.make(op, [
