@@ -281,8 +281,9 @@ class Expression(ASTNode):
     def __deepcopy__(self, memo):
         """ copies everyting but .original """
         key = self.__str1__()
-        if key in memo:
-            return memo[key]
+        val = memo.get(key, None)
+        if val is not None:
+            return val
         if self.value == self:
             return self
         out = copy(self)
@@ -1039,7 +1040,7 @@ class AAggregate(Expression):
         return out
 
     def __deepcopy__(self, memo):
-        return AQuantification.__deepcopy__(self, memo)
+        return super().__deepcopy__(memo)
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
