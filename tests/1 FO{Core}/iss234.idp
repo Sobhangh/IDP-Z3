@@ -1,0 +1,17 @@
+vocabulary V {
+    type AcademicStaff := {Joost,Benjamin,Erem}
+    type Lecturemoment := {Monday_morning,Monday_afternoon,Monday_evening,Tuesday_morning,Tuesday_afternoon,Tuesday_evening,Wednesday_morning,Wednesday_afternoon,Wednesday_evening,Thursday_morning,Thursday_afternoon,Thursday_evening,Friday_morning,Friday_afternoon,Friday_evening}
+    sheduled: AcademicStaff*Lecturemoment →𝔹
+
+}
+
+theory T:V {
+    !p, p2, t: sheduled(p,t) ∧ p ≠ p2 => ~sheduled(p2,t).
+}
+
+structure S:V {
+
+}
+display {
+
+}

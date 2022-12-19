@@ -280,8 +280,10 @@ class Expression(ASTNode):
 
     def __deepcopy__(self, memo):
         """ copies everyting but .original """
-        if self.str in memo:
-            return memo[self.str]
+        key = self.__str1__()
+        val = memo.get(key, None)
+        if val is not None:
+            return val
         if self.value == self:
             return self
         out = copy(self)
@@ -292,7 +294,7 @@ class Expression(ASTNode):
                              else deepcopy(out.co_constraint, memo))
         if hasattr(self, 'questions'):
             out.questions = deepcopy(self.questions, memo)
-        memo[self.str] = out
+        memo[key] = out
         return out
 
     def same_as(self, other: Expression):
@@ -1038,7 +1040,7 @@ class AAggregate(Expression):
         return out
 
     def __deepcopy__(self, memo):
-        return AQuantification.__deepcopy__(self, memo)
+        return super().__deepcopy__(memo)
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
@@ -1120,7 +1122,7 @@ class AppliedSymbol(Expression):
                 f"{ f' {self.is_enumeration} {{{enum}}}' if self.in_enumeration else ''}")
 
     def __deepcopy__(self, memo):
-        out = Expression.__deepcopy__(self, memo)
+        out = super().__deepcopy__(memo)
         out.symbol = deepcopy(out.symbol)
         return out
 
@@ -1262,8 +1264,6 @@ class UnappliedSymbol(Expression):
 
     def __str1__(self): return self.name
 
-    def is_reified(self): return False
-
 
 TRUEC = CONSTRUCTOR('true')
 FALSEC = CONSTRUCTOR('false')
@@ -1331,8 +1331,6 @@ class Number(Expression):
 
     def __str__(self): return self.number
 
-    def is_reified(self): return False
-
     def real(self):
         """converts the INT number to REAL"""
         self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
@@ -1372,8 +1370,6 @@ class Date(Expression):
         return cls(iso=f"#{date.fromordinal(value).isoformat()}")
 
     def __str__(self): return f"#{self.date.isoformat()}"
-
-    def is_reified(self): return False
 
 
 class Brackets(Expression):

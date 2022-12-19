@@ -45,25 +45,27 @@ def query_user(query, default="y", get=False):
         return input(query) in "Nn"
 
 
+run('git pull origin', check=True)
 run('python3 test.py generate')
 
 update_statics = query_user("Update the '/IDP-Z3/idp_web_server/static' folder? (Y/n) ")
 if update_statics:
-    #require_clean_work_tree("idp_web_client")
+
+    run('git pull origin', cwd='idp_web_client', check=True)
 
     # Generate static and commit.
     run('npm run-script build', cwd='idp_web_client', check=True)
     print("Copying to static folder ...")
     copy_tree('idp_web_client/dist/', './idp_web_server/static')
 
-    # Verify we are on main branch.
-    branch = get('git rev-parse --abbrev-ref HEAD')
-    assert branch == b'main\n', \
-        "Cannot deploy: IDP-Z3 not in main branch !"
-
     # Create new version tag.
     new_tag = query_user("Create new tag? (Y/n) ")
     if new_tag:
+        # Verify we are on main branch.
+        branch = get('git rev-parse --abbrev-ref HEAD')
+        assert branch == b'main\n', \
+            "Cannot deploy: IDP-Z3 not in main branch !"
+
         # Find old tag.
         current_tag = (get("git describe --tags --abbrev=0")
                        .decode("utf-8").strip())  # Strip newline
