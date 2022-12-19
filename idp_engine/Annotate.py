@@ -34,7 +34,7 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     ARImplication, AImplication, AEquivalence,
     Operator, AComparison, AUnary, AAggregate,
     AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
-    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, FALSE,
+    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE,
     IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
@@ -231,10 +231,10 @@ def get_instantiables(self,
         rule = rules[0]
         rule.is_whole_domain = all(s.extension(interpretations, extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
-        if not rule.is_whole_domain:
-            self.check(rule.definiendum.symbol.decl not in self.level_symbols,
-                       f"Cannot have inductive definitions on infinite domain")
-        else:
+        inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
+            and rule.definiendum.symbol.decl in rule.parent.level_symbols)
+
+        if rule.is_whole_domain or inductive:
             if rule.out:
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
                                           rule.definiendum.sub_exprs[:-1])
@@ -244,9 +244,6 @@ def get_instantiables(self,
                 head = AppliedSymbol.make(rule.definiendum.symbol,
                                           rule.definiendum.sub_exprs)
                 head.in_head = True
-
-            inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
-                and rule.definiendum.symbol.decl in rule.parent.level_symbols)
 
             # determine reverse implications, if any
             bodies, out = [], []
@@ -278,6 +275,8 @@ def get_instantiables(self,
                                         rule.definiendum, True, True)
                 out.append(IMPLIES([head, all_bodies], self.annotations))
             result[decl] = out
+        else:
+            out = TRUE
     return result
 Definition.get_instantiables = get_instantiables
 

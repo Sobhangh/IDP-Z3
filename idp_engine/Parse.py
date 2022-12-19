@@ -732,7 +732,6 @@ class Rule(ASTNode):
             Expression: a boolean expression
         """
 
-        #TODO assert self.is_whole_domain == False
         out = deepcopy(self.body)  # in case there are no arguments
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True
