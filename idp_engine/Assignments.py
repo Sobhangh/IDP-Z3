@@ -258,11 +258,11 @@ class Assignments(dict):
                 if a.symbol_decl.arity == 0:
                     # Symbol is a proposition or constant.
                     c = f"{str(a.value)}" if a.value is not None else "*"
-                    nullary.add(a.symbol_decl.name)
+                    nullary.add(a.symbol_decl)
                 elif a.value == FALSE:
                     # make sure we have an entry for `a` in `out`
-                    if a.symbol_decl.name not in out:
-                        out[a.symbol_decl.name] = {}
+                    if a.symbol_decl not in out:
+                        out[a.symbol_decl] = {}
                 elif a.value == TRUE:
                     # Symbol is a predicate.
                     c = f"{args}"
@@ -271,17 +271,18 @@ class Assignments(dict):
                     c = f"{args} -> {str(a.value)}"
 
                 if c:
-                    enum = out.get(a.symbol_decl.name, dict())
+                    enum = out.get(a.symbol_decl, dict())
                     enum[c] = c
-                    out[a.symbol_decl.name] = enum
+                    out[a.symbol_decl] = enum
 
         model_str = ""
         for k, enum in out.items():
             if k in nullary:  # do not use {...}
-                val = f"{k} := {list(enum)[0]}.{NEWL}"
+                val = f"{k.name} := {list(enum)[0]}.{NEWL}"
                 if "*" in val:
                     val = f"// {val}"
             else:
-                val = f"{k} := {{{ ', '.join(s for s in enum) }}}.{NEWL}"
+                sign = ':=' if k.instances or k.out.name == BOOL else '>>'
+                val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
             model_str += val
         return model_str
