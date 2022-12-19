@@ -4,12 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
-## [0.10.2] - ??
+## [0.10.2] - 2022-12-19
 
+Contributors (alphabetical): Pierre Carbonnelle.
 
 ### IDP-Z3
-* fix #234: Syntax Error `AConjunction` object has no attribute `symbol`
+* issue #234: Syntax Error `AConjunction` object has no attribute `symbol`
 
+### Interactive Consultant and Web IDE
+* issue #233: IDE should show irrelevant propositions in models
 
 
 ## [0.10.1] - 2022-12-14

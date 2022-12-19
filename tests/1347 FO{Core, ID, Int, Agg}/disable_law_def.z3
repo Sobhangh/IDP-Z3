@@ -9,6 +9,7 @@ f := 13.
 No more models.
 p := {(b, a), (c, a), (c, b), (e, d)}.
 q := {(a, b), (b, c), (d, e)}.
+// f := *.
 
 
 Model 1
