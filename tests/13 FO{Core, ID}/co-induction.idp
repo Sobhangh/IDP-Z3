@@ -3,7 +3,7 @@ vocabulary V {
 }
 
 theory T:V {
-    { (co-induction)
+    { ( co-induction )
         ∀x: p(x) ← ∃ y ∈ ℤ: y=x+1 ∧ p(y).
     }
     p(1).

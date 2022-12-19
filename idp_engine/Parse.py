@@ -607,10 +607,10 @@ class Definition(ASTNode):
     def __init__(self, parent, annotations, mode, rules):
         Definition.definition_id += 1
         self.id = Definition.definition_id
-        self.mode = (S.COMPLETION if mode == "(completion)" else
-                     S.KRIPKEKLEENE if mode == "(Kripke-Kleene)" else
-                     S.COINDUCTION if mode == "(co-induction)" else
-                     S.WELLFOUNDED if (mode == "(well-founded)") or (mode is None) else
+        self.mode = (S.WELLFOUNDED if mode is None or 'well-founded' in mode else
+                     S.COMPLETION if 'completion' in mode else
+                     S.KRIPKEKLEENE if 'Kripke-Kleene' in mode else
+                     S.COINDUCTION if 'co-induction' in mode else
                      mode)
         assert type(self.mode) == S, f"Unsupported mode: {mode}"
         self.annotations = annotations.annotations if annotations else {}
