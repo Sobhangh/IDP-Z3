@@ -328,10 +328,10 @@ def rename_args(self, new_vars):
             self.body = AND([eq, self.body])
 
     for v in vars.values():
-        self.body = EXISTS([Quantee.make(v, v.sort)], self.body)
+        self.body = EXISTS([Quantee.make(v, sort=v.sort)], self.body)
 
     self.definiendum.sub_exprs = list(new_vars.values())
-    self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
+    self.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars.values()]
     return self
 Rule.rename_args = rename_args
 
@@ -709,7 +709,7 @@ def annotate(self, voc, q_vars):
                                 AComparison.make(op,
                                     deepcopy([applied, self.sub_exprs[0]])))
                     coc = AND([coc1, coc2])
-                    quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
+                    quantees = [Quantee.make(v, sort=v.sort) for v in q_vars.values()]
                     applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
                     applied.co_constraint.annotations['reading'] = f"Calculation of {self.code}"
                 return applied

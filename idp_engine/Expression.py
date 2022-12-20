@@ -701,7 +701,10 @@ class Quantee(Expression):
         decl (SymbolDeclaration, Optional): the (unqualified) Declaration to quantify over, after resolution of `$(i)`.
         e.g., the declaration of `Color`
     """
-    def __init__(self, parent, vars, subtype=None, sort=None):
+    def __init__(self, parent,
+                 vars: List[List[Variable]],
+                 subtype: Type = None,
+                 sort: SymbolExpr = None):
         self.vars = vars
         self.subtype = subtype
         sort = sort
@@ -731,9 +734,10 @@ class Quantee(Expression):
     @classmethod
     def make(cls,
              var: List[Variable],
-             sort: SymbolExpr
+             subtype: Type = None,
+             sort: SymbolExpr = None
              ) -> 'Quantee':
-        out = (cls) (None, [var], sort)
+        out = (cls) (None, [var], subtype=subtype, sort=sort)
         return out.annotate1()
 
     def __str1__(self):
@@ -775,7 +779,7 @@ class AQuantification(Expression):
             q = self.quantees.pop()
             for vars in q.vars:
                 for var in vars:
-                    self.quantees.append(Quantee.make(var, None))
+                    self.quantees.append(Quantee.make(var, sort=None))
 
         self.sub_exprs = [self.f]
         super().__init__()
@@ -1289,7 +1293,8 @@ class Variable(Expression):
         self.name = name
         sort = sort
         self.sort = sort
-        assert sort is None or isinstance(sort, Type) or isinstance(sort, Symbol)
+        assert sort is None or isinstance(sort, Type) or isinstance(sort, Symbol), \
+            "Internal error: {self}"
 
         super().__init__()
 

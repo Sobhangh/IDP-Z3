@@ -42,10 +42,10 @@ from typing import Dict, List, Callable
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
-    Definition, ConstructedFrom)
+    Definition, ConstructedFrom, Ranges)
 from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
-    NOT, AppliedSymbol, UnappliedSymbol, Quantee,
+    NOT, AppliedSymbol, UnappliedSymbol, Quantee, TYPE,
     Variable, VARIABLE, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
@@ -267,7 +267,7 @@ def interpret(self, problem):
             q_vars = { f"${sort.decl.name}!{str(i)}$":
                        VARIABLE(f"${sort.decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
-            quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
+            quantees = [Quantee.make(v, sort=v.sort) for v in q_vars.values()]
             expr = self.enumeration.contains(list(q_vars.values()), True)
             constraint = FORALL(quantees, expr).interpret(problem)
             constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
