@@ -45,7 +45,7 @@ from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     Definition, ConstructedFrom, Ranges)
 from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
-    NOT, AppliedSymbol, UnappliedSymbol, Quantee, TYPE,
+    NOT, EQUALS, AppliedSymbol, UnappliedSymbol, Quantee, TYPE,
     Variable, VARIABLE, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
@@ -63,21 +63,27 @@ Import.interpret = interpret
 
 def interpret(self, problem):
     interpretation = problem.interpretations.get(self.name, None)
-    if self.name not in [BOOL, CONCEPT]:
+    if self.name in [BOOL, CONCEPT]:
+        self.translate(problem)
+        ranges = [c.interpret(problem).range for c in self.constructors]
+        ext = ([[t] for r in ranges for t in r], None)
+        problem.extensions[self.name] = ext
+    else:
         enum = interpretation.enumeration.interpret(problem)
         self.interpretation = interpretation
         self.constructors = enum.constructors
-    self.translate(problem)
+        self.translate(problem)
 
-    if self.constructors:
-        ranges = [c.interpret(problem).range for c in self.constructors]
+        if self.constructors:
+            for c in self.constructors:
+                c.interpret(problem)
 
-    # update problem.extensions
+        # update problem.extensions
     if self.name in [BOOL, CONCEPT]:
         ext = ([[t] for r in ranges for t in r], None)
     else:
         ext = enum.extensionE(problem.interpretations, problem.extensions)
-    problem.extensions[self.name] = ext
+        problem.extensions[self.name] = ext
 TypeDeclaration.interpret = interpret
 
 
@@ -212,7 +218,7 @@ def interpret(self, problem):
         enumeration.lookup = lookup
 
         # update problem.assignments with data from enumeration
-        for t in self.enumeration.tuples:
+        for t in enumeration.tuples:
 
             # check that the values are in the range
             if type(self.enumeration) == FunctionEnum:
@@ -251,8 +257,8 @@ def interpret(self, problem):
                 and type(self.enumeration) == FunctionEnum):
                 problem.assignments.assert__(e.formula(), TRUE, status)
 
-        # fill the default value in problem.assignments
         if self.default is not None:
+            # fill the default value in problem.assignments
             for code, expr in decl.instances.items():
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
