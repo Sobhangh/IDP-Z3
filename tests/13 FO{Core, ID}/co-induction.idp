@@ -1,13 +1,16 @@
 vocabulary V {
-    p : ℤ → 𝔹 // n is followed by an infinite sequence of numbers
+    type Node := {a, b}
+    next: Node -> Node
+    p : Node → 𝔹 // n is followed by an infinite sequence of nodes
 }
 
 theory T:V {
     { ( co-induction )
-        ∀x: p(x) ← ∃ y ∈ ℤ: y=x+1 ∧ p(y).
+        ∀x: p(x) ← ∃ y ∈ Node: next(x)=y ∧ p(y).
     }
-    p(1).
+    p(a).
 }
 procedure main(){
+    print(Theory(T).formula())
     pretty_print(model_expand(T,max=1))
 }
