@@ -12,6 +12,8 @@ Contributors (alphabetical): Pierre Carbonnelle.
 
 ### IDP-Z3
 * MR !279: Support co-inductive definitions
+* issue #235: range interpretation of predicate is not respected
+* issue #236: Incorrect nested quantification over infinite domain
 
 
 ## [0.10.2] - 2022-12-19
