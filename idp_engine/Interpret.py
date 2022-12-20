@@ -79,11 +79,26 @@ def interpret(self, problem):
                 c.interpret(problem)
 
         # update problem.extensions
-    if self.name in [BOOL, CONCEPT]:
-        ext = ([[t] for r in ranges for t in r], None)
-    else:
         ext = enum.extensionE(problem.interpretations, problem.extensions)
         problem.extensions[self.name] = ext
+
+        # needed ?
+        # if (isinstance(self.interpretation.enumeration, Ranges)
+        # and self.interpretation.enumeration.tuples):
+        #     # add condition that the interpretation is total over the infinite domain
+        #     # ! x in N: type(x) <=> enum.contains(x)
+        #     t = TYPE(self.type)  # INT, REAL or DATE
+        #     t.decl, t.type = self, self.type
+        #     var = VARIABLE(f"${self.name}!0$",t)
+        #     q_vars = { f"${self.name}!0$": var}
+        #     quantees = [Quantee.make(var, subtype=t)]
+        #     expr1 = AppliedSymbol.make(SYMBOL(self.name), [var])
+        #     expr1.decl = self
+        #     expr2 = enum.contains(list(q_vars.values()), True)
+        #     expr = EQUALS([expr1, expr2])
+        #     constraint = FORALL(quantees, expr)
+        #     constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
+        #     problem.constraints.append(constraint)
 TypeDeclaration.interpret = interpret
 
 
@@ -267,6 +282,22 @@ def interpret(self, problem):
                         and type(self.enumeration) == FunctionEnum
                         and self.default.type != BOOL):
                         problem.assignments.assert__(e.formula(), TRUE, status)
+
+            if isinstance(enumeration, Ranges) and enumeration.tuples and self.sign == '≜':
+                # add condition that the interpretation is total over the infinite domain (#235)
+                # ! x in N: type(x) <=> enum.contains(x)
+                t = TYPE(enumeration.type)  # INT, REAL or DATE
+                t.decl, t.type = problem.declarations[enumeration.type], enumeration.type
+                var = VARIABLE(f"${self.name}!0$", t)
+                q_vars = { f"${self.name}!0$": var}
+                quantees = [Quantee.make(var, subtype=t)]
+                expr1 = AppliedSymbol.make(SYMBOL(self.name), [var])
+                expr1.decl = self.symbol.decl
+                expr2 = enumeration.contains(list(q_vars.values()), True)
+                expr = EQUALS([expr1, expr2])
+                constraint = FORALL(quantees, expr)
+                constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
+                problem.constraints.append(constraint)
         elif self.sign == '≜':
             # add condition that the interpretation is total over the domain
             # ! x in dom(f): enum.contains(x)
