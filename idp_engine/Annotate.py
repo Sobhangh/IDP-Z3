@@ -23,7 +23,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 from copy import copy, deepcopy
 from itertools import chain
 import string
-from typing import Dict
+from typing import Dict, List
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition, Rule,
@@ -34,11 +34,11 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     ARImplication, AImplication, AEquivalence,
     Operator, AComparison, AUnary, AAggregate,
     AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
-    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, FALSE,
+    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE,
     IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-    OrderedSet, IDPZ3Error, DEF_SEMANTICS, Semantics)
+    OrderedSet, IDPZ3Error, Semantics)
 
 
 # Class Vocabulary  #######################################################
@@ -213,7 +213,8 @@ Definition.annotate = annotate
 def get_instantiables(self,
                       interpretations: Dict[str, SymbolInterpretation],
                       extensions: Dict[str, Extension],
-                      for_explain=False):
+                      for_explain=False
+                      ) -> Dict[SymbolDeclaration, List[Expression]]:
     """ compute Definition.instantiables, with level-mapping if definition is inductive
 
     Uses implications instead of equivalence if `for_explain` is True
@@ -229,12 +230,13 @@ def get_instantiables(self,
     result = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.is_whole_domain = all(s.extension(interpretations, extensions)[0] is not None
+        rule.has_finite_domain = all(s.extension(interpretations, extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
-        if not rule.is_whole_domain:
-            self.check(rule.definiendum.symbol.decl not in self.level_symbols,
-                       f"Cannot have inductive definitions on infinite domain")
-        else:
+        inductive = (self.mode != Semantics.COMPLETION
+            and rule.definiendum.symbol.decl in self.level_symbols)
+
+        if rule.has_finite_domain or inductive:
+            # add a constraint containing the definition over the full domain
             if rule.out:
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
                                           rule.definiendum.sub_exprs[:-1])
@@ -244,9 +246,6 @@ def get_instantiables(self,
                 head = AppliedSymbol.make(rule.definiendum.symbol,
                                           rule.definiendum.sub_exprs)
                 head.in_head = True
-
-            inductive = (not rule.out and DEF_SEMANTICS != Semantics.COMPLETION
-                and rule.definiendum.symbol.decl in rule.parent.level_symbols)
 
             # determine reverse implications, if any
             bodies, out = [], []
@@ -259,8 +258,8 @@ def get_instantiables(self,
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
-                        new = deepcopy(new).add_level_mapping(rule.parent.level_symbols,
-                                             rule.definiendum, False, False)
+                        new = deepcopy(new).add_level_mapping(self.level_symbols,
+                                             rule.definiendum, False, False, self.mode)
                         out.append(RIMPLIES([head, new], r.annotations))
 
             all_bodies = OR(bodies)
@@ -271,13 +270,15 @@ def get_instantiables(self,
                     out = [EQUIV([head, all_bodies], self.annotations)]
             else:
                 if not out:  # no reverse implication yet
-                    new = deepcopy(all_bodies).add_level_mapping(rule.parent.level_symbols,
-                                             rule.definiendum, False, False)
+                    new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
+                                             rule.definiendum, False, False, self.mode)
                     out = [RIMPLIES([deepcopy(head), new], self.annotations)]
-                all_bodies = deepcopy(all_bodies).add_level_mapping(rule.parent.level_symbols,
-                                        rule.definiendum, True, True)
+                all_bodies = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
+                                        rule.definiendum, True, True, self.mode)
                 out.append(IMPLIES([head, all_bodies], self.annotations))
             result[decl] = out
+        else:
+            out = TRUE
     return result
 Definition.get_instantiables = get_instantiables
 
@@ -329,10 +330,10 @@ def rename_args(self, new_vars):
             self.body = AND([eq, self.body])
 
     for v in vars.values():
-        self.body = EXISTS([Quantee.make(v, v.sort)], self.body)
+        self.body = EXISTS([Quantee.make(v, sort=v.sort)], self.body)
 
     self.definiendum.sub_exprs = list(new_vars.values())
-    self.quantees = [Quantee.make(v, v.sort) for v in new_vars.values()]
+    self.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars.values()]
     return self
 Rule.rename_args = rename_args
 
@@ -710,7 +711,7 @@ def annotate(self, voc, q_vars):
                                 AComparison.make(op,
                                     deepcopy([applied, self.sub_exprs[0]])))
                     coc = AND([coc1, coc2])
-                    quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
+                    quantees = [Quantee.make(v, sort=v.sort) for v in q_vars.values()]
                     applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
                     applied.co_constraint.annotations['reading'] = f"Calculation of {self.code}"
                 return applied

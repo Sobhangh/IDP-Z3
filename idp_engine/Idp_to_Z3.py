@@ -191,20 +191,21 @@ def translate1(self, problem: "Theory", vars={}):
                f"Internal error in expansion of quantification: {self}"
         return self.sub_exprs[0].translate(problem, vars)
     else:
-        finalvars = copy(vars)
+        all_vars, local_vars = copy(vars), {}
         for q in self.quantees:
             for vars in q.vars:
                 for v in vars:
                     translated = FreshConst(v.sort.decl.base_type.translate(problem))
-                    finalvars[v.str] = translated
-        forms = [f.translate(problem, finalvars) for f in self.sub_exprs]
+                    all_vars[v.str] = translated
+                    local_vars[v.str] = translated
+        forms = [f.translate(problem, all_vars) for f in self.sub_exprs]
 
         if self.q == '∀':
             forms = And(forms) if 1 < len(forms) else forms[0]
-            forms = ForAll(list(finalvars.values()), forms)
+            forms = ForAll(list(local_vars.values()), forms)
         else:
             forms = Or(forms) if 1 < len(forms) else forms[0]
-            forms = Exists(list(finalvars.values()), forms)
+            forms = Exists(list(local_vars.values()), forms)
         return forms
 AQuantification.translate1 = translate1
 

@@ -1027,7 +1027,7 @@ watchdog = ["watchdog"]
 
 [[package]]
 name = "z3-solver"
-version = "4.8.12.0"
+version = "4.11.2.0"
 description = "an efficient SMT solver library"
 category = "main"
 optional = false
@@ -1048,7 +1048,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "a03cfb943687af16fcd19b45e2fb6a2a6b8116f07fdd7a417ad8dc0fb1ab6338"
+content-hash = "3ad7691ba17e1f9a38e8a1f99ffd4a0dbd59ee6486c83a35dd5d590211991357"
 
 [metadata.files]
 alabaster = [
@@ -1720,11 +1720,12 @@ werkzeug = [
     {file = "Werkzeug-1.0.1.tar.gz", hash = "sha256:6c80b1e5ad3665290ea39320b91e1be1e0d5f60652b964a3070216de83d2e47c"},
 ]
 z3-solver = [
-    {file = "z3-solver-4.8.12.0.tar.gz", hash = "sha256:48f66e52d5b267e6df6fab9fccdefdf7e09a846d9e309bc2dccff983c27da612"},
-    {file = "z3_solver-4.8.12.0-py2.py3-none-macosx_10_15_x86_64.whl", hash = "sha256:04f81a3a8705e3adaa348b945fc4a2e2981e0a718315760e774b7c5b0efe2d3a"},
-    {file = "z3_solver-4.8.12.0-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:ffdbb89bc30befcef9b5cfb118d690b452320dccd44a6ae2f7b81caa369de042"},
-    {file = "z3_solver-4.8.12.0-py2.py3-none-win32.whl", hash = "sha256:3efe49975945f4204ac13e1bd66555f4fab50906e476a927f4483ba9b61c38ef"},
-    {file = "z3_solver-4.8.12.0-py2.py3-none-win_amd64.whl", hash = "sha256:2b8af223174b8229ca334637022b56c8f7545c6c04021b63d98beb83e757819c"},
+    {file = "z3-solver-4.11.2.0.tar.gz", hash = "sha256:c7c7f10350db19eec831f9a45833268022c786e9ac0fbd9b2330956b377b9c39"},
+    {file = "z3_solver-4.11.2.0-py2.py3-none-macosx_10_16_x86_64.whl", hash = "sha256:90b34ffbd42ee9465ca047bfb99775c1000f6548f2b98bdeb7d52397347aa197"},
+    {file = "z3_solver-4.11.2.0-py2.py3-none-macosx_11_0_arm64.whl", hash = "sha256:2cb81dcc220292dfcff6b5937f5faebeba4d0db7d2cc690f43e6f619bda40c47"},
+    {file = "z3_solver-4.11.2.0-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:9b5a11370df7ac27394fc660c812b2c9aac26f21fadf11e2c51a19cb707c1795"},
+    {file = "z3_solver-4.11.2.0-py2.py3-none-win32.whl", hash = "sha256:e4d3302c4046d65d0c8b5601d9b085f219b0fa78e312d08a5b24c86bb1629d05"},
+    {file = "z3_solver-4.11.2.0-py2.py3-none-win_amd64.whl", hash = "sha256:f763c6ad22a8455df46efa3755a75d5af5d40535a1e5ec5171c199cfda663e90"},
 ]
 zipp = [
     {file = "zipp-3.11.0-py3-none-any.whl", hash = "sha256:83a28fcb75844b5c0cdaf5aa4003c2d728c77e05f5aeabe8e95e56727005fbaa"},

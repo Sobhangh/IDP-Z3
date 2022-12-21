@@ -42,10 +42,10 @@ from typing import Dict, List, Callable
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
-    Definition, ConstructedFrom)
+    Definition, ConstructedFrom, Ranges)
 from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
-    NOT, AppliedSymbol, UnappliedSymbol, Quantee,
+    NOT, EQUALS, AppliedSymbol, UnappliedSymbol, Quantee, TYPE,
     Variable, VARIABLE, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
@@ -63,21 +63,42 @@ Import.interpret = interpret
 
 def interpret(self, problem):
     interpretation = problem.interpretations.get(self.name, None)
-    if self.name not in [BOOL, CONCEPT]:
+    if self.name in [BOOL, CONCEPT]:
+        self.translate(problem)
+        ranges = [c.interpret(problem).range for c in self.constructors]
+        ext = ([[t] for r in ranges for t in r], None)
+        problem.extensions[self.name] = ext
+    else:
         enum = interpretation.enumeration.interpret(problem)
         self.interpretation = interpretation
         self.constructors = enum.constructors
-    self.translate(problem)
+        self.translate(problem)
 
-    if self.constructors:
-        ranges = [c.interpret(problem).range for c in self.constructors]
+        if self.constructors:
+            for c in self.constructors:
+                c.interpret(problem)
 
-    # update problem.extensions
-    if self.name in [BOOL, CONCEPT]:
-        ext = ([[t] for r in ranges for t in r], None)
-    else:
+        # update problem.extensions
         ext = enum.extensionE(problem.interpretations, problem.extensions)
-    problem.extensions[self.name] = ext
+        problem.extensions[self.name] = ext
+
+        # needed ?
+        # if (isinstance(self.interpretation.enumeration, Ranges)
+        # and self.interpretation.enumeration.tuples):
+        #     # add condition that the interpretation is total over the infinite domain
+        #     # ! x in N: type(x) <=> enum.contains(x)
+        #     t = TYPE(self.type)  # INT, REAL or DATE
+        #     t.decl, t.type = self, self.type
+        #     var = VARIABLE(f"${self.name}!0$",t)
+        #     q_vars = { f"${self.name}!0$": var}
+        #     quantees = [Quantee.make(var, subtype=t)]
+        #     expr1 = AppliedSymbol.make(SYMBOL(self.name), [var])
+        #     expr1.decl = self
+        #     expr2 = enum.contains(list(q_vars.values()), True)
+        #     expr = EQUALS([expr1, expr2])
+        #     constraint = FORALL(quantees, expr)
+        #     constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
+        #     problem.constraints.append(constraint)
 TypeDeclaration.interpret = interpret
 
 
@@ -212,7 +233,7 @@ def interpret(self, problem):
         enumeration.lookup = lookup
 
         # update problem.assignments with data from enumeration
-        for t in self.enumeration.tuples:
+        for t in enumeration.tuples:
 
             # check that the values are in the range
             if type(self.enumeration) == FunctionEnum:
@@ -251,8 +272,8 @@ def interpret(self, problem):
                 and type(self.enumeration) == FunctionEnum):
                 problem.assignments.assert__(e.formula(), TRUE, status)
 
-        # fill the default value in problem.assignments
         if self.default is not None:
+            # fill the default value in problem.assignments
             for code, expr in decl.instances.items():
                 if (code not in problem.assignments
                     or problem.assignments[code].status != status):
@@ -261,13 +282,29 @@ def interpret(self, problem):
                         and type(self.enumeration) == FunctionEnum
                         and self.default.type != BOOL):
                         problem.assignments.assert__(e.formula(), TRUE, status)
+
+            if isinstance(enumeration, Ranges) and enumeration.tuples and self.sign == '≜':
+                # add condition that the interpretation is total over the infinite domain (#235)
+                # ! x in N: type(x) <=> enum.contains(x)
+                t = TYPE(enumeration.type)  # INT, REAL or DATE
+                t.decl, t.type = problem.declarations[enumeration.type], enumeration.type
+                var = VARIABLE(f"${self.name}!0$", t)
+                q_vars = { f"${self.name}!0$": var}
+                quantees = [Quantee.make(var, subtype=t)]
+                expr1 = AppliedSymbol.make(SYMBOL(self.name), [var])
+                expr1.decl = self.symbol.decl
+                expr2 = enumeration.contains(list(q_vars.values()), True)
+                expr = EQUALS([expr1, expr2])
+                constraint = FORALL(quantees, expr)
+                constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
+                problem.constraints.append(constraint)
         elif self.sign == '≜':
             # add condition that the interpretation is total over the domain
             # ! x in dom(f): enum.contains(x)
             q_vars = { f"${sort.decl.name}!{str(i)}$":
                        VARIABLE(f"${sort.decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
-            quantees = [Quantee.make(v, v.sort) for v in q_vars.values()]
+            quantees = [Quantee.make(v, sort=v.sort) for v in q_vars.values()]
             expr = self.enumeration.contains(list(q_vars.values()), True)
             constraint = FORALL(quantees, expr).interpret(problem)
             constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
@@ -604,9 +641,10 @@ def interpret(self, problem):
                 value = f(0, self, sub_exprs)
         elif self.decl.name in problem.interpretations:
             self.decl.needs_interpretation = True
-        if (not self.in_head and not self.variables):
+        if not self.in_head and not self.variables:
+            # instantiate definition (for relevance)
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
-                              for defin in problem.definitions]
+                    for defin in problem.definitions]
             inst = [x for x in inst if x]
             if inst:
                 co_constraint = AND(inst)

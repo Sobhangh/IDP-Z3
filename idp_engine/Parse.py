@@ -43,7 +43,8 @@ from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR, Accesso
     Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
     GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
-    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
+    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION,
+    Semantics as S)
 
 
 def str_to_IDP(atom, val_string):
@@ -603,12 +604,17 @@ class Definition(ASTNode):
     """
     definition_id = 0  # intentional static variable so that no two definitions get the same ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, parent, annotations, mode, rules):
         Definition.definition_id += 1
         self.id = Definition.definition_id
-        self.annotations = kwargs.pop('annotations')
-        self.annotations = self.annotations.annotations if self.annotations else {}
-        self.rules = kwargs.pop('rules')
+        self.mode = (S.WELLFOUNDED if mode is None or 'well-founded' in mode else
+                     S.COMPLETION if 'completion' in mode else
+                     S.KRIPKEKLEENE if 'Kripke-Kleene' in mode else
+                     S.COINDUCTION if 'co-induction' in mode else
+                     mode)
+        assert type(self.mode) == S, f"Unsupported mode: {mode}"
+        self.annotations = annotations.annotations if annotations else {}
+        self.rules = rules
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.canonicals = {}
         self.instantiables = {}
@@ -705,7 +711,7 @@ class Rule(ASTNode):
         self.definiendum = kwargs.pop('definiendum')
         self.out = kwargs.pop('out')
         self.body = kwargs.pop('body')
-        self.is_whole_domain = None  # Bool
+        self.has_finite_domain = None  # Bool
         self.block = None  # theory where it occurs
 
         self.annotations = self.annotations.annotations if self.annotations else {}
@@ -732,7 +738,6 @@ class Rule(ASTNode):
             Expression: a boolean expression
         """
 
-        #TODO assert self.is_whole_domain == False
         out = deepcopy(self.body)  # in case there are no arguments
         instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
         instance.in_head = True

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
+## [0.10.3] - ??
+
+This release has new package dependencies: please run `poetry install` to update.
+
+Contributors (alphabetical): Pierre Carbonnelle.
+
+### IDP-Z3
+* MR !279: Support co-inductive definitions
+* issue #235: range interpretation of predicate is not respected
+* issue #236: Incorrect nested quantification over infinite domain
+
+
 ## [0.10.2] - 2022-12-19
 
 Contributors (alphabetical): Pierre Carbonnelle.

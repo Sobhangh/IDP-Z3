@@ -193,8 +193,13 @@ Definitions
 +++++++++++
 
 A *definition* defines concepts, i.e. predicate_\ s or function_\ s, in terms of other concepts.
-If a predicate is inductively defined in terms of itself, the definition employs the *well-founded* semantics.
 A definition consists of a set of rules, enclosed by ``{`` and ``}``.
+
+If a predicate is inductively defined in terms of itself,
+the definition employs the *well-founded* mode of interpretation by default.
+The other possible modes of interpretation are ``completion``, ``Kripke-Kleene`` and ``co-induction``.
+They can be selected by placing the keyword in parenthesis at the beginning of the definition,
+e.g., ``{ (completion) ...}``.
 
 .. index:: rule
 
@@ -206,7 +211,9 @@ A definition consists of a set of rules, enclosed by ``{`` and ``}``.
 
     ∀ v_1 ∈ T_1, v_n ∈ T_n: F(t_1, .., t_n) = t ← |phi|.
 
-where P is a predicate_ symbol, F is a function_ symbol, |t|, |t1,tn| are terms that may contain the variables |v1,vn| and |phi| is a formula that may contain these variables.
+where P is a predicate_ symbol, F is a function_ symbol,
+|t|, |t1,tn| are terms that may contain the variables |v1,vn|
+and |phi| is a formula that may contain these variables.
 ``P(t_1, t_2,.., t_n)`` is called the *head* of the rule and |phi| the *body*.
 ``<-`` can be used instead of ``←``, and ``≜`` instead of ``=``.
 If the body is ``true``, the left arrow and body of the rule can be omitted.
