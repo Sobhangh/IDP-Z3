@@ -1283,18 +1283,18 @@ class Variable(Expression):
     Args:
         name (str): name of the variable
 
-        sort (Optional[Symbol]): sort of the variable, if known
+        sort (Optional[Union[Type, Symbol]]): sort of the variable, if known
     """
     PRECEDENCE = 200
 
     def __init__(self, parent,
                  name:str,
-                 sort: Optional[Symbol]=None):
+                 sort: Optional[Union[Type, Symbol]]=None):
         self.name = name
         sort = sort
         self.sort = sort
         assert sort is None or isinstance(sort, Type) or isinstance(sort, Symbol), \
-            "Internal error: {self}"
+            f"Internal error: {self}"
 
         super().__init__()
 
@@ -1309,7 +1309,7 @@ class Variable(Expression):
 
     def annotate1(self): return self
 
-def VARIABLE(name, sort):
+def VARIABLE(name: str, sort: Union[Type, Symbol]):
     return Variable(None, name, sort)
 
 class Number(Expression):
