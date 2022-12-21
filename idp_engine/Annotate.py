@@ -23,7 +23,7 @@ Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 from copy import copy, deepcopy
 from itertools import chain
 import string
-from typing import Dict
+from typing import Dict, List
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition, Rule,
@@ -213,7 +213,8 @@ Definition.annotate = annotate
 def get_instantiables(self,
                       interpretations: Dict[str, SymbolInterpretation],
                       extensions: Dict[str, Extension],
-                      for_explain=False):
+                      for_explain=False
+                      ) -> Dict[SymbolDeclaration, List[Expression]]:
     """ compute Definition.instantiables, with level-mapping if definition is inductive
 
     Uses implications instead of equivalence if `for_explain` is True
@@ -231,10 +232,11 @@ def get_instantiables(self,
         rule = rules[0]
         rule.has_finite_domain = all(s.extension(interpretations, extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
-        inductive = (not rule.out and self.mode != Semantics.COMPLETION
-            and rule.definiendum.symbol.decl in rule.parent.level_symbols)
+        inductive = (self.mode != Semantics.COMPLETION
+            and rule.definiendum.symbol.decl in self.level_symbols)
 
         if rule.has_finite_domain or inductive:
+            # add a constraint containing the definition over the full domain
             if rule.out:
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
                                           rule.definiendum.sub_exprs[:-1])
@@ -256,7 +258,7 @@ def get_instantiables(self,
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
-                        new = deepcopy(new).add_level_mapping(rule.parent.level_symbols,
+                        new = deepcopy(new).add_level_mapping(self.level_symbols,
                                              rule.definiendum, False, False, self.mode)
                         out.append(RIMPLIES([head, new], r.annotations))
 
@@ -268,10 +270,10 @@ def get_instantiables(self,
                     out = [EQUIV([head, all_bodies], self.annotations)]
             else:
                 if not out:  # no reverse implication yet
-                    new = deepcopy(all_bodies).add_level_mapping(rule.parent.level_symbols,
+                    new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
                                              rule.definiendum, False, False, self.mode)
                     out = [RIMPLIES([deepcopy(head), new], self.annotations)]
-                all_bodies = deepcopy(all_bodies).add_level_mapping(rule.parent.level_symbols,
+                all_bodies = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
                                         rule.definiendum, True, True, self.mode)
                 out.append(IMPLIES([head, all_bodies], self.annotations))
             result[decl] = out

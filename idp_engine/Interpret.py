@@ -641,9 +641,10 @@ def interpret(self, problem):
                 value = f(0, self, sub_exprs)
         elif self.decl.name in problem.interpretations:
             self.decl.needs_interpretation = True
-        if (not self.in_head and not self.variables):
+        if not self.in_head and not self.variables:
+            # instantiate definition (for relevance)
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
-                              for defin in problem.definitions]
+                    for defin in problem.definitions]
             inst = [x for x in inst if x]
             if inst:
                 co_constraint = AND(inst)
