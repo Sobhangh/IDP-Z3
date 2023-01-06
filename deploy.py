@@ -92,7 +92,7 @@ if update_statics:
         with open("./pyproject.toml", "w") as fp:
             fp.write(pyproject)
 
-        _ = query_user("Update CHANGELOG now.  Ready ?(Y/N)")
+        _ = query_user("Update version in CHANGELOG and in IDP-Z3.py.  Ready ?(Y/N)")
 
     # Add and commit.
     run("git add -A")
