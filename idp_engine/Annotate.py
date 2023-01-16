@@ -19,6 +19,7 @@
 Methods to annotate the Abstract Syntax Tree (AST) of an IDP-Z3 program.
 
 """
+from __future__ import annotations
 
 from copy import copy, deepcopy
 from itertools import chain
@@ -153,7 +154,7 @@ Symbol.annotate = annotate
 
 # Class Type  #######################################################
 
-def annotate(self, voc, q_vars={}):
+def annotate(self, voc, q_vars):
     Symbol.annotate(self, voc, q_vars)
     if self.out:
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]

@@ -21,12 +21,15 @@
 Class to represent a collection of theory and structure blocks.
 
 """
+from __future__ import annotations
 
 import time
 from copy import copy, deepcopy
 from enum import Enum, auto
 from itertools import chain
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
+import logging
+import math
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
                 is_and, BoolVal, get_param)
 
@@ -36,7 +39,7 @@ from .Expression import (TRUE, Expression, FALSE, AppliedSymbol,
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol, SYMBOL,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
-from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE,
+from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, IDPZ3Error,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT, NOT_SATISFIABLE)
 
 
@@ -115,7 +118,7 @@ class Theory(object):
 
     """
     def __init__(self,
-                 *theories: Union[TheoryBlock, Structure, "Theory"],
+                 *theories: Union[TheoryBlock, Structure, Theory],
                  extended: bool = False
                  ) -> None:
         """Creates an instance of ``Theory`` for the list of theories, e.g., ``Theory(T,S)``.
@@ -161,6 +164,7 @@ class Theory(object):
 
     @property
     def solver(self) -> Solver:
+        "Beware that the setting of timeout_seconds (e.g. in expand()) is not thread safe"
         if self._slvr is None:
             self._slvr = Solver(ctx=self.ctx)
             if self.constraintz():
@@ -219,19 +223,21 @@ class Theory(object):
 
         return self._optmz_reif
 
-    def copy(self) -> "Theory":
+    def copy(self) -> Theory:
         """Returns an independent copy of a theory.
         """
         out = copy(self)
         out.assignments = self.assignments.copy()
         out.constraints = OrderedSet(deepcopy(c) for c in self.constraints)
+        out.declarations = {k:copy(v) for k,v in out.declarations.items()}
+        out.interpretations = copy(out.interpretations)
         out.def_constraints = {k:[e for e in v]  #TODO e.copy()
                                for k,v in self.def_constraints.items()}
         # copy() is called before making substitutions => invalidate derived fields
         out._formula = None
         return out
 
-    def add(self, *theories: Union[TheoryBlock, Structure, "Theory"]) -> "Theory":
+    def add(self, *theories: Union[TheoryBlock, Structure, Theory]) -> Theory:
         """Adds a list of theories to the theory.
 
         Args:
@@ -247,6 +253,8 @@ class Theory(object):
                         or name in RESERVED_SYMBOLS), \
                         f"Can't add declaration for {name} in {block.name}: duplicate"
                 self.declarations[name] = decl
+
+            # reset the interpretations of TypeDeclaration
             for decl in self.declarations.values():
                 if type(decl) == TypeDeclaration:
                     decl.interpretation = (  #TODO side-effects ? issue #81
@@ -305,7 +313,7 @@ class Theory(object):
 
         self.co_constraints, questions = OrderedSet(), OrderedSet()
         for c in self.constraints:
-            c.interpret(self)
+            c.interpret(self)  # may add co_constraints
             c.co_constraints(self.co_constraints)
             # don't collect questions from type constraints
             if not c.is_type_constraint_for:
@@ -332,7 +340,7 @@ class Theory(object):
                 code: str,
                 value: Any,
                 status: S = S.GIVEN
-                ) -> "Theory":
+                ) -> Theory:
         """asserts that an expression has a value (or not), e.g. ``theory.assert_("p()", True)``
 
         Args:
@@ -348,7 +356,7 @@ class Theory(object):
             self.assignments.assert__(atom, val, status)
         self._formula = None
 
-    def enable_law(self, code: str) -> "Theory":
+    def enable_law(self, code: str) -> Theory:
         """Enables a law, represented as a code string taken from the output of explain(...).
 
         The law should not result from a structure (e.g., from ``p:=true.``)
@@ -366,7 +374,7 @@ class Theory(object):
                 f"Cannot enable an unknown law: {code}"
         self.ignored_laws.remove(code)
 
-    def disable_law(self, code: str) -> "Theory":
+    def disable_law(self, code: str) -> Theory:
         """Disables a law, represented as a code string taken from the output of explain(...).
 
         The law should not result from a structure (e.g., from ``p:=true.``)
@@ -385,7 +393,6 @@ class Theory(object):
         self.ignored_laws.add(code)
 
     def constraintz(self) -> List[BoolRef]:
-        """"""
         """list of constraints, co_constraints and definitions in Z3 form"""
         if self._constraintz is None:
 
@@ -588,6 +595,7 @@ class Theory(object):
         Yields:
             the models, followed by a string message
         """
+        start = time.time()
         if self.ignored_laws:
             # TODO: should todo be larger in case complete==True?
             solver = self.solver_reified
@@ -613,11 +621,10 @@ class Theory(object):
                 solver.add(q.reified(self) == q.translate(self))
 
         count, ass = 0, {}
-        start = time.process_time()
         while ((max <= 0 or count < max) and
-               (timeout_seconds <= 0 or time.process_time() - start < timeout_seconds)):
+               (timeout_seconds <= 0 or time.time() - start < timeout_seconds)):
             if timeout_seconds:
-                remaining = timeout_seconds - (time.process_time() - start)
+                remaining = timeout_seconds - (time.time() - start)
                 solver.set("timeout", int(remaining*1000+200))
             # exclude ass
             different = []
@@ -640,7 +647,7 @@ class Theory(object):
         solver.pop()
 
         maxed = (0 < max <= count)
-        timeouted = (0 < timeout_seconds <= time.process_time()-start)
+        timeouted = (0 < timeout_seconds <= time.time()-start)
         # if interrupted by the timeout_seconds
         if maxed or timeouted:
             param = ("max and timeout_seconds arguments" if maxed and timeouted else
@@ -659,7 +666,7 @@ class Theory(object):
     def optimize(self,
                  term: str,
                  minimize: bool = True
-                 ) -> "Theory":
+                 ) -> Theory:
         """Updates the value of `term` in the ``assignments`` property of `self`
         to the optimal value that is compatible with the theory.
 
@@ -712,7 +719,7 @@ class Theory(object):
 
         return self
 
-    def symbolic_propagate(self, tag: S = S.UNIVERSAL) -> "Theory":
+    def symbolic_propagate(self, tag: S = S.UNIVERSAL) -> Theory:
         """Returns the theory with its ``assignments`` property updated
         with direct consequences of the constraints of the theory.
 
@@ -730,7 +737,7 @@ class Theory(object):
     def propagate(self,
                   tag: S = S.CONSEQUENCE,
                   method: Propagation = Propagation.DEFAULT
-                  ) -> "Theory":
+                  ) -> Theory:
         """Returns the theory with its ``assignments`` property updated
         with values for all terms and atoms that have the same value
         in every model of the theory.
@@ -807,9 +814,11 @@ class Theory(object):
                 if str(e.sub_exprs[1]) not in forbidden]
 
     def explain(self,
-                consequence: Optional[str] = None
+                consequence: Optional[str] = None,
+                timeout_seconds: int = 0
                 ) -> Tuple[List[Assignment], List[Expression]]:
         """Returns the facts and laws that make the Theory unsatisfiable, or that explains a consequence.
+        Raises an IDPZ3Error if the Theory is satisfiable
 
         Args:
             self (Theory): the problem state
@@ -818,8 +827,10 @@ class Theory(object):
         Returns:
             (List[Assignment], List[Expression])]: list of facts and laws that explain the consequence
         """
+        start = time.time()
 
         solver = self.solver_reified
+        default_timeout = get_param("timeout")
         ps = self.expl_reifs.copy()
         self._extend_reifications(ps)
 
@@ -845,21 +856,30 @@ class Theory(object):
 
             solver.add(Not(to_explain.translate(self)))
 
+        if timeout_seconds:
+            solver.set("timeout", int(timeout_seconds*1000))
+
         result = solver.check([z3_form for z3_form, (_, expr) in ps.items() if
                                     not (expr and expr.code in self.ignored_laws)])
-        assert result == unsat, ("Theory is satisfiable: nothing to explain.")
-        unsatcore = solver.unsat_core()
 
-        solver.pop()
+        solver.set("timeout", int(default_timeout))
+        if not timeout_seconds or time.time() - start < timeout_seconds:
+            if result == sat:
+                raise IDPZ3Error("Theory is satisfiable: nothing to explain.")
+            unsatcore = solver.unsat_core()  # does not respect timeout ?!
 
-        facts, laws = [], []
-        if unsatcore:
-            facts = [ps[a][0] for a in unsatcore if ps[a][1] is None]
-            laws = [ps[a][1] for a in unsatcore if ps[a][1] is not None]
+            solver.pop()
 
-        return facts, laws
+            facts, laws = [], []
+            if unsatcore:
+                facts = [ps[a][0] for a in unsatcore if ps[a][1] is None]
+                laws = [ps[a][1] for a in unsatcore if ps[a][1] is not None]
 
-    def simplify(self) -> "Theory":
+            return facts, laws
+        else:
+            return [], []
+
+    def simplify(self) -> Theory:
         """ Returns a simpler copy of the theory, with a simplified formula
         obtained by substituting terms and atoms by their known values.
 
@@ -882,7 +902,7 @@ class Theory(object):
         out._formula, out._constraintz = None, None
         return out
 
-    def determine_relevance(self) -> "Theory":
+    def determine_relevance(self) -> Theory:
         # monkey-patched
         pass
 

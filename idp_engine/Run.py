@@ -21,7 +21,9 @@ The following Python functions can be used to perform computations
 using FO-dot knowledge bases:
 
 """
+from __future__ import annotations
 
+import logging
 import time
 import types
 from typing import Any, Iterator, List, Union
@@ -261,10 +263,12 @@ def duration(msg: str = "") -> str:
 def execute(self: IDP) -> None:
     """ Execute the ``main()`` procedure block in the IDP program """
     global last_call
+
     last_call = time.process_time()
     main = str(self.procedures['main'])
     mybuiltins = {}
     mylocals = {**self.vocabularies, **self.theories, **self.structures}
+    mylocals['logging'] = logging
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand
     mylocals['model_propagate'] = model_propagate

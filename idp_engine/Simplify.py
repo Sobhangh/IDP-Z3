@@ -23,15 +23,16 @@ This module monkey-patches the Expression class and sub-classes.
 
 
 """
+from __future__ import annotations
 
 from copy import deepcopy
 import sys
 from typing import List
 
 from .Expression import (
-    Constructor, Expression, AIfExpr, AQuantification, Quantee, Type,
+    Constructor, Expression, AIfExpr, IF, AQuantification, Quantee, Type,
     Operator, AEquivalence, AImplication, ADisjunction,
-    AConjunction, AComparison, ASumMinus, AMultDiv, APower,
+    AConjunction, AComparison, EQUALS, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
     Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
 from .Parse import Symbol, Enumeration, TupleIDP, TypeDeclaration
@@ -85,7 +86,6 @@ Expression.simplify1 = simplify1
 
 # Class AIfExpr  ###############################################################
 
-
 def update_exprs(self, new_exprs):
     sub_exprs = list(new_exprs)
     if_, then_, else_ = sub_exprs[0], sub_exprs[1], sub_exprs[2]
@@ -96,11 +96,16 @@ def update_exprs(self, new_exprs):
     else:
         if then_.same_as(else_):
             return self._change(simpler=then_, sub_exprs=sub_exprs)
-        elif then_.same_as(TRUE) and else_.same_as(FALSE):
-            return self._change(simpler=if_, sub_exprs=sub_exprs)
-        elif then_.same_as(FALSE) and else_.same_as(TRUE):
-            return self._change(simpler=NOT(if_),
-                                sub_exprs=sub_exprs)
+        elif then_.same_as(TRUE):
+            if else_.same_as(FALSE):
+                return self._change(simpler=if_, sub_exprs=sub_exprs)
+            else:
+                return self._change(simpler=OR([if_, else_]), sub_exprs=sub_exprs)
+        elif else_.same_as(TRUE):
+            if then_.same_as(FALSE):
+                return self._change(simpler=NOT(if_), sub_exprs=sub_exprs)
+            else:
+                return self._change(simpler=OR([NOT(if_), then_]), sub_exprs=sub_exprs)
     return self._change(sub_exprs=sub_exprs)
 AIfExpr.update_exprs = update_exprs
 
@@ -226,6 +231,19 @@ AConjunction.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
+
+    if len(operands) == 2 and self.operator == ["="]:
+        # a = a
+        if operands[0].same_as(operands[1]):
+            return self._change(value=TRUE, sub_exprs=operands)
+
+        # (if c then a else b) = d  ->  (if c then a=d else b=d)
+        if type(operands[0]) == AIfExpr:
+            then = EQUALS([operands[0].sub_exprs[1], operands[1]]).simplify1()
+            else_ = EQUALS([operands[0].sub_exprs[2], operands[1]]).simplify1()
+            new = IF(operands[0].sub_exprs[0], then, else_).simplify1()
+            return self._change(simpler=new, sub_exprs=operands)
+
     operands1 = [e.value for e in operands]
     acc, acc1 = operands[0], operands1[0]
     assert len(self.operator) == len(operands1[1:]), "Internal error"

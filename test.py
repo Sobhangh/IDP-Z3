@@ -46,7 +46,8 @@ import re
 from idp_web_server.State import State
 from idp_web_server.IO import Output, metaJSON
 from idp_engine import IDP, Theory, model_expand, Status as S
-from idp_engine.utils import start, log, NEWL, RUN_FILE
+from idp_engine.utils import (start, log, NEWL, RUN_FILE,
+                              redirect_stdout, redirect_stderr_to_stdout)
 
 z3lock = threading.Lock()
 
@@ -59,7 +60,8 @@ def generateZ3(theory):
     """
 
     # capture stdout, print()
-    with open(RUN_FILE, mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
+    with open(RUN_FILE, mode='w', encoding='utf-8') as buf, \
+        redirect_stdout(to=buf), redirect_stderr_to_stdout():
         try:
             idp = IDP.from_str(theory)
             if 'main' in idp.procedures:
@@ -194,7 +196,8 @@ def pipeline():
 def api():
     # capture stdout, print()
     error = 0
-    with open(RUN_FILE, mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
+    with open(RUN_FILE, mode='w', encoding='utf-8') as buf, \
+        redirect_stdout(to=buf), redirect_stderr_to_stdout():
         try:
             test = """
                 vocabulary {

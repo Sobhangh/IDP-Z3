@@ -20,6 +20,7 @@
 Methods to show a Theory in plain English.
 
 """
+from __future__ import annotations
 
 from copy import copy
 

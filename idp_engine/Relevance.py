@@ -18,12 +18,13 @@
 """
 This module contains the logic for the computation of relevance.
 """
+from __future__ import annotations
 
-from idp_engine.Assignments import Status as S
-from idp_engine.Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
+from .Assignments import Status as S
+from .Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
                                    AConjunction, Brackets, UnappliedSymbol)
-from idp_engine.Theory import Theory
-from idp_engine.utils import OrderedSet, GOAL_SYMBOL, RELEVANT
+from .Theory import Theory
+from .utils import OrderedSet, GOAL_SYMBOL, RELEVANT
 
 
 def split_constraints(constraints: OrderedSet) -> OrderedSet:

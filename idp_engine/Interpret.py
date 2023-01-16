@@ -34,6 +34,7 @@ This module monkey-patches the ASTNode class and sub-classes.
 ( see docs/zettlr/Substitute.md )
 
 """
+from __future__ import annotations
 
 from copy import copy, deepcopy
 from itertools import product
@@ -74,7 +75,7 @@ def interpret(self, problem):
         self.constructors = enum.constructors
         self.translate(problem)
 
-        if self.constructors:
+        if self.constructors is not None:
             for c in self.constructors:
                 c.interpret(problem)
 
@@ -208,7 +209,7 @@ def interpret(self, problem):
     status = S.DEFAULT if self.block.name == DEFAULT else S.STRUCTURE
     assert not self.is_type_enumeration, "Internal error"
     if not self.name in [GOAL_SYMBOL, EXPAND]:
-        decl = self.symbol.decl
+        decl = problem.declarations[self.name]
         # update problem.extensions
         if self.symbol.decl.out.decl.name == BOOL:  # predicate
             extension = [t.args for t in self.enumeration.tuples]

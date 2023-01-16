@@ -30,7 +30,6 @@ try:
 except:
     pass
 
-from contextlib import redirect_stdout
 from copy import copy
 import os
 import threading
@@ -49,6 +48,7 @@ from idp_engine.utils import log, RUN_FILE
 from idp_engine.Assignments import Status as S
 from idp_engine.Expression import EQUALS
 from idp_engine.Parse import TypeDeclaration, str_to_IDP
+from idp_engine.utils import redirect_stdout, redirect_stderr_to_stdout
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
@@ -123,10 +123,7 @@ def idpOf(code):
 
 class run(Resource):
     """
-    Class which handles the run.
-    <<Explanation of what the run is here.>>
-
-    :arg Resource: <<explanation of resource>>
+    Handler for Web IDE
     """
     def post(self):
         """
@@ -139,7 +136,7 @@ class run(Resource):
         set_option(max_args=10000000, max_lines=1000000, max_depth=10000000, max_visited=1000000)
 
         log("start /run")
-        with z3lock:
+        with z3lock:  # don't remove it, or take care of the side-effect of timeout_seconds (in expand()) on other threads
             try:
                 start = time.process_time()
                 if with_profiling:
@@ -151,7 +148,8 @@ class run(Resource):
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
                 # capture stdout, print()
-                with open(RUN_FILE, mode='w', encoding='utf-8') as buf, redirect_stdout(buf):
+                with open(RUN_FILE, mode='w', encoding='utf-8') as buf, \
+                    redirect_stdout(to=buf), redirect_stderr_to_stdout():
                     try:
                         idp.execute()
                         print(f"\n> Executed in {round(time.process_time()-start, 3)} sec")
@@ -191,7 +189,7 @@ class meta(Resource):
         :returns metaJSON: a json string containing the meta.
         """
         log("start /meta")
-        with z3lock:
+        with z3lock:  # don't remove it, or take care of the side-effect of timeout_seconds (in expand()) on other threads
             try:
                 if with_profiling:
                     g.profiler = Profiler()
@@ -235,7 +233,7 @@ class metaWithGraph(meta):  # subclass that generates call graphs
 class eval(Resource):
     def post(self):
         log("start /eval")
-        with z3lock:
+        with z3lock:  # don't remove it, or take care of the side-effect of timeout_seconds (in expand()) on other threads
             try:
                 if with_profiling:
                     g.profiler = Profiler()

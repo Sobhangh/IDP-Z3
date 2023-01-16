@@ -32,7 +32,7 @@ from typing import Dict, Optional, Tuple, TYPE_CHECKING
 from z3 import BoolRef
 
 from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol
-from .utils import NEWL, BOOL
+from .utils import NEWL, BOOL, INT, REAL, DATE
 
 if TYPE_CHECKING:
     from .Parse import SymbolDeclaration, Enumeration
@@ -283,6 +283,12 @@ class Assignments(dict):
                     val = f"// {val}"
             else:
                 sign = ':=' if k.instances or k.out.name == BOOL else '>>'
+                # TODO improve sign detection (using base_type/extension, interpretation)
+                # needs access to the theory !
+                finite_domain = all(s.name not in [INT, REAL, DATE]
+                        for s in k.sorts)
+                sign = ':=' if finite_domain or k.out.name == BOOL else '>>'
+                val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
                 val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
             model_str += val
         return model_str
