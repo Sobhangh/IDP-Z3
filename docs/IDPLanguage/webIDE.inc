@@ -29,9 +29,7 @@ Within that block, the following variables, classes and functions are available:
 
     - variables containing the vocabularies, theories and structures specified in the same IDP-Z3 program.  The variables have the name of the block;
     - the functions exposed by the ``idp_engine``, described :ref:`here <idp_engine>`;
-    - the ``Theory`` class, described :ref:`here <Theory>`;
-    - Python's `logging <https://docs.python.org/3/library/logging.html>`_ package.
-
+    - the ``Theory`` class, described :ref:`here <Theory>`.
 
 
 .. _IDP_functions:
