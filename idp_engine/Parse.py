@@ -20,6 +20,7 @@
 Classes to parse an IDP-Z3 theory.
 
 """
+from __future__ import annotations
 
 from copy import copy, deepcopy
 from datetime import date
@@ -327,6 +328,8 @@ class TypeDeclaration(ASTNode):
         interpretation (SymbolInterpretation): the symbol interpretation
 
         map (Dict[string, Expression]): a mapping from code to Expression in range
+
+        voc (Vocabulary): the vocabulary block that contains it
     """
 
     def __init__(self, **kwargs):
@@ -352,9 +355,13 @@ class TypeDeclaration(ASTNode):
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
             return ''
-        enumeration = (f"{{{','.join(map(str, self.constructors))}}}" if self.constructors else
-                       f"{self.enumeration}" if self.enumeration else
-                       "")
+        enumeration = self.enumeration if hasattr(self, 'enumeration') and self.enumeration else ""
+        constructors = enumeration.constructors if enumeration else None
+        constructed = ("" if not bool(constructors) or all(0 == len(c.sorts) for c in constructors)
+                       else "constructed from ")
+        enumeration = (f"{constructed}{{{', '.join(str(c) for c in constructors)}}}" if constructors else
+                       f"{self.interpretation}" if self.interpretation else
+                       f"{enumeration}")
         return (f"type {self.name} {'' if not enumeration else ':= ' + enumeration}")
 
     def contains_element(self, term: Expression,
@@ -426,6 +433,8 @@ class SymbolDeclaration(ASTNode):
 
         needs_interpretation (bool):
             whether its interpretation must be sent to Z3
+
+        voc (Vocabulary): the vocabulary block that contains it
     """
 
     def __init__(self, **kwargs):
@@ -450,6 +459,7 @@ class SymbolDeclaration(ASTNode):
         self.unit: str = None
         self.heading: str = None
         self.optimizable: bool = True
+        self.needs_interpretation = False
 
         self.type = None  # a string
         self.base_type = None
@@ -818,6 +828,9 @@ class SymbolInterpretation(ASTNode):
         self.symbol = None
         self.is_type_enumeration = None
 
+    def __repr__(self):
+        return f"{self.name} {self.sign} {self.enumeration}"
+
     def interpret_application(self, rank, applied, args, tuples=None):
         """returns an expression equivalent to `self.symbol` applied to `args`,
         simplified by the interpretation of `self.symbol`.
@@ -1044,7 +1057,7 @@ class TupleIDP(ASTNode):
         return self.code
 
     def __repr__(self):
-        return self.code
+        return f"({self.code})" if 1 < len(self.args) else self.code
 
 
 class FunctionTuple(TupleIDP):
@@ -1123,7 +1136,7 @@ class Ranges(Enumeration):
                   ) -> Extension:
         if not self.elements:
             return(None, None)
-        if self.tuples: # and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
+        if self.tuples is not None: # and len(self.tuples) < MAX_QUANTIFIER_EXPANSION:
             return ([t.args for t in self.tuples], None)
         def filter(args):
             sub_exprs = []
@@ -1135,6 +1148,12 @@ class Ranges(Enumeration):
                 sub_exprs.append(e)
             return OR(sub_exprs)
         return(None, filter)
+
+
+class RangeElement(ASTNode):
+    def __init__(self, **kwargs):
+        self.fromI = kwargs.pop('fromI')
+        self.toI = kwargs.pop('toI')
 
 
 class IntRange(Ranges):
@@ -1351,7 +1370,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          TupleIDP, FunctionTuple, CSVTuple,
                                          ConstructedFrom, Constructor, Ranges,
-                                         Display,
+                                         RangeElement, Display,
 
                                          Procedure, Call1, String,
                                          PyList, PyAssignment])

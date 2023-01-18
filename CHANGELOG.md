@@ -6,12 +6,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.10.3] - ??
 
+The main new features in this release are:
+* Support for co-inductive definitions
+
 This release has new package dependencies: please run `poetry install` to update.
 
 Contributors (alphabetical): Pierre Carbonnelle.
 
 ### IDP-Z3
 * MR !279: Support co-inductive definitions
+* MR !280: various small improvements
 * issue #235: range interpretation of predicate is not respected
 * issue #236: Incorrect nested quantification over infinite domain
 

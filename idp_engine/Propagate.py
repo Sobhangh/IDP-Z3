@@ -27,6 +27,7 @@ It has 2 parts:
 
 This module monkey-patches the Expression and Theory classes and sub-classes.
 """
+from __future__ import annotations
 
 import time
 from copy import copy
