@@ -19,6 +19,9 @@ Contributors (alphabetical): Pierre Carbonnelle.
 * issue #235: range interpretation of predicate is not respected
 * issue #236: Incorrect nested quantification over infinite domain
 
+### Interactive Consultant and Web IDE
+* MR !282: improve display of ⇒ in the editor.
+
 
 ## [0.10.2] - 2022-12-19
 
