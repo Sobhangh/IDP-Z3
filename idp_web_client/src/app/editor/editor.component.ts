@@ -12,7 +12,7 @@ import {Inject} from '@angular/core';
 })
 
 export class EditorComponent {
-  editorOptions = {theme: 'IDP', language: 'IDP'};
+  editorOptions = {theme: 'IDP', language: 'IDP', fontFamily: 'Noto mono'};
 
   private change = false;
   textModeUnicode = false;
