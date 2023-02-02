@@ -84,10 +84,8 @@ export class HeaderComponent implements OnInit, AfterViewInit {
           }, {
             label: 'Share...', command: () => {
               // don't use "?lzw=..." because parameter is length-limited
-              this.origin = window.location.origin;
-              var page = window.location.href.split('?')[0].split('IDE')[0];
-              page = page + (this.idpService.IDE ? 'IDE' : '');
-              this.URL = page + '?' + encodeURIComponent((new CompressionService()).compressString(this.idpService.spec));
+              this.origin = window.location.href.split('?')[0];
+              this.URL = this.origin + '?' + encodeURIComponent((new CompressionService()).compressString(this.idpService.spec));
               this.showFileShare = true;
             }
           }, {
@@ -225,10 +223,8 @@ export class HeaderComponent implements OnInit, AfterViewInit {
           }, {
             label: 'Share...', command: () => {
               // don't use "?lzw=..." because parameter is length-limited
-              this.origin = window.location.origin;
-              var page = window.location.href.split('?')[0].split('IDE')[0];
-              page = page + (this.idpService.IDE ? 'IDE' : '');
-              this.URL = page + '?' + encodeURIComponent((new CompressionService()).compressString(this.idpService.spec));
+              this.origin = window.location.href.split('?')[0];
+              this.URL = this.origin + '?' + encodeURIComponent((new CompressionService()).compressString(this.idpService.spec));
               this.showFileShare = true;
             }
           }, {

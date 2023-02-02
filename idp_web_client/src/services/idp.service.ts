@@ -152,6 +152,7 @@ export class IdpService {
     }
 
     if (window.location.search !== '') {
+      //    /?gist=1234&file=abcd.idp&token=qsdf
       //    /?gist=1234&file=abcd.idp
       // or /?gist=1234  (specification.idp by default)
       // or /?file=spec.idp
@@ -162,14 +163,23 @@ export class IdpService {
 
       if (query0[0] === 'gist' && query0[1] !== '') {
         const URL = 'https://api.github.com/gists/' + query0[1];
-        const res = await this.get_latest(URL);
-        let specFile: string;
-        if (queries.length === 2 ) {
-          specFile = queries[1].split('=') [1];
-        } else {
-          specFile = 'specification.idp';
+        let token: string = '';
+        if (queries.length===3) {
+          token = queries[2].split('=') [1]
         }
-        this.spec = JSON.parse(res)['files'][specFile]['content'];
+        const response = await fetch(URL, (token == '') ? {} : {
+            headers: {
+                'Authorization': 'token ' + token,
+            }
+          }
+        )
+        const res = await response.json()
+
+        let specFile: string = 'specification.idp';
+        if (2 <= queries.length ) {
+          specFile = queries[1].split('=') [1];
+        }
+        this.spec = res['files'][specFile]['content'];
       } else if (query0[0] === 'file' && query0[1] !== '') {
         this.spec = await this.get_latest(AppSettings.SPECIFICATION_URL.replace(/specification\.idp/, query0[1]));
       } else {
