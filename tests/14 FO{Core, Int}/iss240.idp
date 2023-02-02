@@ -1,0 +1,8 @@
+vocabulary V{
+	type Person := {Jan, Piet, Rob, Dirk, Bob, Wouter}
+	Prisoner: Person -> Bool
+	Sentence: Person -> Int
+}
+theory T: V{
+    !x in Person, y in Int: Sentence(x)=y => Prisoner(x).
+}

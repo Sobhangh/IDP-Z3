@@ -19,6 +19,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 * MR !280: various small improvements
 * issue #235: range interpretation of predicate is not respected
 * issue #236: Incorrect nested quantification over infinite domain
+* issue #240: internal error with quantification over infinite domain
 
 ### Interactive Consultant and Web IDE
 * MR !282: improve display of ⇒ in the editor.
