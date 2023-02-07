@@ -395,7 +395,6 @@ def substitute(self, e0, e1, assignments, tag=None):
             return self  # to avoid infinite loops
         return self._change(value=e1)  # e1 is UnappliedSymbol or Number
     else:
-        # will update self.simpler
         out = self.update_exprs(e.substitute(e0, e1, assignments, tag)
                                 for e in self.sub_exprs)
         return out
@@ -673,11 +672,6 @@ def substitute(self, e0, e1, assignments, tag=None):
 
     if self.code == e0.code:
         return self._change(value=e1, co_constraint=new_branch)
-    elif self.simpler is not None:  # has an interpretation
-        assert self.co_constraint is None, \
-               f"Internal error in substitute: {self}"
-        simpler = self.simpler.substitute(e0, e1, assignments, tag)
-        return self._change(simpler=simpler)
     else:
         sub_exprs = [e.substitute(e0, e1, assignments, tag)
                      for e in self.sub_exprs]  # no simplification here

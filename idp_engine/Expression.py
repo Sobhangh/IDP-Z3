@@ -222,12 +222,6 @@ class Expression(ASTNode):
             This is useful for definitions over infinite domains,
             as well as to compute relevant questions.
 
-        simpler (Expression, optional):
-            A simpler, equivalent expression.
-
-            Equivalence is computed in the context of the theory and structure.
-            Simplifying an expression is useful for efficiency
-            and to compute relevant questions.
 
         value (Optional[Expression]):
             A rigid term equivalent to the expression, obtained by
@@ -258,7 +252,6 @@ class Expression(ASTNode):
 
     def __init__(self):
         self.sub_exprs: List[Expression]
-        self.simpler: Optional[Expression] = None
         self.value: Optional[Expression] = None
 
         self.code: str = intern(str(self))
@@ -289,7 +282,6 @@ class Expression(ASTNode):
         out = copy(self)
         out.sub_exprs = [deepcopy(e, memo) for e in out.sub_exprs]
         out.variables = deepcopy(out.variables, memo)
-        out.simpler = None if out.simpler is None else deepcopy(out.simpler, memo)
         out.co_constraint = (None if out.co_constraint is None
                              else deepcopy(out.co_constraint, memo))
         if hasattr(self, 'questions'):
@@ -304,12 +296,8 @@ class Expression(ASTNode):
             return float(self.py_value) == float(other.py_value)
         if self.value is not None and self.value is not self:
             return self.value  .same_as(other)
-        if self.simpler is not None:
-            return self.simpler.same_as(other)
         if other.value is not None and other.value is not other:
             return self.same_as(other.value)
-        if other.simpler is not None:
-            return self.same_as(other.simpler)
 
         if (isinstance(self, Brackets)
            or (isinstance(self, AQuantification)
@@ -327,8 +315,6 @@ class Expression(ASTNode):
     def __str__(self):
         if self.value is not None and self.value is not self:
             return str(self.value)
-        if self.simpler is not None:
-            return str(self.simpler)
         return self.__str1__()
 
     def __log__(self):  # for debugWithYamlLog

@@ -16,8 +16,8 @@ Traceback (most recent call last):
   File "idp_engine/Run.py", line ??, in pretty_print
     for i, xi in enumerate(x):
   File "idp_engine/Run.py", line ??, in decision_table
-    for model in problem.decision_table(goal_string, timeout, max_rows,
-  File "idp_engine/Problem.py", line ??, in decision_table
+    models, timeout_hit = problem.decision_table(goal_string, timeout_seconds,
+  File "idp_engine/Theory.py", line ??, in decision_table
     assert not goal_string or goal.value is not None, \
 AssertionError: The goal is not always determined by the theory
 

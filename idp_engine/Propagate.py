@@ -62,8 +62,6 @@ def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
     if self.value is not None:
         return self
     value, simpler, new_e, co_constraint = None, None, None, None
-    if self.simpler is not None:
-        simpler = self.simpler.simplify_with(assignments)
     if self.co_constraint is not None:
         co_constraint = self.co_constraint.simplify_with(assignments)
     new_e = [e.simplify_with(assignments) for e in self.sub_exprs]
@@ -98,10 +96,7 @@ def symbolic_propagate(self,
     if self.value is None:
         if self.code in assignments:
             assignments.assert__(self, truth, tag)
-        if self.simpler is not None:
-            self.simpler.symbolic_propagate(assignments, tag, truth)
-        else:
-            self.propagate1(assignments, tag, truth)
+        self.propagate1(assignments, tag, truth)
 Expression.symbolic_propagate = symbolic_propagate
 
 

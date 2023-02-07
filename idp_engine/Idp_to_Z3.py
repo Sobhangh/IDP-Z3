@@ -120,7 +120,7 @@ Constructor.translate = translate
 # class Expression  ###########################################################
 
 def translate(self, problem: Theory, vars={}) -> ExprRef:
-    """Converts the syntax tree to a Z3 expression, using .value and .simpler if present
+    """Converts the syntax tree to a Z3 expression, using .value if present
 
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
@@ -133,8 +133,6 @@ def translate(self, problem: Theory, vars={}) -> ExprRef:
     """
     if self.value is not None and self.value is not self:
         return self.value.translate(problem, vars)
-    if self.simpler is not None:
-        return self.simpler.translate(problem, vars)
     if self.variables:
         return self.translate1(problem, vars)
     out = problem.z3.get(self.str, None)
@@ -171,7 +169,7 @@ Symbol.translate=translate
 # Class AIfExpr  ###############################################################
 
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
-    """Converts the syntax tree to a Z3 expression, ignoring .value and .simpler
+    """Converts the syntax tree to a Z3 expression, ignoring .value
 
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
