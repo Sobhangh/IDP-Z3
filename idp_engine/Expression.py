@@ -798,11 +798,19 @@ class AQuantification(Expression):
         return out.annotate1()
 
     def __str1__(self):
-        if self.quantees:  #TODO this is not correct in case of partial expansion
-            vars = ','.join([f"{q}" for q in self.quantees])
-            return f"{self.q} {vars}: {self.sub_exprs[0].str}"
+        if len(self.sub_exprs) == 0:
+            body = TRUE.str if self.q == '∀' else FALSE.str
+        elif len(self.sub_exprs) == 1:
+            body = self.sub_exprs[0].str
         else:
-            return self.sub_exprs[0].str
+            connective = '∧' if self.q == '∀' else '∨'
+            body = connective.join("("+e.str+")" for e in self.sub_exprs)
+
+        if self.quantees:
+            vars = ','.join([f"{q}" for q in self.quantees])
+            return f"{self.q} {vars}: {body}"
+        else:
+            return body
 
     def __deecopy__(self, memo):
         # also called by AAgregate
@@ -1029,7 +1037,9 @@ class AAggregate(Expression):
         super().__init__()
 
     def __str1__(self):
+        # aggregates are over finite domains, and cannot have partial expansion
         if not self.annotated:
+            assert len(self.sub_exprs) == 1, "Internal error"
             vars = ",".join([f"{q}" for q in self.quantees])
             if self.aggtype in ["sum", "min", "max"]:
                 out = (f"{self.aggtype}(lambda {vars} : "
