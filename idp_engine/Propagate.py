@@ -116,10 +116,12 @@ Expression.propagate1 = propagate1
 def symbolic_propagate(self, assignments, tag, truth=TRUE):
     if self.code in assignments:
         assignments.assert__(self, truth, tag)
-    if not self.quantees:  # expanded
-        assert len(self.sub_exprs) == 1,  \
-               f"Internal error in symbolic_propagate: {self}"  # a conjunction or disjunction
-        self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
+    if not self.quantees:  # expanded, no variables
+        if self.q == '∀':
+            AConjunction.symbolic_propagate(self, assignments, tag, truth)
+        else:
+            ADisjunction.symbolic_propagate(self, assignments, tag,
+                    FALSE if truth.same_as(TRUE) else TRUE)
 AQuantification.symbolic_propagate = symbolic_propagate
 
 

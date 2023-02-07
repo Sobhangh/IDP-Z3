@@ -312,8 +312,9 @@ class Theory(object):
         # initialize assignments, co_constraints, questions
 
         self.co_constraints, questions = OrderedSet(), OrderedSet()
+        self.constraints = OrderedSet([v.interpret(self)
+                                       for v in self.constraints])
         for c in self.constraints:
-            c.interpret(self)  # may add co_constraints
             c.co_constraints(self.co_constraints)
             # don't collect questions from type constraints
             if not c.is_type_constraint_for:
@@ -321,8 +322,8 @@ class Theory(object):
         for es in self.def_constraints.values():
             for e in es:
                 e.co_constraints(self.co_constraints)
-        for c in self.co_constraints.values():
-            c.interpret(self)
+        self.co_constraints = OrderedSet([c.interpret(self)
+                                          for c in self.co_constraints])
 
         for s in list(questions.values()):
             if s.code not in self.assignments:

@@ -312,7 +312,9 @@ class Expression(ASTNode):
             return self.same_as(other.simpler)
 
         if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification) and len(self.quantees) == 0)):
+           or (isinstance(self, AQuantification)
+               and len(self.quantees) == 0
+               and len(self.sub_exprs) == 1)):
             return self.sub_exprs[0].same_as(other)
         if (isinstance(other, Brackets)
            or (isinstance(other, AQuantification) and len(other.quantees) == 0)):

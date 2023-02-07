@@ -12,7 +12,9 @@ Traceback (most recent call last):
   File "idp_engine/Theory.py", line ??, in __init__
     self.add(*theories)
   File "idp_engine/Theory.py", line ??, in add
-    c.interpret(self)  # may add co_constraints
+    self.constraints = OrderedSet([v.interpret(self)
+  File "idp_engine/Theory.py", line ??, in <listcomp>
+    self.constraints = OrderedSet([v.interpret(self)
   File "idp_engine/Interpret.py", line ??, in interpret
     assert self.decl.type != BOOL, \
 AssertionError: Can't use 'is enumerated' with predicate is_color.
