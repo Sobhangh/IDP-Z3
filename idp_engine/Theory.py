@@ -369,7 +369,7 @@ class Theory(object):
             AssertionError: if code is unknown
         """
         _ = self.solver_reified
-        assert any(e.code == code
+        assert any(e.original.code == code
                    for _, e in self.expl_reifs.values()), \
                 f"Cannot enable an unknown law: {code}"
         self.ignored_laws.remove(code)
@@ -387,7 +387,7 @@ class Theory(object):
             AssertionError: if code is unknown
         """
         _ = self.solver_reified
-        assert any(e.code == code
+        assert any(e.original.code == code
                    for _, e in self.expl_reifs.values()), \
                 f"Cannot disable an unknown law: {code}"
         self.ignored_laws.add(code)
@@ -561,7 +561,7 @@ class Theory(object):
             if a.status in [S.CONSEQUENCE, S.ENV_CONSQ, S.UNIVERSAL]:
                 self.assignments.assert__(a.sentence, None, S.UNKNOWN)
         for z3_form, (_, expr) in ps.items():
-            if not (expr and expr.code in self.ignored_laws):
+            if not (expr and expr.original.code in self.ignored_laws):
                 solver.add(z3_form)
 
     def expand(self,
@@ -860,7 +860,7 @@ class Theory(object):
             solver.set("timeout", int(timeout_seconds*1000))
 
         result = solver.check([z3_form for z3_form, (_, expr) in ps.items() if
-                                    not (expr and expr.code in self.ignored_laws)])
+                                    not (expr and expr.original.code in self.ignored_laws)])
 
         solver.set("timeout", int(default_timeout))
         if not timeout_seconds or time.time() - start < timeout_seconds:

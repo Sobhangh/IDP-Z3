@@ -58,7 +58,13 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
         if simpler.value is not None:  # example: prime.idp
             self.value = simpler.value
         else:
-            self.simpler = simpler
+            simpler.annotations = self.annotations
+            #simpler.code = self.code
+            simpler.original = self.original
+            simpler.is_type_constraint_for = self.is_type_constraint_for
+            simpler.co_constraint = self.co_constraint
+            simpler.block = self.block if hasattr(self, "block") else None
+            return simpler
     assert (self.value is None
                or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
                                        Number, Date, Type]), \

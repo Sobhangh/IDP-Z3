@@ -1,4 +1,4 @@
-And(Not(p),
+And(p == False,
     green == color,
     red == color,
     blue == color,
