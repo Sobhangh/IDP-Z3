@@ -878,6 +878,9 @@ class Operator(Expression):
         return temp
 
     def collect(self, questions, all_=True, co_constraints=True):
+        if (self.operator[0] == '∨' and type(self.original) == AppliedSymbol
+            and self.original.is_enumerated):
+            self.original.collect(questions, all_, co_constraints)
         if self.operator[0] in '=<>≤≥≠':
             questions.append(self)
         for e in self.sub_exprs:
