@@ -619,9 +619,7 @@ def interpret(self, problem):
                 else:
                     self.as_disjunction = interpretation.enumeration.contains(sub_exprs, True,
                         interpretations=problem.interpretations, extensions=problem.extensions)
-                if 'not' in self.is_enumerated:
-                    self.as_disjunction = NOT(self.as_disjunction)
-                if self.as_disjunction.same_as(FALSE) or self.as_disjunction.same_as(FALSE):
+                if self.as_disjunction.same_as(TRUE) or self.as_disjunction.same_as(FALSE):
                     value = self.as_disjunction
                 self.as_disjunction.annotations = self.annotations
         elif self.in_enumeration:
@@ -629,9 +627,7 @@ def interpret(self, problem):
             core = deepcopy(AppliedSymbol.make(self.symbol, sub_exprs))
             self.as_disjunction = self.in_enumeration.contains([core], False,
                         interpretations=problem.interpretations, extensions=problem.extensions)
-            if 'not' in self.is_enumeration:
-                self.as_disjunction = NOT(self.as_disjunction)
-            if self.as_disjunction.same_as(FALSE) or self.as_disjunction.same_as(FALSE):
+            if self.as_disjunction.same_as(TRUE) or self.as_disjunction.same_as(FALSE):
                 value = self.as_disjunction
             self.as_disjunction.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
