@@ -620,7 +620,7 @@ def interpret(self, problem):
                     self.as_disjunction = interpretation.enumeration.contains(sub_exprs, True,
                         interpretations=problem.interpretations, extensions=problem.extensions)
                 if 'not' in self.is_enumerated:
-                    self.as_disjunction = NOT(self.as_disjunction).simplify1()
+                    self.as_disjunction = NOT(self.as_disjunction)
                 if self.as_disjunction.same_as(FALSE) or self.as_disjunction.same_as(FALSE):
                     value = self.as_disjunction
                 self.as_disjunction.annotations = self.annotations
@@ -630,7 +630,7 @@ def interpret(self, problem):
             self.as_disjunction = self.in_enumeration.contains([core], False,
                         interpretations=problem.interpretations, extensions=problem.extensions)
             if 'not' in self.is_enumeration:
-                self.as_disjunction = NOT(self.as_disjunction).simplify1()
+                self.as_disjunction = NOT(self.as_disjunction)
             if self.as_disjunction.same_as(FALSE) or self.as_disjunction.same_as(FALSE):
                 value = self.as_disjunction
             self.as_disjunction.annotations = self.annotations

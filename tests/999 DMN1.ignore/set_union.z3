@@ -1,7 +1,4 @@
-  c() in {red, blue}
-⇒ p()
-
-  c() = blue ∨ c() = green ∨ c() = red
+  c() in {red, blue, green}
 ⇒ p()
 
 ⇒ Not p()
