@@ -1068,11 +1068,14 @@ class AppliedSymbol(Expression):
     Args:
         symbol (SymbolExpr): the symbol to be applied to arguments
 
-        is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
+        is_enumerated (string): '' or 'is enumerated'
 
-        is_enumeration (string): '' or 'in' or 'not in'
+        is_enumeration (string): '' or 'in'
 
         in_enumeration (Enumeration): the enumeration following 'in'
+
+        as_disjunction (Optional[Expression]):
+            the translation of 'is_enumerated' and 'in_enumeration' as a disjunction
 
         decl (Declaration): the declaration of the symbol, if known
 
@@ -1098,6 +1101,7 @@ class AppliedSymbol(Expression):
 
         super().__init__()
 
+        self.as_disjunction = None
         self.decl = None
         self.in_head = False
 
@@ -1131,6 +1135,7 @@ class AppliedSymbol(Expression):
     def __deepcopy__(self, memo):
         out = super().__deepcopy__(memo)
         out.symbol = deepcopy(out.symbol)
+        out.as_disjunction = deepcopy(out.as_disjunction)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):

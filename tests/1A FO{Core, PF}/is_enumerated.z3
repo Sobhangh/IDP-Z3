@@ -20,6 +20,7 @@ No more models.
 propagate
 And(Color == blue,
     opposite(blue) == blue,
+    Not(Or(Color == green, Color == red)),
     Or(f(B, B) == A, f(B, B) == B))
 T, S2
 No models.

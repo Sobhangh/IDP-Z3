@@ -322,6 +322,8 @@ AAggregate.translate1 = translate1
 # Class AppliedSymbol  #######################################################
 
 def translate1(self, problem: Theory, vars={}):
+    if self.as_disjunction:
+        return self.as_disjunction.translate(problem, vars)
     self.check(self.decl, f"Unknown symbol: {self.symbol}.\n"
                f"Possible fix: introduce a variable "
                f"(e.g., !x in Concept: x=... => $(x)(..))")

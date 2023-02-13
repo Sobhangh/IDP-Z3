@@ -615,21 +615,25 @@ def interpret(self, problem):
             if self.decl.name in problem.interpretations:
                 interpretation = problem.interpretations[self.decl.name]
                 if interpretation.default is not None:
-                    simpler = TRUE
+                    self.as_disjunction = TRUE
                 else:
-                    simpler = interpretation.enumeration.contains(sub_exprs, True,
+                    self.as_disjunction = interpretation.enumeration.contains(sub_exprs, True,
                         interpretations=problem.interpretations, extensions=problem.extensions)
                 if 'not' in self.is_enumerated:
-                    simpler = NOT(simpler)
-                simpler.annotations = self.annotations
+                    self.as_disjunction = NOT(self.as_disjunction).simplify1()
+                if self.as_disjunction.same_as(FALSE) or self.as_disjunction.same_as(FALSE):
+                    value = self.as_disjunction
+                self.as_disjunction.annotations = self.annotations
         elif self.in_enumeration:
             # re-create original Applied Symbol
             core = deepcopy(AppliedSymbol.make(self.symbol, sub_exprs))
-            simpler = self.in_enumeration.contains([core], False,
+            self.as_disjunction = self.in_enumeration.contains([core], False,
                         interpretations=problem.interpretations, extensions=problem.extensions)
             if 'not' in self.is_enumeration:
-                simpler = NOT(simpler)
-            simpler.annotations = self.annotations
+                self.as_disjunction = NOT(self.as_disjunction).simplify1()
+            if self.as_disjunction.same_as(FALSE) or self.as_disjunction.same_as(FALSE):
+                value = self.as_disjunction
+            self.as_disjunction.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
             # and any(s.decl.name == CONCEPT for s in self.decl.sorts)
             and all(a.value is not None for a in sub_exprs)):
@@ -670,6 +674,11 @@ def substitute(self, e0, e1, assignments, tag=None):
         if tag is not None:
             new_branch.symbolic_propagate(assignments, tag)
 
+    if self.as_disjunction is not None:
+        self.as_disjunction = self.as_disjunction.substitute(e0, e1,        assignments, tag)
+        if tag is not None:
+            self.as_disjunction.symbolic_propagate(assignments, tag)
+
     if self.code == e0.code:
         return self._change(value=e1, co_constraint=new_branch)
     else:
@@ -693,6 +702,8 @@ def instantiate1(self, e0, e1, problem=None):
                 out.original = self
         if out.co_constraint is not None:
             out.co_constraint.instantiate(e0, e1, problem)
+        if out.as_disjunction is not None:
+            out.as_disjunction.instantiate(e0, e1, problem)
         if problem and not self.variables:
             return out.interpret(problem)
     return out

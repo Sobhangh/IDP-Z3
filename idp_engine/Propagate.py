@@ -146,6 +146,15 @@ def propagate1(self, assignments, tag, truth=TRUE):
 AUnary.propagate1 = propagate1
 
 
+# class AppliedSymbol  ############################################################
+
+def propagate1(self, assignments, tag, truth=TRUE):
+    if self.as_disjunction:
+        self.as_disjunction.symbolic_propagate(assignments, tag, _not(truth))
+    Expression.propagate1(self, assignments, tag, truth)
+AUnary.propagate1 = propagate1
+
+
 # class AComparison  ##########################################################
 
 def propagate1(self, assignments, tag, truth=TRUE):
