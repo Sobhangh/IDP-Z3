@@ -45,7 +45,7 @@ from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
     Definition, ConstructedFrom, Ranges)
 from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
-    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
+    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
     NOT, EQUALS, AppliedSymbol, UnappliedSymbol, Quantee, TYPE,
     Variable, VARIABLE, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
@@ -424,7 +424,10 @@ def instantiate1(self, e0, e1, problem=None):
     # instantiate expressions, with simplification
     out = self.update_exprs(e.instantiate(e0, e1, problem)
                             for e in self.sub_exprs)
+    return _finalize(self, out, e0, e1)
+Expression.instantiate1 = instantiate1
 
+def _finalize(self, out, e0, e1):
     if out.value is not None:  # replace by new value
         out = out.value
     else:
@@ -438,7 +441,6 @@ def instantiate1(self, e0, e1, problem=None):
             out.code = str(out)
     out.annotations['reading'] = out.code
     return out
-Expression.instantiate1 = instantiate1
 
 
 # class Symbol ###########################################################
@@ -599,7 +601,34 @@ def interpret(self, problem):
     return AQuantification.interpret(self, problem)
 AAggregate.interpret = interpret
 
-AAggregate.instantiate1 = instantiate1  # from AQuantification
+AAggregate.instantiate1 = AQuantification.instantiate1
+
+
+# Class AImplication ######################################################
+
+def instantiate1(self, e0, e1, problem):
+    assert len(self.sub_exprs) == 2
+    premise = self.sub_exprs[0].instantiate(e0, e1, problem)
+    if premise.same_as(FALSE):  # lazy instantiation
+        return TRUE
+    consequent = self.sub_exprs[1].instantiate(e0, e1, problem)
+    out = self.update_exprs([premise, consequent])
+    return _finalize(self, out, e0, e1)
+AImplication.instantiate1 = instantiate1
+
+
+# Class AConjunction ######################################################
+
+def instantiate1(self, e0, e1, problem):
+    new_exprs = []
+    for e in self.sub_exprs:
+        new_e = e.instantiate(e0, e1, problem)
+        if new_e.same_as(FALSE):  # lazy instantiation
+            return FALSE
+        new_exprs.append(new_e)
+    out = self.update_exprs(new_exprs)
+    return _finalize(self, out, e0, e1)
+AConjunction.instantiate1 = instantiate1
 
 
 # Class AppliedSymbol  ##############################################
