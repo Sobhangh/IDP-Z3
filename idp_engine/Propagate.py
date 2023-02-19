@@ -180,11 +180,11 @@ Brackets.symbolic_propagate = symbolic_propagate
 #
 ###############################################################################
 
-def _set_consequences_get_changed_choices(self):
+def _set_consequences_get_changed_choices(self, tag):
     # clear consequences, as these might not be cleared by add_given when
     # running via CLI
     for a in self.assignments.values():
-        if a.status in [S.CONSEQUENCE, S.ENV_CONSQ]:
+        if a.status == tag:
             self.assignments.assert__(a.sentence, None, S.UNKNOWN)
 
     removed_choices = {a.sentence.code: a for a in self.previous_assignments.values()
@@ -201,7 +201,7 @@ def _set_consequences_get_changed_choices(self):
 
     if not removed_choices:
         for a in self.previous_assignments.values():
-            if (a.status in [S.CONSEQUENCE, S.ENV_CONSQ] and
+            if (a.status == tag and
                     self.assignments[a.sentence.code].status
                     not in [S.GIVEN, S.EXPANDED, S.DEFAULT]):
                 self.assignments.assert__(a.sentence, a.value, a.status)
@@ -420,7 +420,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
             yield NOT_SATISFIABLE
             # can't access solver.sexpr()
 
-    removed_choices, added_choices = self._set_consequences_get_changed_choices()
+    removed_choices, added_choices = self._set_consequences_get_changed_choices(tag)
 
     dir_todo = given_todo is None
     if dir_todo:

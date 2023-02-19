@@ -21,6 +21,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 
 ### Interactive Consultant and Web IDE
 * MR !282: improve display of ⇒ in the editor.
+* issue #241: Environmental verification error in the Covid example
 
 
 ## [0.10.2] - 2022-12-19
