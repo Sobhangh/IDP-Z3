@@ -156,7 +156,7 @@ export class SymbolInfo {
           if (a.value == true) {
             v.assignment.value = value;
             v.assignment.status = a.status
-          } else {
+          } else if (value == v.assignment.value) {
             v.assignment.value = null;
             v.assignment.status = 'UNKNOWN'
           }
