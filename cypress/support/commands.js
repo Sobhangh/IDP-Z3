@@ -23,3 +23,24 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+
+
+Cypress.Commands.add('is_unset', (label) => {
+    cy.get('app-symbol-value-selector').filter(':has(app-symbol-value-selector-buttons)').contains(label)
+    .find('.ui-button-success');
+})
+
+Cypress.Commands.add('assert_true', (label) => {
+    cy.get('app-symbol-value-selector').filter(':has(app-symbol-value-selector-buttons)').contains(label)
+        .find('.ui-button-success').click();
+ })
+Cypress.Commands.add('assert_false', (label) => {
+    cy.get('app-symbol-value-selector').filter(':has(app-symbol-value-selector-buttons)').contains(label)
+        .find('.ui-button-danger').click();
+})
+
+Cypress.Commands.add('retract', (label) => {
+    cy.get('app-symbol-value-selector').filter(':has(app-symbol-value-selector-buttons)').contains(label)
+        .find('.ui-button-warning').not(':hidden').click();
+})

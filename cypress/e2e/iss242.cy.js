@@ -3,19 +3,13 @@ describe('template spec', () => {
       cy.visit('http://localhost:4201/')
       cy.contains('File').click()
       cy.contains('Polygon').click()
-      cy.get('.ui-panel-title').contains('sides')
+      cy.get('.ui-panel-title').contains('sides') // wait for loading
 
-      // assert not irregular
-      cy.contains('app-symbol-value-selector', 'irregular').find('.ui-button-danger').click();
-      // assert regular triangle
-      cy.contains('app-symbol-value-selector', 'regular triangle').find('.ui-button-success').click();
-      // retract not irregular
-      cy.contains('app-symbol-value-selector', 'irregular').find('.ui-button-warning').not(':hidden').click();
-      // retract regular triangle
-      cy.get('app-symbol-value-selector').filter(':has(app-symbol-value-selector-buttons)').contains('regular triangle')
-        .find('.ui-button-warning').not(':hidden').click();
+      cy.assert_false('irregular');
+      cy.assert_true('regular triangle');
+      cy.retract('irregular');
+      cy.retract('regular triangle');
 
-      cy.get('app-symbol-value-selector').filter(':has(app-symbol-value-selector-buttons)').contains('regular triangle')
-        .find('.ui-button-success')
+    cy.is_unset('regular triangle');
     })
   })
