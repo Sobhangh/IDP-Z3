@@ -45,12 +45,12 @@ def split_constraints(constraints: OrderedSet) -> OrderedSet:
             for e in c.sub_exprs:
                 split(e, cs)
         elif type(c) == AQuantification and c.q == '∀':
-            assert len(c.sub_exprs) == 1, "Internal error in split"
             conj = OrderedSet()
             if c.simpler:
                 split(c.simpler, conj)
             else:
-                split(c.sub_exprs[0], conj)
+                for e in c.sub_exprs:
+                    split(e, conj)
             for e in conj:
                 out = AQuantification.make(c.q, c.quantees, e)
                 # out.code = c.code
