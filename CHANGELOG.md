@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 The main new features in this release are:
 * Support for co-inductive definitions
+* automated testing of the IC using Cypress  (See README.md for installation)
 
 This release has new package dependencies: please run `poetry install` to update.
 
@@ -22,6 +23,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 ### Interactive Consultant and Web IDE
 * MR !282: improve display of ⇒ in the editor.
 * issue #241: Environmental verification error in the Covid example
+* issue #242: Can't retract assertion in Polygon (+ Cypress)
 
 
 ## [0.10.2] - 2022-12-19
