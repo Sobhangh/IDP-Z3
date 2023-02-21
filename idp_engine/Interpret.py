@@ -287,6 +287,7 @@ def interpret(self, problem):
         elif self.sign == '≜':
             # add condition that the interpretation is total over the domain
             # ! x in dom(f): enum.contains(x)
+            #TODO if the domain of the symbol is known, no need to create an Expression
             q_vars = { f"${sort.decl.name}!{str(i)}$":
                        VARIABLE(f"${sort.decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
