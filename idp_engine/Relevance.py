@@ -46,11 +46,8 @@ def split_constraints(constraints: OrderedSet) -> OrderedSet:
                 split(e, cs)
         elif type(c) == AQuantification and c.q == '∀':
             conj = OrderedSet()
-            if c.simpler:
-                split(c.simpler, conj)
-            else:
-                for e in c.sub_exprs:
-                    split(e, conj)
+            for e in c.sub_exprs:
+                split(e, conj)
             for e in conj:
                 out = AQuantification.make(c.q, c.quantees, e)
                 # out.code = c.code

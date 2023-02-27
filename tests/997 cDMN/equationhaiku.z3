@@ -181,8 +181,8 @@ structure {
               'Solution(Third) = Solution(First) + Solution(Second)': {'environmental': False,
                                                                        'is_assignment': False,
                                                                        'normal': False,
-                                                                       'reading': 'Solution(Third) = Solution(First) + '
-                                                                                  'Solution(Second)',
+                                                                       'reading': 'true ⇒ Solution(Third) = '
+                                                                                  'Solution(First) + Solution(Second)',
                                                                        'relevant': True,
                                                                        'status': 'UNIVERSAL',
                                                                        'typ': 'Bool',

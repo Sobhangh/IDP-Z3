@@ -58,7 +58,13 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
         if simpler.value is not None:  # example: prime.idp
             self.value = simpler.value
         else:
-            self.simpler = simpler
+            simpler.annotations = self.annotations
+            #simpler.code = self.code
+            simpler.original = self.original
+            simpler.is_type_constraint_for = self.is_type_constraint_for
+            simpler.co_constraint = self.co_constraint
+            simpler.block = self.block if hasattr(self, "block") else None
+            return simpler
     assert (self.value is None
                or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
                                        Number, Date, Type]), \
@@ -125,14 +131,10 @@ Quantee.update_exprs = update_exprs
 # Class AQuantification  ######################################################
 
 def update_exprs(self, new_exprs):
-    exprs = list(new_exprs)
-    if not self.quantees:
-        if self.q == '∀':
-            simpler = AND(exprs)
-        else:
-            simpler = OR(exprs)
-        return self._change(simpler=simpler, sub_exprs=[simpler])
-    return self._change(sub_exprs=exprs)
+    if self.q == '∀':
+        return AConjunction.update_exprs(self, new_exprs, replace=False)
+    else:
+        return ADisjunction.update_exprs(self, new_exprs, replace=False)
 AQuantification.update_exprs = update_exprs
 
 
@@ -182,7 +184,7 @@ AEquivalence.update_exprs = update_exprs
 
 # Class ADisjunction  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self, new_exprs, replace=True):
     exprs, other = [], []
     value, simpler = None, None
     for i, expr in enumerate(new_exprs):
@@ -197,7 +199,7 @@ def update_exprs(self, new_exprs):
 
     if len(other) == 0:  # all disjuncts are False
         value = FALSE
-    if len(other) == 1:
+    if replace and len(other) == 1:
         simpler = other[0]
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
@@ -206,7 +208,7 @@ ADisjunction.update_exprs = update_exprs
 # Class AConjunction  #######################################################
 
 # same as ADisjunction, with TRUE and FALSE swapped
-def update_exprs(self, new_exprs):
+def update_exprs(self, new_exprs, replace=True):
     exprs, other = [], []
     value, simpler = None, None
     for i, expr in enumerate(new_exprs):
@@ -221,7 +223,7 @@ def update_exprs(self, new_exprs):
 
     if len(other) == 0:  # all conjuncts are True
         value = TRUE
-    if len(other) == 1:
+    if replace and len(other) == 1:
         simpler = other[0]
     return self._change(value=value, simpler=simpler, sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
@@ -474,7 +476,7 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     )
 
                     core = deepcopy(AppliedSymbol.make(out.symbol, out.sub_exprs))
-                    out.simpler = out.in_enumeration.contains([core], False)
+                    out.as_disjunction = out.in_enumeration.contains([core], False)
 
                     out = Assignment(out,
                                      TRUE if belongs else FALSE,
