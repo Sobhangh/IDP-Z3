@@ -252,7 +252,7 @@ display {
                                           'is_assignment': False,
                                           'normal': False,
                                           'reading': 'All angles are below 180°',
-                                          'relevant': True,
+                                          'relevant': False,
                                           'status': 'UNIVERSAL',
                                           'typ': 'Bool',
                                           'value': True},

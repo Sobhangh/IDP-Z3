@@ -120,7 +120,7 @@ Constructor.translate = translate
 # class Expression  ###########################################################
 
 def translate(self, problem: Theory, vars={}) -> ExprRef:
-    """Converts the syntax tree to a Z3 expression, using .value and .simpler if present
+    """Converts the syntax tree to a Z3 expression, using .value if present
 
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
@@ -133,8 +133,6 @@ def translate(self, problem: Theory, vars={}) -> ExprRef:
     """
     if self.value is not None and self.value is not self:
         return self.value.translate(problem, vars)
-    if self.simpler is not None:
-        return self.simpler.translate(problem, vars)
     if self.variables:
         return self.translate1(problem, vars)
     out = problem.z3.get(self.str, None)
@@ -171,7 +169,7 @@ Symbol.translate=translate
 # Class AIfExpr  ###############################################################
 
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
-    """Converts the syntax tree to a Z3 expression, ignoring .value and .simpler
+    """Converts the syntax tree to a Z3 expression, ignoring .value
 
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
@@ -191,27 +189,28 @@ AIfExpr.translate1 = translate1
 # Class AQuantification  ######################################################
 
 def translate1(self, problem: Theory, vars={}):
-    if not self.quantees:
-        assert len(self.sub_exprs) == 1, \
-               f"Internal error in expansion of quantification: {self}"
-        return self.sub_exprs[0].translate(problem, vars)
-    else:
-        all_vars, local_vars = copy(vars), {}
-        for q in self.quantees:
-            for vars in q.vars:
-                for v in vars:
-                    translated = FreshConst(v.sort.decl.base_type.translate(problem))
-                    all_vars[v.str] = translated
-                    local_vars[v.str] = translated
-        forms = [f.translate(problem, all_vars) for f in self.sub_exprs]
+    all_vars, local_vars = copy(vars), {}
+    for q in self.quantees:
+        for vars in q.vars:
+            for v in vars:
+                translated = FreshConst(v.sort.decl.base_type.translate(problem))
+                all_vars[v.str] = translated
+                local_vars[v.str] = translated
+    forms = [f.translate(problem, all_vars) for f in self.sub_exprs]
 
-        if self.q == '∀':
-            forms = And(forms) if 1 < len(forms) else forms[0]
+    if self.q == '∀':
+        forms = (And(forms) if 1 < len(forms) else
+                 forms[0]   if 1 == len(forms) else
+                 BoolVal(True, problem.ctx))
+        if local_vars:
             forms = ForAll(list(local_vars.values()), forms)
-        else:
-            forms = Or(forms) if 1 < len(forms) else forms[0]
+    else:
+        forms = (Or(forms) if 1 < len(forms) else
+                 forms[0]  if 1 == len(forms) else
+                 BoolVal(False, problem.ctx))
+        if local_vars:
             forms = Exists(list(local_vars.values()), forms)
-        return forms
+    return forms
 AQuantification.translate1 = translate1
 
 
@@ -323,6 +322,8 @@ AAggregate.translate1 = translate1
 # Class AppliedSymbol  #######################################################
 
 def translate1(self, problem: Theory, vars={}):
+    if self.as_disjunction:
+        return self.as_disjunction.translate(problem, vars)
     self.check(self.decl, f"Unknown symbol: {self.symbol}.\n"
                f"Possible fix: introduce a variable "
                f"(e.g., !x in Concept: x=... => $(x)(..))")

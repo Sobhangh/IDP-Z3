@@ -382,7 +382,7 @@ display {
                                              'is_assignment': False,
                                              'normal': False,
                                              'reading': 'Length(Sides) is enumerated',
-                                             'relevant': True,
+                                             'relevant': False,
                                              'status': 'UNIVERSAL',
                                              'typ': 'Bool',
                                              'value': False},

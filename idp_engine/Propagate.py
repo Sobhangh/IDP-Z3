@@ -62,8 +62,6 @@ def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
     if self.value is not None:
         return self
     value, simpler, new_e, co_constraint = None, None, None, None
-    if self.simpler is not None:
-        simpler = self.simpler.simplify_with(assignments)
     if self.co_constraint is not None:
         co_constraint = self.co_constraint.simplify_with(assignments)
     new_e = [e.simplify_with(assignments) for e in self.sub_exprs]
@@ -98,10 +96,7 @@ def symbolic_propagate(self,
     if self.value is None:
         if self.code in assignments:
             assignments.assert__(self, truth, tag)
-        if self.simpler is not None:
-            self.simpler.symbolic_propagate(assignments, tag, truth)
-        else:
-            self.propagate1(assignments, tag, truth)
+        self.propagate1(assignments, tag, truth)
 Expression.symbolic_propagate = symbolic_propagate
 
 
@@ -116,10 +111,11 @@ Expression.propagate1 = propagate1
 def symbolic_propagate(self, assignments, tag, truth=TRUE):
     if self.code in assignments:
         assignments.assert__(self, truth, tag)
-    if not self.quantees:  # expanded
-        assert len(self.sub_exprs) == 1,  \
-               f"Internal error in symbolic_propagate: {self}"  # a conjunction or disjunction
-        self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
+    if not self.quantees:  # expanded, no variables  dead code ?
+        if self.q == '∀' and truth.same_as(TRUE):
+            AConjunction.symbolic_propagate(self, assignments, tag, truth)
+        elif truth.same_as(FALSE):
+            ADisjunction.symbolic_propagate(self, assignments, tag, truth)
 AQuantification.symbolic_propagate = symbolic_propagate
 
 
@@ -146,6 +142,15 @@ AConjunction.propagate1 = propagate1
 def propagate1(self, assignments, tag, truth=TRUE):
     if self.operator == '¬':
         self.sub_exprs[0].symbolic_propagate(assignments, tag, _not(truth))
+AUnary.propagate1 = propagate1
+
+
+# class AppliedSymbol  ############################################################
+
+def propagate1(self, assignments, tag, truth=TRUE):
+    if self.as_disjunction:
+        self.as_disjunction.symbolic_propagate(assignments, tag, truth)
+    Expression.propagate1(self, assignments, tag, truth)
 AUnary.propagate1 = propagate1
 
 

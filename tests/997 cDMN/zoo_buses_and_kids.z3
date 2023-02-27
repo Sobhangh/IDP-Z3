@@ -175,7 +175,8 @@ structure {
                 'TotalPrice() = Amount(Big) ⨯ Price(Big) + Amount(Small) ⨯ Price(Small)': {'environmental': False,
                                                                                            'is_assignment': False,
                                                                                            'normal': False,
-                                                                                           'reading': 'TotalPrice = '
+                                                                                           'reading': 'true ⇒ '
+                                                                                                      'TotalPrice = '
                                                                                                       'Amount(Big) ⨯ '
                                                                                                       'Price(Big) + '
                                                                                                       'Amount(Small) ⨯ '
