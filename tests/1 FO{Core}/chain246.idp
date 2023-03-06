@@ -1,0 +1,19 @@
+vocabulary {
+    type Node ≜ {A, B, C, D}
+    type Color ≜ {Red, Blue}
+    colorOf: Node ⨯ Node → Color
+    _monochrome_triangle: Node ⨯ Node ⨯ Node → 𝔹
+}
+
+theory {
+    [no monochrome triangle]
+    { ∀x, y, z ∈ Node: _monochrome_triangle(x, y, z) ←
+            x ≠ y ≠ z ≠ x
+            ∧ colorOf(x, y) = colorOf(y, z) = colorOf(z, x).
+    }
+}
+
+procedure main() {
+    pretty_print(model_expand(T, max=1))
+}
+
