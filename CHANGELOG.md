@@ -20,6 +20,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 * issue #235: range interpretation of predicate is not respected
 * issue #236: Incorrect nested quantification over infinite domain
 * issue #240: internal error with quantification over infinite domain
+* issue #246: error with chained inequalities
 
 ### Interactive Consultant and Web IDE
 * MR !282: improve display of ⇒ in the editor.

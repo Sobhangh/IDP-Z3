@@ -252,8 +252,11 @@ def update_exprs(self, new_exprs):
             if op in ["<", ">"]:
                 if acc1.same_as(expr1):
                     return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
-            if op == "=":
+            elif op == "=":
                 if not acc1.same_as(expr1):
+                    return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
+            elif op == "≠":  # issue #246
+                if acc1.same_as(expr1):
                     return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
             elif not (Operator.MAP[op]) (acc1.py_value, expr1.py_value):
                 return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
