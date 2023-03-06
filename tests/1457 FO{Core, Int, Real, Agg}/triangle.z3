@@ -470,7 +470,7 @@ display {
                                                                 'is_assignment': False,
                                                                 'normal': False,
                                                                 'reading': 'All sides have the same length',
-                                                                'relevant': True,
+                                                                'relevant': False,
                                                                 'status': 'UNIVERSAL',
                                                                 'typ': 'Bool',
                                                                 'value': True},

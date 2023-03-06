@@ -538,13 +538,8 @@ Expression.annotate = annotate
 def annotate1(self):
     " annotations that are common to __init__ and make() "
     self.variables = set()
-    if self.value is not None:
-        pass
-    if self.simpler is not None:
-        self.variables = self.simpler.variables
-    else:
-        for e in self.sub_exprs:
-            self.variables.update(e.variables)
+    for e in self.sub_exprs:
+        self.variables.update(e.variables)
     return self
 Expression.annotate1 = annotate1
 

@@ -222,12 +222,6 @@ class Expression(ASTNode):
             This is useful for definitions over infinite domains,
             as well as to compute relevant questions.
 
-        simpler (Expression, optional):
-            A simpler, equivalent expression.
-
-            Equivalence is computed in the context of the theory and structure.
-            Simplifying an expression is useful for efficiency
-            and to compute relevant questions.
 
         value (Optional[Expression]):
             A rigid term equivalent to the expression, obtained by
@@ -258,7 +252,6 @@ class Expression(ASTNode):
 
     def __init__(self):
         self.sub_exprs: List[Expression]
-        self.simpler: Optional[Expression] = None
         self.value: Optional[Expression] = None
 
         self.code: str = intern(str(self))
@@ -289,7 +282,6 @@ class Expression(ASTNode):
         out = copy(self)
         out.sub_exprs = [deepcopy(e, memo) for e in out.sub_exprs]
         out.variables = deepcopy(out.variables, memo)
-        out.simpler = None if out.simpler is None else deepcopy(out.simpler, memo)
         out.co_constraint = (None if out.co_constraint is None
                              else deepcopy(out.co_constraint, memo))
         if hasattr(self, 'questions'):
@@ -298,35 +290,40 @@ class Expression(ASTNode):
         return out
 
     def same_as(self, other: Expression):
-        if self.str == other.str:
+        # symmetric
+        if self.str == other.str: # and type(self) == type(other):
             return True
         if self.__class__.__name__ == "Number" and other.__class__.__name__ == "Number":
             return float(self.py_value) == float(other.py_value)
+
+        # asymetric
         if self.value is not None and self.value is not self:
-            return self.value  .same_as(other)
-        if self.simpler is not None:
-            return self.simpler.same_as(other)
-        if other.value is not None and other.value is not other:
-            return self.same_as(other.value)
-        if other.simpler is not None:
-            return self.same_as(other.simpler)
-
+            return self.value.same_as(other)
         if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification) and len(self.quantees) == 0)):
+           or (isinstance(self, AQuantification)
+               and len(self.quantees) == 0
+               and len(self.sub_exprs) == 1)):
             return self.sub_exprs[0].same_as(other)
-        if (isinstance(other, Brackets)
-           or (isinstance(other, AQuantification) and len(other.quantees) == 0)):
-            return self.same_as(other.sub_exprs[0])
 
-        return self.str == other.str and type(self) == type(other)
+        # switch role to be allowed to copy code
+        self, other = other, self
+
+        # copied code
+        if self.value is not None and self.value is not self:
+            return self.value.same_as(other)
+        if (isinstance(self, Brackets)
+           or (isinstance(self, AQuantification)
+               and len(self.quantees) == 0
+               and len(self.sub_exprs) == 1)):
+            return self.sub_exprs[0].same_as(other)
+
+        return False
 
     def __repr__(self): return str(self)
 
     def __str__(self):
         if self.value is not None and self.value is not self:
             return str(self.value)
-        if self.simpler is not None:
-            return str(self.simpler)
         return self.__str1__()
 
     def __log__(self):  # for debugWithYamlLog
@@ -1077,11 +1074,14 @@ class AppliedSymbol(Expression):
     Args:
         symbol (SymbolExpr): the symbol to be applied to arguments
 
-        is_enumerated (string): '' or 'is enumerated' or 'is not enumerated'
+        is_enumerated (string): '' or 'is enumerated'
 
-        is_enumeration (string): '' or 'in' or 'not in'
+        is_enumeration (string): '' or 'in'
 
         in_enumeration (Enumeration): the enumeration following 'in'
+
+        as_disjunction (Optional[Expression]):
+            the translation of 'is_enumerated' and 'in_enumeration' as a disjunction
 
         decl (Declaration): the declaration of the symbol, if known
 
@@ -1107,6 +1107,7 @@ class AppliedSymbol(Expression):
 
         super().__init__()
 
+        self.as_disjunction = None
         self.decl = None
         self.in_head = False
 
@@ -1140,6 +1141,7 @@ class AppliedSymbol(Expression):
     def __deepcopy__(self, memo):
         out = super().__deepcopy__(memo)
         out.symbol = deepcopy(out.symbol)
+        out.as_disjunction = deepcopy(out.as_disjunction)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):

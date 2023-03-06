@@ -1,0 +1,6 @@
+  CountryOfRisk_20(BE001) in {Austria_95}
+⇒ Eligible(BE001)
+
+⇒ Not Eligible(BE001)
+
+end of decision table

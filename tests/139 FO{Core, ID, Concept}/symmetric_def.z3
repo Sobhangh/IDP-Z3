@@ -105,7 +105,7 @@ display {
                                                            'is_assignment': False,
                                                            'normal': False,
                                                            'reading': '∀ x ∈ node,y ∈ node: edge(x, y) ⇒ edge(y, x)',
-                                                           'relevant': True,
+                                                           'relevant': False,
                                                            'status': 'UNIVERSAL',
                                                            'typ': 'Bool',
                                                            'value': True}},

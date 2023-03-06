@@ -17,6 +17,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 ### IDP-Z3
 * MR !279: Support co-inductive definitions
 * MR !280: various small improvements
+* MR !284: Refactor Expression.simpler for better performance
 * issue #235: range interpretation of predicate is not respected
 * issue #236: Incorrect nested quantification over infinite domain
 * issue #240: internal error with quantification over infinite domain

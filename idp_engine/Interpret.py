@@ -45,7 +45,7 @@ from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
     Definition, ConstructedFrom, Ranges)
 from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
-    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
+    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
     NOT, EQUALS, AppliedSymbol, UnappliedSymbol, Quantee, TYPE,
     Variable, VARIABLE, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
@@ -284,21 +284,6 @@ def interpret(self, problem):
                         and self.default.type != BOOL):
                         problem.assignments.assert__(e.formula(), TRUE, status)
 
-            if isinstance(enumeration, Ranges) and enumeration.tuples and self.sign == '≜':
-                # add condition that the interpretation is total over the infinite domain (#235)
-                # ! x in N: type(x) <=> enum.contains(x)
-                t = TYPE(enumeration.type)  # INT, REAL or DATE
-                t.decl, t.type = problem.declarations[enumeration.type], enumeration.type
-                var = VARIABLE(f"${self.name}!0$", t)
-                q_vars = { f"${self.name}!0$": var}
-                quantees = [Quantee.make(var, subtype=t)]
-                expr1 = AppliedSymbol.make(SYMBOL(self.name), [var])
-                expr1.decl = self.symbol.decl
-                expr2 = enumeration.contains(list(q_vars.values()), True)
-                expr = EQUALS([expr1, expr2])
-                constraint = FORALL(quantees, expr)
-                constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
-                problem.constraints.append(constraint)
         elif self.sign == '≜':
             # add condition that the interpretation is total over the domain
             # ! x in dom(f): enum.contains(x)
@@ -396,7 +381,6 @@ def substitute(self, e0, e1, assignments, tag=None):
             return self  # to avoid infinite loops
         return self._change(value=e1)  # e1 is UnappliedSymbol or Number
     else:
-        # will update self.simpler
         out = self.update_exprs(e.substitute(e0, e1, assignments, tag)
                                 for e in self.sub_exprs)
         return out
@@ -426,7 +410,10 @@ def instantiate1(self, e0, e1, problem=None):
     # instantiate expressions, with simplification
     out = self.update_exprs(e.instantiate(e0, e1, problem)
                             for e in self.sub_exprs)
+    return _finalize(self, out, e0, e1)
+Expression.instantiate1 = instantiate1
 
+def _finalize(self, out, e0, e1):
     if out.value is not None:  # replace by new value
         out = out.value
     else:
@@ -440,7 +427,6 @@ def instantiate1(self, e0, e1, problem=None):
             out.code = str(out)
     out.annotations['reading'] = out.code
     return out
-Expression.instantiate1 = instantiate1
 
 
 # class Symbol ###########################################################
@@ -531,16 +517,17 @@ def interpret(self, problem):
         return Expression.interpret(self, problem)
 
     # type inference
-    inferred = self.sub_exprs[0].type_inference()
-    for q in self.quantees:
-        if not q.sub_exprs:
-            assert len(q.vars) == 1 and q.arity == 1, \
-                   f"Internal error: interpret {q}"
-            var = q.vars[0][0]
-            self.check(var.name in inferred,
-                        f"can't infer type of {var.name}")
-            var.sort = inferred[var.name]
-            q.sub_exprs = [inferred[var.name]]
+    if 0 < len(self.sub_exprs):  # in case it was simplified away
+        inferred = self.sub_exprs[0].type_inference()
+        for q in self.quantees:
+            if not q.sub_exprs:
+                assert len(q.vars) == 1 and q.arity == 1, \
+                    f"Internal error: interpret {q}"
+                var = q.vars[0][0]
+                self.check(var.name in inferred,
+                            f"can't infer type of {var.name}")
+                var.sort = inferred[var.name]
+                q.sub_exprs = [inferred[var.name]]
 
     forms = self.sub_exprs
     new_quantees, instantiated = [], False
@@ -600,7 +587,34 @@ def interpret(self, problem):
     return AQuantification.interpret(self, problem)
 AAggregate.interpret = interpret
 
-AAggregate.instantiate1 = instantiate1  # from AQuantification
+AAggregate.instantiate1 = AQuantification.instantiate1
+
+
+# Class AImplication ######################################################
+
+def instantiate1(self, e0, e1, problem):
+    assert len(self.sub_exprs) == 2
+    premise = self.sub_exprs[0].instantiate(e0, e1, problem)
+    if premise.same_as(FALSE):  # lazy instantiation
+        return TRUE
+    consequent = self.sub_exprs[1].instantiate(e0, e1, problem)
+    out = self.update_exprs([premise, consequent])
+    return _finalize(self, out, e0, e1)
+AImplication.instantiate1 = instantiate1
+
+
+# Class AConjunction ######################################################
+
+def instantiate1(self, e0, e1, problem):
+    new_exprs = []
+    for e in self.sub_exprs:
+        new_e = e.instantiate(e0, e1, problem)
+        if new_e.same_as(FALSE):  # lazy instantiation
+            return FALSE
+        new_exprs.append(new_e)
+    out = self.update_exprs(new_exprs)
+    return _finalize(self, out, e0, e1)
+AConjunction.instantiate1 = instantiate1
 
 
 # Class AppliedSymbol  ##############################################
@@ -616,21 +630,21 @@ def interpret(self, problem):
             if self.decl.name in problem.interpretations:
                 interpretation = problem.interpretations[self.decl.name]
                 if interpretation.default is not None:
-                    simpler = TRUE
+                    self.as_disjunction = TRUE
                 else:
-                    simpler = interpretation.enumeration.contains(sub_exprs, True,
+                    self.as_disjunction = interpretation.enumeration.contains(sub_exprs, True,
                         interpretations=problem.interpretations, extensions=problem.extensions)
-                if 'not' in self.is_enumerated:
-                    simpler = NOT(simpler)
-                simpler.annotations = self.annotations
+                if self.as_disjunction.same_as(TRUE) or self.as_disjunction.same_as(FALSE):
+                    value = self.as_disjunction
+                self.as_disjunction.annotations = self.annotations
         elif self.in_enumeration:
             # re-create original Applied Symbol
             core = deepcopy(AppliedSymbol.make(self.symbol, sub_exprs))
-            simpler = self.in_enumeration.contains([core], False,
+            self.as_disjunction = self.in_enumeration.contains([core], False,
                         interpretations=problem.interpretations, extensions=problem.extensions)
-            if 'not' in self.is_enumeration:
-                simpler = NOT(simpler)
-            simpler.annotations = self.annotations
+            if self.as_disjunction.same_as(TRUE) or self.as_disjunction.same_as(FALSE):
+                value = self.as_disjunction
+            self.as_disjunction.annotations = self.annotations
         elif (self.decl.name in problem.interpretations
             # and any(s.decl.name == CONCEPT for s in self.decl.sorts)
             and all(a.value is not None for a in sub_exprs)):
@@ -671,13 +685,13 @@ def substitute(self, e0, e1, assignments, tag=None):
         if tag is not None:
             new_branch.symbolic_propagate(assignments, tag)
 
+    if self.as_disjunction is not None:
+        self.as_disjunction = self.as_disjunction.substitute(e0, e1,        assignments, tag)
+        if tag is not None:
+            self.as_disjunction.symbolic_propagate(assignments, tag)
+
     if self.code == e0.code:
         return self._change(value=e1, co_constraint=new_branch)
-    elif self.simpler is not None:  # has an interpretation
-        assert self.co_constraint is None, \
-               f"Internal error in substitute: {self}"
-        simpler = self.simpler.substitute(e0, e1, assignments, tag)
-        return self._change(simpler=simpler)
     else:
         sub_exprs = [e.substitute(e0, e1, assignments, tag)
                      for e in self.sub_exprs]  # no simplification here
@@ -699,6 +713,8 @@ def instantiate1(self, e0, e1, problem=None):
                 out.original = self
         if out.co_constraint is not None:
             out.co_constraint.instantiate(e0, e1, problem)
+        if out.as_disjunction is not None:
+            out.as_disjunction.instantiate(e0, e1, problem)
         if problem and not self.variables:
             return out.interpret(problem)
     return out

@@ -864,8 +864,9 @@ class SymbolInterpretation(ASTNode):
             key = ",".join(a.code for a in args)
             if key in self.enumeration.lookup:
                 return self.enumeration.lookup[key]
-        # in case of partial interpretation
-        return applied._change(sub_exprs=args)
+            elif self.enumeration.parent.sign != '≜':
+                return applied._change(sub_exprs=args)
+            return self.enumeration.parent.default
     """
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
