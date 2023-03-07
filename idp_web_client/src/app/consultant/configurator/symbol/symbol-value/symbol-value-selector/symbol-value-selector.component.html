@@ -46,7 +46,7 @@
 
         <!-- input box -->
         <ng-container *ngIf="(info.assignment.status=='UNKNOWN' || info.assignment.choice) && !info.assignment.values && info.assignment.typ !='Date'">
-          <input id="float-input" type="number" size="8" step="any" pInputText
+          <input id="float-input" type="number" style="width: 8em" step="any" pInputText
             [disabled] = "this.idpService.openCalls > 0"
             [value] = "info.assignment.value !== null ? info.assignment.value2 : ''"
             [ngClass] = "(info.assignment.value || !info.assignment.relevant) ? '' : 'required_input'"
