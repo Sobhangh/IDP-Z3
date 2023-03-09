@@ -76,6 +76,18 @@ After this, you can manually check what has changed using git.
 There is also a testing pipeline available, which can be used by running `poetry run python3 test.py pipeline`.
 
 
+# Testing of the Interactive Consultant
+
+We use [Cypress](https://www.cypress.io/) to test the IC.  Installation in top project folder:
+~~~~
+npm install cypress --save-dev
+~~~~
+To launch it:
+~~~~
+npx cypress open
+~~~~
+
+
 # Deploy
 
 See the instructions [here](https://gitlab.com/krr/IDP-Z3/-/wikis/Development-and-deployment-guide).
