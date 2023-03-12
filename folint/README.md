@@ -31,3 +31,13 @@ FOLint in editors
 
 FOLint can be integrated in many editors. 
 A collection of guides are kept in the folint-in-editors folder.
+
+
+Build new version
+-----------------
+
+```
+python setup.py bdist_wheel sdist
+```
+
+Don't forget to update the version number of FOLint + the version number of IDP in the dependency!
