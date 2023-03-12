@@ -41,41 +41,43 @@ from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, C
 
 
 ###############
-#help functies voor SCA
-def builtIn_type(elem):     #kijkt of het meegegeven type builtIn type is (return true or false)
-    listOfSbuildIn = ["ℤ" , "𝔹", "ℝ", "Concept", "Int", "Bool", "Real", "Date"]
+# Helper function for SCA.
+def builtIn_type(elem):
+    """ Check if a given element belongs to a built-in type """
+    listOfSbuildIn = ["ℤ", "𝔹", "ℝ", "Concept", "Int", "Bool", "Real", "Date"]
     return elem in listOfSbuildIn
 ################
 
 
-## class IDP(ASTNode):
+# class IDP(ASTNode):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
-    #get all vocabularies
+def printAST(self, spaces):
+    print(f"{spaces*''} {type(self).__name__}: {self}")
+    # Get all vocabularies
     V = self.get_blocks(self.vocabularies)
-    for v in V :
-        v.printAST(spaties+3)
-    #get all structures
+    for v in V:
+        v.printAST(spaces+3)
+    # Get all structures
     S = self.get_blocks(self.structures)
-    for s in S :
-        s.printAST(spaties+3)
-    #get all theories
+    for s in S:
+        s.printAST(spaces+3)
+    # Get all theories
     T = self.get_blocks(self.theories)
-    for t in T :
-        t.printAST(spaties+3)
-    #get all procedures
+    for t in T:
+        t.printAST(spaces+3)
+    # Get all procedures
     P = self.get_blocks(self.procedures)
-    for p in P :
-        p.printAST(spaties+3)
+    for p in P:
+        p.printAST(spaces+3)
 IDP.printAST = printAST
 
-def blockNameCheck(self,a) :
-    if hasattr(a,'name'):
-        for t in self.theories :
+
+def blockNameCheck(self, a):
+    if hasattr(a, 'name'):
+        for t in self.theories:
             if a.name == t:
                 return True
-        for s in self.structures :
+        for s in self.structures:
             if a.name == s:
                 return True
     return False
@@ -85,85 +87,86 @@ IDP.blockNameCheck = blockNameCheck
 ################################ Vocabulary  ##############################
 
 
-## class Vocabulary(ASTNode):
+# class Vocabulary(ASTNode):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+":"+self.name)
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self.name}")
     for i in self.declarations:
-        i.printAST(spaties+5)
+        i.printAST(spaces+5)
 Vocabulary.printAST = printAST
 
-def SCA_Check(self,detections):
+def SCA_Check(self, detections):
     for i in self.declarations:
         i.SCA_Check(detections)
 Vocabulary.SCA_Check = SCA_Check
 
 
-## class TypeDeclaration(ASTNode):
+# class TypeDeclaration(ASTNode):
 
-def printAST(self,spaties):
+def printAST(self, spaces):
     if str(self) > self.name:
-        print(spaties*" "+type(self).__name__+":",self)
-    else :
-        print(spaties*" "+type(self).__name__+":",self.name)
+        print(f"{spaces*''}{type(self).__name__}: self")
+    else:
+        print(f"{spaces*''}{type(self).__name__}: self.name")
     for i in self.sorts:
-        i.printAST(spaties+5)
+        i.printAST(spaces+5)
     if self.interpretation is not None:
-        self.interpretation.printAST(spaties+5)
+        self.interpretation.printAST(spaces+5)
 TypeDeclaration.printAST = printAST
 
-def SCA_Check(self,detections):
+
+def SCA_Check(self, detections):
     # style guide check : capital letter for type
     if self.name[0].islower():
-        detections.append((self,f"Style guide check, type name should start with a capital letter ","Warning"))
+        detections.append((self, f"Style guide check, type name should start with a capital letter ", "Warning"))
 
     # check if type has interpretation, if not check if in structures the type has given an interpretation
-    if (self.interpretation is None and not(builtIn_type(self.name))):
+    if (self.interpretation is None and not builtIn_type(self.name)):
         structs = self.block.idp.get_blocks(self.block.idp.structures)
-        list =[]
+        list = []
         for i in structs:
             list.append(i.name)
-        for s in structs :
+        for s in structs:
             if s.vocab_name == self.block.name:
-                if not(self.name in s.interpretations):
+                if not self.name in s.interpretations:
                     detections.append((self,f"Expected an interpretation for type {self.name} in Vocabulary {self.block.name} or Structures {list} ","Error"))
                     break
 TypeDeclaration.SCA_Check = SCA_Check
 
 
-## class SymbolDeclaration(ASTNode):
+# class SymbolDeclaration(ASTNode):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__,":",self)
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self}")
     for i in self.sorts:
-        i.printAST(spaties+5)
-    self.out.printAST(spaties+5)
+        i.printAST(spaces+5)
+    self.out.printAST(spaces+5)
 SymbolDeclaration.printAST = printAST
 
-def SCA_Check(self,detections):
-    # style regel: func/pred namen met een kleine letter
+
+def SCA_Check(self, detections):
     if self.name[0].isupper():
-        detections.append((self,f"Style guide check, predicate/function name should start with a lower letter ","Warning"))
+        detections.append((self, f"Style guide check, predicate/function name should start with a lower letter ", "Warning"))
 SymbolDeclaration.SCA_Check = SCA_Check
 
 
-## class VarDeclaration(ASTNode):
+# class VarDeclaration(ASTNode):
 #TODO ?
 
 
 ################################ TheoryBlock  ###############################
 
 
-## class TheoryBlock(ASTNode):
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
+# class TheoryBlock(ASTNode):
+def printAST(self, spaces):
     for c in self.constraints:
-        c.printAST(spaties+5)
+        c.printAST(spaces+5)
     for d in self.definitions:
-        d.printAST(spaties+5)
+        d.printAST(spaces+5)
 TheoryBlock.printAST = printAST
 
-def SCA_Check(self,detections):
+
+def SCA_Check(self, detections):
     for c in self.constraints:
         c.SCA_Check(detections)
     for d in self.definitions:
@@ -171,31 +174,33 @@ def SCA_Check(self,detections):
 TheoryBlock.SCA_Check = SCA_Check
 
 
-## class Definition(ASTNode):
+# class Definition(ASTNode):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self}")
     for r in self.rules:
-        r.printAST(spaties+5)
+        r.printAST(spaces+5)
 Definition.printAST = printAST
 
-def SCA_Check(self,detections):
+
+def SCA_Check(self, detections):
     for r in self.rules:
         r.SCA_Check(detections)
 Definition.SCA_Check = SCA_Check
 
 
-## class Rule(ASTNode):
+# class Rule(ASTNode):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self}")
     for q in self.quantees:
-        q.printAST(spaties+5)
-    self.definiendum.printAST(spaties+5)
-    self.body.printAST(spaties+5)
+        q.printAST(spaces+5)
+    self.definiendum.printAST(spaces+5)
+    self.body.printAST(spaces+5)
 Rule.printAST = printAST
 
-def SCA_Check(self,detections):
+
+def SCA_Check(self, detections):
     for q in self.quantees:
         q.SCA_Check(detections)
     self.definiendum.SCA_Check(detections)
@@ -207,40 +212,49 @@ Rule.SCA_Check = SCA_Check
 
 ################################ Structure  ###############################
 
-## class Structure(ASTNode):
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
+# class Structure(ASTNode):
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self}")
     for i in self.interpretations:
-        self.interpretations[i].printAST(spaties+5)
+        self.interpretations[i].printAST(spaces+5)
 Structure.printAST = printAST
 
-def SCA_Check(self,detections):
+
+def SCA_Check(self, detections):
     for i in self.interpretations:
         self.interpretations[i].SCA_Check(detections)
 Structure.SCA_Check = SCA_Check
 
 
-## class SymbolInterpretation(ASTNode):
+# class SymbolInterpretation(ASTNode):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self.name)
-    self.enumeration.printAST(spaties+5)
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self}")
+    self.enumeration.printAST(spaces+5)
 SymbolInterpretation.printAST = printAST
 
-def SCA_Check(self,detections):
+
+def SCA_Check(self, detections):
     # Check the defined functions, predicates, constants and propositions
-    if (not(isinstance(self.enumeration,(Ranges,FunctionEnum))) and not(self.is_type_enumeration)):   # Symbol is predicate, constant or boolean
-        if self.symbol.decl.arity==0: # Symbol is constant or boolean
-            out_type = self.symbol.decl.out             # Get output type
-            if hasattr(out_type.decl,'enumeration'):    # Output type is no built-in type
+
+    # If the symbol is a predicate, constant or bool.
+    if (not isinstance(self.enumeration, (Ranges, FunctionEnum))
+       and not self.is_type_enumeration):
+        if self.symbol.decl.arity == 0:
+            # Symbol is constant or boolean
+            out_type = self.symbol.decl.out
+
+            if hasattr(out_type.decl, 'enumeration'):
+                # Output type is no built-in type
                 out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
                 if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
                     out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
                 if self.default.str not in out_type_values:
-                    detections.append((self.default,f"Element of wrong type","Error"))  # Element of wrong type used
-        else : # Symbol is predicate
+                    detections.append((self.default, "Element of wrong type", "Error"))  # Element of wrong type used
+        else:  # Symbol is n-ary predicate
             options = []
-            for i in self.symbol.decl.sorts:    # Get all values of the argument types
+            for i in self.symbol.decl.sorts:
+                # Get all values of the argument types
                 in_type_values = str(i.decl.enumeration).replace(" ", "").split(',')
                 if (in_type_values[0] != 'None'):   # Type interpretation in Vocabulary
                     options.append(in_type_values)
@@ -248,12 +262,13 @@ def SCA_Check(self,detections):
                     options.append(str(self.parent.interpretations[i.str].enumeration).replace(" ", "").split(','))
             for t in self.enumeration.tuples:
                 if len(t.args) > self.symbol.decl.arity:    # Given to much input elements
-                    detections.append((t.args[0],f"To much input elements, expected {self.symbol.decl.arity}","Error"))
+                    detections.append((t.args[0], f"To much input elements, expected {self.symbol.decl.arity}", "Error"))
                 else :
-                    for i in range(0,len(t.args),1):  # Get elements
+                    for i in range(0, len(t.args), 1):  # Get elements
                         if str(t.args[i]) not in options[i]:
-                            detections.append((t.args[i],f"Element of wrong type","Error"))  # Element of wrong type used in predicate
+                            detections.append((t.args[i], "Element of wrong type", "Error"))  # Element of wrong type used in predicate
 
+    # The symbol is a function.
     if isinstance(self.enumeration, FunctionEnum):
         out_type = self.symbol.decl.out   # Get output type of function
 
@@ -294,6 +309,7 @@ def SCA_Check(self,detections):
 
         possibilities = old_list
         duplicates = []
+        print(possibilities)
         for t in self.enumeration.tuples:
             # Check if the output element is of correct type.
             if out_type.name == 'ℝ':
@@ -306,34 +322,34 @@ def SCA_Check(self,detections):
             elif out_type.name == 'ℤ':
                 try:
                     int(t.value)
-                except:
+                except ValueError:
                     err_str = (f'Output element {str(t.value)} should be Int')
                     detections.append((t.value, err_str, "Error"))
 
             else:
                 if str(t.value) not in out_type_values:  # Used an output element of wrong type
-                    detections.append((t.value,f"Output element of wrong type, {str(t.value)}","Error"))
+                    detections.append((t.value, f"Output element of wrong type, {str(t.value)}", "Error"))
 
             elements = []
-            for i in range(0,len(t.args)-1,1):  # Get input elements
-                if (i < len(options) and (str(t.args[i]) not in options[i])) :
-                    detections.append((t.args[i],f"Element of wrong type, {str(t.args[i])}","Error"))  # Element of wrong type used
+            for i in range(0, len(t.args)-1, 1):  # Get input elements
+                if (i < len(options) and (str(t.args[i]) not in options[i])):
+                    detections.append((t.args[i], f"Element of wrong type, {str(t.args[i])}", "Error"))  # Element of wrong type used
                 elements.append(str(t.args[i]))
             if len(t.args) > self.symbol.decl.arity+1:    # Given to much input elements
-                detections.append((t.args[0],f"To much input elements, expected {self.symbol.decl.arity}","Error"))
+                detections.append((t.args[0], f"To much input elements, expected {self.symbol.decl.arity}", "Error"))
             elif elements in possibilities:     # Valid possiblity
                 possibilities.remove(elements)  # Remove used possibility out of list
                 duplicates.append(elements)     # Add used possibility to list to detect duplicates
-            elif (self.symbol.decl.arity == 1 and elements[0] in possibilities): # Function with 1 input element, valid possibility
+            elif (self.symbol.decl.arity == 1 and elements[0] in possibilities):  # Function with 1 input element, valid possibility
                 possibilities.remove(elements[0])   # Remove used possibility out of list
                 duplicates.append(elements[0])      # Add used possibility to list to detect duplicates
             elif (elements in duplicates or elements[0] in duplicates): # Duplicate
-                    detections.append((t.args[0],f"Wrong input elements, duplicate","Error"))
+                detections.append((t.args[0], "Wrong input elements, duplicate", "Error"))
 
         if (len(possibilities) > 0 and self.symbol.decl.arity == 1): # Function not totally defined
-                detections.append((self,f"Function not total defined, missing {possibilities}","Error"))
+            detections.append((self, "Function not total defined, missing {possibilities}", "Error"))
         elif len(possibilities) > 0: # Function not totally defined
-            detections.append((self,f"Function not total defined, missing elements","Error"))
+            detections.append((self, "Function not total defined, missing elements", "Error"))
 
     else:
         # Symbol is a function mapping an ℝ or ℤ
@@ -343,10 +359,10 @@ SymbolInterpretation.SCA_Check = SCA_Check
 
 ## class Enumeration(ASTNode):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self}")
     for t in self.tuples:
-        t.printAST(spaties+5)
+        t.printAST(spaces+5)
 Enumeration.printAST = printAST
 
 
@@ -356,10 +372,10 @@ Enumeration.printAST = printAST
 
 ## class TupleIDP(ASTNode):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self}")
     for a in self.args:
-        a.printAST(spaties+5)
+        a.printAST(spaces+5)
 TupleIDP.printAST = printAST
 
 
@@ -378,13 +394,14 @@ TupleIDP.printAST = printAST
 
 ## class Procedure(ASTNode):.pystatements)}"
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self.name)
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self}")
     for a in self.pystatements:
-        a.printAST(spaties+5)
+        a.printAST(spaces+5)
 Procedure.printAST = printAST
 
-def SCA_Check(self,detections):
+
+def SCA_Check(self, detections):
     for a in self.pystatements:
         a.SCA_Check(detections)
 Procedure.SCA_Check = SCA_Check
@@ -392,27 +409,29 @@ Procedure.SCA_Check = SCA_Check
 
 ## class Call1(ASTNode):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
+def printAST(self, spaces):
+    print(f"{spaces*''}{type(self).__name__}: {self}")
     for a in self.args:
-        a.printAST(spaties+5)
+        a.printAST(spaces+5)
 Call1.printAST = printAST
 
-def SCA_Check(self,detections):
-    lijst_inferenties = ["model_check","model_expand","model_propagate"]
-    if self.name in lijst_inferenties:
+
+def SCA_Check(self, detections):
+    if self.name in ["model_check", "model_expand", "model_propagate"]:
         if self.parent.name != "pretty_print":    #check if pretty_print is used
-            detections.append((self,f"No pretty_print used!","Warning"))
-    if self.name == "model_check":  #check if correct amount of arguments used by model_check
+            detections.append((self, "No pretty_print used!", "Warning"))
+    if self.name == "model_check":  # check if correct amount of arguments used by model_check
         if (len(self.args) > 2 or len(self.args) == 0):
-            detections.append((self,f"Wrong number of arguments for model_check: given {len(self.args)} <-> expected {1} or {2}","Error"))
+            detections.append((self, f"Wrong number of arguments for model_check: given {len(self.args)} <-> expected {1} or {2}", "Error"))
         else :
             a = self.parent
-            while not(isinstance(a,IDP)):   #zoek IDP node in parent
+            while not isinstance(a, IDP):
+                # Find IDP node in parent.
                 a = a.parent
             for i in self.args:
-                if not(a.blockNameCheck(i)):   #check of block naam bestaat
-                    detections.append((i,f"Block {i} does not exist!","Error"))
+                if not a.blockNameCheck(i):
+                    # Check whether the block exists.
+                    detections.append((i, f"Block {i} does not exist!", "Error"))
 
     for a in self.args:
         a.SCA_Check(detections)
