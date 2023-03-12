@@ -836,15 +836,30 @@ def EXISTS(qs, expr, annotations=None):
 class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
     MAP = dict()  # monkey-patched
+    NORMAL = {
+        "=<": "≤",
+        ">=" : "≥",
+        "~=": "≠",
+        "<=>": "⇔",
+        "is a necessary and sufficient condition for": "⇔",
+        "<=": "⇐",
+        "is a necessary condition for": "⇐",
+        "=>": "⇒",
+        "is a sufficient condition for": "⇒",
+        "|": "∨",
+        "or": "∨",
+        "&": "∧",
+        "and": "∧",
+        "*": "⨯",
+        "is": "=",
+    }
 
     def __init__(self, parent, operator, sub_exprs, annotations=None):
         self.operator = operator
         self.sub_exprs = sub_exprs
 
         self.operator = list(map(
-            lambda op: "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else \
-                "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
-                "∨" if op == "|" else "∧" if op == "&" else "⨯" if op == "*" else op
+            lambda op: Operator.NORMAL.get(op, op)
             , self.operator))
 
         super().__init__()

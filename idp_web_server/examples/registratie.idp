@@ -115,13 +115,14 @@ theory decision:decision {
     // When a choice is made for walonia or brussels, types can still be entered with a view to expandability
 
     [An Heritage is a residential monument in an heritage plan (with additional terms), used as family dwelling]
-    ((type_of_real_estate() = Residential
-    ∧ monument()
-    ∧ use() = As_Family_Dwelling
-    ∧ heritage_investment()
-    ∧ heritage_plan()
-    ∧ additional_terms())
-    ⇐ (registration_type() = Heritage)).
+      ((type_of_real_estate() = Residential
+      and monument()
+      and use() = As_Family_Dwelling
+      and heritage_investment()
+      and heritage_plan()
+      and additional_terms())
+    is a necessary condition for
+      (registration_type() = Heritage)).
 
     [A social dwelling is a residential real estate sold by Vlaamse_Mpy_Voor_Sociaal_Wonen or Erkende_Sociale_Huisvestings_Mpy to a natural person for social housing with a mortgage allowance]
     ((buyer() = Natural_Person
