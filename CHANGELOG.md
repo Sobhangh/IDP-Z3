@@ -20,6 +20,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 * MR !284: Refactor Expression.simpler for better performance
 * issue #235: range interpretation of predicate is not respected
 * issue #236: Incorrect nested quantification over infinite domain
+* issue #238: Fix FOLint issues in structure
 * issue #240: internal error with quantification over infinite domain
 * issue #246: error with chained inequalities
 
