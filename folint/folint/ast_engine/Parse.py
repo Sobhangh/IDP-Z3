@@ -321,15 +321,15 @@ def SCA_Check(self, detections):
             # Check if the output element is of correct type.
             if out_type.name == 'ℝ':
                 try:
-                    float(t.value)
-                except ValueError:
+                    float(t.value.number)
+                except (ValueError, TypeError):
                     err_str = (f'Output element {str(t.value)} should be Real')
                     detections.append((t.value, err_str, "Error"))
 
             elif out_type.name == 'ℤ':
                 try:
-                    int(t.value)
-                except ValueError:
+                    int(t.value.number)
+                except (ValueError, TypeError):
                     err_str = (f'Output element {str(t.value)} should be Int')
                     detections.append((t.value, err_str, "Error"))
 
