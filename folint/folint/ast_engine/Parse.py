@@ -284,24 +284,26 @@ def SCA_Check(self, detections):
         # the totality of the interpretation)
         options = []
         for i in self.symbol.decl.sorts:    # Get all values of the argument types
-            in_type_values = str(i.decl.enumeration).replace(" ", "").split(',')
-            if (in_type_values[0] != 'None'): # Type interpretation in Vocabulary
-                options.append(in_type_values)
-            else:                              # Type interpretation in Structure
-                options.append(str(self.parent.interpretations[i.str].enumeration).replace(" ", "").split(','))
+            try:
+                # Type interpretation in the vocabulary.
+                in_type_values = list(i.decl.enumeration.tuples.keys())
+            except:
+                # Type interpretation in Structure
+                in_type_values = list(self.parent.interpretations[i.str].enumeration.tuples.keys())
+            options.append(in_type_values)
 
         # Determine all possible combinations
         new_list = []
         old_list = options[0]
-        for i in range(1,len(options)):
+        for i in range(1, len(options)):
             new_list = []
             for a in old_list:
                 for b in options[i]:
                     hulp_element = []
-                    if isinstance(a,list):
+                    if isinstance(a, list):
                         for c in a:
                             hulp_element.append(c)
-                    else :
+                    else:
                         hulp_element.append(a)
                     hulp_element.append(b)
                     new_list.append(hulp_element)
@@ -309,13 +311,12 @@ def SCA_Check(self, detections):
 
         possibilities = old_list
         duplicates = []
-        print(possibilities)
         for t in self.enumeration.tuples:
             # Check if the output element is of correct type.
             if out_type.name == 'ℝ':
                 try:
                     float(t.value)
-                except:
+                except ValueError:
                     err_str = (f'Output element {str(t.value)} should be Real')
                     detections.append((t.value, err_str, "Error"))
 
@@ -347,7 +348,7 @@ def SCA_Check(self, detections):
                 detections.append((t.args[0], "Wrong input elements, duplicate", "Error"))
 
         if (len(possibilities) > 0 and self.symbol.decl.arity == 1): # Function not totally defined
-            detections.append((self, "Function not total defined, missing {possibilities}", "Error"))
+            detections.append((self, f"Function not total defined, missing {possibilities}", "Error"))
         elif len(possibilities) > 0: # Function not totally defined
             detections.append((self, "Function not total defined, missing elements", "Error"))
 
