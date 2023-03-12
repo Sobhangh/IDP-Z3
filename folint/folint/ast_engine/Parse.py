@@ -272,13 +272,16 @@ def SCA_Check(self, detections):
     if isinstance(self.enumeration, FunctionEnum):
         out_type = self.symbol.decl.out   # Get output type of function
 
-        # Create a list containing the possible output values, left None if
-        # the output type is an infinite number range.
-        out_type_value = None
+        # Create a list containing the possible output values.
+        # This is left None if the output type is an Int or Real.
+        out_type_values = None
         if out_type.name not in ['ℤ', 'ℝ']:
-            out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
-            if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
-                out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
+            try:
+                # Type interpretation in Voc.
+                out_type_values = list(out_type.decl.enumeration.tuples.keys())
+            except:
+                # Type interpretation in Struct.
+                out_type_values = list(self.parent.interpretations[out_type.str].enumeration.tuples.keys())
 
         # Create a list containing all possible input arguments (to check
         # the totality of the interpretation)
