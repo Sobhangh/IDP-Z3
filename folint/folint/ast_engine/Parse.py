@@ -246,24 +246,27 @@ def SCA_Check(self, detections):
 
             if hasattr(out_type.decl, 'enumeration'):
                 # Output type is no built-in type
-                out_type_values = str(out_type.decl.enumeration).replace(" ", "").split(',')   # Get output type values out of Vocabulary
-                if (out_type_values[0] == 'None'):       # If type interpretation not in Vocabulary, check Structure
-                    out_type_values = str(self.parent.interpretations[out_type.str].enumeration).replace(" ", "").split(',')
+                try:
+                    # Type interpretation in Voc.
+                    out_type_values = list(out_type.decl.enumeration.tuples.keys())
+                except AttributeError:
+                    # Type interpertation in Struct.
+                    out_type_values = list(self.parent.interpretations[out_type.str].enumeration.tuples.keys())
                 if self.default.str not in out_type_values:
                     detections.append((self.default, "Element of wrong type", "Error"))  # Element of wrong type used
         else:  # Symbol is n-ary predicate
             options = []
             for i in self.symbol.decl.sorts:
                 # Get all values of the argument types
-                in_type_values = str(i.decl.enumeration).replace(" ", "").split(',')
-                if (in_type_values[0] != 'None'):   # Type interpretation in Vocabulary
-                    options.append(in_type_values)
-                else:                               # Type interpretation in Structure
-                    options.append(str(self.parent.interpretations[i.str].enumeration).replace(" ", "").split(','))
+                try:
+                    in_type_values = list(i.decl.enumeration.tuples.keys())
+                except AttributeError:
+                    in_type_values = list(self.parent.interpretations[i.str].enumeration.tuples.keys())
+                options.append(in_type_values)
             for t in self.enumeration.tuples:
                 if len(t.args) > self.symbol.decl.arity:    # Given to much input elements
                     detections.append((t.args[0], f"To much input elements, expected {self.symbol.decl.arity}", "Error"))
-                else :
+                else:
                     for i in range(0, len(t.args), 1):  # Get elements
                         if str(t.args[i]) not in options[i]:
                             detections.append((t.args[i], "Element of wrong type", "Error"))  # Element of wrong type used in predicate
@@ -279,7 +282,7 @@ def SCA_Check(self, detections):
             try:
                 # Type interpretation in Voc.
                 out_type_values = list(out_type.decl.enumeration.tuples.keys())
-            except:
+            except AttributeError:
                 # Type interpretation in Struct.
                 out_type_values = list(self.parent.interpretations[out_type.str].enumeration.tuples.keys())
 
@@ -290,7 +293,7 @@ def SCA_Check(self, detections):
             try:
                 # Type interpretation in the vocabulary.
                 in_type_values = list(i.decl.enumeration.tuples.keys())
-            except:
+            except AttributeError:
                 # Type interpretation in Structure
                 in_type_values = list(self.parent.interpretations[i.str].enumeration.tuples.keys())
             options.append(in_type_values)
