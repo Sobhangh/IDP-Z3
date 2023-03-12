@@ -92,13 +92,13 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
                 | aggtype=/sum|min|max/ '(' 'lambda' quantees*=Quantee[',']  ':' f=Expression ')');
     AIfExpr: 'if' if_f=Expression 'then' then_f=Expression 'else' else_f=Expression;
 
-    RImplicationOp: '<=' | '⇐' | /is a necessary condition for/;
-    EquivalenceOp: '<=>' | '⇔' | /is a necessary and sufficient condition for/;
-    ImplicationOp:  '=>' | '⇒' | /is a sufficient condition for/;
+    RImplicationOp: '<=' | '⇐' | /are necessary conditions for/;
+    EquivalenceOp: '<=>' | '⇔' | /are necessary and sufficient conditions for/;
+    ImplicationOp:  '=>' | '⇒' | /are sufficient conditions for/;
     DisjunctionOp:   '|' | '∨' | 'or';
     ConjunctionOp:   '&' | '∧' | 'and';
     DefEqOp:        ':=' | '≜' ;
-    ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠';
+    ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' | 'is';
     SumMinusOp:      '+' | '-';
     MultDivOp:       '⨯' | '*' | '/' | '%';
     UnaryOperator:   '-' | '~' | '¬';
