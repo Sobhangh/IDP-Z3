@@ -27,6 +27,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 * MR !282: improve display of ⇒ in the editor.
 * issue #192: access to gist temporarily disabled
 * issue #241: Environmental verification error in the Covid example
+* issue #245: Fix bugs in the Save functionality
 * issue #242: Can't retract assertion in Polygon (+ Cypress)
 
 
