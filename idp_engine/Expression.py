@@ -837,8 +837,13 @@ class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
     MAP = dict()  # monkey-patched
     NORMAL = {
+        "is strictly less than": "<",
+        "is less than": "≤",
         "=<": "≤",
+        "is more than": "≥",
+        "is strictly more than": ">",
         ">=" : "≥",
+        "is not": "≠",
         "~=": "≠",
         "<=>": "⇔",
         "are necessary and sufficient conditions for": "⇔",

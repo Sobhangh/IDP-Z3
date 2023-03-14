@@ -98,7 +98,10 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
     DisjunctionOp:   '|' | '∨' | 'or';
     ConjunctionOp:   '&' | '∧' | 'and';
     DefEqOp:        ':=' | '≜' ;
-    ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠' | 'is';
+    ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠'
+                    | 'is strictly less than' | 'is less than'
+                    | 'is more than' | 'is strictly more than'
+                    | 'is not' | 'is';
     SumMinusOp:      '+' | '-';
     MultDivOp:       '⨯' | '*' | '/' | '%';
     UnaryOperator:   '-' | '~' | '¬';
