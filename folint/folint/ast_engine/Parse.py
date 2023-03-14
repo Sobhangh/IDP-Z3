@@ -259,13 +259,15 @@ def SCA_Check(self, detections):
             for i in self.symbol.decl.sorts:
                 # Get all values of the argument types
                 try:
+                    # Interpretation in Voc
                     in_type_values = list(i.decl.enumeration.tuples.keys())
                 except AttributeError:
+                    # Interpretation in Struct
                     in_type_values = list(self.parent.interpretations[i.str].enumeration.tuples.keys())
                 options.append(in_type_values)
             for t in self.enumeration.tuples:
                 if len(t.args) > self.symbol.decl.arity:    # Given to much input elements
-                    detections.append((t.args[0], f"To much input elements, expected {self.symbol.decl.arity}", "Error"))
+                    detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
                 else:
                     for i in range(0, len(t.args), 1):  # Get elements
                         if str(t.args[i]) not in options[i]:
@@ -353,10 +355,10 @@ def SCA_Check(self, detections):
             elif (elements in duplicates or elements[0] in duplicates): # Duplicate
                 detections.append((t.args[0], "Wrong input elements, duplicate", "Error"))
 
-        if (len(possibilities) > 0 and self.symbol.decl.arity == 1): # Function not totally defined
-            detections.append((self, f"Function not total defined, missing {possibilities}", "Error"))
-        elif len(possibilities) > 0: # Function not totally defined
-            detections.append((self, "Function not total defined, missing elements", "Error"))
+        if (len(possibilities) > 0 and self.symbol.decl.arity == 1):
+            detections.append((self, f"Function not totally defined, missing {possibilities}", "Error"))
+        elif len(possibilities) > 0:
+            detections.append((self, "Function not totally defined, missing elements", "Error"))
 
     else:
         # Symbol is a function mapping an ℝ or ℤ
