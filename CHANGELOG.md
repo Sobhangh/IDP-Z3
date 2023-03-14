@@ -25,6 +25,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 
 ### Interactive Consultant and Web IDE
 * MR !282: improve display of ⇒ in the editor.
+* MR !289: use narrower numeric field
 * issue #192: access to gist temporarily disabled
 * issue #241: Environmental verification error in the Covid example
 * issue #242: Can't retract assertion in Polygon (+ Cypress)
