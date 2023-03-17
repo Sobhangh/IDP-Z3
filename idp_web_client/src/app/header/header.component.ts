@@ -429,6 +429,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     a.href = window.URL.createObjectURL(new Blob([data], {type: 'text/plain'}));
     a.download = 'theory.idp';
     a.click();
+    window.URL.revokeObjectURL(a.href);
     a.remove();
   }
 }
