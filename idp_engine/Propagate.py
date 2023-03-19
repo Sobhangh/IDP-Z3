@@ -418,12 +418,16 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         yield from self._propagate_ignored(tag, given_todo)
         return
 
+    solver = self.solver
     if not self.previous_assignments:
+        solver.push()
+        self._add_assignment(solver)
         try:
-            yield from self._first_propagate(self.solver)
+            yield from self._first_propagate(solver)
         except IDPZ3Error:
             yield NOT_SATISFIABLE
             # can't access solver.sexpr()
+        solver.pop()
 
     removed_choices, added_choices = self._set_consequences_get_changed_choices(tag)
 
@@ -448,7 +452,6 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         yield "No more consequences."
         return
 
-    solver = self.solver
     solver.push()
 
     self._add_assignment(solver)
