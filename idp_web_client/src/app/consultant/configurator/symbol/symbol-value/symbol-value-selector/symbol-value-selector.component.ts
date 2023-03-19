@@ -36,6 +36,11 @@ export class SymbolValueSelectorComponent implements OnInit {
       info.assignment.status = 'GIVEN';
       this.idpService.meta.atomConsistency(this.info.assignment);
       this.idpService.doPropagation();
+    } else if (info.assignment.value != null) {
+      info.assignment.status = 'UNKNOWN';
+      info.assignment.value = null;
+      this.idpService.meta.atomConsistency(this.info.assignment);
+      this.idpService.doPropagation();
     }
   }
   update(info: ValueInfo, event) {
