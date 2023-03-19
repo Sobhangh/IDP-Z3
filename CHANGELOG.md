@@ -29,6 +29,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 * issue #192: access to gist temporarily disabled
 * issue #241: Environmental verification error in the Covid example
 * issue #242: Can't retract assertion in Polygon (+ Cypress)
+* issue #247: issues with Date field
 
 
 ## [0.10.2] - 2022-12-19
