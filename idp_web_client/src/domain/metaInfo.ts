@@ -71,7 +71,13 @@ export class CurrentAssignment {
         'value': included ? this.value : '',
         'status': this.status
       };
-    } else {
+    } else if (this.typ === 'Date') {
+      return {
+        'typ': 'Date',
+        'value': included ? this.value2 : '',
+        'status': this.status
+      };
+    }{
       return {
         'value': this.value,
         'typ': this.typ,
@@ -82,6 +88,7 @@ export class CurrentAssignment {
 
   reset() {
     this.value = null;
+    this.value2 = '';
     this.unknown = false;
   }
 }

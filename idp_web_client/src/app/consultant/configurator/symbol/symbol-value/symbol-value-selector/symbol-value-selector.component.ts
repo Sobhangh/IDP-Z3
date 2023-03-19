@@ -29,16 +29,16 @@ export class SymbolValueSelectorComponent implements OnInit {
   }
   calendar_update(info) {
     // hack: https://github.com/primefaces/primeng/issues/2426
-    if (this.date_value) {
-      let d = new Date(this.date_value.getTime()
-                       - (this.date_value.getTimezoneOffset() * 60 * 1000));
-      info.assignment.value = '#'+d.toISOString().slice(0,10);
+    if (info.assignment.value) {
+      let d = new Date(info.assignment.value.getTime()
+                       - (info.assignment.value.getTimezoneOffset() * 60 * 1000));
+      info.assignment.value2 = '#'+d.toISOString().slice(0,10);
       info.assignment.status = 'GIVEN';
       this.idpService.meta.atomConsistency(this.info.assignment);
       this.idpService.doPropagation();
-    } else if (info.assignment.value != null) {
+    } else if (info.assignment.value2 != null) {  // value has been emptied
       info.assignment.status = 'UNKNOWN';
-      info.assignment.value = null;
+      info.assignment.value2 = null;
       this.idpService.meta.atomConsistency(this.info.assignment);
       this.idpService.doPropagation();
     }

@@ -440,8 +440,14 @@ procedure main() {
           if (val.assignment.value2 != null && val.assignment.value2.includes('/') && 4<val.assignment.value2.length) {
             const m = val.assignment.value2.match(/(.*)\/(.*)/);
             if (m) {
-              console.log(val.assignment.value2, m[1], m[2])
               val.assignment.value2 = String((+m[1])/(+m[2]))
+            }
+          }
+          if (val.assignment.typ === 'Date') {
+            if ('value' in info) {
+              val.assignment.value = new Date(val.assignment.value2.substring(1))
+            } else {
+              val.assignment.value = null
             }
           }
         }

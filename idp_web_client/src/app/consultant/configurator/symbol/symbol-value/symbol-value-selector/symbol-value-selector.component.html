@@ -36,7 +36,7 @@
 
         <!-- Calendar -->
         <ng-container *ngIf="(info.assignment.status=='UNKNOWN' || info.assignment.choice) && !info.assignment.values && info.assignment.typ =='Date'">
-          <p-calendar id="float-input" [(ngModel)]="date_value"
+          <p-calendar id="float-input" [(ngModel)]="info.assignment.value"
             dateFormat="#yy-mm-dd" showButtonBar="true"
             [disabled] = "this.idpService.openCalls > 0"
             [ngClass] = "(info.assignment.value || !info.assignment.relevant) ? '' : 'required_input'"
