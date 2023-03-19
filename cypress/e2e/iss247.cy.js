@@ -6,17 +6,25 @@ describe('Issue 247', () => {
       cy.get('app-symbol-value-selector').find('input').type('15{enter}')
     }),
     it('Date', () => {
-      cy.visit('http://localhost:4201/?G4ewxghgRgrgNhATgTwAQG8BQqeoCYQAuMAtgDSoDOEJApqgFyoAUAlKoEmEqAIkbZgF9MmQgAtaIFBmy4CxEm1QAeVAGIAKgHluAQQCaAOhk45pRQF4qNWmyNCgA')
-      cy.get('app-symbol-value-selector').contains('datum').find('input').type('#2023-01-01{enter}')
-      cy.get('app-symbol-value-selector').contains('same').contains('#2023-01-01')
+      // enter today's date
+      cy.visit('http://localhost:4201/?G4ewxghgRgrgNhATgTwAQG8BQqeoCYQAuMAtgDSoDOEJApqgFyoAUAlKoEmEqAIkbZgF9MmQgAtaIFBmy4CxEm1QBeADyoAxABUA8twCCATQB0MnHNKKlVGrTYmhQA')
+      cy.get('app-symbol-value-selector').contains('datum').find('input').click()
+      cy.contains('Today').click()
+      cy.get('app-symbol-value-selector').contains('datum').find('input').invoke('val')
+      .then(date_val =>
+        cy.get('app-symbol-value-selector').contains('same').contains(date_val))
+
+      // clear the date
       cy.get('app-symbol-value-selector').find('input').click()
       cy.get('button').contains('Clear').click()
-      cy.get('app-symbol-value-selector').contains('same').should('not.include.text', '#2023-01-01')
+      cy.get('app-symbol-value-selector').contains('same').should('not.include.text', '#')
 
 
-      cy.get('app-symbol-value-selector').contains('datum').find('input').type('#2023-01-01{enter}')
+      // reset the date
+      cy.get('app-symbol-value-selector').contains('datum').find('input').click()
+      cy.contains('Today').click()
       cy.contains('Reset').click()
       cy.contains('Full').click()
-      // TODO cy.get('app-symbol-value-selector').contains('datum').find('input').should('have.value', '')
+      cy.get('app-symbol-value-selector').contains('datum').find('input').should('have.value', '')
     })
   })
