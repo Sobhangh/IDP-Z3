@@ -46,9 +46,10 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
           (('!'|'∀') quantees+=Quantee[','] ':' )*
           definiendum=AppliedSymbol
           (('=' |DefEqOp) out=SumMinus)?
-          (('<-'|'←') body=Expression)? '.' ;
-        Quantee: ( vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
-                | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?);
+          (('<-'|'←' | 'if' ) body=Expression)? '.' ;
+        Quantee:  subtype=Type !'in' !'∈' vars+=Variable
+                | vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
+                | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?;
             Variable: name=/`?[^\d\W]\w*\b/;
             VarTuple: '(' vars+=Variable[','] ')';
             Type: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
@@ -76,7 +77,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
 
 
     AQuantification: annotations=Annotations q=Quantor quantees+=Quantee[','] ':' f=Expression;
-      Quantor: '∀' | '!' | '∃' | '?' ;
+      Quantor: '∀' | '!' | '∃' | '?' | 'for' 'all' | 'there' 'is' 'a';
     ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
     AEquivalence:  sub_exprs=Implication (operator=EquivalenceOp  sub_exprs=Implication)+;
     AImplication:  (sub_exprs=Disjunction (operator=ImplicationOp  sub_exprs=Disjunction)+)
@@ -98,14 +99,14 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
     ImplicationOp:  '=>' | '⇒' | /are sufficient conditions for/;
     DisjunctionOp:   '|' | '∨' | 'or';
     ConjunctionOp:   '&' | '∧' | 'and';
-    DefEqOp:        ':=' | '≜' ;
+    DefEqOp:        ':=' | '≜' | 'is';
     ComparisonOp:   '=<' | '>=' | '~=' | '=' | '<' | '>' | '≤' | '≥' | '≠'
                     | 'is strictly less than' | 'is less than'
                     | 'is more than' | 'is strictly more than'
                     | 'is not' | 'is';
     SumMinusOp:      '+' | '-';
     MultDivOp:       '⨯' | '*' | '/' | '%';
-    UnaryOperator:   '-' | '~' | '¬';
+    UnaryOperator:   '-' | '~' | '¬' | 'not' ;
 
 
     Base:  AQuantification | AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;

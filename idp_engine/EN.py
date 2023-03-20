@@ -86,8 +86,9 @@ def EN(self):
         return self.sub_exprs[0].EN()
     elif self.q == '∀':
         return f"for every {vars}, it is true that {self.sub_exprs[0].EN()}"
-    else:
+    elif self.q == '∃':
         return f"there is a {vars} such that {self.sub_exprs[0].EN()}"
+    self.check(False, "Internal error")
 AQuantification.EN = EN
 
 

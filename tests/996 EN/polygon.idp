@@ -76,7 +76,7 @@ theory {
     [A right triangle is a triangle with a 90° angle]
     subtype()=right_triangle   ⇔ nr_of_sides()=3 ∧
                                  [One angle is 90°]
-                                 ∃n ∈ Side_Nr: angle(n)=90.
+                                 there is a Side_Nr n: angle(n)=90.
 
     [All angles are 90° in squares and rectangles]
     nr_of_sides()=4 ∧ subtype()≠irregular ⇔
@@ -106,7 +106,7 @@ theory {
     ∀x ∈ Side_Nr: 0 ≤ length(x).
 
     [Angles are positive numbers]
-    ∀x ∈ Side_Nr: 0 ≤ angle(x).
+    for all Side_Nr x: 0 ≤ angle(x).
 
     [Angles cannot be 180°]
     ∀x ∈ Side_Nr: angle(x) ≠ 180.

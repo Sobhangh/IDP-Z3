@@ -770,7 +770,9 @@ class AQuantification(Expression):
         self.quantees = quantees
         self.f = f
 
-        self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
+        self.q = ('∀' if self.q in ['!', 'forall'] else
+                  '∃' if self.q in ["?", "thereisa"] else
+                  self.q)
         if self.quantees and not self.quantees[-1].sub_exprs:
             # separate untyped variables, so that they can be typed separately
             q = self.quantees.pop()
@@ -1009,7 +1011,7 @@ class AUnary(Expression):
                  f: Expression):
         self.operators = operators
         self.f = f
-        self.operators = ['¬' if c == '~' else c for c in self.operators]
+        self.operators = ['¬' if c in ['~', 'not'] else c for c in self.operators]
         self.operator = self.operators[0]
         self.check(all([c == self.operator for c in self.operators]),
                    "Incorrect mix of unary operators")
