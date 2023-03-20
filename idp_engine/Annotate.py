@@ -254,14 +254,14 @@ def get_instantiables(self,
                 if not inductive:
                     bodies.append(r.body)
                     if for_explain and 1 < len(rules):  # not simplified -> no need to make copies
-                        out.append(RIMPLIES([head, r.body], r.annotations))
+                        out.append(IMPLIES([r.body, head], r.annotations))
                 else:
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
                         new = deepcopy(new).add_level_mapping(self.level_symbols,
                                              rule.definiendum, False, False, self.mode)
-                        out.append(RIMPLIES([head, new], r.annotations))
+                        out.append(IMPLIES([new, head], r.annotations))
 
             all_bodies = OR(bodies)
             if not inductive:
@@ -273,7 +273,7 @@ def get_instantiables(self,
                 if not out:  # no reverse implication yet
                     new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
                                              rule.definiendum, False, False, self.mode)
-                    out = [RIMPLIES([deepcopy(head), new], self.annotations)]
+                    out = [IMPLIES([new, deepcopy(head)], self.annotations)]
                 all_bodies = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
                                         rule.definiendum, True, True, self.mode)
                 out.append(IMPLIES([head, all_bodies], self.annotations))
