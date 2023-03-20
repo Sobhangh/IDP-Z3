@@ -850,6 +850,7 @@ class Operator(Expression):
         "<=": "⇐",
         "are necessary conditions for": "⇐",
         "=>": "⇒",
+        "then": "⇒",
         "are sufficient conditions for": "⇒",
         "|": "∨",
         "or": "∨",

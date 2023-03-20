@@ -35,7 +35,7 @@ def explain(state, consequence=None):
     for ass in facts:
         out.addAtom(ass.sentence, ass.value, ass.status)
     def en(law):
-        reading = law.annotations['reading']
+        reading = law.annotations.get('reading', law.code)
         return reading if reading != law.code else law.EN()
     out.m['*laws*'] = [(law.code, en(law)) for law in laws]
 
