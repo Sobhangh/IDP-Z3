@@ -52,7 +52,7 @@ def builtIn_type(elem):
 # class IDP(ASTNode):
 
 def printAST(self, spaces):
-    print(f"{spaces*''} {type(self).__name__}: {self}")
+    print(f"{spaces*' '} {type(self).__name__}: {self}")
     # Get all vocabularies
     V = self.get_blocks(self.vocabularies)
     for v in V:
@@ -90,7 +90,7 @@ IDP.blockNameCheck = blockNameCheck
 # class Vocabulary(ASTNode):
 
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self.name}")
+    print(f"{spaces*' '}{type(self).__name__}: {self.name}")
     for i in self.declarations:
         i.printAST(spaces+5)
 Vocabulary.printAST = printAST
@@ -105,9 +105,9 @@ Vocabulary.SCA_Check = SCA_Check
 
 def printAST(self, spaces):
     if str(self) > self.name:
-        print(f"{spaces*''}{type(self).__name__}: self")
+        print(f"{spaces*' '}{type(self).__name__}: self")
     else:
-        print(f"{spaces*''}{type(self).__name__}: self.name")
+        print(f"{spaces*' '}{type(self).__name__}: self.name")
     for i in self.sorts:
         i.printAST(spaces+5)
     if self.interpretation is not None:
@@ -118,7 +118,7 @@ TypeDeclaration.printAST = printAST
 def SCA_Check(self, detections):
     # style guide check : capital letter for type
     if self.name[0].islower():
-        detections.append((self, f"Style guide check, type name should start with a capital letter ", "Warning"))
+        detections.append((self, "Style guide check, type name should start with a capital letter ", "Warning"))
 
     # check if type has interpretation, if not check if in structures the type has given an interpretation
     if (self.interpretation is None and not builtIn_type(self.name)):
@@ -128,8 +128,8 @@ def SCA_Check(self, detections):
             list.append(i.name)
         for s in structs:
             if s.vocab_name == self.block.name:
-                if not self.name in s.interpretations:
-                    detections.append((self,f"Expected an interpretation for type {self.name} in Vocabulary {self.block.name} or Structures {list} ","Error"))
+                if self.name not in s.interpretations:
+                    detections.append((self, f"Expected an interpretation for type {self.name} in Vocabulary {self.block.name} or Structures {list} ", "Error"))
                     break
 TypeDeclaration.SCA_Check = SCA_Check
 
@@ -137,7 +137,7 @@ TypeDeclaration.SCA_Check = SCA_Check
 # class SymbolDeclaration(ASTNode):
 
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self}")
+    print(f"{spaces*' '}{type(self).__name__}: {self}")
     for i in self.sorts:
         i.printAST(spaces+5)
     self.out.printAST(spaces+5)
@@ -177,7 +177,7 @@ TheoryBlock.SCA_Check = SCA_Check
 # class Definition(ASTNode):
 
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self}")
+    print(f"{spaces*' '}{type(self).__name__}: {self}")
     for r in self.rules:
         r.printAST(spaces+5)
 Definition.printAST = printAST
@@ -192,7 +192,7 @@ Definition.SCA_Check = SCA_Check
 # class Rule(ASTNode):
 
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self}")
+    print(f"{spaces*' '}{type(self).__name__}: {self}")
     for q in self.quantees:
         q.printAST(spaces+5)
     self.definiendum.printAST(spaces+5)
@@ -214,7 +214,7 @@ Rule.SCA_Check = SCA_Check
 
 # class Structure(ASTNode):
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self}")
+    print(f"{spaces*' '}{type(self).__name__}: {self}")
     for i in self.interpretations:
         self.interpretations[i].printAST(spaces+5)
 Structure.printAST = printAST
@@ -229,7 +229,7 @@ Structure.SCA_Check = SCA_Check
 # class SymbolInterpretation(ASTNode):
 
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self}")
+    print(f"{spaces*' '}{type(self).__name__}: {self}")
     self.enumeration.printAST(spaces+5)
 SymbolInterpretation.printAST = printAST
 
@@ -237,67 +237,34 @@ SymbolInterpretation.printAST = printAST
 def SCA_Check(self, detections):
     # Check the defined functions, predicates, constants and propositions
 
-    # If the symbol is a predicate, constant or bool.
-    if (not isinstance(self.enumeration, (Ranges, FunctionEnum))
-       and not self.is_type_enumeration):
-        if self.symbol.decl.arity == 0:
-            # Symbol is constant or boolean
-            out_type = self.symbol.decl.out
-
-            if hasattr(out_type.decl, 'enumeration'):
-                # Output type is no built-in type
-                try:
-                    # Type interpretation in Voc.
-                    out_type_values = list(out_type.decl.enumeration.tuples.keys())
-                except AttributeError:
-                    # Type interpertation in Struct.
-                    out_type_values = list(self.parent.interpretations[out_type.str].enumeration.tuples.keys())
-                if self.default.str not in out_type_values:
-                    detections.append((self.default, "Element of wrong type", "Error"))  # Element of wrong type used
-        else:  # Symbol is n-ary predicate
-            options = []
-            for i in self.symbol.decl.sorts:
-                # Get all values of the argument types
-                try:
-                    # Interpretation in Voc
-                    in_type_values = list(i.decl.enumeration.tuples.keys())
-                except AttributeError:
-                    # Interpretation in Struct
-                    in_type_values = list(self.parent.interpretations[i.str].enumeration.tuples.keys())
-                options.append(in_type_values)
-            for t in self.enumeration.tuples:
-                if len(t.args) > self.symbol.decl.arity:    # Given to much input elements
-                    detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
-                else:
-                    for i in range(0, len(t.args), 1):  # Get elements
-                        if str(t.args[i]) not in options[i]:
-                            detections.append((t.args[i], "Element of wrong type", "Error"))  # Element of wrong type used in predicate
+    # If the symbol is a type, do nothing.
+    out_type = self.symbol.decl.out
+    if isinstance(self.enumeration, Ranges) or self.is_type_enumeration:
+        return
 
     # The symbol is a function.
-    if isinstance(self.enumeration, FunctionEnum):
-        out_type = self.symbol.decl.out   # Get output type of function
-
+    elif isinstance(self.enumeration, FunctionEnum):
         # Create a list containing the possible output values.
         # This is left None if the output type is an Int or Real.
         out_type_values = None
         if out_type.name not in ['ℤ', 'ℝ']:
-            try:
-                # Type interpretation in Voc.
-                out_type_values = list(out_type.decl.enumeration.tuples.keys())
-            except AttributeError:
+            if out_type.decl.enumeration is None:
                 # Type interpretation in Struct.
                 out_type_values = list(self.parent.interpretations[out_type.str].enumeration.tuples.keys())
+            else:
+                # Type interpretation in Voc.
+                out_type_values = list(out_type.decl.enumeration.tuples.keys())
 
         # Create a list containing all possible input arguments (to check
         # the totality of the interpretation)
         options = []
         for i in self.symbol.decl.sorts:    # Get all values of the argument types
-            try:
-                # Type interpretation in the vocabulary.
-                in_type_values = list(i.decl.enumeration.tuples.keys())
-            except AttributeError:
+            if i.decl.enumeration is None:
                 # Type interpretation in Structure
                 in_type_values = list(self.parent.interpretations[i.str].enumeration.tuples.keys())
+            else:
+                # Type interpretation in the vocabulary.
+                in_type_values = list(i.decl.enumeration.tuples.keys())
             options.append(in_type_values)
 
         # Determine all possible combinations
@@ -322,16 +289,12 @@ def SCA_Check(self, detections):
         for t in self.enumeration.tuples:
             # Check if the output element is of correct type.
             if out_type.name == 'ℝ':
-                try:
-                    float(t.value.number)
-                except (ValueError, TypeError):
+                if t.value.type not in ['ℝ', 'ℤ']:
                     err_str = (f'Output element {str(t.value)} should be Real')
                     detections.append((t.value, err_str, "Error"))
 
             elif out_type.name == 'ℤ':
-                try:
-                    int(t.value.number)
-                except (ValueError, TypeError):
+                if t.value.type == 'ℝ':
                     err_str = (f'Output element {str(t.value)} should be Int')
                     detections.append((t.value, err_str, "Error"))
 
@@ -345,7 +308,7 @@ def SCA_Check(self, detections):
                     detections.append((t.args[i], f"Element of wrong type, {str(t.args[i])}", "Error"))  # Element of wrong type used
                 elements.append(str(t.args[i]))
             if len(t.args) > self.symbol.decl.arity+1:    # Given to much input elements
-                detections.append((t.args[0], f"To much input elements, expected {self.symbol.decl.arity}", "Error"))
+                detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
             elif elements in possibilities:     # Valid possiblity
                 possibilities.remove(elements)  # Remove used possibility out of list
                 duplicates.append(elements)     # Add used possibility to list to detect duplicates
@@ -360,16 +323,53 @@ def SCA_Check(self, detections):
         elif len(possibilities) > 0:
             detections.append((self, "Function not totally defined, missing elements", "Error"))
 
+    # Symbol is a predicate of arity > 0
+    elif self.symbol.decl.arity > 0:
+        options = []
+        for i in self.symbol.decl.sorts:
+            # Get all values of the argument types
+            if i.decl.enumeration is None:
+                # Interpretation in Struct
+                in_type_values = list(self.parent.interpretations[i.str].enumeration.tuples.keys())
+            else:
+                # Interpretation in Voc
+                in_type_values = list(i.decl.enumeration.tuples.keys())
+            options.append(in_type_values)
+        for t in self.enumeration.tuples:
+            if len(t.args) > self.symbol.decl.arity:    # Given to much input elements
+                detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
+            else:
+                for i in range(0, len(t.args), 1):  # Get elements
+                    if str(t.args[i]) not in options[i]:
+                        detections.append((t.args[i], "Element of wrong type", "Error"))  # Element of wrong type used in predicate
+
+    # Symbol is a proposition (no check necessary).
+    elif out_type.name == '𝔹':
+        return
+
+    # Symbol is a constant.
     else:
-        # Symbol is a function mapping an ℝ or ℤ
-        pass
+        # If the output is not a built-in type, check if it is correct.
+        if hasattr(out_type.decl, 'enumeration'):
+            # Output type is no built-in type
+            if out_type.decl.enumeration is None:
+                # Type interpertation in Struct.
+                out_type_values = list(self.parent.interpretations[out_type.str].enumeration.tuples.keys())
+            else:
+                # Type interpretation in Voc.
+                out_type_values = list(out_type.decl.enumeration.tuples.keys())
+
+            if self.default.str not in out_type_values:
+                detections.append((self.default, "Element of wrong type", "Error"))  # Element of wrong type used
+
+
 SymbolInterpretation.SCA_Check = SCA_Check
 
 
 ## class Enumeration(ASTNode):
 
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self}")
+    print(f"{spaces*' '}{type(self).__name__}: {self}")
     for t in self.tuples:
         t.printAST(spaces+5)
 Enumeration.printAST = printAST
@@ -382,7 +382,7 @@ Enumeration.printAST = printAST
 ## class TupleIDP(ASTNode):
 
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self}")
+    print(f"{spaces*' '}{type(self).__name__}: {self}")
     for a in self.args:
         a.printAST(spaces+5)
 TupleIDP.printAST = printAST
@@ -404,7 +404,7 @@ TupleIDP.printAST = printAST
 ## class Procedure(ASTNode):.pystatements)}"
 
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self}")
+    print(f"{spaces*' '}{type(self).__name__}: {self}")
     for a in self.pystatements:
         a.printAST(spaces+5)
 Procedure.printAST = printAST
@@ -419,7 +419,7 @@ Procedure.SCA_Check = SCA_Check
 ## class Call1(ASTNode):
 
 def printAST(self, spaces):
-    print(f"{spaces*''}{type(self).__name__}: {self}")
+    print(f"{spaces*' '}{type(self).__name__}: {self}")
     for a in self.args:
         a.printAST(spaces+5)
 Call1.printAST = printAST
@@ -429,10 +429,11 @@ def SCA_Check(self, detections):
     if self.name in ["model_check", "model_expand", "model_propagate"]:
         if self.parent.name != "pretty_print":    #check if pretty_print is used
             detections.append((self, "No pretty_print used!", "Warning"))
+
     if self.name == "model_check":  # check if correct amount of arguments used by model_check
         if (len(self.args) > 2 or len(self.args) == 0):
             detections.append((self, f"Wrong number of arguments for model_check: given {len(self.args)} <-> expected {1} or {2}", "Error"))
-        else :
+        else:
             a = self.parent
             while not isinstance(a, IDP):
                 # Find IDP node in parent.
