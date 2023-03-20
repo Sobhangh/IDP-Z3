@@ -90,15 +90,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
             }
           }, {
             label: 'Save...', command: () => {
-              var dataURI = "data:" + "theory.idp" + ";utf-8," + this.idpService.spec.replace('\n', '\n\r');
-              var a = document.createElement("a");
-              // ... set a.href and a.download
-              a.href = dataURI;
-              a['download'] = "theory.idp";
-              // Then click the link:
-              var clickEvent = new MouseEvent("click", { "view": window, "bubbles": true, "cancelable": false});
-              a.dispatchEvent(clickEvent);
-              a.remove();
+              this.saveFile();
               this.showFileSave = true;
             }
           }]
@@ -229,15 +221,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
             }
           }, {
             label: 'Save...', command: () => {
-              var dataURI = "data:" + "theory.idp" + ";utf-8," + this.idpService.spec.replace('\n', '\n\r');
-              var a = document.createElement("a");
-              // ... set a.href and a.download
-              a.href = dataURI;
-              a['download'] = "theory.idp";
-              // Then click the link:
-              var clickEvent = new MouseEvent("click", { "view": window, "bubbles": true, "cancelable": false});
-              a.dispatchEvent(clickEvent);
-              a.remove();
+              this.saveFile();
               this.showFileSave = true;
             }
           }]
@@ -437,5 +421,15 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
     // Disable panel resizing if the mouse is let go.
     document.addEventListener('mouseup', function () {dragging = false; });
+  }
+
+  saveFile() {
+    const a = document.createElement('a');
+    const data = this.idpService.spec.replace('\n', '\n\r');
+    a.href = window.URL.createObjectURL(new Blob([data], {type: 'text/plain'}));
+    a.download = 'theory.idp';
+    a.click();
+    window.URL.revokeObjectURL(a.href);
+    a.remove();
   }
 }
