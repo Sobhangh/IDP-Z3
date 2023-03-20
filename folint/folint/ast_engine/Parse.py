@@ -250,7 +250,7 @@ def SCA_Check(self, detections):
         if out_type.name not in ['ℤ', 'ℝ']:
             if out_type.decl.enumeration is None:
                 # Type interpretation in Struct.
-                out_type_values = list(self.parent.interpretations[out_type.str].enumeration.tuples.keys())
+                out_type_values = list(self.parent.interpretations.get(out_type.str, []).enumeration.tuples.keys())
             else:
                 # Type interpretation in Voc.
                 out_type_values = list(out_type.decl.enumeration.tuples.keys())
@@ -261,7 +261,7 @@ def SCA_Check(self, detections):
         for i in self.symbol.decl.sorts:    # Get all values of the argument types
             if i.decl.enumeration is None:
                 # Type interpretation in Structure
-                in_type_values = list(self.parent.interpretations[i.str].enumeration.tuples.keys())
+                in_type_values = list(self.parent.interpretations.get(i.str, []).enumeration.tuples.keys())
             else:
                 # Type interpretation in the vocabulary.
                 in_type_values = list(i.decl.enumeration.tuples.keys())
@@ -330,7 +330,7 @@ def SCA_Check(self, detections):
             # Get all values of the argument types
             if i.decl.enumeration is None:
                 # Interpretation in Struct
-                in_type_values = list(self.parent.interpretations[i.str].enumeration.tuples.keys())
+                in_type_values = list(self.parent.interpretations.get(i.str, []).enumeration.tuples.keys())
             else:
                 # Interpretation in Voc
                 in_type_values = list(i.decl.enumeration.tuples.keys())
@@ -354,7 +354,7 @@ def SCA_Check(self, detections):
             # Output type is no built-in type
             if out_type.decl.enumeration is None:
                 # Type interpertation in Struct.
-                out_type_values = list(self.parent.interpretations[out_type.str].enumeration.tuples.keys())
+                out_type_values = list(self.parent.interpretations.get(out_type.str, []).enumeration.tuples.keys())
             else:
                 # Type interpretation in Voc.
                 out_type_values = list(out_type.decl.enumeration.tuples.keys())
