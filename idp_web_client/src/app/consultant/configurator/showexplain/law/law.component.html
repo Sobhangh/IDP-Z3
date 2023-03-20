@@ -1,5 +1,6 @@
-<div class="selector">
+<div class="selector" style="display: inline-block">
   <input type="checkbox"
+         style='vertical-align: top;'
          [checked]="true"
          [disabled]="this.idpService.allowIgnoringLaws == false
          || lawTuple[1].startsWith('Structure formula ')
