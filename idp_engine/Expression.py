@@ -1194,9 +1194,8 @@ class AppliedSymbol(Expression):
         return symbols
 
     def has_decision(self):
-        self.check(self.decl.block is not None, "Internal error")
-        return not self.decl.block.name == 'environment' \
-            or any(e.has_decision() for e in self.sub_exprs)
+        return ((self.decl.block is not None and not self.decl.block.name == 'environment')
+            or any(e.has_decision() for e in self.sub_exprs))
 
     def type_inference(self):
         if self.symbol.decl:
