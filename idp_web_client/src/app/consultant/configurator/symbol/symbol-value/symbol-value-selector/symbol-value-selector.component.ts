@@ -46,6 +46,7 @@ export class SymbolValueSelectorComponent implements OnInit {
   update(info: ValueInfo, event) {
     if (info.assignment.value2 !==event.target.value) {
       info.assignment.value = event.target.value;
+      info.assignment.value2 = String(info.assignment.value)
       info.assignment.status = 'GIVEN';
       this.idpService.meta.atomConsistency(this.info.assignment);
       this.idpService.doPropagation();

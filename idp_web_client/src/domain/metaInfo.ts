@@ -12,7 +12,7 @@ export class CurrentAssignment {
 
   typ = null;
   value = null;   // internal value; may be a ratio that needs conversion
-  value2: String = null;  // displayed string
+  value2: String = null;  // string displayed to the user
   values: SelectItem[] = null;
 
   relevant = true;
@@ -88,7 +88,7 @@ export class CurrentAssignment {
 
   reset() {
     this.value = null;
-    this.value2 = '';
+    this.value2 = null;
     this.unknown = false;
   }
 }
