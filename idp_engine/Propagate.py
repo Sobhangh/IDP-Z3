@@ -445,10 +445,6 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         for a in to_remove:
             todo.pop(a.code)
 
-    if not added_choices:
-        yield "No more consequences."
-        return
-
     solver.push()
 
     self._add_assignment(solver)
