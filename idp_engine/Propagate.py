@@ -445,7 +445,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         for a in to_remove:
             todo.pop(a.code)
 
-    if not added_choices:
+    if not todo:
         yield "No more consequences."
         return
 
