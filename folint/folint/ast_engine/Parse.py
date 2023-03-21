@@ -239,7 +239,7 @@ def SCA_Check(self, detections):
 
     # If the symbol is a type, do nothing.
     out_type = self.symbol.decl.out
-    if isinstance(self.enumeration, Ranges) or self.is_type_enumeration:
+    if self.is_type_enumeration:
         return
 
     # The symbol is a function.
