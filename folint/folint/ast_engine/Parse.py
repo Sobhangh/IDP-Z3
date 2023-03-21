@@ -51,27 +51,6 @@ def builtIn_type(elem):
 
 # class IDP(ASTNode):
 
-def printAST(self, spaces):
-    print(f"{spaces*' '} {type(self).__name__}: {self}")
-    # Get all vocabularies
-    V = self.get_blocks(self.vocabularies)
-    for v in V:
-        v.printAST(spaces+3)
-    # Get all structures
-    S = self.get_blocks(self.structures)
-    for s in S:
-        s.printAST(spaces+3)
-    # Get all theories
-    T = self.get_blocks(self.theories)
-    for t in T:
-        t.printAST(spaces+3)
-    # Get all procedures
-    P = self.get_blocks(self.procedures)
-    for p in P:
-        p.printAST(spaces+3)
-IDP.printAST = printAST
-
-
 def blockNameCheck(self, a):
     if hasattr(a, 'name'):
         for t in self.theories:
@@ -89,12 +68,6 @@ IDP.blockNameCheck = blockNameCheck
 
 # class Vocabulary(ASTNode):
 
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self.name}")
-    for i in self.declarations:
-        i.printAST(spaces+5)
-Vocabulary.printAST = printAST
-
 def SCA_Check(self, detections):
     for i in self.declarations:
         i.SCA_Check(detections)
@@ -102,18 +75,6 @@ Vocabulary.SCA_Check = SCA_Check
 
 
 # class TypeDeclaration(ASTNode):
-
-def printAST(self, spaces):
-    if str(self) > self.name:
-        print(f"{spaces*' '}{type(self).__name__}: self")
-    else:
-        print(f"{spaces*' '}{type(self).__name__}: self.name")
-    for i in self.sorts:
-        i.printAST(spaces+5)
-    if self.interpretation is not None:
-        self.interpretation.printAST(spaces+5)
-TypeDeclaration.printAST = printAST
-
 
 def SCA_Check(self, detections):
     # style guide check : capital letter for type
@@ -136,13 +97,6 @@ TypeDeclaration.SCA_Check = SCA_Check
 
 # class SymbolDeclaration(ASTNode):
 
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self}")
-    for i in self.sorts:
-        i.printAST(spaces+5)
-    self.out.printAST(spaces+5)
-SymbolDeclaration.printAST = printAST
-
 
 def SCA_Check(self, detections):
     if self.name[0].isupper():
@@ -158,13 +112,6 @@ SymbolDeclaration.SCA_Check = SCA_Check
 
 
 # class TheoryBlock(ASTNode):
-def printAST(self, spaces):
-    for c in self.constraints:
-        c.printAST(spaces+5)
-    for d in self.definitions:
-        d.printAST(spaces+5)
-TheoryBlock.printAST = printAST
-
 
 def SCA_Check(self, detections):
     for c in self.constraints:
@@ -176,13 +123,6 @@ TheoryBlock.SCA_Check = SCA_Check
 
 # class Definition(ASTNode):
 
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self}")
-    for r in self.rules:
-        r.printAST(spaces+5)
-Definition.printAST = printAST
-
-
 def SCA_Check(self, detections):
     for r in self.rules:
         r.SCA_Check(detections)
@@ -190,15 +130,6 @@ Definition.SCA_Check = SCA_Check
 
 
 # class Rule(ASTNode):
-
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self}")
-    for q in self.quantees:
-        q.printAST(spaces+5)
-    self.definiendum.printAST(spaces+5)
-    self.body.printAST(spaces+5)
-Rule.printAST = printAST
-
 
 def SCA_Check(self, detections):
     for q in self.quantees:
@@ -213,12 +144,6 @@ Rule.SCA_Check = SCA_Check
 ################################ Structure  ###############################
 
 # class Structure(ASTNode):
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self}")
-    for i in self.interpretations:
-        self.interpretations[i].printAST(spaces+5)
-Structure.printAST = printAST
-
 
 def SCA_Check(self, detections):
     for i in self.interpretations:
@@ -227,11 +152,6 @@ Structure.SCA_Check = SCA_Check
 
 
 # class SymbolInterpretation(ASTNode):
-
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self}")
-    self.enumeration.printAST(spaces+5)
-SymbolInterpretation.printAST = printAST
 
 
 def SCA_Check(self, detections):
@@ -367,27 +287,11 @@ SymbolInterpretation.SCA_Check = SCA_Check
 
 
 ## class Enumeration(ASTNode):
-
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self}")
-    for t in self.tuples:
-        t.printAST(spaces+5)
-Enumeration.printAST = printAST
-
-
 ## class FunctionEnum(Enumeration):
 ## class CSVEnumeration(Enumeration):
 ## class ConstructedFrom(Enumeration):
 
 ## class TupleIDP(ASTNode):
-
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self}")
-    for a in self.args:
-        a.printAST(spaces+5)
-TupleIDP.printAST = printAST
-
-
 ## class FunctionTuple(TupleIDP):
 ## class CSVTuple(TupleIDP):
 ## class Ranges(Enumeration):
@@ -403,13 +307,6 @@ TupleIDP.printAST = printAST
 
 ## class Procedure(ASTNode):.pystatements)}"
 
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self}")
-    for a in self.pystatements:
-        a.printAST(spaces+5)
-Procedure.printAST = printAST
-
-
 def SCA_Check(self, detections):
     for a in self.pystatements:
         a.SCA_Check(detections)
@@ -417,13 +314,6 @@ Procedure.SCA_Check = SCA_Check
 
 
 ## class Call1(ASTNode):
-
-def printAST(self, spaces):
-    print(f"{spaces*' '}{type(self).__name__}: {self}")
-    for a in self.args:
-        a.printAST(spaces+5)
-Call1.printAST = printAST
-
 
 def SCA_Check(self, detections):
     if self.name in ["model_check", "model_expand", "model_propagate"]:

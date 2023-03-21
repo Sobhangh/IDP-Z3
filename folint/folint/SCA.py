@@ -226,10 +226,6 @@ def lint_fo(idp_file, timing=True, print_ast=False):
         total = 0
         idp = IDP.from_str(idp_file)  # Parse IDP file to AST.
 
-        # Print AST if requested.
-        if print_ast:
-            idp.printAST(0)
-
         # Execute the SCA!
         total, output_str = sca(idp)
 
