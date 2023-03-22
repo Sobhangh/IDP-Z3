@@ -25,6 +25,7 @@ from idp_engine.Parse import *
 from operator import truediv
 from click import IntRange
 from copy import copy
+import itertools
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
@@ -187,24 +188,8 @@ def SCA_Check(self, detections):
                 in_type_values = list(i.decl.enumeration.tuples.keys())
             options.append(in_type_values)
 
-        # Determine all possible combinations
-        new_list = []
-        old_list = options[0]
-        for i in range(1, len(options)):
-            new_list = []
-            for a in old_list:
-                for b in options[i]:
-                    hulp_element = []
-                    if isinstance(a, list):
-                        for c in a:
-                            hulp_element.append(c)
-                    else:
-                        hulp_element.append(a)
-                    hulp_element.append(b)
-                    new_list.append(hulp_element)
-            old_list = new_list
-
-        possibilities = old_list
+        # possibilities = old_list
+        possibilities = [list(x) for x in list(itertools.product(*options))]
         duplicates = []
         for t in self.enumeration.tuples:
             # Check if the output element is of correct type.
@@ -238,10 +223,8 @@ def SCA_Check(self, detections):
             elif (elements in duplicates or elements[0] in duplicates): # Duplicate
                 detections.append((t.args[0], "Wrong input elements, duplicate", "Error"))
 
-        if (len(possibilities) > 0 and self.symbol.decl.arity == 1):
+        if len(possibilities) > 0:
             detections.append((self, f"Function not totally defined, missing {possibilities}", "Error"))
-        elif len(possibilities) > 0:
-            detections.append((self, "Function not totally defined, missing elements", "Error"))
 
     # Symbol is a predicate of arity > 0
     elif self.symbol.decl.arity > 0:
