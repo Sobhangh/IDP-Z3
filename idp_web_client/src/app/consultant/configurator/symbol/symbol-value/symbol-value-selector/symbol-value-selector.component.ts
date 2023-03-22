@@ -17,8 +17,6 @@ export class SymbolValueSelectorComponent implements OnInit {
   @Input()
   withHeader: boolean;
 
-  date_value: Date = null;
-
   reading = 0;
 
   constructor(private idpService: IdpService, private configurationService: ConfigurationService) {
