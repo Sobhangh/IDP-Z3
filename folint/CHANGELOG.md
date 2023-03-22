@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 - Fix false positives in structure.
+- Multiple minor refactors (see https://gitlab.com/krr/IDP-Z3/-/merge_requests/291)
 
 ## [1.0.3] - 2022-09-28
 - Various minor bugs
