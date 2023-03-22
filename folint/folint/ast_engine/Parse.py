@@ -217,9 +217,6 @@ def SCA_Check(self, detections):
             elif elements in possibilities:     # Valid possiblity
                 possibilities.remove(elements)  # Remove used possibility out of list
                 duplicates.append(elements)     # Add used possibility to list to detect duplicates
-            elif (self.symbol.decl.arity == 1 and elements[0] in possibilities):  # Function with 1 input element, valid possibility
-                possibilities.remove(elements[0])   # Remove used possibility out of list
-                duplicates.append(elements[0])      # Add used possibility to list to detect duplicates
             elif (elements in duplicates or elements[0] in duplicates): # Duplicate
                 detections.append((t.args[0], "Wrong input elements, duplicate", "Error"))
 
