@@ -199,12 +199,12 @@ def SCA_Check(self, detections):
                     detections.append((t.value, err_str, "Error"))
 
             elif out_type.name == 'ℤ':
-                if t.value.type == 'ℝ':
+                if t.value.type != 'ℤ':
                     err_str = (f'Output element {str(t.value)} should be Int')
                     detections.append((t.value, err_str, "Error"))
 
             else:
-                if str(t.value) not in out_type_values:  # Used an output element of wrong type
+                if out_type_values and str(t.value) not in out_type_values:  # Used an output element of wrong type
                     detections.append((t.value, f"Output element of wrong type, {str(t.value)}", "Error"))
 
             elements = []
@@ -217,7 +217,7 @@ def SCA_Check(self, detections):
             elif elements in possibilities:     # Valid possiblity
                 possibilities.remove(elements)  # Remove used possibility out of list
                 duplicates.append(elements)     # Add used possibility to list to detect duplicates
-            elif (elements in duplicates or elements[0] in duplicates): # Duplicate
+            elif (elements in duplicates):  # Duplicate
                 detections.append((t.args[0], "Wrong input elements, duplicate", "Error"))
 
         if len(possibilities) > 0:
@@ -228,7 +228,12 @@ def SCA_Check(self, detections):
         options = []
         for i in self.symbol.decl.sorts:
             # Get all values of the argument types
-            if i.decl.enumeration is None:
+            # Predicates can also have Real or Int as input types.
+            if i.name == 'ℤ':
+                in_type_values = 'ℤ'
+            elif i.name == 'ℝ':
+                in_type_values = 'ℝ'
+            elif i.decl.enumeration is None:
                 # Interpretation in Struct
                 in_type_values = list(self.parent.interpretations.get(i.str, []).enumeration.tuples.keys())
             else:
@@ -240,8 +245,19 @@ def SCA_Check(self, detections):
                 detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
             else:
                 for i in range(0, len(t.args), 1):  # Get elements
-                    if str(t.args[i]) not in options[i]:
-                        detections.append((t.args[i], "Element of wrong type", "Error"))  # Element of wrong type used in predicate
+                    if options[i] == 'ℤ' and not t.args[i].type == 'ℤ':
+                        detections.append((t.args[i],
+                                           "Element of wrong type",
+                                           "Error"))
+                    elif options[i] == 'ℝ' and t.args[i].type not in ['ℝ', 'ℤ']:
+                        detections.append((t.args[i],
+                                           "Element of wrong type",
+                                           "Error"))
+                    elif options[i] not in ['ℤ', 'ℝ'] and str(t.args[i]) not in options[i]:
+                        breakpoint()
+                        detections.append((t.args[i],
+                                           "Element of wrong type",
+                                           "Error"))
 
     # Symbol is a proposition (no check necessary).
     elif out_type.name == '𝔹':
