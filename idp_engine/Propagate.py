@@ -418,9 +418,10 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         yield from self._propagate_ignored(tag, given_todo)
         return
 
+    solver = self.solver
     if not self.previous_assignments:
         try:
-            yield from self._first_propagate(self.solver)
+            yield from self._first_propagate(solver)
         except IDPZ3Error:
             yield NOT_SATISFIABLE
             # can't access solver.sexpr()
@@ -444,11 +445,6 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
         for a in to_remove:
             todo.pop(a.code)
 
-    if not todo:
-        yield "No more consequences."
-        return
-
-    solver = self.solver
     solver.push()
 
     self._add_assignment(solver)

@@ -17,8 +17,6 @@ export class SymbolValueSelectorComponent implements OnInit {
   @Input()
   withHeader: boolean;
 
-  date_value: Date = null;
-
   reading = 0;
 
   constructor(private idpService: IdpService, private configurationService: ConfigurationService) {
@@ -29,11 +27,16 @@ export class SymbolValueSelectorComponent implements OnInit {
   }
   calendar_update(info) {
     // hack: https://github.com/primefaces/primeng/issues/2426
-    if (this.date_value) {
-      let d = new Date(this.date_value.getTime()
-                       - (this.date_value.getTimezoneOffset() * 60 * 1000));
-      info.assignment.value = '#'+d.toISOString().slice(0,10);
+    if (info.assignment.value) {
+      let d = new Date(info.assignment.value.getTime()
+                       - (info.assignment.value.getTimezoneOffset() * 60 * 1000));
+      info.assignment.value2 = '#'+d.toISOString().slice(0,10);
       info.assignment.status = 'GIVEN';
+      this.idpService.meta.atomConsistency(this.info.assignment);
+      this.idpService.doPropagation();
+    } else if (info.assignment.value2 != null) {  // value has been emptied
+      info.assignment.status = 'UNKNOWN';
+      info.assignment.value2 = null;
       this.idpService.meta.atomConsistency(this.info.assignment);
       this.idpService.doPropagation();
     }
@@ -41,6 +44,7 @@ export class SymbolValueSelectorComponent implements OnInit {
   update(info: ValueInfo, event) {
     if (info.assignment.value2 !==event.target.value) {
       info.assignment.value = event.target.value;
+      info.assignment.value2 = String(info.assignment.value)
       info.assignment.status = 'GIVEN';
       this.idpService.meta.atomConsistency(this.info.assignment);
       this.idpService.doPropagation();

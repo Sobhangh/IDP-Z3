@@ -12,7 +12,7 @@ export class CurrentAssignment {
 
   typ = null;
   value = null;   // internal value; may be a ratio that needs conversion
-  value2: String = null;  // displayed string
+  value2: String = null;  // string displayed to the user
   values: SelectItem[] = null;
 
   relevant = true;
@@ -71,7 +71,13 @@ export class CurrentAssignment {
         'value': included ? this.value : '',
         'status': this.status
       };
-    } else {
+    } else if (this.typ === 'Date') {
+      return {
+        'typ': 'Date',
+        'value': included ? this.value2 : '',
+        'status': this.status
+      };
+    }{
       return {
         'value': this.value,
         'typ': this.typ,
@@ -82,6 +88,7 @@ export class CurrentAssignment {
 
   reset() {
     this.value = null;
+    this.value2 = null;
     this.unknown = false;
   }
 }
