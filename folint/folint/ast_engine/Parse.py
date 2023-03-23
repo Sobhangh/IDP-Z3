@@ -156,127 +156,85 @@ Structure.SCA_Check = SCA_Check
 
 
 def SCA_Check(self, detections):
-    # Check the defined functions, predicates, constants and propositions
 
-    # If the symbol is a type, do nothing.
-    out_type = self.symbol.decl.out
-    if self.is_type_enumeration:
+    if self.is_type_enumeration:  # If the symbol is a type, do nothing.
         return
 
-    # The symbol is a function.
-    elif isinstance(self.enumeration, FunctionEnum):
-        # Create a list containing the possible output values.
-        # This is left None if the output type is an Int or Real.
-        out_type_values = None
-        if out_type.name not in ['ℤ', 'ℝ']:
-            if out_type.decl.enumeration is None:
-                # Type interpretation in Struct.
-                out_type_values = list(self.parent.interpretations.get(out_type.str, []).enumeration.tuples.keys())
-            else:
-                # Type interpretation in Voc.
-                out_type_values = list(out_type.decl.enumeration.tuples.keys())
+    # Auxiliary function
+    def check_type(value, type, values, message):
+        err_str = ''
+        if type.name == BOOL:
+            if str(value) not in ['true', 'false']:
+                err_str = (f'{message} {str(value)} should be Bool')
+        elif type.name == REAL:
+            if value.type not in [REAL, INT]:
+                err_str = (f'{message} {str(value)} should be Real')
+        elif type.name == INT:
+            if value.type != INT:
+                err_str = (f'{message} {str(value)} should be Int')
+        elif type.name == DATE:
+            if value.type != DATE:
+                err_str = (f'{message} {str(value)} should be Date')
+        else:
+            if type and str(value) not in values:
+                err_str = f"{message} of wrong type, {str(value)} should be {type.name}"
+        if err_str:
+                detections.append((value, err_str, "Error"))
 
-        # Create a list containing all possible input arguments (to check
-        # the totality of the interpretation)
-        options = []
-        for i in self.symbol.decl.sorts:    # Get all values of the argument types
-            if i.decl.enumeration is None:
-                # Type interpretation in Structure
-                in_type_values = list(self.parent.interpretations.get(i.str, []).enumeration.tuples.keys())
-            else:
-                # Type interpretation in the vocabulary.
-                in_type_values = list(i.decl.enumeration.tuples.keys())
-            options.append(in_type_values)
+    # options = list of list of possible values for an argument
+    options = []
+    for i in self.symbol.decl.sorts:
+        if i.name in [BOOL, INT, REAL, DATE]:
+            in_type_values = []
+        elif i.decl.enumeration is None:  # Interpretation in Struct
+            in_type_values = list(self.parent.interpretations.get(i.str, []).enumeration.tuples.keys())
+        else:  # Interpretation in Voc
+            in_type_values = list(i.decl.enumeration.tuples.keys())
+        options.append(in_type_values)
 
-        # possibilities = old_list
-        possibilities = [list(x) for x in list(itertools.product(*options))]
-        duplicates = []
-        for t in self.enumeration.tuples:
-            # Check if the output element is of correct type.
-            if out_type.name == 'ℝ':
-                if t.value.type not in ['ℝ', 'ℤ']:
-                    err_str = (f'Output element {str(t.value)} should be Real')
-                    detections.append((t.value, err_str, "Error"))
-
-            elif out_type.name == 'ℤ':
-                if t.value.type != 'ℤ':
-                    err_str = (f'Output element {str(t.value)} should be Int')
-                    detections.append((t.value, err_str, "Error"))
-
-            else:
-                if out_type_values and str(t.value) not in out_type_values:  # Used an output element of wrong type
-                    detections.append((t.value, f"Output element of wrong type, {str(t.value)}", "Error"))
-
-            elements = []
-            for i in range(0, len(t.args)-1, 1):  # Get input elements
-                if (i < len(options) and (str(t.args[i]) not in options[i])):
-                    detections.append((t.args[i], f"Element of wrong type, {str(t.args[i])}", "Error"))  # Element of wrong type used
-                elements.append(str(t.args[i]))
-            if len(t.args) > self.symbol.decl.arity+1:    # Given to much input elements
-                detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
-            elif elements in possibilities:     # Valid possiblity
-                possibilities.remove(elements)  # Remove used possibility out of list
-                duplicates.append(elements)     # Add used possibility to list to detect duplicates
-            elif (elements in duplicates):  # Duplicate
-                detections.append((t.args[0], "Wrong input elements, duplicate", "Error"))
-
-        if len(possibilities) > 0:
-            detections.append((self, f"Function not totally defined, missing {possibilities}", "Error"))
-
-    # Symbol is a predicate of arity > 0
-    elif self.symbol.decl.arity > 0:
-        options = []
-        for i in self.symbol.decl.sorts:
-            # Get all values of the argument types
-            # Predicates can also have Real or Int as input types.
-            if i.name == 'ℤ':
-                in_type_values = 'ℤ'
-            elif i.name == 'ℝ':
-                in_type_values = 'ℝ'
-            elif i.decl.enumeration is None:
-                # Interpretation in Struct
-                in_type_values = list(self.parent.interpretations.get(i.str, []).enumeration.tuples.keys())
-            else:
-                # Interpretation in Voc
-                in_type_values = list(i.decl.enumeration.tuples.keys())
-            options.append(in_type_values)
-        for t in self.enumeration.tuples:
-            if len(t.args) > self.symbol.decl.arity:    # Given to much input elements
-                detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
-            else:
-                for i in range(0, len(t.args), 1):  # Get elements
-                    if options[i] == 'ℤ' and not t.args[i].type == 'ℤ':
-                        detections.append((t.args[i],
-                                           "Element of wrong type",
-                                           "Error"))
-                    elif options[i] == 'ℝ' and t.args[i].type not in ['ℝ', 'ℤ']:
-                        detections.append((t.args[i],
-                                           "Element of wrong type",
-                                           "Error"))
-                    elif options[i] not in ['ℤ', 'ℝ'] and str(t.args[i]) not in options[i]:
-                        breakpoint()
-                        detections.append((t.args[i],
-                                           "Element of wrong type",
-                                           "Error"))
-
-    # Symbol is a proposition (no check necessary).
-    elif out_type.name == '𝔹':
-        return
-
-    # Symbol is a constant.
+    # same logic, for out value
+    out_type, out_type_values = self.symbol.decl.out, None
+    if out_type.name in [BOOL, INT, REAL, DATE]:
+        out_type_values = []
+    elif out_type.decl.enumeration is None:
+        # Type interpretation in Struct.
+        out_type_values = list(self.parent.interpretations.get(out_type.str, []).enumeration.tuples.keys())
     else:
-        # If the output is not a built-in type, check if it is correct.
-        if hasattr(out_type.decl, 'enumeration'):
-            # Output type is no built-in type
-            if out_type.decl.enumeration is None:
-                # Type interpertation in Struct.
-                out_type_values = list(self.parent.interpretations.get(out_type.str, []).enumeration.tuples.keys())
-            else:
-                # Type interpretation in Voc.
-                out_type_values = list(out_type.decl.enumeration.tuples.keys())
+        # Type interpretation in Voc.
+        out_type_values = list(out_type.decl.enumeration.tuples.keys())
 
-            if self.default.str not in out_type_values:
-                detections.append((self.default, "Element of wrong type", "Error"))  # Element of wrong type used
+
+    domain_size = 1
+    for x in options:
+        domain_size *= len(x)
+    # possibilities = set of all possible tuples of arguments (if not too big)
+    if domain_size < 10000:
+        possibilities = set(tuple(x) for x in list(itertools.product(*options)))
+    else:
+        possibilities = set()
+    duplicates = set()
+    function = 1 if isinstance(self.enumeration, FunctionEnum) else 0  # to ignore the last element of the tuple
+    for t in self.enumeration.tuples:
+        for i in range(0, self.symbol.decl.arity):  # check each argument in tuple
+            check_type(t.args[i], self.symbol.decl.sorts[i], options[i], 'Element')
+
+        elements = tuple(str(t.args[i]) for i in range(0, self.symbol.decl.arity))
+        if len(t.args) - function > self.symbol.decl.arity:
+            detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
+        possibilities.discard(elements)
+        if elements in duplicates:
+            detections.append((t.args[0], "Duplicate input elements", "Error"))
+        duplicates.add(elements)
+
+    if self.default:  # for constant, or else value
+        check_type(self.default, out_type, out_type_values, 'Output element')
+
+    if isinstance(self.enumeration, FunctionEnum):
+        for t in self.enumeration.tuples:  # check output of each tuple
+            check_type(t.args[-1].value, out_type, out_type_values, 'Output element')
+
+        if len(possibilities) > 0 and not self.default:
+            detections.append((self, f"Function not totally defined, missing {str(possibilities)[:25]}", "Error"))
 
 
 SymbolInterpretation.SCA_Check = SCA_Check
