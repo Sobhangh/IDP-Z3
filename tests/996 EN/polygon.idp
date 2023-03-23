@@ -46,7 +46,7 @@ theory {
     (nr_of_vertices()=4 ⇔ nr_of_sides()=4).
 
     [All triangles are convex]
-    if nr_of_sides()=3, then convex().
+    nr_of_sides()=3 are sufficient conditions for convex().
 
     [Definition of convex]
     convex() ⇔ [All angles are below 180°]
