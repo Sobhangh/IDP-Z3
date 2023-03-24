@@ -80,7 +80,8 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
       Quantor: '∀' | '!' | '∃' | '?' | 'for' 'all' | 'there' 'is' 'a';
     ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
     AEquivalence:  sub_exprs=Implication (operator=EquivalenceOp  sub_exprs=Implication)+;
-    AImplication:  sub_exprs=Disjunction (operator=ImplicationOp  sub_exprs=Disjunction)+;
+    AImplication:  (sub_exprs=Disjunction (operator=ImplicationOp  sub_exprs=Disjunction)+)
+                   | ('if' sub_exprs=Disjunction ',' operator='then' sub_exprs=Disjunction);
     ADisjunction:  sub_exprs=Conjunction (operator=DisjunctionOp  sub_exprs=Conjunction)+;
     AConjunction:  sub_exprs=Comparison  (operator=ConjunctionOp  sub_exprs=Comparison )+;
     AComparison:   annotations=Annotations

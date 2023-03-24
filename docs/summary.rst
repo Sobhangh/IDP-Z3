@@ -107,7 +107,8 @@ It is possible to use English connectives to create expressions:
 
     p() or q()                                   p() ∨ q()
     p() and q()                                  p() ∧ q()
-    p() are sufficient conditions for q()       p() ⇒ q()
+    if p(), then q()                             p() ⇒ q()
+    p() are sufficient conditions for q()        p() ⇒ q()
     p() are necessary conditions for q()         p() ⇐ q()
     p() is the same as q()                       p() ⇔ q()
 
