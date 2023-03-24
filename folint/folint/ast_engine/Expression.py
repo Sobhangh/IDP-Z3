@@ -61,10 +61,6 @@ def typesVergelijken(type1,type2):
 
 ### class ASTNode(object):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
-ASTNode.printAST = printAST
-
 def SCA_Check(self,detections):
     return
     # print("SCA check:"+type(self).__name__+": ",self)
@@ -86,25 +82,7 @@ AIfExpr.get_type = get_type
 
 
 ## class Quantee(Expression):
-
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
-    for var in self.vars:
-        var[0].printAST(spaties+5)
-    for sub in self.sub_exprs:
-        sub.printAST(spaties+5)
-Quantee.printAST = printAST
-
-
 ## class AQuantification(Expression):
-
-def printAST(self, spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
-    for q in self.quantees:
-        q.printAST(spaties+5)
-    for sub in self.sub_exprs:
-        sub.printAST(spaties+5)
-AQuantification.printAST = printAST
 
 def SCA_Check(self, detections):
     vars = set()
@@ -290,12 +268,6 @@ AMultDiv.get_type = get_type
 
 # class AUnary(Expression):
 
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
-    for sub in self.sub_exprs:
-        sub.printAST(spaties+5)
-AUnary.printAST = printAST
-
 def SCA_Check(self,detections):
     # style regel: Gebruik van haakjes bij een negated in-statement
     if (isinstance(self.f, AppliedSymbol) and self.f.is_enumeration=='in'):
@@ -319,14 +291,6 @@ def get_type(self):
 AAggregate.get_type = get_type
 
 ## class AppliedSymbol(Expression):
-
-def printAST(self,spaties):
-    print(spaties*" "+type(self).__name__+": ",self)
-    if self.in_enumeration != None:
-        self.in_enumeration.printAST(spaties+5)
-    for sub in self.sub_exprs:
-        sub.printAST(spaties+5)
-AppliedSymbol.printAST = printAST
 
 def SCA_Check(self,detections):
     # Check for the correct number of arguments.
