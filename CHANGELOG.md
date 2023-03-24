@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
+## [0.10.4] - unreleased yet
+
+This release has new package dependencies: please run `poetry install` to update.
+
+Contributors (alphabetical): Pierre Carbonnelle.
+
+### IDP-Z3
+* issue #249: regression of performance with new Z3 solver
+
+### Interactive Consultant and Web IDE
+
+
 ## [0.10.3] - 2023-03-24
 
 The main new features in this release are:
@@ -12,7 +24,7 @@ The main new features in this release are:
 
 This release has new package dependencies: please run `poetry install` to update.
 
-Contributors (alphabetical): Pierre Carbonnelle.
+Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * MR !279: Support co-inductive definitions
