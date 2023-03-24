@@ -18,6 +18,7 @@ from distutils.dir_util import copy_tree
 import json
 import subprocess
 import re
+import sys
 
 
 def run(c, **kwargs):
@@ -44,6 +45,8 @@ def query_user(query, default="y", get=False):
     else:
         return input(query) in "Nn"
 
+if not query_user("Did you do a 'poetry update'? (Y/n)"):
+    sys.exit()
 
 run('git pull origin', check=True)
 run('python3 test.py generate')
@@ -92,7 +95,8 @@ if update_statics:
         with open("./pyproject.toml", "w") as fp:
             fp.write(pyproject)
 
-        _ = query_user("Update version in CHANGELOG and in IDP-Z3.py.  Ready ?(Y/N)")
+        _ = query_user("Update version (and contributors) in CHANGELOG.  Ready ?(Y/N)")
+        _ = query_user("Update version in IDP-Z3.py.  Ready ?(Y/N)")
 
     # Add and commit.
     run("git add -A")
