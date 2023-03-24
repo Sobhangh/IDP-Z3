@@ -208,7 +208,7 @@ def SCA_Check(self, detections):
     for x in options:
         domain_size *= len(x)
     # possibilities = set of all possible tuples of arguments (if not too big)
-    if domain_size < 10000:
+    if domain_size < 1000:
         possibilities = set(tuple(x) for x in list(itertools.product(*options)))
     else:
         possibilities = set()
