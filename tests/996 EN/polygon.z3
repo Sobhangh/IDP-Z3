@@ -8,17 +8,17 @@
 - [There are as many vertices as there are sides]
   (the number of vertices is 3 if and only if the number of edges is 3) and (the number of vertices is 4 if and only if the number of edges is 4).
 - [All triangles are convex]
-  the number of edges is 3 is a sufficient condition for it is convex.
+  if the number of edges is 3, then it is convex.
 - [Definition of convex]
   it is convex if and only if (for every n in Side_Nr, it is true that angle n°n < 180).
 - [Definition of equilateral]
   it is equilateral if and only if (for every n in Side_Nr, it is true that length n°n is length n°1 or length n°n is 0).
 - [nr_of_sides() = 3 ⇒ subtype() = right_triangle ∨ subtype() = regular_triangle ∨ subtype() = irregular]
-  the subtype is right_triangle or the subtype is regular_triangle or the subtype is irregular is a necessary condition for the number of edges is 3.
+  the subtype is right_triangle or the subtype is regular_triangle or the subtype is irregular are necessary conditions for the number of edges is 3.
 - [nr_of_sides() = 4 ⇒ subtype() = square ∨ subtype() = rectangle ∨ subtype() = irregular]
-  the subtype is square or the subtype is rectangle or the subtype is irregular is a necessary condition for the number of edges is 4.
+  the subtype is square or the subtype is rectangle or the subtype is irregular are necessary conditions for the number of edges is 4.
 - [Squares and rectangles are quadrilaterals]
-  the subtype is square or the subtype is rectangle is a sufficient condition for the number of edges is 4.
+  if the subtype is square or the subtype is rectangle, then the number of edges is 4.
 - [A regular triangle is an equilateral triangle]
   the subtype is regular_triangle if and only if the number of edges is 3 and it is equilateral.
 - [A regular triangle is a triangle where all angles are 60°]
@@ -28,11 +28,11 @@
 - [All angles are 90° in squares and rectangles]
   the number of edges is 4 and the subtype is not irregular if and only if (for every n in Side_Nr, it is true that angle n°n is 90 or angle n°n is 0).
 - [In a rectangle, opposite Side_Nr have the same length, and adjacent sides have different lengths]
-  the subtype is rectangle is a sufficient condition for length n°3 is length n°1 and length n°2 is length n°4 and length n°2 is not length n°1.
+  if the subtype is rectangle, then length n°3 is length n°1 and length n°2 is length n°4 and length n°2 is not length n°1.
 - [A square is an equilateral quadrilateral]
-  the subtype is square is a sufficient condition for the number of edges is 4 and it is equilateral.
+  if the subtype is square, then the number of edges is 4 and it is equilateral.
 - [In a triangle, no Side_Nr is longer than the sum of the 2 other sides]
-  the type is triangle is a sufficient condition for (length n°1 ≤ length n°2 + length n°3) and (length n°2 ≤ length n°3 + length n°1) and (length n°3 ≤ length n°1 + length n°2).
+  if the type is triangle, then (length n°1 ≤ length n°2 + length n°3) and (length n°2 ≤ length n°3 + length n°1) and (length n°3 ≤ length n°1 + length n°2).
 - [The perimeter is the sum of the lengths of the sides]
   the perimeter is the sum of length n°n for all n in Side_Nr.
 - [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]

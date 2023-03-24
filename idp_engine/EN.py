@@ -27,6 +27,7 @@ from copy import copy
 from .Parse import IDP
 from .Parse import Definition, Rule
 from .Expression import (ASTNode, AIfExpr, Quantee, AQuantification, AAggregate,
+                         AImplication, ARImplication,
                          Operator, AComparison, AUnary, AppliedSymbol, Brackets)
 from .Theory import Theory
 from .utils import NEWL
@@ -81,10 +82,13 @@ Quantee.EN = EN
 def EN(self):
     self = self.original
     vars = ','.join([f"{q.EN()}" for q in self.quantees])
-    if self.q == '∀':
+    if not vars:
+        return self.sub_exprs[0].EN()
+    elif self.q == '∀':
         return f"for every {vars}, it is true that {self.sub_exprs[0].EN()}"
-    else:
+    elif self.q == '∃':
         return f"there is a {vars} such that {self.sub_exprs[0].EN()}"
+    self.check(False, "Internal error")
 AQuantification.EN = EN
 
 
@@ -103,15 +107,14 @@ AAggregate.EN = EN
 
 Operator.EN_map =  {'∧': " and ",
                     '∨': " or ",
-                    '⇒': " is a sufficient condition for ",
-                    '⇐': " is a necessary condition for ",
+                    '⇒': " are sufficient conditions for ",
+                    '⇐': " are necessary conditions for ",
                     '⇔': " if and only if ",
                     "=": " is ",
                     "≠": " is not ",
                     }
 
 def EN(self):
-    self = self.original  # for reverse implication
     def parenthesis(precedence, x):
         return f"({x.EN()})" if type(x).PRECEDENCE <= precedence else f"{x.EN()}"
     precedence = type(self).PRECEDENCE
@@ -121,6 +124,15 @@ def EN(self):
         temp += f" {op} {parenthesis(precedence, self.sub_exprs[i])}"
     return temp
 Operator.EN = EN
+
+
+def EN(self):
+    if 2 < len(self.sub_exprs):
+        return Operator.EN(self)
+    elif type(self.original) == ARImplication:
+        return Operator.EN(self.original)
+    return f"if {self.sub_exprs[0].EN()}, then {self.sub_exprs[1].EN()}"
+AImplication.EN = EN
 
 
 def EN(self):

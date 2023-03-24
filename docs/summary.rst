@@ -97,3 +97,26 @@ The equivalent ASCII-only encoding is shown on the right.
     }
 
 See also the :ref:`built-in functions`.
+
+It is possible to use English connectives to create expressions:
+
+.. code::
+
+    for all T x:                                 ∀ x ∈ T:
+    there is a T x:                              ∃ x ∈ T:
+
+    p() or q()                                   p() ∨ q()
+    p() and q()                                  p() ∧ q()
+    if p(), then q()                             p() ⇒ q()
+    p() are sufficient conditions for q()        p() ⇒ q()
+    p() are necessary conditions for q()         p() ⇐ q()
+    p() is the same as q()                       p() ⇔ q()
+
+    x is y                                       x = y
+    x is not y                                   x ≠ y
+    x is strictly less than y                    x < y
+    x is less than y                             x ≤ y
+    x is greater than y                          x ≥ y
+    x is strictly greater than y                 x > y
+
+    p() if q().                                  p() ← q().

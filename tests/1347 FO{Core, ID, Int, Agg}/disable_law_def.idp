@@ -21,10 +21,10 @@ structure S:V {
 procedure main () {
     theo = Theory(T,S)
     pretty_print(theo.expand())
-    theo.disable_law("∀ p0_ ∈ T,p1_ ∈ T: p(p0_, p1_) ⇐ q(p0_, p1_)")
+    theo.disable_law("∀ p0_ ∈ T,p1_ ∈ T: q(p0_, p1_) ⇒ p(p0_, p1_)")
     pretty_print(theo.propagate())
-    theo.enable_law("∀ p0_ ∈ T,p1_ ∈ T: p(p0_, p1_) ⇐ q(p0_, p1_)")
+    theo.enable_law("∀ p0_ ∈ T,p1_ ∈ T: q(p0_, p1_) ⇒ p(p0_, p1_)")
     pretty_print(theo.expand())
-    theo.disable_law("∀ p0_ ∈ T,p1_ ∈ T: p(p0_, p1_) ⇐ q(p1_, p0_)")
+    theo.disable_law("∀ p0_ ∈ T,p1_ ∈ T: q(p0_, p1_) ⇒ p(p0_, p1_)")
     pretty_print(theo.optimize("f()",minimize=False))
 }

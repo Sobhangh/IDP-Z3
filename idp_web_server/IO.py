@@ -168,7 +168,7 @@ class Output(object):
                 elif typ in [REAL, INT, DATE]:
                     symbol = {"typ": FROM.get(typ, typ), }
                 else:
-                    assert False, "dead code"
+                    assert False, f"unknown type {typ} for {atom}"
                     symbol = None
 
                 if symb.name == key and 'reading' in symb.annotations:  #inherit reading

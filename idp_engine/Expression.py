@@ -770,7 +770,9 @@ class AQuantification(Expression):
         self.quantees = quantees
         self.f = f
 
-        self.q = '∀' if self.q == '!' else '∃' if self.q == "?" else self.q
+        self.q = ('∀' if self.q in ['!', 'forall'] else
+                  '∃' if self.q in ["?", "thereisa"] else
+                  self.q)
         if self.quantees and not self.quantees[-1].sub_exprs:
             # separate untyped variables, so that they can be typed separately
             q = self.quantees.pop()
@@ -836,15 +838,36 @@ def EXISTS(qs, expr, annotations=None):
 class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
     MAP = dict()  # monkey-patched
+    NORMAL = {
+        "is strictly less than": "<",
+        "is less than": "≤",
+        "=<": "≤",
+        "is greater than": "≥",
+        "is strictly greater than": ">",
+        ">=" : "≥",
+        "is not": "≠",
+        "~=": "≠",
+        "<=>": "⇔",
+        "is the same as": "⇔",
+        "<=": "⇐",
+        "are necessary conditions for": "⇐",
+        "=>": "⇒",
+        "then": "⇒",
+        "are sufficient conditions for": "⇒",
+        "|": "∨",
+        "or": "∨",
+        "&": "∧",
+        "and": "∧",
+        "*": "⨯",
+        "is": "=",
+    }
 
     def __init__(self, parent, operator, sub_exprs, annotations=None):
         self.operator = operator
         self.sub_exprs = sub_exprs
 
         self.operator = list(map(
-            lambda op: "≤" if op == "=<" else "≥" if op == ">=" else "≠" if op == "~=" else \
-                "⇔" if op == "<=>" else "⇐" if op == "<=" else "⇒" if op == "=>" else \
-                "∨" if op == "|" else "∧" if op == "&" else "⨯" if op == "*" else op
+            lambda op: Operator.NORMAL.get(op, op)
             , self.operator))
 
         super().__init__()
@@ -988,7 +1011,7 @@ class AUnary(Expression):
                  f: Expression):
         self.operators = operators
         self.f = f
-        self.operators = ['¬' if c == '~' else c for c in self.operators]
+        self.operators = ['¬' if c in ['~', 'not'] else c for c in self.operators]
         self.operator = self.operators[0]
         self.check(all([c == self.operator for c in self.operators]),
                    "Incorrect mix of unary operators")
@@ -1171,9 +1194,8 @@ class AppliedSymbol(Expression):
         return symbols
 
     def has_decision(self):
-        self.check(self.decl.block is not None, "Internal error")
-        return not self.decl.block.name == 'environment' \
-            or any(e.has_decision() for e in self.sub_exprs)
+        return ((self.decl.block is not None and not self.decl.block.name == 'environment')
+            or any(e.has_decision() for e in self.sub_exprs))
 
     def type_inference(self):
         if self.symbol.decl:

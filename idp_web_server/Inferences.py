@@ -34,7 +34,10 @@ def explain(state, consequence=None):
     out = Output(state)
     for ass in facts:
         out.addAtom(ass.sentence, ass.value, ass.status)
-    out.m['*laws*'] = [(law.code, law.annotations['reading']) for law in laws]
+    def en(law):
+        reading = law.annotations.get('reading', law.code)
+        return reading if reading != law.code else law.EN()
+    out.m['*laws*'] = [(law.code, en(law)) for law in laws]
 
     # remove irrelevant atoms
     for symb, dictionary in out.m.items():

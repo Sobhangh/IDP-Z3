@@ -1,14 +1,14 @@
 vocabulary environment {
     [EN:the number of participants]
-    nr_of_participants: () → ℤ
+    the_nr_of_participants: () → ℤ
 
     [short:Applies to all participants]
     [EN:all participants have the Covid Safe ticket]
-    have_Covid_Safe_Ticket: () → 𝔹
+    the_participants_have_Covid_Safe_Ticket: () → 𝔹
 
     [short:Applies to all participants]
     [EN:all participants have masks]
-    have_masks: () → 𝔹
+    the_participants_have_masks: () → 𝔹
 }
 vocabulary decision {
     import environment
@@ -22,34 +22,38 @@ vocabulary decision {
     end_time: () → ℤ
 }
 theory environment:environment {
-    [Nr of participants is positive]
-    1 ≤ nr_of_participants().
+    1 is less than the_nr_of_participants().
 }
 theory decision:decision {
 
-    [Outdoor sport activity must end at 8 PM]
-    activity() = Outdoor_sport ⇒ [ends at 8 PM](end_time() ≤ 8)
-            ∧ ( have_masks() ∨ have_Covid_Safe_Ticket() ).
+      end_time() is less than 8
+      and ( the_participants_have_masks() or the_participants_have_Covid_Safe_Ticket() )
+    are necessary conditions for
+      activity() is Outdoor_sport.
 
-    [Indoor sport activity must end at 8 PM and participants must have the Covid Safe Ticket]
-    activity() = Indoor_sport ⇒ end_time() ≤ 8 ∧ have_Covid_Safe_Ticket().
+      end_time() is less than 8
+      and the_participants_have_Covid_Safe_Ticket()
+    are necessary conditions for
+      activity() is Indoor_sport.
 
-    [At most 6 persons, all with Covid Safe Ticket, can sit at a restaurant table, up to 11 PM]
-    activity() = Restaurant ⇒ [ends at 11 PM](end_time() ≤ 11) ∧
-                              [6 participants or less] nr_of_participants() ≤ 6 ∧
-                              have_Covid_Safe_Ticket().
 
-    [Cinemas and Theater can sit at most 2 people next to each other, all with Covid Safe Ticker, and must close at 11 PM]
-    ([Cinema or Theater] activity() ∈ {Cinema, Theater}) ⇒ end_time() ≤ 11 ∧
-                    [1 or 2 participants] nr_of_participants() ≤ 2 ∧
-                    have_Covid_Safe_Ticket().
+      end_time() is less than 11
+      and the_nr_of_participants() is less than 6
+      and the_participants_have_Covid_Safe_Ticket()
+    are necessary conditions for
+      activity() is Restaurant.
 
-    [Activities end in the afternoon]
-    1 ≤ end_time() ≤ 12.
+
+      the_nr_of_participants() is less than 2
+      and the_participants_have_Covid_Safe_Ticket()
+    are necessary conditions for
+      activity() in {Cinema, Theater}.
+
+    1 is less than end_time() is less than 12.
 }
 
 display {
-    heading('Participants', `nr_of_participants, `have_Covid_Safe_Ticket, `have_masks).
+    heading('Participants', `the_nr_of_participants, `the_participants_have_Covid_Safe_Ticket, `the_participants_have_masks).
     heading('Activity ', `activity, `end_time).
     view() = expanded.
     unit('PM', `end_time).

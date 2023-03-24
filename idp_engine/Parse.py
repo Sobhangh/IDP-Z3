@@ -724,7 +724,8 @@ class Rule(ASTNode):
         self.has_finite_domain = None  # Bool
         self.block = None  # theory where it occurs
 
-        self.annotations = self.annotations.annotations if self.annotations else {}
+        self.annotations = (self.annotations.annotations if self.annotations else
+                            {'reading': str(self)})
 
         if self.out is not None:
             self.definiendum.sub_exprs.append(self.out)
@@ -732,8 +733,9 @@ class Rule(ASTNode):
             self.body = TRUE
 
     def __repr__(self):
-        return (f"∀ {','.join(str(q) for q in self.quantees)}: "
-                f"{self.definiendum} "
+        quant = ('' if not self.quantees else
+                 f"∀ {','.join(str(q) for q in self.quantees)}: ")
+        return (f"{quant}{self.definiendum} "
                 f"{(' = ' + str(self.out)) if self.out else ''}"
                 f"← {str(self.body)}")
 

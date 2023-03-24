@@ -18,6 +18,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 * MR !279: Support co-inductive definitions
 * MR !280: various small improvements
 * MR !284: Refactor Expression.simpler for better performance
+* MR #290: English connectives in formula
 * issue #235: range interpretation of predicate is not respected
 * issue #236: Incorrect nested quantification over infinite domain
 * issue #238: Fix FOLint issues in structure
