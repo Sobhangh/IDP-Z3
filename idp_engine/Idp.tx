@@ -95,7 +95,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
     AIfExpr: 'if' if_f=Expression 'then' then_f=Expression 'else' else_f=Expression;
 
     RImplicationOp: '<=' | '⇐' | /are necessary conditions for/;
-    EquivalenceOp: '<=>' | '⇔' | /is the same as/;
+    EquivalenceOp: '<=>' | '⇔' | /is the same as/ | /are necessary and sufficient conditions for/;
     ImplicationOp:  '=>' | '⇒' | /are sufficient conditions for/;
     DisjunctionOp:   '|' | '∨' | 'or';
     ConjunctionOp:   '&' | '∧' | 'and';
