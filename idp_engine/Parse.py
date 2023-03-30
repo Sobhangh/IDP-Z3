@@ -61,6 +61,7 @@ def str_to_IDP(atom: Expression, val_string: str) -> Expression:
         Expression: the value cast as Expression, or None if unknown
     """
 
+    val_string = val_string.replace('True', 'true').replace('False', 'false')
     if val_string == str(atom) or val_string+"()" == str(atom):
         return None  # Z3 means the value is unknown
 
@@ -88,10 +89,11 @@ def str_to_IDP2(type_string: str,
         Expression: the internal representation of the value
     """
     if type_string == BOOL:
-        if val_string not in ['True', 'False', 'true', 'false']:
-            raise IDPZ3Error(f"wrong value: {val_string}")
-        out = (TRUE if val_string in ['True', 'true'] else
-               FALSE)
+        out = (TRUE if val_string == 'true' else
+               FALSE if val_string == 'false' else
+               None)
+        if out is None:
+            raise IDPZ3Error(f"wrong boolean value: {val_string}")
     elif type_string == DATE:
         d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
              date.fromisoformat(val_string[1:]))
