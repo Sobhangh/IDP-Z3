@@ -1,0 +1,19 @@
+vocabulary V {
+    type Color := {red, blue, green}
+    type List := constructed from {nil, cons(car:Color, cdr: List)}
+    a: () -> List
+    len: List -> Int
+}
+
+theory T:V {
+    ! x in List: len(x) = 0 <=> x = nil .
+    { ! x in List: len(x) = 0 <- x = nil.
+      ! x in List, n in Int: len(x) = len(cdr(x))+1 <- is_cons(x). }
+
+    len(a()) = 2.
+}
+
+procedure main() {
+    print(Theory(T).sexpr())
+    pretty_print(model_expand(T, max=10, sort=True))
+}
