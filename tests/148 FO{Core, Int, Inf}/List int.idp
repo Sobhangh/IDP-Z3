@@ -1,0 +1,13 @@
+vocabulary V {
+    type Color := {red, blue, green}
+    type List := constructed from {nil, cons(car:Color, cdr: List)}
+    a: () -> List
+}
+
+theory T:V {
+}
+
+procedure main() {
+    print(Theory(T).sexpr())
+    pretty_print(model_expand(T, max=10))
+}

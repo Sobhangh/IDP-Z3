@@ -62,7 +62,8 @@ def translate(self, problem: Theory):
             sort = Datatype(self.name, ctx=problem.ctx)
             for c in self.constructors:
                 sort.declare(c.name,
-                             *[(a.decl.name, a.decl.out.translate(problem))
+                             *[(a.decl.name,
+                                a.decl.out.translate(problem) if a.decl.out.name != self.name else sort)
                                for a in c.sorts])
             out = sort.create()
 

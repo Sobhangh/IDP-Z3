@@ -326,6 +326,8 @@ def interpret(self, problem):
     assert all(isinstance(s.decl.out, Type) for s in self.sorts), 'internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
+    elif any(s.type == self.type for s in self.sorts):
+        self.range = None
     else:
         extensions = [s.decl.out.extension(problem.interpretations, problem.extensions)
                       for s in self.sorts]
