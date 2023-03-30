@@ -98,6 +98,8 @@ The equivalent ASCII-only encoding is shown on the right.
 
 See also the :ref:`built-in functions`.
 
+.. _English:
+
 It is possible to use English connectives to create expressions:
 
 .. code::
@@ -110,6 +112,7 @@ It is possible to use English connectives to create expressions:
     if p(), then q()                             p() ⇒ q()
     p() are sufficient conditions for q()        p() ⇒ q()
     p() are necessary conditions for q()         p() ⇐ q()
+    p() are necessary and sufficient conditions for q() p() ⇔ q()
     p() is the same as q()                       p() ⇔ q()
 
     x is y                                       x = y

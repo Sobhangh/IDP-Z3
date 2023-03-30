@@ -849,6 +849,7 @@ class Operator(Expression):
         "~=": "≠",
         "<=>": "⇔",
         "is the same as": "⇔",
+        "are necessary and sufficient conditions for": "⇔",
         "<=": "⇐",
         "are necessary conditions for": "⇐",
         "=>": "⇒",

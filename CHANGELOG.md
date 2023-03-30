@@ -11,6 +11,7 @@ This release has new package dependencies: please run `poetry install` to update
 Contributors (alphabetical): Pierre Carbonnelle.
 
 ### IDP-Z3
+* MR !294: `are necessary and sufficient conditions for`
 * issue #249: regression of performance with new Z3 solver
 
 ### Interactive Consultant and Web IDE
