@@ -24,7 +24,6 @@ from __future__ import annotations
 from copy import copy, deepcopy
 from itertools import chain
 import string
-from typing import Dict, List
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition, Rule,
@@ -35,11 +34,11 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     ARImplication, AImplication, AEquivalence,
     Operator, AComparison, AUnary, AAggregate,
     AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
-    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE,
-    IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
+    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, FALSE,
+    FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-    OrderedSet, IDPZ3Error, Semantics)
+    OrderedSet, IDPZ3Error)
 
 
 # Class Vocabulary  #######################################################
@@ -185,7 +184,51 @@ TheoryBlock.annotate = annotate
 
 def annotate(self, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
-    self.set_level_symbols(voc)
+
+    # create level-mapping symbols, as needed
+    # self.level_symbols: Dict[SymbolDeclaration, Symbol]
+    dependencies = set()
+    for r in self.rules:
+        symbs = {}
+        r.body.collect_symbols(symbs)
+        for s in symbs.values():
+            dependencies.add((r.definiendum.symbol.decl, s))
+
+    while True:
+        new_relations = set((x, w) for x, y in dependencies
+                            for q, w in dependencies if q == y)
+        closure_until_now = dependencies | new_relations
+        if len(closure_until_now) == len(dependencies):
+            break
+        dependencies = closure_until_now
+
+    symbs = {s for (s, ss) in dependencies if s == ss}
+    for r in self.rules:
+        key = r.definiendum.symbol.decl
+        if key not in symbs or key in self.level_symbols:
+            continue
+
+        real = TYPE(REAL)
+        real.decl = voc.symbol_decls[REAL]
+        symbdec = SymbolDeclaration.make(
+            "_"+str(self.id)+"lvl_"+key.name,
+            key.arity, key.sorts, real)
+        self.level_symbols[key] = SYMBOL(symbdec.name)
+        self.level_symbols[key].decl = symbdec
+
+    for decl in self.level_symbols.keys():
+        self.check(decl.out.name == BOOL,
+                    f"Inductively defined functions are not supported yet: "
+                    f"{decl.name}.")
+
+    if len(self.level_symbols) > 0:  # check for nested recursive symbols
+        nested = set()
+        for r in self.rules:
+            r.body.collect_nested_symbols(nested, False)
+        for decl in self.level_symbols.keys():
+            self.check(decl not in nested,
+                        f"Inductively defined nested symbols are not supported yet: "
+                        f"{decl.name}.")
 
     # create common variables, and rename vars in rule
     self.canonicals = {}
@@ -199,7 +242,7 @@ def annotate(self, voc, q_vars):
             if decl.out.name != BOOL:
                 q_v[name] = VARIABLE(name, decl.out)
             self.def_vars[decl.name] = q_v
-        new_rule = r.rename_args(self.def_vars[decl.name])
+        new_rule = rename_args(r, self.def_vars[decl.name])
         self.canonicals.setdefault(decl, []).append(new_rule)
 
     # join the bodies of rules
@@ -210,78 +253,6 @@ def annotate(self, voc, q_vars):
         self.clarks[decl] = new_rule
     return self
 Definition.annotate = annotate
-
-def get_instantiables(self,
-                      interpretations: Dict[str, SymbolInterpretation],
-                      extensions: Dict[str, Extension],
-                      for_explain=False
-                      ) -> Dict[SymbolDeclaration, List[Expression]]:
-    """ compute Definition.instantiables, with level-mapping if definition is inductive
-
-    Uses implications instead of equivalence if `for_explain` is True
-
-    Example: `{ p() <- q(). p() <- r().}`
-    Result when not for_explain: `p() <=> q() | r()`
-    Result when for_explain    : `p() <= q(). p() <= r(). p() => (q() | r()).`
-
-    Args:
-        for_explain (Bool):
-            Use implications instead of equivalence, for rule-specific explanations
-    """
-    result = {}
-    for decl, rules in self.canonicals.items():
-        rule = rules[0]
-        rule.has_finite_domain = all(s.extension(interpretations, extensions)[0] is not None
-                                   for s in rule.definiendum.decl.sorts)
-        inductive = (self.mode != Semantics.COMPLETION
-            and rule.definiendum.symbol.decl in self.level_symbols)
-
-        if rule.has_finite_domain or inductive:
-            # add a constraint containing the definition over the full domain
-            if rule.out:
-                expr = AppliedSymbol.make(rule.definiendum.symbol,
-                                          rule.definiendum.sub_exprs[:-1])
-                expr.in_head = True
-                head = EQUALS([expr, rule.definiendum.sub_exprs[-1]])
-            else:
-                head = AppliedSymbol.make(rule.definiendum.symbol,
-                                          rule.definiendum.sub_exprs)
-                head.in_head = True
-
-            # determine reverse implications, if any
-            bodies, out = [], []
-            for r in rules:
-                if not inductive:
-                    bodies.append(r.body)
-                    if for_explain and 1 < len(rules):  # not simplified -> no need to make copies
-                        out.append(IMPLIES([r.body, head], r.annotations))
-                else:
-                    new = r.body.split_equivalences()
-                    bodies.append(new)
-                    if for_explain:
-                        new = deepcopy(new).add_level_mapping(self.level_symbols,
-                                             rule.definiendum, False, False, self.mode)
-                        out.append(IMPLIES([new, head], r.annotations))
-
-            all_bodies = OR(bodies)
-            if not inductive:
-                if out:  # already contains reverse implications
-                    out.append(IMPLIES([head, all_bodies], self.annotations))
-                else:
-                    out = [EQUIV([head, all_bodies], self.annotations)]
-            else:
-                if not out:  # no reverse implication yet
-                    new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
-                                             rule.definiendum, False, False, self.mode)
-                    out = [IMPLIES([new, deepcopy(head)], self.annotations)]
-                all_bodies = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
-                                        rule.definiendum, True, True, self.mode)
-                out.append(IMPLIES([head, all_bodies], self.annotations))
-            result[decl] = out
-        else:
-            out = TRUE
-    return result
-Definition.get_instantiables = get_instantiables
 
 
 # Class Rule  #######################################################
@@ -336,7 +307,7 @@ def rename_args(self, new_vars):
     self.definiendum.sub_exprs = list(new_vars.values())
     self.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars.values()]
     return self
-Rule.rename_args = rename_args
+
 
 
 # Class Structure  #######################################################
