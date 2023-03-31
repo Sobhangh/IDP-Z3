@@ -3,6 +3,7 @@ vocabulary V {
     a: () -> List
     len: List -> Int
     increasing, negative: List -> Bool
+    member: Int*List -> Bool
 }
 
 theory T:V {
@@ -22,12 +23,19 @@ theory T:V {
      ! x in List: increasing(x) <- is_cons(x) & increasing(cdr(x))
              & is_cons(cdr(x)) & car(x) > car(cdr(x)).}
 
+    { (recursive)
+     ! x in Int, l in List: member(x,l) <- is_cons(l) & car(l)=x.
+      ! x in Int, l in List: member(x,l) <- is_cons(l) & member(x, cdr(l)).
+    }
+
     len(a()) = 2.
     negative(a()).
     increasing(a()).
+    member(-1, a()).
+    member(-3, a()).
 }
 
 procedure main() {
     print(Theory(T).sexpr())
-    pretty_print(model_expand(T, max=10, sort=True))
+    pretty_print(model_expand(T, max=1, sort=True))
 }
