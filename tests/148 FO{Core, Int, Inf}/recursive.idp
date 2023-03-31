@@ -1,0 +1,33 @@
+vocabulary V {
+    type List := constructed from {nil, cons(car:Int, cdr: List)}
+    a: () -> List
+    len: List -> Int
+    increasing, negative: List -> Bool
+}
+
+theory T:V {
+
+    { (recursive)
+      ! x in List: len(x) = 0 <- x = nil.
+      ! x in List, n in Int: len(x) = len(cdr(x))+1 <- is_cons(x). }
+
+    { (recursive)
+      ! x in List: negative(x) <- is_nil(x).
+      ! x in List: negative(x) <- is_cons(x) & car(x)<0 & negative(cdr(x)).
+    }
+
+    { (recursive)
+     ! x in List: increasing(x) <- x = nil.
+     ! x in List: increasing(x) <- is_cons(x) & is_nil(cdr(x)).
+     ! x in List: increasing(x) <- is_cons(x) & increasing(cdr(x))
+             & is_cons(cdr(x)) & car(x) > car(cdr(x)).}
+
+    len(a()) = 2.
+    negative(a()).
+    increasing(a()).
+}
+
+procedure main() {
+    print(Theory(T).sexpr())
+    pretty_print(model_expand(T, max=10, sort=True))
+}

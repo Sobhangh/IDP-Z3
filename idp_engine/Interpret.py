@@ -44,10 +44,10 @@ from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
     Definition, Rule, ConstructedFrom)
-from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
+from .Expression import (RecDef, Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
     EQUIV, EQUALS, OR, AppliedSymbol, UnappliedSymbol, Quantee,
-    Variable, VARIABLE, TRUE, FALSE, Number, Extension)
+    Variable, VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND, CO_CONSTR_RECURSION_DEPTH, Semantics)
@@ -198,6 +198,23 @@ def get_def_constraints(self,
         Dict[SymbolDeclaration, Definition, List[Expression]]:
             a mapping from (Symbol, Definition) to the list of constraints
     """
+    if self.mode == Semantics.RECDATA:
+        out = {}
+        # TODO check that quantees are the same in every rule
+        self.check(len(self.clarks) == 1,
+                   f"No support for co-recursive function on datatypes")
+        decl = list(self.clarks.keys())[0]
+
+        # expr = nested if expression, for each rule
+        expr = ZERO if self.rules[0].out else FALSE # todo: pick a value in type
+        for rule in self.rules:
+            val = rule.original.out if rule.original.out is not None else TRUE
+            expr = IF(rule.original.body, val, expr)
+
+        expr = RecDef(self.parent, decl.name, self.rules[0].original.quantees, expr)
+        out[decl, self] = [expr]
+        return out
+
     # add level mappings
     instantiables = {}
     for decl, rules in self.canonicals.items():
@@ -261,7 +278,7 @@ Definition.get_def_constraints = get_def_constraints
 
 def instantiate_definition(self, decl, new_args, theory):
     rule = self.clarks.get(decl, None)
-    if rule:
+    if rule and self.mode != Semantics.RECDATA:
         key = str(new_args)
         if (decl, key) in self.cache:
             return self.cache[decl, key]

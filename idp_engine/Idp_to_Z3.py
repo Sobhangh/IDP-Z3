@@ -28,9 +28,9 @@ from copy import copy
 from fractions import Fraction
 from typing import TYPE_CHECKING
 from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
-                Function, Const, FreshConst, BoolSort, IntSort, RealSort,
+                Function, RecFunction, Const, FreshConst, BoolSort, IntSort, RealSort,
                 Or, Not, And, ForAll, Exists, Sum, If,
-                BoolVal, RatVal, IntVal)
+                BoolVal, RatVal, IntVal, RecAddDefinition)
 
 from .Parse import TypeDeclaration, SymbolDeclaration, TupleIDP, Ranges, IntRange, RealRange, DateRange
 from .Expression import (Constructor, Expression, AIfExpr, Quantee,
@@ -38,9 +38,9 @@ from .Expression import (Constructor, Expression, AIfExpr, Quantee,
                         ADisjunction, AConjunction, AComparison,
                         AUnary, AAggregate, AppliedSymbol,
                         UnappliedSymbol, Number, Date, Brackets,
-                        Variable, TRUE)
+                        Variable, TRUE, RecDef)
 from .utils import (BOOL, INT, REAL, DATE,
-                    GOAL_SYMBOL, RELEVANT, RESERVED_SYMBOLS)
+                    GOAL_SYMBOL, RELEVANT, RESERVED_SYMBOLS, Semantics)
 
 if TYPE_CHECKING:
     from .Theory import Theory
@@ -94,12 +94,16 @@ TypeDeclaration.translate = translate
 def translate(self, problem: Theory):
     out = problem.z3.get(self.name, None)
     if out is None:
+        recursive = any(self in def_.clarks
+                        for _, def_ in problem.def_constraints.keys()
+                        if def_.mode == Semantics.RECDATA)
         if len(self.sorts) == 0:
             out = Const(self.name, self.out.decl.base_type.translate(problem))
         else:
             types = ( [x.decl.base_type.translate(problem) for x in self.sorts]
                     + [self.out.decl.base_type.translate(problem)])
-            out = Function(self.name, types)
+            out = (Function(self.name, types) if not recursive else
+                   RecFunction(self.name, types))
         problem.z3[self.name] = out
     return out
 SymbolDeclaration.translate = translate
@@ -421,6 +425,22 @@ Date.translate = translate
 def translate1(self, problem: Theory, vars={}):
     return self.sub_exprs[0].translate(problem, vars)
 Brackets.translate1 = translate1
+
+
+# Class RecDef  #######################################################
+
+def translate1(self, problem: Theory, vars={}):
+    local_vars = {}
+    for q in self.quantees:
+        local_vars.update(q.translate(problem, vars))
+    all_vars = copy(vars)
+    all_vars.update(local_vars)
+    func = problem.z3[self.name]
+    # add definition to context
+    RecAddDefinition(func, list(local_vars.values()),
+                    self.sub_exprs[0].translate(problem, all_vars))
+    return TRUE.translate(problem)
+RecDef.translate1 = translate1
 
 
 Done = True

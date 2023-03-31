@@ -656,6 +656,7 @@ class Definition(ASTNode):
                      S.COMPLETION if 'completion' in mode else
                      S.KRIPKEKLEENE if 'Kripke-Kleene' in mode else
                      S.COINDUCTION if 'co-induction' in mode else
+                     S.RECDATA if 'recursive' in mode else
                      mode)
         assert type(self.mode) == S, f"Unsupported mode: {mode}"
         self.annotations = annotations.annotations if annotations else {}
@@ -709,6 +710,7 @@ class Rule(ASTNode):
             self.definiendum.sub_exprs.append(self.out)
         if self.body is None:
             self.body = TRUE
+        self.original = None
 
     def __repr__(self):
         quant = ('' if not self.quantees else

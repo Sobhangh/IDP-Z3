@@ -1246,7 +1246,9 @@ class AppliedSymbol(Expression):
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
         assert head.symbol.decl in level_symbols, \
                f"Internal error in level mapping: {self}"
-        if self.symbol.decl not in level_symbols or self.in_head:
+        if (self.symbol.decl not in level_symbols
+            or self.in_head
+            or mode == Semantics.RECDATA):
             return self
         else:
             if mode == Semantics.WELLFOUNDED:
@@ -1440,4 +1442,21 @@ class Brackets(Expression):
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
     def __str1__(self): return str(self)
+
+
+class RecDef(Expression):
+    """represents a recursive definition
+    """
+    def __init__(self, parent, name, quantees, expr):
+        self.parent = parent
+        self.name = name
+        self.quantees = quantees
+        self.sub_exprs = [expr]
+
+        Expression.__init__(self)
+
+    def __str__(self):
+        return (f"{self.name}("
+                f"{', '.join(q.str for q in self.quantees)}"
+                f") = {self.sub_exprs[0]}.")
 
