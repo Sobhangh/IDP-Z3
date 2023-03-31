@@ -591,10 +591,6 @@ class Definition(ASTNode):
             normalized rule for each defined symbol,
             e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
 
-        instantiables (Dict[Declaration], List[Expression]):
-            list of instantiable expressions for each symbol,
-            e.g., `p($p!1$) <=> q($p!1$)`
-
         clarks (Dict[Declaration, Transformed Rule]):
             normalized rule for each defined symbol (used to be Clark completion)
             e.g., `!$p!1$: p($p!1$) <=> q($p!1$)`
@@ -626,7 +622,6 @@ class Definition(ASTNode):
         self.rules = rules
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.canonicals = {}
-        self.instantiables = {}
         self.def_vars = {}  # {String: {String: Variable}}
         self.level_symbols = {}  # {SymbolDeclaration: Symbol}
         self.cache = {}  # {decl, str: Expression}
@@ -647,11 +642,10 @@ class Definition(ASTNode):
     def __hash__(self):
         return hash(self.id)
 
-    def get_instantiables(self,
-                      interpretations: Dict[str, SymbolInterpretation],
-                      extensions: Dict[str, Extension],
-                      for_explain=False
-                      ) -> Dict[SymbolDeclaration, List[Expression]]:
+    def get_def_constraints(self,
+                            problem,
+                            for_explain: bool = False
+                            ) -> Dict[SymbolDeclaration, Definition, List[Expression]]:
         pass # monkey-patched
 
     def instantiate_definition(self, decl, new_args, theory):

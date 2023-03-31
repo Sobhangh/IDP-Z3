@@ -176,31 +176,36 @@ def interpret(self, problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
-    self.instantiables = self.get_instantiables(problem.interpretations, problem.extensions)
-    self.add_def_constraints(self.instantiables, problem, problem.def_constraints)
+    problem.def_constraints.update(self.get_def_constraints(problem))
 Definition.interpret = interpret
 
-def get_instantiables(self,
-                      interpretations: Dict[str, SymbolInterpretation],
-                      extensions: Dict[str, Extension],
-                      for_explain=False
-                      ) -> Dict[SymbolDeclaration, List[Expression]]:
-    """ compute Definition.instantiables, with level-mapping if definition is inductive
+def get_def_constraints(self,
+                        problem,
+                        for_explain: bool = False
+                        ) -> Dict[SymbolDeclaration, Definition, List[Expression]]:
+    """returns the constraints for this definition.
 
-    Uses implications instead of equivalence if `for_explain` is True
-
-    Example: `{ p() <- q(). p() <- r().}`
-    Result when not for_explain: `p() <=> q() | r()`
-    Result when for_explain    : `p() <= q(). p() <= r(). p() => (q() | r()).`
+    The `instantiables` (of the definition) are expanded in `problem`.
 
     Args:
+        instantiables (Dict[SymbolDeclaration, List[Expression]]):
+            the constraints without the quantification
+
+        problem (Theory):
+            contains the structure for the expansion/interpretation of the constraints
+
         for_explain (Bool):
             Use implications instead of equivalence, for rule-specific explanations
+
+    Return:
+        Dict[SymbolDeclaration, Definition, List[Expression]]:
+            a mapping from (Symbol, Definition) to the list of constraints
     """
-    result = {}
+    # add level mappings
+    instantiables = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.has_finite_domain = all(s.extension(interpretations, extensions)[0] is not None
+        rule.has_finite_domain = all(s.extension(problem.interpretations, problem.extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
         inductive = (self.mode != Semantics.COMPLETION
             and rule.definiendum.symbol.decl in self.level_symbols)
@@ -246,33 +251,16 @@ def get_instantiables(self,
                 all_bodies = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
                                         rule.definiendum, True, True, self.mode)
                 out.append(IMPLIES([head, all_bodies], self.annotations))
-            result[decl] = out
-        else:
-            out = TRUE
-    return result
-Definition.get_instantiables = get_instantiables
+            instantiables[decl] = out
 
-def add_def_constraints(self, instantiables, problem, result):
-    """result is updated with the constraints for this definition.
-
-    The `instantiables` (of the definition) are expanded in `problem`.
-
-    Args:
-        instantiables (Dict[SymbolDeclaration, List[Expression]]):
-            the constraints without the quantification
-
-        problem (Theory):
-            contains the structure for the expansion/interpretation of the constraints
-
-        result (Dict[SymbolDeclaration, Definition, List[Expression]]):
-            a mapping from (Symbol, Definition) to the list of constraints
-    """
+    out = {}
     for decl, bodies in instantiables.items():
         quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
         expr = [FORALL(quantees, e, e.annotations).interpret(problem)
                 for e in bodies]
-        result[decl, self] = expr
-Definition.add_def_constraints = add_def_constraints
+        out[decl, self] = expr
+    return out
+Definition.get_def_constraints = get_def_constraints
 
 def instantiate_definition(self, decl, new_args, theory):
     rule = self.clarks.get(decl, None)
