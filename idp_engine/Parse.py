@@ -647,6 +647,13 @@ class Definition(ASTNode):
     def __hash__(self):
         return hash(self.id)
 
+    def get_instantiables(self,
+                      interpretations: Dict[str, SymbolInterpretation],
+                      extensions: Dict[str, Extension],
+                      for_explain=False
+                      ) -> Dict[SymbolDeclaration, List[Expression]]:
+        pass # monkey-patched
+
     def instantiate_definition(self, decl, new_args, theory):
         pass # monkey-patched
 

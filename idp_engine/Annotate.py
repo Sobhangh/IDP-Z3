@@ -24,7 +24,6 @@ from __future__ import annotations
 from copy import copy, deepcopy
 from itertools import chain
 import string
-from typing import Dict, List
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition, Rule,
@@ -35,11 +34,11 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     ARImplication, AImplication, AEquivalence,
     Operator, AComparison, AUnary, AAggregate,
     AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
-    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE,
-    IMPLIES, RIMPLIES, EQUIV, FORALL, EXISTS, Extension)
+    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, FALSE,
+    FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-    OrderedSet, IDPZ3Error, Semantics)
+    OrderedSet, IDPZ3Error)
 
 
 # Class Vocabulary  #######################################################
@@ -254,78 +253,6 @@ def annotate(self, voc, q_vars):
         self.clarks[decl] = new_rule
     return self
 Definition.annotate = annotate
-
-def get_instantiables(self,
-                      interpretations: Dict[str, SymbolInterpretation],
-                      extensions: Dict[str, Extension],
-                      for_explain=False
-                      ) -> Dict[SymbolDeclaration, List[Expression]]:
-    """ compute Definition.instantiables, with level-mapping if definition is inductive
-
-    Uses implications instead of equivalence if `for_explain` is True
-
-    Example: `{ p() <- q(). p() <- r().}`
-    Result when not for_explain: `p() <=> q() | r()`
-    Result when for_explain    : `p() <= q(). p() <= r(). p() => (q() | r()).`
-
-    Args:
-        for_explain (Bool):
-            Use implications instead of equivalence, for rule-specific explanations
-    """
-    result = {}
-    for decl, rules in self.canonicals.items():
-        rule = rules[0]
-        rule.has_finite_domain = all(s.extension(interpretations, extensions)[0] is not None
-                                   for s in rule.definiendum.decl.sorts)
-        inductive = (self.mode != Semantics.COMPLETION
-            and rule.definiendum.symbol.decl in self.level_symbols)
-
-        if rule.has_finite_domain or inductive:
-            # add a constraint containing the definition over the full domain
-            if rule.out:
-                expr = AppliedSymbol.make(rule.definiendum.symbol,
-                                          rule.definiendum.sub_exprs[:-1])
-                expr.in_head = True
-                head = EQUALS([expr, rule.definiendum.sub_exprs[-1]])
-            else:
-                head = AppliedSymbol.make(rule.definiendum.symbol,
-                                          rule.definiendum.sub_exprs)
-                head.in_head = True
-
-            # determine reverse implications, if any
-            bodies, out = [], []
-            for r in rules:
-                if not inductive:
-                    bodies.append(r.body)
-                    if for_explain and 1 < len(rules):  # not simplified -> no need to make copies
-                        out.append(IMPLIES([r.body, head], r.annotations))
-                else:
-                    new = r.body.split_equivalences()
-                    bodies.append(new)
-                    if for_explain:
-                        new = deepcopy(new).add_level_mapping(self.level_symbols,
-                                             rule.definiendum, False, False, self.mode)
-                        out.append(IMPLIES([new, head], r.annotations))
-
-            all_bodies = OR(bodies)
-            if not inductive:
-                if out:  # already contains reverse implications
-                    out.append(IMPLIES([head, all_bodies], self.annotations))
-                else:
-                    out = [EQUIV([head, all_bodies], self.annotations)]
-            else:
-                if not out:  # no reverse implication yet
-                    new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
-                                             rule.definiendum, False, False, self.mode)
-                    out = [IMPLIES([new, deepcopy(head)], self.annotations)]
-                all_bodies = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
-                                        rule.definiendum, True, True, self.mode)
-                out.append(IMPLIES([head, all_bodies], self.annotations))
-            result[decl] = out
-        else:
-            out = TRUE
-    return result
-Definition.get_instantiables = get_instantiables
 
 
 # Class Rule  #######################################################
