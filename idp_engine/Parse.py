@@ -43,8 +43,7 @@ from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR, Accesso
     Number, Brackets, Date, Extension,
     Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
-    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
-    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION,
+    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error, MAX_QUANTIFIER_EXPANSION,
     Semantics as S)
 
 
@@ -592,10 +591,6 @@ class Definition(ASTNode):
             normalized rule for each defined symbol,
             e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
 
-        instantiables (Dict[Declaration], List[Expression]):
-            list of instantiable expressions for each symbol,
-            e.g., `p($p!1$) <=> q($p!1$)`
-
         clarks (Dict[Declaration, Transformed Rule]):
             normalized rule for each defined symbol (used to be Clark completion)
             e.g., `!$p!1$: p($p!1$) <=> q($p!1$)`
@@ -627,7 +622,6 @@ class Definition(ASTNode):
         self.rules = rules
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.canonicals = {}
-        self.instantiables = {}
         self.def_vars = {}  # {String: {String: Variable}}
         self.level_symbols = {}  # {SymbolDeclaration: Symbol}
         self.cache = {}  # {decl, str: Expression}
@@ -648,71 +642,15 @@ class Definition(ASTNode):
     def __hash__(self):
         return hash(self.id)
 
+    def get_def_constraints(self,
+                            problem,
+                            for_explain: bool = False
+                            ) -> Dict[SymbolDeclaration, Definition, List[Expression]]:
+        pass # monkey-patched
+
     def instantiate_definition(self, decl, new_args, theory):
-        rule = self.clarks.get(decl, None)
-        if rule:
-            key = str(new_args)
-            if (decl, key) in self.cache:
-                return self.cache[decl, key]
+        pass # monkey-patched
 
-            if self.inst_def_level + 1 > CO_CONSTR_RECURSION_DEPTH:
-                return None
-            self.inst_def_level += 1
-            self.cache[decl, key] = None
-
-            out = rule.instantiate_definition(new_args, theory)
-
-            self.cache[decl, key] = out
-            self.inst_def_level -= 1
-            return out
-
-    def set_level_symbols(self, voc):
-        """Calculates which symbols in the definition are recursively defined,
-           creates a corresponding level mapping symbol,
-           and stores these in self.level_symbols.
-        """
-        dependencies = set()
-        for r in self.rules:
-            symbs = {}
-            r.body.collect_symbols(symbs)
-            for s in symbs.values():
-                dependencies.add((r.definiendum.symbol.decl, s))
-
-        while True:
-            new_relations = set((x, w) for x, y in dependencies
-                                for q, w in dependencies if q == y)
-            closure_until_now = dependencies | new_relations
-            if len(closure_until_now) == len(dependencies):
-                break
-            dependencies = closure_until_now
-
-        symbs = {s for (s, ss) in dependencies if s == ss}
-        for r in self.rules:
-            key = r.definiendum.symbol.decl
-            if key not in symbs or key in self.level_symbols:
-                continue
-
-            real = TYPE(REAL)
-            real.decl = voc.symbol_decls[REAL]
-            symbdec = SymbolDeclaration.make(
-                "_"+str(self.id)+"lvl_"+key.name,
-                key.arity, key.sorts, real)
-            self.level_symbols[key] = SYMBOL(symbdec.name)
-            self.level_symbols[key].decl = symbdec
-
-        for decl in self.level_symbols.keys():
-            self.check(decl.out.name == BOOL,
-                       f"Inductively defined functions are not supported yet: "
-                       f"{decl.name}.")
-
-        if len(self.level_symbols) > 0:  # check for nested recursive symbols
-            nested = set()
-            for r in self.rules:
-                r.body.collect_nested_symbols(nested, False)
-            for decl in self.level_symbols.keys():
-                self.check(decl not in nested,
-                           f"Inductively defined nested symbols are not supported yet: "
-                           f"{decl.name}.")
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):
@@ -740,32 +678,7 @@ class Rule(ASTNode):
                 f"← {str(self.body)}")
 
     def instantiate_definition(self, new_args, theory):
-        """Create an instance of the definition for new_args, and interpret it for theory.
-
-        Args:
-            new_args ([Expression]): tuple of arguments to be applied to the defined symbol
-            theory (Theory): the context for the interpretation
-
-        Returns:
-            Expression: a boolean expression
-        """
-
-        out = deepcopy(self.body)  # in case there are no arguments
-        instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
-        instance.in_head = True
-        if self.definiendum.decl.type == BOOL:  # a predicate
-            self.check(len(self.definiendum.sub_exprs) == len(new_args),
-                       "Internal error")
-            out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
-            out = EQUIV([instance, out])
-        else:
-            self.check(len(self.definiendum.sub_exprs) == len(new_args)+1 ,
-                       "Internal error")
-            out = out.instantiate(self.definiendum.sub_exprs,
-                                  new_args+[instance], theory)
-        out.block = self.block
-        out = out.interpret(theory)
-        return out
+        pass # monkey-patched
 
 
 # Expressions : see Expression.py

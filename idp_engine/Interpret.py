@@ -43,14 +43,14 @@ from typing import Dict, List, Callable
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
-    Definition, ConstructedFrom, Ranges)
+    Definition, Rule, ConstructedFrom)
 from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
-    NOT, EQUALS, AppliedSymbol, UnappliedSymbol, Quantee, TYPE,
+    EQUIV, EQUALS, OR, AppliedSymbol, UnappliedSymbol, Quantee,
     Variable, VARIABLE, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
-                    GOAL_SYMBOL, EXPAND)
+                    GOAL_SYMBOL, EXPAND, CO_CONSTR_RECURSION_DEPTH, Semantics)
 
 
 # class Import  ###########################################################
@@ -176,31 +176,139 @@ def interpret(self, problem):
             containts the enumerations for the expansion; is updated with the expanded definitions
     """
     self.cache = {}  # reset the cache
-    self.instantiables = self.get_instantiables(problem.interpretations, problem.extensions)
-    self.add_def_constraints(self.instantiables, problem, problem.def_constraints)
+    problem.def_constraints.update(self.get_def_constraints(problem))
 Definition.interpret = interpret
 
-def add_def_constraints(self, instantiables, problem, result):
-    """result is updated with the constraints for this definition.
+def get_def_constraints(self,
+                        problem,
+                        for_explain: bool = False
+                        ) -> Dict[SymbolDeclaration, Definition, List[Expression]]:
+    """returns the constraints for this definition.
 
     The `instantiables` (of the definition) are expanded in `problem`.
 
     Args:
-        instantiables (Dict[SymbolDeclaration, List[Expression]]):
-            the constraints without the quantification
-
         problem (Theory):
             contains the structure for the expansion/interpretation of the constraints
 
-        result (Dict[SymbolDeclaration, Definition, List[Expression]]):
+        for_explain (Bool):
+            Use implications instead of equivalence, for rule-specific explanations
+
+    Return:
+        Dict[SymbolDeclaration, Definition, List[Expression]]:
             a mapping from (Symbol, Definition) to the list of constraints
     """
+    # add level mappings
+    instantiables = {}
+    for decl, rules in self.canonicals.items():
+        rule = rules[0]
+        rule.has_finite_domain = all(s.extension(problem.interpretations, problem.extensions)[0] is not None
+                                   for s in rule.definiendum.decl.sorts)
+        inductive = (self.mode != Semantics.COMPLETION
+            and rule.definiendum.symbol.decl in self.level_symbols)
+
+        if rule.has_finite_domain or inductive:
+            # add a constraint containing the definition over the full domain
+            if rule.out:
+                expr = AppliedSymbol.make(rule.definiendum.symbol,
+                                          rule.definiendum.sub_exprs[:-1])
+                expr.in_head = True
+                head = EQUALS([expr, rule.definiendum.sub_exprs[-1]])
+            else:
+                head = AppliedSymbol.make(rule.definiendum.symbol,
+                                          rule.definiendum.sub_exprs)
+                head.in_head = True
+
+            # determine reverse implications, if any
+            bodies, out = [], []
+            for r in rules:
+                if not inductive:
+                    bodies.append(r.body)
+                    if for_explain and 1 < len(rules):  # not simplified -> no need to make copies
+                        out.append(IMPLIES([r.body, head], r.annotations))
+                else:
+                    new = r.body.split_equivalences()
+                    bodies.append(new)
+                    if for_explain:
+                        new = deepcopy(new).add_level_mapping(self.level_symbols,
+                                             rule.definiendum, False, False, self.mode)
+                        out.append(IMPLIES([new, head], r.annotations))
+
+            all_bodies = OR(bodies)
+            if not inductive:
+                if out:  # already contains reverse implications
+                    out.append(IMPLIES([head, all_bodies], self.annotations))
+                else:
+                    out = [EQUIV([head, all_bodies], self.annotations)]
+            else:
+                if not out:  # no reverse implication yet
+                    new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
+                                             rule.definiendum, False, False, self.mode)
+                    out = [IMPLIES([new, deepcopy(head)], self.annotations)]
+                all_bodies = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
+                                        rule.definiendum, True, True, self.mode)
+                out.append(IMPLIES([head, all_bodies], self.annotations))
+            instantiables[decl] = out
+
+    out = {}
     for decl, bodies in instantiables.items():
         quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
         expr = [FORALL(quantees, e, e.annotations).interpret(problem)
                 for e in bodies]
-        result[decl, self] = expr
-Definition.add_def_constraints = add_def_constraints
+        out[decl, self] = expr
+    return out
+Definition.get_def_constraints = get_def_constraints
+
+def instantiate_definition(self, decl, new_args, theory):
+    rule = self.clarks.get(decl, None)
+    if rule:
+        key = str(new_args)
+        if (decl, key) in self.cache:
+            return self.cache[decl, key]
+
+        if self.inst_def_level + 1 > CO_CONSTR_RECURSION_DEPTH:
+            return None
+        self.inst_def_level += 1
+        self.cache[decl, key] = None
+
+        out = rule.instantiate_definition(new_args, theory)
+
+        self.cache[decl, key] = out
+        self.inst_def_level -= 1
+        return out
+Definition.instantiate_definition = instantiate_definition
+
+
+# class Rule  ###########################################################
+
+def instantiate_definition(self, new_args, theory):
+    """Create an instance of the definition for new_args, and interpret it for theory.
+
+    Args:
+        new_args ([Expression]): tuple of arguments to be applied to the defined symbol
+        theory (Theory): the context for the interpretation
+
+    Returns:
+        Expression: a boolean expression
+    """
+
+    out = deepcopy(self.body)  # in case there are no arguments
+    instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
+    instance.in_head = True
+    if self.definiendum.decl.type == BOOL:  # a predicate
+        self.check(len(self.definiendum.sub_exprs) == len(new_args),
+                    "Internal error")
+        out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
+        out = EQUIV([instance, out])
+    else:
+        self.check(len(self.definiendum.sub_exprs) == len(new_args)+1 ,
+                    "Internal error")
+        out = out.instantiate(self.definiendum.sub_exprs,
+                                new_args+[instance], theory)
+    out.block = self.block
+    out = out.interpret(theory)
+    return out
+Rule.instantiate_definition = instantiate_definition
 
 
 # class SymbolInterpretation  ###########################################################
