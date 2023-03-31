@@ -185,7 +185,51 @@ TheoryBlock.annotate = annotate
 
 def annotate(self, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
-    self.set_level_symbols(voc)
+
+    # create level-mapping symbols, as needed
+    # self.level_symbols: Dict[SymbolDeclaration, Symbol]
+    dependencies = set()
+    for r in self.rules:
+        symbs = {}
+        r.body.collect_symbols(symbs)
+        for s in symbs.values():
+            dependencies.add((r.definiendum.symbol.decl, s))
+
+    while True:
+        new_relations = set((x, w) for x, y in dependencies
+                            for q, w in dependencies if q == y)
+        closure_until_now = dependencies | new_relations
+        if len(closure_until_now) == len(dependencies):
+            break
+        dependencies = closure_until_now
+
+    symbs = {s for (s, ss) in dependencies if s == ss}
+    for r in self.rules:
+        key = r.definiendum.symbol.decl
+        if key not in symbs or key in self.level_symbols:
+            continue
+
+        real = TYPE(REAL)
+        real.decl = voc.symbol_decls[REAL]
+        symbdec = SymbolDeclaration.make(
+            "_"+str(self.id)+"lvl_"+key.name,
+            key.arity, key.sorts, real)
+        self.level_symbols[key] = SYMBOL(symbdec.name)
+        self.level_symbols[key].decl = symbdec
+
+    for decl in self.level_symbols.keys():
+        self.check(decl.out.name == BOOL,
+                    f"Inductively defined functions are not supported yet: "
+                    f"{decl.name}.")
+
+    if len(self.level_symbols) > 0:  # check for nested recursive symbols
+        nested = set()
+        for r in self.rules:
+            r.body.collect_nested_symbols(nested, False)
+        for decl in self.level_symbols.keys():
+            self.check(decl not in nested,
+                        f"Inductively defined nested symbols are not supported yet: "
+                        f"{decl.name}.")
 
     # create common variables, and rename vars in rule
     self.canonicals = {}

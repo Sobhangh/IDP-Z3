@@ -666,53 +666,6 @@ class Definition(ASTNode):
             self.inst_def_level -= 1
             return out
 
-    def set_level_symbols(self, voc):
-        """Calculates which symbols in the definition are recursively defined,
-           creates a corresponding level mapping symbol,
-           and stores these in self.level_symbols.
-        """
-        dependencies = set()
-        for r in self.rules:
-            symbs = {}
-            r.body.collect_symbols(symbs)
-            for s in symbs.values():
-                dependencies.add((r.definiendum.symbol.decl, s))
-
-        while True:
-            new_relations = set((x, w) for x, y in dependencies
-                                for q, w in dependencies if q == y)
-            closure_until_now = dependencies | new_relations
-            if len(closure_until_now) == len(dependencies):
-                break
-            dependencies = closure_until_now
-
-        symbs = {s for (s, ss) in dependencies if s == ss}
-        for r in self.rules:
-            key = r.definiendum.symbol.decl
-            if key not in symbs or key in self.level_symbols:
-                continue
-
-            real = TYPE(REAL)
-            real.decl = voc.symbol_decls[REAL]
-            symbdec = SymbolDeclaration.make(
-                "_"+str(self.id)+"lvl_"+key.name,
-                key.arity, key.sorts, real)
-            self.level_symbols[key] = SYMBOL(symbdec.name)
-            self.level_symbols[key].decl = symbdec
-
-        for decl in self.level_symbols.keys():
-            self.check(decl.out.name == BOOL,
-                       f"Inductively defined functions are not supported yet: "
-                       f"{decl.name}.")
-
-        if len(self.level_symbols) > 0:  # check for nested recursive symbols
-            nested = set()
-            for r in self.rules:
-                r.body.collect_nested_symbols(nested, False)
-            for decl in self.level_symbols.keys():
-                self.check(decl not in nested,
-                           f"Inductively defined nested symbols are not supported yet: "
-                           f"{decl.name}.")
 
 class Rule(ASTNode):
     def __init__(self, **kwargs):
