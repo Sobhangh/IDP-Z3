@@ -188,9 +188,6 @@ def get_def_constraints(self,
     The `instantiables` (of the definition) are expanded in `problem`.
 
     Args:
-        instantiables (Dict[SymbolDeclaration, List[Expression]]):
-            the constraints without the quantification
-
         problem (Theory):
             contains the structure for the expansion/interpretation of the constraints
 

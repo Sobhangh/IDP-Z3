@@ -242,7 +242,7 @@ def annotate(self, voc, q_vars):
             if decl.out.name != BOOL:
                 q_v[name] = VARIABLE(name, decl.out)
             self.def_vars[decl.name] = q_v
-        new_rule = r.rename_args(self.def_vars[decl.name])
+        new_rule = rename_args(r, self.def_vars[decl.name])
         self.canonicals.setdefault(decl, []).append(new_rule)
 
     # join the bodies of rules
@@ -307,7 +307,7 @@ def rename_args(self, new_vars):
     self.definiendum.sub_exprs = list(new_vars.values())
     self.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars.values()]
     return self
-Rule.rename_args = rename_args
+
 
 
 # Class Structure  #######################################################
