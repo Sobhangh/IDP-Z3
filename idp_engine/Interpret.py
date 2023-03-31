@@ -43,14 +43,14 @@ from typing import Dict, List, Callable
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
-    Definition, ConstructedFrom, Ranges)
+    Definition, Rule, ConstructedFrom, Ranges)
 from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
-    NOT, EQUALS, AppliedSymbol, UnappliedSymbol, Quantee, TYPE,
+    EQUIV, AppliedSymbol, UnappliedSymbol, Quantee, TYPE,
     Variable, VARIABLE, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
-                    GOAL_SYMBOL, EXPAND)
+                    GOAL_SYMBOL, EXPAND, CO_CONSTR_RECURSION_DEPTH)
 
 
 # class Import  ###########################################################
@@ -201,6 +201,57 @@ def add_def_constraints(self, instantiables, problem, result):
                 for e in bodies]
         result[decl, self] = expr
 Definition.add_def_constraints = add_def_constraints
+
+def instantiate_definition(self, decl, new_args, theory):
+    rule = self.clarks.get(decl, None)
+    if rule:
+        key = str(new_args)
+        if (decl, key) in self.cache:
+            return self.cache[decl, key]
+
+        if self.inst_def_level + 1 > CO_CONSTR_RECURSION_DEPTH:
+            return None
+        self.inst_def_level += 1
+        self.cache[decl, key] = None
+
+        out = rule.instantiate_definition(new_args, theory)
+
+        self.cache[decl, key] = out
+        self.inst_def_level -= 1
+        return out
+Definition.instantiate_definition = instantiate_definition
+
+
+# class Rule  ###########################################################
+
+def instantiate_definition(self, new_args, theory):
+    """Create an instance of the definition for new_args, and interpret it for theory.
+
+    Args:
+        new_args ([Expression]): tuple of arguments to be applied to the defined symbol
+        theory (Theory): the context for the interpretation
+
+    Returns:
+        Expression: a boolean expression
+    """
+
+    out = deepcopy(self.body)  # in case there are no arguments
+    instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
+    instance.in_head = True
+    if self.definiendum.decl.type == BOOL:  # a predicate
+        self.check(len(self.definiendum.sub_exprs) == len(new_args),
+                    "Internal error")
+        out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
+        out = EQUIV([instance, out])
+    else:
+        self.check(len(self.definiendum.sub_exprs) == len(new_args)+1 ,
+                    "Internal error")
+        out = out.instantiate(self.definiendum.sub_exprs,
+                                new_args+[instance], theory)
+    out.block = self.block
+    out = out.interpret(theory)
+    return out
+Rule.instantiate_definition = instantiate_definition
 
 
 # class SymbolInterpretation  ###########################################################

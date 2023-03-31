@@ -43,8 +43,7 @@ from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR, Accesso
     Number, Brackets, Date, Extension,
     Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
-    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
-    CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION,
+    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error, MAX_QUANTIFIER_EXPANSION,
     Semantics as S)
 
 
@@ -649,22 +648,7 @@ class Definition(ASTNode):
         return hash(self.id)
 
     def instantiate_definition(self, decl, new_args, theory):
-        rule = self.clarks.get(decl, None)
-        if rule:
-            key = str(new_args)
-            if (decl, key) in self.cache:
-                return self.cache[decl, key]
-
-            if self.inst_def_level + 1 > CO_CONSTR_RECURSION_DEPTH:
-                return None
-            self.inst_def_level += 1
-            self.cache[decl, key] = None
-
-            out = rule.instantiate_definition(new_args, theory)
-
-            self.cache[decl, key] = out
-            self.inst_def_level -= 1
-            return out
+        pass # monkey-patched
 
 
 class Rule(ASTNode):
@@ -693,32 +677,7 @@ class Rule(ASTNode):
                 f"← {str(self.body)}")
 
     def instantiate_definition(self, new_args, theory):
-        """Create an instance of the definition for new_args, and interpret it for theory.
-
-        Args:
-            new_args ([Expression]): tuple of arguments to be applied to the defined symbol
-            theory (Theory): the context for the interpretation
-
-        Returns:
-            Expression: a boolean expression
-        """
-
-        out = deepcopy(self.body)  # in case there are no arguments
-        instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
-        instance.in_head = True
-        if self.definiendum.decl.type == BOOL:  # a predicate
-            self.check(len(self.definiendum.sub_exprs) == len(new_args),
-                       "Internal error")
-            out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
-            out = EQUIV([instance, out])
-        else:
-            self.check(len(self.definiendum.sub_exprs) == len(new_args)+1 ,
-                       "Internal error")
-            out = out.instantiate(self.definiendum.sub_exprs,
-                                  new_args+[instance], theory)
-        out.block = self.block
-        out = out.interpret(theory)
-        return out
+        pass # monkey-patched
 
 
 # Expressions : see Expression.py
