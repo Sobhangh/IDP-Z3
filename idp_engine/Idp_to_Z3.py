@@ -33,7 +33,7 @@ from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
                 BoolVal, RatVal, IntVal)
 
 from .Parse import TypeDeclaration, SymbolDeclaration, TupleIDP, Ranges, IntRange, RealRange, DateRange
-from .Expression import (Constructor, Expression, AIfExpr,
+from .Expression import (Constructor, Expression, AIfExpr, Quantee,
                         AQuantification, Operator, Symbol,
                         ADisjunction, AConjunction, AComparison,
                         AUnary, AAggregate, AppliedSymbol,
@@ -187,16 +187,25 @@ def translate1(self, problem: Theory, vars={}) -> ExprRef:
 AIfExpr.translate1 = translate1
 
 
+# Class Quantee  ######################################################
+
+def translate(self, problem: Theory, vars={}):
+    out = {}
+    for vars in self.vars:
+        for v in vars:
+            translated = FreshConst(v.sort.decl.base_type.translate(problem))
+            out[v.str] = translated
+    return out
+Quantee.translate = translate
+
 # Class AQuantification  ######################################################
 
 def translate1(self, problem: Theory, vars={}):
-    all_vars, local_vars = copy(vars), {}
+    local_vars = {}
     for q in self.quantees:
-        for vars in q.vars:
-            for v in vars:
-                translated = FreshConst(v.sort.decl.base_type.translate(problem))
-                all_vars[v.str] = translated
-                local_vars[v.str] = translated
+        local_vars.update(q.translate(problem, vars))
+    all_vars = copy(vars)
+    all_vars.update(local_vars)
     forms = [f.translate(problem, all_vars) for f in self.sub_exprs]
 
     if self.q == '∀':

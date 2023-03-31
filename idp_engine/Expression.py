@@ -529,6 +529,7 @@ class Expression(ASTNode):
 Extension = Tuple[Optional[List[List[Expression]]],  # None if the extension is infinite (e.g., Int)
                   Optional[Callable]]  # None if filtering is not required
 
+
 class Symbol(Expression):
     """Represents a Symbol.  Handles synonyms.
 
@@ -570,6 +571,7 @@ class Symbol(Expression):
 
 def SYMBOL(name: str) -> Symbol:
     return Symbol(None, name)
+
 
 class Type(Symbol):
     """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
@@ -635,6 +637,7 @@ class Type(Symbol):
 def TYPE(name: str, ins=None, out=None) -> Type:
     return Type(None, name, ins, out)
 
+
 class AIfExpr(Expression):
     PRECEDENCE = 10
     IF = 0
@@ -669,7 +672,6 @@ class AIfExpr(Expression):
 
     def collect_nested_symbols(self, symbols, is_nested):
         return Expression.collect_nested_symbols(self, symbols, True)
-
 
 def IF(IF: Expression,
        THEN: Expression,
@@ -835,6 +837,7 @@ def FORALL(qs, expr, annotations=None):
 def EXISTS(qs, expr, annotations=None):
     return AQuantification.make('∃', qs, expr, annotations)
 
+
 class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
     MAP = dict()  # monkey-patched
@@ -932,6 +935,7 @@ class AImplication(Operator):
 def IMPLIES(exprs, annotations=None):
     return AImplication.make('⇒', exprs, annotations)
 
+
 class AEquivalence(Operator):
     PRECEDENCE = 40
 
@@ -948,6 +952,7 @@ class AEquivalence(Operator):
 def EQUIV(exprs, annotations=None):
     return AEquivalence.make('⇔', exprs, annotations)
 
+
 class ARImplication(Operator):
     PRECEDENCE = 30
 
@@ -958,6 +963,7 @@ class ARImplication(Operator):
 
 def RIMPLIES(exprs, annotations):
     return ARImplication.make('⇐', exprs, annotations)
+
 
 class ADisjunction(Operator):
     PRECEDENCE = 60
@@ -970,11 +976,13 @@ class ADisjunction(Operator):
 def OR(exprs):
     return ADisjunction.make('∨', exprs)
 
+
 class AConjunction(Operator):
     PRECEDENCE = 70
 
 def AND(exprs):
     return AConjunction.make('∧', exprs)
+
 
 class AComparison(Operator):
     PRECEDENCE = 80
@@ -990,6 +998,7 @@ class AComparison(Operator):
 
 def EQUALS(exprs):
     return AComparison.make('=',exprs)
+
 
 class ASumMinus(Operator):
     PRECEDENCE = 90
@@ -1039,6 +1048,7 @@ class AUnary(Expression):
 
 def NOT(expr):
     return AUnary.make('¬', expr)
+
 
 class AAggregate(Expression):
     PRECEDENCE = 130
@@ -1305,12 +1315,12 @@ class UnappliedSymbol(Expression):
 
     def __str1__(self): return self.name
 
-
 TRUEC = CONSTRUCTOR('true')
 FALSEC = CONSTRUCTOR('false')
 
 TRUE = UnappliedSymbol.construct(TRUEC)
 FALSE = UnappliedSymbol.construct(FALSEC)
+
 
 class Variable(Expression):
     """AST node for a variable in a quantification or aggregate
@@ -1347,6 +1357,7 @@ class Variable(Expression):
 def VARIABLE(name: str, sort: Union[Type, Symbol]):
     return Variable(None, name, sort)
 
+
 class Number(Expression):
     PRECEDENCE = 200
 
@@ -1377,7 +1388,6 @@ class Number(Expression):
         """converts the INT number to REAL"""
         self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
         return Number(number=str(float(self.py_value)))
-
 
 ZERO = Number(number='0')
 ONE = Number(number='1')
