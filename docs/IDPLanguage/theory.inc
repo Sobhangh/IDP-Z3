@@ -135,6 +135,9 @@ Logic connectives
     ``ϕ_1 ꕕ ϕ_2`` is a formula when ``ϕ_1, ϕ_2`` are two formulae and ``ꕕ`` is one of the following logic connectives ``∨,∧,⇒,⇐,⇔`` (or using ascii characters: ``|, \&, =>, <=, <=>`` respectively).
     Logic connectives can be chained as customary.
 
+    Connectives can be written in English, e.g. ``and``.
+    See full list of English connectives in  :ref:`Syntax summary <English>`.
+
 Parenthesis
     (|phi|) is a formula when |phi| is a formula.
 
