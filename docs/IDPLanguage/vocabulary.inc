@@ -56,6 +56,7 @@ The ``RGB`` constructor takes 3 arguments of type ``Byte``.
 (When given a Color2 not constructed with RGB, they may raise an error)
 
 Constructors can be used to construct recursive data types, e.g., ``type List := constructed from {nil, cons(car:Color, cdr: List)}``.
+(However, unsatisfiable theories with recursive definitions do not terminate; propagation and explanation inferences are not supported).
 
 
 .. _function:
