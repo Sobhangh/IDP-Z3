@@ -7,7 +7,7 @@ vocabulary V {
 
 theory T:V {
     ! x in List: len(x) = 0 <=> x = nil .
-    { ! x in List: len(x) = 0 <- x = nil.
+    { len(nil) = 0.
       ! x in List, n in Int: len(x) = len(cdr(x))+1 <- is_cons(x). }
 
     len(a()) = 2.

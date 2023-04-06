@@ -10,7 +10,7 @@ theory T:V {
 
     { (recursive)
       len1(nil1) = 0.
-      ! x in List1: len1(x) = len1(cdr1(x))+1 <- is_cons1(x). }
+      ! x in List1, y in Int: len1(x) = y <- y= len1(cdr1(x))+1 & is_cons1(x). }
 
     // between 1 and 2
     { (recursive)

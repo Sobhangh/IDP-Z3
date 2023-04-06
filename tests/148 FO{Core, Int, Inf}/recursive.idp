@@ -2,7 +2,7 @@ vocabulary V {
     type List := constructed from {nil, cons(car:Int, cdr: List)}
     a: () -> List
     len: List -> Int
-    increasing, negative: List -> Bool
+    increasing, positive: List -> Bool
     member: Int*List -> Bool
 }
 
@@ -10,18 +10,18 @@ theory T:V {
 
     { (recursive)
       ! x in List: len(x) = 0 <- x = nil.
-      ! x in List, n in Int: len(x) = len(cdr(x))+1 <- is_cons(x). }
+      ! x in List: len(x) = len(cdr(x))+1 <- is_cons(x). }
 
     { (recursive)
-      ! x in List: negative(x) <- is_nil(x).
-      ! x in List: negative(x) <- is_cons(x) & car(x)<0 & negative(cdr(x)).
+      ! x in List: positive(x) <- is_nil(x).
+      ! x in List: positive(x) <- is_cons(x) & 0 < car(x) & positive(cdr(x)).
     }
 
     { (recursive)
      ! x in List: increasing(x) <- x = nil.
      ! x in List: increasing(x) <- is_cons(x) & is_nil(cdr(x)).
      ! x in List: increasing(x) <- is_cons(x) & increasing(cdr(x))
-             & is_cons(cdr(x)) & car(x) > car(cdr(x)).}
+             & is_cons(cdr(x)) & car(x) < car(cdr(x)).}
 
     { (recursive)
      ! x in Int, l in List: member(x,l) <- is_cons(l) & car(l)=x.
@@ -29,10 +29,10 @@ theory T:V {
     }
 
     len(a()) = 2.
-    negative(a()).
+    positive(a()).
     increasing(a()).
-    member(-1, a()).
-    member(-3, a()).
+    member(1, a()).
+    member(3, a()).
 }
 
 procedure main() {

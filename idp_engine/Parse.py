@@ -116,7 +116,7 @@ def str_to_IDP2(type_string: str,
             elif c == ')':
                 start = stack.pop()
                 if len(stack) == 0:
-                    args.append(val_string[start: i])
+                    args.append(val_string[start: i])  # TODO construct the AppliedSymbol here, rather than later
 
         # find the constructor
         constructor = None
@@ -627,6 +627,10 @@ class Definition(ASTNode):
         rules ([Rule]):
             set of rules for the definition, e.g., `!x: p(x) <- q(x)`
 
+        renamed (Dict[Declaration, List[Rule]]):
+            normalized rule for each defined symbol (except for the value in the head),
+            e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
+
         canonicals (Dict[Declaration, List[Rule]]):
             normalized rule for each defined symbol,
             e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
@@ -661,6 +665,7 @@ class Definition(ASTNode):
         assert type(self.mode) == S, f"Unsupported mode: {mode}"
         self.annotations = annotations.annotations if annotations else {}
         self.rules = rules
+        self.renamed = {}
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.canonicals = {}
         self.def_vars = {}  # {String: {String: Variable}}
@@ -718,6 +723,14 @@ class Rule(ASTNode):
         return (f"{quant}{self.definiendum} "
                 f"{(' = ' + str(self.out)) if self.out else ''}"
                 f"← {str(self.body)}")
+
+    def __deepcopy__(self, memo):
+        out = copy(self)
+        out.definiendum = deepcopy(self.definiendum)
+        out.definiendum.sub_exprs = [deepcopy(e) for e in self.definiendum.sub_exprs]
+        out.out = deepcopy(self.out)
+        out.body = deepcopy(self.body)
+        return out
 
     def instantiate_definition(self, new_args, theory):
         pass # monkey-patched

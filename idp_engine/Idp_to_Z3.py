@@ -63,7 +63,8 @@ def translate(self, problem: Theory):
             for c in self.constructors:
                 sort.declare(c.name,
                              *[(a.decl.name,
-                                a.decl.out.translate(problem) if a.decl.out.name != self.name else sort)
+                                a.decl.out.translate(problem) if a.decl.out.name != self.name else
+                                sort)  # recursive data type
                                for a in c.sorts])
             out = sort.create()
 
@@ -431,8 +432,9 @@ Brackets.translate1 = translate1
 
 def translate1(self, problem: Theory, vars={}):
     local_vars = {}
-    for q in self.quantees:
-        local_vars.update(q.translate(problem, vars))
+    for v in self.vars:
+        translated = FreshConst(v.sort.decl.base_type.translate(problem))
+        local_vars[v.str] = translated
     all_vars = copy(vars)
     all_vars.update(local_vars)
     func = problem.z3[self.name]
