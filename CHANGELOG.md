@@ -15,6 +15,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 * issue #249: regression of performance with new Z3 solver
 
 ### Interactive Consultant and Web IDE
+* issue #252: incorrect relevance with if-then-else
 
 
 ## [0.10.3] - 2023-03-24
