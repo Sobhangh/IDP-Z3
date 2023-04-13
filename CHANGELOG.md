@@ -13,6 +13,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 ### IDP-Z3
 * MR !294: `are necessary and sufficient conditions for`
 * issue #249: regression of performance with new Z3 solver
+* issue #254: Improve type checking on inequalities
 
 ### Interactive Consultant and Web IDE
 
