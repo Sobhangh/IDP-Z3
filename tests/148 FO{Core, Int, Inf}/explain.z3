@@ -11,7 +11,7 @@
                    (let ((a!1 (and ((_ is (cons1 (Int List1) List1)) x!1)
                                    ((_ increasing 0) (cdr1 x!1))
                                    ((_ is (cons1 (Int List1) List1)) (cdr1 x!1))
-                                   (> (car1 x!1) (car1 (cdr1 x!1))))))
+                                   (< (car1 x!1) (car1 (cdr1 x!1))))))
                      (or a!1
                          (and ((_ is (cons1 (Int List1) List1)) x!1)
                               ((_ is (nil1 () List1)) (cdr1 x!1)))
@@ -37,7 +37,7 @@
 
 Model 1
 ==========
-a := cons1(2, cons1(1, nil1)).
+a := cons1(1, cons1(2, nil1)).
 
 
 More models may be available.  Change the max argument to see them.

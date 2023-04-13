@@ -27,7 +27,7 @@ theory T:V {
      ! x in List1: increasing(x) <- x = nil1.
      ! x in List1: increasing(x) <- is_cons1(x) & is_nil1(cdr1(x)).
      ! x in List1: increasing(x) <- is_cons1(x) & increasing(cdr1(x))
-             & is_cons1(cdr1(x)) & car1(x) > car1(cdr1(x)).}
+             & is_cons1(cdr1(x)) & car1(x) < car1(cdr1(x)).}
 
     len1(a()) = 2.
     positive(a()).
