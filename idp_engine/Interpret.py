@@ -70,6 +70,9 @@ def interpret(self, problem):
         ext = ([[t] for r in ranges for t in r], None)
         problem.extensions[self.name] = ext
     else:
+        self.check(hasattr(interpretation, 'enumeration'),
+                   f'Expected an interpretation for type {self.name}')
+
         enum = interpretation.enumeration.interpret(problem)
         self.interpretation = interpretation
         self.constructors = enum.constructors
