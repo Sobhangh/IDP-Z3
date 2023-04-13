@@ -12,6 +12,8 @@ z3.z3types.Z3Exception: Sort mismatch
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
+  File "test.py", line ??, in generateZ3
+    idp.execute()
   File "idp_engine/Run.py", line ??, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line ??, in <module>
@@ -36,13 +38,4 @@ Traceback (most recent call last):
   File "idp_engine/Expression.py", line ??, in check
     raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
 idp_engine.utils.IDPZ3Error: Error on line ??, col 5: Incorrect symbol application: spouseOf(red)
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "test.py", line ??, in generateZ3
-    idp.execute()
-  File "idp_engine/Run.py", line ??, in execute
-    raise IDPZ3Error(f'Error in procedure, {e}')
-idp_engine.utils.IDPZ3Error: Error in procedure, Error on line ??, col 5: Incorrect symbol application: spouseOf(red)
 
