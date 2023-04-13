@@ -283,7 +283,7 @@ def execute(self: IDP) -> None:
 
     try:
         exec(main, mybuiltins, mylocals)
-    except Exception as e:
+    except (SyntaxError, AttributeError) as e:
         raise IDPZ3Error(f'Error in procedure, {e}')
 
 IDP.execute = execute
