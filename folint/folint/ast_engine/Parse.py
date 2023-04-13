@@ -187,7 +187,14 @@ def SCA_Check(self, detections):
         if i.name in [BOOL, INT, REAL, DATE]:
             in_type_values = []
         elif i.decl.enumeration is None:  # Interpretation in Struct
-            in_type_values = list(self.parent.interpretations.get(i.str, []).enumeration.tuples.keys())
+            in_type_interpretation = self.parent.interpretations.get(i.str, [])
+
+            if in_type_interpretation != []:
+                in_type_values = list(in_type_interpretation.enumeration.tuples.keys())
+            else:
+                detections.append((self, f'Symbol has an uninterpreted type: "{i.str}". Cannot verify correctness.', "Error"))
+                return
+
         else:  # Interpretation in Voc
             in_type_values = list(i.decl.enumeration.tuples.keys())
         options.append(in_type_values)
@@ -198,7 +205,13 @@ def SCA_Check(self, detections):
         out_type_values = []
     elif out_type.decl.enumeration is None:
         # Type interpretation in Struct.
-        out_type_values = list(self.parent.interpretations.get(out_type.str, []).enumeration.tuples.keys())
+        out_type_interpretation = self.parent.interpretations.get(out_type.str, [])
+
+        if out_type_interpretation != []:
+            out_type_values = list(out_type_interpretation.enumeration.tuples.keys())
+        else:
+            detections.append((self, f'Symbol has an uninterpreted type: "{out_type.str}". Cannot verify correctness', "Error"))
+            return
     else:
         # Type interpretation in Voc.
         out_type_values = list(out_type.decl.enumeration.tuples.keys())
