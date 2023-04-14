@@ -373,7 +373,8 @@ def annotate(self, block):
     if self.default is not None:
         self.default = self.default.annotate(voc, {})
         self.check(self.default.value is not None,
-            f"Default value for '{self.name}' must be ground: {self.default}")
+                   f"Value for '{self.name}' may only use numerals,"
+                   f" identifiers or constructors: '{self.default}'")
 SymbolInterpretation.annotate = annotate
 
 
@@ -391,7 +392,8 @@ Enumeration.annotate = annotate
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
     self.check(all(a.value is not None for a in self.args),
-                f"Tuple must be ground : ({self})")
+               f"Interpretation may only contain numerals,"
+               f" identifiers or constructors: '{self}'")
 TupleIDP.annotate = annotate
 
 
