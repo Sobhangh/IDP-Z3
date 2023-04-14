@@ -38,7 +38,7 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-    OrderedSet, IDPZ3Error, Semantics)
+    OrderedSet, Semantics)
 
 
 # Class Vocabulary  #######################################################
@@ -355,8 +355,8 @@ def annotate(self, idp):
     :arg idp: a `Parse.IDP` object.
     :returns None:
     """
-    if self.vocab_name not in idp.vocabularies:
-        raise IDPZ3Error(f"Unknown vocabulary: {self.vocab_name}")
+    self.check(self.vocab_name in idp.vocabularies,
+               f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
     for i in self.interpretations.values():
         i.annotate(self)
