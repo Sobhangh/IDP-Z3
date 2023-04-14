@@ -1,0 +1,42 @@
+vocabulary V {
+    type List1 := constructed from {nil1, cons1(car1:Int, cdr1: List1)}
+    a: () -> List1
+    len1: List1 -> Int
+    increasing, positive: List1 -> Bool
+    member: Int*List1 -> Bool
+}
+
+theory T:V {
+
+    { (recursive)
+      len1(nil1) = 0.
+      ! x in List1: len1(x) = len1(cdr1(x))+1 <- is_cons1(x). }
+
+    // between 1 and 2
+    { (recursive)
+      ! x in List1: positive(x) <- is_nil1(x).
+      ! x in List1: positive(x) <- is_cons1(x) & 0<car1(x)<3 & positive(cdr1(x)).
+    }
+
+    { (recursive)
+     ! l in List1, x in Int: member(x,l) <- is_cons1(l) & car1(l)=x.
+      ! x in Int, l in List1: member(x,l) <- is_cons1(l) & member(x, cdr1(l)).
+    }
+
+    { (recursive)
+     ! x in List1: increasing(x) <- x = nil1.
+     ! x in List1: increasing(x) <- is_cons1(x) & is_nil1(cdr1(x)).
+     ! x in List1: increasing(x) <- is_cons1(x) & increasing(cdr1(x))
+             & is_cons1(cdr1(x)) & car1(x) < car1(cdr1(x)).}
+
+    len1(a()) = 2.
+    positive(a()).
+    increasing(a()).
+    member(1, a()) | member(2, a()).
+}
+
+procedure main() {
+    print(Theory(T).sexpr())
+    pretty_print(model_expand(T, max=1, sort=True))
+    // timeout !!  pretty_print(Theory(T).explain("member(1, a())"))
+}

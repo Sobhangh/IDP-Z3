@@ -47,50 +47,90 @@ from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, C
     Semantics as S)
 
 
-def str_to_IDP(atom, val_string):
+def str_to_IDP(atom: Expression, val_string: str) -> Expression:
     """cast a string value for 'atom into an Expr object, or None
 
     used to convert Z3 models or json data from GUI
 
     Args:
-        atom (Expr): the atom whose value must be converted
+        atom (Expression): the atom whose value must be converted
         val_string (str): the string representation of the value
 
     Returns:
-        Expr?: the value cast as Expr, or None if unknown
+        Expression: the value cast as Expression, or None if unknown
     """
-    assert atom.type, "Internal error"
+
+    val_string = val_string.replace('True', 'true').replace('False', 'false')
     if val_string == str(atom) or val_string+"()" == str(atom):
-        out = None  # Z3 means the value is unknown
-    elif atom.type == BOOL:
-        if val_string not in ['True', 'False', 'true', 'false']:
-            raise IDPZ3Error(
-                f"{atom.annotations['reading']} has wrong value: {val_string}")
-        out = (TRUE if val_string in ['True', 'true'] else
-               FALSE)
-    elif atom.type == DATE:
+        return None  # Z3 means the value is unknown
+
+    assert atom.type, "Internal error"
+    type_string = atom.type
+    typ = atom.decl.out.decl if hasattr(atom, 'decl') else None
+    return str_to_IDP2(type_string, typ, val_string)
+
+
+def str_to_IDP2(type_string: str,
+                typ: TypeDeclaration|None,
+                val_string: str
+                ) -> Expression:
+    """recursive function to decode a val_string of type type_string and type
+
+    Args:
+        type_string (str):
+        typ (TypeDeclaration): type declaration of the value string
+        val_string (str): value_string
+
+    Raises:
+        IDPZ3Error: if wrong value
+
+    Returns:
+        Expression: the internal representation of the value
+    """
+    if type_string == BOOL:
+        out = (TRUE if val_string == 'true' else
+               FALSE if val_string == 'false' else
+               None)
+        if out is None:
+            raise IDPZ3Error(f"wrong boolean value: {val_string}")
+    elif type_string == DATE:
         d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
              date.fromisoformat(val_string[1:]))
         out = Date(iso=f"#{d.isoformat()}")
-    elif (hasattr(atom.decl.out.decl.base_type, 'map')
-          and val_string in atom.decl.out.decl.base_type.map):  # constructor
-        out = atom.decl.out.decl.base_type.map[val_string]
+    elif (hasattr(typ.base_type, 'map')
+          and val_string in typ.base_type.map):  # constructor
+        out = typ.base_type.map[val_string]
     elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
-        # deconstruct val_string
-        m = match(r"(?P<function>\w+)\s?\((?P<args>(?P<arg>\w+(,\s?)?)+)\)",
-                  val_string).groupdict()
-
-        typ = atom.decl.out.decl
         assert hasattr(typ, 'interpretation'), "Internal error"
-        constructor = next(c for c in typ.interpretation.enumeration.constructors
-                           if c.name == m['function'])
 
-        args = m['args'].split(',')
-        args = [Number(number=str(eval(a.replace('?', ''))))  #TODO deal with any argument based on constructor signature
-                for a in args]
+        # find constructor name and its arguments in val_string
+        stack, args = [], []
+        for i, c in enumerate(val_string):
+            if c == '(':
+                name = val_string[:i].strip() if len(stack) == 0 else name
+                stack.append(i+1)
+            elif c == ',' and len(stack) == 1:
+                start = stack.pop()
+                args.append(val_string[start: i])
+                stack.append(i+2)
+            elif c == ')':
+                start = stack.pop()
+                if len(stack) == 0:
+                    args.append(val_string[start: i])  # TODO construct the AppliedSymbol here, rather than later
 
-        out = AppliedSymbol.construct(constructor, args)
-    elif atom.type == REAL:  # Z3 adds a '?' when the real number is rounded
+        # find the constructor
+        constructor = None
+        for c in typ.interpretation.enumeration.constructors:
+            if c.name == name:
+                constructor = c
+        assert constructor is not None, f"wrong constructor name '{name}' for {type_string}"
+
+        new_args = []
+        for a, acc in zip(args, constructor.args):
+            new_args.append(str_to_IDP2(acc.decl.out.name, acc.decl.out.decl, a))
+
+        out = AppliedSymbol.construct(constructor, new_args)
+    elif type_string == REAL:  # Z3 adds a '?' when the real number is rounded
         out = Number(number= val_string if '/' in val_string else
                      str(float(eval(val_string.replace('?', '')))))
     else:  # an Int
@@ -587,6 +627,10 @@ class Definition(ASTNode):
         rules ([Rule]):
             set of rules for the definition, e.g., `!x: p(x) <- q(x)`
 
+        renamed (Dict[Declaration, List[Rule]]):
+            normalized rule for each defined symbol (except for the value in the head),
+            e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
+
         canonicals (Dict[Declaration, List[Rule]]):
             normalized rule for each defined symbol,
             e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
@@ -616,10 +660,12 @@ class Definition(ASTNode):
                      S.COMPLETION if 'completion' in mode else
                      S.KRIPKEKLEENE if 'Kripke-Kleene' in mode else
                      S.COINDUCTION if 'co-induction' in mode else
+                     S.RECDATA if 'recursive' in mode else
                      mode)
         assert type(self.mode) == S, f"Unsupported mode: {mode}"
         self.annotations = annotations.annotations if annotations else {}
         self.rules = rules
+        self.renamed = {}
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.canonicals = {}
         self.def_vars = {}  # {String: {String: Variable}}
@@ -669,6 +715,7 @@ class Rule(ASTNode):
             self.definiendum.sub_exprs.append(self.out)
         if self.body is None:
             self.body = TRUE
+        self.original = None
 
     def __repr__(self):
         quant = ('' if not self.quantees else
@@ -676,6 +723,14 @@ class Rule(ASTNode):
         return (f"{quant}{self.definiendum} "
                 f"{(' = ' + str(self.out)) if self.out else ''}"
                 f"← {str(self.body)}")
+
+    def __deepcopy__(self, memo):
+        out = copy(self)
+        out.definiendum = deepcopy(self.definiendum)
+        out.definiendum.sub_exprs = [deepcopy(e) for e in self.definiendum.sub_exprs]
+        out.out = deepcopy(self.out)
+        out.body = deepcopy(self.body)
+        return out
 
     def instantiate_definition(self, new_args, theory):
         pass # monkey-patched
