@@ -1,0 +1,18 @@
+vocabulary {
+    type color := {red, blue, green}
+    p, q : () → 𝔹
+    r: color -> Int
+    val: () -> Int
+}
+
+theory {
+    if p(),
+    then val() = 2 +(if q() then 1 else 0)
+    and for all color c: 0 =< r(c).
+    p().
+}
+
+
+display {
+  view() = expanded.
+}

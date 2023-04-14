@@ -1,0 +1,41 @@
+vocabulary V {
+    type List := constructed from {nil, cons(car:Int, cdr: List)}
+    a: () -> List
+    len: List -> Int
+    increasing, positive: List -> Bool
+    member: Int*List -> Bool
+}
+
+theory T:V {
+
+    { (recursive)
+      ! x in List: len(x) = 0 <- x = nil.
+      ! x in List: len(x) = len(cdr(x))+1 <- is_cons(x). }
+
+    { (recursive)
+      ! x in List: positive(x) <- is_nil(x).
+      ! x in List: positive(x) <- is_cons(x) & 0 < car(x) & positive(cdr(x)).
+    }
+
+    { (recursive)
+     ! x in List: increasing(x) <- x = nil.
+     ! x in List: increasing(x) <- is_cons(x) & is_nil(cdr(x)).
+     ! x in List: increasing(x) <- is_cons(x) & increasing(cdr(x))
+             & is_cons(cdr(x)) & car(x) < car(cdr(x)).}
+
+    { (recursive)
+     ! x in Int, l in List: member(x,l) <- is_cons(l) & car(l)=x.
+      ! x in Int, l in List: member(x,l) <- is_cons(l) & member(x, cdr(l)).
+    }
+
+    len(a()) = 2.
+    positive(a()).
+    increasing(a()).
+    member(1, a()).
+    member(3, a()).
+}
+
+procedure main() {
+    print(Theory(T).sexpr())
+    pretty_print(model_expand(T, max=1, sort=True))
+}

@@ -22,6 +22,7 @@ Feel free to contact us on `our Matrix channel <https://matrix.to/#/#IDP-Z3:matr
    FO-dot
    IDP-Z3
    interactive_consultant
+   explanations
    code_reference
    summary
    genindex

@@ -200,7 +200,8 @@ A definition consists of a set of rules, enclosed by ``{`` and ``}``.
 
 If a predicate is inductively defined in terms of itself,
 the definition employs the *well-founded* mode of interpretation by default.
-The other possible modes of interpretation are ``completion``, ``Kripke-Kleene`` and ``co-induction``.
+The other possible modes of interpretation are ``completion``, ``Kripke-Kleene``,
+``co-induction`` and ``recursive`` (for :ref:`recursive datatypes<recursive_datatypes>`).
 They can be selected by placing the keyword in parenthesis at the beginning of the definition,
 e.g., ``{ (completion) ...}``.
 

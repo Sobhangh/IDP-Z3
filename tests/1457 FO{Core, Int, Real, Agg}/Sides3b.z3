@@ -415,7 +415,7 @@ display {
                                       'is_assignment': False,
                                       'normal': False,
                                       'reading': 'Length(2) = Length(4)',
-                                      'relevant': False,
+                                      'relevant': True,
                                       'status': 'UNIVERSAL',
                                       'typ': 'Bool',
                                       'value': False},

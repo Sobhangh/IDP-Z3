@@ -44,12 +44,12 @@ from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
     Definition, Rule, ConstructedFrom)
-from .Expression import (Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
+from .Expression import (RecDef, Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
     EQUIV, EQUALS, OR, AppliedSymbol, UnappliedSymbol, Quantee,
-    Variable, VARIABLE, TRUE, FALSE, Number, Extension)
+    Variable, VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
 from .Theory import Theory
-from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
+from .utils import (BOOL, INT, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND, CO_CONSTR_RECURSION_DEPTH, Semantics)
 
 
@@ -201,6 +201,25 @@ def get_def_constraints(self,
         Dict[SymbolDeclaration, Definition, List[Expression]]:
             a mapping from (Symbol, Definition) to the list of constraints
     """
+    if self.mode == Semantics.RECDATA:
+        out = {}
+        for decl in self.renamed:
+            # expr = nested if expression, for each rule
+            decl.check(decl.out.name in [INT, BOOL],
+                       f"Recursive functions of type {decl.out.name} are not supported yet")
+            expr = (ZERO if decl.out.name == INT else
+                    FALSE if decl.out.name == BOOL else
+                    FALSE ) # todo: pick a value in type enumeration
+            for rule in self.renamed[decl]:
+                val = rule.out if rule.out is not None else TRUE
+                expr = IF(rule.body, val, expr)
+
+            vars = sorted(list(self.def_vars[decl.name].values()), key=lambda v: v.name)
+            vars = vars[:-1] if decl.out.name != BOOL else vars
+            expr = RecDef(self.parent, decl.name, vars, expr)
+            out[decl, self] = [expr]
+        return out
+
     # add level mappings
     instantiables = {}
     for decl, rules in self.canonicals.items():
@@ -264,7 +283,7 @@ Definition.get_def_constraints = get_def_constraints
 
 def instantiate_definition(self, decl, new_args, theory):
     rule = self.clarks.get(decl, None)
-    if rule:
+    if rule and self.mode != Semantics.RECDATA:
         key = str(new_args)
         if (decl, key) in self.cache:
             return self.cache[decl, key]
@@ -437,6 +456,8 @@ def interpret(self, problem):
     assert all(isinstance(s.decl.out, Type) for s in self.sorts), 'internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
+    elif any(s.type == self.type for s in self.sorts):  # recursive data type
+        self.range = None
     else:
         extensions = [s.decl.out.extension(problem.interpretations, problem.extensions)
                       for s in self.sorts]

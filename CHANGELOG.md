@@ -6,17 +6,24 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.10.4] - unreleased yet
 
+The main new features in this release are:
+* support for recursive data types (#185)
+
 This release has new package dependencies: please run `poetry install` to update.
 
-Contributors (alphabetical): Pierre Carbonnelle.
+Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * MR !294: `are necessary and sufficient conditions for`
+* issue #185: support for recursive datatypes
 * issue #249: regression of performance with new Z3 solver
 * issue #255: Line numbers are wrong
+* issue #257: Error messages for uninterpreted types
 * issue #262: "ground" in error messages
 
 ### Interactive Consultant and Web IDE
+* MR !300: improve loading time in IC
+* issue #252: incorrect relevance with if-then-else
 
 
 ## [0.10.3] - 2023-03-24

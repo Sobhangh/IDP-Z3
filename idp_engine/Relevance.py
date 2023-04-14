@@ -92,21 +92,23 @@ def determine_relevance(self: Theory) -> Theory:
     out = self.simplify()  # creates a copy
 
     # analyse given information
+    constraints = OrderedSet()
     given = OrderedSet()
-    for q in out.assignments.values():
+    for q in self.assignments.values():
         q.relevant = False
         if q.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
+            q.relevant = True  # given are relevant
             if not q.sentence.has_decision():
                 given.append(q.sentence)
+        elif (q.value is not None and type(q.sentence) != AppliedSymbol):
+            constraints.append(q.sentence)  # issue 252
 
     # collect (co-)constraints
-    constraints = OrderedSet()
     for constraint in out.constraints:
         if constraint.code not in self.ignored_laws:
             constraints.append(constraint)
             constraint.co_constraints(constraints)
     constraints = split_constraints(constraints)
-
     # constraints have set of questions in out.assignments
     # set constraint.relevant, constraint.questions
     # initialize reachable with relevant, if any
@@ -125,6 +127,7 @@ def determine_relevance(self: Theory) -> Theory:
     if len(reachable) == 0:
         for constraint in constraints:
             if constraint.is_type_constraint_for is None:
+                reachable.append(constraint)
                 for q in constraint.questions:
                     reachable.append(q)
 

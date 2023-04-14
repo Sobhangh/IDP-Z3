@@ -43,6 +43,7 @@ class Semantics(Enum):
     KRIPKEKLEENE = auto()
     WELLFOUNDED = auto()
     COINDUCTION = auto()
+    RECDATA = auto()
 
 """
     String constants

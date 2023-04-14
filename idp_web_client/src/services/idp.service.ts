@@ -306,9 +306,6 @@ procedure main() {
         window['pckry'].reloadItems();
         window['pckry'].layout();
       }
-
-      await this.doPropagation();
-
     }
   }
 
