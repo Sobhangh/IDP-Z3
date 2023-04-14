@@ -22,6 +22,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 
 ### Interactive Consultant and Web IDE
 * MR !300: improve loading time in IC
+* MR !301: access proper version of documentation
 * issue #252: incorrect relevance with if-then-else
 *
 *
