@@ -609,10 +609,21 @@ AQuantification.annotate1 = annotate1
 
 # Class Operator  #######################################################
 
+def annotate(self, voc, q_vars):
+    self = Expression.annotate(self, voc, q_vars)
+
+    for e in self.sub_exprs:
+        if self.operator[0] in '&|∧∨⇒⇐⇔':
+            self.check(e.type is None or e.type == BOOL or e.str in ['true', 'false'],
+                       f"Expected boolean formula, got {e.type}: {e}")
+    return self
+Operator.annotate = annotate
+
 def annotate1(self):
-    if self.type is None:
+    if self.type is None:  # not a BOOL operator
         self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
                 else INT if any(e.type == INT for e in self.sub_exprs) \
+                else DATE if any(e.type == DATE for e in self.sub_exprs) \
                 else self.sub_exprs[0].type  # constructed type, without arithmetic
     return Expression.annotate1(self)
 Operator.annotate1 = annotate1
@@ -655,6 +666,18 @@ ARImplication.annotate = annotate
 def annotate(self, voc, q_vars):
     out = Operator.annotate(self, voc, q_vars)
     out.type = BOOL
+
+    for e in self.sub_exprs:
+        if self.operator[0] in "<>≤≥":
+            self.check(e.type != BOOL,
+                        f"Expected numeric formula, got {e.type}: {e}")
+            self.check(e.type is None or e.type in ['', INT, REAL, DATE]
+                       or voc.symbol_decls[e.type].type in [INT, REAL, DATE]
+                       or voc.symbol_decls[e.type].interpretation is None # can't infer type yet
+                       or not hasattr(voc.symbol_decls[e.type], 'enumeration')
+                       or voc.symbol_decls[e.type].enumeration is None,
+                        f"Expected numeric formula, got {e.type}: {e}")
+
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
         out = NOT(EQUALS(self.sub_exprs))
