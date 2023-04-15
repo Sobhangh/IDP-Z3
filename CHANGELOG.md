@@ -24,6 +24,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 ### Interactive Consultant and Web IDE
 * MR !300: improve loading time in IC
 * issue #252: incorrect relevance with if-then-else
+* issue #258: Disable (certain) style warnings
 
 
 ## [0.10.3] - 2023-03-24
