@@ -145,6 +145,10 @@ VarDeclaration.annotate = annotate
 def annotate(self, voc, q_vars):
     if self.name in q_vars:
         return q_vars[self.name]
+
+    self.check(self.name in voc.symbol_decls,
+               f'Undeclared symbol name: "{self.name}"')
+
     self.decl = voc.symbol_decls[self.name]
     self.type = self.decl.type
     return self
