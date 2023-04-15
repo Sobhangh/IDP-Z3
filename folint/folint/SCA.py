@@ -129,12 +129,6 @@ def extra_check(file, detections):
         if line.strip().startswith('['):
             continue
 
-        # Some symbols should not have a space in front.
-        for match in re.finditer(r'\s,\s?', line):
-            detections.append((line_number, match.span()[0], match.span()[1],
-                               "Style: no space in front of a comma",
-                               "Warning"))
-
         # Some symbols should have a space in front.
         for match in re.finditer(r'[\w\)\d][*⨯><→⇒⇔≤≠≥=∉∈∧∨&|]', line):
             symbol = match.group()[1]
@@ -150,19 +144,11 @@ def extra_check(file, detections):
                                "Warning"))
 
         # Some symbols should not be followed by a space.
-        for match in re.finditer(r'[~¬]s', line):
+        for match in re.finditer(r'[~¬]\s', line):
             symbol = match.group()[0]
             detections.append((line_number, match.span()[0], match.span()[1],
                                f"Style: no space allowed after '{symbol}'",
                                "Warning"))
-
-        # Comments on separate lines
-        for match in re.finditer(pattern2, line):
-            if len(line[0:match.span()[0]].strip()) != 0:
-                detections.append((line_number, match.span()[0],
-                                   match.span()[1],
-                                   "Style: comment should be on separate line",
-                                   "Warning"))
 
         # Don't allow multiple rules on the same line.
         if line.count('. ') > 1:
