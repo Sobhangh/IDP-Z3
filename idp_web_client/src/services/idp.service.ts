@@ -139,8 +139,14 @@ export class IdpService {
     // get versionInfo
     let versions_: string;
     try {
-      versions_ = await this.get_latest(AppSettings.VERSIONS_URL);
-      this.versions = JSON.parse(JSON.parse(versions_)['files']['versions.json']['content']);
+      const response = await fetch(AppSettings.VERSIONS_URL, {
+          headers: {
+              'Authorization': 'token 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',
+          }
+        }
+      );
+      const res = await response.json();
+      this.versions = JSON.parse(res['files']['versions.json']['content']);
     } catch (e) {
       this.versions = {};
       this.versionInfo = 'Unknowable';
