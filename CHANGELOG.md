@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
-## [0.10.4] - unreleased yet
+## [0.10.4] - 2023-04-17
 
 The main new features in this release are:
 * support for recursive data types (#185)

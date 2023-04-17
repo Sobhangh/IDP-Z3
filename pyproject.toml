@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "idp-engine"
-version = "0.10.3"
+version = "0.10.4"
 description = "IDP-Z3 is a reasoning engine for knowledge represented using the FO(.) (aka FO-dot) language."
 authors = ["pierre.carbonnelle <pierre.carbonnelle@cs.kuleuven.be>"]
 license = "GNU LGPL 3"
