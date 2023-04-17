@@ -38,7 +38,7 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-    OrderedSet, IDPZ3Error, Semantics)
+    OrderedSet, Semantics)
 
 
 # Class Vocabulary  #######################################################
@@ -145,6 +145,10 @@ VarDeclaration.annotate = annotate
 def annotate(self, voc, q_vars):
     if self.name in q_vars:
         return q_vars[self.name]
+
+    self.check(self.name in voc.symbol_decls,
+               f'Undeclared symbol name: "{self.name}"')
+
     self.decl = voc.symbol_decls[self.name]
     self.type = self.decl.type
     return self
@@ -355,8 +359,8 @@ def annotate(self, idp):
     :arg idp: a `Parse.IDP` object.
     :returns None:
     """
-    if self.vocab_name not in idp.vocabularies:
-        raise IDPZ3Error(f"Unknown vocabulary: {self.vocab_name}")
+    self.check(self.vocab_name in idp.vocabularies,
+               f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
     for i in self.interpretations.values():
         i.annotate(self)
@@ -407,7 +411,8 @@ def annotate(self, block):
     if self.default is not None:
         self.default = self.default.annotate(voc, {})
         self.check(self.default.value is not None,
-            f"Default value for '{self.name}' must be ground: {self.default}")
+                   f"Value for '{self.name}' may only use numerals,"
+                   f" identifiers or constructors: '{self.default}'")
 SymbolInterpretation.annotate = annotate
 
 
@@ -425,7 +430,8 @@ Enumeration.annotate = annotate
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
     self.check(all(a.value is not None for a in self.args),
-                f"Tuple must be ground : ({self})")
+               f"Interpretation may only contain numerals,"
+               f" identifiers or constructors: '{self}'")
 TupleIDP.annotate = annotate
 
 
@@ -607,10 +613,21 @@ AQuantification.annotate1 = annotate1
 
 # Class Operator  #######################################################
 
+def annotate(self, voc, q_vars):
+    self = Expression.annotate(self, voc, q_vars)
+
+    for e in self.sub_exprs:
+        if self.operator[0] in '&|∧∨⇒⇐⇔':
+            self.check(e.type is None or e.type == BOOL or e.str in ['true', 'false'],
+                       f"Expected boolean formula, got {e.type}: {e}")
+    return self
+Operator.annotate = annotate
+
 def annotate1(self):
-    if self.type is None:
+    if self.type is None:  # not a BOOL operator
         self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
                 else INT if any(e.type == INT for e in self.sub_exprs) \
+                else DATE if any(e.type == DATE for e in self.sub_exprs) \
                 else self.sub_exprs[0].type  # constructed type, without arithmetic
     return Expression.annotate1(self)
 Operator.annotate1 = annotate1
@@ -653,6 +670,18 @@ ARImplication.annotate = annotate
 def annotate(self, voc, q_vars):
     out = Operator.annotate(self, voc, q_vars)
     out.type = BOOL
+
+    for e in self.sub_exprs:
+        if self.operator[0] in "<>≤≥":
+            self.check(e.type != BOOL,
+                        f"Expected numeric formula, got {e.type}: {e}")
+            self.check(e.type is None or e.type in ['', INT, REAL, DATE]
+                       or voc.symbol_decls[e.type].type in [INT, REAL, DATE]
+                       or voc.symbol_decls[e.type].interpretation is None # can't infer type yet
+                       or not hasattr(voc.symbol_decls[e.type], 'enumeration')
+                       or voc.symbol_decls[e.type].enumeration is None,
+                        f"Expected numeric formula, got {e.type}: {e}")
+
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
         out = NOT(EQUALS(self.sub_exprs))
