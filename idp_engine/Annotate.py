@@ -674,13 +674,15 @@ def annotate(self, voc, q_vars):
 
     for e in self.sub_exprs:
         if self.operator[0] in "<>≤≥":
+            decl = voc.symbol_decls.get(e.type, None)
             self.check(e.type != BOOL,
                         f"Expected numeric formula, got {e.type}: {e}")
             self.check(e.type is None or e.type in ['', INT, REAL, DATE]
-                       or voc.symbol_decls[e.type].type in [INT, REAL, DATE]
-                       or voc.symbol_decls[e.type].interpretation is None # can't infer type yet
-                       or not hasattr(voc.symbol_decls[e.type], 'enumeration')
-                       or voc.symbol_decls[e.type].enumeration is None,
+                       or decl.type in [INT, REAL, DATE]
+                       or (hasattr(decl, 'interpretation')
+                           and decl.interpretation is None)
+                       or not hasattr(decl, 'enumeration')
+                       or decl.enumeration is None,
                         f"Expected numeric formula, got {e.type}: {e}")
 
     # a≠b --> Not(a=b)
