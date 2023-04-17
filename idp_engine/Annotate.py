@@ -638,16 +638,6 @@ Operator.annotate1 = annotate1
 def annotate1(self):
     self.check(len(self.sub_exprs) == 2,
                "Implication is not associative.  Please use parenthesis.")
-    self.check(self.sub_exprs[0].type == '𝔹' or
-               self.sub_exprs[0].same_as(TRUE) or
-               self.sub_exprs[0].same_as(FALSE),
-               f'Cannot apply Implication to argument of type'
-               f' {self.sub_exprs[0].type}: "{self.sub_exprs[0]}"')
-    self.check(self.sub_exprs[1].type == '𝔹' or
-               self.sub_exprs[1].same_as(TRUE) or
-               self.sub_exprs[1].same_as(FALSE),
-               f'Cannot apply Implication to argument of type'
-               f' {self.sub_exprs[1].type}: "{self.sub_exprs[1]}"')
     self.type = BOOL
     return Expression.annotate1(self)
 AImplication.annotate1 = annotate1
@@ -658,16 +648,6 @@ AImplication.annotate1 = annotate1
 def annotate1(self):
     self.check(len(self.sub_exprs) == 2,
                "Equivalence is not associative.  Please use parenthesis.")
-    self.check(self.sub_exprs[0].type == '𝔹' or
-               self.sub_exprs[0].same_as(TRUE) or
-               self.sub_exprs[0].same_as(FALSE),
-               f'Cannot apply Equivalence to argument of type'
-               f' {self.sub_exprs[0].type}: "{self.sub_exprs[0]}"')
-    self.check(self.sub_exprs[1].type == '𝔹' or
-               self.sub_exprs[1].same_as(TRUE) or
-               self.sub_exprs[1].same_as(FALSE),
-               f'Cannot apply Equivalence to argument of type'
-               f' {self.sub_exprs[1].type}: "{self.sub_exprs[1]}"')
     self.type = BOOL
     return Expression.annotate1(self)
 AEquivalence.annotate1 = annotate1
