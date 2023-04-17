@@ -17,6 +17,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * MR !294: `are necessary and sufficient conditions for`
 * issue #185: support for recursive datatypes
 * issue #249: regression of performance with new Z3 solver
+* issue #254: Improve type checking on inequalities
 * issue #255: Line numbers are wrong
 * issue #257: Error messages for uninterpreted types
 * issue #262: "ground" in error messages

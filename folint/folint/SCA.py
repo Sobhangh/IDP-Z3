@@ -226,7 +226,7 @@ def lint_fo(idp_file, timing=True, print_ast=False):
         res1 = e1.args[0].split(': ', 1)
         res = res1[0].split()
         output_str += "\n---------- Syntax Error ----------\n"
-        if 5 <= len(res):
+        if res1[0].startswith("Error on line") and 6 <= len(res):
             output_str += f"{res[0]}: line {res[3].strip(',')} - colStart {res[5].strip(':')} - colEnd {res[5].strip(':')} => {res1[1]}\n"
         else:
             output_str += e1.args[0]

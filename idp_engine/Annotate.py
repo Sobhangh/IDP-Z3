@@ -35,7 +35,7 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     Operator, AComparison, AUnary, AAggregate,
     AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
     FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, FALSE,
-    FORALL, EXISTS)
+    FORALL, EXISTS, TRUE)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
     OrderedSet, Semantics)
@@ -656,8 +656,9 @@ AEquivalence.annotate1 = annotate1
 
 def annotate(self, voc, q_vars):
     # reverse the implication
-    out = AImplication(None, sub_exprs=list(reversed(list(self.sub_exprs))),
-                        operator=['⇒']*len(self.operator))
+    self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
+    out = AImplication.make(ops=['⇒'], operands=list(reversed(list(self.sub_exprs))),
+                        annotations=None, parent=self)
     out.original = self
     if hasattr(self, "block"):
         out.block = self.block
