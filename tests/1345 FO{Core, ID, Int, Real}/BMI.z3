@@ -16,13 +16,16 @@ weight() = 80
 Not riskLevel() = Increased
 Not BMILevel() = Overweight
 ? BMILevel() = Severely_Underweight
+bmi() < 18.5
 bmi() = weight() / (25600)
 ? sex() = Male
 ? BMILevel() = Underweight
 ? sex() = Female
 Not 18.5 ≤ bmi()
+bmi() ≤ 24.9
 Not BMILevel() = Normal
 Not 25 ≤ bmi()
+bmi() ≤ 29.9
 Not BMILevel() = Obese_I
 Not 30 ≤ bmi()
 bmi() ≤ 34.9

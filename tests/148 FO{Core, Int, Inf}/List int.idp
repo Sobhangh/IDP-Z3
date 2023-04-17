@@ -1,0 +1,38 @@
+vocabulary V {
+    type List := constructed from {nil, cons(car:Int, cdr: List)}
+    a: () -> List
+    len: List -> Int
+    increasing, negative: List -> Bool
+    member: Int*List -> Bool
+}
+
+theory T:V {
+    ! x in List: len(x) = 0 <=> x = nil .
+    // does not terminate: ! x in List: is_cons(x) => len(x) = len(cdr(x))+1.
+
+    { ! x in List: len(x) = 0 <- x = nil.
+      ! x in List, n in Int: len(x) = len(cdr(x))+1 <- is_cons(x). }
+
+    { ! x in List: increasing(x) <- x = nil.
+      ! x in List: increasing(x) <- is_cons(x) & is_nil(cdr(x)).
+      ! x in List: increasing(x) <- is_cons(x) & is_cons(cdr(x)) & car(x) > car(cdr(x)).}
+
+    // { ! x in Int, l in List: member(x,l) <- is_cons(l) & (car(l)=x | member(x, cdr(l))).}
+    // { ! x in Int, l in List: member(x,l) <- is_cons(l) & car(l)=x.
+    //  ! x in Int, l in List: member(x,l) <- is_cons(l) & member(x, cdr(l)).}
+
+    // non terminating !x in List: negative(x) <=> x=nil | (car(x)<0 & negative(cdr(x))).
+    // { ! x in List: negative(x) <- is_nil(x).
+    //   ! x in List: negative(x) <- is_cons(x) & car(x)<0 & negative(cdr(x)).
+    // }
+
+
+    len(a()) = 2.
+    increasing(a()).
+    member(0, a()).
+}
+
+procedure main() {
+    print(Theory(T).sexpr())
+    pretty_print(model_expand(T, max=10, sort=True))
+}

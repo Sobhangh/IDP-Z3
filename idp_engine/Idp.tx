@@ -41,7 +41,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
              )* '}';
 
   Definition: annotations=Annotations '{' mode=Mode rules*=Rule '}';
-    Mode: ('(' ('well-founded' | 'completion' | 'Kripke-Kleene' | 'co-induction') ')')?;
+    Mode: ('(' ('well-founded' | 'completion' | 'Kripke-Kleene' | 'co-induction' | 'recursive' ) ')')?;
     Rule: annotations=Annotations
           (('!'|'∀'| 'for' 'all') quantees+=Quantee[','] ':' )*
           definiendum=AppliedSymbol

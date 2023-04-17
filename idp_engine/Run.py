@@ -32,7 +32,7 @@ from z3 import Solver
 from .Parse import IDP, TheoryBlock, Structure
 from .Theory import Theory
 from .Assignments import Status as S, Assignments
-from .utils import NEWL
+from .utils import NEWL, IDPZ3Error
 
 last_call = time.process_time()  # define it as global
 
@@ -281,7 +281,10 @@ def execute(self: IDP) -> None:
     mylocals['time'] = time
     mylocals['duration'] = duration
 
-    exec(main, mybuiltins, mylocals)
+    try:
+        exec(main, mybuiltins, mylocals)
+    except (SyntaxError, AttributeError) as e:
+        raise IDPZ3Error(f'Error in procedure, {e}')
 
 IDP.execute = execute
 

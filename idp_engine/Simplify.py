@@ -402,6 +402,8 @@ def update_exprs(self, new_exprs):
         and self.decl):
         if self.decl.name in new_exprs[0].decl.parent.accessors:
             i = new_exprs[0].decl.parent.accessors[self.decl.name]
+            self.check(i < len(new_exprs[0].sub_exprs),
+                       f"Incorrect expression: {self}")
             return self._change(simpler=new_exprs[0].sub_exprs[i], sub_exprs=new_exprs)
         if self.decl.name == new_exprs[0].decl.tester.name:
             return self._change(value=TRUE, sub_exprs=new_exprs)

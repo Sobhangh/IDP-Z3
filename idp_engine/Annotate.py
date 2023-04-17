@@ -38,7 +38,7 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     FORALL, EXISTS, TRUE)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-    OrderedSet, IDPZ3Error)
+    OrderedSet, Semantics)
 
 
 # Class Vocabulary  #######################################################
@@ -145,6 +145,10 @@ VarDeclaration.annotate = annotate
 def annotate(self, voc, q_vars):
     if self.name in q_vars:
         return q_vars[self.name]
+
+    self.check(self.name in voc.symbol_decls,
+               f'Undeclared symbol name: "{self.name}"')
+
     self.decl = voc.symbol_decls[self.name]
     self.type = self.decl.type
     return self
@@ -216,23 +220,35 @@ def annotate(self, voc, q_vars):
         self.level_symbols[key] = SYMBOL(symbdec.name)
         self.level_symbols[key].decl = symbdec
 
-    for decl in self.level_symbols.keys():
-        self.check(decl.out.name == BOOL,
-                    f"Inductively defined functions are not supported yet: "
-                    f"{decl.name}.")
-
-    if len(self.level_symbols) > 0:  # check for nested recursive symbols
-        nested = set()
+    if self.mode == Semantics.RECDATA:
+        # check that the variables in r.out are in the arguments of definiendum
         for r in self.rules:
-            r.body.collect_nested_symbols(nested, False)
-        for decl in self.level_symbols.keys():
-            self.check(decl not in nested,
-                        f"Inductively defined nested symbols are not supported yet: "
+            if r.out:
+                args = set()
+                for e in r.definiendum.sub_exprs[:-1]:
+                    for v in e.variables:
+                        args.add(v)
+                error = list(set(r.out.variables) - args)
+                self.check(len(error) == 0,
+                        f"Eliminate variable {error} in the head of : {r}")
+
+    # check for nested recursive symbols
+    nested = set()
+    for r in self.rules:
+        r.body.collect_nested_symbols(nested, False)
+    for decl in self.level_symbols.keys():
+        self.check(decl not in nested,
+                    f"Inductively defined nested symbols are not supported yet: "
+                    f"{decl.name}.")
+        if self.mode != Semantics.RECDATA:
+            self.check(decl.out.name == BOOL,
+                        f"Inductively defined functions are not supported yet: "
                         f"{decl.name}.")
 
     # create common variables, and rename vars in rule
     self.canonicals = {}
     for r in self.rules:
+        # create common variables
         decl = voc.symbol_decls[r.definiendum.decl.name]
         if decl.name not in self.def_vars:
             name = f"{decl.name}_"
@@ -242,8 +258,49 @@ def annotate(self, voc, q_vars):
             if decl.out.name != BOOL:
                 q_v[name] = VARIABLE(name, decl.out)
             self.def_vars[decl.name] = q_v
-        new_rule = rename_args(r, self.def_vars[decl.name])
-        self.canonicals.setdefault(decl, []).append(new_rule)
+
+        # rename the variables in the arguments of the definiendum
+        new_vars = self.def_vars[decl.name]
+        renamed = deepcopy(r)
+
+        vars = {var.name : var for q in renamed.quantees for vars in q.vars for var in vars}
+        args = renamed.definiendum.sub_exprs
+        r.check(len(args) == len(new_vars), "Internal error")
+
+        for i in range(len(args)- (1 if decl.out.name != BOOL else 0)):  # without rule.out
+            arg, nv = args[i], list(new_vars.values())[i]
+            if type(arg) == Variable \
+            and arg.name in vars and arg.name not in new_vars:  # a variable, but not repeated (and not a new variable name, by chance)
+                del vars[arg.name]
+                rename_args(renamed, [arg], [nv])
+            else:
+                eq = EQUALS([nv, arg])
+                renamed.body = AND([eq, renamed.body])
+
+        canonical = deepcopy(renamed)
+
+        for v in vars.values():
+            renamed.body = EXISTS([Quantee.make(v, sort=v.sort)], renamed.body)
+        self.renamed.setdefault(decl, []).append(renamed)
+
+        # rename the variable for the value of the definiendum
+        if decl.out.name != BOOL:  # now process r.out
+            arg, nv = canonical.definiendum.sub_exprs[-1], list(new_vars.values())[-1]
+            if type(arg) == Variable \
+            and arg.name in vars and arg.name not in new_vars:  # a variable, but not repeated (and not a new variable name, by chance)
+                del vars[arg.name]
+                rename_args(canonical, [arg], [nv])
+            else:
+                eq = EQUALS([nv, arg])
+                canonical.body = AND([eq, canonical.body])
+
+        for v in vars.values():
+            canonical.body = EXISTS([Quantee.make(v, sort=v.sort)], canonical.body)
+
+        canonical.definiendum.sub_exprs = list(new_vars.values())
+        canonical.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars.values()]
+
+        self.canonicals.setdefault(decl, []).append(canonical)
 
     # join the bodies of rules
     for decl, rules in self.canonicals.items():
@@ -279,35 +336,16 @@ def annotate(self, voc, q_vars):
     return self
 Rule.annotate = annotate
 
-def rename_args(self, new_vars):
-    """ for Clark's completion
-        input : '!v: f(args) <- body(args)'
-        output: '!nv: f(nv) <- nv=args & body(args)'
+def rename_args(self, old, new):
+    """replace old variables by new variables
+        (ignoring arguments in the head before the it
     """
-    self.check(len(self.definiendum.sub_exprs) == len(new_vars), "Internal error")
-    vars = {var.name : var for q in self.quantees for vars in q.vars for var in vars}
-    for i in range(len(self.definiendum.sub_exprs)):
-        arg, nv = self.definiendum.sub_exprs[i], list(new_vars.values())[i]
-        if type(arg) == Variable \
-        and arg.name in vars and arg.name not in new_vars:
-            del vars[arg.name]
-            self.body = self.body.instantiate([arg], [nv])
-            self.out = (self.out.instantiate([arg], [nv]) if self.out else
-                        self.out)
-            for j in range(i, len(self.definiendum.sub_exprs)):
-                self.definiendum.sub_exprs[j] = \
-                    self.definiendum.sub_exprs[j].instantiate([arg], [nv])
-        else:
-            eq = EQUALS([nv, arg])
-            self.body = AND([eq, self.body])
-
-    for v in vars.values():
-        self.body = EXISTS([Quantee.make(v, sort=v.sort)], self.body)
-
-    self.definiendum.sub_exprs = list(new_vars.values())
-    self.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars.values()]
-    return self
-
+    self.body = self.body.instantiate(old, new)
+    self.out = (self.out.instantiate(old, new) if self.out else
+                self.out)
+    args = self.definiendum.sub_exprs
+    for j in range(0, len(args)):
+        args[j] = args[j].instantiate(old, new)
 
 
 # Class Structure  #######################################################
@@ -321,8 +359,8 @@ def annotate(self, idp):
     :arg idp: a `Parse.IDP` object.
     :returns None:
     """
-    if self.vocab_name not in idp.vocabularies:
-        raise IDPZ3Error(f"Unknown vocabulary: {self.vocab_name}")
+    self.check(self.vocab_name in idp.vocabularies,
+               f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
     for i in self.interpretations.values():
         i.annotate(self)
@@ -373,7 +411,8 @@ def annotate(self, block):
     if self.default is not None:
         self.default = self.default.annotate(voc, {})
         self.check(self.default.value is not None,
-            f"Default value for '{self.name}' must be ground: {self.default}")
+                   f"Value for '{self.name}' may only use numerals,"
+                   f" identifiers or constructors: '{self.default}'")
 SymbolInterpretation.annotate = annotate
 
 
@@ -391,7 +430,8 @@ Enumeration.annotate = annotate
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
     self.check(all(a.value is not None for a in self.args),
-                f"Tuple must be ground : ({self})")
+               f"Interpretation may only contain numerals,"
+               f" identifiers or constructors: '{self}'")
 TupleIDP.annotate = annotate
 
 
@@ -573,10 +613,21 @@ AQuantification.annotate1 = annotate1
 
 # Class Operator  #######################################################
 
+def annotate(self, voc, q_vars):
+    self = Expression.annotate(self, voc, q_vars)
+
+    for e in self.sub_exprs:
+        if self.operator[0] in '&|∧∨⇒⇐⇔':
+            self.check(e.type is None or e.type == BOOL or e.str in ['true', 'false'],
+                       f"Expected boolean formula, got {e.type}: {e}")
+    return self
+Operator.annotate = annotate
+
 def annotate1(self):
-    if self.type is None:
+    if self.type is None:  # not a BOOL operator
         self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
                 else INT if any(e.type == INT for e in self.sub_exprs) \
+                else DATE if any(e.type == DATE for e in self.sub_exprs) \
                 else self.sub_exprs[0].type  # constructed type, without arithmetic
     return Expression.annotate1(self)
 Operator.annotate1 = annotate1
@@ -639,6 +690,18 @@ ARImplication.annotate = annotate
 def annotate(self, voc, q_vars):
     out = Operator.annotate(self, voc, q_vars)
     out.type = BOOL
+
+    for e in self.sub_exprs:
+        if self.operator[0] in "<>≤≥":
+            self.check(e.type != BOOL,
+                        f"Expected numeric formula, got {e.type}: {e}")
+            self.check(e.type is None or e.type in ['', INT, REAL, DATE]
+                       or voc.symbol_decls[e.type].type in [INT, REAL, DATE]
+                       or voc.symbol_decls[e.type].interpretation is None # can't infer type yet
+                       or not hasattr(voc.symbol_decls[e.type], 'enumeration')
+                       or voc.symbol_decls[e.type].enumeration is None,
+                        f"Expected numeric formula, got {e.type}: {e}")
+
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
         out = NOT(EQUALS(self.sub_exprs))
