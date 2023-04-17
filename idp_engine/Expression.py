@@ -250,7 +250,9 @@ class Expression(ASTNode):
                  'is_type_constraint_for', 'co_constraint',
                  'questions', 'relevant')
 
-    def __init__(self):
+    def __init__(self, parent=None):
+        if parent:
+            self.parent = parent
         self.sub_exprs: List[Expression]
         self.value: Optional[Expression] = None
 
@@ -874,7 +876,7 @@ class Operator(Expression):
             lambda op: Operator.NORMAL.get(op, op)
             , self.operator))
 
-        super().__init__()
+        super().__init__(parent)
 
         self.type = BOOL if self.operator[0] in '&|∧∨⇒⇐⇔' \
                else BOOL if self.operator[0] in '=<>≤≥≠' \
@@ -884,7 +886,8 @@ class Operator(Expression):
     def make(cls,
              ops: Union[str, List[str]],
              operands: List[Expression],
-             annotations=None
+             annotations=None,
+             parent=None
              ) -> 'Operator':
         """ creates a BinaryOp
             beware: cls must be specific for ops !
@@ -899,7 +902,10 @@ class Operator(Expression):
             return operands[0]
         if isinstance(ops, str):
             ops = [ops] * (len(operands)-1)
-        out = (cls)(None, ops, operands, annotations)
+        out = (cls)(parent, ops, operands, annotations)
+        if parent:  # for error messages
+            out._tx_position = parent. _tx_position
+            out._tx_position_end = parent. _tx_position_end
         if annotations:
             out.annotations = annotations
         return out.annotate1().simplify1()
