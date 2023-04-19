@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
+## [0.10.5] -
+
+Contributors (alphabetical): Pierre Carbonnelle
+
+### IDP-Z3
+*
+*
+
+### Interactive Consultant and Web IDE
+* MR !302: incorrect linter error for partial interpretation of function
+*
+*
+
+
 ## [0.10.4] - 2023-04-17
 
 The main new features in this release are:
