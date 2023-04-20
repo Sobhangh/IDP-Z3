@@ -14,7 +14,7 @@ Contributors (alphabetical): Pierre Carbonnelle
 
 ### Interactive Consultant and Web IDE
 * MR !302: incorrect linter error for partial interpretation of function
-*
+* issue #268: Open FLAIR link in new tab
 *
 
 
