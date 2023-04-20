@@ -246,7 +246,7 @@ def SCA_Check(self, detections):
         for t in self.enumeration.tuples:  # check output of each tuple
             check_type(t.args[-1].value, out_type, out_type_values, 'Output element')
 
-        if len(possibilities) > 0 and not self.default:
+        if self.sign == "≜" and len(possibilities) > 0 and not self.default:
             detections.append((self, f"Function not totally defined, missing {str(possibilities)[:25]}", "Error"))
 
 
