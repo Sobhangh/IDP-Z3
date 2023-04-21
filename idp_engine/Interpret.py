@@ -44,7 +44,7 @@ from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
     Definition, Rule, ConstructedFrom)
-from .Expression import (RecDef, Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
+from .Expression import (catch_error, RecDef, Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
     EQUIV, EQUALS, OR, AppliedSymbol, UnappliedSymbol, Quantee,
     Variable, VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
@@ -55,6 +55,7 @@ from .utils import (BOOL, INT, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
 
 # class Import  ###########################################################
 
+@catch_error
 def interpret(self, problem):
     pass
 Import.interpret = interpret
@@ -62,6 +63,7 @@ Import.interpret = interpret
 
 # class TypeDeclaration  ###########################################################
 
+@catch_error
 def interpret(self, problem):
     interpretation = problem.interpretations.get(self.name, None)
     if self.name in [BOOL, CONCEPT]:
@@ -108,6 +110,7 @@ TypeDeclaration.interpret = interpret
 
 # class SymbolDeclaration  ###########################################################
 
+@catch_error
 def interpret(self, problem):
     assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
 
@@ -171,6 +174,7 @@ SymbolDeclaration.interpret = interpret
 
 # class Definition  ###########################################################
 
+@catch_error
 def interpret(self, problem):
     """updates problem.def_constraints, by expanding the definitions
 
@@ -182,6 +186,7 @@ def interpret(self, problem):
     problem.def_constraints.update(self.get_def_constraints(problem))
 Definition.interpret = interpret
 
+@catch_error
 def get_def_constraints(self,
                         problem,
                         for_explain: bool = False
@@ -216,7 +221,7 @@ def get_def_constraints(self,
 
             vars = sorted(list(self.def_vars[decl.name].values()), key=lambda v: v.name)
             vars = vars[:-1] if decl.out.name != BOOL else vars
-            expr = RecDef(self.parent, decl.name, vars, expr)
+            expr = RecDef(self, decl.name, vars, expr)
             out[decl, self] = [expr]
         return out
 
@@ -281,6 +286,7 @@ def get_def_constraints(self,
     return out
 Definition.get_def_constraints = get_def_constraints
 
+@catch_error
 def instantiate_definition(self, decl, new_args, theory):
     rule = self.clarks.get(decl, None)
     if rule and self.mode != Semantics.RECDATA:
@@ -303,6 +309,7 @@ Definition.instantiate_definition = instantiate_definition
 
 # class Rule  ###########################################################
 
+@catch_error
 def instantiate_definition(self, new_args, theory):
     """Create an instance of the definition for new_args, and interpret it for theory.
 
@@ -335,6 +342,7 @@ Rule.instantiate_definition = instantiate_definition
 
 # class SymbolInterpretation  ###########################################################
 
+@catch_error
 def interpret(self, problem):
     status = S.DEFAULT if self.block.name == DEFAULT else S.STRUCTURE
     assert not self.is_type_enumeration, "Internal error"
@@ -431,6 +439,7 @@ SymbolInterpretation.interpret = interpret
 
 # class Enumeration  ###########################################################
 
+@catch_error
 def interpret(self, problem):
     return self
 Enumeration.interpret = interpret
@@ -438,6 +447,7 @@ Enumeration.interpret = interpret
 
 # class ConstructedFrom  ###########################################################
 
+@catch_error
 def interpret(self, problem):
     self.tuples = OrderedSet()
     for c in self.constructors:
@@ -452,6 +462,7 @@ ConstructedFrom.interpret = interpret
 
 # class Constructor  ###########################################################
 
+@catch_error
 def interpret(self, problem):
     assert all(isinstance(s.decl.out, Type) for s in self.sorts), 'internal error'
     if not self.sorts:
@@ -474,6 +485,7 @@ Constructor.interpret = interpret
 
 # class Expression  ###########################################################
 
+@catch_error
 def interpret(self, problem) -> Expression:
     """ uses information in the problem and its vocabulary to:
     - expand quantifiers in the expression
@@ -494,6 +506,7 @@ Expression.interpret = interpret
 
 
 # @log  # decorator patched in by tests/main.py
+@catch_error
 def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self (e0 is not a Variable)
 
@@ -519,6 +532,7 @@ def substitute(self, e0, e1, assignments, tag=None):
 Expression.substitute = substitute
 
 
+@catch_error
 def instantiate(self, e0, e1, problem=None):
     """Recursively substitute Variable in e0 by e1 in a copy of self.
     Update .variables.
@@ -533,6 +547,7 @@ def instantiate(self, e0, e1, problem=None):
     return out.instantiate1(e0, e1, problem)
 Expression.instantiate = instantiate
 
+@catch_error
 def instantiate1(self, e0, e1, problem=None):
     """Recursively substitute Variable in e0 by e1 in self.
 
@@ -545,6 +560,7 @@ def instantiate1(self, e0, e1, problem=None):
     return _finalize(self, out, e0, e1)
 Expression.instantiate1 = instantiate1
 
+@catch_error
 def _finalize(self, out, e0, e1):
     if out.value is not None:  # replace by new value
         out = out.value
@@ -563,6 +579,7 @@ def _finalize(self, out, e0, e1):
 
 # class Symbol ###########################################################
 
+@catch_error
 def instantiate(self, e0, e1, problem=None):
     return self
 Symbol.instantiate = instantiate
@@ -570,6 +587,7 @@ Symbol.instantiate = instantiate
 
 # class Type ###########################################################
 
+@catch_error
 def extension(self, interpretations: Dict[str, SymbolInterpretation],
               extensions: Dict[str, Extension]
               ) -> Extension:
@@ -635,6 +653,7 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
         return out
     return expr
 
+@catch_error
 def interpret(self, problem):
     """apply information in the problem and its vocabulary
 
@@ -701,6 +720,7 @@ def interpret(self, problem):
 AQuantification.interpret = interpret
 
 
+@catch_error
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # updates .variables
     for q in self.quantees: # for !x in $(output_domain(s,1))
@@ -714,6 +734,7 @@ AQuantification.instantiate1 = instantiate1
 
 # Class AAggregate  ######################################################
 
+@catch_error
 def interpret(self, problem):
     assert self.annotated, f"Internal error in interpret"
     return AQuantification.interpret(self, problem)
@@ -724,6 +745,7 @@ AAggregate.instantiate1 = AQuantification.instantiate1
 
 # Class AImplication ######################################################
 
+@catch_error
 def instantiate1(self, e0, e1, problem):
     assert len(self.sub_exprs) == 2
     premise = self.sub_exprs[0].instantiate(e0, e1, problem)
@@ -737,6 +759,7 @@ AImplication.instantiate1 = instantiate1
 
 # Class AConjunction ######################################################
 
+@catch_error
 def instantiate1(self, e0, e1, problem):
     new_exprs = []
     for e in self.sub_exprs:
@@ -751,6 +774,7 @@ AConjunction.instantiate1 = instantiate1
 
 # Class AppliedSymbol  ##############################################
 
+@catch_error
 def interpret(self, problem):
     self.symbol = self.symbol.interpret(problem)
     sub_exprs = [e.interpret(problem) for e in self.sub_exprs]
@@ -805,6 +829,7 @@ AppliedSymbol.interpret = interpret
 
 
 # @log_calls  # decorator patched in by tests/main.py
+@catch_error
 def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self """
 
@@ -830,6 +855,7 @@ def substitute(self, e0, e1, assignments, tag=None):
         return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
 AppliedSymbol .substitute = substitute
 
+@catch_error
 def instantiate1(self, e0, e1, problem=None):
     out = Expression.instantiate1(self, e0, e1, problem)  # update .variables
     if type(out) == AppliedSymbol:  # might be a number after instantiation
@@ -855,17 +881,20 @@ AppliedSymbol .instantiate1 = instantiate1
 
 # Class Variable  #######################################################
 
+@catch_error
 def interpret(self, problem):
     return self
 Variable.interpret = interpret
 
 # @log  # decorator patched in by tests/main.py
+@catch_error
 def substitute(self, e0, e1, assignments, tag=None):
     if self.sort:
         self.sort = self.sort.substitute(e0,e1, assignments, tag)
     return e1 if self.code == e0.code else self
 Variable.substitute = substitute
 
+@catch_error
 def instantiate1(self, e0, e1, problem=None):
     if self.sort:
         self.sort = self.sort.instantiate(e0, e1, problem)

@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Contributors (alphabetical): Pierre Carbonnelle
 
 ### IDP-Z3
-*
+* MR !304: show line number for internal error in python code
 *
 
 ### Interactive Consultant and Web IDE

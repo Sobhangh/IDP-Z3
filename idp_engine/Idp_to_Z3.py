@@ -33,7 +33,7 @@ from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
                 BoolVal, RatVal, IntVal, RecAddDefinition)
 
 from .Parse import TypeDeclaration, SymbolDeclaration, TupleIDP, Ranges, IntRange, RealRange, DateRange
-from .Expression import (Constructor, Expression, AIfExpr, Quantee,
+from .Expression import (catch_error, Constructor, Expression, AIfExpr, Quantee,
                         AQuantification, Operator, Symbol,
                         ADisjunction, AConjunction, AComparison,
                         AUnary, AAggregate, AppliedSymbol,
@@ -47,6 +47,7 @@ if TYPE_CHECKING:
 
 # class TypeDeclaration  ###########################################################
 
+@catch_error
 def translate(self, problem: Theory):
     out = problem.z3.get(self.name, None)
     if out is None:
@@ -92,6 +93,7 @@ TypeDeclaration.translate = translate
 
 # class SymbolDeclaration  ###########################################################
 
+@catch_error
 def translate(self, problem: Theory):
     out = problem.z3.get(self.name, None)
     if out is None:
@@ -112,12 +114,14 @@ SymbolDeclaration.translate = translate
 
 # class TupleIDP  ###########################################################
 
+@catch_error
 def translate(self, problem: Theory):
     return [arg.translate(problem) for arg in self.args]
 TupleIDP.translate = translate
 
 # class Constructor  ###########################################################
 
+@catch_error
 def translate(self, problem: Theory):
     return problem.z3[self.name]
 Constructor.translate = translate
@@ -125,6 +129,7 @@ Constructor.translate = translate
 
 # class Expression  ###########################################################
 
+@catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, using .value if present
 
@@ -160,6 +165,7 @@ Expression.reified = reified
 
 # class Symbol  ###############################################################
 
+@catch_error
 def translate(self, problem: Theory, vars={}):
     if self.name == BOOL:
         return BoolSort(problem.ctx)
@@ -194,6 +200,7 @@ AIfExpr.translate1 = translate1
 
 # Class Quantee  ######################################################
 
+@catch_error
 def translate(self, problem: Theory, vars={}):
     out = {}
     for vars in self.vars:
@@ -391,6 +398,7 @@ UnappliedSymbol.translate1 = translate1
 
 # Class Variable  #######################################################
 
+@catch_error
 def translate(self, problem: Theory, vars={}):
     return vars[self.str]
 Variable.translate = translate
@@ -398,6 +406,7 @@ Variable.translate = translate
 
 # Class Number  #######################################################
 
+@catch_error
 def translate(self, problem: Theory, vars={}):
     out = problem.z3.get(self.str, None)
     if out is None:
@@ -412,6 +421,7 @@ Number.translate = translate
 
 # Class Date  #######################################################
 
+@catch_error
 def translate(self, problem: Theory, vars={}):
     out = problem.z3.get(self.str, None)
     if out is None:
