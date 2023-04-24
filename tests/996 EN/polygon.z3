@@ -36,7 +36,7 @@
 - [The perimeter is the sum of the lengths of the sides]
   the perimeter is the sum of length n°n for all n in Side_Nr.
 - [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
-  the sum of angle n°n for all n in Side_Nr satisfying 0 ≤ n is (the number of edges - 2) ⨯ 180.
+  the sum of angle n°n for all n in Side_Nr such that 0 ≤ n is (the number of edges - 2) ⨯ 180.
 - [Lengths are positive numbers]
   for every x in Side_Nr, it is true that 0 ≤ length n°x.
 - [Angles are positive numbers]
