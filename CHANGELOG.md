@@ -6,7 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.10.5] -
 
-Contributors (alphabetical): Pierre Carbonnelle
+The main new features in this release are:
+* new syntax for aggregates (MR !294)
+
+Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * MR !294: IEP 27 `if` in sum / min / max aggregates

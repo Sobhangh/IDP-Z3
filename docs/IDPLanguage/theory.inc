@@ -93,6 +93,7 @@ Aggregate over sets
     a numerical term where ``agg`` can be ``min`` or ``max``,
     |v1,vn| are variables, |t| is a term and ``p`` is a boolean expression.
     The variables declared by the aggregate can occur in ``t`` and ``p``.
+    If ``: p`` is omitted, ``p`` is presumed to be ``true``.
 
     This aggregate denotes the minimum (resp. maximum) of term ``t``
     for each value of the variables that satisfies ``p``.
@@ -103,6 +104,7 @@ Aggregate over multisets
     The term ``sum{{ t | v_1 in typeOfV_1, .., v_n in typeOfV_n : p}}`` denotes
     the sum of the term ``t`` for each value of the variables that satisfies boolean expression ``p``.
     The variables declared by the aggregate can occur in ``t`` and ``p``.
+    If ``: p`` is omitted, ``p`` is presumed to be ``true``.
     If the multiset is empty the value of the aggregate is 0.
 
 (if .. then .. else ..)
