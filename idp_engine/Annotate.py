@@ -706,11 +706,13 @@ AUnary.annotate1 = annotate1
 
 def annotate(self, voc, q_vars):
     if not self.annotated:
-        if self.aggtype == "sum" and len(self.sub_exprs) == 2:
-            self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
-                                    self.sub_exprs[0], ZERO)]
 
         self = AQuantification.annotate(self, voc, q_vars)
+
+        if self.aggtype == "sum" and len(self.sub_exprs) == 2:
+            self.original = copy(self)
+            self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
+                                    self.sub_exprs[0], ZERO).annotate1()]
 
         if self.aggtype == "#":
             self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),

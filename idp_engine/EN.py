@@ -93,12 +93,15 @@ AQuantification.EN = EN
 
 
 def EN(self):
-    self = self.original
+    def origine(x):
+        return x if x.original == x or not x.annotated else origine(x.original)
+    self = origine(self)
     vars = ",".join([f"{q.EN()}" for q in self.quantees])
     if self.aggtype in ['sum', 'min', 'max']:
         return (f"the {self.aggtype} of "
                 f"{self.sub_exprs[0].EN()} "
-                f"for all {vars}")
+                f"for all {vars}"
+                f"{f' satisfying {self.sub_exprs[1].EN()}' if len(self.sub_exprs) == 2 else ''}")
     else: #  #
         return (f"the number of {vars} satisfying "
                 f"{self.sub_exprs[0].EN()}")
