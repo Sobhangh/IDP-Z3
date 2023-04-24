@@ -47,7 +47,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
           definiendum=AppliedSymbol
           (('=' |DefEqOp) out=SumMinus)?
           (('<-'|'←' | 'if' ) body=Expression)? '.' ;
-        Quantee:  subtype=Type !'in' !'∈' vars+=Variable
+        Quantee:  subtype=Type !'in' !'∈' vars+=Variable[',']
                 | vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
                 | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?;
             Variable: name=/`?[^\d\W]\w*\b/;
@@ -90,8 +90,9 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
     AMultDiv:      sub_exprs=Power       (operator=MultDivOp      sub_exprs=Power      )+;
     APower:        sub_exprs=Unary       (operator='^'            sub_exprs=Unary      );
     AUnary: !INT !IDPFLOAT               (operators+=UnaryOperator  f=Aggregate);
-    AAggregate: ( aggtype=/#|card/ '{' quantees*=Quantee[',']  ':' f=Expression '}'
-                | aggtype=/sum|min|max/ '(' 'lambda' quantees*=Quantee[',']  ':' f=Expression ')');
+    AAggregate:   aggtype=/#|card/ '{' quantees*=Quantee[',']  ':' f=Expression '}'
+                | aggtype=/sum|min|max/ '(' 'lambda' quantees*=Quantee[',']  ':' f=Expression ')'
+                | aggtype=/sum|min|max/ '(' f=Expression 'for' 'all' quantees*=Quantee[','] ('if' if_=Expression)? ')';
     AIfExpr: 'if' if_f=Expression 'then' then_f=Expression 'else' else_f=Expression;
 
     RImplicationOp: '<=' | '⇐' | /are necessary conditions for/;

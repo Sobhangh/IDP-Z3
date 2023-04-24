@@ -1062,10 +1062,13 @@ class AAggregate(Expression):
     def __init__(self, parent,
                  aggtype: str,
                  quantees: List[Quantee],
-                 f: Expression):
+                 f: Expression,
+                 if_: Expression = None):
         self.aggtype = aggtype
         self.quantees = quantees
         self.f = f
+        if if_:
+            self.f = AIfExpr(parent, if_, f, ZERO)
 
         self.aggtype = "#" if self.aggtype == "card" else self.aggtype
         self.sub_exprs = [self.f]  # later: expressions to be summed
