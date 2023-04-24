@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Contributors (alphabetical): Pierre Carbonnelle
 
 ### IDP-Z3
+* MR !294: IEP 27 `if` in sum / min / max aggregates
 *
 *
 

@@ -19,6 +19,11 @@ And(Vehicle(o2),
     If(Vehicle(o2), weight(o2), 0) +
     0,
     fleetTotal(f2) == 0 + 0 + If(Vehicle(o3), weight(o3), 0),
+    fleetTotal(f1) ==
+    If(Vehicle(o1), weight(o1), 0) +
+    If(Vehicle(o2), weight(o2), 0) +
+    0,
+    fleetTotal(f2) == 0 + 0 + If(Vehicle(o3), weight(o3), 0),
     fleetCard(f1) ==
     If(Vehicle(o1), 1, 0) + If(Vehicle(o2), 1, 0) + 0,
     fleetCard(f2) == 0 + 0 + If(Vehicle(o3), 1, 0),
@@ -26,6 +31,10 @@ And(Vehicle(o2),
     _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1),
     fleetMin(f2) ==
     _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
+    fleetMin(f1) ==
+    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1),
+    fleetMin(f2) ==
+    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2),
     Or(_min(lambda x ∈ ConfigObj : weight(x)) == weight(o1),
        _min(lambda x ∈ ConfigObj : weight(x)) == weight(o2),
        _min(lambda x ∈ ConfigObj : weight(x)) == weight(o3)),
@@ -61,6 +70,21 @@ And(Vehicle(o2),
     999 >=
     _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
     _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2) <=
+    weight(o3),
+    Or(_min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) ==
+       weight(o1),
+       _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) ==
+       weight(o2),
+       False),
+    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) <=
+    weight(o1),
+    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) <=
+    weight(o2),
+    Or(False,
+       False,
+       _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2) ==
+       weight(o3)),
+    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2) <=
     weight(o3))
 
 Model 1

@@ -43,7 +43,7 @@ The equivalent ASCII-only encoding is shown on the right.
 
         f() in {1,2,3}.
         f() = #{x∈T: p(x)}.                       f() = #{x in T: p(x)}.
-        f() = sum(lambda x∈T: f(x)).              f() = sum(lambda x in T: f(x)).
+        f() = sum(lambda x∈T: f(x) if p(x)).      f() = sum(lambda x in T: f(x) if p(x)).
         if p1() then p2() else p3().
         f1() = if p() then f2() else f3().
 

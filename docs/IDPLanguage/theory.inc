@@ -88,12 +88,11 @@ Cardinality aggregate
     The term denotes the number of tuples of distinct values for |v1,vn| which make |phi| true.
 
 Aggregate over anonymous function
-    ``agg(lambda v_1 in typeOfV_1, .., v_n in typeOfV_n : t)`` is a numerical term where ``agg`` can be any of (``sum``, ``min``, ``max``),
-    |v1,vn| are variables and |t| is a term.
+    ``agg(lambda v_1 in typeOfV_1, .., v_n in typeOfV_n : t if a)`` is a numerical term where ``agg`` can be any of (``sum``, ``min``, ``max``),
+    |v1,vn| are variables and |t| is a term and ``a`` is a boolean expression.
 
-    The term ``sum(lambda v in T : t(v))`` denotes the sum of ``t(v)`` for each ``v`` in ``T``.
-    Similarly, ``min`` (resp. ``max``) can be used to compute the minimum (resp. maximum) of ``t(v)`` for each ``v`` in ``T``.
-    ``t(v)`` can use the construct ``(if .. then .. else ..)`` to filter out unwanted ``v`` values.
+    The term ``sum(lambda v in T : t(v) if a(v))`` denotes the sum of ``t(v)`` for each ``v`` in ``T`` that satisfy ``a(v)``.
+    Similarly, ``min`` (resp. ``max``) can be used to compute the minimum (resp. maximum) of ``t(v)`` for each ``v`` in ``T`` that satisfy ``a(v)``.
 
 (if .. then .. else ..)
     ``(if t_1 then t_2 else t_3)`` is a term when |t1| is a formula, |t2| and |t3| are terms of the same type.

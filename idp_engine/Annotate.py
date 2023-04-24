@@ -34,8 +34,8 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     ARImplication, AImplication, AEquivalence,
     Operator, AComparison, AUnary, AAggregate,
     AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
-    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, FALSE,
-    FORALL, EXISTS, TRUE)
+    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE, ZERO,
+    IMPLIES, FORALL, EXISTS, Extension)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
     OrderedSet, Semantics)
@@ -705,10 +705,13 @@ AUnary.annotate1 = annotate1
 # Class AAggregate  #######################################################
 
 def annotate(self, voc, q_vars):
-    self = AQuantification.annotate(self, voc, q_vars)
-
     if not self.annotated:
-        assert len(self.sub_exprs) == 1, "Internal error"
+        if self.aggtype == "sum" and len(self.sub_exprs) == 2:
+            self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
+                                    self.sub_exprs[0], ZERO)]
+
+        self = AQuantification.annotate(self, voc, q_vars)
+
         if self.aggtype == "#":
             self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
                                  Number(number='0'))]
@@ -716,10 +719,10 @@ def annotate(self, voc, q_vars):
         else:
             self.type = self.sub_exprs[0].type
             if self.aggtype in ["min", "max"]:
-                # the `min` aggregate in `!y in T: min(lamda x in type: term(x,y))=0`
+                # the `min` aggregate in `!y in T: min(lamda x in type: term(x,y) if cond(x,y))=0`
                 # is replaced by `_*(y)` with the following co-constraint:
-                #     !y in T: ( ?x in type: term(x) = _*(y)
-                #                !x in type: term(x) =< _*(y).
+                #     !y in T: ( ?x in type: cond(x,y) & term(x) = _*(y)
+                #                !x in type: cond(x,y) => term(x) =< _*(y).
                 self.check(self.type, f"Can't infer type of {self}")
                 name = "_" + self.str
                 if name in voc.symbol_decls:
@@ -737,12 +740,18 @@ def annotate(self, voc, q_vars):
                 applied = applied.annotate(voc, q_vars)
 
                 if to_create:
-                    coc1 = EXISTS(self.quantees,
-                                EQUALS([deepcopy(applied), self.sub_exprs[0]]))
+                    eq = EQUALS([deepcopy(applied), self.sub_exprs[0]])
+                    if len(self.sub_exprs) == 2:
+                        eq = AND([self.sub_exprs[1], eq])
+                    coc1 = EXISTS(self.quantees, eq)
+
                     op = '≤' if self.aggtype == "min" else '≥'
-                    coc2 = FORALL(deepcopy(self.quantees),
-                                AComparison.make(op,
-                                    deepcopy([applied, self.sub_exprs[0]])))
+                    comp = AComparison.make(op,
+                                    deepcopy([applied, self.sub_exprs[0]]))
+                    if len(self.sub_exprs) == 2:
+                        comp = IMPLIES([self.sub_exprs[1], comp])
+                    coc2 = FORALL(deepcopy(self.quantees), comp)
+
                     coc = AND([coc1, coc2])
                     quantees = [Quantee.make(v, sort=v.sort) for v in q_vars.values()]
                     applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)

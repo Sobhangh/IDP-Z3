@@ -1067,11 +1067,11 @@ class AAggregate(Expression):
         self.aggtype = aggtype
         self.quantees = quantees
         self.f = f
-        if if_:
-            self.f = AIfExpr(parent, if_, f, ZERO)
 
         self.aggtype = "#" if self.aggtype == "card" else self.aggtype
         self.sub_exprs = [self.f]  # later: expressions to be summed
+        if if_:
+            self.sub_exprs.append(if_)
         self.annotated = False  # cannot test q_vars, because aggregate may not have quantee
         self.q = ''
         super().__init__()
@@ -1079,11 +1079,12 @@ class AAggregate(Expression):
     def __str1__(self):
         # aggregates are over finite domains, and cannot have partial expansion
         if not self.annotated:
-            assert len(self.sub_exprs) == 1, "Internal error"
+            assert len(self.sub_exprs) <= 2, "Internal error"
             vars = ",".join([f"{q}" for q in self.quantees])
             if self.aggtype in ["sum", "min", "max"]:
                 out = (f"{self.aggtype}(lambda {vars} : "
                         f"{self.sub_exprs[0].str}"
+                        f"{f' if {self.sub_exprs[1]}' if len(self.sub_exprs) == 2 else ''}"
                         f")" )
             else:
                 out = (f"{self.aggtype}{{{vars} : "
