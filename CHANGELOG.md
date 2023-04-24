@@ -46,8 +46,9 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 ## [0.10.3] - 2023-03-24
 
 The main new features in this release are:
-* Support for co-inductive definitions
-* automated testing of the IC using Cypress  (See README.md for installation)
+* Support for co-inductive definitions (MR !279)
+* connectives in English (MR !290)
+* automated testing of the IC using Cypress  (See README.md for installation) (#242)
 
 This release has new package dependencies: please run `poetry install` to update.
 
@@ -57,7 +58,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * MR !279: Support co-inductive definitions
 * MR !280: various small improvements
 * MR !284: Refactor Expression.simpler for better performance
-* MR #290: English connectives in formula
+* MR !290: English connectives in formula
 * issue #235: range interpretation of predicate is not respected
 * issue #236: Incorrect nested quantification over infinite domain
 * issue #238: Fix FOLint issues in structure
