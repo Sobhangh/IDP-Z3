@@ -84,6 +84,7 @@ Parenthesis
 
 Cardinality aggregate
     ``#{v_1 in typeOfV_1, .., v_n in typeOfV_n : ϕ}`` is a numerical term when |v1,vn| are variables, and |phi| is a sentence_ containing these variables.
+    If ``: ϕ`` is omitted, |phi| is presumed to be ``true``.
 
     The term denotes the number of tuples of distinct values for |v1,vn| which make |phi| true.
 
