@@ -103,7 +103,7 @@ def EN(self):
                 f"for all {vars}"
                 f"{f' such that {self.sub_exprs[1].EN()}' if len(self.sub_exprs) == 2 else ''}")
     else: #  #
-        return (f"the number of {vars} satisfying "
+        return (f"the number of {vars} such that "
                 f"{self.sub_exprs[0].EN()}")
 AAggregate.EN = EN
 

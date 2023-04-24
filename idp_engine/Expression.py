@@ -1062,11 +1062,13 @@ class AAggregate(Expression):
     def __init__(self, parent,
                  aggtype: str,
                  quantees: List[Quantee],
+                 lambda_: str=None,
                  f: Expression = None,
                  if_: Expression = None):
         self.aggtype = aggtype
         self.quantees = quantees
         self.f = f
+        self.lambda_ = lambda_
 
         self.aggtype = ("#" if self.aggtype == "card" else
                         "min" if self.aggtype == "minimum" else

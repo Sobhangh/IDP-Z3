@@ -92,7 +92,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
     AUnary: !INT !IDPFLOAT               (operators+=UnaryOperator  f=Aggregate);
     AAggregate:   aggtype=/#|card/ '{' quantees*=Quantee[',']  (':' f=Expression)? '}'
                 | aggtype=/sum/ '{{' f=Base '|' quantees*=Quantee[',']  (':' if_=Expression)? '}}'
-                | aggtype=/sum|min|max/ '(' 'lambda' quantees*=Quantee[',']  ':' f=Expression ')'
+                | aggtype=/sum|min|max/ '(' lambda_='lambda' quantees*=Quantee[',']  ':' f=Expression ')'
                 | aggtype=/min|max/ '{' f=Base '|' quantees*=Quantee[',']  (':' if_=Expression)? '}'
                 | 'the' aggtype=/sum|minimum|maximum/ 'of' f=Base 'for' 'all' quantees*=Quantee[','] ('such' 'that' if_=Expression)? ;
     AIfExpr: 'if' if_f=Expression 'then' then_f=Expression 'else' else_f=Expression;
