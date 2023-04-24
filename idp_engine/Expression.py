@@ -1068,7 +1068,10 @@ class AAggregate(Expression):
         self.quantees = quantees
         self.f = f
 
-        self.aggtype = "#" if self.aggtype == "card" else self.aggtype
+        self.aggtype = ("#" if self.aggtype == "card" else
+                        "min" if self.aggtype == "minimum" else
+                        "max" if self.aggtype == "maximum" else
+                        self.aggtype)
         self.f = TRUE if f is None and self.aggtype == "#" else f
         self.sub_exprs = [self.f]  # later: expressions to be summed
         if if_:

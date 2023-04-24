@@ -11,6 +11,10 @@ And(Vehicle(o2),
     If(Vehicle(o1), weight(o1), 0) +
     If(Vehicle(o2), weight(o2), 0) +
     If(Vehicle(o3), weight(o3), 0),
+    total ==
+    If(Vehicle(o1), weight(o1), 0) +
+    If(Vehicle(o2), weight(o2), 0) +
+    If(Vehicle(o3), weight(o3), 0),
     min == _min(lambda x ∈ ConfigObj : weight(x)),
     max == _max(lambda x ∈ ConfigObj : weight(x)),
     max2 == _max(lambda x ∈ ConfigObj : weight(x)),

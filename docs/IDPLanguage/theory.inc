@@ -88,12 +88,22 @@ Cardinality aggregate
 
     The term denotes the number of tuples of distinct values for |v1,vn| which make |phi| true.
 
-Aggregate over anonymous function
-    ``agg(lambda v_1 in typeOfV_1, .., v_n in typeOfV_n : t if a)`` is a numerical term where ``agg`` can be any of (``sum``, ``min``, ``max``),
-    |v1,vn| are variables and |t| is a term and ``a`` is a boolean expression.
+Aggregate over sets
+    ``agg{ t | v_1 in typeOfV_1, .., v_n in typeOfV_n : p}`` is
+    a numerical term where ``agg`` can be ``min`` or ``max``,
+    |v1,vn| are variables, |t| is a term and ``p`` is a boolean expression.
+    The variables declared by the aggregate can occur in ``t`` and ``p``.
 
-    The term ``sum(lambda v in T : t(v) if a(v))`` denotes the sum of ``t(v)`` for each ``v`` in ``T`` that satisfy ``a(v)``.
-    Similarly, ``min`` (resp. ``max``) can be used to compute the minimum (resp. maximum) of ``t(v)`` for each ``v`` in ``T`` that satisfy ``a(v)``.
+    This aggregate denotes the minimum (resp. maximum) of term ``t``
+    for each value of the variables that satisfies ``p``.
+    Note that the set must be non-empty.
+
+Aggregate over multisets
+
+    The term ``sum{{ t | v_1 in typeOfV_1, .., v_n in typeOfV_n : p}}`` denotes
+    the sum of the term ``t`` for each value of the variables that satisfies boolean expression ``p``.
+    The variables declared by the aggregate can occur in ``t`` and ``p``.
+    If the multiset is empty the value of the aggregate is 0.
 
 (if .. then .. else ..)
     ``(if t_1 then t_2 else t_3)`` is a term when |t1| is a formula, |t2| and |t3| are terms of the same type.

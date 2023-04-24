@@ -101,7 +101,7 @@ def EN(self):
         return (f"the {self.aggtype} of "
                 f"{self.sub_exprs[0].EN()} "
                 f"for all {vars}"
-                f"{f' satisfying {self.sub_exprs[1].EN()}' if len(self.sub_exprs) == 2 else ''}")
+                f"{f' such that {self.sub_exprs[1].EN()}' if len(self.sub_exprs) == 2 else ''}")
     else: #  #
         return (f"the number of {vars} satisfying "
                 f"{self.sub_exprs[0].EN()}")

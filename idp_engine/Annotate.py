@@ -35,7 +35,7 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     Operator, AComparison, AUnary, AAggregate,
     AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
     FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE, ZERO,
-    IMPLIES, FORALL, EXISTS, Extension)
+    IMPLIES, FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
     OrderedSet, Semantics)
