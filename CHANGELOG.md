@@ -11,6 +11,7 @@ Contributors (alphabetical): Pierre Carbonnelle
 ### IDP-Z3
 * MR !304: show line number for internal error in python code
 *
+*
 
 ### Interactive Consultant and Web IDE
 * MR !302: incorrect linter error for partial interpretation of function
