@@ -12,8 +12,8 @@ The main new features in this release are:
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
-* MR !294: IEP 27 `if` in sum / min / max aggregates
 *
+* MR !305: IEP 27 `if` in sum / min / max aggregates
 *
 
 ### Interactive Consultant and Web IDE
