@@ -170,7 +170,28 @@ export class EditorComponent {
       line = line.replace(/\!/g, '∀');
       line = line.replace(/\?/g, '∃');
       line = line.replace(/\&/g, '∧');
+
+      // replace first "|" in set expressions by ENQ, to protect it
+      const ENQ = "\u0005";
+      class CustomReplacer {
+        value: string;
+        constructor(value) {
+          this.value = value;
+        }
+        [Symbol.replace](string) {
+          const matches = string.match(/\{.*?\|.*?\}/g)
+          if (matches) {
+            for (var match of matches) {
+              string = string.replace(match, match.replace('|', ENQ))
+            }
+          };
+          return string;
+        }
+      }
+      line = line.replace(new CustomReplacer(ENQ))
       line = line.replace(/\|/g, '∨');
+      line = line.replaceAll(ENQ, "|"); // restore "|"
+
       line = line.replace(/~/g, '¬');
       line = line.replace(/\*/g, '⨯');
 
