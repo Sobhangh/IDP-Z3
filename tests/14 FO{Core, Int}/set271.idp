@@ -1,0 +1,15 @@
+// issue 271
+// TODO fix incorrect model p := {0, 2}.
+
+vocabulary V {
+    p : Int → 𝔹
+}
+
+theory T:V {
+    !x: p(x) => p(x-1) | p(x+1).
+    p(0).
+}
+
+procedure main() {
+    pretty_print(model_expand(T))
+}

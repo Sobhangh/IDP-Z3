@@ -41,6 +41,7 @@ from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol, SYM
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, IDPZ3Error,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT, NOT_SATISFIABLE)
+from .Z3_to_IDP import collect_questions
 
 
 class Propagation(Enum):
@@ -481,6 +482,18 @@ class Theory(object):
                     result = res == unsat
         return result
 
+    def _new_questions_from_model(self, model, ass: Assignments) -> OrderedSet:
+        out = []
+        for decl in self.declarations.values():
+            if (type(decl) == SymbolDeclaration
+            and decl.arity == 1
+            and decl.instances is None
+            and not decl.name in RESERVED_SYMBOLS
+            and decl.name in self.z3):  # defined but not used in theory
+                interp = model[self.z3[decl.name]]
+                collect_questions(interp, decl, ass, out)
+        return out
+
     def _from_model(self,
                     solver: Solver,
                     todo: List[Expression],
@@ -491,11 +504,12 @@ class Theory(object):
         """
         ass = copy(self.assignments)
         model = solver.model()
+        todo.extend(self._new_questions_from_model(model, ass))
         for q in todo:
             assert self.extended or not q.is_reified(), \
                     "Reified atom should only appear in case of extended theories"
 
-            a = ass[q.code]
+            a = ass[q.code] if q.code in ass else Assignment(q, None, None)
             if not self._is_defined(model, q):
                 a.value, a.tag, a.relevant = None, S.UNKNOWN, False
             else:

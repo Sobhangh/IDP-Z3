@@ -9,7 +9,7 @@ vocabulary V {
 theory T:V {
 
     { (recursive)
-      ! x in List: len(x) = 0 <- x = nil.
+      ! x in List: len(x) = 0 <- is_nil(x).
       ! x in List: len(x) = len(cdr(x))+1 <- is_cons(x). }
 
     { (recursive)
@@ -18,7 +18,7 @@ theory T:V {
     }
 
     { (recursive)
-     ! x in List: increasing(x) <- x = nil.
+     ! x in List: increasing(x) <- is_nil(x).
      ! x in List: increasing(x) <- is_cons(x) & is_nil(cdr(x)).
      ! x in List: increasing(x) <- is_cons(x) & increasing(cdr(x))
              & is_cons(cdr(x)) & car(x) < car(cdr(x)).}
