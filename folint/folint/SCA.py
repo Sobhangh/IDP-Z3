@@ -107,7 +107,7 @@ def extra_check(file, detections):
     unicode_symbols = ['⨯', '→', '𝔹', 'ℤ', 'ℝ', '∀', '∃', '∈', '∉', '←', '∧',
                        '∨', '¬', '⇒', '⇔', '⇐', '≤', '≠', '≥']
     ascii_symbols = ['*', '->', ' Bool ', ' Int ', ' Real ', '!', '?', ' in ',
-                     '<-', '&', '|', '~', '=>', '<=>', '<=', '=<',
+                     '<-', '&', '~', '=>', '<=>', '<=', '=<',
                      '~=', '>=']
     cur_block = None
     for line_number, line in enumerate(file.split('\n'), start=1):
