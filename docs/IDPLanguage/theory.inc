@@ -100,7 +100,6 @@ Aggregate over sets
     Note that the set must be non-empty.
 
 Aggregate over multisets
-
     The term ``sum{{ t | v_1 in typeOfV_1, .., v_n in typeOfV_n : p}}`` denotes
     the sum of the term ``t`` for each value of the variables that satisfies boolean expression ``p``.
     The variables declared by the aggregate can occur in ``t`` and ``p``.
