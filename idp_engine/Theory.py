@@ -482,7 +482,7 @@ class Theory(object):
                     result = res == unsat
         return result
 
-    def _new_questions_from_model(self, model, ass: Assignments) -> OrderedSet:
+    def _new_questions_from_model(self, model, ass: Assignments) -> List[Expression]:
         out = []
         for decl in self.declarations.values():
             if (type(decl) == SymbolDeclaration

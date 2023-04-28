@@ -1,0 +1,28 @@
+vocabulary V {
+    type range ≜ {1..3}
+    daysoff: range → ℤ
+    opgenomen : ℤ → 𝔹
+    min, max: () → ℤ
+}
+
+theory T:V {
+    ∀x ∈ range: min() < daysoff(x) < max().
+
+    // ascending
+    ∀x ∈ range: x=1 ∨ daysoff(x-1) = daysoff(x)-1.
+
+    // equivalence
+    ∀x ∈ range: opgenomen(daysoff(x)).
+    ∀n ∈ ℤ: opgenomen(n) ⇒ ∃x ∈ range: n=daysoff(x).
+}
+
+structure S:V {
+    min ≜ 10.
+    max ≜ 15.
+}
+
+procedure main() {
+    // pretty_print(Theory(T).sexpr())
+    pretty_print(model_expand(T, S, max=3))
+    pretty_print(Theory(T, S).propagate())
+}

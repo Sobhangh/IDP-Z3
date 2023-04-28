@@ -67,6 +67,7 @@ def str_to_IDP(atom: Expression, val_string: str) -> Expression:
     assert atom.type, "Internal error"
     type_string = atom.type
     typ = atom.decl.out.decl if hasattr(atom, 'decl') else None
+    #TODO assert typ is None or typ.name == type_string, f"{atom}: {typ.name} != {type_string}"
     return str_to_IDP2(type_string, typ, val_string)
 
 
