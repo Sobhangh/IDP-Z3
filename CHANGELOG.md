@@ -11,6 +11,7 @@ Contributors (alphabetical): Pierre Carbonnelle
 ### IDP-Z3
 *
 *
+* !271: Incomplete interpretation of set of integers
 
 ### Interactive Consultant and Web IDE
 * MR !302: incorrect linter error for partial interpretation of function
