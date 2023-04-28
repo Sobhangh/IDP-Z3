@@ -1062,11 +1062,13 @@ class AAggregate(Expression):
     def __init__(self, parent,
                  aggtype: str,
                  quantees: List[Quantee],
+                 bra: str=None,
                  lambda_: str=None,
                  f: Expression = None,
                  if_: Expression = None):
         self.aggtype = aggtype
         self.quantees = quantees
+        self.bra = bra
         self.f = f
         self.lambda_ = lambda_
 
