@@ -84,16 +84,28 @@ Parenthesis
 
 Cardinality aggregate
     ``#{v_1 in typeOfV_1, .., v_n in typeOfV_n : ϕ}`` is a numerical term when |v1,vn| are variables, and |phi| is a sentence_ containing these variables.
+    If ``: ϕ`` is omitted, |phi| is presumed to be ``true``.
 
     The term denotes the number of tuples of distinct values for |v1,vn| which make |phi| true.
 
-Aggregate over anonymous function
-    ``agg(lambda v_1 in typeOfV_1, .., v_n in typeOfV_n : t)`` is a numerical term where ``agg`` can be any of (``sum``, ``min``, ``max``),
-    |v1,vn| are variables and |t| is a term.
+Aggregate over sets
+    ``agg{ t | v_1 in typeOfV_1, .., v_n in typeOfV_n : p}`` is
+    a numerical term where ``agg`` can be ``min`` or ``max``,
+    |v1,vn| are variables, |t| is a term and ``p`` is a boolean expression.
+    The variables declared by the aggregate can occur in ``t`` and ``p``.
+    If ``: p`` is omitted, ``p`` is presumed to be ``true``.
 
-    The term ``sum(lambda v in T : t(v))`` denotes the sum of ``t(v)`` for each ``v`` in ``T``.
-    Similarly, ``min`` (resp. ``max``) can be used to compute the minimum (resp. maximum) of ``t(v)`` for each ``v`` in ``T``.
-    ``t(v)`` can use the construct ``(if .. then .. else ..)`` to filter out unwanted ``v`` values.
+    This aggregate denotes the minimum (resp. maximum) of term ``t``
+    for each value of the variables that satisfies ``p``.
+    Note that the set must be non-empty.
+
+Aggregate over multisets
+    The term ``agg{{ t | v_1 in typeOfV_1, .., v_n in typeOfV_n : p}}``
+    where ``agg`` can be ``sum``, ``min`` or ``max``,  denotes
+    the aggregate of the term ``t`` for each value of the variables that satisfies boolean expression ``p``.
+    The variables declared by the aggregate can occur in ``t`` and ``p``.
+    If ``: p`` is omitted, ``p`` is presumed to be ``true``.
+    Note that the set must be non-empty, or the aggregate must be ``sum''.
 
 (if .. then .. else ..)
     ``(if t_1 then t_2 else t_3)`` is a term when |t1| is a formula, |t2| and |t3| are terms of the same type.

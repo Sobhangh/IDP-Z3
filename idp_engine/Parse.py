@@ -807,7 +807,7 @@ class SymbolInterpretation(ASTNode):
 
         This is a recursive function.
 
-        Example: assume `f>>{(1,2)->A, (1, 3)->B, (2,1)->C}` and `args=[g(1),2)].
+        Example: assume `f>>{(1,2)->A, (1, 3)->B, (2,1)->C}` and `args=[g(1),2)]`.
         The returned expression is:
         ```
         if g(1) = 1 then A

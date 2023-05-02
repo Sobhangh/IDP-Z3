@@ -43,7 +43,8 @@ The equivalent ASCII-only encoding is shown on the right.
 
         f() in {1,2,3}.
         f() = #{x∈T: p(x)}.                       f() = #{x in T: p(x)}.
-        f() = sum(lambda x∈T: f(x)).              f() = sum(lambda x in T: f(x)).
+        f() = min{  f(x) | x in T: p(x) }.
+        f() = sum{{ f(x) | x in T: p(x) }}.
         if p1() then p2() else p3().
         f1() = if p() then f2() else f3().
 
@@ -122,4 +123,5 @@ It is possible to use English connectives to create expressions:
     x is greater than y                          x ≥ y
     x is strictly greater than y                 x > y
 
+    the sum of f(x) for each T x such that p(x)  sum{{f(x) | x∈T: p(x) }}
     p() if q().                                  p() ← q().

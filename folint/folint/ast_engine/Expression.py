@@ -70,7 +70,14 @@ ASTNode.SCA_Check = SCA_Check
 ## class Annotations(ASTNode):
 ## class Constructor(ASTNode):
 ## class Accessor(ASTNode):
+
 ## class Expression(ASTNode):
+
+def SCA_Check(self,detections):
+    for sub in self.sub_exprs:
+        sub.SCA_Check(detections)
+Expression.SCA_Check = SCA_Check
+
 ## class Symbol(Expression):
 ## class Subtype(Symbol):
 
@@ -121,8 +128,7 @@ def SCA_Check(self, detections):
             set3 = vars - links.variables
             detections.append((self.f,f"Common mistake, variable {set3.pop()} only occuring on one side of equivalence","Warning"))
 
-    for sub in self.sub_exprs:
-        sub.SCA_Check(detections)
+    Expression.SCA_Check(self, detections)
 AQuantification.SCA_Check = SCA_Check
 
 
@@ -169,9 +175,7 @@ def SCA_Check(self,detections):
     if (type1 is None and type2 is None):   #beide types zijn unknown
         detections.append((self.sub_exprs[0],f"Comparison of 2 unknown types: {type1} and {type2}","Warning"))
 
-    #SCA check voor kind nodes
-    for sub in self.sub_exprs:
-        sub.SCA_Check(detections)
+    Expression.SCA_Check(self, detections)
 AComparison.SCA_Check = SCA_Check
 
 
@@ -274,8 +278,7 @@ def SCA_Check(self,detections):
         if hasattr(self,"parent"):
             detections.append((self,f"Style guide check, place brackets around negated in-statement ","Warning"))
 
-    for sub in self.sub_exprs:
-        sub.SCA_Check(detections)
+    Expression.SCA_Check(self, detections)
 AUnary.SCA_Check = SCA_Check
 
 def get_type(self):
@@ -284,6 +287,13 @@ AUnary.get_type = get_type
 
 
 ## class AAggregate(Expression):
+
+def SCA_Check(self,detections):
+    assert self.aggtype in ["sum", "#"], "Internal error"  # min aggregates are changed by Annotate !
+    if self.lambda_ == "lambda":
+        detections.append((self,f"Please use the new syntax for aggregates","Warning"))
+    Expression.SCA_Check(self, detections)
+AAggregate.SCA_Check = SCA_Check
 
 def get_type(self):
     # return "Int"        #Sum zou altijd Int moeten zijn
@@ -326,7 +336,7 @@ def SCA_Check(self,detections):
                 # the argument.
                 # found_type = str(self.sub_exprs[i].sort.decl.sorts[i])
                 continue
-                found_type = self.sub_exprs[i].get_type()
+                found_type = self.sub_exprs[i].get_type() #TODO dead code ?
             elif not hasattr(self.sub_exprs[i], 'name'):
                 continue
             else:
@@ -350,8 +360,7 @@ def SCA_Check(self,detections):
                 detections.append((i.args[0],f"Element of wrong type : expected type= {type_symbol_to_str(self.decl.type)} but given type= {type_symbol_to_str(i.args[0].get_type())}","Error"))
                 break
 
-    for sub in self.sub_exprs:
-        sub.SCA_Check(detections)
+    Expression.SCA_Check(self, detections)
 AppliedSymbol.SCA_Check = SCA_Check
 
 def get_type(self):

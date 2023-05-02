@@ -5,7 +5,7 @@ vocabulary V {
 }
 
 theory T:V {
-    { ∀r,c ∈ Range: count(r,c) = #{r1,c1 ∈ Range: true}.
+    { ∀r,c ∈ Range: count(r,c) = #{r1,c1 ∈ Range}.
     }
 }
 
