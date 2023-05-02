@@ -23,13 +23,37 @@ routines to analyze Z3 expressions, e.g., the definition of a function in a mode
 
 from __future__ import annotations
 from typing import List
-from z3 import FuncInterp, is_and, is_or, is_eq, is_not
+from z3 import FuncInterp, is_and, is_or, is_eq, is_not, AstRef
 
-from .Assignments import Assignment
+from .Assignments import Assignments
 from .Expression import Expression, SYMBOL, AppliedSymbol
-from .Parse import str_to_IDP2
+from .Parse import str_to_IDP2, SymbolDeclaration
 
-def collect_questions(z3_expr, decl, ass, out: List[Expression]):
+def collect_questions(z3_expr: AstRef,
+                      decl: SymbolDeclaration,
+                      ass: Assignments,
+                      out: List[Expression]):
+    """ determines the function applications that should be evaluated/propagated
+    based on the function interpretation in `z3_expr` (obtained from a Z3 model).
+
+    i.e., add `<decl>(<value>)` to `out`
+       for each occurrence of `var(0) = value`
+       in the else clause of a Z3 function interpretation.
+
+    example: the interpretation of opgenomen is `z3_expr`, i.e. `
+            [else ->
+                Or(Var(0) == 12,
+                    And(Not(Var(0) == 12), Not(Var(0) == 11), Var(0) == 13),
+                    And(Not(Var(0) == 12), Var(0) == 11))]`
+
+    result: `[opgenomen(11), opgenomen(12), opgenomen(13)]` is added to `out`
+
+    Args:
+        z3_expr (AstRef): the function interpretation in a model of Z3
+        decl (SymbolDeclaration): the declaration of the function
+        ass (Assignments): teh list of assignments already planned for evaluation/propagation
+        out (List[Expression]): the resulting list
+    """
     if type(z3_expr) == FuncInterp:
         collect_questions(z3_expr.else_value(), decl, ass, out)
     elif is_and(z3_expr) or is_or(z3_expr) or is_not(z3_expr):
