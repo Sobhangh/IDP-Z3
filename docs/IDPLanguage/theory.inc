@@ -100,11 +100,12 @@ Aggregate over sets
     Note that the set must be non-empty.
 
 Aggregate over multisets
-    The term ``sum{{ t | v_1 in typeOfV_1, .., v_n in typeOfV_n : p}}`` denotes
-    the sum of the term ``t`` for each value of the variables that satisfies boolean expression ``p``.
+    The term ``agg{{ t | v_1 in typeOfV_1, .., v_n in typeOfV_n : p}}``
+    where ``agg`` can be ``sum``, ``min`` or ``max``,  denotes
+    the aggregate of the term ``t`` for each value of the variables that satisfies boolean expression ``p``.
     The variables declared by the aggregate can occur in ``t`` and ``p``.
     If ``: p`` is omitted, ``p`` is presumed to be ``true``.
-    If the multiset is empty the value of the aggregate is 0.
+    Note that the set must be non-empty, or the aggregate must be ``sum''.
 
 (if .. then .. else ..)
     ``(if t_1 then t_2 else t_3)`` is a term when |t1| is a formula, |t2| and |t3| are terms of the same type.

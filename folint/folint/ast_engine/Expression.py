@@ -290,8 +290,6 @@ AUnary.get_type = get_type
 
 def SCA_Check(self,detections):
     assert self.aggtype in ["sum", "#"], "Internal error"  # min aggregates are changed by Annotate !
-    if self.aggtype == 'sum' and self.bra == "{":
-        detections.append((self,"Please use {{...}} for sum aggregates, to denote a multiset","Warning"))
     if self.lambda_ == "lambda":
         detections.append((self,f"Please use the new syntax for aggregates","Warning"))
     Expression.SCA_Check(self, detections)
