@@ -13,10 +13,9 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * MR !304: show line number for internal error in python code
-*
 * MR !305: IEP 27 `if` in sum / min / max aggregates
-*
 * !271: Incomplete interpretation of set of integers
+* !272: Diagrams are missing in the Appendix of the documentation
 
 ### Interactive Consultant and Web IDE
 * MR !302: incorrect linter error for partial interpretation of function
