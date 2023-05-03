@@ -15,7 +15,7 @@
                      (or a!1
                          (and ((_ is (cons1 (Int List1) List1)) x!1)
                               ((_ is (nil1 () List1)) (cdr1 x!1)))
-                         (= x!1 nil1)))
+                         ((_ is (nil1 () List1)) x!1)))
                    (or (and ((_ is (cons1 (Int List1) List1)) x!1)
                             (< 0 (car1 x!1))
                             (> 3 (car1 x!1))

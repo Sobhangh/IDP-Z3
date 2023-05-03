@@ -378,13 +378,16 @@ def translate1(self, problem: Theory, vars={}):
 AppliedSymbol.translate1 = translate1
 
 def reified(self, problem: Theory, vars={}) -> DatatypeRef:
-    str = b'*'+self.code.encode()
-    out = problem.z3.get(str, None)
-    if out is None:
-        sort = (BoolSort(problem.ctx) if self.in_enumeration or self.is_enumerated else
-                self.decl.out.decl.base_type.translate(problem))
-        out = Const(str, sort)
-        problem.z3[str] = out
+    if self.is_reified():
+        str = b'*'+self.code.encode()
+        out = problem.z3.get(str, None)
+        if out is None:
+            sort = (BoolSort(problem.ctx) if self.in_enumeration or self.is_enumerated else
+                    self.decl.out.decl.base_type.translate(problem))
+            out = Const(str, sort)
+            problem.z3[str] = out
+    else:
+        out = self.translate(problem)
     return out
 AppliedSymbol.reified = reified
 

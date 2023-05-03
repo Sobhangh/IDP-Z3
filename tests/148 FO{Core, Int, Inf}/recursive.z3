@@ -15,7 +15,7 @@
                      (or a!1
                          (and ((_ is (cons (Int List) List)) x!1)
                               ((_ is (nil () List)) (cdr x!1)))
-                         (= x!1 nil)))
+                         ((_ is (nil () List)) x!1)))
                    (or (and ((_ is (cons (Int List) List)) x!1)
                             (< 0 (car x!1))
                             ((_ positive 0) (cdr x!1)))

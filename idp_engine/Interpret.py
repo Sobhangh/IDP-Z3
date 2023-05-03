@@ -144,8 +144,8 @@ def interpret(self, problem):
         self.range = [e[0] for e in range]
 
     # create instances + empty assignment
-    self.instances = {}
-    if self.name not in RESERVED_SYMBOLS and superset:
+    if self.name not in RESERVED_SYMBOLS and superset is not None:
+        self.instances = {}
         for args in superset:
             expr = AppliedSymbol.make(symbol, args)
             expr.annotate(self.voc, {})
@@ -157,7 +157,7 @@ def interpret(self, problem):
         problem.interpretations[self.name].interpret(problem)
 
     # create type constraints
-    if self.out.decl.name != BOOL:
+    if type(self.instances) == dict and self.out.decl.name != BOOL:
         for expr in self.instances.values():
             # add type constraints to problem.constraints
             # ! (x,y) in domain: range(f(x,y))
@@ -412,15 +412,16 @@ def interpret(self, problem):
                 problem.assignments.assert__(e.formula(), TRUE, status)
 
         if self.default is not None:
-            # fill the default value in problem.assignments
-            for code, expr in decl.instances.items():
-                if (code not in problem.assignments
-                    or problem.assignments[code].status != status):
-                    e = problem.assignments.assert__(expr, self.default, status)
-                    if (status == S.DEFAULT  # for proper display in IC
-                        and type(self.enumeration) == FunctionEnum
-                        and self.default.type != BOOL):
-                        problem.assignments.assert__(e.formula(), TRUE, status)
+            if decl.instances is not None:
+                # fill the default value in problem.assignments
+                for code, expr in decl.instances.items():
+                    if (code not in problem.assignments
+                        or problem.assignments[code].status != status):
+                        e = problem.assignments.assert__(expr, self.default, status)
+                        if (status == S.DEFAULT  # for proper display in IC
+                            and type(self.enumeration) == FunctionEnum
+                            and self.default.type != BOOL):
+                            problem.assignments.assert__(e.formula(), TRUE, status)
 
         elif self.sign == '≜':
             # add condition that the interpretation is total over the domain

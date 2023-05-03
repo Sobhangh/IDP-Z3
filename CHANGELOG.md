@@ -16,6 +16,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 *
 * MR !305: IEP 27 `if` in sum / min / max aggregates
 *
+* !271: Incomplete interpretation of set of integers
 
 ### Interactive Consultant and Web IDE
 * MR !302: incorrect linter error for partial interpretation of function

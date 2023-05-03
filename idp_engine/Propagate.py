@@ -309,7 +309,9 @@ def _propagate_inner(self, tag, solver, todo):
 
     if res1 == sat:
         model = solver.model()
-        valqs = [(model.eval(q.reified(self)), q) for q in todo.values()]
+        new_todo = list(todo.values())
+        new_todo.extend(self._new_questions_from_model(model, self.assignments))
+        valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
         while valqs:
             (val1, q) = valqs.pop()
             if str(val1) == str(q.reified(self)):
@@ -361,8 +363,12 @@ def _first_propagate(self, solver):
 
     assert res1 == sat, "Incorrect solver behavior"
     model = solver.model()
-    valqs = [(model.eval(q.reified(self)), q) for q in todo]
+    new_todo = list(todo.values())
+    new_todo.extend(self._new_questions_from_model(model, self.assignments))
+    valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
     for val1, q in valqs:
+        assert self.extended or not q.is_reified(), \
+                "Reified atom should only appear in case of extended theories"
         if str(val1) == str(q.reified(self)):
             continue  # irrelevant
         solver.push()
@@ -374,9 +380,9 @@ def _first_propagate(self, solver):
         if res2 == unsat:
             val = str_to_IDP(q, str(val1))
 
-            ass = self.assignments.get(q.code)
-            if (ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED] and
-                    not ass.value.same_as(val)):
+            ass = self.assignments.get(q.code, None)
+            if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
+            and not ass.value.same_as(val)):
                 solver.pop()
                 raise IDPZ3Error(NOT_SATISFIABLE)
             yield self.assignments.assert__(q, val, S.UNIVERSAL)

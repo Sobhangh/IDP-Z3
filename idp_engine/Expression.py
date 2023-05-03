@@ -1258,11 +1258,7 @@ class AppliedSymbol(Expression):
 
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated
-                or not all(e.value is not None for e in self.sub_exprs))
-
-    def reified(self, problem: Theory):
-        return ( super().reified(problem) if self.is_reified() else
-                 self.translate(problem) )
+                or any(e.value is None for e in self.sub_exprs))
 
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]
