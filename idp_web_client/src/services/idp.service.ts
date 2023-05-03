@@ -128,7 +128,18 @@ export class IdpService {
     return await this.http.get(`${URL}?${salt}`, {responseType: 'text'}).toPromise();
   }
 
-  // get version, initial idp code + reloadMeta
+  private async get_versions() {
+    // fetch from gist
+    try {
+      const response = await fetch(AppSettings.VERSIONS_URL, );
+      const res = await response.json();
+      this.versions = JSON.parse(res['files']['versions.json']['content']);
+    } catch (e) {
+      this.versions = {};
+    }
+  }
+
+  // get versionInfo, initial idp code + reloadMeta
   public async initObject() {
     this.openCalls++;
     // avoid error message on load
@@ -137,23 +148,18 @@ export class IdpService {
     this.IDE = window.location.pathname.search(/IDE/) !== -1;
 
     // get versionInfo
-    let versions_: string;
-    try {
-      const response = await fetch(AppSettings.VERSIONS_URL, {
-          headers: {
-              'Authorization': 'token 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',
-          }
+    if (window.location.hostname == 'interactive-consultant.idp-z3.be') {
+      this.versionInfo = 'IDP-Z3 stable'
+    } else if (window.location.hostname == 'localhost'
+          || window.location.hostname == '127.0.0.1') {
+          this.versionInfo = 'local'
+    } else {
+      this.get_versions();
+      this.versionInfo = 'unknown';
+      for (let key in this.versions) {
+        if (this.versions[key] === window.location.hostname) {
+          this.versionInfo = key;
         }
-      );
-      const res = await response.json();
-      this.versions = JSON.parse(res['files']['versions.json']['content']);
-    } catch (e) {
-      this.versions = {};
-      this.versionInfo = 'Unknowable';
-    }
-    for (let key in this.versions) {
-      if (this.versions[key] === window.location.hostname) {
-        this.versionInfo = key;
       }
     }
 
@@ -171,7 +177,7 @@ export class IdpService {
         const URL = 'https://api.github.com/gists/' + query0[1];
         let token: string = '';
         if (queries.length===3) {
-          token = queries[2].split('=') [1]
+          token = queries[2].split('=')[1].replace('-', '')  // handle obfuscation
         }
         const response = await fetch(URL, (token == '') ? {} : {
             headers: {
@@ -206,6 +212,7 @@ export class IdpService {
     const versionRegex = /^#!\s*(.*)/;
     if (versionRegex.test(this.spec)) {
       const version = versionRegex.exec(this.spec)[1];
+      this.get_versions();
       if (! (version in this.versions)) {
         this.messageService.clear();
         this.messageService.add({severity: 'error', summary: 'Unknown version in Shebang', detail: version});

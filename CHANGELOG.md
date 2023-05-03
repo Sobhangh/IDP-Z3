@@ -19,7 +19,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 ### Interactive Consultant and Web IDE
 * MR !302: incorrect linter error for partial interpretation of function
 * issue #268: Open FLAIR link in new tab
-*
+* issue #273: Access to documentation is broken
 
 
 ## [0.10.4] - 2023-04-17
