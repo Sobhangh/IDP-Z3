@@ -131,7 +131,7 @@ export class IdpService {
   private async get_versions() {
     // fetch from gist
     try {
-      const response = await fetch(AppSettings.VERSIONS_URL, );
+      const response = await fetch(AppSettings.VERSIONS_URL, {});
       const res = await response.json();
       this.versions = JSON.parse(res['files']['versions.json']['content']);
     } catch (e) {
@@ -179,13 +179,19 @@ export class IdpService {
         if (queries.length===3) {
           token = queries[2].split('=')[1].replace('-', '')  // handle obfuscation
         }
-        const response = await fetch(URL, (token == '') ? {} : {
-            headers: {
-                'Authorization': 'token ' + token,
+        var res
+        try {
+          const response = await fetch(URL, (token == '') ? {} : {
+              headers: {
+                  'Authorization': 'token ' + token,
+              }
             }
-          }
-        )
-        const res = await response.json()
+          )
+          res = await response.json()
+        } catch (e) {  // fallback without token
+          const response = await fetch(URL, {})
+          res = await response.json()
+        }
 
         let specFile: string = 'specification.idp';
         if (2 <= queries.length ) {
