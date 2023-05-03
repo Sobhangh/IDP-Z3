@@ -68,3 +68,5 @@ autodoc_default_options = {
 }
 add_module_names = False
 autodoc_typehints = "description"
+
+mermaid_params = ['-p' 'puppeteer-config.json']
