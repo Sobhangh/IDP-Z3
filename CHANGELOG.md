@@ -12,6 +12,7 @@ The main new features in this release are:
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
+* MR !304: show line number for internal error in python code
 *
 * MR !305: IEP 27 `if` in sum / min / max aggregates
 *

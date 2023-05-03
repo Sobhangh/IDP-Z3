@@ -102,6 +102,17 @@ class ASTNode(object):
         pass  # monkey-patched
 
 
+def catch_error(func):
+    def inner_function(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except IDPZ3Error as e:
+            raise e
+        except Exception as e:
+            self.check(False, str(e))
+    return inner_function
+
+
 class Annotations(ASTNode):
     def __init__(self, parent, annotations: List[str]):
 
@@ -1470,6 +1481,10 @@ class RecDef(Expression):
         self.sub_exprs = [expr]
 
         Expression.__init__(self)
+
+        if parent:  # for error messages
+            self._tx_position = parent. _tx_position
+            self._tx_position_end = parent. _tx_position_end
 
     def __str__(self):
         return (f"{self.name}("
