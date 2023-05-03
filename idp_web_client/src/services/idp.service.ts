@@ -154,7 +154,7 @@ export class IdpService {
           || window.location.hostname == '127.0.0.1') {
           this.versionInfo = 'local'
     } else {
-      this.get_versions();
+      await this.get_versions();
       this.versionInfo = 'unknown';
       for (let key in this.versions) {
         if (this.versions[key] === window.location.hostname) {
