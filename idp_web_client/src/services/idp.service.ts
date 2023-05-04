@@ -131,7 +131,7 @@ export class IdpService {
   private async get_versions() {
     // fetch from gist
     try {
-      const response = await fetch(AppSettings.VERSIONS_URL, {});
+      const response = await fetch(AppSettings.VERSIONS_URL);
       const res = await response.json();
       this.versions = JSON.parse(res['files']['versions.json']['content']);
     } catch (e) {
@@ -213,12 +213,12 @@ export class IdpService {
     this.openCalls--;
   }
 
-  private shebang() {
+  private async shebang() {
     // redirect using Shebang
     const versionRegex = /^#!\s*(.*)/;
     if (versionRegex.test(this.spec)) {
       const version = versionRegex.exec(this.spec)[1];
-      this.get_versions();
+      await this.get_versions();
       if (! (version in this.versions)) {
         this.messageService.clear();
         this.messageService.add({severity: 'error', summary: 'Unknown version in Shebang', detail: version});
@@ -256,7 +256,7 @@ procedure main() {
     this.appRef.tick()
   }
   public async run() {
-    this.shebang();
+    await this.shebang();
     this.openCalls++;
     const result = await this.call(AppSettings.IDE_URL, {code: this.spec}).toPromise();
     if (typeof result === 'string') {
@@ -276,7 +276,7 @@ procedure main() {
   // get meta, init
 
   public async reloadMeta() {
-    this.shebang();
+    await this.shebang();
 
     if (this.IDE) {return; }
     if (this.spec !== this.previousSpec) {
