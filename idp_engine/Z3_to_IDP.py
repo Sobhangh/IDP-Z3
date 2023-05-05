@@ -55,7 +55,11 @@ def collect_questions(z3_expr: AstRef,
         out (List[Expression]): the resulting list
     """
     if type(z3_expr) == FuncInterp:
-        collect_questions(z3_expr.else_value(), decl, ass, out)
+        try:
+            else_ = z3_expr.else_value()
+        except:
+            return
+        collect_questions(else_, decl, ass, out)
     elif is_and(z3_expr) or is_or(z3_expr) or is_not(z3_expr):
         for e in z3_expr.children():
             collect_questions(e, decl, ass, out)
@@ -69,5 +73,4 @@ def collect_questions(z3_expr: AstRef,
             symb.decl = decl
             atom = AppliedSymbol.make(symb, [arg])
             out.append(atom)
-        pass
     return
