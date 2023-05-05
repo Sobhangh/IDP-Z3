@@ -1,7 +1,7 @@
-# FOlint support in vscode
+# FOLint support in vscode
 
 This is a brief guide detailing how to use the FOLint tool in VSCode.
-FOlint is a linting tool for FO(·), a language used by the IDP system.
+FOLint is a linting tool for FO(·), a language used by the IDP system.
 
 First of all, you need to install FOLint. 
 
