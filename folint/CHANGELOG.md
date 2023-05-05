@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [1.0.4] - 2023-05-05
 - Fix false positives in structure.
 - Multiple minor refactors (see https://gitlab.com/krr/IDP-Z3/-/merge_requests/291)
+- Various other improvements (https://gitlab.com/krr/IDP-Z3/-/merge_requests/299/)
+- Update to IDP-Z3 0.10.7
 
 ## [1.0.3] - 2022-09-28
 - Various minor bugs
