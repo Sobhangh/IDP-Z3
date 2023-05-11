@@ -286,7 +286,7 @@ class Expression(ASTNode):
 
     def __deepcopy__(self, memo):
         """ copies everyting but .original """
-        key = self.__str1__()
+        key = str(self)
         val = memo.get(key, None)
         if val is not None:
             return val
@@ -329,9 +329,6 @@ class Expression(ASTNode):
         return False
 
     def __repr__(self): return str(self)
-
-    def __str__(self):
-        return self.__str1__()
 
     def __log__(self):  # for debugWithYamlLog
         return {'class': type(self).__name__,
@@ -451,7 +448,7 @@ class Expression(ASTNode):
                 msg = f"Unknown error for {self}"
             self.check(False, msg)
 
-    def __str1__(self) -> str:
+    def __str__(self) -> str:
         return ''  # monkey-patched
 
     def update_exprs(self, new_exprs: List[Expression]) -> Expression:
@@ -689,7 +686,7 @@ class AIfExpr(Expression):
         out = (cls)(None, if_f=if_f, then_f=then_f, else_f=else_f)
         return out.annotate1().simplify1()
 
-    def __str1__(self):
+    def __str__(self):
         return (f"if {self.sub_exprs[AIfExpr.IF  ].str}"
                 f" then {self.sub_exprs[AIfExpr.THEN].str}"
                 f" else {self.sub_exprs[AIfExpr.ELSE].str}")
@@ -763,7 +760,7 @@ class Quantee(Expression):
         out = (cls) (None, [var], subtype=subtype, sort=sort)
         return out.annotate1()
 
-    def __str1__(self):
+    def __str__(self):
         signature = ("" if len(self.sub_exprs) <= 1 else
                      f"[{','.join(t.str for t in self.sub_exprs[1:-1])}->{self.sub_exprs[-1]}]"
         )
@@ -822,7 +819,7 @@ class AQuantification(Expression):
         out = cls(None, annotations, q, quantees, f)
         return out.annotate1()
 
-    def __str1__(self):
+    def __str__(self):
         if len(self.sub_exprs) == 0:
             body = TRUE.str if self.q == '∀' else FALSE.str
         elif len(self.sub_exprs) == 1:
@@ -932,7 +929,7 @@ class Operator(Expression):
             out.annotations = annotations
         return out.annotate1().simplify1()
 
-    def __str1__(self):
+    def __str__(self):
         def parenthesis(precedence, x):
             return f"({x.str})" if type(x).PRECEDENCE <= precedence else f"{x.str}"
         precedence = type(self).PRECEDENCE
@@ -996,9 +993,9 @@ def RIMPLIES(exprs, annotations):
 class ADisjunction(Operator):
     PRECEDENCE = 60
 
-    def __str1__(self):
+    def __str__(self):
         if not hasattr(self, 'enumerated'):
-            return super().__str1__()
+            return super().__str__()
         return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
 
 def OR(exprs):
@@ -1061,7 +1058,7 @@ class AUnary(Expression):
         out = AUnary(None, operators=[op], f=expr)
         return out.annotate1().simplify1()
 
-    def __str1__(self):
+    def __str__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
@@ -1103,7 +1100,7 @@ class AAggregate(Expression):
         self.q = ''
         super().__init__()
 
-    def __str1__(self):
+    def __str__(self):
         # aggregates are over finite domains, and cannot have partial expansion
         if not self.annotated:
             assert len(self.sub_exprs) <= 2, "Internal error"
@@ -1201,7 +1198,7 @@ class AppliedSymbol(Expression):
         out.variables = {}
         return out
 
-    def __str1__(self):
+    def __str__(self):
         out = f"{self.symbol}({', '.join([x.str for x in self.sub_exprs])})"
         if self.in_enumeration:
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
@@ -1317,7 +1314,7 @@ class SymbolExpr(Expression):
         self.decl = self.sub_exprs[0].decl if not self.eval else None
         super().__init__()
 
-    def __str1__(self):
+    def __str__(self):
         return (f"$({self.sub_exprs[0]})" if self.eval else
                 f"{self.sub_exprs[0]}")
 
@@ -1358,7 +1355,7 @@ class UnappliedSymbol(Expression):
 
     def is_reified(self): return False
 
-    def __str1__(self): return self.name
+    def __str__(self): return self.name
 
 TRUEC = CONSTRUCTOR('true')
 FALSEC = CONSTRUCTOR('false')
@@ -1392,7 +1389,7 @@ class Variable(Expression):
         self.sub_exprs = []
         self.variables = set([self.name])
 
-    def __str1__(self): return self.name
+    def __str__(self): return self.name
 
     def __deepcopy__(self, memo):
         return self
@@ -1492,7 +1489,6 @@ class Brackets(Expression):
 
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
-    def __str1__(self): return str(self)
 
 
 class RecDef(Expression):
