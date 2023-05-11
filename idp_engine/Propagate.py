@@ -71,8 +71,7 @@ def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
     # E.g., P(C()) where P := {0} and C := 0.
     ass = assignments.get(self.str, None)
     if ass and ass.value is not None:
-        value = ass.value
-        self = self._change(value=value)
+        self = ass.value
     return self.simplify1()
 Expression.simplify_with = simplify_with
 

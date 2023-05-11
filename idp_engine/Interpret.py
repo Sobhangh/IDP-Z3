@@ -525,7 +525,7 @@ def substitute(self, e0, e1, assignments, tag=None):
     if self.code == e0.code:
         if self.code == e1.code:
             return self  # to avoid infinite loops
-        return self._change(value=e1)  # e1 is UnappliedSymbol or Number
+        return e1  # e1 is UnappliedSymbol or Number
     else:
         out = self.update_exprs(e.substitute(e0, e1, assignments, tag)
                                 for e in self.sub_exprs)
@@ -849,7 +849,7 @@ def substitute(self, e0, e1, assignments, tag=None):
             self.as_disjunction.symbolic_propagate(assignments, tag)
 
     if self.code == e0.code:
-        return self._change(value=e1, co_constraint=new_branch)
+        return e1
     else:
         sub_exprs = [e.substitute(e0, e1, assignments, tag)
                      for e in self.sub_exprs]  # no simplification here
