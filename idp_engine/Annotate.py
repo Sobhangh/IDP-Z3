@@ -34,7 +34,7 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
     ARImplication, AImplication, AEquivalence,
     Operator, AComparison, AUnary, AAggregate,
     AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
-    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, TRUE, FALSE, ZERO,
+    FALSE, SymbolExpr, Number, Date, NOT, EQUALS, AND, OR, TRUE, FALSE, ZERO,
     IMPLIES, FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
@@ -410,7 +410,7 @@ def annotate(self, block):
 
     if self.default is not None:
         self.default = self.default.annotate(voc, {})
-        self.check(self.default.value is not None,
+        self.check(self.default.is_value(),
                    f"Value for '{self.name}' may only use numerals,"
                    f" identifiers or constructors: '{self.default}'")
 SymbolInterpretation.annotate = annotate
@@ -429,7 +429,7 @@ Enumeration.annotate = annotate
 
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
-    self.check(all(not a.is_reified() for a in self.args),
+    self.check(all(a.is_value() for a in self.args),
                f"Interpretation may only contain numerals,"
                f" identifiers or constructors: '{self}'")
 TupleIDP.annotate = annotate

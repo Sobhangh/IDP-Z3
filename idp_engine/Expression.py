@@ -290,7 +290,7 @@ class Expression(ASTNode):
         val = memo.get(key, None)
         if val is not None:
             return val
-        if self.value == self:
+        if self.is_value():
             return self
         out = copy(self)
         out.sub_exprs = [deepcopy(e, memo) for e in out.sub_exprs]
@@ -310,8 +310,6 @@ class Expression(ASTNode):
             return float(self.py_value) == float(other.py_value)
 
         # asymetric
-        if self.value is not None and self.value is not self:
-            return self.value.same_as(other)
         if (isinstance(self, Brackets)
            or (isinstance(self, AQuantification)
                and len(self.quantees) == 0
@@ -322,8 +320,6 @@ class Expression(ASTNode):
         self, other = other, self
 
         # copied code
-        if self.value is not None and self.value is not self:
-            return self.value.same_as(other)
         if (isinstance(self, Brackets)
            or (isinstance(self, AQuantification)
                and len(self.quantees) == 0
@@ -335,8 +331,6 @@ class Expression(ASTNode):
     def __repr__(self): return str(self)
 
     def __str__(self):
-        if self.value is not None and self.value is not self:
-            return str(self.value)
         return self.__str1__()
 
     def __log__(self):  # for debugWithYamlLog
@@ -414,11 +408,19 @@ class Expression(ASTNode):
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
 
-    def is_reified(self) -> bool:
+    def is_value(self) -> bool:
         """False for numerals, date, identifiers,
         and constructors applied to non-reified arguments.
 
-        Synomym: "is not ground", "is not rigid"
+        Synomym: "is ground", "is rigid"
+
+        Returns:
+            bool: True if `self` represents a value.
+        """
+        return False
+
+    def is_reified(self) -> bool:
+        """False for values and for symbols applied to values.
 
         Returns:
             bool: True if `self` has to be reified to obtain its value in a Z3 model.
@@ -1015,12 +1017,11 @@ class AComparison(Operator):
 
     def is_assignment(self):
         # f(x)=y
-        return len(self.sub_exprs) == 2 and \
-                self.operator in [['='], ['≠']] \
-                and isinstance(self.sub_exprs[0], AppliedSymbol) \
-                and all(e.value is not None
-                        for e in self.sub_exprs[0].sub_exprs) \
-                and self.sub_exprs[1].value is not None
+        return (len(self.sub_exprs) == 2 and
+                self.operator in [['='], ['≠']]
+                and isinstance(self.sub_exprs[0], AppliedSymbol)
+                and not self.sub_exprs[0].is_reified()
+                and self.sub_exprs[1].is_value())
 
 def EQUALS(exprs):
     return AComparison.make('=',exprs)
@@ -1265,12 +1266,15 @@ class AppliedSymbol(Expression):
                 msg = f"Unknown error for symbol {self}"
             self.check(False, msg)
 
+    def is_value(self):
+        return (not self.in_enumeration
+                and not self.is_enumerated
+                and type(self.decl) == Constructor
+                and all(e.is_value() for e in self.sub_exprs))
+
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated
-                or any(e.value is None
-                       and not (type(e) == AppliedSymbol and type(e.decl) == Constructor
-                                and all(not e1.is_reified() for e1 in e.sub_exprs))
-                       for e in self.sub_exprs))
+                or not all (e.is_value() for e in self.sub_exprs))
 
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]
@@ -1350,6 +1354,8 @@ class UnappliedSymbol(Expression):
         out.variables = {}
         return out
 
+    def is_value(self): return True
+
     def is_reified(self): return False
 
     def __str1__(self): return self.name
@@ -1428,6 +1434,8 @@ class Number(Expression):
         self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
         return Number(number=str(float(self.py_value)))
 
+    def is_value(self): return True
+
     def is_reified(self): return False
 
 ZERO = Number(number='0')
@@ -1463,6 +1471,8 @@ class Date(Expression):
         return cls(iso=f"#{date.fromordinal(value).isoformat()}")
 
     def __str__(self): return f"#{self.date.isoformat()}"
+
+    def is_value(self): return True
 
     def is_reified(self): return False
 
