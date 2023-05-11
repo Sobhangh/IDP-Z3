@@ -58,7 +58,7 @@ display {
                              'is_assignment': True,
                              'normal': True,
                              'reading': 'codeOf(blue)',
-                             'relevant': True,
+                             'relevant': False,
                              'status': 'UNIVERSAL',
                              'typ': 'code',
                              'value': 'a',

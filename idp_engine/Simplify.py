@@ -46,6 +46,18 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
             co_constraint=None):
     " change attributes of an expression, and resets derived attributes "
 
+    if simpler is not None:
+        # if simpler.value is not None:  # example: prime.idp
+        #     self.value = simpler.value
+        # else:
+        simpler.annotations = self.annotations
+        #simpler.code = self.code
+        simpler.original = self.original
+        simpler.is_type_constraint_for = self.is_type_constraint_for
+        simpler.co_constraint = self.co_constraint
+        simpler.block = self.block if hasattr(self, "block") else None
+        return simpler
+
     if sub_exprs is not None:
         self.sub_exprs = sub_exprs
     if ops is not None:
@@ -54,17 +66,6 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
         self.co_constraint = co_constraint
     if value is not None:
         self.value = value
-    elif simpler is not None:
-        if simpler.value is not None:  # example: prime.idp
-            self.value = simpler.value
-        else:
-            simpler.annotations = self.annotations
-            #simpler.code = self.code
-            simpler.original = self.original
-            simpler.is_type_constraint_for = self.is_type_constraint_for
-            simpler.co_constraint = self.co_constraint
-            simpler.block = self.block if hasattr(self, "block") else None
-            return simpler
     assert (self.value is None
                or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
                                        Number, Date, Type]), \
