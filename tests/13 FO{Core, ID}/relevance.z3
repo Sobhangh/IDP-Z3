@@ -70,7 +70,7 @@ display {
                'is_assignment': False,
                'normal': True,
                'reading': 'p',
-               'relevant': True,
+               'relevant': False,
                'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}},

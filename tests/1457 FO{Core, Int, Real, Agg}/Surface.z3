@@ -313,7 +313,7 @@ display {
                          'is_assignment': False,
                          'normal': True,
                          'reading': 'Convex',
-                         'relevant': True,
+                         'relevant': False,
                          'status': 'UNIVERSAL',
                          'typ': 'Bool',
                          'value': True}},

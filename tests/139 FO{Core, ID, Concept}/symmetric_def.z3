@@ -113,7 +113,7 @@ display {
                                     'is_assignment': False,
                                     'normal': True,
                                     'reading': 'symmetric(`edge)',
-                                    'relevant': True,
+                                    'relevant': False,
                                     'status': 'UNIVERSAL',
                                     'typ': 'Bool',
                                     'value': True}}}

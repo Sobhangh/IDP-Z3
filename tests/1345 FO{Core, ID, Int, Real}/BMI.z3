@@ -7,15 +7,9 @@ riskLevel() -> Low
 weight() -> 80.0
 No more consequences.
 
-riskLevel() -> Low
-Not riskLevel() = Increased
-Not riskLevel() = High
-Not riskLevel() = Very_High
-Not riskLevel() = Extremely_High
-riskLevel() = Low
 
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
-bmi() = bmi_ ⇔ bmi_ = weight() / (25600)
+bmi() = bmi_ ⇔ bmi_ = weight() / 25600
 definition of BMILevel
 weight() = 80
 

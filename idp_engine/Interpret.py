@@ -690,7 +690,7 @@ def interpret(self, problem):
         if isinstance(domain, Type):  # quantification over type / Concepts
             (superset, filter) = domain.extension(problem.interpretations,
                                         problem.extensions)
-        elif isinstance(domain, SymbolExpr):  # SymbolExpr (e.g. $(`Color))
+        elif type(domain) in [SymbolExpr, Symbol]:  # SymbolExpr (e.g. $(`Color))
             self.check(domain.decl.out.type == BOOL,
                         f"{domain} is not a type or predicate")
             assert domain.decl.name in problem.extensions, "internal error"

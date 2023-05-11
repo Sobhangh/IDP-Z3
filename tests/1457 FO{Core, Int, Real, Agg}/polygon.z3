@@ -315,7 +315,7 @@ display {
                         'is_assignment': False,
                         'normal': True,
                         'reading': 'Large(1)',
-                        'relevant': True,
+                        'relevant': False,
                         'status': 'UNIVERSAL',
                         'typ': 'Bool',
                         'value': False},

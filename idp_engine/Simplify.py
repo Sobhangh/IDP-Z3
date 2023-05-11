@@ -46,15 +46,16 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
             co_constraint=None):
     " change attributes of an expression, and resets derived attributes "
 
+    if value is not None:
+        assert (type(value) in [AppliedSymbol, UnappliedSymbol, Symbol,
+                                       Number, Date, Type]), \
+            f"Incorrect value in _change: {value}"
+        # do not modify value, or copy it first
+        return value
+
     if simpler is not None:
-        # if simpler.value is not None:  # example: prime.idp
-        #     self.value = simpler.value
-        # else:
-        simpler.annotations = self.annotations
-        #simpler.code = self.code
         simpler.original = self.original
         simpler.is_type_constraint_for = self.is_type_constraint_for
-        simpler.co_constraint = self.co_constraint
         simpler.block = self.block if hasattr(self, "block") else None
         return simpler
 
@@ -64,12 +65,6 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
         self.operator = ops
     if co_constraint is not None:
         self.co_constraint = co_constraint
-    if value is not None:
-        self.value = value
-    assert (self.value is None
-               or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
-                                       Number, Date, Type]), \
-            f"Incorrect value in _change: {self.value}"
 
     # reset derived attributes
     self.str = sys.intern(str(self))
@@ -387,7 +382,7 @@ def update_exprs(self, new_exprs):
             self.decl.type if self.decl else None)
     if self.decl and type(self.decl) == Constructor:
         if all(e.value is not None for e in new_exprs):
-            return self._change(sub_exprs=new_exprs, value = self)
+            return self._change(sub_exprs=new_exprs)
 
     # simplify abs()
     if (self.decl and self.decl.name == ABS and len(new_exprs) == 1

@@ -17,7 +17,6 @@ gebeurtenis() = huwelijk
 persoon() = zelf
 dagen_verlet() = 2
 Not gebeurtenis() = overlijden
-Not persoon() in {echtgenoot, samenwonende_partner, feitelijk_samenwonende_partner, kind}
 Not dagen_verlet() = 10
 Not #{dag ∈ opgenomen : dag ≤ begrafenis_datum()} = 3
 ? #2023-05-08 ≤ begrafenis_datum()

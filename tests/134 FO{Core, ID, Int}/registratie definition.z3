@@ -670,7 +670,7 @@ display {
                                                  'is_assignment': False,
                                                  'normal': True,
                                                  'reading': 'Professional_Buyer',
-                                                 'relevant': True,
+                                                 'relevant': False,
                                                  'status': 'UNIVERSAL',
                                                  'typ': 'Bool',
                                                  'value': False}},
