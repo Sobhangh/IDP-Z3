@@ -429,7 +429,7 @@ Enumeration.annotate = annotate
 
 def annotate(self, voc):
     self.args = [arg.annotate(voc, {}) for arg in self.args]
-    self.check(all(a.value is not None for a in self.args),
+    self.check(all(not a.is_reified() for a in self.args),
                f"Interpretation may only contain numerals,"
                f" identifiers or constructors: '{self}'")
 TupleIDP.annotate = annotate

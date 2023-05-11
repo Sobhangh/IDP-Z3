@@ -414,7 +414,16 @@ class Expression(ASTNode):
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
 
-    def is_reified(self) -> bool: return True
+    def is_reified(self) -> bool:
+        """False for numerals, date, identifiers,
+        and constructors applied to non-reified arguments.
+
+        Synomym: "is not ground", "is not rigid"
+
+        Returns:
+            bool: True if `self` has to be reified to obtain its value in a Z3 model.
+        """
+        return True
 
     def is_assignment(self) -> bool:
         """
@@ -1258,7 +1267,10 @@ class AppliedSymbol(Expression):
 
     def is_reified(self):
         return (self.in_enumeration or self.is_enumerated
-                or any(e.value is None for e in self.sub_exprs))
+                or any(e.value is None
+                       and not (type(e) == AppliedSymbol and type(e.decl) == Constructor
+                                and all(not e1.is_reified() for e1 in e.sub_exprs))
+                       for e in self.sub_exprs))
 
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]
@@ -1338,6 +1350,8 @@ class UnappliedSymbol(Expression):
         out.variables = {}
         return out
 
+    def is_reified(self): return False
+
     def __str1__(self): return self.name
 
 TRUEC = CONSTRUCTOR('true')
@@ -1414,6 +1428,8 @@ class Number(Expression):
         self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
         return Number(number=str(float(self.py_value)))
 
+    def is_reified(self): return False
+
 ZERO = Number(number='0')
 ONE = Number(number='1')
 
@@ -1447,6 +1463,8 @@ class Date(Expression):
         return cls(iso=f"#{date.fromordinal(value).isoformat()}")
 
     def __str__(self): return f"#{self.date.isoformat()}"
+
+    def is_reified(self): return False
 
 
 class Brackets(Expression):
