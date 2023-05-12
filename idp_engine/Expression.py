@@ -233,13 +233,6 @@ class Expression(ASTNode):
             This is useful for definitions over infinite domains,
             as well as to compute relevant questions.
 
-
-        value (Optional[Expression]):
-            A rigid term equivalent to the expression, obtained by
-            transformation.
-
-            Equivalence is computed in the context of the theory and structure.
-
         annotations (Dict[str, str]):
             The set of annotations given by the expert in the IDP-Z3 program.
 
@@ -256,7 +249,7 @@ class Expression(ASTNode):
             name of the symbol for which the expression is a type constraint
 
     """
-    __slots__ = ('sub_exprs', 'simpler', 'value', 'code',
+    __slots__ = ('sub_exprs', 'code',
                  'annotations', 'original', 'str', 'variables', 'type',
                  'is_type_constraint_for', 'co_constraint',
                  'questions', 'relevant')
@@ -306,25 +299,10 @@ class Expression(ASTNode):
         # symmetric
         if self.str == other.str: # and type(self) == type(other):
             return True
-        if self.__class__.__name__ == "Number" and other.__class__.__name__ == "Number":
+
+        if (self.__class__.__name__ in ["Number", "Date"]
+        and other.__class__.__name__ in ["Number", "Date"]):
             return float(self.py_value) == float(other.py_value)
-
-        # asymetric
-        if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification)
-               and len(self.quantees) == 0
-               and len(self.sub_exprs) == 1)):
-            return self.sub_exprs[0].same_as(other)
-
-        # switch role to be allowed to copy code
-        self, other = other, self
-
-        # copied code
-        if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification)
-               and len(self.quantees) == 0
-               and len(self.sub_exprs) == 1)):
-            return self.sub_exprs[0].same_as(other)
 
         return False
 
@@ -346,10 +324,10 @@ class Expression(ASTNode):
         `questions` is an OrderedSet of Expression
         Questions are the terms and the simplest sub-formula that
         can be evaluated.
-        `collect` uses the simplified version of the expression.
 
         all_=False : ignore expanded formulas
         and AppliedSymbol interpreted in a structure
+
         co_constraints=False : ignore co_constraints
 
         default implementation for UnappliedSymbol, AIfExpr, AUnary, Variable,
@@ -1264,14 +1242,13 @@ class AppliedSymbol(Expression):
             self.check(False, msg)
 
     def is_value(self):
-        return (not self.in_enumeration
-                and not self.is_enumerated
-                and type(self.decl) == Constructor
+        # independent of is_enumeration and in_enumeration !
+        return (type(self.decl) == Constructor
                 and all(e.is_value() for e in self.sub_exprs))
 
     def is_reified(self):
-        return (self.in_enumeration or self.is_enumerated
-                or not all (e.is_value() for e in self.sub_exprs))
+        # independent of is_enumeration and in_enumeration !
+        return (not all (e.is_value() for e in self.sub_exprs))
 
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]
