@@ -384,8 +384,8 @@ class Expression(ASTNode):
             e.co_constraints(co_constraints)
 
     def is_value(self) -> bool:
-        """False for numerals, date, identifiers,
-        and constructors applied to non-reified arguments.
+        """True for numerals, date, identifiers,
+        and constructors applied to values.
 
         Synomym: "is ground", "is rigid"
 
