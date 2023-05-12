@@ -1,10 +1,4 @@
 
-// https://20230404t110454-dot-interactive-consultant.ew.r.appspot.com//?gist=fc1766ec8feb3bbf168353445406a2c2&file=Verlet.idp
-// https://werk.belgie.be/nl/themas/arbeidsovereenkomsten/schorsing-van-de-arbeidsovereenkomst/oorzaken-van-schorsing-hoofde-12
-// TODO: I did not make a distinction between biological children and "plus-children", which is my interpretation of the text, but I may be wrong.
-// TODO: No "coming-of-age" party for non-Christian non-Atheist children?
-// TODO: Did not take into account the last comment about deducting periods of guaranteed pay in case of both sickness and "klein verlet".
-
 vocabulary V {
     type Weekdatum := {Maandag, Dinsdag, Woensdag, Donderdag, Vrijdag, Zaterdag, Zondag}
     type Gebeurtenis := {huwelijk, wijding, intreding, overlijden, plechtige_communie, vrijzinnig_feest, dienstplicht, gewetensbezwaarde, familieraad, rechtbankverschijning, stembureau_nationaal, stembureau_Europees, hoofdbureau}
