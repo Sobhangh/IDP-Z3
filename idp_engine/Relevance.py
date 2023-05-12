@@ -101,7 +101,7 @@ def determine_relevance(self: Theory) -> Theory:
             if not q.sentence.has_decision():
                 given.append(q.sentence)
 
-    # reconsider the complex non-numeric questions used for simplifications
+    # reconsider the non-numeric questions used for simplifications
     for q in out.assignments.values():  # out => non-numeric
         if q.value is not None:
             constraints.append(q.sentence)  # issue #252, #277
