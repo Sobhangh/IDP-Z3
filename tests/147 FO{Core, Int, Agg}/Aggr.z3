@@ -30,7 +30,7 @@ display {
                'is_assignment': False,
                'normal': True,
                'reading': 'p',
-               'relevant': False,
+               'relevant': True,
                'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}}}

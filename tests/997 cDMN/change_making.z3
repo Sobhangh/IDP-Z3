@@ -193,7 +193,7 @@ structure {
                                        'is_assignment': True,
                                        'normal': False,
                                        'reading': 'TotalMoney = 567',
-                                       'relevant': True,
+                                       'relevant': False,
                                        'status': 'UNIVERSAL',
                                        'typ': 'Bool',
                                        'value': True},

@@ -145,6 +145,8 @@ def update_exprs(self, new_exprs):
             return TRUE
         elif exprs1.same_as(FALSE):  # (p => false) is ~p
             simpler = NOT(exprs0)
+        elif exprs1.same_as(exprs0):  # (p => p) is true
+            return TRUE
     return self._change(simpler=simpler,
                         sub_exprs=[exprs0, exprs1])
 AImplication.update_exprs = update_exprs
