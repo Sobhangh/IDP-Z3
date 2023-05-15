@@ -112,6 +112,18 @@ export class EditorComponent {
         comment = line.match(/\/\/(.*)/g);
         line = line.replace(/\/\/(.*)/g, '');
       }
+
+      // If an annotation is present, replace it by a placeholder and put it back later.
+      // As there can be multiple annotations per line (theoretically, at least), we want to capture and replace all of them.
+      let annotations = []
+      if (line.match(/\[.*]/g)) {
+        annotations = line.match(/\[.*?]/g);
+        for (let idx in annotations) {
+            line = line.replace(annotations[idx], 'ANNOT'+idx);
+        }
+      }
+
+
       line = line.replace(/→/g, '->');
       line = line.replace(/←/g, '<-');
       line = line.replace(/∈/g, 'in');
@@ -133,6 +145,11 @@ export class EditorComponent {
       line = line.replace(/¬/g, '~');
       line = line.replace(/⨯/g, '*');
 
+      // Re-add the annotations.
+      for (let idx in annotations) {
+        line = line.replace('ANNOT'+idx, annotations[idx])
+      }
+
       // Re-add the comment.
       line += comment;
       lines[i] = line;
@@ -150,6 +167,17 @@ export class EditorComponent {
         comment = line.match(/\/\/(.*)/g);
         line = line.replace(/\/\/(.*)/g, '');
       }
+
+      // If an annotation is present, replace it by a placeholder and put it back later.
+      // As there can be multiple annotations per line (theoretically, at least), we want to capture and replace all of them.
+      let annotations = []
+      if (line.match(/\[.*]/g)) {
+        annotations = line.match(/\[.*?]/g);
+        for (let idx in annotations) {
+            line = line.replace(annotations[idx], 'ANNOT'+idx);
+        }
+      }
+
       line = line.replace(/->/g, '→');
       line = line.replace(/<-/g, '←');
       line = line.replace(/\bin\b/g, '∈');
@@ -170,6 +198,8 @@ export class EditorComponent {
       line = line.replace(/\!/g, '∀');
       line = line.replace(/\?/g, '∃');
       line = line.replace(/\&/g, '∧');
+      line = line.replace(/~/g, '¬');
+      line = line.replace(/\*/g, '⨯');
 
       // replace first "|" in set expressions by ENQ, to protect it
       const ENQ = "\u0005";
@@ -192,8 +222,11 @@ export class EditorComponent {
       line = line.replace(/\|/g, '∨');
       line = line.replaceAll(ENQ, "|"); // restore "|"
 
-      line = line.replace(/~/g, '¬');
-      line = line.replace(/\*/g, '⨯');
+
+      // Re-add the annotations.
+      for (let idx in annotations) {
+        line = line.replace('ANNOT'+idx, annotations[idx])
+      }
 
       // Re-add the comment.
       line += comment;
