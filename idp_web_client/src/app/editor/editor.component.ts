@@ -69,8 +69,14 @@ export class EditorComponent {
 
       } else {
         // Run the static code analysis after 1 second of no inputs.
+        // We also save the current state of the spec to the localStorage.
+        // This will allow the IC to load the spec, even after refreshing. 
+        // Helpful to prevent frustration when accidentally opening a new tab or something.
         clearTimeout(this.lintTimeout);
-        this.lintTimeout = setTimeout(() => this.doLint(idpService), 1000);
+        this.lintTimeout = setTimeout(() => {
+            this.doLint(idpService);
+            localStorage.setItem('idp_spec', idpService.editor.model.getLinesContent().join('\n'));
+        }, 1000);
       }
     });
 
