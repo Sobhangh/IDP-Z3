@@ -43,7 +43,7 @@ from typing import Dict, List, Callable
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
-    Definition, Rule, ConstructedFrom)
+    Definition, Rule)
 from .Expression import (catch_error, RecDef, Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
     AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
     EQUIV, EQUALS, OR, AppliedSymbol, UnappliedSymbol, Quantee,
@@ -525,7 +525,7 @@ def substitute(self, e0, e1, assignments, tag=None):
     if self.code == e0.code:
         if self.code == e1.code:
             return self  # to avoid infinite loops
-        return self._change(value=e1)  # e1 is UnappliedSymbol or Number
+        return e1  # e1 is UnappliedSymbol or Number
     else:
         out = self.update_exprs(e.substitute(e0, e1, assignments, tag)
                                 for e in self.sub_exprs)
@@ -540,7 +540,7 @@ def instantiate(self, e0, e1, problem=None):
     """
     assert all(type(e) == Variable for e in e0), \
            f"Internal error: instantiate {e0}"
-    if self.value:
+    if self.is_value():
         return self
     out = copy(self)  # shallow copy !
     out.annotations = copy(out.annotations)
@@ -563,9 +563,7 @@ Expression.instantiate1 = instantiate1
 
 @catch_error
 def _finalize(self, out, e0, e1):
-    if out.value is not None:  # replace by new value
-        out = out.value
-    else:
+    if not out.is_value():
         self.check(len(e0) == len(e1),
                    f"Incorrect arity: {e0}, {e1}")
         for o, n in zip(e0, e1):
@@ -690,7 +688,7 @@ def interpret(self, problem):
         if isinstance(domain, Type):  # quantification over type / Concepts
             (superset, filter) = domain.extension(problem.interpretations,
                                         problem.extensions)
-        elif isinstance(domain, SymbolExpr):  # SymbolExpr (e.g. $(`Color))
+        elif type(domain) in [SymbolExpr, Symbol]:  # SymbolExpr (e.g. $(`Color))
             self.check(domain.decl.out.type == BOOL,
                         f"{domain} is not a type or predicate")
             assert domain.decl.name in problem.extensions, "internal error"
@@ -802,17 +800,14 @@ def interpret(self, problem):
             if self.as_disjunction.same_as(TRUE) or self.as_disjunction.same_as(FALSE):
                 value = self.as_disjunction
             self.as_disjunction.annotations = self.annotations
-        elif (self.decl.name in problem.interpretations
-            # and any(s.decl.name == CONCEPT for s in self.decl.sorts)
-            and all(a.value is not None for a in sub_exprs)):
-            # apply enumeration of predicate over symbols to allow simplification
-            # do not do it otherwise, for performance reasons
-            interpretation = problem.interpretations[self.decl.name]
-            if interpretation.block.name != DEFAULT:
-                f = interpretation.interpret_application
-                value = f(0, self, sub_exprs)
         elif self.decl.name in problem.interpretations:
-            self.decl.needs_interpretation = True
+            if all(a.is_value() for a in sub_exprs):
+                interpretation = problem.interpretations[self.decl.name]
+                if interpretation.block.name != DEFAULT:
+                    f = interpretation.interpret_application
+                    value = f(0, self, sub_exprs)
+            else:
+                self.decl.needs_interpretation = True
         if not self.in_head and not self.variables:
             # instantiate definition (for relevance)
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
@@ -849,7 +844,7 @@ def substitute(self, e0, e1, assignments, tag=None):
             self.as_disjunction.symbolic_propagate(assignments, tag)
 
     if self.code == e0.code:
-        return self._change(value=e1, co_constraint=new_branch)
+        return e1
     else:
         sub_exprs = [e.substitute(e0, e1, assignments, tag)
                      for e in self.sub_exprs]  # no simplification here

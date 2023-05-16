@@ -1,4 +1,6 @@
-And(Not(is(rgb, red)), Not(is(red, blue)))
+And(Not(is(rgb, red)),
+    Not(is(red, blue)),
+    Not(rgb(t, u) == red))
 
 Model 1
 ==========

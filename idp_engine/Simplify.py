@@ -42,9 +42,15 @@ from .utils import BOOL, INT, DATE, CONCEPT, ABS, RESERVED_SYMBOLS
 
 # class Expression  ###########################################################
 
-def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
+def _change(self, sub_exprs=None, ops=None, simpler=None,
             co_constraint=None):
     " change attributes of an expression, and resets derived attributes "
+
+    if simpler is not None:
+        simpler.original = self.original
+        simpler.is_type_constraint_for = self.is_type_constraint_for
+        simpler.block = self.block if hasattr(self, "block") else None
+        return simpler
 
     if sub_exprs is not None:
         self.sub_exprs = sub_exprs
@@ -52,23 +58,6 @@ def _change(self, sub_exprs=None, ops=None, value=None, simpler=None,
         self.operator = ops
     if co_constraint is not None:
         self.co_constraint = co_constraint
-    if value is not None:
-        self.value = value
-    elif simpler is not None:
-        if simpler.value is not None:  # example: prime.idp
-            self.value = simpler.value
-        else:
-            simpler.annotations = self.annotations
-            #simpler.code = self.code
-            simpler.original = self.original
-            simpler.is_type_constraint_for = self.is_type_constraint_for
-            simpler.co_constraint = self.co_constraint
-            simpler.block = self.block if hasattr(self, "block") else None
-            return simpler
-    assert (self.value is None
-               or type(self.value) in [AppliedSymbol, UnappliedSymbol, Symbol,
-                                       Number, Date, Type]), \
-            f"Incorrect value in _change: {self.value}"
 
     # reset derived attributes
     self.str = sys.intern(str(self))
@@ -144,23 +133,19 @@ def update_exprs(self, new_exprs):
     if type(new_exprs) == list:
         new_exprs = iter(new_exprs)
     exprs0 = next(new_exprs)
-    value, simpler = None, None
+    simpler = None
     if exprs0.same_as(FALSE):  # (false => p) is true
-        # exprs[0] may be false because exprs[1] was false
-        exprs1 = self.sub_exprs[1] if self.sub_exprs[1].same_as(FALSE)\
-            else FALSE
-        value = TRUE
+        return TRUE
     elif exprs0.same_as(TRUE):  # (true => p) is p
         exprs1 = next(new_exprs)
         simpler = exprs1
     else:
         exprs1 = next(new_exprs)
         if exprs1.same_as(TRUE):  # (p => true) is true
-            exprs0 = exprs0 if self.sub_exprs[0].same_as(TRUE) else TRUE
-            value = TRUE
+            return TRUE
         elif exprs1.same_as(FALSE):  # (p => false) is ~p
             simpler = NOT(exprs0)
-    return self._change(value=value, simpler=simpler,
+    return self._change(simpler=simpler,
                         sub_exprs=[exprs0, exprs1])
 AImplication.update_exprs = update_exprs
 
@@ -187,21 +172,18 @@ AEquivalence.update_exprs = update_exprs
 def update_exprs(self, new_exprs, replace=True):
     exprs, other = [], []
     value, simpler = None, None
-    for i, expr in enumerate(new_exprs):
+    for expr in new_exprs:
         if expr.same_as(TRUE):
-            # simplify only if one other sub_exprs was unknown
-            if any(e.value is None and not i == j for j, e in enumerate(self.sub_exprs)):
-                return self._change(value=TRUE, sub_exprs=[expr])
-            value = TRUE
+            return TRUE
         exprs.append(expr)
         if not expr.same_as(FALSE):
             other.append(expr)
 
     if len(other) == 0:  # all disjuncts are False
-        value = FALSE
+        return FALSE
     if replace and len(other) == 1:
         simpler = other[0]
-    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
+    return self._change(simpler=simpler, sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
 
 
@@ -210,22 +192,19 @@ ADisjunction.update_exprs = update_exprs
 # same as ADisjunction, with TRUE and FALSE swapped
 def update_exprs(self, new_exprs, replace=True):
     exprs, other = [], []
-    value, simpler = None, None
+    simpler = None
     for i, expr in enumerate(new_exprs):
         if expr.same_as(FALSE):
-            # simplify only if one other sub_exprs was unknown
-            if any(e.value is None and not i == j for j, e in enumerate(self.sub_exprs)):
-                return self._change(value=FALSE, sub_exprs=[expr])
-            value = FALSE
+            return FALSE
         exprs.append(expr)
         if not expr.same_as(TRUE):
             other.append(expr)
 
     if len(other) == 0:  # all conjuncts are True
-        value = TRUE
+        return TRUE
     if replace and len(other) == 1:
         simpler = other[0]
-    return self._change(value=value, simpler=simpler, sub_exprs=exprs)
+    return self._change(simpler=simpler, sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
 
 
@@ -237,7 +216,7 @@ def update_exprs(self, new_exprs):
     if len(operands) == 2 and self.operator == ["="]:
         # a = a
         if operands[0].same_as(operands[1]):
-            return self._change(value=TRUE, sub_exprs=operands)
+            return TRUE
 
         # (if c then a else b) = d  ->  (if c then a=d else b=d)
         if type(operands[0]) == AIfExpr:
@@ -253,18 +232,18 @@ def update_exprs(self, new_exprs):
         if acc1 is not None and expr1 is not None:
             if op in ["<", ">"]:
                 if acc1.same_as(expr1):
-                    return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
+                    return FALSE
             if op == "=":
                 if not acc1.same_as(expr1):
-                    return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
+                    return FALSE
             if op == "≠":  # issue #246
                 if acc1.same_as(expr1):
-                    return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
+                    return FALSE
             elif not (Operator.MAP[op]) (acc1.py_value, expr1.py_value):
-                return self._change(value=FALSE, sub_exprs=[acc, expr], ops=[op])
+                return FALSE
         acc, acc1 = expr, expr1
     if all(e is not None for e in operands1):
-        return self._change(value=TRUE, sub_exprs=operands)
+        return TRUE
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
 
@@ -294,7 +273,7 @@ def update_arith(self, family, operands):
                 out = function(out, e.py_value)
         value = (Number(number=str(out)) if operands[0].type != DATE else
                  Date.make(out))
-        return self._change(value=value, sub_exprs=operands)
+        return value
     return self._change(sub_exprs=operands)
 
 
@@ -314,7 +293,7 @@ def update_exprs(self, new_exprs):
         if len(operands) == 2 \
            and all(e is not None for e in operands1):
             out = operands1[0].py_value % operands1[1].py_value
-            return self._change(value=Number(number=str(out)), sub_exprs=operands)
+            return Number(number=str(out))
         else:
             return self._change(sub_exprs=operands)
     return update_arith(self, '⨯', operands)
@@ -329,7 +308,7 @@ def update_exprs(self, new_exprs):
     if len(operands) == 2 \
        and all(e is not None for e in operands1):
         out = operands1[0].py_value ** operands1[1].py_value
-        return self._change(value=Number(number=str(out)), sub_exprs=operands)
+        return Number(number=str(out))
     else:
         return self._change(sub_exprs=operands)
 APower.update_exprs = update_exprs
@@ -341,15 +320,14 @@ def update_exprs(self, new_exprs):
     operand = list(new_exprs)[0]
     if self.operator == '¬':
         if operand.same_as(TRUE):
-            return self._change(value=FALSE, sub_exprs=[operand])
+            return FALSE
         if operand.same_as(FALSE):
-            return self._change(value=TRUE, sub_exprs=[operand])
+            return TRUE
     else:  # '-'
         a = operand.value
         if a is not None:
             if type(a) == Number:
-                return self._change(value=Number(number=f"{-a.py_value}"),
-                                    sub_exprs=[operand])
+                return Number(number=f"{-a.py_value}")
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
@@ -368,8 +346,7 @@ def update_exprs(self, new_exprs):
         operands1 = [e.value for e in operands]
         if all(e is not None for e in operands1):
             out = sum(e.py_value for e in operands1)
-            out = Number(number=str(out))
-            return self._change(value=out, sub_exprs=operands)
+            return Number(number=str(out))
     return self._change(sub_exprs=operands)
 AAggregate.update_exprs = update_exprs
 
@@ -386,13 +363,12 @@ def update_exprs(self, new_exprs):
             self.decl.type if self.decl else None)
     if self.decl and type(self.decl) == Constructor:
         if all(e.value is not None for e in new_exprs):
-            return self._change(sub_exprs=new_exprs, value = self)
+            return self._change(sub_exprs=new_exprs)
 
     # simplify abs()
     if (self.decl and self.decl.name == ABS and len(new_exprs) == 1
         and new_exprs[0].value):
-        value = Number(number=str(abs(new_exprs[0].py_value)))
-        return self._change(value=value, sub_exprs=new_exprs)
+        return Number(number=str(abs(new_exprs[0].py_value)))
 
     # simplify x(pos(0,0)) to 0,  is_pos(pos(0,0)) to True
     if (len(new_exprs) == 1
@@ -406,7 +382,7 @@ def update_exprs(self, new_exprs):
                        f"Incorrect expression: {self}")
             return self._change(simpler=new_exprs[0].sub_exprs[i], sub_exprs=new_exprs)
         if self.decl.name == new_exprs[0].decl.tester.name:
-            return self._change(value=TRUE, sub_exprs=new_exprs)
+            return TRUE
 
     return self._change(sub_exprs=new_exprs)
 AppliedSymbol.update_exprs = update_exprs
@@ -427,18 +403,18 @@ def update_exprs(self, new_exprs):
     value = (symbol if self.eval == '' else
              symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
              None)
-    self.check(not value or type(value) != Variable,
-               f"Variable `{value}` cannot be applied to argument(s).")
-    self.decl = value.decl if value else None
-    return self._change(sub_exprs=[symbol], value=value)
+    if value is not None:
+        self.check(type(value) != Variable,
+                f"Variable `{value}` cannot be applied to argument(s).")
+        return value
+    return self._change(sub_exprs=[symbol])
 SymbolExpr.update_exprs = update_exprs
 
 
 # Class Brackets  #######################################################
 
 def update_exprs(self, new_exprs):
-    expr = list(new_exprs)[0]
-    return self._change(sub_exprs=[expr], value=expr.value)
+    return list(new_exprs)[0]
 Brackets.update_exprs = update_exprs
 
 
