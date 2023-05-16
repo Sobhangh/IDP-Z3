@@ -204,9 +204,11 @@ export class IdpService {
         const lzw = decodeURIComponent(query0[0]);
         this.spec = (new CompressionService()).decompressString(lzw);
       }
-    } else if (localStorage.getItem('idp_spec')) {
+    } else if (this.IDE && 'idpSpecIDE' in localStorage) {
       // If there's a specification cached in the localStorage, use that.
-      this.spec = localStorage.getItem('idp_spec');
+      this.spec = localStorage.getItem('idpSpecIDE');
+    } else if (!this.IDE && 'idpSpecIC' in localStorage) {
+      this.spec = localStorage.getItem('idpSpecIC');
     } else if (this.IDE) {
       this.spec = await this.get_latest(AppSettings.SPECIFICATION_URL.replace(/specification/, 'newIDE'));
     } else {

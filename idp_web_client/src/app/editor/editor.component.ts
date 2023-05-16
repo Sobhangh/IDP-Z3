@@ -75,7 +75,12 @@ export class EditorComponent {
         clearTimeout(this.lintTimeout);
         this.lintTimeout = setTimeout(() => {
             this.doLint(idpService);
-            localStorage.setItem('idp_spec', idpService.editor.model.getLinesContent().join('\n'));
+
+            if (idpService.IDE) {
+                localStorage.setItem('idpSpecIDE', idpService.editor.model.getLinesContent().join('\n'));
+            } else {
+                localStorage.setItem('idpSpecIC', idpService.editor.model.getLinesContent().join('\n'));
+            }
         }, 1000);
       }
     });
