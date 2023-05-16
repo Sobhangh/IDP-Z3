@@ -249,6 +249,7 @@ class Expression(ASTNode):
             name of the symbol for which the expression is a type constraint
 
     """
+    # slots for marginally faster code
     __slots__ = ('sub_exprs', 'code',
                  'annotations', 'original', 'str', 'variables', 'type',
                  'is_type_constraint_for', 'co_constraint',
@@ -300,8 +301,8 @@ class Expression(ASTNode):
         if self.str == other.str: # and type(self) == type(other):
             return True
 
-        if (self.__class__.__name__ in ["Number", "Date"]
-        and other.__class__.__name__ in ["Number", "Date"]):
+        if (type(self) in [Number, Date]
+        and type(other) in [Number, Date]):
             return float(self.py_value) == float(other.py_value)
 
         return False

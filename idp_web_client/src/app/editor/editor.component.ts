@@ -69,8 +69,19 @@ export class EditorComponent {
 
       } else {
         // Run the static code analysis after 1 second of no inputs.
+        // We also save the current state of the spec to the localStorage.
+        // This will allow the IC to load the spec, even after refreshing. 
+        // Helpful to prevent frustration when accidentally opening a new tab or something.
         clearTimeout(this.lintTimeout);
-        this.lintTimeout = setTimeout(() => this.doLint(idpService), 1000);
+        this.lintTimeout = setTimeout(() => {
+            this.doLint(idpService);
+
+            if (idpService.IDE) {
+                localStorage.setItem('idpSpecIDE', idpService.editor.model.getLinesContent().join('\n'));
+            } else {
+                localStorage.setItem('idpSpecIC', idpService.editor.model.getLinesContent().join('\n'));
+            }
+        }, 1000);
       }
     });
 
@@ -112,6 +123,18 @@ export class EditorComponent {
         comment = line.match(/\/\/(.*)/g);
         line = line.replace(/\/\/(.*)/g, '');
       }
+
+      // If an annotation is present, replace it by a placeholder and put it back later.
+      // As there can be multiple annotations per line (theoretically, at least), we want to capture and replace all of them.
+      let annotations = []
+      if (line.match(/\[.*]/g)) {
+        annotations = line.match(/\[.*?]/g);
+        for (let idx in annotations) {
+            line = line.replace(annotations[idx], 'ANNOT'+idx);
+        }
+      }
+
+
       line = line.replace(/→/g, '->');
       line = line.replace(/←/g, '<-');
       line = line.replace(/∈/g, 'in');
@@ -133,6 +156,11 @@ export class EditorComponent {
       line = line.replace(/¬/g, '~');
       line = line.replace(/⨯/g, '*');
 
+      // Re-add the annotations.
+      for (let idx in annotations) {
+        line = line.replace('ANNOT'+idx, annotations[idx])
+      }
+
       // Re-add the comment.
       line += comment;
       lines[i] = line;
@@ -150,6 +178,17 @@ export class EditorComponent {
         comment = line.match(/\/\/(.*)/g);
         line = line.replace(/\/\/(.*)/g, '');
       }
+
+      // If an annotation is present, replace it by a placeholder and put it back later.
+      // As there can be multiple annotations per line (theoretically, at least), we want to capture and replace all of them.
+      let annotations = []
+      if (line.match(/\[.*]/g)) {
+        annotations = line.match(/\[.*?]/g);
+        for (let idx in annotations) {
+            line = line.replace(annotations[idx], 'ANNOT'+idx);
+        }
+      }
+
       line = line.replace(/->/g, '→');
       line = line.replace(/<-/g, '←');
       line = line.replace(/\bin\b/g, '∈');
@@ -170,6 +209,8 @@ export class EditorComponent {
       line = line.replace(/\!/g, '∀');
       line = line.replace(/\?/g, '∃');
       line = line.replace(/\&/g, '∧');
+      line = line.replace(/~/g, '¬');
+      line = line.replace(/\*/g, '⨯');
 
       // replace first "|" in set expressions by ENQ, to protect it
       const ENQ = "\u0005";
@@ -192,8 +233,11 @@ export class EditorComponent {
       line = line.replace(/\|/g, '∨');
       line = line.replaceAll(ENQ, "|"); // restore "|"
 
-      line = line.replace(/~/g, '¬');
-      line = line.replace(/\*/g, '⨯');
+
+      // Re-add the annotations.
+      for (let idx in annotations) {
+        line = line.replace('ANNOT'+idx, annotations[idx])
+      }
 
       // Re-add the comment.
       line += comment;

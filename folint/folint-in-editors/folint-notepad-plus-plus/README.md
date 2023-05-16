@@ -1,16 +1,16 @@
-# FOlint support in Notepad++
+# FOLint support in Notepad++
 
 This is a brief guide detailing how to use the FOLint tool in Notepad++.
-FOlint is a linting tool for FO(·), a language used by the IDP system.
+FOLint is a linting tool for FO(·), a language used by the IDP system.
 
 Firstly, you need to install FOLint. 
 
-Secondly, we need to install the necesarry Notepad++ plugins. 
-The plugins we need are NppEventExec(https://github.com/MIvanchev/NppEventExec) and NppExec(https://github.com/d0vgan/nppexec). 
-Probaly they are already installed. If not go in Notepad++ to Plugins and install NppEventExec and NppExec.
+Secondly, we need to install the necessary Notepad++ plugins. 
+The plugins we need are [NppEventExec](https://github.com/MIvanchev/NppEventExec) and [NppExec](https://github.com/d0vgan/nppexec), which are most likely already installed.
+If not, you can go in Notepad++ to Plugins and install them.
 
-If everything is installed go to plugins. Choose NppExec plugin and choose execute.
-Here you need to make a command and give it a name like "folint". DOn't forget to save it.
+Next, go to plugins, select NppExec and choose `execute`.
+Here you need to make a command and give it a name like "FOLint". Don't forget to save it.
 
 ```
 NPP_SAVE
@@ -19,8 +19,8 @@ NPP_SAVE
  python -u -m pylint "$(FULL_CURRENT_PATH)"
 ```
 
-Now you can run this by open a .idp file, go back to NppExec execute... .
-Choose folint and click run. This will add a Console window at the bottom of Notepad++'s window. 
+Now you can run this by opening an .idp file, going back to NppExec execute..., and choosing "FOLint" followed by clicking on run.
+This will add a Console window at the bottom of Notepad++'s window. 
 In this window you will see the output of FOLint package.
 
 Then you go to the NppEventExec plugin to make an event on wich this command needs to be executed.

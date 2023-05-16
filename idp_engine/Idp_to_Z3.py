@@ -181,6 +181,8 @@ Symbol.translate=translate
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, without lookup in problem.z3
 
+    A lookup is wasteful when `self` is a subformula of a formula that is not in `problem.z3`.
+
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
 
