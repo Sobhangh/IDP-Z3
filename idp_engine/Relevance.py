@@ -22,9 +22,9 @@ from __future__ import annotations
 
 from .Assignments import Status as S
 from .Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
-                                   AConjunction, Brackets, AComparison)
+                                   AConjunction, Brackets)
 from .Theory import Theory
-from .utils import OrderedSet, INT, REAL, DATE, RELEVANT
+from .utils import OrderedSet, RELEVANT
 
 
 def split_constraints(constraints: OrderedSet) -> OrderedSet:
@@ -89,7 +89,7 @@ def determine_relevance(self: Theory) -> Theory:
     for a in self.assignments.values():
         a.relevant = False
 
-    out = self.simplify()  # creates a copy
+    out = self.simplify(except_numeric=True)  # creates a copy
 
     # set given information to relevant
     constraints = OrderedSet()
