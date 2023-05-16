@@ -86,18 +86,13 @@ def determine_relevance(self: Theory) -> Theory:
     assert self.extended == True,\
         "The theory must be created with 'extended=True' for relevance computations."
 
-    for a in self.assignments.values():
-        a.relevant = False
-
     out = self.simplify()  # creates a copy
 
     # set given information to relevant
-    constraints = OrderedSet()
     for q in self.assignments.values():
-        q.relevant = False
-        if q.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
-            q.relevant = True  # given are relevant
+        q.relevant = (q.status in [S.GIVEN, S.DEFAULT, S.EXPANDED])
 
+    constraints = OrderedSet()
     # reconsider the non-numeric questions used for simplifications
     for q in out.assignments.values():  # out => non-numeric
         if q.value is not None:
@@ -107,12 +102,14 @@ def determine_relevance(self: Theory) -> Theory:
     for constraint in out.constraints:
         if constraint.code not in self.ignored_laws:
             constraints.append(constraint)
-            constraint.co_constraints(constraints)
+            constraint.collect_co_constraints(constraints)
+
     constraints = split_constraints(constraints)
+
     # constraints have set of questions in out.assignments
     # set constraint.relevant, constraint.questions
-    # initialize reachable with relevant, if any
-    reachable = OrderedSet()
+    # initialize _relevant with relevant, if any
+    _relevant = OrderedSet()
     for constraint in constraints:
         constraint.relevant = False
         constraint.questions = OrderedSet()
@@ -121,51 +118,49 @@ def determine_relevance(self: Theory) -> Theory:
 
         if (type(constraint) == AppliedSymbol
            and constraint.decl.name == RELEVANT):
-            reachable.append(constraint.sub_exprs[0])
+            _relevant.append(constraint.sub_exprs[0])
 
     # nothing relevant --> make every question in a simplified constraint relevant
-    if len(reachable) == 0:
+    if len(_relevant) == 0:
         for constraint in constraints:
             if constraint.is_type_constraint_for is None:
-                reachable.append(constraint)
                 for q in constraint.questions:
-                    reachable.append(q)
+                    _relevant.append(q)
 
     # still nothing relevant --> make every question in def_constraints relevant
-    if len(reachable) == 0:
+    if len(_relevant) == 0:
         for def_constraints in out.def_constraints.values():
             for def_constraint in def_constraints:
                 def_constraint.questions = OrderedSet()
                 def_constraint.collect(def_constraint.questions,
                                     all_=True, co_constraints=True)
                 for q in def_constraint.questions:
-                    reachable.append(q)
+                    _relevant.append(q)
+    else:
+        # find relevant symbols by breadth-first propagation
+        # input: _relevant, constraints
+        # output: out.assignments[].relevant, constraints[].relevant, relevants[].rank
+        to_add = _relevant
+        while to_add:
+            next = OrderedSet()
+            for q in to_add:
+                _relevant.append(q)
 
-    # find relevant symbols by breadth-first propagation
-    # input: reachable, constraints
-    # output: out.assignments[].relevant, constraints[].relevant, relevants[].rank
-    to_add = reachable
-    while to_add:
-        for q in to_add:
-            if (q.code in self.assignments
-                and not self.assignments[q.code].is_certainly_undefined):
-                self.assignments[q.code].relevant = True
-            # for s in q.collect_symbols(co_constraints=False):
-            #     if s not in relevants:
-            #         relevants[s] = rank
-            reachable.append(q)
+                #TODO should lookup definition of symbol
 
-        to_add, rank = OrderedSet(), 2  # or rank+1
-        for constraint in constraints:
-            # consider constraint not yet considered
-            if (not constraint.relevant
-                # and with a question that is reachable
-                and any(q in reachable
-                        for q in constraint.questions)):
-                constraint.relevant = True
-                to_add.extend([q for q in constraint.questions
-                               if q not in reachable])
+            for constraint in constraints:
+                if (not constraint.relevant  # consider constraint not yet considered
+                # and with a question that is _relevant
+                and any(q in _relevant for q in constraint.questions)):
+                    constraint.relevant = True
+                    next.extend([q for q in constraint.questions
+                                if q not in _relevant])
+            to_add = next
 
+    for q in _relevant:
+        ass = self.assignments.get(q.code, None)
+        if (ass and not ass.is_certainly_undefined):  #TODO
+            ass.relevant = True
     return self
 Theory.determine_relevance = determine_relevance
 

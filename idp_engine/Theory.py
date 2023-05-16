@@ -313,13 +313,13 @@ class Theory(object):
         self.constraints = OrderedSet([v.interpret(self)
                                        for v in self.constraints])
         for c in self.constraints:
-            c.co_constraints(self.co_constraints)
+            c.collect_co_constraints(self.co_constraints)
             # don't collect questions from type constraints
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         for es in self.def_constraints.values():
             for e in es:
-                e.co_constraints(self.co_constraints)
+                e.collect_co_constraints(self.co_constraints)
         self.co_constraints = OrderedSet([c.interpret(self)
                                           for c in self.co_constraints])
 

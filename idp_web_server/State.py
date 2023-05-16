@@ -134,7 +134,7 @@ class State(Theory):
     def __str__(self) -> str:
         self.co_constraints = OrderedSet()
         for c in self.constraints:
-            c.co_constraints(self.co_constraints)
+            c.collect_co_constraints(self.co_constraints)
         return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == S.UNIVERSAL)}{NEWL}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.CONSEQUENCE, S.ENV_CONSQ])}{NEWL}"
                 f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
