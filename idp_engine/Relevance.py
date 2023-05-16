@@ -93,13 +93,10 @@ def determine_relevance(self: Theory) -> Theory:
 
     # set given information to relevant
     constraints = OrderedSet()
-    given = OrderedSet()
     for q in self.assignments.values():
         q.relevant = False
         if q.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
             q.relevant = True  # given are relevant
-            if not q.sentence.has_decision():
-                given.append(q.sentence)
 
     # reconsider the non-numeric questions used for simplifications
     for q in out.assignments.values():  # out => non-numeric
@@ -145,9 +142,9 @@ def determine_relevance(self: Theory) -> Theory:
                     reachable.append(q)
 
     # find relevant symbols by breadth-first propagation
-    # input: reachable, given, constraints
+    # input: reachable, constraints
     # output: out.assignments[].relevant, constraints[].relevant, relevants[].rank
-    to_add, rank = reachable, 1
+    to_add = reachable
     while to_add:
         for q in to_add:
             if (q.code in self.assignments
@@ -156,15 +153,14 @@ def determine_relevance(self: Theory) -> Theory:
             # for s in q.collect_symbols(co_constraints=False):
             #     if s not in relevants:
             #         relevants[s] = rank
-            if q not in given:
-                reachable.append(q)
+            reachable.append(q)
 
         to_add, rank = OrderedSet(), 2  # or rank+1
         for constraint in constraints:
             # consider constraint not yet considered
             if (not constraint.relevant
-                # and with a question that is reachable but not given
-                and any(q in reachable and q not in given
+                # and with a question that is reachable
+                and any(q in reachable
                         for q in constraint.questions)):
                 constraint.relevant = True
                 to_add.extend([q for q in constraint.questions
