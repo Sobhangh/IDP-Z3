@@ -10,11 +10,12 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * MR !312: refactor `simplify.py`
-*
+* 
 *
 
 ### Interactive Consultant and Web IDE
-*
+* issue #274: Content of editor is lost on page reload
+* issue #278: Annotations in IDE: prettify bug and syntax highlight
 *
 *
 

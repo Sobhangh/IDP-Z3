@@ -90,7 +90,7 @@ export function monacoLoad() {
 
               // Annotations
               // @ts-ignore
-              [/\[[a-zA-Z 0-9:]+\]/, 'annotation'],
+              [/\[.*?]/, 'annotation'],
           ],
       },
   });
