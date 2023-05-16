@@ -1212,9 +1212,9 @@ class Display(ASTNode):
                 raise IDPZ3Error(f"Unknown enumeration in display: {interpretation}")
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
-                self.check(type(constraint.symbol.sub_exprs[0]) == Symbol,
-                           f"Invalid syntax: {constraint}")
-                name = constraint.symbol.sub_exprs[0].name
+                self.check(type(constraint.symbol) == Symbol,
+                           f"Invalid syntax: {constraint}")  # SymbolExpr $()
+                name = constraint.symbol.name
                 symbols = base_symbols(name, constraint.sub_exprs)
 
                 if name == 'hide':  # e.g. hide(Length, Angle)
@@ -1247,9 +1247,9 @@ class Display(ASTNode):
                                      f" {constraint}")
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
-                self.check(type(constraint.sub_exprs[0].symbol.sub_exprs[0]) == Symbol,
+                self.check(type(constraint.sub_exprs[0].symbol) == Symbol,
                            f"Invalid syntax: {constraint}")
-                if constraint.sub_exprs[0].symbol.sub_exprs[0].name == 'view':
+                if constraint.sub_exprs[0].symbol.name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
                         for s in self.voc.symbol_decls.values():
                             if type(s) == SymbolDeclaration and s.view == ViewType.NORMAL:

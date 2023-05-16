@@ -233,13 +233,6 @@ class Expression(ASTNode):
             This is useful for definitions over infinite domains,
             as well as to compute relevant questions.
 
-
-        value (Optional[Expression]):
-            A rigid term equivalent to the expression, obtained by
-            transformation.
-
-            Equivalence is computed in the context of the theory and structure.
-
         annotations (Dict[str, str]):
             The set of annotations given by the expert in the IDP-Z3 program.
 
@@ -256,7 +249,8 @@ class Expression(ASTNode):
             name of the symbol for which the expression is a type constraint
 
     """
-    __slots__ = ('sub_exprs', 'simpler', 'value', 'code',
+    # slots for marginally faster code
+    __slots__ = ('sub_exprs', 'code',
                  'annotations', 'original', 'str', 'variables', 'type',
                  'is_type_constraint_for', 'co_constraint',
                  'questions', 'relevant')
@@ -286,11 +280,11 @@ class Expression(ASTNode):
 
     def __deepcopy__(self, memo):
         """ copies everyting but .original """
-        key = self.__str1__()
+        key = str(self)
         val = memo.get(key, None)
         if val is not None:
             return val
-        if self.value == self:
+        if self.is_value():
             return self
         out = copy(self)
         out.sub_exprs = [deepcopy(e, memo) for e in out.sub_exprs]
@@ -306,38 +300,14 @@ class Expression(ASTNode):
         # symmetric
         if self.str == other.str: # and type(self) == type(other):
             return True
-        if self.__class__.__name__ == "Number" and other.__class__.__name__ == "Number":
+
+        if (type(self) in [Number, Date]
+        and type(other) in [Number, Date]):
             return float(self.py_value) == float(other.py_value)
-
-        # asymetric
-        if self.value is not None and self.value is not self:
-            return self.value.same_as(other)
-        if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification)
-               and len(self.quantees) == 0
-               and len(self.sub_exprs) == 1)):
-            return self.sub_exprs[0].same_as(other)
-
-        # switch role to be allowed to copy code
-        self, other = other, self
-
-        # copied code
-        if self.value is not None and self.value is not self:
-            return self.value.same_as(other)
-        if (isinstance(self, Brackets)
-           or (isinstance(self, AQuantification)
-               and len(self.quantees) == 0
-               and len(self.sub_exprs) == 1)):
-            return self.sub_exprs[0].same_as(other)
 
         return False
 
     def __repr__(self): return str(self)
-
-    def __str__(self):
-        if self.value is not None and self.value is not self:
-            return str(self.value)
-        return self.__str1__()
 
     def __log__(self):  # for debugWithYamlLog
         return {'class': type(self).__name__,
@@ -355,10 +325,10 @@ class Expression(ASTNode):
         `questions` is an OrderedSet of Expression
         Questions are the terms and the simplest sub-formula that
         can be evaluated.
-        `collect` uses the simplified version of the expression.
 
         all_=False : ignore expanded formulas
         and AppliedSymbol interpreted in a structure
+
         co_constraints=False : ignore co_constraints
 
         default implementation for UnappliedSymbol, AIfExpr, AUnary, Variable,
@@ -414,7 +384,24 @@ class Expression(ASTNode):
         for e in self.sub_exprs:
             e.co_constraints(co_constraints)
 
-    def is_reified(self) -> bool: return True
+    def is_value(self) -> bool:
+        """True for numerals, date, identifiers,
+        and constructors applied to values.
+
+        Synomym: "is ground", "is rigid"
+
+        Returns:
+            bool: True if `self` represents a value.
+        """
+        return False
+
+    def is_reified(self) -> bool:
+        """False for values and for symbols applied to values.
+
+        Returns:
+            bool: True if `self` has to be reified to obtain its value in a Z3 model.
+        """
+        return True
 
     def is_assignment(self) -> bool:
         """
@@ -440,7 +427,7 @@ class Expression(ASTNode):
                 msg = f"Unknown error for {self}"
             self.check(False, msg)
 
-    def __str1__(self) -> str:
+    def __str__(self) -> str:
         return ''  # monkey-patched
 
     def update_exprs(self, new_exprs: List[Expression]) -> Expression:
@@ -678,7 +665,7 @@ class AIfExpr(Expression):
         out = (cls)(None, if_f=if_f, then_f=then_f, else_f=else_f)
         return out.annotate1().simplify1()
 
-    def __str1__(self):
+    def __str__(self):
         return (f"if {self.sub_exprs[AIfExpr.IF  ].str}"
                 f" then {self.sub_exprs[AIfExpr.THEN].str}"
                 f" else {self.sub_exprs[AIfExpr.ELSE].str}")
@@ -752,7 +739,7 @@ class Quantee(Expression):
         out = (cls) (None, [var], subtype=subtype, sort=sort)
         return out.annotate1()
 
-    def __str1__(self):
+    def __str__(self):
         signature = ("" if len(self.sub_exprs) <= 1 else
                      f"[{','.join(t.str for t in self.sub_exprs[1:-1])}->{self.sub_exprs[-1]}]"
         )
@@ -811,7 +798,7 @@ class AQuantification(Expression):
         out = cls(None, annotations, q, quantees, f)
         return out.annotate1()
 
-    def __str1__(self):
+    def __str__(self):
         if len(self.sub_exprs) == 0:
             body = TRUE.str if self.q == '∀' else FALSE.str
         elif len(self.sub_exprs) == 1:
@@ -921,7 +908,7 @@ class Operator(Expression):
             out.annotations = annotations
         return out.annotate1().simplify1()
 
-    def __str1__(self):
+    def __str__(self):
         def parenthesis(precedence, x):
             return f"({x.str})" if type(x).PRECEDENCE <= precedence else f"{x.str}"
         precedence = type(self).PRECEDENCE
@@ -985,9 +972,9 @@ def RIMPLIES(exprs, annotations):
 class ADisjunction(Operator):
     PRECEDENCE = 60
 
-    def __str1__(self):
+    def __str__(self):
         if not hasattr(self, 'enumerated'):
-            return super().__str1__()
+            return super().__str__()
         return f"{self.sub_exprs[0].sub_exprs[0].code} in {{{self.enumerated}}}"
 
 def OR(exprs):
@@ -1006,12 +993,11 @@ class AComparison(Operator):
 
     def is_assignment(self):
         # f(x)=y
-        return len(self.sub_exprs) == 2 and \
-                self.operator in [['='], ['≠']] \
-                and isinstance(self.sub_exprs[0], AppliedSymbol) \
-                and all(e.value is not None
-                        for e in self.sub_exprs[0].sub_exprs) \
-                and self.sub_exprs[1].value is not None
+        return (len(self.sub_exprs) == 2 and
+                self.operator in [['='], ['≠']]
+                and isinstance(self.sub_exprs[0], AppliedSymbol)
+                and not self.sub_exprs[0].is_reified()
+                and self.sub_exprs[1].is_value())
 
 def EQUALS(exprs):
     return AComparison.make('=',exprs)
@@ -1051,7 +1037,7 @@ class AUnary(Expression):
         out = AUnary(None, operators=[op], f=expr)
         return out.annotate1().simplify1()
 
-    def __str1__(self):
+    def __str__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
     def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
@@ -1093,7 +1079,7 @@ class AAggregate(Expression):
         self.q = ''
         super().__init__()
 
-    def __str1__(self):
+    def __str__(self):
         # aggregates are over finite domains, and cannot have partial expansion
         if not self.annotated:
             assert len(self.sub_exprs) <= 2, "Internal error"
@@ -1191,7 +1177,7 @@ class AppliedSymbol(Expression):
         out.variables = {}
         return out
 
-    def __str1__(self):
+    def __str__(self):
         out = f"{self.symbol}({', '.join([x.str for x in self.sub_exprs])})"
         if self.in_enumeration:
             enum = f"{', '.join(str(e) for e in self.in_enumeration.tuples)}"
@@ -1256,9 +1242,14 @@ class AppliedSymbol(Expression):
                 msg = f"Unknown error for symbol {self}"
             self.check(False, msg)
 
+    def is_value(self):
+        # independent of is_enumeration and in_enumeration !
+        return (type(self.decl) == Constructor
+                and all(e.is_value() for e in self.sub_exprs))
+
     def is_reified(self):
-        return (self.in_enumeration or self.is_enumerated
-                or any(e.value is None for e in self.sub_exprs))
+        # independent of is_enumeration and in_enumeration !
+        return (not all (e.is_value() for e in self.sub_exprs))
 
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]
@@ -1301,7 +1292,7 @@ class SymbolExpr(Expression):
         self.decl = self.sub_exprs[0].decl if not self.eval else None
         super().__init__()
 
-    def __str1__(self):
+    def __str__(self):
         return (f"$({self.sub_exprs[0]})" if self.eval else
                 f"{self.sub_exprs[0]}")
 
@@ -1338,7 +1329,11 @@ class UnappliedSymbol(Expression):
         out.variables = {}
         return out
 
-    def __str1__(self): return self.name
+    def is_value(self): return True
+
+    def is_reified(self): return False
+
+    def __str__(self): return self.name
 
 TRUEC = CONSTRUCTOR('true')
 FALSEC = CONSTRUCTOR('false')
@@ -1372,7 +1367,7 @@ class Variable(Expression):
         self.sub_exprs = []
         self.variables = set([self.name])
 
-    def __str1__(self): return self.name
+    def __str__(self): return self.name
 
     def __deepcopy__(self, memo):
         return self
@@ -1414,6 +1409,10 @@ class Number(Expression):
         self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
         return Number(number=str(float(self.py_value)))
 
+    def is_value(self): return True
+
+    def is_reified(self): return False
+
 ZERO = Number(number='0')
 ONE = Number(number='1')
 
@@ -1448,6 +1447,10 @@ class Date(Expression):
 
     def __str__(self): return f"#{self.date.isoformat()}"
 
+    def is_value(self): return True
+
+    def is_reified(self): return False
+
 
 class Brackets(Expression):
     PRECEDENCE = 200
@@ -1464,7 +1467,6 @@ class Brackets(Expression):
 
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
-    def __str1__(self): return str(self)
 
 
 class RecDef(Expression):
