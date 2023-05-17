@@ -1,0 +1,7 @@
+vocabulary  {
+    type T:={1..5}
+    p :  () → T
+}
+theory  {
+    p()<3.
+}

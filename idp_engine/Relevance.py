@@ -19,6 +19,7 @@
 This module contains the logic for the computation of relevance.
 """
 from __future__ import annotations
+from copy import copy
 
 from .Assignments import Status as S
 from .Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
@@ -111,21 +112,22 @@ def determine_relevance(self: Theory) -> Theory:
 
     # no goal_symbol --> make every simplified constraint relevant
     if len(to_add) == 0:
-        to_add = constraints
+        to_add = copy(constraints)
 
     # need to add the propagated assignments used for simplifications
     for q in out.assignments.values():  # out => exclude numeric expressions
         if q.value is not None:
             to_add.append(q.sentence)  # issue #252, #277
 
-    # still nothing relevant --> make every question in def_constraints relevant
-    if len(to_add) == 0:
+    # no constraints --> make every question in def_constraints relevant
+    if all(e.is_type_constraint_for is not None for e in self.constraints):
+        _relevant = to_add
         for def_constraints in out.def_constraints.values():
-            for def_constraint in def_constraints:  #TODO simplify ?
-                def_constraint.questions = OrderedSet()
-                def_constraint.collect(def_constraint.questions,
-                                    all_=True, co_constraints=True)
-                for q in def_constraint.questions:
+            for def_constraint in def_constraints:
+                q = def_constraint.simplify_with(out.assignments, co_constraints_too=False)
+                questions = OrderedSet()
+                q.collect(questions, all_=True, co_constraints=True)
+                for q in questions:
                     _relevant.append(q)
     else:
         # find relevant symbols by breadth-first diffusion

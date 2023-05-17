@@ -903,16 +903,19 @@ class Theory(object):
         if except_numeric:
             # do not simplify numeric comparisons nor quantification away (#252, #277)
             for ass in out.assignments.values():
-                if ((ass.value and type(ass.sentence) == AComparison
-                    and ass.sentence.sub_exprs[0].type in [INT, REAL, DATE])
-                or (ass.value and type(ass.sentence) == AQuantification)):
+                if (ass.value
+                and (( type(ass.sentence) == AComparison
+                       and (any(e.type in [INT, REAL, DATE] for e in ass.sentence.sub_exprs)
+                            or any(op in '<>≤≥' for op in ass.sentence.operator)))
+                    or type(ass.sentence) == AQuantification)):
                     ass.status = S.UNKNOWN
                     ass.value = None
 
         new_constraints: List[Expression] = []
         for constraint in out.constraints:
             if constraint.code not in self.ignored_laws:
-                new_constraint = constraint.simplify_with(out.assignments)
+                new_constraint = constraint.simplify_with(out.assignments,
+                                co_constraints_too=not except_numeric)
                 new_constraints.append(new_constraint)
         out.constraints = new_constraints
         out._formula, out._constraintz = None, None
