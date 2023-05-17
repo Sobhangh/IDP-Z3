@@ -909,8 +909,9 @@ class Theory(object):
 
         new_constraints: List[Expression] = []
         for constraint in out.constraints:
-            new_constraint = constraint.simplify_with(out.assignments)
-            new_constraints.append(new_constraint)
+            if constraint.code not in self.ignored_laws:
+                new_constraint = constraint.simplify_with(out.assignments)
+                new_constraints.append(new_constraint)
         out.constraints = new_constraints
         out._formula, out._constraintz = None, None
         return out

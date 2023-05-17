@@ -1035,7 +1035,7 @@ display {
                                 'is_assignment': True,
                                 'normal': False,
                                 'reading': 'Use = For_Resale',
-                                'relevant': True,
+                                'relevant': False,
                                 'status': 'UNKNOWN',
                                 'typ': 'Bool'},
          'Use() = Social_Housing': {'environmental': True,
