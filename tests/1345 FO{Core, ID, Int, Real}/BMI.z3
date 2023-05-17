@@ -7,6 +7,41 @@ riskLevel() -> Low
 weight() -> 80.0
 No more consequences.
 
+bmi() -> 1/320
+? BMILevel()
+? sex()
+riskLevel() -> Low
+? waist()
+weight() -> 80.0
+Not riskLevel() = Increased
+Not BMILevel() = Overweight
+? BMILevel() = Severely_Underweight
+bmi() < 18.5
+bmi() = weight() / 25600
+? sex() = Male
+? BMILevel() = Underweight
+? sex() = Female
+Not 18.5 ≤ bmi()
+bmi() ≤ 24.9
+Not BMILevel() = Normal
+Not 25 ≤ bmi()
+bmi() ≤ 29.9
+Not BMILevel() = Obese_I
+Not 30 ≤ bmi()
+bmi() ≤ 34.9
+Not BMILevel() = Obese_II
+Not 35 ≤ bmi()
+bmi() ≤ 39.9
+Not BMILevel() = Extreme_Obesity
+Not bmi() ≥ 40
+? waist() ≤ 102
+Not riskLevel() = High
+? waist() > 102
+? waist() ≤ 88
+? waist() > 88
+Not riskLevel() = Very_High
+Not riskLevel() = Extremely_High
+riskLevel() = Low
 
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
 bmi() = bmi_ ⇔ bmi_ = weight() / 25600

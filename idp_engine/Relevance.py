@@ -109,7 +109,7 @@ def determine_relevance(self: Theory) -> Theory:
     # determine the starting set of relevant questions, and initialize the ending set
     # start with goal_symbol
     to_add, _relevant = OrderedSet(), OrderedSet()  # set of questions and constraints
-    for constraint in constraints:
+    for constraint in self.constraints:  # not simplified !
         if (type(constraint) == AppliedSymbol
            and constraint.decl.name == RELEVANT):
             to_add.extend(constraint.sub_exprs)  # all instances of the goal symbol

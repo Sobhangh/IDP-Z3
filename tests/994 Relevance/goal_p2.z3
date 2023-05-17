@@ -61,7 +61,7 @@ display {
                'is_assignment': False,
                'normal': True,
                'reading': 'q',
-               'relevant': False,
+               'relevant': True,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
  'r': {'r()': {'environmental': False,
@@ -75,6 +75,6 @@ display {
                'is_assignment': False,
                'normal': True,
                'reading': 's',
-               'relevant': False,
+               'relevant': True,
                'status': 'UNKNOWN',
                'typ': 'Bool'}}}
