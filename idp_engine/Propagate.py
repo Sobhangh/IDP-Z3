@@ -59,9 +59,7 @@ def _not(truth):
 
 def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
     """ simplify the expression using the assignments """
-    if self.value is not None:
-        return self
-    value, simpler, new_e, co_constraint = None, None, None, None
+    simpler, new_e, co_constraint = None, None, None
     if self.co_constraint is not None:
         co_constraint = self.co_constraint.simplify_with(assignments)
     new_e = [e.simplify_with(assignments) for e in self.sub_exprs]
@@ -92,10 +90,9 @@ def symbolic_propagate(self,
         truth (Expression, optional):
             The truth value of the expression `self`. Defaults to TRUE.
     """
-    if self.value is None:
-        if self.code in assignments:
-            assignments.assert__(self, truth, tag)
-        self.propagate1(assignments, tag, truth)
+    if self.code in assignments:
+        assignments.assert__(self, truth, tag)
+    self.propagate1(assignments, tag, truth)
 Expression.symbolic_propagate = symbolic_propagate
 
 
@@ -160,13 +157,12 @@ def propagate1(self, assignments, tag, truth=TRUE):
         # generates both (x->0) and (x=0->True)
         # generating only one from universals would make the second one
         # a consequence, not a universal
-        operands1 = [e.value for e in self.sub_exprs]
         if (type(self.sub_exprs[0]) == AppliedSymbol
-        and operands1[1] is not None):
-            assignments.assert__(self.sub_exprs[0], operands1[1], tag)
+        and self.sub_exprs[1].is_value()):
+            assignments.assert__(self.sub_exprs[0], self.sub_exprs[1], tag)
         elif (type(self.sub_exprs[1]) == AppliedSymbol
-        and operands1[0] is not None):
-            assignments.assert__(self.sub_exprs[1], operands1[0], tag)
+        and self.sub_exprs[0].is_value()):
+            assignments.assert__(self.sub_exprs[1], self.sub_exprs[0], tag)
 AComparison.propagate1 = propagate1
 
 

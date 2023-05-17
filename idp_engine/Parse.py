@@ -915,7 +915,7 @@ class Enumeration(ASTNode):
 
         # constructs If-then-else recursively
         groups = groupby(tuples, key=lambda t: str(t.args[rank]))
-        if args[rank].value is not None:
+        if args[rank].is_value():
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
                     return self.contains(args, function, arity, rank+1, list(tuples2),
