@@ -1,0 +1,93 @@
+
+vocabulary V {
+    type Weekdatum := {Maandag, Dinsdag, Woensdag, Donderdag, Vrijdag, Zaterdag, Zondag}
+    type Gebeurtenis := {huwelijk, wijding, intreding, overlijden, plechtige_communie, vrijzinnig_feest, dienstplicht, gewetensbezwaarde, familieraad, rechtbankverschijning, stembureau_nationaal, stembureau_Europees, hoofdbureau}
+
+    type Persoon := {zelf, ouder, schoonouder, grootouder, kind, echtgenoot, samenwonende_partner, feitelijk_samenwonende_partner, kleinkind, broer, zus, schoonbroer, schoonzus, pleegkind, schoonkind, stiefouder, pleegouder, overgrootouder, achterkleinkind}
+    gebeurtenis : () -> Gebeurtenis
+    gebeurtenis_datum : () -> Date
+    persoon : () -> Persoon
+    begrafenis_datum : () -> Date
+    inwonend : () -> Bool
+
+    [long: Met langdurige pleegzorg wordt bedoeld pleegzorg waarvan bij aanvang duidelijk is dat het kind voor minstens zes maanden in hetzelfde pleeggezin of bij dezelfde pleegouder of dezelfde pleegouders zal verblijven. De attestering hiervan gebeurt door de bevoegde pleegzorg-diensten binnen de drie gemeenschappen.]
+    langdurige_pleegzorg : () -> Bool
+    nodige_tijd : () -> Int
+    federaal_ambtenaar : () -> Bool
+
+    _feestdag: Date -> Bool
+    _window : Date -> Bool
+    _werkdag: Date -> Bool
+    _begin_van_de_week_van: Date -> Date
+
+    type Clause := {1, 4, 15}
+    dagen_verlet : () -> Int
+    opgenomen : _window -> Bool
+    akkoord_werkgever : () -> Bool
+    van_toepassing : (Clause) -> Bool
+}
+
+theory T:V {
+
+    _window := {#2023-05-08..#2023-05-12}.
+    gebeurtenis_datum() = #2023-05-10.
+
+    // art. 1
+        not federaal_ambtenaar()
+        and gebeurtenis() = huwelijk
+        and persoon() = zelf
+    are necessary and sufficient conditions for
+        van_toepassing(1).
+
+    if van_toepassing(1),
+    then (dagen_verlet() = 2
+          and for all opgenomen dag: _begin_van_de_week_van(gebeurtenis_datum()) =< dag =< _begin_van_de_week_van(gebeurtenis_datum()) + 13).
+
+    // art. 4
+        not federaal_ambtenaar()
+        and gebeurtenis() = overlijden
+        and persoon() in {echtgenoot, samenwonende_partner, feitelijk_samenwonende_partner, kind}
+    are necessary and sufficient conditions for
+        van_toepassing(4).
+
+    if van_toepassing(4),
+    then (dagen_verlet() = 10
+    and (for all opgenomen dag: dag >= gebeurtenis_datum())
+    and (akkoord_werkgever() or #{opgenomen dag: dag =< begrafenis_datum()} = 3)).
+
+
+
+    // art. 15
+        not federaal_ambtenaar()
+        and gebeurtenis() = familieraad
+        and persoon() = zelf
+    are necessary and sufficient conditions for
+        van_toepassing(15).
+
+    van_toepassing(15) => (dagen_verlet() = (if nodige_tijd() > 1 then 1 else nodige_tijd())).
+
+
+
+    // general
+
+    for all opgenomen dag: _werkdag(dag).
+
+    #{opgenomen dag: true} =< dagen_verlet().
+
+    if not there is a Clause x: van_toepassing(x),
+    then dagen_verlet() = 0.
+
+    // for better explanation
+    federaal_ambtenaar := false.
+
+}
+
+structure default:V {
+    gebeurtenis := huwelijk.
+    persoon := zelf.
+}
+
+procedure main() {
+    pretty_print(determine_relevance(Theory(T, default)))
+}
+

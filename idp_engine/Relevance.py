@@ -22,9 +22,9 @@ from __future__ import annotations
 
 from .Assignments import Status as S
 from .Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
-                                   AConjunction, Brackets, UnappliedSymbol)
+                                   AConjunction, Brackets)
 from .Theory import Theory
-from .utils import OrderedSet, GOAL_SYMBOL, RELEVANT
+from .utils import OrderedSet, RELEVANT
 
 
 def split_constraints(constraints: OrderedSet) -> OrderedSet:
@@ -89,9 +89,9 @@ def determine_relevance(self: Theory) -> Theory:
     for a in self.assignments.values():
         a.relevant = False
 
-    out = self.simplify()  # creates a copy
+    out = self.simplify(except_numeric=True)  # creates a copy
 
-    # analyse given information
+    # set given information to relevant
     constraints = OrderedSet()
     given = OrderedSet()
     for q in self.assignments.values():
@@ -100,8 +100,11 @@ def determine_relevance(self: Theory) -> Theory:
             q.relevant = True  # given are relevant
             if not q.sentence.has_decision():
                 given.append(q.sentence)
-        elif (q.value is not None and type(q.sentence) != AppliedSymbol):
-            constraints.append(q.sentence)  # issue 252
+
+    # reconsider the non-numeric questions used for simplifications
+    for q in out.assignments.values():  # out => non-numeric
+        if q.value is not None:
+            constraints.append(q.sentence)  # issue #252, #277
 
     # collect (co-)constraints
     for constraint in out.constraints:
@@ -144,7 +147,6 @@ def determine_relevance(self: Theory) -> Theory:
     # find relevant symbols by breadth-first propagation
     # input: reachable, given, constraints
     # output: out.assignments[].relevant, constraints[].relevant, relevants[].rank
-    relevants = {}  # Dict[string: int]
     to_add, rank = reachable, 1
     while to_add:
         for q in to_add:

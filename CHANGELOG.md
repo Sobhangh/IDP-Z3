@@ -10,7 +10,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * MR !312: refactor `simplify.py`
-* 
+* fix #277: Incorrect relevance for theories with numeric comparison
 *
 
 ### Interactive Consultant and Web IDE

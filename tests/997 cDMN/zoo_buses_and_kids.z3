@@ -150,7 +150,7 @@ structure {
                                          'is_assignment': True,
                                          'normal': False,
                                          'reading': 'Kids_amount = 300',
-                                         'relevant': True,
+                                         'relevant': False,
                                          'status': 'UNIVERSAL',
                                          'typ': 'Bool',
                                          'value': True},

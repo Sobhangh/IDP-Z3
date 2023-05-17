@@ -27,16 +27,14 @@ import time
 from copy import copy, deepcopy
 from enum import Enum, auto
 from itertools import chain
-import logging
-import math
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
                 is_and, BoolVal, get_param)
 
 from .Assignments import Status as S, Assignment, Assignments
-from .Expression import (TRUE, Expression, FALSE, AppliedSymbol,
+from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
                          EQUALS, NOT, Extension)
-from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, Symbol, SYMBOL,
+from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SYMBOL,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, IDPZ3Error,
@@ -893,20 +891,22 @@ class Theory(object):
         else:
             return [], []
 
-    def simplify(self) -> Theory:
+    def simplify(self, except_numeric=False) -> Theory:
         """ Returns a simpler copy of the theory, with a simplified formula
         obtained by substituting terms and atoms by their known values.
 
-        Assignments obtained by propagation become UNIVERSAL constraints.
+        Args:
+            except_numeric: If true, numeric comparisons with known values are ignored.
         """
         out = self.copy()
 
-        # convert consequences to Universal
-        for ass in out.assignments.values():
-            if ass.value:
-                # TODO: what if consequences are due to choices (e.g., defaults?)
-                ass.status = (S.UNIVERSAL if ass.status in [S.CONSEQUENCE, S.ENV_CONSQ] else
-                        ass.status)
+        if except_numeric:
+            # do not simplify numeric comparisons away (#252, #277)
+            for ass in out.assignments.values():
+                if (ass.value and type(ass.sentence) == AComparison
+                and ass.sentence.sub_exprs[0].type in [INT, REAL, DATE]):
+                    ass.status = S.UNKNOWN
+                    ass.value = None
 
         new_constraints: List[Expression] = []
         for constraint in out.constraints:
