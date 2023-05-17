@@ -137,8 +137,8 @@ class State(Theory):
             c.collect_co_constraints(self.co_constraints)
         return (f"Universals:  {indented}{indented.join(repr(c) for c in self.assignments.values() if c.status == S.UNIVERSAL)}{NEWL}"
                 f"Consequences:{indented}{indented.join(repr(c) for c in self.assignments.values() if c.status in [S.CONSEQUENCE, S.ENV_CONSQ])}{NEWL}"
-                f"Simplified:  {indented}{indented.join(c.__str1__()  for c in self.constraints)}{NEWL}"
+                f"Simplified:  {indented}{indented.join(c.__str__()  for c in self.constraints)}{NEWL}"
                 f"Irrelevant:  {indented}{indented.join(repr(c) for c in self.assignments.values() if not c.relevant)}{NEWL}"
-                f"Co-constraints:{indented}{indented.join(c.__str1__() for c in self.co_constraints)}{NEWL}"
+                f"Co-constraints:{indented}{indented.join(c.__str__() for c in self.co_constraints)}{NEWL}"
                 )
 

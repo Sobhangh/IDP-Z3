@@ -891,19 +891,20 @@ class Theory(object):
         else:
             return [], []
 
-    def simplify(self) -> Theory:
+    def simplify(self, except_numeric=False) -> Theory:
         """ Returns a simpler copy of the theory, with a simplified formula
         obtained by substituting terms and atoms by their known values.
 
-        Side effect: Numeric comparisons that were consequences, are not anymore.
+        Args:
+            except_numeric: If true, numeric comparisons with known values are ignored.
         """
         out = self.copy()
 
-        for ass in out.assignments.values():
-            if ass.value:
-                # do not simplify numeric comparisons away (#252, #277)
-                if (type(ass.sentence) == AComparison
-                    and ass.sentence.sub_exprs[0].type in [INT, REAL, DATE]):
+        if except_numeric:
+            # do not simplify numeric comparisons away (#252, #277)
+            for ass in out.assignments.values():
+                if (ass.value and type(ass.sentence) == AComparison
+                and ass.sentence.sub_exprs[0].type in [INT, REAL, DATE]):
                     ass.status = S.UNKNOWN
                     ass.value = None
 

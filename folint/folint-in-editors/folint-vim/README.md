@@ -1,16 +1,16 @@
-# FOlint support in Vim and more
+# FOLint support in Vim/Neovim and more
 
-This is a brief guide detailing how to set up the FOlint tool in Vim, and how to enable syntax highlighting/automatic indentation for IDP.
+This is a brief guide detailing how to set up the FOLint tool in Vim/Neovim, and how to enable syntax highlighting/automatic indentation for IDP.
 
-## FOLint
+## FOLint with ALE
 
-FOlint is a linting tool for FO(·), a language used by the IDP system.
+FOLint is a linting tool for FO(·), a language used by the IDP system.
 
 A popular Vim plugin to support linting is [ALE](https://github.com/dense-analysis/ale), which already comes with support for many linters.
-We can extend it with support for FOlint by adding a custom linter.
+We can extend it with support for FOLint by adding a custom linter.
 
-Firstly, we need to modify our `.vimrc` so that it recognizes the `.idp` file extension and we need to tell ALE that we can use FOlint.
-```
+Firstly, we need to modify our `.vimrc` so that it recognizes the `.idp` file extension and we need to tell ALE that we can use FOLint.
+```vim
 au BufNewFile,BufRead *.idp set filetype=idp
 let g:ale_linters = {
     \   'idp': ['folint']
@@ -21,7 +21,7 @@ Then we configure the linter itself in ALE.
 ALE collects all its linters in `~/.vim/bundle/ale/ale_linters/<language>`.
 After creating an `idp` folder in that location, save the following vimscript as `folint.vim`:
 
-```
+```vim
 function! Folint_callback(bufnr, lines) abort
     let result = []
 
@@ -59,6 +59,56 @@ call ale#linter#Define('idp', {
 \ 'project_root': './',
 \ 'callback': 'Folint_callback'
 \    })
+```
+
+## FOLint with null-ls (Neovim)
+
+[null-ls](https://github.com/jose-elias-alvarez/null-ls.nvim) is a popular Neovim plugin for non-LSP sources to hook into Neovim's LSP client.
+This allows linters to hook into Neovim's LSP diagnostics.
+
+This requires Neovim to recognize the IDP filetype as specified above. Below you can find a lua version for this.
+```lua
+vim.api.nvim_create_autocmd(
+  { "BufNewFile", "BufRead" },
+  {
+    pattern = { "*.idp" },
+    command = [[set filetype=idp]],
+  }
+)
+```
+
+Next we need a null-ls source for FOLint and register it:
+```lua
+local null_ls = require'null-ls'
+local helpers = require'null-ls.helpers'
+
+local folint = {
+  name = "FOLint",
+  method = null_ls.methods.DIAGNOSTICS_ON_SAVE,
+  filetypes = { "idp" },
+  generator = helpers.generator_factory{
+    args = { "$FILENAME" },
+    command = "folint",
+    format = "line",
+    on_output = helpers.diagnostics.from_pattern(
+      [[((%u)%w+): line (%d+) -- colStart (%d+) -- colEnd (%d+) => (.*)]],
+      {"code", "severity", "row", "col", "col_end", "message"}
+    )
+  },
+}
+
+-- then add it to your null-ls setup
+null_ls.setup{
+  sources = {
+    -- other sources
+    folint,
+    -- more sources
+  }
+}
+
+-- or register it separately
+null_ls.register(folint)
+
 ```
 
 ## Syntax highlighting

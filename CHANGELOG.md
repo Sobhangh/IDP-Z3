@@ -14,7 +14,8 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 *
 
 ### Interactive Consultant and Web IDE
-*
+* issue #274: Content of editor is lost on page reload
+* issue #278: Annotations in IDE: prettify bug and syntax highlight
 *
 *
 

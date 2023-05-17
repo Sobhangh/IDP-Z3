@@ -10,7 +10,7 @@ python-dateutil
 pyyaml
 recommonmark
 sphinx-autobuild
-sphinxcontrib-mermaid==0.7.1
+sphinxcontrib-mermaid==0.8.1
 git+https://github.com/sphinx-contrib/video.git
 sphinxcontrib-youtube
 sphinx_bootstrap_theme
