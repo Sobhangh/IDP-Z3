@@ -177,7 +177,7 @@ structure {
                                                                                                                                                                                                                                                                           'sum(lambda  '
                                                                                                                                                                                                                                                                           ': '
                                                                                                                                                                                                                                                                           'TwoEuro)',
-                                                                                                                                                                                                                                                               'relevant': True,
+                                                                                                                                                                                                                                                               'relevant': False,
                                                                                                                                                                                                                                                                'status': 'UNIVERSAL',
                                                                                                                                                                                                                                                                'typ': 'Bool',
                                                                                                                                                                                                                                                                'value': True}},
@@ -185,7 +185,7 @@ structure {
                                  'is_assignment': True,
                                  'normal': True,
                                  'reading': 'TotalMoney',
-                                 'relevant': True,
+                                 'relevant': False,
                                  'status': 'UNIVERSAL',
                                  'typ': 'Int',
                                  'value': '567'},
@@ -249,7 +249,7 @@ structure {
                                                                                                                                                                                                                                                                                                                     'TwoEuro '
                                                                                                                                                                                                                                                                                                                     '⨯ '
                                                                                                                                                                                                                                                                                                                     '200)',
-                                                                                                                                                                                                                                                                                                         'relevant': True,
+                                                                                                                                                                                                                                                                                                         'relevant': False,
                                                                                                                                                                                                                                                                                                          'status': 'UNIVERSAL',
                                                                                                                                                                                                                                                                                                          'typ': 'Bool',
                                                                                                                                                                                                                                                                                                          'value': True}},

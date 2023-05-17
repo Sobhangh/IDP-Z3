@@ -83,7 +83,7 @@ theory {
                'is_assignment': True,
                'normal': True,
                'reading': 'x',
-               'relevant': True,
+               'relevant': False,
                'status': 'UNIVERSAL',
                'typ': 'Int',
                'value': '1'},

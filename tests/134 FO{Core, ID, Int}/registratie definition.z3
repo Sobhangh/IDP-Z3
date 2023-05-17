@@ -777,7 +777,7 @@ display {
                                                                        'normal': False,
                                                                        'reading': 'Registration_Type = '
                                                                                   'Professional_Purchase',
-                                                                       'relevant': True,
+                                                                       'relevant': False,
                                                                        'status': 'UNIVERSAL',
                                                                        'typ': 'Bool',
                                                                        'value': False},
@@ -926,7 +926,7 @@ display {
                        'is_assignment': True,
                        'normal': False,
                        'reading': 'Tax = 4',
-                       'relevant': True,
+                       'relevant': False,
                        'status': 'UNIVERSAL',
                        'typ': 'Bool',
                        'value': False},

@@ -192,7 +192,7 @@ display {
                                       'is_assignment': False,
                                       'normal': False,
                                       'reading': 'Cost = ECost(Epoxy)',
-                                      'relevant': True,
+                                      'relevant': False,
                                       'status': 'UNIVERSAL',
                                       'typ': 'Bool',
                                       'value': True}},
@@ -226,7 +226,7 @@ display {
                                                   'is_assignment': False,
                                                   'normal': False,
                                                   'reading': 'EHighest_Storage_T(Epoxy) = -900',
-                                                  'relevant': True,
+                                                  'relevant': False,
                                                   'status': 'UNIVERSAL',
                                                   'typ': 'Bool',
                                                   'value': False},
@@ -237,7 +237,7 @@ display {
                                                                                                      '≥ Max_Storage_T '
                                                                                                      '≥ '
                                                                                                      'ELowest_Storage_T(Epoxy)',
-                                                                                          'relevant': True,
+                                                                                          'relevant': False,
                                                                                           'status': 'UNIVERSAL',
                                                                                           'typ': 'Bool',
                                                                                           'value': True},
@@ -253,7 +253,7 @@ display {
                                                  'is_assignment': False,
                                                  'normal': False,
                                                  'reading': 'ELowest_Storage_T(Epoxy) = -900',
-                                                 'relevant': True,
+                                                 'relevant': False,
                                                  'status': 'UNIVERSAL',
                                                  'typ': 'Bool',
                                                  'value': False},
@@ -264,7 +264,7 @@ display {
                                                                                                      '≤ Min_Storage_T '
                                                                                                      '≤ '
                                                                                                      'EHighest_Storage_T(Epoxy)',
-                                                                                          'relevant': True,
+                                                                                          'relevant': False,
                                                                                           'status': 'UNIVERSAL',
                                                                                           'typ': 'Bool',
                                                                                           'value': True},
@@ -287,7 +287,7 @@ display {
                                                'is_assignment': False,
                                                'normal': True,
                                                'reading': 'KnownHighStorageT',
-                                               'relevant': True,
+                                               'relevant': False,
                                                'status': 'UNIVERSAL',
                                                'typ': 'Bool',
                                                'value': True}},
@@ -295,7 +295,7 @@ display {
                                              'is_assignment': False,
                                              'normal': True,
                                              'reading': 'KnownLowStorageT',
-                                             'relevant': True,
+                                             'relevant': False,
                                              'status': 'UNIVERSAL',
                                              'typ': 'Bool',
                                              'value': True}},
@@ -348,7 +348,7 @@ display {
                                                                                  'normal': False,
                                                                                  'reading': 'Safe_High_Storage_T = '
                                                                                             'EHighest_Storage_T(Epoxy)',
-                                                                                 'relevant': True,
+                                                                                 'relevant': False,
                                                                                  'status': 'UNIVERSAL',
                                                                                  'typ': 'Bool',
                                                                                  'value': True}},
@@ -365,7 +365,7 @@ display {
                                                                               'normal': False,
                                                                               'reading': 'Safe_Low_Storage_T = '
                                                                                          'ELowest_Storage_T(Epoxy)',
-                                                                              'relevant': True,
+                                                                              'relevant': False,
                                                                               'status': 'UNIVERSAL',
                                                                               'typ': 'Bool',
                                                                               'value': True}}}

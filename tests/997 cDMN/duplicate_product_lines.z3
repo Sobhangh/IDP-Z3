@@ -68,7 +68,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '1)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -77,7 +77,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '2)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -86,7 +86,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '3)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -95,7 +95,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '4)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -104,7 +104,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '5)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -113,7 +113,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '6)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -122,7 +122,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(1, '
                                                                                           '7)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -131,7 +131,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '1)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -140,7 +140,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '2)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -149,7 +149,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '3)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -158,7 +158,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '4)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': True},
@@ -167,7 +167,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '5)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -176,7 +176,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '6)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -185,7 +185,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(2, '
                                                                                           '7)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -194,7 +194,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '1)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -203,7 +203,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '2)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -212,7 +212,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '3)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -221,7 +221,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '4)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -230,7 +230,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '5)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -239,7 +239,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '6)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -248,7 +248,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(3, '
                                                                                           '7)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -257,7 +257,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '1)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -266,7 +266,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '2)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': True},
@@ -275,7 +275,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '3)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -284,7 +284,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '4)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -293,7 +293,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '5)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -302,7 +302,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '6)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -311,7 +311,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(4, '
                                                                                           '7)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -320,7 +320,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '1)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -329,7 +329,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '2)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -338,7 +338,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '3)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -347,7 +347,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '4)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -356,7 +356,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '5)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -365,7 +365,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '6)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -374,7 +374,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(5, '
                                                                                           '7)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -383,7 +383,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '1)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -392,7 +392,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '2)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -401,7 +401,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '3)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -410,7 +410,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '4)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -419,7 +419,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '5)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -428,7 +428,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '6)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -437,7 +437,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(6, '
                                                                                           '7)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -446,7 +446,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '1)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -455,7 +455,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '2)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -464,7 +464,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '3)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -473,7 +473,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '4)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -482,7 +482,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '5)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -491,7 +491,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '6)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False},
@@ -500,7 +500,7 @@ structure S: V{
                                                                                'normal': True,
                                                                                'reading': 'Product_is_duplicate_of_Product(7, '
                                                                                           '7)',
-                                                                               'relevant': True,
+                                                                               'relevant': False,
                                                                                'status': 'UNIVERSAL',
                                                                                'typ': 'Bool',
                                                                                'value': False}},

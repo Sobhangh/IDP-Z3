@@ -34,7 +34,7 @@ theory  {
                    'is_assignment': False,
                    'normal': False,
                    'reading': 'p < 3',
-                   'relevant': True,
+                   'relevant': False,
                    'status': 'UNIVERSAL',
                    'typ': 'Bool',
                    'value': True}}}

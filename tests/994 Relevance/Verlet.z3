@@ -1,5 +1,4 @@
 gebeurtenis() -> huwelijk
-gebeurtenis_datum() -> #2023-05-10
 persoon() -> zelf
 Not federaal_ambtenaar()
 _window(#2023-05-08)
@@ -21,5 +20,4 @@ persoon() = zelf
 Not gebeurtenis() = overlijden
 Not persoon() in {echtgenoot, samenwonende_partner, feitelijk_samenwonende_partner, kind}
 Not gebeurtenis() = familieraad
-#{dag ∈ opgenomen : true} ≤ dagen_verlet()
 ∃ x ∈ Clause: van_toepassing(x)

@@ -157,7 +157,8 @@ def determine_relevance(self: Theory) -> Theory:
 
     for q in _relevant:
         ass = self.assignments.get(q.code, None)
-        if (ass and not ass.is_certainly_undefined):  #TODO
+        if (ass and not ass.is_certainly_undefined
+        and ass.status != S.UNIVERSAL):  #TODO
             ass.relevant = True
     return self
 Theory.determine_relevance = determine_relevance
