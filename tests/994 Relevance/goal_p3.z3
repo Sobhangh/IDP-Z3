@@ -1,16 +1,20 @@
 
 -- original ---------------------------------
-vocabulary {
-    p, l, r, rd, i: () → Bool
+vocabulary V {
+    p, q, r, s, g: () -> Bool
 }
-theory {
-  { i() <- rd().}
-  { p() <- l() | r().}
-  { r() <- rd().}
-  r().
+
+theory T:V {
+    { p() <- q() | s(). }
+    g() => p().
 }
+
+structure default:V {
+    p := true.
+}
+
 display {
-  goal_symbol:={`p}.
+    goal_symbol := {`g}.
 }
 -- meta -------------------------------------
 {'manualPropagation': False,
@@ -24,7 +28,7 @@ display {
               'type': 'proposition',
               'view': 'normal'},
              {'environmental': False,
-              'idpname': 'l',
+              'idpname': 'q',
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
@@ -36,13 +40,13 @@ display {
               'type': 'proposition',
               'view': 'normal'},
              {'environmental': False,
-              'idpname': 'rd',
+              'idpname': 's',
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
               'view': 'normal'},
              {'environmental': False,
-              'idpname': 'i',
+              'idpname': 'g',
               'priority': 'core',
               'showOptimize': True,
               'type': 'proposition',
@@ -51,42 +55,39 @@ display {
 
 -- propagation ------------------------------
 {' Global': {'env_dec': False},
- 'i': {'i()': {'environmental': False,
+ 'g': {'g()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
-               'reading': 'i',
-               'relevant': False,
-               'status': 'UNIVERSAL',
-               'typ': 'Bool',
-               'value': True}},
- 'l': {'l()': {'environmental': False,
-               'is_assignment': False,
-               'normal': True,
-               'reading': 'l',
-               'relevant': False,
+               'reading': 'g',
+               'relevant': True,
                'status': 'UNKNOWN',
                'typ': 'Bool'}},
  'p': {'p()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
                'reading': 'p',
-               'relevant': False,
-               'status': 'UNIVERSAL',
+               'relevant': True,
+               'status': 'DEFAULT',
                'typ': 'Bool',
                'value': True}},
+ 'q': {'q()': {'environmental': False,
+               'is_assignment': False,
+               'normal': True,
+               'reading': 'q',
+               'relevant': True,
+               'status': 'UNKNOWN',
+               'typ': 'Bool'}},
  'r': {'r()': {'environmental': False,
                'is_assignment': False,
                'normal': True,
                'reading': 'r',
                'relevant': False,
-               'status': 'UNIVERSAL',
-               'typ': 'Bool',
-               'value': True}},
- 'rd': {'rd()': {'environmental': False,
-                 'is_assignment': False,
-                 'normal': True,
-                 'reading': 'rd',
-                 'relevant': False,
-                 'status': 'UNIVERSAL',
-                 'typ': 'Bool',
-                 'value': True}}}
+               'status': 'UNKNOWN',
+               'typ': 'Bool'}},
+ 's': {'s()': {'environmental': False,
+               'is_assignment': False,
+               'normal': True,
+               'reading': 's',
+               'relevant': True,
+               'status': 'UNKNOWN',
+               'typ': 'Bool'}}}

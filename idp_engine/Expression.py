@@ -460,7 +460,7 @@ class Expression(ASTNode):
                     ) -> Expression:
         return self  # monkey-patched
 
-    def simplify_with(self, assignments: Assignments) -> Expression:
+    def simplify_with(self, assignments: Assignments, co_constraints_too=True) -> Expression:
         return self  # monkey-patched
 
     def symbolic_propagate(self,

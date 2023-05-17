@@ -49,6 +49,8 @@ def _change(self, sub_exprs=None, ops=None, simpler=None,
     if simpler is not None:
         simpler.original = self.original
         simpler.is_type_constraint_for = self.is_type_constraint_for
+        if type(self) == AppliedSymbol:
+            simpler.in_head = self.in_head
         simpler.block = self.block if hasattr(self, "block") else None
         return simpler
 

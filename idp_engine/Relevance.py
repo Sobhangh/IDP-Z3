@@ -99,17 +99,12 @@ def determine_relevance(self: Theory) -> Theory:
         if constraint.is_type_constraint_for is None:
             constraints.append(constraint)
 
-    # also collect propagated assignments used for simplifications
-    for q in out.assignments.values():  # out => exclude numeric expressions
-        if q.value is not None:
-            constraints.append(q.sentence)  # issue #252, #277
-
     constraints = split_constraints(constraints)
 
     # determine the starting set of relevant questions, and initialize the ending set
     # start with goal_symbol
     to_add, _relevant = OrderedSet(), OrderedSet()  # set of questions and constraints
-    for constraint in self.constraints:  # not simplified !
+    for constraint in self.constraints:  # not simplified
         if (type(constraint) == AppliedSymbol
            and constraint.decl.name == RELEVANT):
             to_add.extend(constraint.sub_exprs)  # all instances of the goal symbol
@@ -118,10 +113,15 @@ def determine_relevance(self: Theory) -> Theory:
     if len(to_add) == 0:
         to_add = constraints
 
+    # need to add the propagated assignments used for simplifications
+    for q in out.assignments.values():  # out => exclude numeric expressions
+        if q.value is not None:
+            to_add.append(q.sentence)  # issue #252, #277
+
     # still nothing relevant --> make every question in def_constraints relevant
     if len(to_add) == 0:
         for def_constraints in out.def_constraints.values():
-            for def_constraint in def_constraints:
+            for def_constraint in def_constraints:  #TODO simplify ?
                 def_constraint.questions = OrderedSet()
                 def_constraint.collect(def_constraint.questions,
                                     all_=True, co_constraints=True)
@@ -143,15 +143,19 @@ def determine_relevance(self: Theory) -> Theory:
                 for constraint in constraints:
                     if constraint.questions is None:
                         constraint.questions = OrderedSet()
-                        constraint.collect(constraint.questions, all_=True, co_constraints=False)
+                        constraint.collect(constraint.questions,
+                                        all_=True, co_constraints=False)
                     if q in constraint.questions:
                         next.extend(constraint.questions)
 
                 # append questions in co_constraints to next too
-                co_constraints = OrderedSet()
-                q.collect_co_constraints(co_constraints, recursive=False)
-                for constraint in co_constraints:
-                    next.append(constraint)
+                if type(q) == AppliedSymbol:
+                    inst = [defin.instantiate_definition(q.decl, q.sub_exprs, self)
+                            for defin in self.definitions]
+                    inst = [x.simplify_with(out.assignments, co_constraints_too=False)
+                            for x in inst if x]
+                    if inst:
+                        next.extend(inst)
 
             to_add = OrderedSet(e for e in next if e not in _relevant)
 

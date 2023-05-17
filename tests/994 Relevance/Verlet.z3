@@ -20,4 +20,3 @@ persoon() = zelf
 Not gebeurtenis() = overlijden
 Not persoon() in {echtgenoot, samenwonende_partner, feitelijk_samenwonende_partner, kind}
 Not gebeurtenis() = familieraad
-∃ x ∈ Clause: van_toepassing(x)

@@ -33,7 +33,7 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, An
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
-                         EQUALS, NOT, Extension)
+                         EQUALS, NOT, Extension, AQuantification)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SYMBOL,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
@@ -901,10 +901,11 @@ class Theory(object):
         out = self.copy()
 
         if except_numeric:
-            # do not simplify numeric comparisons away (#252, #277)
+            # do not simplify numeric comparisons nor quantification away (#252, #277)
             for ass in out.assignments.values():
-                if (ass.value and type(ass.sentence) == AComparison
-                and ass.sentence.sub_exprs[0].type in [INT, REAL, DATE]):
+                if ((ass.value and type(ass.sentence) == AComparison
+                    and ass.sentence.sub_exprs[0].type in [INT, REAL, DATE])
+                or (ass.value and type(ass.sentence) == AQuantification)):
                     ass.status = S.UNKNOWN
                     ass.value = None
 
