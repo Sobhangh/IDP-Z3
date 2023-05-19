@@ -259,7 +259,6 @@ class Expression(ASTNode):
         if parent:
             self.parent = parent
         self.sub_exprs: List[Expression]
-        self.value: Optional[Expression] = None
 
         self.code: str = intern(str(self))
         if not hasattr(self, 'annotations') or self.annotations == None:

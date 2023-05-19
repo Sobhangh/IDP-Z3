@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
-* MR !312: refactor `simplify.py`
+* MR !312, !315: refactor `simplify.py`
 * fix #277: Incorrect relevance for theories with numeric comparison
 *
 
