@@ -109,15 +109,6 @@ AIfExpr.update_exprs = update_exprs
 
 # Class Quantee  #######################################################
 
-def update_exprs(self, new_exprs):
-    if not self.decl and self.sub_exprs:
-        symbol = self.sub_exprs[0].value
-        if symbol:
-            self.decl = symbol.decl
-            self.sub_exprs[0].decl = self.decl
-    return self
-Quantee.update_exprs = update_exprs
-
 
 # Class AQuantification  ######################################################
 
@@ -359,7 +350,7 @@ def update_exprs(self, new_exprs):
 
     # simplify abs()
     if (self.decl and self.decl.name == ABS and len(new_exprs) == 1
-        and new_exprs[0].value):
+        and new_exprs[0].is_value()):
         return Number(number=str(abs(new_exprs[0].py_value)))
 
     # simplify x(pos(0,0)) to 0,  is_pos(pos(0,0)) to True
