@@ -109,7 +109,6 @@ def determine_relevance(self: Theory) -> Theory:
     # also add the propagated assignments used for simplifications  #252, #277
     constraints.extend(q.sentence for q in out.assignments.values()  # out => exclude numeric expressions
                        if q.value is not None)
-    # (note: an assignment may have a (non-simplified) co_constraint)
 
     # determine the set of relevant questions in constraints
     _relevant = copy(constraints)  # a set of questions and constraints
@@ -139,6 +138,7 @@ def determine_relevance(self: Theory) -> Theory:
             # append questions in simplified co_constraints to to_add too
             if type(q) == AppliedSymbol:
                 inst = ([q.co_constraint] if q.co_constraint else
+                        # out.assignments may not have a co-constraint even when it should
                         [defin.instantiate_definition(q.decl, q.sub_exprs, self)
                             for defin in self.definitions])
                 inst = [x.simplify_with(out.assignments, co_constraints_too=False)
