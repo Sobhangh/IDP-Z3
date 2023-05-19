@@ -87,6 +87,13 @@ def determine_relevance(self: Theory) -> Theory:
     assert self.extended == True,\
         "The theory must be created with 'extended=True' for relevance computations."
 
+    # determine goals
+    goals = OrderedSet()
+    for constraint in self.constraints:  # not simplified
+        if (type(constraint) == AppliedSymbol
+           and constraint.decl.name == RELEVANT):
+            goals.extend(constraint.sub_exprs)  # all instances of the goal symbol
+
     out = self.simplify(except_numeric=True)  # creates a copy
 
     # set given information to relevant
@@ -105,13 +112,25 @@ def determine_relevance(self: Theory) -> Theory:
     # determine the starting set of relevant questions, and initialize the ending set
     # start with goal_symbol
     to_add, _relevant = OrderedSet(), OrderedSet()  # set of questions and constraints
-    for constraint in self.constraints:  # not simplified
-        if (type(constraint) == AppliedSymbol
-           and constraint.decl.name == RELEVANT):
-            to_add.extend(constraint.sub_exprs)  # all instances of the goal symbol
 
-    # no goal_symbol --> make every simplified constraint relevant
-    if len(to_add) == 0:
+    if goals:
+        to_add = goals
+
+        # append constraints (indirectly) related to q (for goal_symbol)
+        done = False
+        while not done:
+            done = True
+            for constraint in constraints:
+                if constraint.questions is None:
+                    constraint.questions = OrderedSet()
+                    constraint.collect(constraint.questions,
+                                    all_=True, co_constraints=False)
+                if any(q in to_add for q in constraint.questions):  # if constraint is related
+                    for q in constraint.questions:
+                        if q not in to_add:
+                            to_add.extend(constraint.questions)
+                            done = False
+    else:
         to_add = copy(constraints)
 
     # need to add the propagated assignments used for simplifications
@@ -140,15 +159,6 @@ def determine_relevance(self: Theory) -> Theory:
 
                 # append questions in q to next
                 q.collect(next, all_=True, co_constraints=False)
-
-                # append constraints related to q (for goal_symbol)
-                for constraint in constraints:
-                    if constraint.questions is None:
-                        constraint.questions = OrderedSet()
-                        constraint.collect(constraint.questions,
-                                        all_=True, co_constraints=False)
-                    if q in constraint.questions:
-                        next.extend(constraint.questions)
 
                 # append questions in co_constraints to next too
                 if type(q) == AppliedSymbol:
