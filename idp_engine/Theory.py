@@ -891,16 +891,16 @@ class Theory(object):
         else:
             return [], []
 
-    def simplify(self, except_numeric=False) -> Theory:
+    def simplify(self, for_relevance=False) -> Theory:
         """ Returns a simpler copy of the theory, with a simplified formula
         obtained by substituting terms and atoms by their known values.
 
         Args:
-            except_numeric: If true, numeric comparisons with known values are ignored.
+            for_relevance: If true, numeric comparisons with known values are ignored.
         """
         out = self.copy()
 
-        if except_numeric:
+        if for_relevance:
             # do not simplify numeric comparisons nor quantification away (#252, #277)
             for ass in out.assignments.values():
                 if (ass.value
@@ -915,7 +915,7 @@ class Theory(object):
         for constraint in out.constraints:
             if constraint.code not in self.ignored_laws:
                 new_constraint = constraint.simplify_with(out.assignments,
-                                co_constraints_too=not except_numeric)
+                                co_constraints_too=not for_relevance)
                 new_constraints.append(new_constraint)
         out.constraints = new_constraints
         out._formula, out._constraintz = None, None

@@ -1,0 +1,18 @@
+vocabulary V {
+    type nat := {1..3}
+    f: nat -> Int
+    double: Int -> Int
+    p: () -> Bool
+}
+
+theory T:V {
+    { ! x in nat: f(x) = (if p() then double(x) else x).
+      ! x in Int: double(x) = if p() then 2*x else 3*x. }
+}
+
+structure default:V {
+}
+
+procedure main() {
+    pretty_print(determine_relevance(Theory(T, default)))
+}
