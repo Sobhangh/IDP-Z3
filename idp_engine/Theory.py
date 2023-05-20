@@ -911,7 +911,8 @@ class Theory(object):
 
                     questions = OrderedSet()
                     ass.sentence.collect(questions, all_=True, co_constraints=False)
-                    if 1 < len(ass.symbols) or 1 < len(questions): # more than 1 symbol or 1 question
+                    if (1 < len(ass.symbols)  # more than 1 symbol or 1 question
+                    or 1 < len([q for q in questions.values() if type(q)==AppliedSymbol])):
                         ass.status = S.UNKNOWN
                         ass.value = None
 
