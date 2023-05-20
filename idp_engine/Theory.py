@@ -901,15 +901,19 @@ class Theory(object):
         out = self.copy()
 
         if for_relevance:
-            # do not simplify numeric comparisons nor quantification away (#252, #277)
+            # do not simplify complex numeric comparisons nor quantification away (#252, #277)
             for ass in out.assignments.values():
                 if (ass.value
                 and (( type(ass.sentence) == AComparison
                        and (any(e.type in [INT, REAL, DATE] for e in ass.sentence.sub_exprs)
                             or any(op in '<>≤≥' for op in ass.sentence.operator)))
                     or type(ass.sentence) == AQuantification)):
-                    ass.status = S.UNKNOWN
-                    ass.value = None
+
+                    questions = OrderedSet()
+                    ass.sentence.collect(questions, all_=True, co_constraints=False)
+                    if 1 < len(ass.symbols) or 1 < len(questions): # more than 1 symbol or 1 question
+                        ass.status = S.UNKNOWN
+                        ass.value = None
 
         new_constraints: List[Expression] = []
         for constraint in out.constraints:
