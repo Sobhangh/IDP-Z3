@@ -288,10 +288,8 @@ class Expression(ASTNode):
         out = copy(self)
         out.sub_exprs = [deepcopy(e, memo) for e in out.sub_exprs]
         out.variables = deepcopy(out.variables, memo)
-        out.co_constraint = (None if out.co_constraint is None
-                             else deepcopy(out.co_constraint, memo))
-        if hasattr(self, 'questions'):
-            out.questions = deepcopy(self.questions, memo)
+        out.co_constraint = deepcopy(out.co_constraint, memo)
+        out.questions = deepcopy(self.questions, memo)
         memo[key] = out
         return out
 
