@@ -545,7 +545,6 @@ class Symbol(Expression):
         self.decl = None
         super().__init__()
         self.variables = set()
-        self.value = self
 
     def __str__(self):
         return self.name
@@ -1317,7 +1316,6 @@ class UnappliedSymbol(Expression):
         self.is_enumerated = None
         self.is_enumeration = None
         self.in_enumeration = None
-        self.value = self
 
     @classmethod
     def construct(cls, constructor: Constructor):
@@ -1387,7 +1385,6 @@ class Number(Expression):
 
         self.sub_exprs = []
         self.variables = set()
-        self.value = self
 
         ops = self.number.split("/")
         if len(ops) == 2:  # possible with str_to_IDP on Z3 value
@@ -1435,7 +1432,6 @@ class Date(Expression):
 
         self.sub_exprs = []
         self.variables = set()
-        self.value = self
 
         self.py_value = int(self.date.toordinal())
         self.type = DATE
