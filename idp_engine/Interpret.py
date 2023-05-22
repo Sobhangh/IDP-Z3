@@ -163,8 +163,10 @@ def interpret(self, problem):
             # ! (x,y) in domain: range(f(x,y))
             range_condition = self.out.has_element(deepcopy(expr),
                                 problem.interpretations, problem.extensions)
+            if range_condition.same_as(TRUE):
+                break
             range_condition = range_condition.interpret(problem)
-            constraint = IMPLIES([filter(expr.sub_exprs), range_condition])
+            constraint = IMPLIES([filter(expr.sub_exprs), range_condition]).simplify1()
             constraint.block = self.block
             constraint.is_type_constraint_for = self.name
             constraint.annotations['reading'] = f"Possible values for {expr}"
