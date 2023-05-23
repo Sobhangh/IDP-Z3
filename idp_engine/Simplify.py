@@ -49,6 +49,8 @@ def _change(self, sub_exprs=None, ops=None, simpler=None,
     if simpler is not None:
         simpler.original = self.original
         simpler.is_type_constraint_for = self.is_type_constraint_for
+        if type(self) == AppliedSymbol:
+            simpler.in_head = self.in_head
         simpler.block = self.block if hasattr(self, "block") else None
         return simpler
 
@@ -106,15 +108,6 @@ AIfExpr.update_exprs = update_exprs
 
 
 # Class Quantee  #######################################################
-
-def update_exprs(self, new_exprs):
-    if not self.decl and self.sub_exprs:
-        symbol = self.sub_exprs[0].value
-        if symbol:
-            self.decl = symbol.decl
-            self.sub_exprs[0].decl = self.decl
-    return self
-Quantee.update_exprs = update_exprs
 
 
 # Class AQuantification  ######################################################
@@ -227,24 +220,21 @@ def update_exprs(self, new_exprs):
             new = IF(operands[0].sub_exprs[0], then, else_).simplify1()
             return self._change(simpler=new, sub_exprs=operands)
 
-    operands1 = [e.value for e in operands]
-    acc, acc1 = operands[0], operands1[0]
-    assert len(self.operator) == len(operands1[1:]), "Internal error"
-    for op, expr, expr1 in zip(self.operator, operands[1:], operands1[1:]):
-        if acc1 is not None and expr1 is not None:
-            if op in ["<", ">"]:
-                if acc1.same_as(expr1):
-                    return FALSE
-            if op == "=":
-                if not acc1.same_as(expr1):
-                    return FALSE
-            if op == "≠":  # issue #246
-                if acc1.same_as(expr1):
-                    return FALSE
-            elif not (Operator.MAP[op]) (acc1.py_value, expr1.py_value):
+    acc = operands[0]
+    assert len(self.operator) == len(operands[1:]), "Internal error"
+    for op, expr in zip(self.operator, operands[1:]):
+        if acc.is_value() and expr.is_value():
+            if op in ["<", ">"] and acc.same_as(expr):
                 return FALSE
-        acc, acc1 = expr, expr1
-    if all(e is not None for e in operands1):
+            if op == "=" and not acc.same_as(expr):
+                return FALSE
+            if op == "≠":  # issue #246
+                if acc.same_as(expr):
+                    return FALSE
+            elif not (Operator.MAP[op]) (acc.py_value, expr.py_value):
+                return FALSE
+        acc = expr
+    if all(e.is_value() for e in operands):
         return TRUE
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
@@ -259,14 +249,13 @@ AComparison.as_set_condition = as_set_condition
 
 def update_arith(self, family, operands):
     operands = list(operands)
-    operands1 = [e.value for e in operands]
-    if all(e is not None for e in operands1):
-        self.check(all(hasattr(e, 'py_value') for e in operands1),
+    if all(e.is_value() for e in operands):
+        self.check(all(hasattr(e, 'py_value') for e in operands),
                 f"Incorrect numeric type in {self}")
-        out = operands1[0].py_value
+        out = operands[0].py_value
 
-        assert len(self.operator) == len(operands1[1:]), "Internal error"
-        for op, e in zip(self.operator, operands1[1:]):
+        assert len(self.operator) == len(operands[1:]), "Internal error"
+        for op, e in zip(self.operator, operands[1:]):
             function = Operator.MAP[op]
 
             if op == '/' and self.type == INT:  # integer division
@@ -291,10 +280,8 @@ ASumMinus.update_exprs = update_exprs
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
     if any(op == '%' for op in self.operator):  # special case !
-        operands1 = [e.value for e in operands]
-        if len(operands) == 2 \
-           and all(e is not None for e in operands1):
-            out = operands1[0].py_value % operands1[1].py_value
+        if len(operands) == 2 and all(e.is_value() for e in operands):
+            out = operands[0].py_value % operands[1].py_value
             return Number(number=str(out))
         else:
             return self._change(sub_exprs=operands)
@@ -306,10 +293,9 @@ AMultDiv.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
-    operands1 = [e.value for e in operands]
     if len(operands) == 2 \
-       and all(e is not None for e in operands1):
-        out = operands1[0].py_value ** operands1[1].py_value
+       and all(e.is_value() for e in operands):
+        out = operands[0].py_value ** operands[1].py_value
         return Number(number=str(out))
     else:
         return self._change(sub_exprs=operands)
@@ -326,10 +312,8 @@ def update_exprs(self, new_exprs):
         if operand.same_as(FALSE):
             return TRUE
     else:  # '-'
-        a = operand.value
-        if a is not None:
-            if type(a) == Number:
-                return Number(number=f"{-a.py_value}")
+        if operand.is_value() and type(operand) == Number:
+            return Number(number=f"{-operand.py_value}")
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
@@ -345,9 +329,8 @@ AUnary.as_set_condition = as_set_condition
 def update_exprs(self, new_exprs):
     operands = list(new_exprs)
     if self.annotated and not self.quantees:
-        operands1 = [e.value for e in operands]
-        if all(e is not None for e in operands1):
-            out = sum(e.py_value for e in operands1)
+        if all(e.is_value() for e in operands):
+            out = sum(e.py_value for e in operands)
             return Number(number=str(out))
     return self._change(sub_exprs=operands)
 AAggregate.update_exprs = update_exprs
@@ -357,19 +340,17 @@ AAggregate.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs):
     new_exprs = list(new_exprs)
-    if not self.decl:
-        symbol = self.symbol.value
-        if symbol:
-            self.decl = symbol.decl
+    if not self.decl and type(self.symbol) == Symbol:
+        self.decl = self.symbol.decl
     self.type = (BOOL if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
     if self.decl and type(self.decl) == Constructor:
-        if all(e.value is not None for e in new_exprs):
+        if all(e.is_value() for e in new_exprs):
             return self._change(sub_exprs=new_exprs)
 
     # simplify abs()
     if (self.decl and self.decl.name == ABS and len(new_exprs) == 1
-        and new_exprs[0].value):
+        and new_exprs[0].is_value()):
         return Number(number=str(abs(new_exprs[0].py_value)))
 
     # simplify x(pos(0,0)) to 0,  is_pos(pos(0,0)) to True
