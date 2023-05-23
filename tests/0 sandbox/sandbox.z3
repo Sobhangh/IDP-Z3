@@ -59,7 +59,7 @@ display {
                                                'is_assignment': False,
                                                'normal': False,
                                                'reading': 'opposite(Color) is enumerated',
-                                               'relevant': True,
+                                               'relevant': False,
                                                'status': 'UNIVERSAL',
                                                'typ': 'Bool',
                                                'value': True}},

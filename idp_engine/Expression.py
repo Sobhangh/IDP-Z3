@@ -288,10 +288,8 @@ class Expression(ASTNode):
         out = copy(self)
         out.sub_exprs = [deepcopy(e, memo) for e in out.sub_exprs]
         out.variables = deepcopy(out.variables, memo)
-        out.co_constraint = (None if out.co_constraint is None
-                             else deepcopy(out.co_constraint, memo))
-        if hasattr(self, 'questions'):
-            out.questions = deepcopy(self.questions, memo)
+        out.co_constraint = deepcopy(out.co_constraint, memo)
+        out.questions = deepcopy(self.questions, memo)
         memo[key] = out
         return out
 
@@ -373,15 +371,19 @@ class Expression(ASTNode):
         for e in self.sub_exprs:
             e.generate_constructors(constructors)
 
-    def co_constraints(self, co_constraints: OrderedSet):
+    def collect_co_constraints(self, co_constraints: OrderedSet, recursive=True):
         """ collects the constraints attached to AST nodes, e.g. instantiated
         definitions
+
+        Args:
+            recursive: if True, collect co_constraints of co_constraints too
         """
         if self.co_constraint is not None and self.co_constraint not in co_constraints:
             co_constraints.append(self.co_constraint)
-            self.co_constraint.co_constraints(co_constraints)
+            if recursive:
+                self.co_constraint.collect_co_constraints(co_constraints, recursive)
         for e in self.sub_exprs:
-            e.co_constraints(co_constraints)
+            e.collect_co_constraints(co_constraints, recursive)
 
     def is_value(self) -> bool:
         """True for numerals, date, identifiers,
@@ -456,7 +458,7 @@ class Expression(ASTNode):
                     ) -> Expression:
         return self  # monkey-patched
 
-    def simplify_with(self, assignments: Assignments) -> Expression:
+    def simplify_with(self, assignments: Assignments, co_constraints_too=True) -> Expression:
         return self  # monkey-patched
 
     def symbolic_propagate(self,

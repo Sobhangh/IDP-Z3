@@ -1,0 +1,16 @@
+vocabulary {
+    type nat := {1..3}
+    p, q, r : nat → 𝔹
+    c: () -> Int
+}
+
+theory {
+    { !x in nat: p(x) <- q(x) | r(x). }
+    p(c()).
+}
+structure default {
+}
+
+display {
+    goal_symbol := {`c}.
+}

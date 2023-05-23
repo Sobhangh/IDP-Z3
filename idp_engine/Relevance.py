@@ -19,6 +19,7 @@
 This module contains the logic for the computation of relevance.
 """
 from __future__ import annotations
+from copy import copy
 
 from .Assignments import Status as S
 from .Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
@@ -63,113 +64,94 @@ def split_constraints(constraints: OrderedSet) -> OrderedSet:
 
 
 def determine_relevance(self: Theory) -> Theory:
-    """Determines the questions that are relevant in a model,
-    or that can appear in a justification of a ``goal_symbol``.
+    """Determines the questions that are relevant in a consistent state of Theory ``self``.
 
-    When an *irrelevant* value is changed in a model M of the theory,
-    the resulting M' structure is still a model.
-    Relevant questions are those that are not irrelevant.
+    Some definitions:
+    * a consistent state s of theory T is a partial interpretation of vocabulary V of T that can be expanded in a model of T;
+    * a solution S of theory T is a state such that every expansion of solution S is a model of theory T;
+    * a minimal solution for theory T in state s is a solution that expands state s and is not more precise than another solution of theory T;
+    * a symbol is relevant for theory T in state s iff it is interpreted in a minimal solution for theory T in state s.
 
-    Call must be made after a propagation, on a Theory created with ``extended=True``.
+    This method must be called after a call to ``propagate``, on a Theory created with ``extended=True``.
+    The method 1) computes a simplified theory equivalent to ``self``,
+    2) collects the relevant questions in that theory. A question is considered relevant if:
+    * it appears in a constraint;
+    * or it is a goal symbol;
+    * or it appears in a co_constraint for a relevant question.
+
     The result is found in the ``relevant`` attribute of the assignments in ``self.assignments``.
-
-    If ``goal_symbol`` has an enumeration in the theory
-    (e.g., ``goal_symbol := {`tax_amount}.``),
-    relevance is computed relative to those goals.
-
-    Definitions in the theory are ignored,
-    unless they influence axioms in the theory or goals in ``goal_symbol``.
 
     Returns:
         Theory: the Theory with relevant information in ``self.assignments``.
     """
+
     assert self.extended == True,\
         "The theory must be created with 'extended=True' for relevance computations."
 
-    for a in self.assignments.values():
-        a.relevant = False
-
-    out = self.simplify(except_numeric=True)  # creates a copy
-
     # set given information to relevant
-    constraints = OrderedSet()
-    given = OrderedSet()
     for q in self.assignments.values():
-        q.relevant = False
-        if q.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]:
-            q.relevant = True  # given are relevant
-            if not q.sentence.has_decision():
-                given.append(q.sentence)
+        q.relevant = (q.status in [S.GIVEN, S.DEFAULT, S.EXPANDED])
 
-    # reconsider the non-numeric questions used for simplifications
-    for q in out.assignments.values():  # out => non-numeric
-        if q.value is not None:
-            constraints.append(q.sentence)  # issue #252, #277
-
-    # collect (co-)constraints
-    for constraint in out.constraints:
-        if constraint.code not in self.ignored_laws:
-            constraints.append(constraint)
-            constraint.co_constraints(constraints)
-    constraints = split_constraints(constraints)
-    # constraints have set of questions in out.assignments
-    # set constraint.relevant, constraint.questions
-    # initialize reachable with relevant, if any
-    reachable = OrderedSet()
-    for constraint in constraints:
-        constraint.relevant = False
-        constraint.questions = OrderedSet()
-        constraint.collect(constraint.questions,
-                           all_=True, co_constraints=False)
-
+    # determine goals
+    goals = OrderedSet()
+    for constraint in self.constraints:  # not simplified
         if (type(constraint) == AppliedSymbol
            and constraint.decl.name == RELEVANT):
-            reachable.append(constraint.sub_exprs[0])
+            goals.extend(constraint.sub_exprs)  # all instances of the goal symbol
 
-    # nothing relevant --> make every question in a simplified constraint relevant
-    if len(reachable) == 0:
-        for constraint in constraints:
-            if constraint.is_type_constraint_for is None:
-                reachable.append(constraint)
-                for q in constraint.questions:
-                    reachable.append(q)
+    # simplify for relevance (do not simplify co_constraints, exclude numeric expressions)
+    out = self.simplify(for_relevance=True)  # creates a copy
 
-    # still nothing relevant --> make every question in def_constraints relevant
-    if len(reachable) == 0:
+    # collect constraints in the simplified theory (except type constraints)
+    constraints = OrderedSet(c for c in out.constraints
+                             if c.is_type_constraint_for is None)
+    constraints = split_constraints(constraints)
+    # also add the propagated assignments used for simplifications  #252, #277
+    constraints.extend(q.sentence for q in out.assignments.values()  # out => exclude numeric expressions
+                       if q.value is not None)
+
+    # determine the set of relevant questions in constraints
+    _relevant = copy(constraints)  # a set of questions and constraints
+    _relevant.extend(goals)
+
+    # no constraints nor goal --> make every question in simplified def_constraints relevant
+    if (all(e.is_type_constraint_for is not None for e in self.constraints)
+    and not goals):
         for def_constraints in out.def_constraints.values():
             for def_constraint in def_constraints:
-                def_constraint.questions = OrderedSet()
-                def_constraint.collect(def_constraint.questions,
-                                    all_=True, co_constraints=True)
-                for q in def_constraint.questions:
-                    reachable.append(q)
+                q = def_constraint.simplify_with(out.assignments, co_constraints_too=False)
+                questions = OrderedSet()
+                q.collect(questions, all_=True, co_constraints=False)
+                for q in questions:
+                    _relevant.append(q)
 
-    # find relevant symbols by breadth-first propagation
-    # input: reachable, given, constraints
-    # output: out.assignments[].relevant, constraints[].relevant, relevants[].rank
-    to_add, rank = reachable, 1
-    while to_add:
-        for q in to_add:
-            if (q.code in self.assignments
-                and not self.assignments[q.code].is_certainly_undefined):
-                self.assignments[q.code].relevant = True
-            # for s in q.collect_symbols(co_constraints=False):
-            #     if s not in relevants:
-            #         relevants[s] = rank
-            if q not in given:
-                reachable.append(q)
+    # find questions in co_constraints
+    to_do = _relevant  # a set of questions and constraints to process
+    while to_do:
+        to_add = OrderedSet()
+        for q in to_do:
+            _relevant.append(q)
 
-        to_add, rank = OrderedSet(), 2  # or rank+1
-        for constraint in constraints:
-            # consider constraint not yet considered
-            if (not constraint.relevant
-                # and with a question that is reachable but not given
-                and any(q in reachable and q not in given
-                        for q in constraint.questions)):
-                constraint.relevant = True
-                to_add.extend([q for q in constraint.questions
-                               if q not in reachable])
+            # append questions in q to to_add
+            q.collect(to_add, all_=True, co_constraints=False)
 
+            # append questions in simplified co_constraints to to_add too
+            if type(q) == AppliedSymbol:
+                inst = ([q.co_constraint] if q.co_constraint else
+                        # out.assignments may not have a co-constraint even when it should
+                        [defin.instantiate_definition(q.decl, q.sub_exprs, self)
+                            for defin in self.definitions])
+                inst = [x.simplify_with(out.assignments, co_constraints_too=False)
+                        for x in inst if x]
+                to_add.extend(inst)
+
+        to_do = OrderedSet(e for e in to_add if e not in _relevant)
+
+    for q in _relevant:
+        ass = self.assignments.get(q.code, None)
+        if (ass and not ass.is_certainly_undefined
+        and ass.status != S.UNIVERSAL):  #TODO
+            ass.relevant = True
     return self
 Theory.determine_relevance = determine_relevance
 

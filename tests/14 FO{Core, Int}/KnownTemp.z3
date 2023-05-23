@@ -144,7 +144,7 @@ display {
                                          'is_assignment': False,
                                          'normal': False,
                                          'reading': 'T must be within acceptable range',
-                                         'relevant': True,
+                                         'relevant': False,
                                          'status': 'UNIVERSAL',
                                          'typ': 'Bool',
                                          'value': True},

@@ -1,0 +1,13 @@
+vocabulary V {
+    p, q, r: () -> Bool
+}
+
+theory T:V {
+}
+
+structure default:V {
+}
+
+display {
+    goal_symbol := {`p}.
+}

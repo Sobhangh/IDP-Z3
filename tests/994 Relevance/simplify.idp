@@ -1,0 +1,15 @@
+vocabulary V {
+    p, q, r: () -> Bool
+}
+
+theory T:V {
+    p() | q().
+}
+
+structure default:V {
+    p := true.
+}
+
+procedure main() {
+    pretty_print(determine_relevance(Theory(T, default)))
+}

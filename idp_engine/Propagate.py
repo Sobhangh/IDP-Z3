@@ -57,13 +57,13 @@ def _not(truth):
 
 # class Expression ############################################################
 
-def simplify_with(self: Expression, assignments: "Assignments") -> Expression:
+def simplify_with(self: Expression, assignments: Assignments, co_constraints_too=True) -> Expression:
     """ simplify the expression using the assignments """
-    value, simpler, new_e, co_constraint = None, None, None, None
-    if self.co_constraint is not None:
-        co_constraint = self.co_constraint.simplify_with(assignments)
-    new_e = [e.simplify_with(assignments) for e in self.sub_exprs]
-    self = self._change(sub_exprs=new_e, simpler=simpler, co_constraint=co_constraint)
+    simpler, new_e, co_constraint = None, None, None
+    if co_constraints_too and self.co_constraint is not None:
+        co_constraint = self.co_constraint.simplify_with(assignments, co_constraints_too)
+    new_e = [e.simplify_with(assignments, co_constraints_too) for e in self.sub_exprs]
+    self = copy(self)._change(sub_exprs=new_e, simpler=simpler, co_constraint=co_constraint)
     # calculate ass.value on the changed expression, as simplified sub
     # expressions may lead to stronger simplifications
     # E.g., P(C()) where P := {0} and C := 0.

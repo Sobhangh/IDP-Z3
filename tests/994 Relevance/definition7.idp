@@ -1,0 +1,14 @@
+vocabulary {
+    p, q, r : () → 𝔹
+}
+
+theory {
+    { p() <- r().
+      q() <- r(). }
+}
+structure default {
+}
+
+display {
+    goal_symbol := {`p}.
+}

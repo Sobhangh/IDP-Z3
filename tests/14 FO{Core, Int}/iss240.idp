@@ -6,3 +6,5 @@ vocabulary V{
 theory T: V{
     !x in Person, y in Int: Sentence(x)=y => Prisoner(x).
 }
+
+// Relevance: for the implication to be true for any y, Prisoner(x) must be true, and Sentence is irrelevant.

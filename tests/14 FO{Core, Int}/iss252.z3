@@ -55,7 +55,7 @@ display {
                'is_assignment': False,
                'normal': True,
                'reading': 'p',
-               'relevant': True,
+               'relevant': False,
                'status': 'UNIVERSAL',
                'typ': 'Bool',
                'value': True}},
@@ -106,7 +106,7 @@ display {
                                                 'is_assignment': False,
                                                 'normal': False,
                                                 'reading': 'val = 2 + (if q then 1 else 0)',
-                                                'relevant': True,
+                                                'relevant': False,
                                                 'status': 'UNIVERSAL',
                                                 'typ': 'Bool',
                                                 'value': True}}}

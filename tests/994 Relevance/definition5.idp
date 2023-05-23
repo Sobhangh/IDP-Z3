@@ -1,0 +1,12 @@
+vocabulary {
+    p, q, r : () → 𝔹
+}
+
+theory {
+    { p() <- q() | r(). }
+}
+structure default {
+    r := true.
+}
+
+display {}

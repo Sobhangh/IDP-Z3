@@ -34,7 +34,7 @@ display { view() = expanded. }
                     'is_assignment': False,
                     'normal': False,
                     'reading': 'f(1) ≥ 2',
-                    'relevant': True,
+                    'relevant': False,
                     'status': 'UNIVERSAL',
                     'typ': 'Bool',
                     'value': True}}}

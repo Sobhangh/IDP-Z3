@@ -1,0 +1,16 @@
+vocabulary V {
+    p, q : () → 𝔹
+    c: () -> Int
+}
+
+theory T:V {
+    c()>3 => p() or q().
+    c()<2.
+}
+
+structure S:V {
+
+}
+display {
+    view() = expanded.
+}

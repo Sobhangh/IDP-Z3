@@ -204,7 +204,7 @@ structure {
                                                 'is_assignment': False,
                                                 'normal': False,
                                                 'reading': 'Total_Calories < 3000',
-                                                'relevant': True,
+                                                'relevant': False,
                                                 'status': 'UNIVERSAL',
                                                 'typ': 'Bool',
                                                 'value': True},
@@ -221,7 +221,7 @@ structure {
                                                                                                                 'Number(Item) '
                                                                                                                 '⨯ '
                                                                                                                 'Calories(Item))',
-                                                                                                     'relevant': True,
+                                                                                                     'relevant': False,
                                                                                                      'status': 'UNIVERSAL',
                                                                                                      'typ': 'Bool',
                                                                                                      'value': True}},
@@ -240,7 +240,7 @@ structure {
                                                                                                     'Item_t : '
                                                                                                     'Number(Item) ⨯ '
                                                                                                     'Cost(Item))',
-                                                                                         'relevant': True,
+                                                                                         'relevant': False,
                                                                                          'status': 'UNIVERSAL',
                                                                                          'typ': 'Bool',
                                                                                          'value': True}},
@@ -255,7 +255,7 @@ structure {
                                      'is_assignment': False,
                                      'normal': False,
                                      'reading': 'Total_Fat < 150',
-                                     'relevant': True,
+                                     'relevant': False,
                                      'status': 'UNIVERSAL',
                                      'typ': 'Bool',
                                      'value': True},
@@ -267,7 +267,7 @@ structure {
                                                                                                  'Item_t : '
                                                                                                  'Number(Item) ⨯ '
                                                                                                  'Fat(Item))',
-                                                                                      'relevant': True,
+                                                                                      'relevant': False,
                                                                                       'status': 'UNIVERSAL',
                                                                                       'typ': 'Bool',
                                                                                       'value': True}},
@@ -282,7 +282,7 @@ structure {
                                             'is_assignment': False,
                                             'normal': False,
                                             'reading': 'Total_Sodium < 3000',
-                                            'relevant': True,
+                                            'relevant': False,
                                             'status': 'UNIVERSAL',
                                             'typ': 'Bool',
                                             'value': True},
@@ -297,7 +297,7 @@ structure {
                                                                                                           'Number(Item) '
                                                                                                           '⨯ '
                                                                                                           'Sodium(Item))',
-                                                                                               'relevant': True,
+                                                                                               'relevant': False,
                                                                                                'status': 'UNIVERSAL',
                                                                                                'typ': 'Bool',
                                                                                                'value': True}}}

@@ -1,0 +1,15 @@
+vocabulary V {
+    p, q, r, s: () -> Bool
+}
+
+theory T:V {
+    { p() <- q(). }
+    { r() <- s(). }
+}
+
+structure default:V {
+}
+
+display {
+    goal_symbol := {`p}.
+}

@@ -33,7 +33,7 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, An
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
-                         EQUALS, NOT, Extension)
+                         EQUALS, NOT, Extension, AQuantification)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SYMBOL,
                     TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
 from .Simplify import join_set_conditions
@@ -313,13 +313,13 @@ class Theory(object):
         self.constraints = OrderedSet([v.interpret(self)
                                        for v in self.constraints])
         for c in self.constraints:
-            c.co_constraints(self.co_constraints)
+            c.collect_co_constraints(self.co_constraints)
             # don't collect questions from type constraints
             if not c.is_type_constraint_for:
                 c.collect(questions, all_=False)
         for es in self.def_constraints.values():
             for e in es:
-                e.co_constraints(self.co_constraints)
+                e.collect_co_constraints(self.co_constraints)
         self.co_constraints = OrderedSet([c.interpret(self)
                                           for c in self.co_constraints])
 
@@ -891,27 +891,37 @@ class Theory(object):
         else:
             return [], []
 
-    def simplify(self, except_numeric=False) -> Theory:
+    def simplify(self, for_relevance=False) -> Theory:
         """ Returns a simpler copy of the theory, with a simplified formula
         obtained by substituting terms and atoms by their known values.
 
         Args:
-            except_numeric: If true, numeric comparisons with known values are ignored.
+            for_relevance: If true, numeric comparisons with known values are ignored.
         """
         out = self.copy()
 
-        if except_numeric:
-            # do not simplify numeric comparisons away (#252, #277)
+        if for_relevance:
+            # do not simplify complex numeric comparisons nor quantification away (#252, #277)
             for ass in out.assignments.values():
-                if (ass.value and type(ass.sentence) == AComparison
-                and ass.sentence.sub_exprs[0].type in [INT, REAL, DATE]):
-                    ass.status = S.UNKNOWN
-                    ass.value = None
+                if (ass.value
+                and (( type(ass.sentence) == AComparison
+                       and (any(e.type in [INT, REAL, DATE] for e in ass.sentence.sub_exprs)
+                            or any(op in '<>≤≥' for op in ass.sentence.operator)))
+                    or type(ass.sentence) == AQuantification)):
+
+                    questions = OrderedSet()
+                    ass.sentence.collect(questions, all_=True, co_constraints=False)
+                    if (1 < len(ass.symbols)  # more than 1 symbol or 1 question
+                    or 1 < len([q for q in questions.values() if type(q)==AppliedSymbol])):
+                        ass.status = S.UNKNOWN
+                        ass.value = None
 
         new_constraints: List[Expression] = []
         for constraint in out.constraints:
-            new_constraint = constraint.simplify_with(out.assignments)
-            new_constraints.append(new_constraint)
+            if constraint.code not in self.ignored_laws:
+                new_constraint = constraint.simplify_with(out.assignments,
+                                co_constraints_too=not for_relevance)
+                new_constraints.append(new_constraint)
         out.constraints = new_constraints
         out._formula, out._constraintz = None, None
         return out

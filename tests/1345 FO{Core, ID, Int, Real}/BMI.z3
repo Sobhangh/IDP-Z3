@@ -7,6 +7,13 @@ riskLevel() -> Low
 weight() -> 80.0
 No more consequences.
 
+length() -> 160
+? BMILevel()
+? sex()
+? BMILevel() = Severely_Underweight
+? sex() = Male
+? BMILevel() = Underweight
+? sex() = Female
 
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
 bmi() = bmi_ ⇔ bmi_ = weight() / 25600

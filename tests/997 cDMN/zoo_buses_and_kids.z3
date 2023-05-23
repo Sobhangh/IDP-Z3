@@ -142,7 +142,7 @@ structure {
                                    'is_assignment': True,
                                    'normal': True,
                                    'reading': 'Kids_amount',
-                                   'relevant': True,
+                                   'relevant': False,
                                    'status': 'UNIVERSAL',
                                    'typ': 'Int',
                                    'value': '300'},
@@ -159,7 +159,7 @@ structure {
                                                                          'normal': False,
                                                                          'reading': 'Kids_amount = sum(lambda Bus ∈ '
                                                                                     'Bus_t : Kids(Bus))',
-                                                                         'relevant': True,
+                                                                         'relevant': False,
                                                                          'status': 'UNIVERSAL',
                                                                          'typ': 'Bool',
                                                                          'value': True}},
@@ -180,7 +180,7 @@ structure {
                                                                                                       'Price(Big) + '
                                                                                                       'Amount(Small) ⨯ '
                                                                                                       'Price(Small)',
-                                                                                           'relevant': True,
+                                                                                           'relevant': False,
                                                                                            'status': 'UNIVERSAL',
                                                                                            'typ': 'Bool',
                                                                                            'value': True}}}
