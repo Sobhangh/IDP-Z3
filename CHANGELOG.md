@@ -10,6 +10,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * MR !312, !315: refactor `simplify.py`
+* MR !317: accelerate generation of type constraints
 * fix #277: Incorrect relevance for theories with numeric comparison
 * fix #279: Incorrect relevance for Registration
 
