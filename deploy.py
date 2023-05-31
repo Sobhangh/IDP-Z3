@@ -120,8 +120,8 @@ if update_statics:
         run("rm -rf ./dist")
 
         # publish new version of folint on Pypi
-        run("python3 setup.py sdist bdist_wheel", cwd="folint")
-        run("twine upload dist/*", cwd="folint")
+        run("python3.10 setup.py sdist bdist_wheel", cwd="folint")
+        run("poetry run python3.10 -m twine upload dist/*", cwd="folint")
 
     # if input("Deploy on Heroku ?") in "Yy":
     #     run("git push heroku main")
