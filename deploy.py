@@ -5,12 +5,13 @@ ready.
 It does the following things:
     * add a tag in git;
     * update version in pyproject.toml;
-    * deploy idp-engine module to pypi;
+    * deploy idp-engine package to pypi;
+    * deploy folint package to pypi;
     * deploy IDP-Z3 to GAE;
     * add version in versions.json.
 
 Before actually deploying, it runs the tests to make sure that there are no
-errors.
+errors, and regenerates the '/IDP-Z3/idp_web_server/static' folder.
 
 Authors: Pierre Carbonnelle, Simon Vandevelde
 """
@@ -97,6 +98,7 @@ if update_statics:
 
         _ = query_user("Update version (and contributors) in CHANGELOG.  Ready ?(Y/N)")
         _ = query_user("Update version in IDP-Z3.py.  Ready ?(Y/N)")
+        _ = query_user("Update folint and IDP-Z3 version in /folint/setup.py. Ready ?(Y/N)")
 
     # Add and commit.
     run("git add -A")
@@ -110,12 +112,16 @@ if update_statics:
         # Push tags.
         run(f"git push origin {tag_version}")
 
-        # Publish new version on Pypi.
+        # Publish new version of IDP-Z3 on Pypi.
         run("poetry install")
         run("poetry build")
         print("Publishing to pypi (Username: krr)")
         run("poetry publish --username krr")
         run("rm -rf ./dist")
+
+        # publish new version of folint on Pypi
+        run("python3 setup.py sdist bdist_wheel", cwd="folint")
+        run("twine upload dist/*", cwd="folint")
 
     # if input("Deploy on Heroku ?") in "Yy":
     #     run("git push heroku main")

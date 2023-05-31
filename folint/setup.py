@@ -25,7 +25,7 @@ setup(
         'Topic :: Software Development :: Quality Assurance'
       ],
     packages=find_packages(),
-    install_requires=["textX", "z3-solver", "click", "idp_engine==0.10.2"],
+    install_requires=["idp_engine>=0.10.8"],
     entry_points={
       'console_scripts': ['folint=folint.SCA:main']
     }
