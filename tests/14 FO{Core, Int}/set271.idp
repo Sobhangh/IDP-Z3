@@ -1,6 +1,4 @@
 // issue 271
-// TODO fix incorrect model p := {0, 2}. ??
-// TODO fix incorrect propagation p := {0} ??
 
 vocabulary V {
     p : Int → 𝔹
