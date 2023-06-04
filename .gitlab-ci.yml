@@ -2,8 +2,8 @@ test:
     image: ubuntu
     script:
         - apt update
-        - apt -y install python3.10 python3-pip git
-        - python3.10 install-poetry.py
+        - apt -y install python3.11 python3-pip git
+        - python3.11 install-poetry.py
         - ~/.local/share/pypoetry/venv/bin/poetry install
         - ~/.local/share/pypoetry/venv/bin/poetry run coverage run test.py generate pipeline api
         - ~/.local/share/pypoetry/venv/bin/poetry run coverage report

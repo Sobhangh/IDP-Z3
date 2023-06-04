@@ -1,12 +1,16 @@
 Traceback (most recent call last):
   File "test.py", line ??, in generateZ3
     idp = IDP.from_str(theory)
+          ^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Parse.py", line ??, in from_str
     out = idpparser.model_from_str(code)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "textx/metamodel.py", line ??, in model_from_str
     model = self._parser_blueprint.clone().get_model_from_str(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "textx/model.py", line ??, in get_model_from_str
     model = parse_tree_to_objgraph(
+            ^^^^^^^^^^^^^^^^^^^^^^^
   File "textx/model.py", line ??, in parse_tree_to_objgraph
     _end_model_construction(m)
   File "textx/model.py", line ??, in _end_model_construction

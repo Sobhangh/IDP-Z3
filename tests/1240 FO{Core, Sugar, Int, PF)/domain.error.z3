@@ -12,12 +12,14 @@ Traceback (most recent call last):
     raise e
   File "idp_engine/Expression.py", line ??, in inner_function
     return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Interpret.py", line ??, in interpret
     problem.interpretations[self.name].interpret(problem)
   File "idp_engine/Expression.py", line ??, in inner_function
     raise e
   File "idp_engine/Expression.py", line ??, in inner_function
     return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Interpret.py", line ??, in interpret
     self.check(not condition.same_as(FALSE),
   File "idp_engine/Expression.py", line ??, in check

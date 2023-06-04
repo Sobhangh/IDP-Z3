@@ -2,8 +2,10 @@ T3, S
 Traceback (most recent call last):
   File "idp_engine/Expression.py", line ??, in inner_function
     return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Interpret.py", line ??, in interpret
     assert self.decl.type != BOOL, \
+           ^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 
 During handling of the above exception, another exception occurred:
@@ -18,12 +20,15 @@ Traceback (most recent call last):
     for i, xi in enumerate(x):
   File "idp_engine/Run.py", line ??, in model_expand
     problem = Theory(*theories, extended=extended)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Theory.py", line ??, in __init__
     self.add(*theories)
   File "idp_engine/Theory.py", line ??, in add
     self.constraints = OrderedSet([v.interpret(self)
+                                  ^^^^^^^^^^^^^^^^^^
   File "idp_engine/Theory.py", line ??, in <listcomp>
     self.constraints = OrderedSet([v.interpret(self)
+                                   ^^^^^^^^^^^^^^^^^
   File "idp_engine/Expression.py", line ??, in inner_function
     self.check(False, str(e))
   File "idp_engine/Expression.py", line ??, in check
