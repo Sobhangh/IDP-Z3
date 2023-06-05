@@ -4,6 +4,7 @@ test:
         - apt update
         - apt -y install python3.11 python3-pip git
         - python3.11 install-poetry.py
+        - ~/.local/share/pypoetry/venv/bin/poetry env use 3.11
         - ~/.local/share/pypoetry/venv/bin/poetry install
         - ~/.local/share/pypoetry/venv/bin/poetry run coverage run test.py generate pipeline api
         - ~/.local/share/pypoetry/venv/bin/poetry run coverage report
