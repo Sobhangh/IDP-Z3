@@ -176,7 +176,7 @@ class Constructor(ASTNode):
 
     def __str__(self):
         return (self.name if not self.sorts else
-                f"{self.name}({', '.join((str(a) for a in self.sorts))}" )
+                f"{self.name}({', '.join((str(a) for a in self.sorts))})" )
 
 def CONSTRUCTOR(name: Symbol, args=None) -> Constructor:
     return Constructor(None, name, args)
