@@ -1,4 +1,4 @@
-// issue 271
+// issue 267
 vocabulary V {
 
     type Element := {1,2}
