@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
-* issue #271: Use variable declaration for type inference in definitions
+* issue #267: Use variable declaration for type inference in recursive definitions
 *
 *
 
