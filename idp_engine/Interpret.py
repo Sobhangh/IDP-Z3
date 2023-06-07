@@ -223,7 +223,7 @@ def get_def_constraints(self,
 
             vars = sorted(list(self.def_vars[decl.name].values()), key=lambda v: v.name)
             vars = vars[:-1] if decl.out.name != BOOL else vars
-            expr = RecDef(self, decl.name, vars, expr)
+            expr = RecDef(self, decl.name, vars, expr.interpret(problem))
             out[decl, self] = [expr]
         return out
 
