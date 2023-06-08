@@ -518,7 +518,7 @@ def annotate(self, idp):
     ]:
         symbol_decl = SymbolDeclaration(annotations='',
                                         name=SYMBOL(name),
-                                        sorts=[out] if out else [], out=out)
+                                        sorts=[], out=out)
         symbol_decl.annotate(self.voc)
 
     # annotate constraints and interpretations
@@ -771,6 +771,11 @@ AAggregate.annotate1 = AQuantification.annotate1
 
 def annotate(self, voc, q_vars):
     self.symbol = self.symbol.annotate(voc, q_vars)
+    if self.symbol.decl:
+        self.check(self.symbol.decl.arity == len(self.sub_exprs)
+                   or self.symbol.decl.name in ['hide', 'unit', 'heading', 'noOptimization'],
+            f"Incorrect number of arguments in {self}: "
+            f"should be {self.symbol.decl.arity}")
     self.check((not self.symbol.decl or type(self.symbol.decl) != Constructor
                 or 0 < self.symbol.decl.arity),
                f"Constructor `{self.symbol}` cannot be applied to argument(s)")
