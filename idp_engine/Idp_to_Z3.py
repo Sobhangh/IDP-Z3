@@ -307,9 +307,9 @@ def translate1(self, problem: Theory, vars={}):
         assert y is not None, f"Internal error: {y} is None"
         try:
             out = out + [function(x, y)]
-        except Z3Exception:
+        except Z3Exception as e:
             self.check(False,
-                       "{}{}{}".format(str(x), self.operator[i - 1], str(y)))
+                       "{}:{}{}{}".format(str(e),str(x), self.operator[i - 1], str(y)))
     if 1 < len(out):
         return And(out)
     else:
@@ -324,9 +324,9 @@ AUnary.MAP = {'-': lambda x: 0 - x,
               }
 
 def translate1(self, problem: Theory, vars={}):
+    out = self.sub_exprs[0].translate(problem, vars)
+    function = AUnary.MAP[self.operator]
     try:
-        out = self.sub_exprs[0].translate(problem, vars)
-        function = AUnary.MAP[self.operator]
         return function(out)
     except:
         self.check(False, f"Incorrect syntax {self}")
