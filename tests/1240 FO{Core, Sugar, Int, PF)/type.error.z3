@@ -41,6 +41,11 @@ Traceback (most recent call last):
   File "idp_engine/Idp_to_Z3.py", line ??, in translate
     out = self.translate1(problem, vars)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Expression.py", line ??, in inner_function
+    raise e
+  File "idp_engine/Expression.py", line ??, in inner_function
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Idp_to_Z3.py", line ??, in translate1
     x = self.sub_exprs[i-1].translate(problem, vars)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -52,6 +57,11 @@ Traceback (most recent call last):
   File "idp_engine/Idp_to_Z3.py", line ??, in translate
     out = self.translate1(problem, vars)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Expression.py", line ??, in inner_function
+    raise e
+  File "idp_engine/Expression.py", line ??, in inner_function
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Idp_to_Z3.py", line ??, in translate1
     self.check(False, msg)
   File "idp_engine/Expression.py", line ??, in check
