@@ -264,14 +264,13 @@ def get_def_constraints(self,
                         out.append(IMPLIES([new, head], r.annotations))
 
             all_bodies = OR(bodies)
-            if not inductive:
+            if not inductive:  # i.e., function with finite domain
                 if out:  # already contains reverse implications
                     out.append(IMPLIES([head, all_bodies], self.annotations))
                 else:
                     out = [EQUIV([head, all_bodies], self.annotations)]
-            else:
+            else:  # i.e., predicate
                 if not out:  # no reverse implication
-                    #TODO what about rule.out ?
                     new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
                                              rule.definiendum, False, False, self.mode)
                     out = [IMPLIES([new, deepcopy(head)], self.annotations)]
