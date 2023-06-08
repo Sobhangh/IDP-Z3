@@ -225,7 +225,7 @@ def annotate(self, voc, q_vars):
         for r in self.rules:
             if r.out:
                 args = set()
-                for e in r.definiendum.sub_exprs[:-1]:
+                for e in r.definiendum.sub_exprs:
                     for v in e.variables:
                         args.add(v)
                 error = list(set(r.out.variables) - args)
@@ -260,17 +260,18 @@ def annotate(self, voc, q_vars):
             self.def_vars[decl.name] = q_v
 
         # rename the variables in the arguments of the definiendum
-        new_vars = self.def_vars[decl.name]
+        new_vars_dict = self.def_vars[decl.name]
+        new_vars = list(new_vars_dict.values())
         renamed = deepcopy(r)
 
         vars = {var.name : var for q in renamed.quantees for vars in q.vars for var in vars}
-        args = renamed.definiendum.sub_exprs
+        args = renamed.definiendum.sub_exprs + ([renamed.out] if r.out else [])
         r.check(len(args) == len(new_vars), "Internal error")
 
-        for i in range(len(args)- (1 if decl.out.name != BOOL else 0)):  # without rule.out
-            arg, nv = args[i], list(new_vars.values())[i]
+        for i in range(len(args)- (1 if r.out else 0)):  # without rule.out
+            arg, nv = args[i], new_vars[i]
             if type(arg) == Variable \
-            and arg.name in vars and arg.name not in new_vars:  # a variable, but not repeated (and not a new variable name, by chance)
+            and arg.name in vars and arg.name not in new_vars_dict:  # a variable, but not repeated (and not a new variable name, by chance)
                 del vars[arg.name]
                 rename_args(renamed, [arg], [nv])
             else:
@@ -284,8 +285,8 @@ def annotate(self, voc, q_vars):
         self.renamed.setdefault(decl, []).append(renamed)
 
         # rename the variable for the value of the definiendum
-        if decl.out.name != BOOL:  # now process r.out
-            arg, nv = canonical.definiendum.sub_exprs[-1], list(new_vars.values())[-1]
+        if r.out:  # now process r.out
+            arg, nv = canonical.out, new_vars[-1]
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars:  # a variable, but not repeated (and not a new variable name, by chance)
                 del vars[arg.name]
@@ -297,8 +298,9 @@ def annotate(self, voc, q_vars):
         for v in vars.values():
             canonical.body = EXISTS([Quantee.make(v, sort=v.sort)], canonical.body)
 
-        canonical.definiendum.sub_exprs = list(new_vars.values())
-        canonical.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars.values()]
+        canonical.definiendum.sub_exprs = new_vars[:-1] if r.out else new_vars
+        canonical.out = new_vars[-1] if r.out else None
+        canonical.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars]
 
         self.canonicals.setdefault(decl, []).append(canonical)
 
