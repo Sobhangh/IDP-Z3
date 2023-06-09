@@ -575,6 +575,8 @@ def annotate(self, voc, q_vars):
     for q in self.quantees:
         q.annotate(voc, q_vars)
         for vars in q.vars:
+            self.check(not q.sub_exprs or len(vars)==len(q.sub_exprs[0].decl.sorts),
+                       f"Incorrect arity for {q}")
             for i, var in enumerate(vars):
                 self.check(var.name not in voc.symbol_decls
                            or type(voc.symbol_decls[var.name]) == VarDeclaration,
