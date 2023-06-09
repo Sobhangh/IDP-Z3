@@ -1,27 +1,35 @@
 vocabulary {
-    type Range := {1..2}
-    type Pos := constructed from {pos(x:Range, y:Range)}
+    type Row := {1..2}
+    type Col := {1..2}
+    type Pos := constructed from {pos(x:Row, y:Col)}
     gridSize: () -> Int // coordinates are in {1..gridSize}
 
     clip: Int -> Int    // restrict coordinate to {1..gridSize}
     makePos: Int ⨯ Int -> Pos
     _add: Pos ⨯ Pos -> Pos
 
-    x1: () -> Range
+    x1: () -> Row
     p: () -> Pos
+
+    var r in Row
+    var c in Col
 }
 theory {
     gridSize := 2.
     {!n,m in Int: clip(n) = m <- m=(if n<1 then 1 else (if gridSize()<n then gridSize() else n)).}
-    {!n1,n2 in Int: makePos(n1,n2) = pos(clip(n1), clip(n2)).}
+    {!r,c: makePos(r,c) = pos(clip(r), clip(c)).}
     {!p1,p2 in Pos: _add(p1,p2) = makePos(x(p1)+x(p2), y(p1)+y(p2)).}
 
     x1() = clip(4).
     x(pos(1,1))=1.
     p() = _add(pos(1,2), pos(2,1)).
+
+    ? r, c : x(pos(r,c))= 1.
+    #{r,c: x(pos(r,c))=1} = 2.
+
 }
 
 procedure main() {
-    print(Theory(T).formula())
+    //print(Theory(T).formula())
     pretty_print(model_expand(T))
 }
