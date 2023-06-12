@@ -178,6 +178,7 @@ Symbol.translate=translate
 
 # Class AIfExpr  ###############################################################
 
+@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, without lookup in problem.z3
 
@@ -212,6 +213,7 @@ Quantee.translate = translate
 
 # Class AQuantification  ######################################################
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
     local_vars = {}
     for q in self.quantees:
@@ -258,6 +260,7 @@ Operator.MAP = {'∧': lambda x, y: And(x, y),
                 }
 
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
     out = self.sub_exprs[0].translate(problem, vars)
 
@@ -273,6 +276,7 @@ Operator.translate1 = translate1
 
 # Class ADisjunction  #######################################################
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate(problem, vars)
@@ -284,6 +288,7 @@ ADisjunction.translate1 = translate1
 
 # Class AConjunction  #######################################################
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate(problem, vars)
@@ -295,6 +300,7 @@ AConjunction.translate1 = translate1
 
 # Class AComparison  #######################################################
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
     assert not self.operator == ['≠'],f"Internal error: {self}"
     # chained comparisons -> And()
@@ -307,9 +313,9 @@ def translate1(self, problem: Theory, vars={}):
         assert y is not None, f"Internal error: {y} is None"
         try:
             out = out + [function(x, y)]
-        except Z3Exception:
+        except Z3Exception as e:
             self.check(False,
-                       "{}{}{}".format(str(x), self.operator[i - 1], str(y)))
+                       "{}:{}{}{}".format(str(e),str(x), self.operator[i - 1], str(y)))
     if 1 < len(out):
         return And(out)
     else:
@@ -323,10 +329,11 @@ AUnary.MAP = {'-': lambda x: 0 - x,
               '¬': lambda x: Not(x)
               }
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
+    out = self.sub_exprs[0].translate(problem, vars)
+    function = AUnary.MAP[self.operator]
     try:
-        out = self.sub_exprs[0].translate(problem, vars)
-        function = AUnary.MAP[self.operator]
         return function(out)
     except:
         self.check(False, f"Incorrect syntax {self}")
@@ -335,6 +342,7 @@ AUnary.translate1 = translate1
 
 # Class AAggregate  #######################################################
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
     assert self.annotated and not self.quantees, f"Cannot expand {self.code}"
     return Sum([f.translate(problem, vars) for f in self.sub_exprs])
@@ -343,6 +351,7 @@ AAggregate.translate1 = translate1
 
 # Class AppliedSymbol  #######################################################
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
     if self.as_disjunction:
         return self.as_disjunction.translate(problem, vars)
@@ -394,6 +403,7 @@ AppliedSymbol.reified = reified
 
 # Class UnappliedSymbol  #######################################################
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
     return problem.z3[self.name]
 UnappliedSymbol.translate1 = translate1
@@ -443,6 +453,7 @@ Brackets.translate1 = translate1
 
 # Class RecDef  #######################################################
 
+@catch_error
 def translate1(self, problem: Theory, vars={}):
     local_vars = {}
     for v in self.vars:

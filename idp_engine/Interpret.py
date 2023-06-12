@@ -240,9 +240,9 @@ def get_def_constraints(self,
             # add a constraint containing the definition over the full domain
             if rule.out:
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
-                                          rule.definiendum.sub_exprs[:-1])
+                                          rule.definiendum.sub_exprs)
                 expr.in_head = True
-                head = EQUALS([expr, rule.definiendum.sub_exprs[-1]])
+                head = EQUALS([expr, rule.out])
             else:
                 head = AppliedSymbol.make(rule.definiendum.symbol,
                                           rule.definiendum.sub_exprs)
@@ -264,13 +264,13 @@ def get_def_constraints(self,
                         out.append(IMPLIES([new, head], r.annotations))
 
             all_bodies = OR(bodies)
-            if not inductive:
+            if not inductive:  # i.e., function with finite domain
                 if out:  # already contains reverse implications
                     out.append(IMPLIES([head, all_bodies], self.annotations))
                 else:
                     out = [EQUIV([head, all_bodies], self.annotations)]
-            else:
-                if not out:  # no reverse implication yet
+            else:  # i.e., predicate
+                if not out:  # no reverse implication
                     new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
                                              rule.definiendum, False, False, self.mode)
                     out = [IMPLIES([new, deepcopy(head)], self.annotations)]
@@ -332,9 +332,9 @@ def instantiate_definition(self, new_args, theory):
         out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
         out = EQUIV([instance, out])
     else:
-        self.check(len(self.definiendum.sub_exprs) == len(new_args)+1 ,
+        self.check(len(self.definiendum.sub_exprs) == len(new_args) ,
                     "Internal error")
-        out = out.instantiate(self.definiendum.sub_exprs,
+        out = out.instantiate(self.definiendum.sub_exprs+[self.out],
                                 new_args+[instance], theory)
     out.block = self.block
     out = out.interpret(theory)

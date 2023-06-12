@@ -714,8 +714,6 @@ class Rule(ASTNode):
         self.annotations = (self.annotations.annotations if self.annotations else
                             {'reading': str(self)})
 
-        if self.out is not None:
-            self.definiendum.sub_exprs.append(self.out)
         if self.body is None:
             self.body = TRUE
         self.original = None

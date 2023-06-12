@@ -225,7 +225,7 @@ def annotate(self, voc, q_vars):
         for r in self.rules:
             if r.out:
                 args = set()
-                for e in r.definiendum.sub_exprs[:-1]:
+                for e in r.definiendum.sub_exprs:
                     for v in e.variables:
                         args.add(v)
                 error = list(set(r.out.variables) - args)
@@ -260,17 +260,18 @@ def annotate(self, voc, q_vars):
             self.def_vars[decl.name] = q_v
 
         # rename the variables in the arguments of the definiendum
-        new_vars = self.def_vars[decl.name]
+        new_vars_dict = self.def_vars[decl.name]
+        new_vars = list(new_vars_dict.values())
         renamed = deepcopy(r)
 
         vars = {var.name : var for q in renamed.quantees for vars in q.vars for var in vars}
-        args = renamed.definiendum.sub_exprs
+        args = renamed.definiendum.sub_exprs + ([renamed.out] if r.out else [])
         r.check(len(args) == len(new_vars), "Internal error")
 
-        for i in range(len(args)- (1 if decl.out.name != BOOL else 0)):  # without rule.out
-            arg, nv = args[i], list(new_vars.values())[i]
+        for i in range(len(args)- (1 if r.out else 0)):  # without rule.out
+            arg, nv = renamed.definiendum.sub_exprs[i], new_vars[i]
             if type(arg) == Variable \
-            and arg.name in vars and arg.name not in new_vars:  # a variable, but not repeated (and not a new variable name, by chance)
+            and arg.name in vars and arg.name not in new_vars_dict:  # a variable, but not repeated (and not a new variable name, by chance)
                 del vars[arg.name]
                 rename_args(renamed, [arg], [nv])
             else:
@@ -285,8 +286,8 @@ def annotate(self, voc, q_vars):
         self.renamed.setdefault(decl, []).append(renamed)
 
         # rename the variable for the value of the definiendum
-        if decl.out.name != BOOL:  # now process r.out
-            arg, nv = canonical.definiendum.sub_exprs[-1], list(new_vars.values())[-1]
+        if r.out:  # now process r.out
+            arg, nv = canonical.out, new_vars[-1]
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars:  # a variable, but not repeated (and not a new variable name, by chance)
                 del vars[arg.name]
@@ -299,9 +300,9 @@ def annotate(self, voc, q_vars):
             canonical.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {})],
                                     canonical.body)
 
-        canonical.definiendum.sub_exprs = list(new_vars.values())
-        canonical.quantees = [Quantee.make(v, sort=v.sort).annotate(voc, {})
-                              for v in new_vars.values()]
+        canonical.definiendum.sub_exprs = new_vars[:-1] if r.out else new_vars
+        canonical.out = new_vars[-1] if r.out else None
+        canonical.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars]
 
         self.canonicals.setdefault(decl, []).append(canonical)
 
@@ -519,7 +520,7 @@ def annotate(self, idp):
     ]:
         symbol_decl = SymbolDeclaration(annotations='',
                                         name=SYMBOL(name),
-                                        sorts=[out] if out else [], out=out)
+                                        sorts=[], out=out)
         symbol_decl.annotate(self.voc)
 
     # annotate constraints and interpretations
@@ -573,6 +574,8 @@ AIfExpr.annotate1 = annotate1
 def annotate(self, voc, q_vars):
     Expression.annotate(self, voc, q_vars)
     for vars in self.vars:
+        self.check(not self.sub_exprs or len(vars)==len(self.sub_exprs[0].decl.sorts),
+                    f"Incorrect arity for {self}")
         for i, var in enumerate(vars):
             self.check(var.name not in voc.symbol_decls
                         or type(voc.symbol_decls[var.name]) == VarDeclaration,
@@ -781,6 +784,11 @@ AAggregate.annotate1 = AQuantification.annotate1
 
 def annotate(self, voc, q_vars):
     self.symbol = self.symbol.annotate(voc, q_vars)
+    if self.symbol.decl:
+        self.check(self.symbol.decl.arity == len(self.sub_exprs)
+                   or self.symbol.decl.name in ['hide', 'unit', 'heading', 'noOptimization'],
+            f"Incorrect number of arguments in {self}: "
+            f"should be {self.symbol.decl.arity}")
     self.check((not self.symbol.decl or type(self.symbol.decl) != Constructor
                 or 0 < self.symbol.decl.arity),
                f"Constructor `{self.symbol}` cannot be applied to argument(s)")
