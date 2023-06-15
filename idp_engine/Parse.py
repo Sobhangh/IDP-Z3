@@ -35,7 +35,7 @@ from typing import Dict, List, Union, Optional
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR, Accessor,
-    Symbol, SYMBOL, SymbolExpr, Expression, AIfExpr, IF, AQuantification, split_quantee,
+    Symbol, SYMBOL, SymbolExpr, Expression, AIfExpr, IF, AQuantification, split_quantees,
     Type, TYPE, Quantee, ARImplication, AEquivalence,
     AImplication, ADisjunction, AConjunction,
     AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -709,7 +709,7 @@ class Rule(ASTNode):
         self.has_finite_domain = None  # Bool
         self.block = None  # theory where it occurs
 
-        split_quantee(self)
+        split_quantees(self)
 
         self.annotations = (self.annotations.annotations if self.annotations else
                             {'reading': str(self)})
