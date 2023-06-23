@@ -129,7 +129,6 @@ Constructor.translate = translate
 
 # class Expression  ###########################################################
 
-@catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, with lookup in problem.z3
 
