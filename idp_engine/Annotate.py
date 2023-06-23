@@ -581,10 +581,7 @@ def annotate(self, voc, q_vars):
                         or type(voc.symbol_decls[var.name]) == VarDeclaration,
                 f"the quantified variable '{var.name}' cannot have"
                 f" the same name as another symbol")
-            if len(vars) == 1:
-                var.sort = self.sub_exprs[0] if self.sub_exprs else None
-            else:  # VarTuple
-                var.sort = self.sub_exprs[0].decl.sorts[i]
+            var.sort = self.sub_exprs[0].decl.sorts[i] if self.sub_exprs else None
             var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
             if self.subtype is None and var_decl:
                 subtype = var_decl.subtype
