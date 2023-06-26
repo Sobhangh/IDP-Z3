@@ -682,7 +682,7 @@ def interpret(self, problem):
                 q.sub_exprs = [inferred[var.name]]
 
     forms = self.sub_exprs
-    new_quantees, instantiated = [], False
+    new_quantees = []
     for q in self.quantees:
         domain = q.sub_exprs[0]
 
@@ -698,24 +698,33 @@ def interpret(self, problem):
         else:
             self.check(False, f"Can't resolve the domain of {str(q.vars)}")
 
+        for vars in q.vars:
+            forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
         if superset is None:
             new_quantees.append(q)
-            for vars in q.vars:
-                forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
+            if problem:
+                forms = [f.interpret(problem) for f in forms]
         else:
+            def flatten(a):
+                # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
+                out = []
+                for sublist in a:
+                    out.extend(sublist)
+                return out
+
             for vars in q.vars:
                 self.check(domain.decl.arity == len(vars),
                             f"Incorrect arity of {domain}")
-                out = []
-                for f in forms:
-                    for val in superset:
-                        new_f = f.instantiate(vars, val, problem)
-                        instantiated = True
-                        out.append(_add_filter(self.q, new_f, filter, val, problem))
-                forms = out
+            vars1 = flatten(q.vars)
 
-    if not instantiated:
-        forms = [f.interpret(problem) if problem else f for f in forms]
+            out = []
+            for f in forms:
+                for vals in product(superset, repeat=len(q.vars)):
+                    vals1 = flatten(vals)
+                    new_f2 = f.instantiate(vars1, vals1, problem)
+                    out.append(new_f2)
+            forms = out
+
     self.quantees = new_quantees
     return self.update_exprs(forms)
 AQuantification.interpret = interpret
