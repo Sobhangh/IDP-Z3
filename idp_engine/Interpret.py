@@ -540,8 +540,9 @@ def instantiate(self, e0, e1, problem=None):
     """Recursively substitute Variable in e0 by e1 in a copy of self.
     Update .variables.
     """
-    assert all(type(e) == Variable for e in e0), \
-           f"Internal error: instantiate {e0}"
+    if type(e0) != dict:
+        assert all(type(e) == Variable for e in e0), \
+            f"Internal error: instantiate {e0}"
     if self.is_value():
         return self
     out = copy(self)  # shallow copy !
@@ -568,11 +569,16 @@ def _finalize(self, out, e0, e1):
     if not out.is_value():
         self.check(len(e0) == len(e1),
                    f"Incorrect arity: {e0}, {e1}")
-        for o, n in zip(e0, e1):
-            if o.name in out.variables:
-                out.variables.discard(o.name)
-                if type(n) == Variable:
-                    out.variables.add(n.name)
+        if type(e0) == dict:
+            for oname in e0.keys():
+                if oname in out.variables:
+                    out.variables.discard(oname)
+        else:
+            for o, n in zip(e0, e1):
+                if o.name in out.variables:
+                    out.variables.discard(o.name)
+                    if type(n) == Variable:
+                        out.variables.add(n.name)
         out.code = str(out)
     out.annotations['reading'] = out.code
     return out
@@ -721,7 +727,8 @@ def interpret(self, problem):
             for f in forms:
                 for vals in product(superset, repeat=len(q.vars)):
                     vals1 = flatten(vals)
-                    new_f2 = f.instantiate(vars1, vals1, problem)
+                    d = dict((var.code, val) for var, val in zip(vars1, vals1))
+                    new_f2 = f.instantiate(d, vals1, problem)
                     out.append(new_f2)
             forms = out
 
@@ -905,11 +912,16 @@ Variable.substitute = substitute
 def instantiate1(self, e0, e1, problem=None):
     if self.sort:
         self.sort = self.sort.instantiate(e0, e1, problem)
-    self.check(len(e0) == len(e1),
-               f"Incorrect arity: {e0}, {e1}")
-    for o, n in zip(e0, e1):
-        if self.code == o.code:
-            return n
+    if type(e0) == dict:
+        out = e0.get(self.code)
+        if out:
+            return out
+    else:
+        self.check(len(e0) == len(e1),
+                f"Incorrect arity: {e0}, {e1}")
+        for o, n in zip(e0, e1):
+            if self.code == o.code:
+                return n
     return self
 Variable.instantiate1 = instantiate1
 
