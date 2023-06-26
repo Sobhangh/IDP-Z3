@@ -699,7 +699,10 @@ def interpret(self, problem):
             self.check(False, f"Can't resolve the domain of {str(q.vars)}")
 
         for vars in q.vars:
+            self.check(domain.decl.arity == len(vars),
+                        f"Incorrect arity of {domain}")
             forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
+
         if superset is None:
             new_quantees.append(q)
             if problem:
@@ -712,9 +715,6 @@ def interpret(self, problem):
                     out.extend(sublist)
                 return out
 
-            for vars in q.vars:
-                self.check(domain.decl.arity == len(vars),
-                            f"Incorrect arity of {domain}")
             vars1 = flatten(q.vars)
 
             out = []
