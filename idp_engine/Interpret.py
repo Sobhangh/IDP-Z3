@@ -573,7 +573,7 @@ def _finalize(self, out, e0, e1):
                 out.variables.discard(o.name)
                 if type(n) == Variable:
                     out.variables.add(n.name)
-            out.code = str(out)
+        out.code = str(out)
     out.annotations['reading'] = out.code
     return out
 
