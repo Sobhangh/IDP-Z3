@@ -223,7 +223,7 @@ def get_def_constraints(self,
 
             vars = sorted(list(self.def_vars[decl.name].values()), key=lambda v: v.name)
             vars = vars[:-1] if decl.out.name != BOOL else vars
-            expr = RecDef(self, decl.name, vars, expr)
+            expr = RecDef(self, decl.name, vars, expr.interpret(problem))
             out[decl, self] = [expr]
         return out
 
@@ -727,7 +727,7 @@ def instantiate1(self, e0, e1, problem=None):
     for q in self.quantees: # for !x in $(output_domain(s,1))
         if q.sub_exprs:
             q.sub_exprs[0] = q.sub_exprs[0].instantiate(e0, e1, problem)
-    if problem and not self.variables:  # expand nested quantifier if no variables left
+    if problem and not out.variables:  # expand nested quantifier if no variables left
         out = out.interpret(problem)
     return out
 AQuantification.instantiate1 = instantiate1

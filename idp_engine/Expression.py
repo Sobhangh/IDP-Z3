@@ -748,6 +748,20 @@ class Quantee(Expression):
                 f"{signature}")
 
 
+def split_quantees(self):
+    """replaces an untyped quantee `x,y,z` into 3 quantees,
+    so that each variable can have its own sort
+
+    Args:
+        self: either a AQuantification, AAggregate or Rule"""
+    if len(self.quantees)==1 and not self.quantees[0].sub_exprs:
+        # separate untyped variables, so that they can be typed separately
+        q = self.quantees.pop()
+        for vars in q.vars:
+            for var in vars:
+                self.quantees.append(Quantee.make(var, sort=None))
+
+
 class AQuantification(Expression):
     """ASTNode representing a quantified formula
 
@@ -775,12 +789,7 @@ class AQuantification(Expression):
         self.q = ('∀' if self.q in ['!', 'forall'] else
                   '∃' if self.q in ["?", "thereisa"] else
                   self.q)
-        if self.quantees and not self.quantees[-1].sub_exprs:
-            # separate untyped variables, so that they can be typed separately
-            q = self.quantees.pop()
-            for vars in q.vars:
-                for var in vars:
-                    self.quantees.append(Quantee.make(var, sort=None))
+        split_quantees(self)
 
         self.sub_exprs = [self.f]
         super().__init__()
@@ -1071,6 +1080,7 @@ class AAggregate(Expression):
                         "min" if self.aggtype == "minimum" else
                         "max" if self.aggtype == "maximum" else
                         self.aggtype)
+        split_quantees(self)
         self.f = TRUE if f is None and self.aggtype == "#" else f
         self.sub_exprs = [self.f]  # later: expressions to be summed
         if if_:

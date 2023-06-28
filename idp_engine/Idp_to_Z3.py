@@ -129,7 +129,6 @@ Constructor.translate = translate
 
 # class Expression  ###########################################################
 
-@catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, with lookup in problem.z3
 
@@ -461,7 +460,8 @@ def translate1(self, problem: Theory, vars={}):
         local_vars[v.str] = translated
     all_vars = copy(vars)
     all_vars.update(local_vars)
-    func = problem.z3[self.name]
+    decl = problem.declarations[self.name]
+    func = decl.translate(problem)
     # add definition to context
     RecAddDefinition(func, list(local_vars.values()),
                     self.sub_exprs[0].translate(problem, all_vars))

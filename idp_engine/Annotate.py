@@ -80,7 +80,7 @@ def annotate(self, idp):
 
     # populate .map of CONCEPT
     for c in concepts.constructors:
-        assert not c.sorts
+        assert not c.sorts, "Internal error"
         concepts.map[str(c)] = UnappliedSymbol.construct(c)
 Vocabulary.annotate = annotate
 
@@ -269,7 +269,7 @@ def annotate(self, voc, q_vars):
         r.check(len(args) == len(new_vars), "Internal error")
 
         for i in range(len(args)- (1 if r.out else 0)):  # without rule.out
-            arg, nv = args[i], new_vars[i]
+            arg, nv = renamed.definiendum.sub_exprs[i], new_vars[i]
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars_dict:  # a variable, but not repeated (and not a new variable name, by chance)
                 del vars[arg.name]
@@ -281,7 +281,8 @@ def annotate(self, voc, q_vars):
         canonical = deepcopy(renamed)
 
         for v in vars.values():
-            renamed.body = EXISTS([Quantee.make(v, sort=v.sort)], renamed.body)
+            renamed.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {})],
+                                  renamed.body)
         self.renamed.setdefault(decl, []).append(renamed)
 
         # rename the variable for the value of the definiendum
@@ -296,7 +297,8 @@ def annotate(self, voc, q_vars):
                 canonical.body = AND([eq, canonical.body])
 
         for v in vars.values():
-            canonical.body = EXISTS([Quantee.make(v, sort=v.sort)], canonical.body)
+            canonical.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {})],
+                                    canonical.body)
 
         canonical.definiendum.sub_exprs = new_vars[:-1] if r.out else new_vars
         canonical.out = new_vars[-1] if r.out else None
@@ -567,37 +569,42 @@ def annotate1(self):
 AIfExpr.annotate1 = annotate1
 
 
+# Class Quantee  #######################################################
+
+def annotate(self, voc, q_vars):
+    Expression.annotate(self, voc, q_vars)
+    for vars in self.vars:
+        self.check(not self.sub_exprs or len(vars)==len(self.sub_exprs[0].decl.sorts),
+                    f"Incorrect arity for {self}")
+        for i, var in enumerate(vars):
+            self.check(var.name not in voc.symbol_decls
+                        or type(voc.symbol_decls[var.name]) == VarDeclaration,
+                f"the quantified variable '{var.name}' cannot have"
+                f" the same name as another symbol")
+            var.sort = self.sub_exprs[0].decl.sorts[i] if self.sub_exprs else None
+            var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
+            if self.subtype is None and var_decl:
+                subtype = var_decl.subtype
+                self.check(var.sort is None
+                            or var.sort.name == subtype.name,
+                    f"Can't use declared {var.name} as a "
+                    f"{var.sort.name if var.sort else ''}")
+                if var.sort is None:
+                    self.sub_exprs = [subtype.annotate(voc, {})]
+                    var.sort = self.sub_exprs[0]
+            var.type = var.sort.decl.name if var.sort and var.sort.decl else ''
+            q_vars[var.name] = var
+    return self
+Quantee.annotate = annotate
+
+
 # Class AQuantification  #######################################################
 
 def annotate(self, voc, q_vars):
     # also called by AAgregate.annotate
     q_v = {**q_vars}  # copy
     for q in self.quantees:
-        q.annotate(voc, q_vars)
-        for vars in q.vars:
-            self.check(not q.sub_exprs or len(vars)==len(q.sub_exprs[0].decl.sorts),
-                       f"Incorrect arity for {q}")
-            for i, var in enumerate(vars):
-                self.check(var.name not in voc.symbol_decls
-                           or type(voc.symbol_decls[var.name]) == VarDeclaration,
-                    f"the quantified variable '{var.name}' cannot have"
-                    f" the same name as another symbol")
-                if len(vars) == 1:
-                    var.sort = q.sub_exprs[0] if q.sub_exprs else None
-                else:  # VarTuple
-                    var.sort = q.sub_exprs[0].decl.sorts[i]
-                var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
-                if var_decl:
-                    subtype = var_decl.subtype
-                    self.check(var.sort is None
-                               or var.sort.name == subtype.name,
-                        f"Can't use declared {var.name} as a "
-                        f"{var.sort.name if var.sort else ''}")
-                    if var.sort is None:
-                        q.sub_exprs = [subtype.annotate(voc, {})]
-                        var.sort = q.sub_exprs[0]
-                var.type = var.sort.decl.name if var.sort and var.sort.decl else ''
-                q_v[var.name] = var
+        q.annotate(voc, q_v)
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
 AQuantification.annotate = annotate
@@ -759,7 +766,8 @@ def annotate(self, voc, q_vars):
                     coc2 = FORALL(deepcopy(self.quantees), comp)
 
                     coc = AND([coc1, coc2])
-                    quantees = [Quantee.make(v, sort=v.sort) for v in q_vars.values()]
+                    quantees = [Quantee.make(v, sort=v.sort).annotate(voc, {})
+                                for v in q_vars.values()]
                     applied.co_constraint = FORALL(quantees, coc).annotate(voc, q_vars)
                     applied.co_constraint.annotations['reading'] = f"Calculation of {self.code}"
                 return applied

@@ -1,0 +1,25 @@
+// issue 267
+vocabulary V {
+
+    type Element := {1,2}
+    type CSet := constructed from { singleton(e: Element), union(c: CSet, d: CSet) }
+    member: Element * CSet -> Bool
+
+    var x in Element
+    var s in CSet
+    var t in CSet
+}
+
+theory T: V {
+
+    { (recursive)
+    !x: member(x,singleton(x)).
+    !x: !s,t: member(x, union(s,t)) <- member(x,s).
+    !x: !s,t: member(x, union(s,t)) <- member(x,t).
+    }
+
+}
+
+procedure main() {
+    pretty_print(model_expand(T))
+}
