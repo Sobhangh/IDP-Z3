@@ -827,13 +827,10 @@ def interpret(self, problem):
                 value = self.as_disjunction
             self.as_disjunction.annotations = self.annotations
         elif self.decl.name in problem.interpretations:
-            if all(a.is_value() for a in sub_exprs):
-                interpretation = problem.interpretations[self.decl.name]
-                if interpretation.block.name != DEFAULT:
-                    f = interpretation.interpret_application
-                    value = f(0, self, sub_exprs)
-            else:
-                self.decl.needs_interpretation = True
+            interpretation = problem.interpretations[self.decl.name]
+            if interpretation.block.name != DEFAULT:
+                f = interpretation.interpret_application
+                value = f(0, self, sub_exprs)
         if not self.in_head and not self.variables:
             # instantiate definition (for relevance)
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)

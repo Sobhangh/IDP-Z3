@@ -830,15 +830,15 @@ class SymbolInterpretation(ASTNode):
         Returns:
             Expression: Grounded interpretation of self.symbol applied to args
         """
-        if tuples == None:  # first call
+        if tuples == None:
             tuples = self.enumeration.sorted_tuples
-            key = ",".join(a.code for a in args)
-            if key in self.enumeration.lookup:
-                return self.enumeration.lookup[key]
-            elif self.enumeration.parent.sign != '≜':
-                return applied._change(sub_exprs=args)
-            return self.enumeration.parent.default
-    """
+            if all(a.is_value() for a in args):  # use lookup
+                key = ",".join(a.code for a in args)
+                if key in self.enumeration.lookup:
+                    return self.enumeration.lookup[key]
+                elif self.enumeration.parent.sign == '≜':  # can use default
+                    return self.enumeration.parent.default
+
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
@@ -853,7 +853,7 @@ class SymbolInterpretation(ASTNode):
                    applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if args[rank].value is not None:
+            if args[rank].is_value():
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret_application(rank+1,
@@ -867,7 +867,6 @@ class SymbolInterpretation(ASTNode):
                                                    applied, args, tuples),
                         out)
             return out
-    """
 
 
 class Enumeration(ASTNode):
