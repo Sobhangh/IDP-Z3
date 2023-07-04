@@ -171,8 +171,7 @@ class Theory(object):
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
-                                and (a.status == S.UNIVERSAL
-                                     or a.status == S.STRUCTURE)]
+                                and a.status == S.UNIVERSAL]
             self._slvr.add(assignment_forms)
         return self._slvr
 
@@ -185,8 +184,7 @@ class Theory(object):
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
-                                and (a.status == S.UNIVERSAL
-                                     or a.status == S.STRUCTURE)]
+                                and a.status == S.UNIVERSAL]
             self._optmz.add(assignment_forms)
         return self._optmz
 
