@@ -567,8 +567,6 @@ Expression.instantiate1 = instantiate1
 @catch_error
 def _finalize(self, out, e0, e1):
     if not out.is_value():
-        self.check(len(e0) == len(e1),
-                   f"Incorrect arity: {e0}, {e1}")
         if type(e0) == dict:
             for oname, n in e0.items():
                 if oname in out.variables:
@@ -576,6 +574,8 @@ def _finalize(self, out, e0, e1):
                     if type(n) == Variable:
                         out.variables.add(n.name)
         else:
+            self.check(len(e0) == len(e1),
+                    f"Incorrect arity: {e0}, {e1}")
             for o, n in zip(e0, e1):
                 if o.name in out.variables:
                     out.variables.discard(o.name)
@@ -662,8 +662,15 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
         return out
     return expr
 
+def flatten(a):
+    # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
+    out = []
+    for sublist in a:
+        out.extend(sublist)
+    return out
+
 @catch_error
-def interpret(self, problem):
+def interpret(self, problem, subs=None):
     """apply information in the problem and its vocabulary
 
     Args:
@@ -673,7 +680,10 @@ def interpret(self, problem):
         Expression: the expanded quantifier expression
     """
     # This method is called by AAggregate.interpret !
-    if not self.quantees:
+
+    subs = dict() if subs is None else copy(subs)
+
+    if not self.quantees and not subs:
         return Expression.interpret(self, problem)
 
     # type inference
@@ -689,15 +699,15 @@ def interpret(self, problem):
                 var.sort = inferred[var.name]
                 q.sub_exprs = [inferred[var.name]]
 
+    # determine the domain of the variables, and add filter to the expression if needed
+    new_quantees, vars1, supersets = [], [], []
     forms = self.sub_exprs
-    new_quantees = []
     for q in self.quantees:
         domain = q.sub_exprs[0]
 
-        superset, filter = None, None
         if isinstance(domain, Type):  # quantification over type / Concepts
             (superset, filter) = domain.extension(problem.interpretations,
-                                        problem.extensions)
+                                                  problem.extensions)
         elif type(domain) in [SymbolExpr, Symbol]:  # SymbolExpr (e.g. $(`Color))
             self.check(domain.decl.out.type == BOOL,
                         f"{domain} is not a type or predicate")
@@ -709,53 +719,40 @@ def interpret(self, problem):
         for vars in q.vars:
             self.check(domain.decl.arity == len(vars),
                         f"Incorrect arity of {domain}")
-            forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
+            if filter:
+                forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
 
-        def flatten(a):
-            # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
-            out = []
-            for sublist in a:
-                out.extend(sublist)
-            return out
-        vars1 = flatten(q.vars)
+        vars1.extend(flatten(q.vars))
 
         if superset is None:
             new_quantees.append(q)
-            supersets = [q.vars]
-            out = []
-            for f in forms:
-                for vals in product(*supersets):
-                    vals1 = flatten(vals)
-                    d = dict((var.code, val) for var, val in zip(vars1, vals1))
-                    new_f2 = f.instantiate(d, vals1, problem)
-                    out.append(new_f2)
-            forms = out
-            if problem:
-                forms = [f.interpret(problem) for f in forms]
+            supersets.extend([q.vars])  # replace the variable by itself
         else:
-            supersets = [superset]*len(q.vars)
-            out = []
-            for f in forms:
-                for vals in product(*supersets):
-                    vals1 = flatten(vals)
-                    d = dict((var.code, val) for var, val in zip(vars1, vals1))
-                    new_f2 = f.instantiate(d, vals1, problem)
-                    out.append(new_f2)
-            forms = out
-
+            supersets.extend([superset]*len(q.vars))
     self.quantees = new_quantees
-    return self.update_exprs(forms)
+
+    # expand the formula by the cross-product of the supersets, and substitute per `subs`
+    out = []
+    for f in forms:
+        for vals in product(*supersets):
+            vals1 = flatten(vals)
+            subs.update((var.code, val) for var, val in zip(vars1, vals1))
+            new_f2 = f.instantiate(subs, vals1, problem)
+            out.append(new_f2)
+
+    return self.update_exprs(out)
 AQuantification.interpret = interpret
 
 
 @catch_error
 def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)  # updates .variables
     for q in self.quantees: # for !x in $(output_domain(s,1))
         if q.sub_exprs:
             q.sub_exprs[0] = q.sub_exprs[0].instantiate(e0, e1, problem)
-    if problem and not out.variables:  # expand nested quantifier if no variables left
-        out = out.interpret(problem)
+    if type(e0) == dict:
+        out = self.interpret(problem, e0)
+    else:
+        out = Expression.instantiate1(self, e0, e1, problem)  # updates .variables
     return out
 AQuantification.instantiate1 = instantiate1
 
@@ -763,9 +760,9 @@ AQuantification.instantiate1 = instantiate1
 # Class AAggregate  ######################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret(self, problem, subs=None):
     assert self.annotated, f"Internal error in interpret"
-    return AQuantification.interpret(self, problem)
+    return AQuantification.interpret(self, problem, subs)
 AAggregate.interpret = interpret
 
 AAggregate.instantiate1 = AQuantification.instantiate1
@@ -898,7 +895,7 @@ def instantiate1(self, e0, e1, problem=None):
             out.co_constraint.instantiate(e0, e1, problem)
         if out.as_disjunction is not None:
             out.as_disjunction.instantiate(e0, e1, problem)
-        if problem and not self.variables:
+        if problem:
             return out.interpret(problem)
     return out
 AppliedSymbol .instantiate1 = instantiate1
