@@ -570,9 +570,11 @@ def _finalize(self, out, e0, e1):
         self.check(len(e0) == len(e1),
                    f"Incorrect arity: {e0}, {e1}")
         if type(e0) == dict:
-            for oname in e0.keys():
+            for oname, n in e0.items():
                 if oname in out.variables:
                     out.variables.discard(oname)
+                    if type(n) == Variable:
+                        out.variables.add(n.name)
         else:
             for o, n in zip(e0, e1):
                 if o.name in out.variables:
@@ -709,23 +711,32 @@ def interpret(self, problem):
                         f"Incorrect arity of {domain}")
             forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
 
+        def flatten(a):
+            # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
+            out = []
+            for sublist in a:
+                out.extend(sublist)
+            return out
+        vars1 = flatten(q.vars)
+
         if superset is None:
             new_quantees.append(q)
+            supersets = [q.vars]
+            out = []
+            for f in forms:
+                for vals in product(*supersets):
+                    vals1 = flatten(vals)
+                    d = dict((var.code, val) for var, val in zip(vars1, vals1))
+                    new_f2 = f.instantiate(d, vals1, problem)
+                    out.append(new_f2)
+            forms = out
             if problem:
                 forms = [f.interpret(problem) for f in forms]
         else:
-            def flatten(a):
-                # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
-                out = []
-                for sublist in a:
-                    out.extend(sublist)
-                return out
-
-            vars1 = flatten(q.vars)
-
+            supersets = [superset]*len(q.vars)
             out = []
             for f in forms:
-                for vals in product(superset, repeat=len(q.vars)):
+                for vals in product(*supersets):
                     vals1 = flatten(vals)
                     d = dict((var.code, val) for var, val in zip(vars1, vals1))
                     new_f2 = f.instantiate(d, vals1, problem)
@@ -883,7 +894,7 @@ def instantiate1(self, e0, e1, problem=None):
                           {})
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs, **kwargs)
                 out.original = self
-        if out.co_constraint is not None:
+        if out.co_constraint is not None and not out.same_as(self):
             out.co_constraint.instantiate(e0, e1, problem)
         if out.as_disjunction is not None:
             out.as_disjunction.instantiate(e0, e1, problem)
