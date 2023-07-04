@@ -172,8 +172,7 @@ class Theory(object):
                                 for a in self.assignments.values()
                                 if a.value is not None
                                 and (a.status == S.UNIVERSAL
-                                     or (a.status == S.STRUCTURE
-                                         and a.symbol_decl.needs_interpretation))]
+                                     or a.status == S.STRUCTURE)]
             self._slvr.add(assignment_forms)
         return self._slvr
 
@@ -187,8 +186,7 @@ class Theory(object):
                                 for a in self.assignments.values()
                                 if a.value is not None
                                 and (a.status == S.UNIVERSAL
-                                     or (a.status == S.STRUCTURE
-                                         and a.symbol_decl.needs_interpretation))]
+                                     or a.status == S.STRUCTURE)]
             self._optmz.add(assignment_forms)
         return self._optmz
 
@@ -280,8 +278,6 @@ class Theory(object):
         self.extensions = {}  # reset the cache
 
         for decl in self.declarations.values():
-            if type(decl) == SymbolDeclaration:  # reset it
-                decl.needs_interpretation = False
             decl.interpret(self)
 
         # remove RELEVANT constraints
@@ -425,7 +421,7 @@ class Theory(object):
                 # occurring in the (potentially simplified) z3 constraints
                 all = ([a.formula().translate(self)
                         for a in self.assignments.values()
-                        if (a.status != S.STRUCTURE or a.symbol_decl.needs_interpretation)
+                        if a.status != S.STRUCTURE
                         and a.value is not None
                         and a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]]
                         + self.constraintz())

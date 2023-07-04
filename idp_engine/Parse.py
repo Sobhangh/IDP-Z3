@@ -471,9 +471,6 @@ class SymbolDeclaration(ASTNode):
         optimizable (bool):
             whether this symbol should get optimize buttons in the IC
 
-        needs_interpretation (bool):
-            whether its interpretation must be sent to Z3
-
         voc (Vocabulary): the vocabulary block that contains it
     """
 
@@ -499,7 +496,6 @@ class SymbolDeclaration(ASTNode):
         self.unit: str = None
         self.heading: str = None
         self.optimizable: bool = True
-        self.needs_interpretation = False
 
         self.type = None  # a string
         self.base_type = None
