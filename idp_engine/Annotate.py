@@ -273,10 +273,11 @@ def annotate(self, voc, q_vars):
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars_dict:  # a variable, but not repeated (and not a new variable name, by chance)
                 del vars[arg.name]
-                rename_args(renamed, [arg], [nv])
+                rename_args(renamed, {arg.name: nv})
             else:
                 eq = EQUALS([nv, arg])
                 renamed.body = AND([eq, renamed.body])
+        renamed.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars]
 
         canonical = deepcopy(renamed)
 
@@ -291,7 +292,7 @@ def annotate(self, voc, q_vars):
             if type(arg) == Variable \
             and arg.name in vars and arg.name not in new_vars:  # a variable, but not repeated (and not a new variable name, by chance)
                 del vars[arg.name]
-                rename_args(canonical, [arg], [nv])
+                rename_args(canonical, {arg.name: nv})
             else:
                 eq = EQUALS([nv, arg])
                 canonical.body = AND([eq, canonical.body])
@@ -340,16 +341,16 @@ def annotate(self, voc, q_vars):
     return self
 Rule.annotate = annotate
 
-def rename_args(self, old, new):
+def rename_args(self, subs):
     """replace old variables by new variables
         (ignoring arguments in the head before the it
     """
-    self.body = self.body.instantiate(old, new)
-    self.out = (self.out.instantiate(old, new) if self.out else
+    self.body = self.body.instantiate(subs)
+    self.out = (self.out.instantiate(subs) if self.out else
                 self.out)
     args = self.definiendum.sub_exprs
     for j in range(0, len(args)):
-        args[j] = args[j].instantiate(old, new)
+        args[j] = args[j].instantiate(subs)
 
 
 # Class Structure  #######################################################

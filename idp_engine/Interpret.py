@@ -326,16 +326,16 @@ def instantiate_definition(self, new_args, theory):
     out = deepcopy(self.body)  # in case there are no arguments
     instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
     instance.in_head = True
+    self.check(len(self.definiendum.sub_exprs) == len(new_args),
+                "Internal error")
+    subs = dict(zip([e.name for e in self.definiendum.sub_exprs], new_args))
+
     if self.definiendum.decl.type == BOOL:  # a predicate
-        self.check(len(self.definiendum.sub_exprs) == len(new_args),
-                    "Internal error")
-        out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
+        out = out.instantiate(subs, theory)
         out = EQUIV([instance, out])
     else:
-        self.check(len(self.definiendum.sub_exprs) == len(new_args) ,
-                    "Internal error")
-        out = out.instantiate(self.definiendum.sub_exprs+[self.out],
-                                new_args+[instance], theory)
+        subs[self.out.name] = instance
+        out = out.instantiate(subs, theory)
     out.block = self.block
     out = out.interpret(theory)
     return out
@@ -536,51 +536,39 @@ Expression.substitute = substitute
 
 
 @catch_error
-def instantiate(self, e0, e1, problem=None):
+def instantiate(self, subs, problem=None):
     """Recursively substitute Variable in e0 by e1 in a copy of self.
     Update .variables.
     """
-    if type(e0) != dict:
-        assert all(type(e) == Variable for e in e0), \
-            f"Internal error: instantiate {e0}"
     if self.is_value():
         return self
     out = copy(self)  # shallow copy !
     out.annotations = copy(out.annotations)
     out.variables = copy(out.variables)
-    return out.instantiate1(e0, e1, problem)
+    return out.instantiate1(subs, problem)
 Expression.instantiate = instantiate
 
 @catch_error
-def instantiate1(self, e0, e1, problem=None):
+def instantiate1(self, subs, problem=None):
     """Recursively substitute Variable in e0 by e1 in self.
 
     Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
     Update .variables.
     """
     # instantiate expressions, with simplification
-    out = self.update_exprs(e.instantiate(e0, e1, problem)
+    out = self.update_exprs(e.instantiate(subs, problem)
                             for e in self.sub_exprs)
-    return _finalize(self, out, e0, e1)
+    return _finalize(self, out, subs)
 Expression.instantiate1 = instantiate1
 
 @catch_error
-def _finalize(self, out, e0, e1):
+def _finalize(self, out, subs):
     if not out.is_value():
-        if type(e0) == dict:
-            for oname, n in e0.items():
-                if oname in out.variables:
-                    out.variables.discard(oname)
-                    if type(n) == Variable:
-                        out.variables.add(n.name)
-        else:
-            self.check(len(e0) == len(e1),
-                    f"Incorrect arity: {e0}, {e1}")
-            for o, n in zip(e0, e1):
-                if o.name in out.variables:
-                    out.variables.discard(o.name)
-                    if type(n) == Variable:
-                        out.variables.add(n.name)
+        for oname, n in subs.items():
+            if oname in out.variables:
+                out.variables.discard(oname)
+                if type(n) == Variable:
+                    out.variables.add(n.name)
         out.code = str(out)
     out.annotations['reading'] = out.code
     return out
@@ -589,7 +577,7 @@ def _finalize(self, out, e0, e1):
 # class Symbol ###########################################################
 
 @catch_error
-def instantiate(self, e0, e1, problem=None):
+def instantiate(self, subs, problem=None):
     return self
 Symbol.instantiate = instantiate
 
@@ -705,16 +693,19 @@ def interpret(self, problem, subs=None):
     for q in self.quantees:
         domain = q.sub_exprs[0]
 
-        if isinstance(domain, Type):  # quantification over type / Concepts
-            (superset, filter) = domain.extension(problem.interpretations,
-                                                  problem.extensions)
-        elif type(domain) in [SymbolExpr, Symbol]:  # SymbolExpr (e.g. $(`Color))
-            self.check(domain.decl.out.type == BOOL,
-                        f"{domain} is not a type or predicate")
-            assert domain.decl.name in problem.extensions, "internal error"
-            (superset, filter) = problem.extensions[domain.decl.name]
+        if problem:
+            if isinstance(domain, Type):  # quantification over type / Concepts
+                (superset, filter) = domain.extension(problem.interpretations,
+                                                    problem.extensions)
+            elif type(domain) in [SymbolExpr, Symbol]:  # SymbolExpr (e.g. $(`Color))
+                self.check(domain.decl.out.type == BOOL,
+                            f"{domain} is not a type or predicate")
+                assert domain.decl.name in problem.extensions, "internal error"
+                (superset, filter) = problem.extensions[domain.decl.name]
+            else:
+                self.check(False, f"Can't resolve the domain of {str(q.vars)}")
         else:
-            self.check(False, f"Can't resolve the domain of {str(q.vars)}")
+            (superset, filter) = None, None
 
         for vars in q.vars:
             self.check(domain.decl.arity == len(vars),
@@ -726,7 +717,7 @@ def interpret(self, problem, subs=None):
 
         if superset is None:
             new_quantees.append(q)
-            supersets.extend([q.vars])  # replace the variable by itself
+            supersets.extend([q] for q in q.vars)  # replace the variable by itself
         else:
             supersets.extend([superset]*len(q.vars))
     self.quantees = new_quantees
@@ -737,7 +728,7 @@ def interpret(self, problem, subs=None):
         for vals in product(*supersets):
             vals1 = flatten(vals)
             subs.update((var.code, val) for var, val in zip(vars1, vals1))
-            new_f2 = f.instantiate(subs, vals1, problem)
+            new_f2 = f.instantiate(subs, problem)
             out.append(new_f2)
 
     return self.update_exprs(out)
@@ -745,14 +736,10 @@ AQuantification.interpret = interpret
 
 
 @catch_error
-def instantiate1(self, e0, e1, problem=None):
+def instantiate1(self, subs, problem=None):
     for q in self.quantees: # for !x in $(output_domain(s,1))
-        if q.sub_exprs:
-            q.sub_exprs[0] = q.sub_exprs[0].instantiate(e0, e1, problem)
-    if type(e0) == dict:
-        out = self.interpret(problem, e0)
-    else:
-        out = Expression.instantiate1(self, e0, e1, problem)  # updates .variables
+        q.sub_exprs = [e.instantiate(subs, problem) for e in q.sub_exprs]
+    out = self.interpret(problem, subs)
     return out
 AQuantification.instantiate1 = instantiate1
 
@@ -771,29 +758,29 @@ AAggregate.instantiate1 = AQuantification.instantiate1
 # Class AImplication ######################################################
 
 @catch_error
-def instantiate1(self, e0, e1, problem):
+def instantiate1(self, subs, problem):
     assert len(self.sub_exprs) == 2
-    premise = self.sub_exprs[0].instantiate(e0, e1, problem)
+    premise = self.sub_exprs[0].instantiate(subs, problem)
     if premise.same_as(FALSE):  # lazy instantiation
         return TRUE
-    consequent = self.sub_exprs[1].instantiate(e0, e1, problem)
+    consequent = self.sub_exprs[1].instantiate(subs, problem)
     out = self.update_exprs([premise, consequent])
-    return _finalize(self, out, e0, e1)
+    return _finalize(self, out, subs)
 AImplication.instantiate1 = instantiate1
 
 
 # Class AConjunction ######################################################
 
 @catch_error
-def instantiate1(self, e0, e1, problem):
+def instantiate1(self, subs, problem):
     new_exprs = []
     for e in self.sub_exprs:
-        new_e = e.instantiate(e0, e1, problem)
+        new_e = e.instantiate(subs, problem)
         if new_e.same_as(FALSE):  # lazy instantiation
             return FALSE
         new_exprs.append(new_e)
     out = self.update_exprs(new_exprs)
-    return _finalize(self, out, e0, e1)
+    return _finalize(self, out, subs)
 AConjunction.instantiate1 = instantiate1
 
 
@@ -875,11 +862,11 @@ def substitute(self, e0, e1, assignments, tag=None):
 AppliedSymbol .substitute = substitute
 
 @catch_error
-def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)  # update .variables
+def instantiate1(self, subs, problem=None):
+    out = Expression.instantiate1(self, subs, problem)  # update .variables
     if type(out) == AppliedSymbol:  # might be a number after instantiation
         if type(out.symbol) == SymbolExpr and out.symbol.is_intentional():  # $(x)()
-            out.symbol = out.symbol.instantiate(e0, e1, problem)
+            out.symbol = out.symbol.instantiate(subs, problem)
             if type(out.symbol) == Symbol:  # found $(x)
                 self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
                             f"Incorrect arity for {out.code}")
@@ -889,9 +876,9 @@ def instantiate1(self, e0, e1, problem=None):
                 out = AppliedSymbol.make(out.symbol, out.sub_exprs, **kwargs)
                 out.original = self
         if out.co_constraint is not None and not out.same_as(self):
-            out.co_constraint.instantiate(e0, e1, problem)
+            out.co_constraint.instantiate(subs, problem)
         if out.as_disjunction is not None:
-            out.as_disjunction.instantiate(e0, e1, problem)
+            out.as_disjunction.instantiate(subs, problem)
         if problem:
             return out.interpret(problem)
     return out
@@ -914,20 +901,11 @@ def substitute(self, e0, e1, assignments, tag=None):
 Variable.substitute = substitute
 
 @catch_error
-def instantiate1(self, e0, e1, problem=None):
+def instantiate1(self, subs, problem=None):
     if self.sort:
-        self.sort = self.sort.instantiate(e0, e1, problem)
-    if type(e0) == dict:
-        out = e0.get(self.code)
-        if out:
-            return out
-    else:
-        self.check(len(e0) == len(e1),
-                f"Incorrect arity: {e0}, {e1}")
-        for o, n in zip(e0, e1):
-            if self.code == o.code:
-                return n
-    return self
+        self.sort = self.sort.instantiate(subs, problem)
+    out = subs.get(self.code, self)
+    return out
 Variable.instantiate1 = instantiate1
 
 

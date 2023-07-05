@@ -445,15 +445,13 @@ class Expression(ASTNode):
         return self  # monkey-patched
 
     def instantiate(self,
-                    e0: List[Expression],
-                    e1: List[Expression],
+                    subs: Dict[str, Expression],
                     problem: Theory=None
                     ) -> Expression:
         return self  # monkey-patched
 
     def instantiate1(self,
-                    e0: Expression,
-                    e1: Expression,
+                    subs: Dict[str, Expression],
                     problem: Theory=None
                     ) -> Expression:
         return self  # monkey-patched

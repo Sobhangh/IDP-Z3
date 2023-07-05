@@ -625,16 +625,17 @@ class Definition(ASTNode):
             set of rules for the definition, e.g., `!x: p(x) <- q(x)`
 
         renamed (Dict[Declaration, List[Rule]]):
-            normalized rule for each defined symbol (except for the value in the head),
-            e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
+            rules with normalized body for each defined symbol,
+            e.g., `!x: p(x) <- q(p1_)`
+            (quantees and head are unchanged)
 
         canonicals (Dict[Declaration, List[Rule]]):
             normalized rule for each defined symbol,
-            e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
+            e.g., `! p1_: p(p1_) <- q(p1_)`
 
         clarks (Dict[Declaration, Transformed Rule]):
             normalized rule for each defined symbol (used to be Clark completion)
-            e.g., `!$p!1$: p($p!1$) <=> q($p!1$)`
+            e.g., `! p1_: p(p1_) <=> q(p1_)`
 
         def_vars (Dict[String, Dict[String, Variable]]):
             Fresh variables for arguments and result
