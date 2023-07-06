@@ -26,7 +26,6 @@ Methods to ground / interpret a theory in a data structure
 
 This module also includes methods to:
 
-* substitute a node by another in an AST tree
 * instantiate an expresion, i.e. replace a variable by a value
 
 This module monkey-patches the ASTNode class and sub-classes.
@@ -508,33 +507,6 @@ def interpret(self, problem) -> Expression:
 Expression.interpret = interpret
 
 
-# @log  # decorator patched in by tests/main.py
-@catch_error
-def substitute(self, e0, e1, assignments, tag=None):
-    """ recursively substitute e0 by e1 in self (e0 is not a Variable)
-
-    if tag is present, updates assignments with symbolic propagation of co-constraints.
-
-    implementation for everything but AppliedSymbol, UnappliedSymbol and
-    Fresh_variable
-    """
-    assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
-               f"Internal error in substitute {e0} by {e1}" # should use instantiate instead
-    assert self.co_constraint is None,  \
-               f"Internal error in substitue: {self.co_constraint}" # see AppliedSymbol instead
-
-    # similar code in AppliedSymbol !
-    if self.code == e0.code:
-        if self.code == e1.code:
-            return self  # to avoid infinite loops
-        return e1  # e1 is UnappliedSymbol or Number
-    else:
-        out = self.update_exprs(e.substitute(e0, e1, assignments, tag)
-                                for e in self.sub_exprs)
-        return out
-Expression.substitute = substitute
-
-
 @catch_error
 def instantiate(self, subs, problem=None):
     """Recursively substitute Variable in e0 by e1 in a copy of self.
@@ -833,34 +805,6 @@ def interpret(self, problem):
         return self
 AppliedSymbol.interpret = interpret
 
-
-# @log_calls  # decorator patched in by tests/main.py
-@catch_error
-def substitute(self, e0, e1, assignments, tag=None):
-    """ recursively substitute e0 by e1 in self """
-
-    assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
-        f"should use 'instantiate instead of 'substitute for {e0}->{e1}"
-
-    new_branch = None
-    if self.co_constraint is not None:
-        new_branch = self.co_constraint.substitute(e0, e1, assignments, tag)
-        if tag is not None:
-            new_branch.symbolic_propagate(assignments, tag)
-
-    if self.as_disjunction is not None:
-        self.as_disjunction = self.as_disjunction.substitute(e0, e1,        assignments, tag)
-        if tag is not None:
-            self.as_disjunction.symbolic_propagate(assignments, tag)
-
-    if self.code == e0.code:
-        return e1
-    else:
-        sub_exprs = [e.substitute(e0, e1, assignments, tag)
-                     for e in self.sub_exprs]  # no simplification here
-        return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
-AppliedSymbol .substitute = substitute
-
 @catch_error
 def instantiate1(self, subs, problem=None):
     out = Expression.instantiate1(self, subs, problem)  # update .variables
@@ -891,14 +835,6 @@ AppliedSymbol .instantiate1 = instantiate1
 def interpret(self, problem):
     return self
 Variable.interpret = interpret
-
-# @log  # decorator patched in by tests/main.py
-@catch_error
-def substitute(self, e0, e1, assignments, tag=None):
-    if self.sort:
-        self.sort = self.sort.substitute(e0,e1, assignments, tag)
-    return e1 if self.code == e0.code else self
-Variable.substitute = substitute
 
 @catch_error
 def instantiate1(self, subs, problem=None):
