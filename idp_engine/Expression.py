@@ -210,7 +210,7 @@ class Expression(ASTNode):
             Textual representation of the expression.  Often used as a key.
 
             It is generated from the sub-tree.
-            Some tree transformations change it (e.g., instantiate),
+            Some tree transformations change it (e.g., interpret),
             others don't.
 
         sub_exprs (List[Expression]):
@@ -447,13 +447,7 @@ class Expression(ASTNode):
                    tag=None) -> Expression:
         return self  # monkey-patched
 
-    def instantiate(self,
-                    subs: Dict[str, Expression],
-                    problem: Theory=None
-                    ) -> Expression:
-        return self  # monkey-patched
-
-    def instantiate1(self,
+    def interpret1(self,
                     subs: Dict[str, Expression],
                     problem: Theory=None
                     ) -> Expression:
@@ -554,6 +548,8 @@ class Symbol(Expression):
 
     def __repr__(self):
         return str(self)
+
+    def is_value(self): return True
 
     def has_element(self, term: Expression,
                     interpretations: Dict[str, SymbolInterpretation],

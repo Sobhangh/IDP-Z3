@@ -51,7 +51,7 @@ def substitute(self, e0, e1, assignments, tag=None):
     Fresh_variable
     """
     assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
-               f"Internal error in substitute {e0} by {e1}" # should use instantiate instead
+               f"Internal error in substitute {e0} by {e1}" # should use interpret instead
     assert self.co_constraint is None,  \
                f"Internal error in substitue: {self.co_constraint}" # see AppliedSymbol instead
 
@@ -75,7 +75,7 @@ def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self """
 
     assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
-        f"should use 'instantiate instead of 'substitute for {e0}->{e1}"
+        f"should use 'interpret instead of 'substitute for {e0}->{e1}"
 
     new_branch = None
     if self.co_constraint is not None:

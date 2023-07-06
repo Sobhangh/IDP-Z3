@@ -24,6 +24,7 @@ from __future__ import annotations
 from copy import copy, deepcopy
 from itertools import chain
 import string
+from typing import Dict
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition, Rule,
@@ -341,16 +342,16 @@ def annotate(self, voc, q_vars):
     return self
 Rule.annotate = annotate
 
-def rename_args(self, subs):
+def rename_args(self: Rule, subs: Dict[str, Expression]):
     """replace old variables by new variables
         (ignoring arguments in the head before the it
     """
-    self.body = self.body.instantiate(subs)
-    self.out = (self.out.instantiate(subs) if self.out else
+    self.body = self.body.interpret(None, subs)
+    self.out = (self.out.interpret(None, subs) if self.out else
                 self.out)
     args = self.definiendum.sub_exprs
     for j in range(0, len(args)):
-        args[j] = args[j].instantiate(subs)
+        args[j] = args[j].interpret(None, subs)
 
 
 # Class Structure  #######################################################

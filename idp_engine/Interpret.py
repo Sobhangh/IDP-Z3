@@ -24,10 +24,6 @@ Methods to ground / interpret a theory in a data structure
 * expand quantifiers
 * replace symbols interpreted in the structure by their interpretation
 
-This module also includes methods to:
-
-* instantiate an expresion, i.e. replace a variable by a value
-
 This module monkey-patches the ASTNode class and sub-classes.
 
 ( see docs/zettlr/Substitute.md )
@@ -330,11 +326,11 @@ def instantiate_definition(self: Rule, new_args, theory):
     subs = dict(zip([e.name for e in self.definiendum.sub_exprs], new_args))
 
     if self.definiendum.decl.type == BOOL:  # a predicate
-        out = out.instantiate(subs, theory)
+        out = out.interpret(theory, subs)
         out = EQUIV([instance, out])
     else:
         subs[self.out.name] = instance
-        out = out.instantiate(subs, theory)
+        out = out.interpret(theory, subs)
     out.block = self.block
     out = out.interpret(theory, {})
     return out
@@ -512,56 +508,23 @@ Expression.interpret = interpret
 
 def interpret1(self: Expression, problem: Theory, subs: Dict[str, Expression]) -> Expression:
     out = self.update_exprs(e.interpret(problem, subs) for e in self.sub_exprs)
-    if subs:
-        _finalize(self, out, subs)
+    _finalize(out, subs)
     return out
 Expression.interpret1 = interpret1
 
 @catch_error
-def instantiate(self: Expression, subs, problem=None):
-    """Recursively substitute Variable in e0 by e1 in a copy of self.
-    Update .variables.
-    """
-    if self.is_value():
-        return self
-    out = copy(self)  # shallow copy !
-    out.annotations = copy(out.annotations)
-    out.variables = copy(out.variables)
-    return out.instantiate1(subs, problem)
-Expression.instantiate = instantiate
-
-@catch_error
-def instantiate1(self: Expression, subs, problem=None):
-    """Recursively substitute Variable in e0 by e1 in self.
-
-    Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
-    Update .variables.
-    """
-    # instantiate expressions, with simplification
-    out = self.update_exprs(e.instantiate(subs, problem)
-                            for e in self.sub_exprs)
-    return _finalize(self, out, subs)
-Expression.instantiate1 = instantiate1
-
-@catch_error
-def _finalize(self: Expression, out, subs):
-    if not out.is_value():
-        for oname, n in subs.items():
-            if oname in out.variables:
-                out.variables.discard(oname)
-                if type(n) == Variable:
-                    out.variables.add(n.name)
-        out.code = str(out)
-    out.annotations['reading'] = out.code
-    return out
-
-
-# class Symbol ###########################################################
-
-@catch_error
-def instantiate(self: Symbol, subs, problem=None):
+def _finalize(self: Expression, subs):
+    """update self.variables and reading"""
+    if subs:
+        if not self.is_value():
+            for oname, n in subs.items():
+                if oname in self.variables:
+                    self.variables.discard(oname)
+                    if type(n) == Variable:
+                        self.variables.add(n.name)
+            self.code = str(self)
+        self.annotations['reading'] = self.code
     return self
-Symbol.instantiate = instantiate
 
 
 # class Type ###########################################################
@@ -711,20 +674,13 @@ def interpret1(self: AQuantification, problem: Theory, subs: Dict[str, Expressio
         for vals in product(*supersets):
             vals1 = flatten(vals)
             subs1.update((var.code, val) for var, val in zip(vars1, vals1))
-            new_f2 = f.instantiate(subs1, problem)
+            new_f2 = f.interpret(problem, subs1)
             out.append(new_f2)
 
     out = self.update_exprs(out)
 
     return out
 AQuantification.interpret1 = interpret1
-
-
-@catch_error
-def instantiate1(self, subs, problem=None):
-    out = self.interpret(problem, subs)
-    return out
-AQuantification.instantiate1 = instantiate1
 
 
 # Class AAggregate  ######################################################
@@ -734,8 +690,6 @@ def interpret1(self: AAggregate, problem: Theory, subs: Dict[str, Expression]) -
     assert self.annotated, f"Internal error in interpret"
     return AQuantification.interpret1(self, problem, subs)
 AAggregate.interpret1 = interpret1
-
-AAggregate.instantiate1 = AQuantification.instantiate1
 
 
 # Class AppliedSymbol  ##############################################
@@ -758,10 +712,9 @@ def interpret1(self: AppliedSymbol, problem: Theory, subs: Dict[str, Expression]
     # interpret the arguments
     sub_exprs = [e.interpret(problem, subs) for e in self.sub_exprs]
     self = self.update_exprs(sub_exprs)
+    _finalize(self, subs)
     if self.is_value():
         return self
-    if subs:  # update self.variables
-        _finalize(self, self, subs)
 
     # interpret the AppliedSymbol
     value, co_constraint = None, None
@@ -806,28 +759,16 @@ def interpret1(self: AppliedSymbol, problem: Theory, subs: Dict[str, Expression]
     return out
 AppliedSymbol.interpret1 = interpret1
 
-@catch_error
-def instantiate1(self, subs, problem=None):
-    out = self.interpret(problem, subs)
-    return out
-AppliedSymbol .instantiate1 = instantiate1
-
 
 # Class Variable  #######################################################
 
 @catch_error
 def interpret(self: Variable, problem: Theory, subs: Dict[str, Expression]) -> Expression:
     if self.sort:
-        self.sort = self.sort.instantiate(subs, problem)
+        self.sort = self.sort.interpret(problem, subs)
     out = subs.get(self.code, self)
     return out
 Variable.interpret = interpret
-
-@catch_error
-def instantiate1(self, subs, problem=None):
-    return self.interpret(problem, subs)
-Variable.instantiate1 = instantiate1
-
 
 
 Done = True
