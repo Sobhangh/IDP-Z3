@@ -81,7 +81,7 @@ def annotate(self, idp):
 
     # populate .map of CONCEPT
     for c in concepts.constructors:
-        assert not c.sorts
+        assert not c.sorts, "Internal error"
         concepts.map[str(c)] = UnappliedSymbol.construct(c)
 Vocabulary.annotate = annotate
 
