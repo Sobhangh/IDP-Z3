@@ -437,7 +437,13 @@ class Expression(ASTNode):
     def simplify1(self) -> Expression:
         return self  # monkey-patched
 
-    def interpret(self, problem: Theory, subs: Dict[str, Expression]) -> Expression:
+    def interpret(self, problem: Theory | None, subs: Dict[str, Expression]) -> Expression:
+        return self  # monkey-patched
+
+    def interpret1(self,
+                    problem: Theory | None,
+                    subs: Dict[str, Expression]
+                    ) -> Expression:
         return self  # monkey-patched
 
     def substitute(self,
@@ -445,12 +451,6 @@ class Expression(ASTNode):
                    e1: Expression,
                    assignments: Assignments,
                    tag=None) -> Expression:
-        return self  # monkey-patched
-
-    def interpret1(self,
-                    subs: Dict[str, Expression],
-                    problem: Theory=None
-                    ) -> Expression:
         return self  # monkey-patched
 
     def simplify_with(self, assignments: Assignments, co_constraints_too=True) -> Expression:

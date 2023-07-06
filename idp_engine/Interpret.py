@@ -484,7 +484,10 @@ Constructor.interpret = interpret
 # class Expression  ###########################################################
 
 @catch_error
-def interpret(self: Expression, problem: Theory, subs: Dict[str, Expression]) -> Expression:
+def interpret(self: Expression,
+              problem: Theory | None,
+              subs: Dict[str, Expression]
+              ) -> Expression:
     """ uses information in the problem and its vocabulary to:
     - expand quantifiers in the expression
     - simplify the expression using known assignments and enumerations
@@ -506,7 +509,10 @@ def interpret(self: Expression, problem: Theory, subs: Dict[str, Expression]) ->
     return out
 Expression.interpret = interpret
 
-def interpret1(self: Expression, problem: Theory, subs: Dict[str, Expression]) -> Expression:
+def interpret1(self: Expression,
+               problem: Theory | None,
+               subs: Dict[str, Expression]
+               ) -> Expression:
     out = self.update_exprs(e.interpret(problem, subs) for e in self.sub_exprs)
     _finalize(out, subs)
     return out
@@ -603,7 +609,10 @@ def flatten(a):
     return out
 
 @catch_error
-def interpret1(self: AQuantification, problem: Theory, subs: Dict[str, Expression]) -> Expression:
+def interpret1(self: AQuantification,
+               problem: Theory | None,
+               subs: Dict[str, Expression]
+               ) -> Expression:
     """apply information in the problem and its vocabulary
 
     Args:
@@ -686,7 +695,10 @@ AQuantification.interpret1 = interpret1
 # Class AAggregate  ######################################################
 
 @catch_error
-def interpret1(self: AAggregate, problem: Theory, subs: Dict[str, Expression]) -> Expression:
+def interpret1(self: AAggregate,
+               problem: Theory | None,
+               subs: Dict[str, Expression]
+               ) -> Expression:
     assert self.annotated, f"Internal error in interpret"
     return AQuantification.interpret1(self, problem, subs)
 AAggregate.interpret1 = interpret1
@@ -695,7 +707,10 @@ AAggregate.interpret1 = interpret1
 # Class AppliedSymbol  ##############################################
 
 @catch_error
-def interpret1(self: AppliedSymbol, problem: Theory, subs: Dict[str, Expression]) -> Expression:
+def interpret1(self: AppliedSymbol,
+               problem: Theory | None,
+               subs: Dict[str, Expression]
+               ) -> Expression:
     # interpret the symbol expression, if any
     if type(self.symbol) == SymbolExpr and self.symbol.is_intentional():  # $(x)()
         self.symbol = self.symbol.interpret(problem, subs)
@@ -763,7 +778,10 @@ AppliedSymbol.interpret1 = interpret1
 # Class Variable  #######################################################
 
 @catch_error
-def interpret(self: Variable, problem: Theory, subs: Dict[str, Expression]) -> Expression:
+def interpret(self: Variable,
+              problem: Theory | None,
+              subs: Dict[str, Expression]
+              ) -> Expression:
     if self.sort:
         self.sort = self.sort.interpret(problem, subs)
     out = subs.get(self.code, self)
