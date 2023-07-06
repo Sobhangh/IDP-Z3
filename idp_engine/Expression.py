@@ -437,7 +437,10 @@ class Expression(ASTNode):
     def simplify1(self) -> Expression:
         return self  # monkey-patched
 
-    def interpret(self, problem: Theory | None, subs: Dict[str, Expression]) -> Expression:
+    def interpret(self,
+                  problem: Theory | None,
+                  subs: Dict[str, Expression]
+                  ) -> Expression:
         return self  # monkey-patched
 
     def interpret1(self,

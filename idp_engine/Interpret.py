@@ -185,7 +185,7 @@ Definition.interpret = interpret
 
 @catch_error
 def get_def_constraints(self: Definition,
-                        problem,
+                        problem: Theory,
                         for_explain: bool = False
                         ) -> Dict[SymbolDeclaration, Definition, List[Expression]]:
     """returns the constraints for this definition.
@@ -284,7 +284,7 @@ def get_def_constraints(self: Definition,
 Definition.get_def_constraints = get_def_constraints
 
 @catch_error
-def instantiate_definition(self: Definition, decl, new_args, theory):
+def instantiate_definition(self: Definition, decl, new_args, theory) -> Expression:
     rule = self.clarks.get(decl, None)
     if rule and self.mode != Semantics.RECDATA:
         key = str(new_args)
@@ -307,7 +307,10 @@ Definition.instantiate_definition = instantiate_definition
 # class Rule  ###########################################################
 
 @catch_error
-def instantiate_definition(self: Rule, new_args, theory):
+def instantiate_definition(self: Rule,
+                           new_args: List[Expression],
+                           theory: Theory
+                           ) -> Expression:
     """Create an instance of the definition for new_args, and interpret it for theory.
 
     Args:
@@ -438,7 +441,7 @@ SymbolInterpretation.interpret = interpret
 # class Enumeration  ###########################################################
 
 @catch_error
-def interpret(self: Enumeration, problem: Theory):
+def interpret(self: Enumeration, problem: Theory) -> Enumeration:
     return self
 Enumeration.interpret = interpret
 
@@ -446,7 +449,7 @@ Enumeration.interpret = interpret
 # class ConstructedFrom  ###########################################################
 
 @catch_error
-def interpret(self: ConstructedFrom, problem: Theory):
+def interpret(self: ConstructedFrom, problem: Theory) -> ConstructedFrom:
     self.tuples = OrderedSet()
     for c in self.constructors:
         c.interpret(problem)
@@ -461,7 +464,7 @@ ConstructedFrom.interpret = interpret
 # class Constructor  ###########################################################
 
 @catch_error
-def interpret(self: Constructor, problem: Theory):
+def interpret(self: Constructor, problem: Theory) -> Constructor:
     assert all(isinstance(s.decl.out, Type) for s in self.sorts), 'internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
@@ -519,7 +522,7 @@ def interpret1(self: Expression,
 Expression.interpret1 = interpret1
 
 @catch_error
-def _finalize(self: Expression, subs):
+def _finalize(self: Expression, subs: Dict[str, Expression]):
     """update self.variables and reading"""
     if subs:
         if not self.is_value():

@@ -278,7 +278,6 @@ def annotate(self, voc, q_vars):
             else:
                 eq = EQUALS([nv, arg])
                 renamed.body = AND([eq, renamed.body])
-        renamed.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars]
 
         canonical = deepcopy(renamed)
 
