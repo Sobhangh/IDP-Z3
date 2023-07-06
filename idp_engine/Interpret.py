@@ -727,35 +727,6 @@ AAggregate.interpret = interpret
 AAggregate.instantiate1 = AQuantification.instantiate1
 
 
-# Class AImplication ######################################################
-
-@catch_error
-def instantiate1(self, subs, problem):
-    assert len(self.sub_exprs) == 2
-    premise = self.sub_exprs[0].instantiate(subs, problem)
-    if premise.same_as(FALSE):  # lazy instantiation
-        return TRUE
-    consequent = self.sub_exprs[1].instantiate(subs, problem)
-    out = self.update_exprs([premise, consequent])
-    return _finalize(self, out, subs)
-AImplication.instantiate1 = instantiate1
-
-
-# Class AConjunction ######################################################
-
-@catch_error
-def instantiate1(self, subs, problem):
-    new_exprs = []
-    for e in self.sub_exprs:
-        new_e = e.instantiate(subs, problem)
-        if new_e.same_as(FALSE):  # lazy instantiation
-            return FALSE
-        new_exprs.append(new_e)
-    out = self.update_exprs(new_exprs)
-    return _finalize(self, out, subs)
-AConjunction.instantiate1 = instantiate1
-
-
 # Class AppliedSymbol  ##############################################
 
 @catch_error

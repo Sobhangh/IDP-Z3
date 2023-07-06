@@ -1253,7 +1253,7 @@ class AppliedSymbol(Expression):
                 msg = f"Unknown error for symbol {self}"
             self.check(False, msg)
 
-    def is_value(self):
+    def is_value(self) -> bool:
         # independent of is_enumeration and in_enumeration !
         return (type(self.decl) == Constructor
                 and all(e.is_value() for e in self.sub_exprs))
