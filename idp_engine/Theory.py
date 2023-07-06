@@ -199,7 +199,7 @@ class Theory(object):
             for defin in self.definitions:
                 def_constraints.update(defin.get_def_constraints(self, for_explain=True))
 
-            for constraint in chain([c.interpret(self) for c in self.constraints],
+            for constraint in chain([c.interpret(self, {}) for c in self.constraints],
                                     chain(*def_constraints.values())):
                 p = constraint.reified(self)
                 self.expl_reifs[p] = (constraint.translate(self), constraint)
@@ -304,7 +304,7 @@ class Theory(object):
         # initialize assignments, co_constraints, questions
 
         self.co_constraints, questions = OrderedSet(), OrderedSet()
-        self.constraints = OrderedSet([v.interpret(self)
+        self.constraints = OrderedSet([v.interpret(self, {})
                                        for v in self.constraints])
         for c in self.constraints:
             c.collect_co_constraints(self.co_constraints)
@@ -314,7 +314,7 @@ class Theory(object):
         for es in self.def_constraints.values():
             for e in es:
                 e.collect_co_constraints(self.co_constraints)
-        self.co_constraints = OrderedSet([c.interpret(self)
+        self.co_constraints = OrderedSet([c.interpret(self, {})
                                           for c in self.co_constraints])
 
         for s in list(questions.values()):

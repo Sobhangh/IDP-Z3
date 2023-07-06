@@ -19,6 +19,7 @@
     Various utilities (in particular, OrderedSet)
 """
 from __future__ import annotations
+from typing import TYPE_CHECKING, Iterator
 
 from collections import ChainMap
 from collections.abc import Iterable
@@ -28,6 +29,8 @@ import time
 import tempfile
 from enum import Enum, auto
 
+if TYPE_CHECKING:
+    from .Expression import Expression
 
 """
     Global Parameters:
@@ -95,7 +98,7 @@ class IDPZ3Error(Exception):
     pass
 
 
-def unquote(s):
+def unquote(s: str) -> str:
     if s[0] == "'" and s[-1] == "'":
         return s[1:-1]
     return s
@@ -112,27 +115,27 @@ class OrderedSet(dict):
         assert isinstance(els, Iterable), "Internal error in OrderedSet"
         super(OrderedSet, self).__init__(((el.code, el) for el in els))
 
-    def append(self, el):
+    def append(self, el: Expression):
         if el not in self:
             self[el.code] = el
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Expression]:
         return iter(self.values())  # instead of keys()
 
-    def __contains__(self, expression):
+    def __contains__(self, expression: Expression) -> bool:
         return super(OrderedSet, self).__contains__(expression.code)
 
-    def extend(self, more):
+    def extend(self, more: Iterator[Expression]):
         for el in more:
             self.append(el)
 
     # def items(self):
     #     return super(OrderedSet, self).items()
 
-    def pop(self, key, default=None):
+    def pop(self, key: str, default: Expression = None) -> Expression:
         return super(OrderedSet, self).pop(key.code, default)
 
-    def __or__(self, other: "OrderedSet") -> "OrderedSet":
+    def __or__(self, other: OrderedSet) -> OrderedSet:
         """returns the union of self and other.  Use: `self | other`.
 
         Returns:
@@ -142,7 +145,7 @@ class OrderedSet(dict):
         out.extend(other)
         return out
 
-    def __and__(self, other: "OrderedSet") -> "OrderedSet":
+    def __and__(self, other: OrderedSet) -> OrderedSet:
         """returns the intersection of self and other.  Use: `self & other`.
 
         Returns:
@@ -151,7 +154,7 @@ class OrderedSet(dict):
         out = OrderedSet({v for v in self if v in other})
         return out
 
-    def __xor__(self, other: "OrderedSet") -> "OrderedSet":
+    def __xor__(self, other: OrderedSet) -> OrderedSet:
         """returns the self minus other.  Use: `self ^ other`.
 
         Returns:

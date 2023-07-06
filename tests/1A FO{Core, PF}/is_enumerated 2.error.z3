@@ -24,11 +24,11 @@ Traceback (most recent call last):
   File "idp_engine/Theory.py", line ??, in __init__
     self.add(*theories)
   File "idp_engine/Theory.py", line ??, in add
-    self.constraints = OrderedSet([v.interpret(self)
-                                  ^^^^^^^^^^^^^^^^^^
+    self.constraints = OrderedSet([v.interpret(self, {})
+                                  ^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Theory.py", line ??, in <listcomp>
-    self.constraints = OrderedSet([v.interpret(self)
-                                   ^^^^^^^^^^^^^^^^^
+    self.constraints = OrderedSet([v.interpret(self, {})
+                                   ^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Expression.py", line ??, in inner_function
     self.check(False, str(e))
   File "idp_engine/Expression.py", line ??, in check

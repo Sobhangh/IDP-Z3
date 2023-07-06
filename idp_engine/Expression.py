@@ -95,7 +95,7 @@ class ASTNode(object):
     def annotate1(self, idp):
         return  # monkey-patched
 
-    def interpret(self, problem: Any) -> Expression:
+    def interpret(self, problem: Theory) -> Expression:
         return self  # monkey-patched
 
     def EN(self):
@@ -435,6 +435,9 @@ class Expression(ASTNode):
         return self  # monkey-patched
 
     def simplify1(self) -> Expression:
+        return self  # monkey-patched
+
+    def interpret(self, problem: Theory, subs: Dict[str, Expression]) -> Expression:
         return self  # monkey-patched
 
     def substitute(self,
