@@ -434,6 +434,14 @@ class Expression(ASTNode):
     def __str__(self) -> str:
         return ''  # monkey-patched
 
+    def _change(self: Expression,
+                sub_exprs: List[Expression] = None,
+                ops : List[str] = None,
+                simpler : Expression = None,
+                co_constraint : Expression = None
+                ) -> Expression:
+        pass
+
     def update_exprs(self, new_exprs: List[Expression]) -> Expression:
         return self  # monkey-patched
 
@@ -485,11 +493,11 @@ class Expression(ASTNode):
     def translate1(self, problem: Theory, vars={}):
         pass  # monkey-patched
 
-    def as_set_condition(self) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
+    def as_set_condition(self) -> Tuple[AppliedSymbol | None, bool | None, Enumeration | None]:
         """Returns an equivalent expression of the type "x in y", or None
 
         Returns:
-            Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "expr is (not) in enumeration"
+            Tuple[AppliedSymbol | None, bool | None, Enumeration | None]: meaning "expr is (not) in enumeration"
         """
         return (None, None, None)
 
