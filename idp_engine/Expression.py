@@ -788,6 +788,8 @@ class AQuantification(Expression):
         quantees (List[Quantee]): list of variable declarations
 
         f (Expression): the formula being quantified
+
+        supersets, new_quantees, vars1: attributes used in `interpret`
     """
     PRECEDENCE = 20
 
@@ -806,6 +808,7 @@ class AQuantification(Expression):
         super().__init__()
 
         self.type = BOOL
+        self.supersets, self.new_quantees, self.vars1 = None, None, None
 
     @classmethod
     def make(cls,
@@ -1098,6 +1101,7 @@ class AAggregate(Expression):
             self.sub_exprs.append(if_)
         self.annotated = False  # cannot test q_vars, because aggregate may not have quantee
         self.q = ''
+        self.supersets, self.new_quantees, self.vars1 = None, None, None
         super().__init__()
 
     def __str__(self):

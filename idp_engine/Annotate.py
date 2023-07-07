@@ -575,14 +575,18 @@ AIfExpr.annotate1 = annotate1
 def annotate(self, voc, q_vars):
     Expression.annotate(self, voc, q_vars)
     for vars in self.vars:
-        self.check(not self.sub_exprs or len(vars)==len(self.sub_exprs[0].decl.sorts),
+        self.check(not self.sub_exprs
+                   or not self.sub_exprs[0].decl
+                   or len(vars)==len(self.sub_exprs[0].decl.sorts),
                     f"Incorrect arity for {self}")
         for i, var in enumerate(vars):
             self.check(var.name not in voc.symbol_decls
                         or type(voc.symbol_decls[var.name]) == VarDeclaration,
                 f"the quantified variable '{var.name}' cannot have"
                 f" the same name as another symbol")
-            var.sort = self.sub_exprs[0].decl.sorts[i] if self.sub_exprs else None
+            var.sort = (self.sub_exprs[0].decl.sorts[i]
+                        if self.sub_exprs and self.sub_exprs[0].decl
+                        else None)
             var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
             if self.subtype is None and var_decl:
                 subtype = var_decl.subtype

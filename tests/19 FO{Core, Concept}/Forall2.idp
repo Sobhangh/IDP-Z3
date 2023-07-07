@@ -1,0 +1,12 @@
+vocabulary {
+	type node := {a,b,c}
+    property: Concept[node -> Bool] -> Bool
+    q: node -> Bool
+}
+theory {
+    property := {`q}.
+    ! `p in property: ?x in $(`p): $(`p)(x).
+}
+procedure main() {
+    pretty_print(model_expand(T))
+}

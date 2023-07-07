@@ -515,6 +515,10 @@ def interpretA(self: Expression,
     Returns:
         Expression: _description_
     """
+
+    for e in self.sub_exprs:
+        interpretA(e, problem, subs)
+
     if isinstance(self, AQuantification) or isinstance(self, AAggregate):
         # type inference
         if 0 < len(self.sub_exprs):  # in case it was simplified away
@@ -528,9 +532,7 @@ def interpretA(self: Expression,
                                 f"can't infer type of {var.name}")
                     var.sort = inferred[var.name]
                     q.sub_exprs = [inferred[var.name]]
-
-    for e in self.sub_exprs:
-        interpretA(e, problem, subs)
+        get_supersets(self, problem)
 
 @catch_error
 def interpretB(self: Expression,
@@ -616,6 +618,47 @@ Type.extension = extension
 
 # Class AQuantification  ######################################################
 
+def get_supersets(self: Expression, problem: Theory):
+    """determine the domain of the variables, if possible,
+    and add filter to the quantified expression if needed
+    """
+    self.new_quantees, self.vars1, self.supersets = [], [], []
+    forms = self.sub_exprs
+    for q in self.quantees:
+        domain = q.sub_exprs[0]
+
+        if problem:
+            if isinstance(domain, Type):  # quantification over type / Concepts
+                (superset, filter) = domain.extension(problem.interpretations,
+                                                    problem.extensions)
+            elif type(domain) == SymbolExpr:
+                return
+            elif type(domain) in [Symbol]:  # SymbolExpr (e.g. $(`Color))
+                self.check(domain.decl.out.type == BOOL,
+                            f"{domain} is not a type or predicate")
+                assert domain.decl.name in problem.extensions, "internal error"
+                (superset, filter) = problem.extensions[domain.decl.name]
+            else:
+                self.check(False, f"Can't resolve the domain of {str(q.vars)}")
+        else:
+            (superset, filter) = None, None
+
+        for vars in q.vars:
+            self.check(domain.decl.arity == len(vars),
+                        f"Incorrect arity of {domain}")
+            if filter:
+                forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
+
+        self.vars1.extend(flatten(q.vars))
+
+        if superset is None:
+            self.new_quantees.append(q)
+            self.supersets.extend([q] for q in q.vars)  # replace the variable by itself
+        else:
+            self.supersets.extend([superset]*len(q.vars))
+    self.sub_exprs = forms
+
+
 def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expression],
                 theory: Theory) -> Expression:
     """add `filter(args)` to `expr` quantified by `q`
@@ -672,56 +715,23 @@ def interpret1(self: AQuantification,
     if not self.quantees and not subs:  # already expanded
         return Expression.interpret1(self, problem, subs)
 
-    # interpret quantees
-    for q in self.quantees: # for !x in $(output_domain(s,1))
-        q.sub_exprs = [e.interpretB(problem, subs) for e in q.sub_exprs]
+    if not self.supersets:
+        # interpret quantees
+        for q in self.quantees: # for !x in $(output_domain(s,1))
+            q.sub_exprs = [e.interpretB(problem, subs) for e in q.sub_exprs]
+        get_supersets(self, problem)
 
-    # determine the domain of the variables, and add filter to the expression if needed
-    new_quantees, vars1, supersets = [], [], []
-    forms = self.sub_exprs
-    for q in self.quantees:
-        domain = q.sub_exprs[0]
-
-        if problem:
-            if isinstance(domain, Type):  # quantification over type / Concepts
-                (superset, filter) = domain.extension(problem.interpretations,
-                                                    problem.extensions)
-            elif type(domain) in [SymbolExpr, Symbol]:  # SymbolExpr (e.g. $(`Color))
-                self.check(domain.decl.out.type == BOOL,
-                            f"{domain} is not a type or predicate")
-                assert domain.decl.name in problem.extensions, "internal error"
-                (superset, filter) = problem.extensions[domain.decl.name]
-            else:
-                self.check(False, f"Can't resolve the domain of {str(q.vars)}")
-        else:
-            (superset, filter) = None, None
-
-        for vars in q.vars:
-            self.check(domain.decl.arity == len(vars),
-                        f"Incorrect arity of {domain}")
-            if filter:
-                forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
-
-        vars1.extend(flatten(q.vars))
-
-        if superset is None:
-            new_quantees.append(q)
-            supersets.extend([q] for q in q.vars)  # replace the variable by itself
-        else:
-            supersets.extend([superset]*len(q.vars))
-    self.quantees = new_quantees
-
+    self.quantees = self.new_quantees
     # expand the formula by the cross-product of the supersets, and substitute per `subs`
     out, subs1 = [], copy(subs)
-    for f in forms:
-        for vals in product(*supersets):
+    for f in self.sub_exprs:
+        for vals in product(*self.supersets):
             vals1 = flatten(vals)
-            subs1.update((var.code, val) for var, val in zip(vars1, vals1))
+            subs1.update((var.code, val) for var, val in zip(self.vars1, vals1))
             new_f2 = f.interpretB(problem, subs1)
             out.append(new_f2)
 
     out = self.update_exprs(out)
-
     return out
 AQuantification.interpret1 = interpret1
 
