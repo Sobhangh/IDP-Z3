@@ -328,7 +328,7 @@ def instantiate_definition(self: Rule,
     Returns:
         Expression: a boolean expression
     """
-    out = deepcopy(self.body)  # in case there are no arguments
+    out = self.body  # in case there are no arguments
     instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
     instance.in_head = True
     self.check(len(self.definiendum.sub_exprs) == len(new_args),
@@ -336,13 +336,11 @@ def instantiate_definition(self: Rule,
     subs = dict(zip([e.name for e in self.definiendum.sub_exprs], new_args))
 
     if self.definiendum.decl.type == BOOL:  # a predicate
-        out = out.interpret(theory, subs)
         out = EQUIV([instance, out])
     else:
         subs[self.out.name] = instance
-        out = out.interpret(theory, subs)
+    out = out.interpret(theory, subs)
     out.block = self.block
-    out = out.interpret(theory, {})
     return out
 Rule.instantiate_definition = instantiate_definition
 
@@ -493,8 +491,16 @@ Constructor.interpret = interpret
 
 # class Expression  ###########################################################
 
-@catch_error
 def interpret(self: Expression,
+              problem: Theory | None,
+              subs: Dict[str, Expression]
+              ) -> Expression:
+    return (self if self.is_type_constraint_for else
+            self.interpretB(problem, subs))
+Expression.interpret = interpret
+
+@catch_error
+def interpretB(self: Expression,
               problem: Theory | None,
               subs: Dict[str, Expression]
               ) -> Expression:
@@ -513,20 +519,20 @@ def interpret(self: Expression,
     Returns:
         Expression: the resulting expression
     """
-    if self.is_value() or self.is_type_constraint_for:  # do not interpret typeConstraints
+    if self.is_value():  # do not interpret typeConstraints
         return self
     if subs:
         self = copy(self)  # shallow copy !
         self.annotations = copy(self.annotations)
     out = self.interpret1(problem, subs)
     return out
-Expression.interpret = interpret
+Expression.interpretB = interpretB
 
 def interpret1(self: Expression,
                problem: Theory | None,
                subs: Dict[str, Expression]
                ) -> Expression:
-    out = self.update_exprs(e.interpret(problem, subs) for e in self.sub_exprs)
+    out = self.update_exprs(e.interpretB(problem, subs) for e in self.sub_exprs)
     _finalize(out, subs)
     return out
 Expression.interpret1 = interpret1
@@ -593,7 +599,7 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
         Expression: `expr` extended with appropriate filter
     """
     if filter:  # adds `filter(val) =>` in front of expression
-        applied = filter(args).interpret(theory, {})
+        applied = filter(args).interpretB(theory, {})
         if q == '∀':
             out = IMPLIES([applied, expr])
         elif q == '∃':
@@ -628,13 +634,13 @@ def interpret1(self: AQuantification,
     Returns:
         Expression: the expanded quantifier expression
     """
-    # This method is called by AAggregate.interpret !
+    # This method is called by AAggregate.interpret1 !
 
     if not self.quantees and not subs:
         return Expression.interpret1(self, problem, subs)
 
     for q in self.quantees: # for !x in $(output_domain(s,1))
-        q.sub_exprs = [e.interpret(problem, subs) for e in q.sub_exprs]
+        q.sub_exprs = [e.interpretB(problem, subs) for e in q.sub_exprs]
 
     # type inference
     if 0 < len(self.sub_exprs):  # in case it was simplified away
@@ -690,7 +696,7 @@ def interpret1(self: AQuantification,
         for vals in product(*supersets):
             vals1 = flatten(vals)
             subs1.update((var.code, val) for var, val in zip(vars1, vals1))
-            new_f2 = f.interpret(problem, subs1)
+            new_f2 = f.interpretB(problem, subs1)
             out.append(new_f2)
 
     out = self.update_exprs(out)
@@ -720,7 +726,7 @@ def interpret1(self: AppliedSymbol,
                ) -> Expression:
     # interpret the symbol expression, if any
     if type(self.symbol) == SymbolExpr and self.symbol.is_intentional():  # $(x)()
-        self.symbol = self.symbol.interpret(problem, subs)
+        self.symbol = self.symbol.interpretB(problem, subs)
         if type(self.symbol) == Symbol:  # found $(x)
             self.check(len(self.sub_exprs) == len(self.symbol.decl.sorts),
                         f"Incorrect arity for {self.code}")
@@ -732,7 +738,7 @@ def interpret1(self: AppliedSymbol,
             self = out
 
     # interpret the arguments
-    sub_exprs = [e.interpret(problem, subs) for e in self.sub_exprs]
+    sub_exprs = [e.interpretB(problem, subs) for e in self.sub_exprs]
     self = self.update_exprs(sub_exprs)
     _finalize(self, subs)
     if self.is_value():
@@ -785,15 +791,15 @@ AppliedSymbol.interpret1 = interpret1
 # Class Variable  #######################################################
 
 @catch_error
-def interpret(self: Variable,
+def interpretB(self: Variable,
               problem: Theory | None,
               subs: Dict[str, Expression]
               ) -> Expression:
     if self.sort:
-        self.sort = self.sort.interpret(problem, subs)
+        self.sort = self.sort.interpretB(problem, subs)
     out = subs.get(self.code, self)
     return out
-Variable.interpret = interpret
+Variable.interpretB = interpretB
 
 
 Done = True
