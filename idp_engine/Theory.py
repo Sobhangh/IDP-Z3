@@ -29,7 +29,7 @@ from enum import Enum, auto
 from itertools import chain
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
-                is_and, BoolVal, get_param)
+                is_and, BoolVal, get_param, is_true)
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
@@ -391,7 +391,7 @@ class Theory(object):
 
             def collect_constraints(e, constraints):
                 """collect constraints in e, flattening conjunctions"""
-                if e.sexpr() == 'true':
+                if is_true(e):
                     return
                 if is_and(e):
                     for e1 in e.children():
