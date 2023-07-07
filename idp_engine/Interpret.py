@@ -518,7 +518,6 @@ def interpret(self: Expression,
     if subs:
         self = copy(self)  # shallow copy !
         self.annotations = copy(self.annotations)
-        self.variables = copy(self.variables)
     out = self.interpret1(problem, subs)
     return out
 Expression.interpret = interpret
@@ -536,13 +535,7 @@ Expression.interpret1 = interpret1
 def _finalize(self: Expression, subs: Dict[str, Expression]):
     """update self.variables and reading"""
     if subs:
-        if not self.is_value():
-            for oname, n in subs.items():
-                if oname in self.variables:
-                    self.variables.discard(oname)
-                    if type(n) == Variable:
-                        self.variables.add(n.name)
-            self.code = str(self)
+        self.code = str(self)
         self.annotations['reading'] = self.code
     return self
 

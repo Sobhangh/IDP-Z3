@@ -243,7 +243,7 @@ class Expression(ASTNode):
             The original expression, before propagation and simplification.
 
         variables (Set(string)):
-            The set of names of the variables in the expression.
+            The set of names of the variables in the expression, before interpretation.
 
         is_type_constraint_for (string):
             name of the symbol for which the expression is a type constraint
