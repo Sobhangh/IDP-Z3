@@ -23,6 +23,7 @@ using FO-dot knowledge bases:
 """
 from __future__ import annotations
 
+from copy import copy
 import logging
 import time
 import types
@@ -267,7 +268,9 @@ def execute(self: IDP) -> None:
     last_call = time.process_time()
     main = str(self.procedures['main'])
     mybuiltins = {}
-    mylocals = {**self.vocabularies, **self.theories, **self.structures}
+    mylocals = copy(self.vocabularies)
+    mylocals.update(self.theories)
+    mylocals.update(self.structures)
     mylocals['logging'] = logging
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand

@@ -325,7 +325,7 @@ def annotate(self, voc, q_vars):
                 f"No support for intentional objects in the head of a rule: "
                 f"{self}")
     # create head variables
-    q_v = {**q_vars}  # copy
+    q_v = copy(q_vars)
     for q in self.quantees:
         q.annotate(voc, q_vars)
         for vars in q.vars:
@@ -603,7 +603,7 @@ Quantee.annotate = annotate
 
 def annotate(self, voc, q_vars):
     # also called by AAgregate.annotate
-    q_v = {**q_vars}  # copy
+    q_v = copy(q_vars)
     for q in self.quantees:
         q.annotate(voc, q_v)
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
