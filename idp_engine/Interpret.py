@@ -287,6 +287,14 @@ Definition.get_def_constraints = get_def_constraints
 def instantiate_definition(self: Definition, decl, new_args, theory) -> Expression:
     rule = self.clarks.get(decl, None)
     if rule and self.mode != Semantics.RECDATA:
+        instantiable = all(  # finite domain or not a variable
+            s.extension(theory.interpretations, theory.extensions)[0] is not None
+            or not v.has_variables()
+            for s, v in zip(rule.definiendum.decl.sorts, new_args))
+
+        if not instantiable:
+            return None
+
         key = str(new_args)
         if (decl, key) in self.cache:
             return self.cache[decl, key]
@@ -320,7 +328,6 @@ def instantiate_definition(self: Rule,
     Returns:
         Expression: a boolean expression
     """
-
     out = deepcopy(self.body)  # in case there are no arguments
     instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
     instance.in_head = True
@@ -767,7 +774,7 @@ def interpret1(self: AppliedSymbol,
             if interpretation.block.name != DEFAULT:
                 f = interpretation.interpret_application
                 value = f(0, self, sub_exprs)
-        if not self.in_head and not self.variables:
+        if not self.in_head:
             # instantiate definition (for relevance)
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
                     for defin in problem.definitions]

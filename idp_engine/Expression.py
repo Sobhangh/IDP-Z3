@@ -312,6 +312,9 @@ class Expression(ASTNode):
                 'str': self.str,
                 'co_constraint': self.co_constraint}
 
+    def has_variables(self) -> bool:
+        return any(e.has_variables() for e in self.sub_exprs)
+
     def collect(self,
                 questions: OrderedSet,
                 all_: bool=True,
@@ -1382,6 +1385,8 @@ class Variable(Expression):
         return self
 
     def annotate1(self): return self
+
+    def has_variables(self) -> bool: return True
 
 def VARIABLE(name: str, sort: Union[Type, Symbol]):
     return Variable(None, name, sort)
