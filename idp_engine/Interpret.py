@@ -495,9 +495,42 @@ def interpret(self: Expression,
               problem: Theory | None,
               subs: Dict[str, Expression]
               ) -> Expression:
-    return (self if self.is_type_constraint_for else
-            self.interpretB(problem, subs))
+    if self.is_type_constraint_for:
+        return self
+    interpretA(self, problem, subs)
+    return self.interpretB(problem, subs)
 Expression.interpret = interpret
+
+def interpretA(self: Expression,
+              problem: Theory | None,
+              subs: Dict[str, Expression]
+              ) -> Expression:
+    """Prepare the interpretation by computing type inference
+
+    Args:
+        self (Expression): _description_
+        problem (Theory | None): _description_
+        subs (Dict[str, Expression]): _description_
+
+    Returns:
+        Expression: _description_
+    """
+    if isinstance(self, AQuantification) or isinstance(self, AAggregate):
+        # type inference
+        if 0 < len(self.sub_exprs):  # in case it was simplified away
+            inferred = self.sub_exprs[0].type_inference()
+            for q in self.quantees:
+                if not q.sub_exprs:
+                    assert len(q.vars) == 1 and q.arity == 1, \
+                        f"Internal error: interpret {q}"
+                    var = q.vars[0][0]
+                    self.check(var.name in inferred,
+                                f"can't infer type of {var.name}")
+                    var.sort = inferred[var.name]
+                    q.sub_exprs = [inferred[var.name]]
+
+    for e in self.sub_exprs:
+        interpretA(e, problem, subs)
 
 @catch_error
 def interpretB(self: Expression,
@@ -636,24 +669,12 @@ def interpret1(self: AQuantification,
     """
     # This method is called by AAggregate.interpret1 !
 
-    if not self.quantees and not subs:
+    if not self.quantees and not subs:  # already expanded
         return Expression.interpret1(self, problem, subs)
 
+    # interpret quantees
     for q in self.quantees: # for !x in $(output_domain(s,1))
         q.sub_exprs = [e.interpretB(problem, subs) for e in q.sub_exprs]
-
-    # type inference
-    if 0 < len(self.sub_exprs):  # in case it was simplified away
-        inferred = self.sub_exprs[0].type_inference()
-        for q in self.quantees:
-            if not q.sub_exprs:
-                assert len(q.vars) == 1 and q.arity == 1, \
-                    f"Internal error: interpret {q}"
-                var = q.vars[0][0]
-                self.check(var.name in inferred,
-                            f"can't infer type of {var.name}")
-                var.sort = inferred[var.name]
-                q.sub_exprs = [inferred[var.name]]
 
     # determine the domain of the variables, and add filter to the expression if needed
     new_quantees, vars1, supersets = [], [], []

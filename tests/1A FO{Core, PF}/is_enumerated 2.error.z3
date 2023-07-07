@@ -30,8 +30,8 @@ Traceback (most recent call last):
     self.constraints = OrderedSet([v.interpret(self, {})
                                    ^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Interpret.py", line ??, in interpret
-    self.interpretB(problem, subs))
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    return self.interpretB(problem, subs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Expression.py", line ??, in inner_function
     raise e
   File "idp_engine/Expression.py", line ??, in inner_function
