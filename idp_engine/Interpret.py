@@ -496,8 +496,12 @@ def interpret(self: Expression,
     - simplify the expression using known assignments and enumerations
     - instantiate definitions
 
+    This method calls `interpret1` after copying `self`
+
     Args:
         problem (Theory): the Theory to apply
+
+        subs: a dictionary holding the value of the free variables of self
 
     Returns:
         Expression: the resulting expression
