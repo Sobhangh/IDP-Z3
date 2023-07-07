@@ -141,12 +141,11 @@ def translate(self, problem: Theory, vars={}) -> ExprRef:
     Returns:
         ExprRef: Z3 expression
     """
-    if self.variables:
-        return self.translate1(problem, vars)
     out = problem.z3.get(self.str, None)
     if out is None:
         out = self.translate1(problem, vars)
-        problem.z3[self.str] = out
+        if not vars:
+            problem.z3[self.str] = out
     return out
 Expression.translate = translate
 
