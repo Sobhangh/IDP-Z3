@@ -27,17 +27,17 @@ from __future__ import annotations
 
 from copy import deepcopy
 import sys
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from .Expression import (
-    Constructor, Expression, AIfExpr, IF, AQuantification, Quantee, Type,
+    Constructor, Expression, AIfExpr, IF, AQuantification,
     Operator, AEquivalence, AImplication, ADisjunction,
     AConjunction, AComparison, EQUALS, ASumMinus, AMultDiv, APower,
     AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
     Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
-from .Parse import Symbol, Enumeration, TupleIDP, TypeDeclaration
+from .Parse import Symbol, Enumeration, TupleIDP
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, INT, DATE, CONCEPT, ABS, RESERVED_SYMBOLS
+from .utils import BOOL, INT, DATE, ABS
 
 
 # class Expression  ###########################################################
@@ -243,7 +243,7 @@ def update_exprs(self: AComparison, new_exprs: List[Expression]) -> Expression:
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
 
-def as_set_condition(self: AComparison) -> Tuple[AppliedSymbol | None, bool | None, Enumeration | None]:
+def as_set_condition(self: AComparison) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
     return ((None, None, None) if not self.is_assignment() else
             (self.sub_exprs[0], True,
              Enumeration(tuples=[TupleIDP(args=[self.sub_exprs[1]])])))
@@ -321,7 +321,7 @@ def update_exprs(self: AUnary, new_exprs: List[Expression]) -> Expression:
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
-def as_set_condition(self: AUnary) -> Tuple[AppliedSymbol | None, bool | None, Enumeration | None]:
+def as_set_condition(self: AUnary) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
     (x, y, z) = self.sub_exprs[0].as_set_condition()
     return ((None, None, None) if x is None else
             (x, not y, z))
@@ -374,7 +374,7 @@ def update_exprs(self: AppliedSymbol, new_exprs: List[Expression]) -> Expression
     return self._change(sub_exprs=new_exprs)
 AppliedSymbol.update_exprs = update_exprs
 
-def as_set_condition(self: AppliedSymbol) -> Tuple[AppliedSymbol | None, bool | None, Enumeration | None]:
+def as_set_condition(self: AppliedSymbol) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
     # determine core after substitutions
     core = AppliedSymbol.make(self.symbol, deepcopy(self.sub_exprs))
 

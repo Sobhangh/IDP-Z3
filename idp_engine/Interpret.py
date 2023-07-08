@@ -34,14 +34,14 @@ from __future__ import annotations
 
 from copy import copy, deepcopy
 from itertools import product
-from typing import Dict, List, Callable
+from typing import Dict, List, Callable, Optional
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
     Definition, Rule)
 from .Expression import (catch_error, RecDef, Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
-    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
+    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
     EQUIV, EQUALS, OR, AppliedSymbol, UnappliedSymbol, Quantee,
     Variable, VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
 from .Theory import Theory
@@ -493,7 +493,7 @@ Constructor.interpret = interpret
 # class Expression  ###########################################################
 
 def interpret(self: Expression,
-              problem: Theory | None,
+              problem: Optional[Theory],
               subs: Dict[str, Expression]
               ) -> Expression:
     """expand quantifiers and replace symbols interpreted in the structure
@@ -514,7 +514,7 @@ def interpret(self: Expression,
 Expression.interpret = interpret
 
 def interpretA(self: Expression,
-              problem: Theory | None,
+              problem: Optional[Theory],
               subs: Dict[str, Expression]
               ) -> Expression:
     """Prepare the interpretation by transforming quantifications and aggregates
@@ -541,7 +541,7 @@ def interpretA(self: Expression,
 
 @catch_error
 def interpretB(self: Expression,
-              problem: Theory | None,
+              problem: Optional[Theory],
               subs: Dict[str, Expression]
               ) -> Expression:
     """ uses information in the problem and its vocabulary to:
@@ -569,7 +569,7 @@ def interpretB(self: Expression,
 Expression.interpretB = interpretB
 
 def interpret1(self: Expression,
-               problem: Theory | None,
+               problem: Optional[Theory],
                subs: Dict[str, Expression]
                ) -> Expression:
     out = self.update_exprs(e.interpretB(problem, subs) for e in self.sub_exprs)
@@ -703,7 +703,7 @@ def flatten(a):
 
 @catch_error
 def interpret1(self: AQuantification,
-               problem: Theory | None,
+               problem: Optional[Theory],
                subs: Dict[str, Expression]
                ) -> Expression:
     """apply information in the problem and its vocabulary
@@ -744,7 +744,7 @@ AQuantification.interpret1 = interpret1
 
 @catch_error
 def interpret1(self: AAggregate,
-               problem: Theory | None,
+               problem: Optional[Theory],
                subs: Dict[str, Expression]
                ) -> Expression:
     assert self.annotated, f"Internal error in interpret"
@@ -756,7 +756,7 @@ AAggregate.interpret1 = interpret1
 
 @catch_error
 def interpret1(self: AppliedSymbol,
-               problem: Theory | None,
+               problem: Optional[Theory],
                subs: Dict[str, Expression]
                ) -> Expression:
     # interpret the symbol expression, if any
@@ -827,7 +827,7 @@ AppliedSymbol.interpret1 = interpret1
 
 @catch_error
 def interpretB(self: Variable,
-              problem: Theory | None,
+              problem: Optional[Theory],
               subs: Dict[str, Expression]
               ) -> Expression:
     if self.sort:

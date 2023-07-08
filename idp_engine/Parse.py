@@ -27,7 +27,6 @@ from datetime import date
 from enum import Enum
 from itertools import groupby
 from os import path
-from re import match
 from sys import intern
 from textx import metamodel_from_file
 from typing import Dict, List, Union, Optional
@@ -41,7 +40,7 @@ from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR, Accesso
     AComparison, ASumMinus, AMultDiv, APower, AUnary,
     AAggregate, AppliedSymbol, UnappliedSymbol,
     Number, Brackets, Date, Extension,
-    Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
+    Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
     GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error, MAX_QUANTIFIER_EXPANSION,
     Semantics as S)

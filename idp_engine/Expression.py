@@ -31,7 +31,7 @@ from fractions import Fraction
 from re import findall
 from sys import intern
 from textx import get_location
-from typing import Optional, List, Union, Tuple, Dict, Set, Any, Callable, TYPE_CHECKING
+from typing import Optional, List, Union, Tuple, Dict, Set, Callable, TYPE_CHECKING
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
@@ -449,13 +449,13 @@ class Expression(ASTNode):
         return self  # monkey-patched
 
     def interpret(self,
-                  problem: Theory | None,
+                  problem: Optional[Theory],
                   subs: Dict[str, Expression]
                   ) -> Expression:
         return self  # monkey-patched
 
     def interpret1(self,
-                    problem: Theory | None,
+                    problem: Optional[Theory],
                     subs: Dict[str, Expression]
                     ) -> Expression:
         return self  # monkey-patched
@@ -493,11 +493,11 @@ class Expression(ASTNode):
     def translate1(self, problem: Theory, vars={}):
         pass  # monkey-patched
 
-    def as_set_condition(self) -> Tuple[AppliedSymbol | None, bool | None, Enumeration | None]:
+    def as_set_condition(self) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
         """Returns an equivalent expression of the type "x in y", or None
 
         Returns:
-            Tuple[AppliedSymbol | None, bool | None, Enumeration | None]: meaning "expr is (not) in enumeration"
+            Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "expr is (not) in enumeration"
         """
         return (None, None, None)
 

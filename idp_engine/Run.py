@@ -27,7 +27,7 @@ from copy import copy
 import logging
 import time
 import types
-from typing import Any, Iterator, List, Union
+from typing import Any, Iterator, Union
 from z3 import Solver
 
 from .Parse import IDP, TheoryBlock, Structure

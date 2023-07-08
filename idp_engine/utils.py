@@ -21,7 +21,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Iterator
 
-from collections import ChainMap
 from collections.abc import Iterable
 from datetime import datetime
 from json import JSONEncoder
