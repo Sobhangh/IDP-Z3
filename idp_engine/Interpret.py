@@ -144,7 +144,6 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         self.instances = {}
         for args in superset:
             expr = AppliedSymbol.make(symbol, args)
-            expr.annotate(self.voc, {})
             self.instances[expr.code] = expr
             problem.assignments.assert__(expr, None, S.UNKNOWN)
 

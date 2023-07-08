@@ -24,6 +24,7 @@ using FO-dot knowledge bases:
 from __future__ import annotations
 
 from copy import copy
+import gc
 import logging
 import time
 import types
@@ -271,6 +272,7 @@ def execute(self: IDP) -> None:
     mylocals = copy(self.vocabularies)
     mylocals.update(self.theories)
     mylocals.update(self.structures)
+    mylocals['gc'] = gc
     mylocals['logging'] = logging
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand
