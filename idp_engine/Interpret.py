@@ -23,6 +23,7 @@ Methods to ground / interpret a theory in a data structure
 
 * expand quantifiers
 * replace symbols interpreted in the structure by their interpretation
+* instantiate definitions
 
 This module monkey-patches the ASTNode class and sub-classes.
 
@@ -495,6 +496,17 @@ def interpret(self: Expression,
               problem: Theory | None,
               subs: Dict[str, Expression]
               ) -> Expression:
+    """expand quantifiers and replace symbols interpreted in the structure
+    by their interpretation
+
+    Args:
+        self: the expression to be interpreted
+        problem: the theory to be applied
+        subs: a dictionary mapping variable names to their value
+
+    Returns:
+        Expression: the interpreted expression
+    """
     if self.is_type_constraint_for:
         return self
     interpretA(self, problem, subs)
@@ -505,15 +517,8 @@ def interpretA(self: Expression,
               problem: Theory | None,
               subs: Dict[str, Expression]
               ) -> Expression:
-    """Prepare the interpretation by computing type inference
+    """Prepare the interpretation by transforming quantifications and aggregates
 
-    Args:
-        self (Expression): _description_
-        problem (Theory | None): _description_
-        subs (Dict[str, Expression]): _description_
-
-    Returns:
-        Expression: _description_
     """
 
     for e in self.sub_exprs:
@@ -554,7 +559,7 @@ def interpretB(self: Expression,
     Returns:
         Expression: the resulting expression
     """
-    if self.is_value():  # do not interpret typeConstraints
+    if self.is_value():
         return self
     if subs:
         self = copy(self)  # shallow copy !
@@ -618,12 +623,11 @@ Type.extension = extension
 
 # Class AQuantification  ######################################################
 
-def get_supersets(self: Expression, problem: Theory):
+def get_supersets(self: AQuantification | AAggregate, problem: Theory):
     """determine the domain of the variables, if possible,
     and add filter to the quantified expression if needed
     """
     self.new_quantees, self.vars1, self.supersets = [], [], []
-    forms = self.sub_exprs
     for q in self.quantees:
         domain = q.sub_exprs[0]
 
@@ -647,7 +651,8 @@ def get_supersets(self: Expression, problem: Theory):
             self.check(domain.decl.arity == len(vars),
                         f"Incorrect arity of {domain}")
             if filter:
-                forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
+                self.sub_exprs = [_add_filter(self.q, f, filter, vars, problem)
+                                  for f in self.sub_exprs]
 
         self.vars1.extend(flatten(q.vars))
 
@@ -656,7 +661,6 @@ def get_supersets(self: Expression, problem: Theory):
             self.supersets.extend([q] for q in q.vars)  # replace the variable by itself
         else:
             self.supersets.extend([superset]*len(q.vars))
-    self.sub_exprs = forms
 
 
 def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expression],
@@ -675,7 +679,7 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
         Expression: `expr` extended with appropriate filter
     """
     if filter:  # adds `filter(val) =>` in front of expression
-        applied = filter(args).interpretB(theory, {})
+        applied = filter(args)
         if q == '∀':
             out = IMPLIES([applied, expr])
         elif q == '∃':
