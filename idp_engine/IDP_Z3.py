@@ -1,4 +1,4 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 
 # This file is part of Interactive_Consultant.
 
