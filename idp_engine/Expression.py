@@ -463,12 +463,6 @@ class Expression(ASTNode):
                     ) -> Expression:
         return self  # monkey-patched
 
-    def interpret1(self,
-                    problem: Optional[Theory],
-                    subs: dict[str, Expression]
-                    ) -> Expression:
-        return self  # monkey-patched
-
     def substitute(self,
                    e0: Expression,
                    e1: Expression,

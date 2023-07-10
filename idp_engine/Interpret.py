@@ -541,17 +541,31 @@ def interpretA(self: Expression,
                     q.sub_exprs = [inferred[var.name]]
         get_supersets(self, problem)
 
-@catch_error
+
+
+def wrapB(func):
+    @catch_error
+    def inner_function(self, problem, subs):
+        if self.is_value():
+            return self
+        if subs:
+            self = copy(self)  # shallow copy !
+            self.annotations = copy(self.annotations)
+        out = func(self, problem, subs)
+        return out
+    return inner_function
+
+@wrapB
 def interpretB(self: Expression,
-              problem: Optional[Theory],
-              subs: dict[str, Expression]
-              ) -> Expression:
+               problem: Optional[Theory],
+               subs: dict[str, Expression]
+               ) -> Expression:
     """ uses information in the problem and its vocabulary to:
     - expand quantifiers in the expression
     - simplify the expression using known assignments and enumerations
     - instantiate definitions
 
-    This method calls `interpret1` after copying `self`
+    This method creates a copy when necessary.
 
     Args:
         problem (Theory): the Theory to apply
@@ -561,23 +575,10 @@ def interpretB(self: Expression,
     Returns:
         Expression: the resulting expression
     """
-    if self.is_value():
-        return self
-    if subs:
-        self = copy(self)  # shallow copy !
-        self.annotations = copy(self.annotations)
-    out = self.interpret1(problem, subs)
-    return out
-Expression.interpretB = interpretB
-
-def interpret1(self: Expression,
-               problem: Optional[Theory],
-               subs: dict[str, Expression]
-               ) -> Expression:
     out = self.update_exprs(e.interpretB(problem, subs) for e in self.sub_exprs)
     _finalize(out, subs)
     return out
-Expression.interpret1 = interpret1
+Expression.interpretB = interpretB
 
 @catch_error
 def _finalize(self: Expression, subs: dict[str, Expression]):
@@ -706,8 +707,8 @@ def flatten(a):
         out.extend(sublist)
     return out
 
-@catch_error
-def interpret1(self: AQuantification | AAggregate,
+@wrapB
+def interpretB(self: AQuantification | AAggregate,
                problem: Optional[Theory],
                subs: dict[str, Expression]
                ) -> Expression:
@@ -719,10 +720,10 @@ def interpret1(self: AQuantification | AAggregate,
     Returns:
         Expression: the expanded quantifier expression
     """
-    # This method is called by AAggregate.interpret1 !
+    # This method is called by AAggregate.interpretB !
 
     if not self.quantees and not subs:  # already expanded
-        return Expression.interpret1(self, problem, subs)
+        return Expression.interpretB(self, problem, subs)
 
     if not self.supersets:
         # interpret quantees
@@ -743,25 +744,25 @@ def interpret1(self: AQuantification | AAggregate,
 
     out = self.update_exprs(f for f in forms)
     return out
-AQuantification.interpret1 = interpret1
+AQuantification.interpretB = interpretB
 
 
 # Class AAggregate  ######################################################
 
-@catch_error
-def interpret1(self: AAggregate,
+@wrapB
+def interpretB(self: AAggregate,
                problem: Optional[Theory],
                subs: dict[str, Expression]
                ) -> Expression:
     assert self.annotated, f"Internal error in interpret"
-    return AQuantification.interpret1(self, problem, subs)
-AAggregate.interpret1 = interpret1
+    return AQuantification.interpretB(self, problem, subs)
+AAggregate.interpretB = interpretB
 
 
 # Class AppliedSymbol  ##############################################
 
-@catch_error
-def interpret1(self: AppliedSymbol,
+@wrapB
+def interpretB(self: AppliedSymbol,
                problem: Optional[Theory],
                subs: dict[str, Expression]
                ) -> Expression:
@@ -826,7 +827,7 @@ def interpret1(self: AppliedSymbol,
     else:
         out = self
     return out
-AppliedSymbol.interpret1 = interpret1
+AppliedSymbol.interpretB = interpretB
 
 
 # Class Variable  #######################################################
