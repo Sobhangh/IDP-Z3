@@ -62,19 +62,19 @@ class Theory(object):
         extended (Bool): True when the truth value of inequalities
             and quantified formula is of interest (e.g. in the Interactive Consultant)
 
-        declarations (Dict[str, Declaration]): the list of type and symbol declarations
+        declarations (dict[str, Declaration]): the list of type and symbol declarations
 
         constraints (OrderedSet): a set of assertions.
 
         definitions ([Definition]): a list of definitions in this problem
 
-        interpretations (Dict[string, SymbolInterpretation]):
+        interpretations (dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
-        extensions (Dict[string, Extension]):
+        extensions (dict[string, Extension]):
             Extension of types and predicates
 
-        def_constraints (Dict[SymbolDeclaration, Definition], List[Expression]):
+        def_constraints (dict[SymbolDeclaration, Definition], List[Expression]):
             A mapping of defined symbol to the whole-domain constraints
             equivalent to its definition.
 
@@ -85,7 +85,7 @@ class Theory(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
-        z3 (Dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
+        z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
 
         ctx : Z3 context
 
@@ -132,20 +132,20 @@ class Theory(object):
 
         self.extended: Optional[bool] = extended
 
-        self.declarations: Dict[str, Declaration] = {}
+        self.declarations: dict[str, Declaration] = {}
         self.definitions: List[Definition] = []
         self.constraints: OrderedSet = OrderedSet()
         self.assignments: Assignments = Assignments()
-        self.def_constraints: Dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
-        self.interpretations: Dict[str, SymbolInterpretation] = {}  # interpretations given by user
-        self.extensions: Dict[str, Extension] = {}  # computed extension of types and predicates
+        self.def_constraints: dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
+        self.interpretations: dict[str, SymbolInterpretation] = {}  # interpretations given by user
+        self.extensions: dict[str, Extension] = {}  # computed extension of types and predicates
         self.name: str = ''
 
         self._contraintz: Optional[List[BoolRef]] = None
         self._formula: Optional[BoolRef] = None  # the problem expressed in one logic formula
         self.co_constraints: Optional[OrderedSet] = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
-        self.z3: Dict[str, ExprRef] = {}
+        self.z3: dict[str, ExprRef] = {}
         self.ctx: Context = Context()
         self.add(*theories)
 
@@ -535,7 +535,7 @@ class Theory(object):
             solver.add(af)
 
     def _extend_reifications(self,
-                             reifs: Dict[ExprRef, Tuple[Assignment, Expression]]
+                             reifs: dict[ExprRef, Tuple[Assignment, Expression]]
                              ) -> None:
         """extends the given reifications with the current choices and structure
 

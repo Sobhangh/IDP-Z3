@@ -135,7 +135,7 @@ def translate(self, problem: Theory, vars={}) -> ExprRef:
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
 
-        vars (Dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
+        vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
 
     Returns:
@@ -185,7 +185,7 @@ def translate1(self, problem: Theory, vars={}) -> ExprRef:
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
 
-        vars (Dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
+        vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
 
     Returns:

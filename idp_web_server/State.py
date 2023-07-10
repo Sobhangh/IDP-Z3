@@ -33,7 +33,7 @@ from typing import Dict, Tuple, Union
 
 class State(Theory):
     """ Contains a state of problem solving """
-    cache: Dict[str, 'State'] = {}
+    cache: dict[str, 'State'] = {}
 
     @classmethod
     def make(cls, idp: IDP, previous_active: str, active: str, ignore: str = None) -> "State":

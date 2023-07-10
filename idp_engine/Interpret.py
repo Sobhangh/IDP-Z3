@@ -187,7 +187,7 @@ Definition.interpret = interpret
 def get_def_constraints(self: Definition,
                         problem: Theory,
                         for_explain: bool = False
-                        ) -> Dict[Tuple[SymbolDeclaration, Definition], List[Expression]]:
+                        ) -> dict[Tuple[SymbolDeclaration, Definition], List[Expression]]:
     """returns the constraints for this definition.
 
     The `instantiables` (of the definition) are expanded in `problem`.
@@ -200,7 +200,7 @@ def get_def_constraints(self: Definition,
             Use implications instead of equivalence, for rule-specific explanations
 
     Return:
-        Dict[SymbolDeclaration, Definition, List[Expression]]:
+        dict[SymbolDeclaration, Definition, List[Expression]]:
             a mapping from (Symbol, Definition) to the list of constraints
     """
     if self.mode == Semantics.RECDATA:
@@ -496,7 +496,7 @@ Constructor.interpret = interpret
 
 def interpret(self: Expression,
               problem: Optional[Theory],
-              subs: Dict[str, Expression]
+              subs: dict[str, Expression]
               ) -> Expression:
     """expand quantifiers and replace symbols interpreted in the structure
     by their interpretation
@@ -517,7 +517,7 @@ Expression.interpret = interpret
 
 def interpretA(self: Expression,
               problem: Optional[Theory],
-              subs: Dict[str, Expression]
+              subs: dict[str, Expression]
               ):
     """Prepare the interpretation by transforming quantifications and aggregates
 
@@ -544,7 +544,7 @@ def interpretA(self: Expression,
 @catch_error
 def interpretB(self: Expression,
               problem: Optional[Theory],
-              subs: Dict[str, Expression]
+              subs: dict[str, Expression]
               ) -> Expression:
     """ uses information in the problem and its vocabulary to:
     - expand quantifiers in the expression
@@ -572,7 +572,7 @@ Expression.interpretB = interpretB
 
 def interpret1(self: Expression,
                problem: Optional[Theory],
-               subs: Dict[str, Expression]
+               subs: dict[str, Expression]
                ) -> Expression:
     out = self.update_exprs(e.interpretB(problem, subs) for e in self.sub_exprs)
     _finalize(out, subs)
@@ -580,7 +580,7 @@ def interpret1(self: Expression,
 Expression.interpret1 = interpret1
 
 @catch_error
-def _finalize(self: Expression, subs: Dict[str, Expression]):
+def _finalize(self: Expression, subs: dict[str, Expression]):
     """update self.variables and reading"""
     if subs:
         self.code = str(self)
@@ -591,8 +591,8 @@ def _finalize(self: Expression, subs: Dict[str, Expression]):
 # class Type ###########################################################
 
 @catch_error
-def extension(self, interpretations: Dict[str, SymbolInterpretation],
-              extensions: Dict[str, Extension]
+def extension(self, interpretations: dict[str, SymbolInterpretation],
+              extensions: dict[str, Extension]
               ) -> Extension:
     """returns the extension of a Type, given some interpretations.
 
@@ -600,7 +600,7 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation],
     However, for Concept[T->T], an additional filtering is applied.
 
     Args:
-        interpretations (Dict[str, SymbolInterpretation]):
+        interpretations (dict[str, SymbolInterpretation]):
         the known interpretations of types and symbols
 
     Returns:
@@ -709,7 +709,7 @@ def flatten(a):
 @catch_error
 def interpret1(self: AQuantification | AAggregate,
                problem: Optional[Theory],
-               subs: Dict[str, Expression]
+               subs: dict[str, Expression]
                ) -> Expression:
     """apply information in the problem and its vocabulary
 
@@ -751,7 +751,7 @@ AQuantification.interpret1 = interpret1
 @catch_error
 def interpret1(self: AAggregate,
                problem: Optional[Theory],
-               subs: Dict[str, Expression]
+               subs: dict[str, Expression]
                ) -> Expression:
     assert self.annotated, f"Internal error in interpret"
     return AQuantification.interpret1(self, problem, subs)
@@ -763,7 +763,7 @@ AAggregate.interpret1 = interpret1
 @catch_error
 def interpret1(self: AppliedSymbol,
                problem: Optional[Theory],
-               subs: Dict[str, Expression]
+               subs: dict[str, Expression]
                ) -> Expression:
     # interpret the symbol expression, if any
     if type(self.symbol) == SymbolExpr and self.symbol.is_intentional():  # $(x)()
@@ -834,7 +834,7 @@ AppliedSymbol.interpret1 = interpret1
 @catch_error
 def interpretB(self: Variable,
               problem: Optional[Theory],
-              subs: Dict[str, Expression]
+              subs: dict[str, Expression]
               ) -> Expression:
     if self.sort:
         self.sort = self.sort.interpretB(problem, subs)

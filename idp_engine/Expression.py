@@ -65,18 +65,18 @@ class ASTNode(object):
             raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
 
     def dedup_nodes(self,
-                    kwargs: Dict[str, ASTNode],
+                    kwargs: dict[str, ASTNode],
                     arg_name:str
-                    ) -> Dict[str, ASTNode]:
+                    ) -> dict[str, ASTNode]:
         """pops `arg_name` from kwargs as a list of named items
         and returns a mapping from name to items
 
         Args:
-            kwargs (Dict[str, ASTNode])
+            kwargs (dict[str, ASTNode])
             arg_name (str): name of the kwargs argument, e.g. "interpretations"
 
         Returns:
-            Dict[str, ASTNode]: mapping from `name` to AST nodes
+            dict[str, ASTNode]: mapping from `name` to AST nodes
 
         Raises:
             AssertionError: in case of duplicate name
@@ -236,7 +236,7 @@ class Expression(ASTNode):
             This is useful for definitions over infinite domains,
             as well as to compute relevant questions.
 
-        annotations (Dict[str, str]):
+        annotations (dict[str, str]):
             The set of annotations given by the expert in the IDP-Z3 program.
 
             ``annotations['reading']`` is the annotation
@@ -265,7 +265,7 @@ class Expression(ASTNode):
 
         self.code: str = intern(str(self))
         if not hasattr(self, 'annotations') or self.annotations == None:
-            self.annotations: Dict[str, str] = {'reading': self.code}
+            self.annotations: dict[str, str] = {'reading': self.code}
         elif type(self.annotations) == Annotations:
             self.annotations = self.annotations.annotations
         self.original: Expression = self
@@ -341,9 +341,9 @@ class Expression(ASTNode):
             e.collect(questions, all_, co_constraints)
 
     def collect_symbols(self,
-                        symbols: Dict[str, SymbolDeclaration]=None,
+                        symbols: dict[str, SymbolDeclaration]=None,
                         co_constraints: bool=True
-                        ) -> Dict[str, Declaration]:
+                        ) -> dict[str, Declaration]:
         """ returns the list of symbol declarations in self, ignoring type constraints
         """
         symbols = {} if symbols == None else symbols
@@ -370,7 +370,7 @@ class Expression(ASTNode):
             e.collect_nested_symbols(symbols, is_nested)
         return symbols
 
-    def generate_constructors(self, constructors: Dict[str, List[Constructor]]):
+    def generate_constructors(self, constructors: dict[str, List[Constructor]]):
         """ fills the list `constructors` with all constructors belonging to
         open types.
         """
@@ -423,7 +423,7 @@ class Expression(ASTNode):
         # vocabulary
         return any(e.has_decision() for e in self.sub_exprs)
 
-    def type_inference(self) -> Dict[str, Symbol]:
+    def type_inference(self) -> dict[str, Symbol]:
         # returns a dictionary {Variable : Symbol}
         try:
             return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
@@ -453,19 +453,19 @@ class Expression(ASTNode):
 
     def interpret(self,
                   problem: Optional[Theory],
-                  subs: Dict[str, Expression]
+                  subs: dict[str, Expression]
                   ) -> Expression:
         return self  # monkey-patched
 
     def interpretB(self,
                     problem: Optional[Theory],
-                    subs: Dict[str, Expression]
+                    subs: dict[str, Expression]
                     ) -> Expression:
         return self  # monkey-patched
 
     def interpret1(self,
                     problem: Optional[Theory],
-                    subs: Dict[str, Expression]
+                    subs: dict[str, Expression]
                     ) -> Expression:
         return self  # monkey-patched
 
@@ -521,7 +521,7 @@ class Expression(ASTNode):
         return out
 
     def add_level_mapping(self,
-                          level_symbols: Dict[SymbolDeclaration, Symbol],
+                          level_symbols: dict[SymbolDeclaration, Symbol],
                           head: AppliedSymbol,
                           pos_justification: bool,
                           polarity: bool,
@@ -531,7 +531,7 @@ class Expression(ASTNode):
          are added to atoms containing recursive symbols.
 
         Arguments:
-            - level_symbols (Dict[SymbolDeclaration, Symbol]): the level mapping
+            - level_symbols (dict[SymbolDeclaration, Symbol]): the level mapping
               symbols as well as their corresponding recursive symbols
             - head (AppliedSymbol): head of the rule we are adding level mapping
               symbols to.
@@ -573,8 +573,8 @@ class Symbol(Expression):
     def is_value(self): return True
 
     def has_element(self, term: Expression,
-                    interpretations: Dict[str, SymbolInterpretation],
-                    extensions: Dict[str, Extension]
+                    interpretations: dict[str, SymbolInterpretation],
+                    extensions: dict[str, Extension]
                     ) -> Expression:
         """Returns an expression that says whether `term` is in the type/predicate denoted by `self`.
 
@@ -626,15 +626,15 @@ class Type(Symbol):
                     all(s==o for s, o in zip(self.ins, other.ins)))))
 
     def extension(self,
-                  interpretations: Dict[str, SymbolInterpretation],
-                  extensions: Dict[str, Extension]
+                  interpretations: dict[str, SymbolInterpretation],
+                  extensions: dict[str, Extension]
                   ) -> Extension:
         pass  # monkey-patched
 
     def has_element(self,
                     term: Expression,
-                    interpretations: Dict[str, SymbolInterpretation],
-                    extensions: Dict[str, Extension]
+                    interpretations: dict[str, SymbolInterpretation],
+                    extensions: dict[str, Extension]
                     ) -> Expression:
         """Returns an Expression that says whether `term` is in the type/predicate denoted by `self`.
 
@@ -784,7 +784,7 @@ class AQuantification(Expression):
     """ASTNode representing a quantified formula
 
     Args:
-        annotations (Dict[str, str]):
+        annotations (dict[str, str]):
             The set of annotations given by the expert in the IDP-Z3 program.
 
             ``annotations['reading']`` is the annotation

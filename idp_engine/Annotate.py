@@ -191,7 +191,7 @@ def annotate(self, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
     # create level-mapping symbols, as needed
-    # self.level_symbols: Dict[SymbolDeclaration, Symbol]
+    # self.level_symbols: dict[SymbolDeclaration, Symbol]
     dependencies = set()
     for r in self.rules:
         symbs = {}
@@ -341,7 +341,7 @@ def annotate(self, voc, q_vars):
     return self
 Rule.annotate = annotate
 
-def rename_args(self: Rule, subs: Dict[str, Expression]):
+def rename_args(self: Rule, subs: dict[str, Expression]):
     """replace old variables by new variables
         (ignoring arguments in the head before the it
     """
@@ -541,7 +541,7 @@ def annotate(self, voc, q_vars):
 
     Args:
         voc (Vocabulary): the vocabulary
-        q_vars (Dict[str, Variable]): the quantifier variables that may appear in the expression
+        q_vars (dict[str, Variable]): the quantifier variables that may appear in the expression
 
     Returns:
         Expression: an equivalent AST node, with updated type, .variables

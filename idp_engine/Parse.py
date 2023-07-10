@@ -153,13 +153,13 @@ class IDP(ASTNode):
     Attributes:
         code (str): source code of the IDP program
 
-        vocabularies (Dict[str, Vocabulary]): list of vocabulary blocks, by name
+        vocabularies (dict[str, Vocabulary]): list of vocabulary blocks, by name
 
-        theories (Dict[str, TheoryBlock]): list of theory blocks, by name
+        theories (dict[str, TheoryBlock]): list of theory blocks, by name
 
-        structures (Dict[str, Structure]): list of structure blocks, by name
+        structures (dict[str, Structure]): list of structure blocks, by name
 
-        procedures (Dict[str, Procedure]): list of procedure blocks, by name
+        procedures (dict[str, Procedure]): list of procedure blocks, by name
 
         display (Display, Optional): display block, if any
     """
@@ -272,7 +272,7 @@ class Vocabulary(ASTNode):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
         self.idp = None  # parent object
-        self.symbol_decls: Dict[str, Declaration] = {}
+        self.symbol_decls: dict[str, Declaration] = {}
 
         self.name = 'V' if not self.name else self.name
         self.voc = self
@@ -368,7 +368,7 @@ class TypeDeclaration(ASTNode):
 
         interpretation (SymbolInterpretation): the symbol interpretation
 
-        map (Dict[string, Expression]): a mapping from code to Expression in range
+        map (dict[string, Expression]): a mapping from code to Expression in range
 
         voc (Vocabulary): the vocabulary block that contains it
     """
@@ -406,8 +406,8 @@ class TypeDeclaration(ASTNode):
         return (f"type {self.name} {'' if not enumeration else ':= ' + enumeration}")
 
     def contains_element(self, term: Expression,
-                     interpretations: Dict[str, "SymbolInterpretation"],
-                     extensions: Dict[str, Extension]
+                     interpretations: dict[str, "SymbolInterpretation"],
+                     extensions: dict[str, Extension]
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` is in the type
         """
@@ -457,7 +457,7 @@ class SymbolDeclaration(ASTNode):
 
         base_type (TypeDeclaration): base type of the unary predicate (None otherwise)
 
-        instances (Dict[string, Expression]):
+        instances (dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of
             arguments to its parsed AST
 
@@ -524,8 +524,8 @@ class SymbolDeclaration(ASTNode):
         return str(self)
 
     def has_in_domain(self, args: List[Expression],
-                      interpretations: Dict[str, "SymbolInterpretation"],
-                      extensions: Dict[str, Extension]
+                      interpretations: dict[str, "SymbolInterpretation"],
+                      extensions: dict[str, Extension]
                       ) -> Expression:
         """Returns an expression that is TRUE when `args` are in the domain of the symbol.
 
@@ -541,16 +541,16 @@ class SymbolDeclaration(ASTNode):
                    for typ, term in zip(self.sorts, args)])
 
     def has_in_range(self, value: Expression,
-                     interpretations: Dict[str, "SymbolInterpretation"],
-                     extensions: Dict[str, Extension]
+                     interpretations: dict[str, "SymbolInterpretation"],
+                     extensions: dict[str, Extension]
                      ) -> Expression:
         """Returns an expression that says whether `value` is in the range of the symbol.
         """
         return self.out.has_element(value, interpretations, extensions)
 
     def contains_element(self, term: Expression,
-                     interpretations: Dict[str, "SymbolInterpretation"],
-                     extensions: Dict[str, Extension]
+                     interpretations: dict[str, "SymbolInterpretation"],
+                     extensions: dict[str, Extension]
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` satisfies the predicate
         """
@@ -627,26 +627,26 @@ class Definition(ASTNode):
         rules ([Rule]):
             set of rules for the definition, e.g., `!x: p(x) <- q(x)`
 
-        renamed (Dict[Declaration, List[Rule]]):
+        renamed (dict[Declaration, List[Rule]]):
             rules with normalized body for each defined symbol,
             e.g., `!x: p(x) <- q(p1_)`
             (quantees and head are unchanged)
 
-        canonicals (Dict[Declaration, List[Rule]]):
+        canonicals (dict[Declaration, List[Rule]]):
             normalized rule for each defined symbol,
             e.g., `! p1_: p(p1_) <- q(p1_)`
 
-        clarks (Dict[Declaration, Transformed Rule]):
+        clarks (dict[Declaration, Transformed Rule]):
             normalized rule for each defined symbol (used to be Clark completion)
             e.g., `! p1_: p(p1_) <=> q(p1_)`
 
-        def_vars (Dict[String, Dict[String, Variable]]):
+        def_vars (dict[String, Dict[String, Variable]]):
             Fresh variables for arguments and result
 
-        level_symbols (Dict[SymbolDeclaration, Symbol]):
+        level_symbols (dict[SymbolDeclaration, Symbol]):
             map of recursively defined symbols to level mapping symbols
 
-        cache (Dict[SymbolDeclaration, str, Expression]):
+        cache (dict[SymbolDeclaration, str, Expression]):
             cache of instantiation of the definition
 
         inst_def_level (int): depth of recursion during instantiation
@@ -692,7 +692,7 @@ class Definition(ASTNode):
     def get_def_constraints(self,
                             problem,
                             for_explain: bool = False
-                            ) -> Dict[SymbolDeclaration, Definition, List[Expression]]:
+                            ) -> dict[SymbolDeclaration, Definition, List[Expression]]:
         pass # monkey-patched
 
     def instantiate_definition(self, decl, new_args, theory):
@@ -901,8 +901,8 @@ class Enumeration(ASTNode):
                 f'{{{", ".join([repr(t) for t in self.constructors])}}}')
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Dict[str, "SymbolInterpretation"]=None,
-                 extensions: Dict[str, Extension]=None
+                 interpretations: dict[str, "SymbolInterpretation"]=None,
+                 extensions: dict[str, Extension]=None
                  ) -> Expression:
         """ returns an Expression that says whether Tuple args is in the enumeration """
 
@@ -938,14 +938,14 @@ class Enumeration(ASTNode):
             return out
 
     def extensionE(self,
-                   interpretations: Dict[str, "SymbolInterpretation"]=None,
-                   extensions: Dict[str, Extension]=None
+                   interpretations: dict[str, "SymbolInterpretation"]=None,
+                   extensions: dict[str, Extension]=None
                   ) -> Extension:
         """computes the extension of an enumeration, i.e., a set of tuples and a filter
 
         Args:
-            interpretations (Dict[str, &quot;SymbolInterpretation&quot;], optional): _description_. Defaults to None.
-            extensions (Dict[str, Extension], optional): _description_. Defaults to None.
+            interpretations (dict[str, &quot;SymbolInterpretation&quot;], optional): _description_. Defaults to None.
+            extensions (dict[str, Extension], optional): _description_. Defaults to None.
 
         Returns:
             Extension: _description_
@@ -956,8 +956,8 @@ class Enumeration(ASTNode):
 
 class FunctionEnum(Enumeration):
     def extensionE(self,
-                   interpretations: Dict[str, "SymbolInterpretation"]=None,
-                   extensions: Dict[str, Extension]=None
+                   interpretations: dict[str, "SymbolInterpretation"]=None,
+                   extensions: dict[str, Extension]=None
                   ) -> Extension:
         self.check(False,
                    f"Can't use function enumeration for type declaration or quantification")
@@ -975,7 +975,7 @@ class ConstructedFrom(Enumeration):
 
         constructors (List[Constructor]): List of Constructor
 
-        accessors (Dict[str, Int]): index of the accessor in the constructors
+        accessors (dict[str, Int]): index of the accessor in the constructors
     """
     def __init__(self, **kwargs):
         self.constructed = kwargs.pop('constructed')
@@ -984,8 +984,8 @@ class ConstructedFrom(Enumeration):
         self.accessors = dict()
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Dict[str, "SymbolInterpretation"]=None,
-                 extensions: Dict[str, Extension]=None
+                 interpretations: dict[str, "SymbolInterpretation"]=None,
+                 extensions: dict[str, Extension]=None
                  ) -> Expression:
         """returns True if args belong to the type enumeration"""
         # args must satisfy the tester of one of the constructors
@@ -1002,8 +1002,8 @@ class ConstructedFrom(Enumeration):
         return OR(out)
 
     def extensionE(self,
-                   interpretations: Dict[str, "SymbolInterpretation"]=None,
-                   extensions: Dict[str, Extension]=None
+                   interpretations: dict[str, "SymbolInterpretation"]=None,
+                   extensions: dict[str, Extension]=None
                   ) -> Extension:
         def filter(args):
             if type(args[0]) != Variable and type(args[0].decl) == Constructor:  # try to simplify it
@@ -1083,8 +1083,8 @@ class Ranges(Enumeration):
         Enumeration.__init__(self, tuples=tuples)
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Dict[str, "SymbolInterpretation"]=None,
-                 extensions: Dict[str, Extension]=None
+                 interpretations: dict[str, "SymbolInterpretation"]=None,
+                 extensions: dict[str, Extension]=None
                  ) -> Expression:
         var = args[0]
         if not self.elements:
@@ -1103,8 +1103,8 @@ class Ranges(Enumeration):
         return OR(sub_exprs)
 
     def extensionE(self,
-                   interpretations: Dict[str, "SymbolInterpretation"]=None,
-                   extensions: Dict[str, Extension]=None
+                   interpretations: dict[str, "SymbolInterpretation"]=None,
+                   extensions: dict[str, Extension]=None
                   ) -> Extension:
         if not self.elements:
             return(None, None)
@@ -1135,8 +1135,8 @@ class IntRange(Ranges):
         self.tuples = None
 
     def extensionE(self,
-                   interpretations: Dict[str, "SymbolInterpretation"]=None,
-                   extensions: Dict[str, Extension]=None
+                   interpretations: dict[str, "SymbolInterpretation"]=None,
+                   extensions: dict[str, Extension]=None
                   ) -> Extension:
         return (None, None)
 
@@ -1148,8 +1148,8 @@ class RealRange(Ranges):
         self.tuples = None
 
     def extensionE(self,
-                   interpretations: Dict[str, "SymbolInterpretation"]=None,
-                   extensions: Dict[str, Extension]=None
+                   interpretations: dict[str, "SymbolInterpretation"]=None,
+                   extensions: dict[str, Extension]=None
                   ) -> Extension:
         return (None, None)
 
@@ -1161,8 +1161,8 @@ class DateRange(Ranges):
         self.tuples = None
 
     def extensionE(self,
-                   interpretations: Dict[str, "SymbolInterpretation"]=None,
-                   extensions: Dict[str, Extension]=None
+                   interpretations: dict[str, "SymbolInterpretation"]=None,
+                   extensions: dict[str, Extension]=None
                   ) -> Extension:
         return (None, None)
 
