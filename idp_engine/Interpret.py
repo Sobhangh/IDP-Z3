@@ -34,7 +34,7 @@ from __future__ import annotations
 
 from copy import copy, deepcopy
 from itertools import product
-from typing import Dict, List, Callable, Optional
+from typing import Dict, List, Callable, Optional, Tuple
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
@@ -187,7 +187,7 @@ Definition.interpret = interpret
 def get_def_constraints(self: Definition,
                         problem: Theory,
                         for_explain: bool = False
-                        ) -> Dict[SymbolDeclaration, Definition, List[Expression]]:
+                        ) -> Dict[Tuple[SymbolDeclaration, Definition], List[Expression]]:
     """returns the constraints for this definition.
 
     The `instantiables` (of the definition) are expanded in `problem`.
@@ -244,35 +244,35 @@ def get_def_constraints(self: Definition,
                 head.in_head = True
 
             # determine reverse implications, if any
-            bodies, out = [], []
+            bodies, implications = [], []
             for r in rules:
                 if not inductive:
                     bodies.append(r.body)
                     if for_explain and 1 < len(rules):  # not simplified -> no need to make copies
-                        out.append(IMPLIES([r.body, head], r.annotations))
+                        implications.append(IMPLIES([r.body, head], r.annotations))
                 else:
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
                         new = deepcopy(new).add_level_mapping(self.level_symbols,
                                              rule.definiendum, False, False, self.mode)
-                        out.append(IMPLIES([new, head], r.annotations))
+                        implications.append(IMPLIES([new, head], r.annotations))
 
             all_bodies = OR(bodies)
             if not inductive:  # i.e., function with finite domain
-                if out:  # already contains reverse implications
-                    out.append(IMPLIES([head, all_bodies], self.annotations))
+                if implications:  # already contains reverse implications
+                    implications.append(IMPLIES([head, all_bodies], self.annotations))
                 else:
-                    out = [EQUIV([head, all_bodies], self.annotations)]
+                    implications = [EQUIV([head, all_bodies], self.annotations)]
             else:  # i.e., predicate
-                if not out:  # no reverse implication
+                if not implications:  # no reverse implication
                     new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
                                              rule.definiendum, False, False, self.mode)
-                    out = [IMPLIES([new, deepcopy(head)], self.annotations)]
+                    implications = [IMPLIES([new, deepcopy(head)], self.annotations)]
                 all_bodies = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
                                         rule.definiendum, True, True, self.mode)
-                out.append(IMPLIES([head, all_bodies], self.annotations))
-            instantiables[decl] = out
+                implications.append(IMPLIES([head, all_bodies], self.annotations))
+            instantiables[decl] = implications
 
     out = {}
     for decl, bodies in instantiables.items():
@@ -284,7 +284,7 @@ def get_def_constraints(self: Definition,
 Definition.get_def_constraints = get_def_constraints
 
 @catch_error
-def instantiate_definition(self: Definition, decl, new_args, theory) -> Expression:
+def instantiate_definition(self: Definition, decl, new_args, theory) -> Optional[Expression]:
     rule = self.clarks.get(decl, None)
     if rule and self.mode != Semantics.RECDATA:
         instantiable = all(  # finite domain or not a variable
@@ -309,6 +309,7 @@ def instantiate_definition(self: Definition, decl, new_args, theory) -> Expressi
         self.cache[decl, key] = out
         self.inst_def_level -= 1
         return out
+    return None
 Definition.instantiate_definition = instantiate_definition
 
 
@@ -353,6 +354,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
     assert not self.is_type_enumeration, "Internal error"
     if not self.name in [GOAL_SYMBOL, EXPAND]:
         decl = problem.declarations[self.name]
+        assert isinstance(decl, SymbolDeclaration), "Internal error"
         # update problem.extensions
         if self.symbol.decl.out.decl.name == BOOL:  # predicate
             extension = [t.args for t in self.enumeration.tuples]
@@ -461,7 +463,7 @@ def interpret(self: ConstructedFrom, problem: Theory) -> ConstructedFrom:
         if c.range is None:
             self.tuples = None
             return self
-        self.tuples.extend([TupleIDP(args=[e]) for e in c.range])
+        self.tuples.extend(TupleIDP(args=[e]) for e in c.range)
     return self
 ConstructedFrom.interpret = interpret
 
@@ -470,12 +472,13 @@ ConstructedFrom.interpret = interpret
 
 @catch_error
 def interpret(self: Constructor, problem: Theory) -> Constructor:
-    assert all(isinstance(s.decl.out, Type) for s in self.sorts), 'internal error'
+    # assert all(s.decl and isinstance(s.decl.out, Type) for s in self.sorts), 'Internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
     elif any(s.type == self.type for s in self.sorts):  # recursive data type
         self.range = None
     else:
+        # assert all(isinstance(s.decl, SymbolDeclaration) for s in self.sorts), "Internal error"
         extensions = [s.decl.out.extension(problem.interpretations, problem.extensions)
                       for s in self.sorts]
         if any(e[0] is None for e in extensions):
@@ -515,7 +518,7 @@ Expression.interpret = interpret
 def interpretA(self: Expression,
               problem: Optional[Theory],
               subs: Dict[str, Expression]
-              ) -> Expression:
+              ):
     """Prepare the interpretation by transforming quantifications and aggregates
 
     """
@@ -607,9 +610,14 @@ def extension(self, interpretations: Dict[str, SymbolInterpretation],
     """
     if self.code not in extensions:
         self.check(self.name == CONCEPT, "internal error")
-        assert self.out, "internal error"  # Concept[T->T]
-        out = [v for v in extensions[CONCEPT][0]
-                if v[0].decl.symbol.decl.arity == len(self.ins)
+        assert (self.out
+                and extensions is not None
+                and extensions[CONCEPT] is not None), "internal error"  # Concept[T->T]
+        ext = extensions[CONCEPT][0]
+        assert isinstance(ext, List) , "Internal error"
+        out = [v for v in ext
+                if type(v[0]) == UnappliedSymbol
+                and v[0].decl.symbol.decl.arity == len(self.ins)
                 and isinstance(v[0].decl.symbol.decl, SymbolDeclaration)
                 and v[0].decl.symbol.decl.out == self.out
                 and len(v[0].decl.symbol.decl.sorts) == len(self.ins)
@@ -622,7 +630,7 @@ Type.extension = extension
 
 # Class AQuantification  ######################################################
 
-def get_supersets(self: AQuantification | AAggregate, problem: Theory):
+def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory]):
     """determine the domain of the variables, if possible,
     and add filter to the quantified expression if needed
     """
@@ -636,7 +644,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Theory):
                                                     problem.extensions)
             elif type(domain) == SymbolExpr:
                 return
-            elif type(domain) in [Symbol]:  # SymbolExpr (e.g. $(`Color))
+            elif type(domain) == Symbol and domain.decl:
                 self.check(domain.decl.out.type == BOOL,
                             f"{domain} is not a type or predicate")
                 assert domain.decl.name in problem.extensions, "internal error"
@@ -646,10 +654,10 @@ def get_supersets(self: AQuantification | AAggregate, problem: Theory):
         else:
             (superset, filter) = None, None
 
+        arity = domain.decl.arity
         for vars in q.vars:
-            self.check(domain.decl.arity == len(vars),
-                        f"Incorrect arity of {domain}")
-            if filter:
+            self.check(len(vars) == arity, f"Incorrect arity for {domain}")
+            if problem and filter:
                 self.sub_exprs = [_add_filter(self.q, f, filter, vars, problem)
                                   for f in self.sub_exprs]
 
@@ -662,7 +670,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Theory):
             self.supersets.extend([superset]*len(q.vars))
 
 
-def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expression],
+def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Variable],
                 theory: Theory) -> Expression:
     """add `filter(args)` to `expr` quantified by `q`
 
@@ -677,21 +685,19 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
     Returns:
         Expression: `expr` extended with appropriate filter
     """
-    if filter:  # adds `filter(val) =>` in front of expression
-        applied = filter(args)
-        if q == '∀':
-            out = IMPLIES([applied, expr])
-        elif q == '∃':
-            out = AND([applied, expr])
-        else:  # aggregate
-            if isinstance(expr, AIfExpr):  # cardinality
-                # if a then b else 0 -> if (applied & a) then b else 0
-                arg1 = AND([applied, expr.sub_exprs[0]])
-                out = IF(arg1, expr.sub_exprs[1], expr.sub_exprs[2])
-            else:  # sum
-                out = IF(applied, expr, Number(number="0"))
-        return out
-    return expr
+    applied = filter(args)
+    if q == '∀':
+        out = IMPLIES([applied, expr])
+    elif q == '∃':
+        out = AND([applied, expr])
+    else:  # aggregate
+        if isinstance(expr, AIfExpr):  # cardinality
+            # if a then b else 0 -> if (applied & a) then b else 0
+            arg1 = AND([applied, expr.sub_exprs[0]])
+            out = IF(arg1, expr.sub_exprs[1], expr.sub_exprs[2])
+        else:  # sum
+            out = IF(applied, expr, Number(number="0"))
+    return out
 
 def flatten(a):
     # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
@@ -701,7 +707,7 @@ def flatten(a):
     return out
 
 @catch_error
-def interpret1(self: AQuantification,
+def interpret1(self: AQuantification | AAggregate,
                problem: Optional[Theory],
                subs: Dict[str, Expression]
                ) -> Expression:
@@ -724,17 +730,18 @@ def interpret1(self: AQuantification,
             q.sub_exprs = [e.interpretB(problem, subs) for e in q.sub_exprs]
         get_supersets(self, problem)
 
+    assert self.new_quantees is not None and self.vars1 is not None, "Internal error"
     self.quantees = self.new_quantees
     # expand the formula by the cross-product of the supersets, and substitute per `subs`
-    out, subs1 = [], copy(subs)
+    forms, subs1 = [], copy(subs)
     for f in self.sub_exprs:
         for vals in product(*self.supersets):
             vals1 = flatten(vals)
             subs1.update((var.code, val) for var, val in zip(self.vars1, vals1))
             new_f2 = f.interpretB(problem, subs1)
-            out.append(new_f2)
+            forms.append(new_f2)
 
-    out = self.update_exprs(out)
+    out = self.update_exprs(f for f in forms)
     return out
 AQuantification.interpret1 = interpret1
 

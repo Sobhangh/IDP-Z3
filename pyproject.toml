@@ -44,6 +44,7 @@ myst-parser = "^0.16.1"
 markupsafe = "2.0.1"
 py-spy = "^0.3.14"
 twine = "^4.0.2"
+mypy = "^1.4.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

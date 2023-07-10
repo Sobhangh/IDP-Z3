@@ -29,7 +29,7 @@ from itertools import groupby
 from os import path
 from sys import intern
 from textx import metamodel_from_file
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union, Optional, TYPE_CHECKING
 
 
 from .Assignments import Assignments
@@ -39,14 +39,16 @@ from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR, Accesso
     AImplication, ADisjunction, AConjunction,
     AComparison, ASumMinus, AMultDiv, APower, AUnary,
     AAggregate, AppliedSymbol, UnappliedSymbol,
-    Number, Brackets, Date, Extension,
+    Number, Brackets, Date, Extension, Identifier,
     Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
     GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error, MAX_QUANTIFIER_EXPANSION,
     Semantics as S)
 
+if TYPE_CHECKING:
+    from .Theory import Theory
 
-def str_to_IDP(atom: Expression, val_string: str) -> Expression:
+def str_to_IDP(atom: Expression, val_string: str) -> Optional[Expression]:
     """cast a string value for 'atom into an Expr object, or None
 
     used to convert Z3 models or json data from GUI
@@ -234,7 +236,7 @@ class IDP(ASTNode):
         out.code = code
         return out
 
-    def get_blocks(self, blocks: List[str]) -> List[ASTNode]:
+    def get_blocks(self, blocks: List[str] | str) -> List[ASTNode]:
         """returns the AST nodes for the blocks whose names are given
 
         Args:
@@ -426,6 +428,8 @@ class TypeDeclaration(ASTNode):
                 out = TRUE
             return out
 
+    def translate(self, problem: Theory):
+        pass
 
 class SymbolDeclaration(ASTNode):
     """The class of AST nodes representing an entry in the vocabulary,
@@ -794,6 +798,7 @@ class SymbolInterpretation(ASTNode):
 
         self.symbol = None
         self.is_type_enumeration = None
+        self.block = None
 
     def __repr__(self):
         return f"{self.name} {self.sign} {self.enumeration}"
@@ -1017,7 +1022,7 @@ class ConstructedFrom(Enumeration):
 
 class TupleIDP(ASTNode):
     def __init__(self, **kwargs):
-        self.args = kwargs.pop('args')
+        self.args: List[Identifier] = kwargs.pop('args')
         self.code = intern(",".join([str(a) for a in self.args]))
 
     def __str__(self):

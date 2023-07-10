@@ -31,7 +31,7 @@ from fractions import Fraction
 from re import findall
 from sys import intern
 from textx import get_location
-from typing import Optional, List, Union, Tuple, Dict, Set, Callable, TYPE_CHECKING
+from typing import Optional, List, Union, Tuple, Dict, Set, Callable, TYPE_CHECKING, Generator
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
@@ -158,11 +158,13 @@ class Constructor(ASTNode):
         has been applied to some arguments (e.g., is_rgb)
 
         symbol (Symbol): only for Symbol constructors
+
+        range: the list of identifiers
     """
 
     def __init__(self, parent,
                  name: Union[UnappliedSymbol, str],
-                 args: List[Accessor]=None):
+                 args: Optional[List[Accessor]] = None):
         self.name = name
         self.sorts = args if args is not None else []
 
@@ -173,6 +175,7 @@ class Constructor(ASTNode):
         self.type = None
         self.symbol = None
         self.tester = None
+        self.range: Optional[List[Expression]] = None
 
     def __str__(self):
         return (self.name if not self.sorts else
@@ -195,7 +198,7 @@ class Accessor(ASTNode):
     def __init__(self, parent, type: UnappliedSymbol, accessor: UnappliedSymbol=None):
         self.accessor = accessor
         self.type = type.name
-        self.decl = None
+        self.decl: Optional[SymbolDeclaration] = None
 
     def __str__(self):
         return (self.type if not self.accessor else
@@ -319,7 +322,7 @@ class Expression(ASTNode):
                 questions: OrderedSet,
                 all_: bool=True,
                 co_constraints: bool=True
-                ) -> OrderedSet:
+                ):
         """collects the questions in self.
 
         `questions` is an OrderedSet of Expression
@@ -420,7 +423,7 @@ class Expression(ASTNode):
         # vocabulary
         return any(e.has_decision() for e in self.sub_exprs)
 
-    def type_inference(self) -> Dict[Variable, Symbol]:
+    def type_inference(self) -> Dict[str, Symbol]:
         # returns a dictionary {Variable : Symbol}
         try:
             return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
@@ -435,14 +438,14 @@ class Expression(ASTNode):
         return ''  # monkey-patched
 
     def _change(self: Expression,
-                sub_exprs: List[Expression] = None,
-                ops : List[str] = None,
-                simpler : Expression = None,
-                co_constraint : Expression = None
+                sub_exprs: Optional[List[Expression]] = None,
+                ops : Optional[List[str]] = None,
+                simpler : Optional[Expression] = None,
+                co_constraint : Optional[Expression] = None
                 ) -> Expression:
         pass
 
-    def update_exprs(self, new_exprs: List[Expression]) -> Expression:
+    def update_exprs(self, new_exprs: Generator[Expression, None, None]) -> Expression:
         return self  # monkey-patched
 
     def simplify1(self) -> Expression:
@@ -452,6 +455,12 @@ class Expression(ASTNode):
                   problem: Optional[Theory],
                   subs: Dict[str, Expression]
                   ) -> Expression:
+        return self  # monkey-patched
+
+    def interpretB(self,
+                    problem: Optional[Theory],
+                    subs: Dict[str, Expression]
+                    ) -> Expression:
         return self  # monkey-patched
 
     def interpret1(self,
@@ -536,8 +545,6 @@ class Expression(ASTNode):
                                    for e in self.sub_exprs))
                     .annotate1())  # update .variables
 
-Extension = Tuple[Optional[List[List[Expression]]],  # None if the extension is infinite (e.g., Int)
-                  Optional[Callable]]  # None if filtering is not required
 
 
 class Symbol(Expression):
@@ -553,7 +560,7 @@ class Symbol(Expression):
         self.name = unquote(name)
         self.name = Symbol.TO.get(self.name, self.name)
         self.sub_exprs = []
-        self.decl = None
+        self.decl: Optional[SymbolDeclaration] = None
         super().__init__()
         self.variables = set()
 
@@ -796,7 +803,7 @@ class AQuantification(Expression):
     def __init__(self, parent, annotations, q, quantees, f):
         self.annotations = annotations
         self.q = q
-        self.quantees = quantees
+        self.quantees: List[Quantee] = quantees
         self.f = f
 
         self.q = ('∀' if self.q in ['!', 'forall'] else
@@ -808,7 +815,9 @@ class AQuantification(Expression):
         super().__init__()
 
         self.type = BOOL
-        self.supersets, self.new_quantees, self.vars1 = None, None, None
+        self.supersets: List[List[List[Union[Identifier, Variable]]]] = None
+        self.new_quantees: List[Quantee] = None
+        self.vars1 : List[Variable] = None
 
     @classmethod
     def make(cls,
@@ -1086,7 +1095,7 @@ class AAggregate(Expression):
                  f: Expression = None,
                  if_: Expression = None):
         self.aggtype = aggtype
-        self.quantees = quantees
+        self.quantees: List[Quantee] = quantees
         self.f = f
         self.lambda_ = lambda_
 
@@ -1513,3 +1522,6 @@ class RecDef(Expression):
                 f"{', '.join(str(v) for v in self.vars)}"
                 f") = {self.sub_exprs[0]}.")
 
+Identifier = AppliedSymbol | UnappliedSymbol | Number | Date
+Extension = Tuple[Optional[List[List[Identifier]]],  # None if the extension is infinite (e.g., Int)
+                  Optional[Callable]]  # None if filtering is not required
