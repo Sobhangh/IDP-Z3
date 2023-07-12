@@ -19,14 +19,19 @@
 This module contains code to create and analyze messages to/from the
 web client.
 """
+from __future__ import annotations
 
 import ast
+from typing import TYPE_CHECKING
 
 from idp_engine import Theory, Status
 from idp_engine.Expression import (TRUE, FALSE, Number, Date)
 from idp_engine.Parse import str_to_IDP
 from idp_engine.Assignments import Status as S
 from idp_engine.utils import BOOL, INT, REAL, DATE
+
+if TYPE_CHECKING:
+    from .State import State
 
 def metaJSON(state):
     """
@@ -141,7 +146,7 @@ def load_json(assignments, jsonstr: str, keep_defaults: bool):
 
 
 class Output(object):
-    def __init__(self, state):
+    def __init__(self, state: State):
         self.m = {}  # [symbol.name][atom.code][attribute name] -> attribute value
         self.state = state
 

@@ -608,7 +608,6 @@ class TheoryBlock(ASTNode):
 
         self.constraints = OrderedSet()
         for c in constraints:
-            c.block = self
             if c.annotations is not None:
                 c.expr.annotations = c.annotations.annotations
             self.constraints.append(c.expr)

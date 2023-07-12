@@ -94,7 +94,7 @@ class Assignment(object):
         # First symbol in the sentence, preferably not starting with '_':
         # if no public symbol (not starting with '_') is found, the first
         # private one is used.
-        self.symbol_decl: SymbolDeclaration = None
+        self.symbol_decl: Optional[SymbolDeclaration] = None
         default = None
         self.symbols: dict[str, SymbolDeclaration] = \
             sentence.collect_symbols(co_constraints=False).values()

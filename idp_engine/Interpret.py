@@ -68,7 +68,8 @@ def interpret(self: TypeDeclaration, problem: Theory):
         ext = ([[t] for r in ranges for t in r], None)
         problem.extensions[self.name] = ext
     else:
-        self.check(hasattr(interpretation, 'enumeration'),
+        self.check(interpretation is not None
+                   and hasattr(interpretation, 'enumeration'),
                    f'Expected an interpretation for type {self.name}')
 
         enum = interpretation.enumeration.interpret(problem)
@@ -162,7 +163,6 @@ def interpret(self: SymbolDeclaration, problem: Theory):
                 break
             range_condition = range_condition.interpret(problem, {})
             constraint = IMPLIES([filter(expr.sub_exprs), range_condition])
-            constraint.block = self.block
             constraint.is_type_constraint_for = self.name
             constraint.annotations['reading'] = f"Possible values for {expr}"
             problem.constraints.append(constraint)
@@ -655,6 +655,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
         else:
             (superset, filter) = None, None
 
+        assert hasattr(domain, "decl"), "Internal error"
         arity = domain.decl.arity
         for vars in q.vars:
             self.check(len(vars) == arity, f"Incorrect arity for {domain}")
@@ -781,51 +782,49 @@ def interpretB(self: AppliedSymbol,
 
     # interpret the arguments
     sub_exprs = [e.interpretB(problem, subs) for e in self.sub_exprs]
-    self = self.update_exprs(sub_exprs)
-    _finalize(self, subs)
-    if self.is_value():
-        return self
+    out = self.update_exprs(e for e in sub_exprs)
+    _finalize(out, subs)
+    if out.is_value():
+        return out
 
     # interpret the AppliedSymbol
     value, co_constraint = None, None
-    if self.decl and problem:
-        if self.is_enumerated:
-            assert self.decl.type != BOOL, \
-                f"Can't use 'is enumerated' with predicate {self.decl.name}."
-            if self.decl.name in problem.interpretations:
-                interpretation = problem.interpretations[self.decl.name]
+    if out.decl and problem:
+        if out.is_enumerated:
+            assert out.decl.type != BOOL, \
+                f"Can't use 'is enumerated' with predicate {out.decl.name}."
+            if out.decl.name in problem.interpretations:
+                interpretation = problem.interpretations[out.decl.name]
                 if interpretation.default is not None:
-                    self.as_disjunction = TRUE
+                    out.as_disjunction = TRUE
                 else:
-                    self.as_disjunction = interpretation.enumeration.contains(sub_exprs, True,
+                    out.as_disjunction = interpretation.enumeration.contains(sub_exprs, True,
                         interpretations=problem.interpretations, extensions=problem.extensions)
-                if self.as_disjunction.same_as(TRUE) or self.as_disjunction.same_as(FALSE):
-                    value = self.as_disjunction
-                self.as_disjunction.annotations = self.annotations
-        elif self.in_enumeration:
+                if out.as_disjunction.same_as(TRUE) or out.as_disjunction.same_as(FALSE):
+                    value = out.as_disjunction
+                out.as_disjunction.annotations = out.annotations
+        elif out.in_enumeration:
             # re-create original Applied Symbol
-            core = deepcopy(AppliedSymbol.make(self.symbol, sub_exprs))
-            self.as_disjunction = self.in_enumeration.contains([core], False,
+            core = deepcopy(AppliedSymbol.make(out.symbol, sub_exprs))
+            out.as_disjunction = out.in_enumeration.contains([core], False,
                         interpretations=problem.interpretations, extensions=problem.extensions)
-            if self.as_disjunction.same_as(TRUE) or self.as_disjunction.same_as(FALSE):
-                value = self.as_disjunction
-            self.as_disjunction.annotations = self.annotations
-        elif self.decl.name in problem.interpretations:
-            interpretation = problem.interpretations[self.decl.name]
+            if out.as_disjunction.same_as(TRUE) or out.as_disjunction.same_as(FALSE):
+                value = out.as_disjunction
+            out.as_disjunction.annotations = out.annotations
+        elif out.decl.name in problem.interpretations:
+            interpretation = problem.interpretations[out.decl.name]
             if interpretation.block.name != DEFAULT:
                 f = interpretation.interpret_application
-                value = f(0, self, sub_exprs)
-        if not self.in_head:
+                value = f(0, out, sub_exprs)
+        if not out.in_head:
             # instantiate definition (for relevance)
-            inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
+            inst = [defin.instantiate_definition(out.decl, sub_exprs, problem)
                     for defin in problem.definitions]
             inst = [x for x in inst if x]
             if inst:
                 co_constraint = AND(inst)
         out = (value if value else
-               self._change(sub_exprs=sub_exprs, co_constraint=co_constraint))
-    else:
-        out = self
+               out._change(sub_exprs=sub_exprs, co_constraint=co_constraint))
     return out
 AppliedSymbol.interpretB = interpretB
 

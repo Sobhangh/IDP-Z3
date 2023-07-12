@@ -676,8 +676,6 @@ def annotate(self, voc, q_vars):
     out = AImplication.make(ops=['⇒'], operands=list(reversed(list(self.sub_exprs))),
                         annotations=None, parent=self)
     out.original = self
-    if hasattr(self, "block"):
-        out.block = self.block
     return out.annotate(voc, q_vars)
 ARImplication.annotate = annotate
 

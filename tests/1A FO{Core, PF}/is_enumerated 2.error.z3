@@ -7,8 +7,8 @@ Traceback (most recent call last):
     out = func(self, problem, subs)
           ^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Interpret.py", line ??, in interpretB
-    assert self.decl.type != BOOL, \
-           ^^^^^^^^^^^^^^^^^^^^^^
+    assert out.decl.type != BOOL, \
+           ^^^^^^^^^^^^^^^^^^^^^
 AssertionError: Can't use 'is enumerated' with predicate is_color.
 
 During handling of the above exception, another exception occurred:
