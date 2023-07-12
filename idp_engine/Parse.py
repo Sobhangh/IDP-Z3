@@ -370,7 +370,7 @@ class TypeDeclaration(ASTNode):
 
         map (dict[string, Expression]): a mapping from code to Expression in range
 
-        voc (Vocabulary): the vocabulary block that contains it
+        block (Vocabulary): the vocabulary block that contains it
     """
 
     def __init__(self, **kwargs):
@@ -386,6 +386,7 @@ class TypeDeclaration(ASTNode):
         self.type = (self.name if type(enumeration) != Ranges else
                      enumeration.type)  # INT or REAL or DATE
         self.base_type = self
+        self.block: Optional[Block] = None
 
         self.map = {}  # {String: constructor}
 
@@ -464,6 +465,8 @@ class SymbolDeclaration(ASTNode):
         range (List[Expression]): the list of possible values
 
         private (Bool): True if the symbol name starts with '_' (for use in IC)
+
+        block: the vocabulary where it is defined
 
         unit (str):
             the unit of the symbol, such as m (meters)

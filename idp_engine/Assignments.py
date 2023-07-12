@@ -171,6 +171,7 @@ class Assignment(object):
             [type]: returns an Assignment for the same sentence, but an opposite truth value.
         """
         assert self.sentence.type == BOOL, "Cannot negate a non-boolean assignment"
+        assert self.value is not None, "Cannot negate an assignment without value"
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
 
@@ -187,6 +188,7 @@ class Assignment(object):
             Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "appSymb is (not) in enumeration"
         """
         (x, y, z) = self.sentence.as_set_condition()
+        assert self.value is not None, "Internal error"
         if x:
             return (x, y if self.value.same_as(TRUE) else not y, z)
         return (None, None, None)
@@ -211,10 +213,6 @@ class Assignments(dict):
 
     def copy(self, shallow: bool = False) -> "Assignments":
         return Assignments({k: v.copy(shallow) for k, v in self.items()})
-
-    def extend(self, more: "Assignments") -> None:
-        for v in more.values():
-            self.assert_(v.sentence, v.value, v.status, v.relevant)
 
     def assert__(self,
                  sentence: Expression,
@@ -247,7 +245,7 @@ class Assignments(dict):
         with the exception of nullary symbols, which are printed as
         `name := value`.
         """
-        out = {}
+        out : dict[SymbolDeclaration, dict[str, str]] = {}  # ordered set of strings
         nullary = set()
         for a in self.values():
             if type(a.sentence) == AppliedSymbol:

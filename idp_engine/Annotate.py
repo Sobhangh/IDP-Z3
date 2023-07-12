@@ -90,6 +90,7 @@ Vocabulary.annotate = annotate
 
 def annotate(self, voc):
     self.voc = voc
+    self.block = voc
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self

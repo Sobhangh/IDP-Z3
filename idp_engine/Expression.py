@@ -31,7 +31,7 @@ from fractions import Fraction
 from re import findall
 from sys import intern
 from textx import get_location
-from typing import Optional, List, Union, Tuple, Dict, Set, Callable, TYPE_CHECKING, Generator
+from typing import Optional, List, Union, Tuple, Set, Callable, TYPE_CHECKING, Generator, Any
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
@@ -65,7 +65,7 @@ class ASTNode(object):
             raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
 
     def dedup_nodes(self,
-                    kwargs: dict[str, ASTNode],
+                    kwargs: dict[str, List[ASTNode]],
                     arg_name:str
                     ) -> dict[str, ASTNode]:
         """pops `arg_name` from kwargs as a list of named items
@@ -85,6 +85,7 @@ class ASTNode(object):
         out = {}
         for i in ast_nodes:
             # can't get location here
+            assert hasattr(i, "name"), "internal error"
             assert i.name not in out, f"Duplicate '{i.name}' in {arg_name}"
             out[i.name] = i
         return out
@@ -92,10 +93,10 @@ class ASTNode(object):
     def annotate(self, idp):
         return  # monkey-patched
 
-    def annotate1(self, idp):
+    def annotate1(self):
         return  # monkey-patched
 
-    def interpret(self, problem: Theory) -> Expression:
+    def interpret(self, problem: Optional[Theory]) -> ASTNode:
         return self  # monkey-patched
 
     def EN(self):
@@ -116,7 +117,8 @@ def catch_error(func):
 class Annotations(ASTNode):
     def __init__(self, parent, annotations: List[str]):
 
-        self.annotations = {}
+        self.annotations : dict[str, Union[str, dict[str, Any]]] = {}
+        v: Union[str, dict[str, Any]]
         for s in annotations:
             p = s.split(':', 1)
             if len(p) == 2:
@@ -165,11 +167,10 @@ class Constructor(ASTNode):
     def __init__(self, parent,
                  name: Union[UnappliedSymbol, str],
                  args: Optional[List[Accessor]] = None):
-        self.name = name
+        self.name : str = (name.s.name if type(name) == UnappliedSymbol else
+                     name)
         self.sorts = args if args is not None else []
 
-        self.name = (self.name.s.name if type(self.name) == UnappliedSymbol else
-                     self.name)
         self.arity = len(self.sorts)
 
         self.type = None
@@ -181,7 +182,7 @@ class Constructor(ASTNode):
         return (self.name if not self.sorts else
                 f"{self.name}({', '.join((str(a) for a in self.sorts))})" )
 
-def CONSTRUCTOR(name: Symbol, args=None) -> Constructor:
+def CONSTRUCTOR(name: str, args=None) -> Constructor:
     return Constructor(None, name, args)
 
 
@@ -195,7 +196,9 @@ class Accessor(ASTNode):
 
         decl (SymbolDeclaration): declaration of the accessor function
     """
-    def __init__(self, parent, type: UnappliedSymbol, accessor: UnappliedSymbol=None):
+    def __init__(self, parent,
+                 type: UnappliedSymbol,
+                 accessor: Optional[UnappliedSymbol] = None):
         self.accessor = accessor
         self.type = type.name
         self.decl: Optional[SymbolDeclaration] = None
@@ -341,12 +344,13 @@ class Expression(ASTNode):
             e.collect(questions, all_, co_constraints)
 
     def collect_symbols(self,
-                        symbols: dict[str, SymbolDeclaration]=None,
+                        symbols: Optional[dict[str, SymbolDeclaration]] = None,
                         co_constraints: bool=True
-                        ) -> dict[str, Declaration]:
+                        ) -> dict[str, SymbolDeclaration]:
         """ returns the list of symbol declarations in self, ignoring type constraints
         """
         symbols = {} if symbols == None else symbols
+        assert symbols is not None, "Internal error"
         if self.is_type_constraint_for is None:  # ignore type constraints
             if (hasattr(self, 'decl') and self.decl
                 and self.decl.__class__.__name__ == "SymbolDeclaration"
@@ -433,6 +437,7 @@ class Expression(ASTNode):
             else:
                 msg = f"Unknown error for {self}"
             self.check(False, msg)
+            return {}  # dead code
 
     def __str__(self) -> str:
         return ''  # monkey-patched
@@ -443,7 +448,7 @@ class Expression(ASTNode):
                 simpler : Optional[Expression] = None,
                 co_constraint : Optional[Expression] = None
                 ) -> Expression:
-        pass
+        return self  # monkey-patched
 
     def update_exprs(self, new_exprs: Generator[Expression, None, None]) -> Expression:
         return self  # monkey-patched
@@ -578,6 +583,7 @@ class Symbol(Expression):
         Returns:
             Expression: whether `term` is in the type denoted by `self`.
         """
+        assert self.decl is not None, "Internal error"
         self.check(self.decl.out.name == BOOL, "internal error")
         return self.decl.contains_element(term, interpretations, extensions)
 
@@ -600,8 +606,8 @@ class Type(Symbol):
 
     def __init__(self, parent,
                  name:str,
-                 ins: List[Type]=None,
-                 out: Type=None):
+                 ins: Optional[List[Type]] = None,
+                 out: Optional[Type] = None):
         self.ins = ins
         self.out = out
         super().__init__(parent, name)
@@ -623,7 +629,7 @@ class Type(Symbol):
                   interpretations: dict[str, SymbolInterpretation],
                   extensions: dict[str, Extension]
                   ) -> Extension:
-        pass  # monkey-patched
+        return extensions[""]  # monkey-patched
 
     def has_element(self,
                     term: Expression,
@@ -639,10 +645,12 @@ class Type(Symbol):
             Expression: whether `term` `term` is in the type denoted by `self`.
         """
         if self.name == CONCEPT:
-            comparisons = [EQUALS([term, c[0]])
-                           for c in self.extension(interpretations, extensions)[0]]
+            extension = self.extension(interpretations, extensions)[0]
+            assert extension is not None, "Internal error"
+            comparisons = [EQUALS([term, c[0]]) for c in extension]
             return OR(comparisons)
         else:
+            assert self.decl is not None, "Internal error"
             self.check(self.decl.out.name == BOOL, "internal error")
             return self.decl.contains_element(term, interpretations, extensions)
 
@@ -660,7 +668,7 @@ class AIfExpr(Expression):
                  if_f: Expression,
                  then_f: Expression,
                  else_f: Expression
-                 ) -> AIfExpr:
+                 ):
         self.if_f = if_f
         self.then_f = then_f
         self.else_f = else_f
@@ -713,10 +721,9 @@ class Quantee(Expression):
         e.g., the declaration of `Color`
     """
     def __init__(self, parent,
-                 vars: List[List[Variable]],
-                 subtype: Type = None,
-                 sort: SymbolExpr = None):
-        self.vars = vars
+                 vars: Union[List[Variable], List[List[Variable]]],
+                 subtype: Optional[Type] = None,
+                 sort: Optional[SymbolExpr] = None):
         self.subtype = subtype
         sort = sort
         if self.subtype:
@@ -727,13 +734,15 @@ class Quantee(Expression):
                           [self.subtype] if self.subtype else
                           [])
         self.arity = None
-        for i, v in enumerate(self.vars):
+        self.vars : List[List[Variable]] = []
+        for i, v in enumerate(vars):
             if hasattr(v, 'vars'):  # varTuple
                 self.check(1 < len(v.vars), f"Can't have singleton in binary quantification")
-                self.vars[i] = v.vars
+                self.vars.append(v.vars)
                 self.arity = len(v.vars) if self.arity == None else self.arity
             else:
-                self.vars[i] = [v]
+                assert isinstance(v, Variable), "Internal error"
+                self.vars.append([v])
                 self.arity = 1 if self.arity == None else self.arity
 
         super().__init__()
@@ -745,8 +754,8 @@ class Quantee(Expression):
     @classmethod
     def make(cls,
              var: List[Variable],
-             subtype: Type = None,
-             sort: SymbolExpr = None
+             subtype: Optional[Type] = None,
+             sort: Optional[SymbolExpr] = None
              ) -> 'Quantee':
         out = (cls) (None, [var], subtype=subtype, sort=sort)
         return out.annotate1()
@@ -866,7 +875,7 @@ def EXISTS(qs, expr, annotations=None):
 
 class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
-    MAP = dict()  # monkey-patched
+    MAP: dict[str, Callable] = dict()  # monkey-patched
     NORMAL = {
         "is strictly less than": "<",
         "is less than": "≤",
@@ -912,7 +921,7 @@ class Operator(Expression):
              operands: List[Expression],
              annotations=None,
              parent=None
-             ) -> 'Operator':
+             ) -> Expression:
         """ creates a BinaryOp
             beware: cls must be specific for ops !
         """
@@ -1043,7 +1052,7 @@ class APower(Operator):
 
 class AUnary(Expression):
     PRECEDENCE = 120
-    MAP = dict()  # monkey-patched
+    MAP : dict[str, Callable] = dict()  # monkey-patched
 
     def __init__(self, parent,
                  operators: List[str],
@@ -1085,12 +1094,11 @@ class AAggregate(Expression):
     def __init__(self, parent,
                  aggtype: str,
                  quantees: List[Quantee],
-                 lambda_: str=None,
-                 f: Expression = None,
-                 if_: Expression = None):
+                 lambda_: Optional[str] = None,
+                 f: Optional[Expression] = None,
+                 if_: Optional[Expression] = None):
         self.aggtype = aggtype
         self.quantees: List[Quantee] = quantees
-        self.f = f
         self.lambda_ = lambda_
 
         self.aggtype = ("#" if self.aggtype == "card" else
@@ -1282,6 +1290,7 @@ class AppliedSymbol(Expression):
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]
         if hasattr(symbol, 'name') and symbol.name in ['unit', 'heading']:
+            assert type(self.sub_exprs[0]) == UnappliedSymbol, "Internal error"
             constructor = CONSTRUCTOR(self.sub_exprs[0].name)
             constructors[symbol.name].append(constructor)
 
@@ -1353,7 +1362,7 @@ class UnappliedSymbol(Expression):
         """
         out = (cls)(None, s=SYMBOL(constructor.name))
         out.decl = constructor
-        out.variables = {}
+        out.variables = set()
         return out
 
     def is_value(self): return True
@@ -1417,6 +1426,7 @@ class Number(Expression):
 
         self.sub_exprs = []
         self.variables = set()
+        self.py_value = 0 # to get the type
 
         ops = self.number.split("/")
         if len(ops) == 2:  # possible with str_to_IDP on Z3 value
@@ -1516,6 +1526,6 @@ class RecDef(Expression):
                 f"{', '.join(str(v) for v in self.vars)}"
                 f") = {self.sub_exprs[0]}.")
 
-Identifier = AppliedSymbol | UnappliedSymbol | Number | Date
+Identifier = Union[AppliedSymbol, UnappliedSymbol, Number, Date]
 Extension = Tuple[Optional[List[List[Identifier]]],  # None if the extension is infinite (e.g., Int)
                   Optional[Callable]]  # None if filtering is not required
