@@ -1,0 +1,12 @@
+vocabulary V {
+    d1, d2: () -> Date
+}
+
+theory T:V {
+    d2() = d1()+1.
+    d1() = #TODAY.
+}
+
+procedure main() {
+    pretty_print(model_expand(T))
+}
