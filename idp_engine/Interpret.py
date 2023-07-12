@@ -24,11 +24,6 @@ Methods to ground / interpret a theory in a data structure
 * expand quantifiers
 * replace symbols interpreted in the structure by their interpretation
 
-This module also includes methods to:
-
-* substitute a node by another in an AST tree
-* instantiate an expresion, i.e. replace a variable by a value
-
 This module monkey-patches the ASTNode class and sub-classes.
 
 ( see docs/zettlr/Substitute.md )
@@ -56,7 +51,7 @@ from .utils import (BOOL, INT, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
 # class Import  ###########################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret(self: Import, problem: Theory):
     pass
 Import.interpret = interpret
 
@@ -64,7 +59,7 @@ Import.interpret = interpret
 # class TypeDeclaration  ###########################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret(self: TypeDeclaration, problem: Theory):
     interpretation = problem.interpretations.get(self.name, None)
     if self.name in [BOOL, CONCEPT]:
         self.translate(problem)
@@ -111,7 +106,7 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret(self: SymbolDeclaration, problem: Theory):
     assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
 
     symbol = SYMBOL(self.name)
@@ -165,7 +160,7 @@ def interpret(self, problem):
                                 problem.interpretations, problem.extensions)
             if range_condition.same_as(TRUE):
                 break
-            range_condition = range_condition.interpret(problem)
+            range_condition = range_condition.interpret(problem, {})
             constraint = IMPLIES([filter(expr.sub_exprs), range_condition])
             constraint.block = self.block
             constraint.is_type_constraint_for = self.name
@@ -177,7 +172,7 @@ SymbolDeclaration.interpret = interpret
 # class Definition  ###########################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret(self: Definition, problem: Theory):
     """updates problem.def_constraints, by expanding the definitions
 
     Args:
@@ -189,8 +184,8 @@ def interpret(self, problem):
 Definition.interpret = interpret
 
 @catch_error
-def get_def_constraints(self,
-                        problem,
+def get_def_constraints(self: Definition,
+                        problem: Theory,
                         for_explain: bool = False
                         ) -> Dict[SymbolDeclaration, Definition, List[Expression]]:
     """returns the constraints for this definition.
@@ -223,7 +218,7 @@ def get_def_constraints(self,
 
             vars = sorted(list(self.def_vars[decl.name].values()), key=lambda v: v.name)
             vars = vars[:-1] if decl.out.name != BOOL else vars
-            expr = RecDef(self, decl.name, vars, expr.interpret(problem))
+            expr = RecDef(self, decl.name, vars, expr.interpret(problem, {}))
             out[decl, self] = [expr]
         return out
 
@@ -282,14 +277,14 @@ def get_def_constraints(self,
     out = {}
     for decl, bodies in instantiables.items():
         quantees = self.canonicals[decl][0].quantees  # take quantee from 1st renamed rule
-        expr = [FORALL(quantees, e, e.annotations).interpret(problem)
+        expr = [FORALL(quantees, e, e.annotations).interpret(problem, {})
                 for e in bodies]
         out[decl, self] = expr
     return out
 Definition.get_def_constraints = get_def_constraints
 
 @catch_error
-def instantiate_definition(self, decl, new_args, theory):
+def instantiate_definition(self: Definition, decl, new_args, theory) -> Expression:
     rule = self.clarks.get(decl, None)
     if rule and self.mode != Semantics.RECDATA:
         key = str(new_args)
@@ -312,7 +307,10 @@ Definition.instantiate_definition = instantiate_definition
 # class Rule  ###########################################################
 
 @catch_error
-def instantiate_definition(self, new_args, theory):
+def instantiate_definition(self: Rule,
+                           new_args: List[Expression],
+                           theory: Theory
+                           ) -> Expression:
     """Create an instance of the definition for new_args, and interpret it for theory.
 
     Args:
@@ -326,18 +324,18 @@ def instantiate_definition(self, new_args, theory):
     out = deepcopy(self.body)  # in case there are no arguments
     instance = AppliedSymbol.make(self.definiendum.symbol, new_args)
     instance.in_head = True
+    self.check(len(self.definiendum.sub_exprs) == len(new_args),
+                "Internal error")
+    subs = dict(zip([e.name for e in self.definiendum.sub_exprs], new_args))
+
     if self.definiendum.decl.type == BOOL:  # a predicate
-        self.check(len(self.definiendum.sub_exprs) == len(new_args),
-                    "Internal error")
-        out = out.instantiate(self.definiendum.sub_exprs, new_args, theory)
+        out = out.interpret(theory, subs)
         out = EQUIV([instance, out])
     else:
-        self.check(len(self.definiendum.sub_exprs) == len(new_args) ,
-                    "Internal error")
-        out = out.instantiate(self.definiendum.sub_exprs+[self.out],
-                                new_args+[instance], theory)
+        subs[self.out.name] = instance
+        out = out.interpret(theory, subs)
     out.block = self.block
-    out = out.interpret(theory)
+    out = out.interpret(theory, {})
     return out
 Rule.instantiate_definition = instantiate_definition
 
@@ -345,7 +343,7 @@ Rule.instantiate_definition = instantiate_definition
 # class SymbolInterpretation  ###########################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret(self: SymbolInterpretation, problem: Theory):
     status = S.DEFAULT if self.block.name == DEFAULT else S.STRUCTURE
     assert not self.is_type_enumeration, "Internal error"
     if not self.name in [GOAL_SYMBOL, EXPAND]:
@@ -434,7 +432,7 @@ def interpret(self, problem):
                        for i, sort in enumerate(decl.sorts)}
             quantees = [Quantee.make(v, sort=v.sort) for v in q_vars.values()]
             expr = self.enumeration.contains(list(q_vars.values()), True)
-            constraint = FORALL(quantees, expr).interpret(problem)
+            constraint = FORALL(quantees, expr).interpret(problem, {})
             constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
             problem.constraints.append(constraint)
 SymbolInterpretation.interpret = interpret
@@ -443,7 +441,7 @@ SymbolInterpretation.interpret = interpret
 # class Enumeration  ###########################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret(self: Enumeration, problem: Theory) -> Enumeration:
     return self
 Enumeration.interpret = interpret
 
@@ -451,7 +449,7 @@ Enumeration.interpret = interpret
 # class ConstructedFrom  ###########################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret(self: ConstructedFrom, problem: Theory) -> ConstructedFrom:
     self.tuples = OrderedSet()
     for c in self.constructors:
         c.interpret(problem)
@@ -466,7 +464,7 @@ ConstructedFrom.interpret = interpret
 # class Constructor  ###########################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret(self: Constructor, problem: Theory) -> Constructor:
     assert all(isinstance(s.decl.out, Type) for s in self.sorts), 'internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
@@ -489,101 +487,57 @@ Constructor.interpret = interpret
 # class Expression  ###########################################################
 
 @catch_error
-def interpret(self, problem) -> Expression:
+def interpret(self: Expression,
+              problem: Theory | None,
+              subs: Dict[str, Expression]
+              ) -> Expression:
     """ uses information in the problem and its vocabulary to:
     - expand quantifiers in the expression
     - simplify the expression using known assignments and enumerations
     - instantiate definitions
 
+    This method calls `interpret1` after copying `self`
+
     Args:
         problem (Theory): the Theory to apply
+
+        subs: a dictionary holding the value of the free variables of self
 
     Returns:
         Expression: the resulting expression
     """
-    if self.is_type_constraint_for:  # do not interpret typeConstraints
+    if self.is_value() or self.is_type_constraint_for:  # do not interpret typeConstraints
         return self
-    out = self.update_exprs(e.interpret(problem) for e in self.sub_exprs)
+    if subs:
+        self = copy(self)  # shallow copy !
+        self.annotations = copy(self.annotations)
+        self.variables = copy(self.variables)
+    out = self.interpret1(problem, subs)
     return out
 Expression.interpret = interpret
 
-
-# @log  # decorator patched in by tests/main.py
-@catch_error
-def substitute(self, e0, e1, assignments, tag=None):
-    """ recursively substitute e0 by e1 in self (e0 is not a Variable)
-
-    if tag is present, updates assignments with symbolic propagation of co-constraints.
-
-    implementation for everything but AppliedSymbol, UnappliedSymbol and
-    Fresh_variable
-    """
-    assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
-               f"Internal error in substitute {e0} by {e1}" # should use instantiate instead
-    assert self.co_constraint is None,  \
-               f"Internal error in substitue: {self.co_constraint}" # see AppliedSymbol instead
-
-    # similar code in AppliedSymbol !
-    if self.code == e0.code:
-        if self.code == e1.code:
-            return self  # to avoid infinite loops
-        return e1  # e1 is UnappliedSymbol or Number
-    else:
-        out = self.update_exprs(e.substitute(e0, e1, assignments, tag)
-                                for e in self.sub_exprs)
-        return out
-Expression.substitute = substitute
-
-
-@catch_error
-def instantiate(self, e0, e1, problem=None):
-    """Recursively substitute Variable in e0 by e1 in a copy of self.
-    Update .variables.
-    """
-    assert all(type(e) == Variable for e in e0), \
-           f"Internal error: instantiate {e0}"
-    if self.is_value():
-        return self
-    out = copy(self)  # shallow copy !
-    out.annotations = copy(out.annotations)
-    out.variables = copy(out.variables)
-    return out.instantiate1(e0, e1, problem)
-Expression.instantiate = instantiate
-
-@catch_error
-def instantiate1(self, e0, e1, problem=None):
-    """Recursively substitute Variable in e0 by e1 in self.
-
-    Interpret appliedSymbols immediately if grounded (and not occurring in head of definition).
-    Update .variables.
-    """
-    # instantiate expressions, with simplification
-    out = self.update_exprs(e.instantiate(e0, e1, problem)
-                            for e in self.sub_exprs)
-    return _finalize(self, out, e0, e1)
-Expression.instantiate1 = instantiate1
-
-@catch_error
-def _finalize(self, out, e0, e1):
-    if not out.is_value():
-        self.check(len(e0) == len(e1),
-                   f"Incorrect arity: {e0}, {e1}")
-        for o, n in zip(e0, e1):
-            if o.name in out.variables:
-                out.variables.discard(o.name)
-                if type(n) == Variable:
-                    out.variables.add(n.name)
-            out.code = str(out)
-    out.annotations['reading'] = out.code
+def interpret1(self: Expression,
+               problem: Theory | None,
+               subs: Dict[str, Expression]
+               ) -> Expression:
+    out = self.update_exprs(e.interpret(problem, subs) for e in self.sub_exprs)
+    _finalize(out, subs)
     return out
-
-
-# class Symbol ###########################################################
+Expression.interpret1 = interpret1
 
 @catch_error
-def instantiate(self, e0, e1, problem=None):
+def _finalize(self: Expression, subs: Dict[str, Expression]):
+    """update self.variables and reading"""
+    if subs:
+        if not self.is_value():
+            for oname, n in subs.items():
+                if oname in self.variables:
+                    self.variables.discard(oname)
+                    if type(n) == Variable:
+                        self.variables.add(n.name)
+            self.code = str(self)
+        self.annotations['reading'] = self.code
     return self
-Symbol.instantiate = instantiate
 
 
 # class Type ###########################################################
@@ -639,7 +593,7 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
         Expression: `expr` extended with appropriate filter
     """
     if filter:  # adds `filter(val) =>` in front of expression
-        applied = filter(args).interpret(theory)
+        applied = filter(args).interpret(theory, {})
         if q == '∀':
             out = IMPLIES([applied, expr])
         elif q == '∃':
@@ -654,8 +608,18 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Expressio
         return out
     return expr
 
+def flatten(a):
+    # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
+    out = []
+    for sublist in a:
+        out.extend(sublist)
+    return out
+
 @catch_error
-def interpret(self, problem):
+def interpret1(self: AQuantification,
+               problem: Theory | None,
+               subs: Dict[str, Expression]
+               ) -> Expression:
     """apply information in the problem and its vocabulary
 
     Args:
@@ -665,8 +629,12 @@ def interpret(self, problem):
         Expression: the expanded quantifier expression
     """
     # This method is called by AAggregate.interpret !
-    if not self.quantees:
-        return Expression.interpret(self, problem)
+
+    if not self.quantees and not subs:
+        return Expression.interpret1(self, problem, subs)
+
+    for q in self.quantees: # for !x in $(output_domain(s,1))
+        q.sub_exprs = [e.interpret(problem, subs) for e in q.sub_exprs]
 
     # type inference
     if 0 < len(self.sub_exprs):  # in case it was simplified away
@@ -681,106 +649,98 @@ def interpret(self, problem):
                 var.sort = inferred[var.name]
                 q.sub_exprs = [inferred[var.name]]
 
+    # determine the domain of the variables, and add filter to the expression if needed
+    new_quantees, vars1, supersets = [], [], []
     forms = self.sub_exprs
-    new_quantees, instantiated = [], False
     for q in self.quantees:
         domain = q.sub_exprs[0]
 
-        superset, filter = None, None
-        if isinstance(domain, Type):  # quantification over type / Concepts
-            (superset, filter) = domain.extension(problem.interpretations,
-                                        problem.extensions)
-        elif type(domain) in [SymbolExpr, Symbol]:  # SymbolExpr (e.g. $(`Color))
-            self.check(domain.decl.out.type == BOOL,
-                        f"{domain} is not a type or predicate")
-            assert domain.decl.name in problem.extensions, "internal error"
-            (superset, filter) = problem.extensions[domain.decl.name]
+        if problem:
+            if isinstance(domain, Type):  # quantification over type / Concepts
+                (superset, filter) = domain.extension(problem.interpretations,
+                                                    problem.extensions)
+            elif type(domain) in [SymbolExpr, Symbol]:  # SymbolExpr (e.g. $(`Color))
+                self.check(domain.decl.out.type == BOOL,
+                            f"{domain} is not a type or predicate")
+                assert domain.decl.name in problem.extensions, "internal error"
+                (superset, filter) = problem.extensions[domain.decl.name]
+            else:
+                self.check(False, f"Can't resolve the domain of {str(q.vars)}")
         else:
-            self.check(False, f"Can't resolve the domain of {str(q.vars)}")
+            (superset, filter) = None, None
+
+        for vars in q.vars:
+            self.check(domain.decl.arity == len(vars),
+                        f"Incorrect arity of {domain}")
+            if filter:
+                forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
+
+        vars1.extend(flatten(q.vars))
 
         if superset is None:
             new_quantees.append(q)
-            for vars in q.vars:
-                forms = [_add_filter(self.q, f, filter, vars, problem) for f in forms]
+            supersets.extend([q] for q in q.vars)  # replace the variable by itself
         else:
-            for vars in q.vars:
-                self.check(domain.decl.arity == len(vars),
-                            f"Incorrect arity of {domain}")
-                out = []
-                for f in forms:
-                    for val in superset:
-                        new_f = f.instantiate(vars, val, problem)
-                        instantiated = True
-                        out.append(_add_filter(self.q, new_f, filter, val, problem))
-                forms = out
-
-    if not instantiated:
-        forms = [f.interpret(problem) if problem else f for f in forms]
+            supersets.extend([superset]*len(q.vars))
     self.quantees = new_quantees
-    return self.update_exprs(forms)
-AQuantification.interpret = interpret
 
+    # expand the formula by the cross-product of the supersets, and substitute per `subs`
+    out, subs1 = [], copy(subs)
+    for f in forms:
+        for vals in product(*supersets):
+            vals1 = flatten(vals)
+            subs1.update((var.code, val) for var, val in zip(vars1, vals1))
+            new_f2 = f.interpret(problem, subs1)
+            out.append(new_f2)
 
-@catch_error
-def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)  # updates .variables
-    for q in self.quantees: # for !x in $(output_domain(s,1))
-        if q.sub_exprs:
-            q.sub_exprs[0] = q.sub_exprs[0].instantiate(e0, e1, problem)
-    if problem and not out.variables:  # expand nested quantifier if no variables left
-        out = out.interpret(problem)
+    out = self.update_exprs(out)
+
     return out
-AQuantification.instantiate1 = instantiate1
+AQuantification.interpret1 = interpret1
 
 
 # Class AAggregate  ######################################################
 
 @catch_error
-def interpret(self, problem):
+def interpret1(self: AAggregate,
+               problem: Theory | None,
+               subs: Dict[str, Expression]
+               ) -> Expression:
     assert self.annotated, f"Internal error in interpret"
-    return AQuantification.interpret(self, problem)
-AAggregate.interpret = interpret
-
-AAggregate.instantiate1 = AQuantification.instantiate1
-
-
-# Class AImplication ######################################################
-
-@catch_error
-def instantiate1(self, e0, e1, problem):
-    assert len(self.sub_exprs) == 2
-    premise = self.sub_exprs[0].instantiate(e0, e1, problem)
-    if premise.same_as(FALSE):  # lazy instantiation
-        return TRUE
-    consequent = self.sub_exprs[1].instantiate(e0, e1, problem)
-    out = self.update_exprs([premise, consequent])
-    return _finalize(self, out, e0, e1)
-AImplication.instantiate1 = instantiate1
-
-
-# Class AConjunction ######################################################
-
-@catch_error
-def instantiate1(self, e0, e1, problem):
-    new_exprs = []
-    for e in self.sub_exprs:
-        new_e = e.instantiate(e0, e1, problem)
-        if new_e.same_as(FALSE):  # lazy instantiation
-            return FALSE
-        new_exprs.append(new_e)
-    out = self.update_exprs(new_exprs)
-    return _finalize(self, out, e0, e1)
-AConjunction.instantiate1 = instantiate1
+    return AQuantification.interpret1(self, problem, subs)
+AAggregate.interpret1 = interpret1
 
 
 # Class AppliedSymbol  ##############################################
 
 @catch_error
-def interpret(self, problem):
-    self.symbol = self.symbol.interpret(problem)
-    sub_exprs = [e.interpret(problem) for e in self.sub_exprs]
-    value, simpler, co_constraint = None, None, None
-    if self.decl:
+def interpret1(self: AppliedSymbol,
+               problem: Theory | None,
+               subs: Dict[str, Expression]
+               ) -> Expression:
+    # interpret the symbol expression, if any
+    if type(self.symbol) == SymbolExpr and self.symbol.is_intentional():  # $(x)()
+        self.symbol = self.symbol.interpret(problem, subs)
+        if type(self.symbol) == Symbol:  # found $(x)
+            self.check(len(self.sub_exprs) == len(self.symbol.decl.sorts),
+                        f"Incorrect arity for {self.code}")
+            kwargs = ({'is_enumerated': self.is_enumerated} if self.is_enumerated else
+                        {'in_enumeration': self.in_enumeration} if self.in_enumeration else
+                        {})
+            out = AppliedSymbol.make(self.symbol, self.sub_exprs, **kwargs)
+            out.original = self
+            self = out
+
+    # interpret the arguments
+    sub_exprs = [e.interpret(problem, subs) for e in self.sub_exprs]
+    self = self.update_exprs(sub_exprs)
+    _finalize(self, subs)
+    if self.is_value():
+        return self
+
+    # interpret the AppliedSymbol
+    value, co_constraint = None, None
+    if self.decl and problem:
         if self.is_enumerated:
             assert self.decl.type != BOOL, \
                 f"Can't use 'is enumerated' with predicate {self.decl.name}."
@@ -803,13 +763,10 @@ def interpret(self, problem):
                 value = self.as_disjunction
             self.as_disjunction.annotations = self.annotations
         elif self.decl.name in problem.interpretations:
-            if all(a.is_value() for a in sub_exprs):
-                interpretation = problem.interpretations[self.decl.name]
-                if interpretation.block.name != DEFAULT:
-                    f = interpretation.interpret_application
-                    value = f(0, self, sub_exprs)
-            else:
-                self.decl.needs_interpretation = True
+            interpretation = problem.interpretations[self.decl.name]
+            if interpretation.block.name != DEFAULT:
+                f = interpretation.interpret_application
+                value = f(0, self, sub_exprs)
         if not self.in_head and not self.variables:
             # instantiate definition (for relevance)
             inst = [defin.instantiate_definition(self.decl, sub_exprs, problem)
@@ -818,92 +775,25 @@ def interpret(self, problem):
             if inst:
                 co_constraint = AND(inst)
         out = (value if value else
-               self._change(sub_exprs=sub_exprs, simpler=simpler,
-                        co_constraint=co_constraint))
-        return out
+               self._change(sub_exprs=sub_exprs, co_constraint=co_constraint))
     else:
-        return self
-AppliedSymbol.interpret = interpret
-
-
-# @log_calls  # decorator patched in by tests/main.py
-@catch_error
-def substitute(self, e0, e1, assignments, tag=None):
-    """ recursively substitute e0 by e1 in self """
-
-    assert not isinstance(e0, Variable) or isinstance(e1, Variable), \
-        f"should use 'instantiate instead of 'substitute for {e0}->{e1}"
-
-    new_branch = None
-    if self.co_constraint is not None:
-        new_branch = self.co_constraint.substitute(e0, e1, assignments, tag)
-        if tag is not None:
-            new_branch.symbolic_propagate(assignments, tag)
-
-    if self.as_disjunction is not None:
-        self.as_disjunction = self.as_disjunction.substitute(e0, e1,        assignments, tag)
-        if tag is not None:
-            self.as_disjunction.symbolic_propagate(assignments, tag)
-
-    if self.code == e0.code:
-        return e1
-    else:
-        sub_exprs = [e.substitute(e0, e1, assignments, tag)
-                     for e in self.sub_exprs]  # no simplification here
-        return self._change(sub_exprs=sub_exprs, co_constraint=new_branch)
-AppliedSymbol .substitute = substitute
-
-@catch_error
-def instantiate1(self, e0, e1, problem=None):
-    out = Expression.instantiate1(self, e0, e1, problem)  # update .variables
-    if type(out) == AppliedSymbol:  # might be a number after instantiation
-        if type(out.symbol) == SymbolExpr and out.symbol.is_intentional():  # $(x)()
-            out.symbol = out.symbol.instantiate(e0, e1, problem)
-            if type(out.symbol) == Symbol:  # found $(x)
-                self.check(len(out.sub_exprs) == len(out.symbol.decl.sorts),
-                            f"Incorrect arity for {out.code}")
-                kwargs = ({'is_enumerated': out.is_enumerated} if out.is_enumerated else
-                          {'in_enumeration': out.in_enumeration} if out.in_enumeration else
-                          {})
-                out = AppliedSymbol.make(out.symbol, out.sub_exprs, **kwargs)
-                out.original = self
-        if out.co_constraint is not None:
-            out.co_constraint.instantiate(e0, e1, problem)
-        if out.as_disjunction is not None:
-            out.as_disjunction.instantiate(e0, e1, problem)
-        if problem and not self.variables:
-            return out.interpret(problem)
+        out = self
     return out
-AppliedSymbol .instantiate1 = instantiate1
+AppliedSymbol.interpret1 = interpret1
 
 
 # Class Variable  #######################################################
 
 @catch_error
-def interpret(self, problem):
-    return self
+def interpret(self: Variable,
+              problem: Theory | None,
+              subs: Dict[str, Expression]
+              ) -> Expression:
+    if self.sort:
+        self.sort = self.sort.interpret(problem, subs)
+    out = subs.get(self.code, self)
+    return out
 Variable.interpret = interpret
-
-# @log  # decorator patched in by tests/main.py
-@catch_error
-def substitute(self, e0, e1, assignments, tag=None):
-    if self.sort:
-        self.sort = self.sort.substitute(e0,e1, assignments, tag)
-    return e1 if self.code == e0.code else self
-Variable.substitute = substitute
-
-@catch_error
-def instantiate1(self, e0, e1, problem=None):
-    if self.sort:
-        self.sort = self.sort.instantiate(e0, e1, problem)
-    self.check(len(e0) == len(e1),
-               f"Incorrect arity: {e0}, {e1}")
-    for o, n in zip(e0, e1):
-        if self.code == o.code:
-            return n
-    return self
-Variable.instantiate1 = instantiate1
-
 
 
 Done = True

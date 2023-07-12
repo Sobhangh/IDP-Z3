@@ -166,7 +166,7 @@ AEquivalence.update_exprs = update_exprs
 
 def update_exprs(self, new_exprs, replace=True):
     exprs, other = [], []
-    value, simpler = None, None
+    simpler = None
     for expr in new_exprs:
         if expr.same_as(TRUE):
             return TRUE
@@ -188,7 +188,7 @@ ADisjunction.update_exprs = update_exprs
 def update_exprs(self, new_exprs, replace=True):
     exprs, other = [], []
     simpler = None
-    for i, expr in enumerate(new_exprs):
+    for expr in new_exprs:
         if expr.same_as(FALSE):
             return FALSE
         exprs.append(expr)

@@ -1,0 +1,17 @@
+vocabulary V {
+    p : ℤ → 𝔹
+    q : ℤ → 𝔹
+}
+
+theory T:V {
+
+    ∀ x ∈ ℤ : p(x) ⇔ q(x).
+
+    q ≜ {1}.
+
+}
+
+procedure main() {
+    pretty_print(Theory(T).propagate())
+}
+

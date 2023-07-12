@@ -95,7 +95,7 @@ class ASTNode(object):
     def annotate1(self, idp):
         return  # monkey-patched
 
-    def interpret(self, problem: Any) -> Expression:
+    def interpret(self, problem: Theory) -> Expression:
         return self  # monkey-patched
 
     def EN(self):
@@ -210,7 +210,7 @@ class Expression(ASTNode):
             Textual representation of the expression.  Often used as a key.
 
             It is generated from the sub-tree.
-            Some tree transformations change it (e.g., instantiate),
+            Some tree transformations change it (e.g., interpret),
             others don't.
 
         sub_exprs (List[Expression]):
@@ -437,25 +437,23 @@ class Expression(ASTNode):
     def simplify1(self) -> Expression:
         return self  # monkey-patched
 
+    def interpret(self,
+                  problem: Theory | None,
+                  subs: Dict[str, Expression]
+                  ) -> Expression:
+        return self  # monkey-patched
+
+    def interpret1(self,
+                    problem: Theory | None,
+                    subs: Dict[str, Expression]
+                    ) -> Expression:
+        return self  # monkey-patched
+
     def substitute(self,
                    e0: Expression,
                    e1: Expression,
                    assignments: Assignments,
                    tag=None) -> Expression:
-        return self  # monkey-patched
-
-    def instantiate(self,
-                    e0: List[Expression],
-                    e1: List[Expression],
-                    problem: Theory=None
-                    ) -> Expression:
-        return self  # monkey-patched
-
-    def instantiate1(self,
-                    e0: Expression,
-                    e1: Expression,
-                    problem: Theory=None
-                    ) -> Expression:
         return self  # monkey-patched
 
     def simplify_with(self, assignments: Assignments, co_constraints_too=True) -> Expression:
@@ -553,6 +551,8 @@ class Symbol(Expression):
 
     def __repr__(self):
         return str(self)
+
+    def is_value(self): return True
 
     def has_element(self, term: Expression,
                     interpretations: Dict[str, SymbolInterpretation],
@@ -1252,7 +1252,7 @@ class AppliedSymbol(Expression):
                 msg = f"Unknown error for symbol {self}"
             self.check(False, msg)
 
-    def is_value(self):
+    def is_value(self) -> bool:
         # independent of is_enumeration and in_enumeration !
         return (type(self.decl) == Constructor
                 and all(e.is_value() for e in self.sub_exprs))

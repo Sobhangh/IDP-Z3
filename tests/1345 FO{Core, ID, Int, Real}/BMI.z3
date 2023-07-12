@@ -16,7 +16,7 @@ length() -> 160
 ? sex() = Female
 
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
-bmi() = bmi_ ⇔ bmi_ = weight() / 25600
+bmi() = bmi_ ⇔ bmi_ = weight() / (length() ⨯ length())
 definition of BMILevel
 weight() = 80
 
@@ -27,6 +27,7 @@ weight() = 80
 (declare-fun riskLevel () riskLevelt_t)
 (declare-fun waist () Real)
 (declare-fun sex () sext_t)
+(declare-fun length () Real)
 (declare-fun weight () Real)
 (declare-fun bmi () Real)
 (assert (let ((a!1 (and (<= (/ 37.0 2.0) bmi) (>= (/ 249.0 10.0) bmi) (= sex Male)))
@@ -54,7 +55,7 @@ weight() = 80
       (a!18 (= (= BMILevel Obese_I)
                (and (<= (to_real 30) bmi) (>= (/ 349.0 10.0) bmi))))
       (a!20 (forall ((c!0 Real))
-              (= (= bmi c!0) (= c!0 (/ weight (to_real 25600)))))))
+              (= (= bmi c!0) (= c!0 (/ weight (* length length)))))))
 (let ((a!7 (or (and (= BMILevel Severely_Underweight)
                     (and (> (/ 37.0 2.0) bmi) (= sex Male)))
                (and (= BMILevel Underweight)

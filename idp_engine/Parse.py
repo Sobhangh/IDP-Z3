@@ -471,9 +471,6 @@ class SymbolDeclaration(ASTNode):
         optimizable (bool):
             whether this symbol should get optimize buttons in the IC
 
-        needs_interpretation (bool):
-            whether its interpretation must be sent to Z3
-
         voc (Vocabulary): the vocabulary block that contains it
     """
 
@@ -499,7 +496,6 @@ class SymbolDeclaration(ASTNode):
         self.unit: str = None
         self.heading: str = None
         self.optimizable: bool = True
-        self.needs_interpretation = False
 
         self.type = None  # a string
         self.base_type = None
@@ -629,16 +625,17 @@ class Definition(ASTNode):
             set of rules for the definition, e.g., `!x: p(x) <- q(x)`
 
         renamed (Dict[Declaration, List[Rule]]):
-            normalized rule for each defined symbol (except for the value in the head),
-            e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
+            rules with normalized body for each defined symbol,
+            e.g., `!x: p(x) <- q(p1_)`
+            (quantees and head are unchanged)
 
         canonicals (Dict[Declaration, List[Rule]]):
             normalized rule for each defined symbol,
-            e.g., `!$p!1$: p($p!1$) <- q($p!1$)`
+            e.g., `! p1_: p(p1_) <- q(p1_)`
 
         clarks (Dict[Declaration, Transformed Rule]):
             normalized rule for each defined symbol (used to be Clark completion)
-            e.g., `!$p!1$: p($p!1$) <=> q($p!1$)`
+            e.g., `! p1_: p(p1_) <=> q(p1_)`
 
         def_vars (Dict[String, Dict[String, Variable]]):
             Fresh variables for arguments and result
@@ -830,15 +827,15 @@ class SymbolInterpretation(ASTNode):
         Returns:
             Expression: Grounded interpretation of self.symbol applied to args
         """
-        if tuples == None:  # first call
+        if tuples == None:
             tuples = self.enumeration.sorted_tuples
-            key = ",".join(a.code for a in args)
-            if key in self.enumeration.lookup:
-                return self.enumeration.lookup[key]
-            elif self.enumeration.parent.sign != '≜':
-                return applied._change(sub_exprs=args)
-            return self.enumeration.parent.default
-    """
+            if all(a.is_value() for a in args):  # use lookup
+                key = ",".join(a.code for a in args)
+                if key in self.enumeration.lookup:
+                    return self.enumeration.lookup[key]
+                elif self.enumeration.parent.sign == '≜':  # can use default
+                    return self.enumeration.parent.default
+
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
@@ -853,7 +850,7 @@ class SymbolInterpretation(ASTNode):
                    applied._change(sub_exprs=args))
             groups = groupby(tuples, key=lambda t: str(t.args[rank]))
 
-            if args[rank].value is not None:
+            if args[rank].is_value():
                 for val, tuples2 in groups:  # try to resolve
                     if str(args[rank]) == val:
                         out = self.interpret_application(rank+1,
@@ -867,7 +864,6 @@ class SymbolInterpretation(ASTNode):
                                                    applied, args, tuples),
                         out)
             return out
-    """
 
 
 class Enumeration(ASTNode):

@@ -171,9 +171,7 @@ class Theory(object):
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
-                                and (a.status == S.UNIVERSAL
-                                     or (a.status == S.STRUCTURE
-                                         and a.symbol_decl.needs_interpretation))]
+                                and a.status == S.UNIVERSAL]
             self._slvr.add(assignment_forms)
         return self._slvr
 
@@ -186,9 +184,7 @@ class Theory(object):
             assignment_forms = [a.formula().translate(self)
                                 for a in self.assignments.values()
                                 if a.value is not None
-                                and (a.status == S.UNIVERSAL
-                                     or (a.status == S.STRUCTURE
-                                         and a.symbol_decl.needs_interpretation))]
+                                and a.status == S.UNIVERSAL]
             self._optmz.add(assignment_forms)
         return self._optmz
 
@@ -203,7 +199,7 @@ class Theory(object):
             for defin in self.definitions:
                 def_constraints.update(defin.get_def_constraints(self, for_explain=True))
 
-            for constraint in chain([c.interpret(self) for c in self.constraints],
+            for constraint in chain([c.interpret(self, {}) for c in self.constraints],
                                     chain(*def_constraints.values())):
                 p = constraint.reified(self)
                 self.expl_reifs[p] = (constraint.translate(self), constraint)
@@ -280,8 +276,6 @@ class Theory(object):
         self.extensions = {}  # reset the cache
 
         for decl in self.declarations.values():
-            if type(decl) == SymbolDeclaration:  # reset it
-                decl.needs_interpretation = False
             decl.interpret(self)
 
         # remove RELEVANT constraints
@@ -310,7 +304,7 @@ class Theory(object):
         # initialize assignments, co_constraints, questions
 
         self.co_constraints, questions = OrderedSet(), OrderedSet()
-        self.constraints = OrderedSet([v.interpret(self)
+        self.constraints = OrderedSet([v.interpret(self, {})
                                        for v in self.constraints])
         for c in self.constraints:
             c.collect_co_constraints(self.co_constraints)
@@ -320,7 +314,7 @@ class Theory(object):
         for es in self.def_constraints.values():
             for e in es:
                 e.collect_co_constraints(self.co_constraints)
-        self.co_constraints = OrderedSet([c.interpret(self)
+        self.co_constraints = OrderedSet([c.interpret(self, {})
                                           for c in self.co_constraints])
 
         for s in list(questions.values()):
@@ -425,7 +419,7 @@ class Theory(object):
                 # occurring in the (potentially simplified) z3 constraints
                 all = ([a.formula().translate(self)
                         for a in self.assignments.values()
-                        if (a.status != S.STRUCTURE or a.symbol_decl.needs_interpretation)
+                        if a.status != S.STRUCTURE
                         and a.value is not None
                         and a.status not in [S.CONSEQUENCE, S.ENV_CONSQ]]
                         + self.constraintz())
