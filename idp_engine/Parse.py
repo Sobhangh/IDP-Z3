@@ -433,9 +433,13 @@ class TypeDeclaration(ASTNode):
             (superset, filter) = extensions[self.name]
             if superset is not None:
                 # superset.sort(key=lambda t: str(t))
-                comparisons = [EQUALS([term, t[0]]) for t in superset]
-                out = (OR(comparisons) if filter is None else
-                       AND([filter([term]), OR(comparisons)]))
+                if term.is_value():
+                    comparisons = (TRUE if any(term.same_as(t[0]) for t in superset) else
+                                   FALSE)
+                else:
+                    comparisons = OR([EQUALS([term, t[0]]) for t in superset])
+                out = (comparisons if filter is None else
+                       AND([filter([term]), comparisons]))
             elif filter is not None:
                 out = filter([term])
             else:
