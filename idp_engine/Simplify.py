@@ -29,12 +29,12 @@ from copy import deepcopy
 import sys
 from typing import List, Tuple, Optional, Generator
 
-from .Expression import (
-    Constructor, Expression, AIfExpr, IF, AQuantification,
-    Operator, AEquivalence, AImplication, ADisjunction,
-    AConjunction, AComparison, EQUALS, ASumMinus, AMultDiv, APower,
-    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
-    Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
+from .Expression import (Constructor, Expression, AIfExpr, IF,
+                         AQuantification, Operator, AEquivalence, AImplication,
+                         ADisjunction, AConjunction, AComparison, EQUALS,
+                         ASumMinus, AMultDiv, APower, AUnary, AAggregate,
+                         SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
+                         Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
 from .Parse import Symbol, Enumeration, TupleIDP
 from .Assignments import Status as S, Assignment
 from .utils import BOOL, INT, DATE, ABS

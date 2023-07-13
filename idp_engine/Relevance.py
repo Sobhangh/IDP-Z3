@@ -23,7 +23,7 @@ from copy import copy
 
 from .Assignments import Status as S
 from .Expression import (AppliedSymbol, Expression, AQuantification,
-                                   AConjunction, Brackets)
+                         AConjunction, Brackets)
 from .Theory import Theory
 from .utils import OrderedSet, RELEVANT
 

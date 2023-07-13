@@ -33,17 +33,18 @@ from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 
 
 from .Assignments import Assignments
-from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR, Accessor,
-    Symbol, SYMBOL, SymbolExpr, Expression, AIfExpr, IF, AQuantification, split_quantees,
-    Type, TYPE, Quantee, ARImplication, AEquivalence,
-    AImplication, ADisjunction, AConjunction,
-    AComparison, ASumMinus, AMultDiv, APower, AUnary,
-    AAggregate, AppliedSymbol, UnappliedSymbol,
-    Number, Brackets, Date, Extension, Identifier,
-    Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR)
-from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
-    GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error, MAX_QUANTIFIER_EXPANSION,
-    Semantics as S)
+from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR,
+                         Accessor, Symbol, SYMBOL, SymbolExpr, Expression,
+                         AIfExpr, IF, AQuantification, split_quantees, Type,
+                         TYPE, Quantee, ARImplication, AEquivalence,
+                         AImplication, ADisjunction, AConjunction, AComparison,
+                         ASumMinus, AMultDiv, APower, AUnary, AAggregate,
+                         AppliedSymbol, UnappliedSymbol, Number, Brackets,
+                         Date, Extension, Identifier, Variable, TRUEC, FALSEC,
+                         TRUE, FALSE, EQUALS, AND, OR)
+from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
+                    CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
+                    MAX_QUANTIFIER_EXPANSION, Semantics as S)
 
 if TYPE_CHECKING:
     from .Theory import Theory

@@ -31,14 +31,15 @@ from fractions import Fraction
 from re import findall
 from sys import intern
 from textx import get_location
-from typing import Optional, List, Union, Tuple, Set, Callable, TYPE_CHECKING, Generator, Any
+from typing import (Optional, List, Union, Tuple, Set, Callable, TYPE_CHECKING,
+                    Generator, Any)
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
-    from .Parse import Declaration, SymbolDeclaration, SymbolInterpretation, Enumeration
+    from .Parse import SymbolDeclaration, SymbolInterpretation, Enumeration
 
-from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS, \
-    IDPZ3Error, Semantics
+from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
+                    RESERVED_SYMBOLS, IDPZ3Error, Semantics)
 
 
 class ASTNode(object):

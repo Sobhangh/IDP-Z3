@@ -28,17 +28,19 @@ from copy import copy, deepcopy
 from enum import Enum, auto
 from itertools import chain
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
-from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
-                is_and, BoolVal, get_param, is_true)
+from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not,
+                And, Or, Implies, is_and, BoolVal, get_param, is_true)
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
                          EQUALS, NOT, Extension, AQuantification)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SYMBOL,
-                    TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
+                    TheoryBlock, Structure, Definition, str_to_IDP,
+                    SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, IDPZ3Error,
-                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT, NOT_SATISFIABLE)
+                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT,
+                    NOT_SATISFIABLE)
 from .Z3_to_IDP import collect_questions
 
 

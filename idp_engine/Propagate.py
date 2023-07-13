@@ -32,12 +32,13 @@ from __future__ import annotations
 import time
 from copy import copy
 from typing import Optional
-from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true, is_not, is_eq)
+from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true,
+                is_not, is_eq)
 
 from .Assignments import Status as S, Assignments
-from .Expression import (Expression, AQuantification,
-                    ADisjunction, AConjunction, AppliedSymbol,
-                    AComparison, AUnary, Brackets, TRUE, FALSE)
+from .Expression import (Expression, AQuantification, ADisjunction,
+                         AConjunction, AppliedSymbol, AComparison, AUnary,
+                         Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
 from .Theory import Theory
 from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE

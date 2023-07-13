@@ -28,7 +28,7 @@ __all__ = ["Status", "Assignment", "Assignments"]
 
 from copy import copy, deepcopy
 from enum import Enum, auto
-from typing import Dict, Optional, Tuple, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING
 from z3 import BoolRef
 
 from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol

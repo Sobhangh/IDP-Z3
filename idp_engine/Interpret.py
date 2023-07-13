@@ -34,16 +34,17 @@ from __future__ import annotations
 
 from copy import copy, deepcopy
 from itertools import product
-from typing import Dict, List, Callable, Optional, Tuple
+from typing import List, Callable, Optional, Tuple
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
-    SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
-    Definition, Rule)
-from .Expression import (catch_error, RecDef, Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
-    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate,
-    EQUIV, EQUALS, OR, AppliedSymbol, UnappliedSymbol, Quantee,
-    Variable, VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
+                    SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP,
+                    ConstructedFrom, Definition, Rule)
+from .Expression import (catch_error, RecDef, Symbol, SYMBOL, AIfExpr, IF,
+                         SymbolExpr, Expression, Constructor, AQuantification,
+                         Type, FORALL, IMPLIES, AND, AAggregate, EQUIV, EQUALS,
+                         OR, AppliedSymbol, UnappliedSymbol, Quantee, Variable,
+                         VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
 from .Theory import Theory
 from .utils import (BOOL, INT, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND, CO_CONSTR_RECURSION_DEPTH, Semantics)

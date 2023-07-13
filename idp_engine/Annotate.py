@@ -24,22 +24,21 @@ from __future__ import annotations
 from copy import copy, deepcopy
 from itertools import chain
 import string
-from typing import Dict
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
-    SymbolDeclaration, VarDeclaration, TheoryBlock, Definition, Rule,
-    Structure, SymbolInterpretation, Enumeration, FunctionEnum,
-    TupleIDP, ConstructedFrom, Display)
+                    SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
+                    Rule, Structure, SymbolInterpretation, Enumeration,
+                    FunctionEnum, TupleIDP, ConstructedFrom, Display)
 from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
-    Constructor, CONSTRUCTOR, AIfExpr, IF, AQuantification, Quantee,
-    ARImplication, AImplication, AEquivalence,
-    Operator, AComparison, AUnary, AAggregate,
-    AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
-    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, FALSE, ZERO,
-    IMPLIES, FORALL, EXISTS)
+                         Constructor, CONSTRUCTOR, AIfExpr, IF,
+                         AQuantification, Quantee, ARImplication, AImplication,
+                         AEquivalence, Operator, AComparison, AUnary,
+                         AAggregate, AppliedSymbol, UnappliedSymbol, Variable,
+                         VARIABLE, Brackets, SymbolExpr, Number, NOT,
+                         EQUALS, AND, OR, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-    OrderedSet, Semantics)
+                    OrderedSet, Semantics)
 
 
 # Class Vocabulary  #######################################################

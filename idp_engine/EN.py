@@ -26,9 +26,10 @@ from copy import copy
 
 from .Parse import IDP
 from .Parse import Definition, Rule
-from .Expression import (ASTNode, AIfExpr, Quantee, AQuantification, AAggregate,
-                         AImplication, ARImplication,
-                         Operator, AComparison, AUnary, AppliedSymbol, Brackets)
+from .Expression import (ASTNode, AIfExpr, Quantee, AQuantification,
+                         AAggregate, AImplication, ARImplication,
+                         Operator, AComparison, AUnary, AppliedSymbol,
+                         Brackets)
 from .Theory import Theory
 from .utils import NEWL
 
