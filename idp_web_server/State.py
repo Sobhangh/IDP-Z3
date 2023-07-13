@@ -22,13 +22,12 @@ Management of the State of problem solving with the Interactive Consultant.
 
 from idp_engine.Assignments import Status as S
 from idp_engine.Run import Theory
-from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
+from idp_engine.utils import OrderedSet, NEWL, indented
 from .IO import load_json
 import json
 
 # Types
 from idp_engine import IDP
-from typing import Dict, Tuple, Union
 
 
 class State(Theory):

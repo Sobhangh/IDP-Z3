@@ -73,8 +73,9 @@ class ASTNode(object):
         and returns a mapping from name to items
 
         Args:
-            kwargs (dict[str, ASTNode])
-            arg_name (str): name of the kwargs argument, e.g. "interpretations"
+            kwargs: dictionary mapping named arguments to list of ASTNodes
+
+            arg_name: name of the kwargs argument, e.g. "interpretations"
 
         Returns:
             dict[str, ASTNode]: mapping from `name` to AST nodes
@@ -463,7 +464,7 @@ class Expression(ASTNode):
                   ) -> Expression:
         return self  # monkey-patched
 
-    def interpretB(self,
+    def _interpret(self,
                     problem: Optional[Theory],
                     subs: dict[str, Expression]
                     ) -> Expression:

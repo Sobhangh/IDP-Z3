@@ -27,7 +27,7 @@ import time
 from copy import copy, deepcopy
 from enum import Enum, auto
 from itertools import chain
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Iterator, List, Optional, Tuple, Union
 from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not,
                 And, Or, Implies, is_and, BoolVal, get_param, is_true)
 
@@ -107,7 +107,7 @@ class Theory(object):
         _optmz_reif (Solver): stateful solver used for optimizing when disabling laws.
             Use self.optimize_solver_reified to access.
 
-        expl_reifs = (Dict[z3.BoolRef, (z3.BoolRef,Expression)]):
+        expl_reifs = (dict[z3.BoolRef, (z3.BoolRef,Expression)]):
             dictionary storing for Z3 reification symbols (the keys) which
             Z3 constraint it represents, and what the original FO(.) expression was.
             If the original expression is `None`, the reification represents a
@@ -160,7 +160,7 @@ class Theory(object):
         self._reif: Solver = None
         self._optmz_reif: Solver = None
 
-        self.expl_reifs: Dict[BoolRef: (BoolRef,Expression)] = {}  # {reified: (constraint, original)}
+        self.expl_reifs: dict[BoolRef: (BoolRef,Expression)] = {}  # {reified: (constraint, original)}
         self.ignored_laws: set[str] = set()
 
     @property
@@ -542,7 +542,7 @@ class Theory(object):
         """extends the given reifications with the current choices and structure
 
         Args:
-            reifs (Dict[z3.BoolRef: (z3.BoolRef,Expression)]): reifications to
+            reifs (dict[z3.BoolRef: (z3.BoolRef,Expression)]): reifications to
             be extended
         """
         for a in self.assignments.values():
