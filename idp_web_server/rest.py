@@ -54,8 +54,6 @@ from .Inferences import explain, abstract
 from .IO import Output, metaJSON
 from .htmx import stateX, valuesX, explainX, wrap, render
 
-from typing import Dict
-
 import re
 
 from folint.folint.SCA import lint_fo

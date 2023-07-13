@@ -512,11 +512,11 @@ def interpret(self: Expression,
     """
     if self.is_type_constraint_for:
         return self
-    interpretA(self, problem, subs)
-    return self.interpretB(problem, subs)
+    _prepare_interpret(self, problem, subs)
+    return self._interpret(problem, subs)
 Expression.interpret = interpret
 
-def interpretA(self: Expression,
+def _prepare_interpret(self: Expression,
               problem: Optional[Theory],
               subs: dict[str, Expression]
               ):
@@ -525,7 +525,7 @@ def interpretA(self: Expression,
     """
 
     for e in self.sub_exprs:
-        interpretA(e, problem, subs)
+        _prepare_interpret(e, problem, subs)
 
     if isinstance(self, AQuantification) or isinstance(self, AAggregate):
         # type inference
@@ -544,7 +544,7 @@ def interpretA(self: Expression,
 
 
 
-def wrapB(func):
+def clone_when_necessary(func):
     @catch_error
     def inner_function(self, problem, subs):
         if self.is_value():
@@ -556,8 +556,8 @@ def wrapB(func):
         return out
     return inner_function
 
-@wrapB
-def interpretB(self: Expression,
+@clone_when_necessary
+def _interpret(self: Expression,
                problem: Optional[Theory],
                subs: dict[str, Expression]
                ) -> Expression:
@@ -576,10 +576,10 @@ def interpretB(self: Expression,
     Returns:
         Expression: the resulting expression
     """
-    out = self.update_exprs(e.interpretB(problem, subs) for e in self.sub_exprs)
+    out = self.update_exprs(e._interpret(problem, subs) for e in self.sub_exprs)
     _finalize(out, subs)
     return out
-Expression.interpretB = interpretB
+Expression._interpret = _interpret
 
 @catch_error
 def _finalize(self: Expression, subs: dict[str, Expression]):
@@ -709,8 +709,8 @@ def flatten(a):
         out.extend(sublist)
     return out
 
-@wrapB
-def interpretB(self: AQuantification | AAggregate,
+@clone_when_necessary
+def _interpret(self: AQuantification | AAggregate,
                problem: Optional[Theory],
                subs: dict[str, Expression]
                ) -> Expression:
@@ -722,15 +722,15 @@ def interpretB(self: AQuantification | AAggregate,
     Returns:
         Expression: the expanded quantifier expression
     """
-    # This method is called by AAggregate.interpretB !
+    # This method is called by AAggregate._interpret !
 
     if not self.quantees and not subs:  # already expanded
-        return Expression.interpretB(self, problem, subs)
+        return Expression._interpret(self, problem, subs)
 
     if not self.supersets:
         # interpret quantees
         for q in self.quantees: # for !x in $(output_domain(s,1))
-            q.sub_exprs = [e.interpretB(problem, subs) for e in q.sub_exprs]
+            q.sub_exprs = [e._interpret(problem, subs) for e in q.sub_exprs]
         get_supersets(self, problem)
 
     assert self.new_quantees is not None and self.vars1 is not None, "Internal error"
@@ -741,36 +741,36 @@ def interpretB(self: AQuantification | AAggregate,
         for vals in product(*self.supersets):
             vals1 = flatten(vals)
             subs1.update((var.code, val) for var, val in zip(self.vars1, vals1))
-            new_f2 = f.interpretB(problem, subs1)
+            new_f2 = f._interpret(problem, subs1)
             forms.append(new_f2)
 
     out = self.update_exprs(f for f in forms)
     return out
-AQuantification.interpretB = interpretB
+AQuantification._interpret = _interpret
 
 
 # Class AAggregate  ######################################################
 
-@wrapB
-def interpretB(self: AAggregate,
+@clone_when_necessary
+def _interpret(self: AAggregate,
                problem: Optional[Theory],
                subs: dict[str, Expression]
                ) -> Expression:
     assert self.annotated, f"Internal error in interpret"
-    return AQuantification.interpretB(self, problem, subs)
-AAggregate.interpretB = interpretB
+    return AQuantification._interpret(self, problem, subs)
+AAggregate._interpret = _interpret
 
 
 # Class AppliedSymbol  ##############################################
 
-@wrapB
-def interpretB(self: AppliedSymbol,
+@clone_when_necessary
+def _interpret(self: AppliedSymbol,
                problem: Optional[Theory],
                subs: dict[str, Expression]
                ) -> Expression:
     # interpret the symbol expression, if any
     if type(self.symbol) == SymbolExpr and self.symbol.is_intentional():  # $(x)()
-        self.symbol = self.symbol.interpretB(problem, subs)
+        self.symbol = self.symbol._interpret(problem, subs)
         if type(self.symbol) == Symbol:  # found $(x)
             self.check(len(self.sub_exprs) == len(self.symbol.decl.sorts),
                         f"Incorrect arity for {self.code}")
@@ -782,7 +782,7 @@ def interpretB(self: AppliedSymbol,
             self = out
 
     # interpret the arguments
-    sub_exprs = [e.interpretB(problem, subs) for e in self.sub_exprs]
+    sub_exprs = [e._interpret(problem, subs) for e in self.sub_exprs]
     out = self.update_exprs(e for e in sub_exprs)
     _finalize(out, subs)
     if out.is_value():
@@ -827,21 +827,21 @@ def interpretB(self: AppliedSymbol,
         out = (value if value else
                out._change(sub_exprs=sub_exprs, co_constraint=co_constraint))
     return out
-AppliedSymbol.interpretB = interpretB
+AppliedSymbol._interpret = _interpret
 
 
 # Class Variable  #######################################################
 
 @catch_error
-def interpretB(self: Variable,
+def _interpret(self: Variable,
               problem: Optional[Theory],
               subs: dict[str, Expression]
               ) -> Expression:
     if self.sort:
-        self.sort = self.sort.interpretB(problem, subs)
+        self.sort = self.sort._interpret(problem, subs)
     out = subs.get(self.code, self)
     return out
-Variable.interpretB = interpretB
+Variable._interpret = _interpret
 
 
 Done = True

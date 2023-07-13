@@ -657,7 +657,7 @@ class Definition(ASTNode):
             normalized rule for each defined symbol (used to be Clark completion)
             e.g., `! p1_: p(p1_) <=> q(p1_)`
 
-        def_vars (dict[String, Dict[String, Variable]]):
+        def_vars (dict[String, dict[String, Variable]]):
             Fresh variables for arguments and result
 
         level_symbols (dict[SymbolDeclaration, Symbol]):
