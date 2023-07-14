@@ -1,7 +1,7 @@
 #
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,18 +27,20 @@ import time
 from copy import copy, deepcopy
 from enum import Enum, auto
 from itertools import chain
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
-from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not, And, Or, Implies,
-                is_and, BoolVal, get_param)
+from typing import Any, Iterator, List, Optional, Tuple, Union
+from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not,
+                And, Or, Implies, is_and, BoolVal, get_param, is_true)
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
                          EQUALS, NOT, Extension, AQuantification)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SYMBOL,
-                    TheoryBlock, Structure, Definition, str_to_IDP, SymbolInterpretation)
+                    TheoryBlock, Structure, Definition, str_to_IDP,
+                    SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, IDPZ3Error,
-                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT, NOT_SATISFIABLE)
+                    RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT,
+                    NOT_SATISFIABLE)
 from .Z3_to_IDP import collect_questions
 
 
@@ -62,19 +64,19 @@ class Theory(object):
         extended (Bool): True when the truth value of inequalities
             and quantified formula is of interest (e.g. in the Interactive Consultant)
 
-        declarations (Dict[str, Declaration]): the list of type and symbol declarations
+        declarations (dict[str, Declaration]): the list of type and symbol declarations
 
         constraints (OrderedSet): a set of assertions.
 
         definitions ([Definition]): a list of definitions in this problem
 
-        interpretations (Dict[string, SymbolInterpretation]):
+        interpretations (dict[string, SymbolInterpretation]):
             A mapping of enumerated symbols to their interpretation.
 
-        extensions (Dict[string, Extension]):
+        extensions (dict[string, Extension]):
             Extension of types and predicates
 
-        def_constraints (Dict[SymbolDeclaration, Definition], List[Expression]):
+        def_constraints (dict[SymbolDeclaration, Definition], List[Expression]):
             A mapping of defined symbol to the whole-domain constraints
             equivalent to its definition.
 
@@ -85,7 +87,7 @@ class Theory(object):
 
         co_constraints (OrderedSet): the set of co_constraints in the problem.
 
-        z3 (Dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
+        z3 (dict[str, ExprRef]): mapping from string of the code to Z3 expression, to avoid recomputing it
 
         ctx : Z3 context
 
@@ -105,7 +107,7 @@ class Theory(object):
         _optmz_reif (Solver): stateful solver used for optimizing when disabling laws.
             Use self.optimize_solver_reified to access.
 
-        expl_reifs = (Dict[z3.BoolRef, (z3.BoolRef,Expression)]):
+        expl_reifs = (dict[z3.BoolRef, (z3.BoolRef,Expression)]):
             dictionary storing for Z3 reification symbols (the keys) which
             Z3 constraint it represents, and what the original FO(.) expression was.
             If the original expression is `None`, the reification represents a
@@ -132,20 +134,20 @@ class Theory(object):
 
         self.extended: Optional[bool] = extended
 
-        self.declarations: Dict[str, Declaration] = {}
+        self.declarations: dict[str, Declaration] = {}
         self.definitions: List[Definition] = []
         self.constraints: OrderedSet = OrderedSet()
         self.assignments: Assignments = Assignments()
-        self.def_constraints: Dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
-        self.interpretations: Dict[str, SymbolInterpretation] = {}  # interpretations given by user
-        self.extensions: Dict[str, Extension] = {}  # computed extension of types and predicates
+        self.def_constraints: dict[Tuple[SymbolDeclaration, Definition], List[Expression]] = {}
+        self.interpretations: dict[str, SymbolInterpretation] = {}  # interpretations given by user
+        self.extensions: dict[str, Extension] = {}  # computed extension of types and predicates
         self.name: str = ''
 
         self._contraintz: Optional[List[BoolRef]] = None
         self._formula: Optional[BoolRef] = None  # the problem expressed in one logic formula
         self.co_constraints: Optional[OrderedSet] = None  # Constraints attached to subformula. (see also docs/zettlr/Glossary.md)
 
-        self.z3: Dict[str, ExprRef] = {}
+        self.z3: dict[str, ExprRef] = {}
         self.ctx: Context = Context()
         self.add(*theories)
 
@@ -158,7 +160,7 @@ class Theory(object):
         self._reif: Solver = None
         self._optmz_reif: Solver = None
 
-        self.expl_reifs: Dict[BoolRef: (BoolRef,Expression)] = {}  # {reified: (constraint, original)}
+        self.expl_reifs: dict[BoolRef: (BoolRef,Expression)] = {}  # {reified: (constraint, original)}
         self.ignored_laws: set[str] = set()
 
     @property
@@ -391,7 +393,7 @@ class Theory(object):
 
             def collect_constraints(e, constraints):
                 """collect constraints in e, flattening conjunctions"""
-                if e.sexpr() == 'true':
+                if is_true(e):
                     return
                 if is_and(e):
                     for e1 in e.children():
@@ -535,12 +537,12 @@ class Theory(object):
             solver.add(af)
 
     def _extend_reifications(self,
-                             reifs: Dict[ExprRef, Tuple[Assignment, Expression]]
+                             reifs: dict[ExprRef, Tuple[Assignment, Expression]]
                              ) -> None:
         """extends the given reifications with the current choices and structure
 
         Args:
-            reifs (Dict[z3.BoolRef: (z3.BoolRef,Expression)]): reifications to
+            reifs (dict[z3.BoolRef: (z3.BoolRef,Expression)]): reifications to
             be extended
         """
         for a in self.assignments.values():

@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,18 +27,18 @@ from __future__ import annotations
 from copy import copy
 from fractions import Fraction
 from typing import TYPE_CHECKING
-from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef,
-                Function, RecFunction, Const, FreshConst, BoolSort, IntSort, RealSort,
-                Or, Not, And, ForAll, Exists, Sum, If,
-                BoolVal, RatVal, IntVal, RecAddDefinition)
+from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef, Function,
+                RecFunction, Const, FreshConst, BoolSort, IntSort, RealSort,
+                Or, Not, And, ForAll, Exists, Sum, If, BoolVal, RatVal, IntVal,
+                RecAddDefinition)
 
-from .Parse import TypeDeclaration, SymbolDeclaration, TupleIDP, Ranges, IntRange, RealRange, DateRange
-from .Expression import (catch_error, Constructor, Expression, AIfExpr, Quantee,
-                        AQuantification, Operator, Symbol,
-                        ADisjunction, AConjunction, AComparison,
-                        AUnary, AAggregate, AppliedSymbol,
-                        UnappliedSymbol, Number, Date, Brackets,
-                        Variable, TRUE, RecDef)
+from .Parse import (TypeDeclaration, SymbolDeclaration, TupleIDP, Ranges,
+                    IntRange, RealRange, DateRange)
+from .Expression import (catch_error, Constructor, Expression, AIfExpr,
+                         Quantee, AQuantification, Operator, Symbol,
+                         ADisjunction, AConjunction, AComparison, AUnary,
+                         AAggregate, AppliedSymbol, UnappliedSymbol, Number,
+                         Date, Brackets, Variable, TRUE, RecDef)
 from .utils import (BOOL, INT, REAL, DATE,
                     GOAL_SYMBOL, RELEVANT, RESERVED_SYMBOLS, Semantics)
 
@@ -135,18 +135,17 @@ def translate(self, problem: Theory, vars={}) -> ExprRef:
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
 
-        vars (Dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
+        vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
 
     Returns:
         ExprRef: Z3 expression
     """
-    if self.variables:
-        return self.translate1(problem, vars)
     out = problem.z3.get(self.str, None)
     if out is None:
         out = self.translate1(problem, vars)
-        problem.z3[self.str] = out
+        if not vars:
+            problem.z3[self.str] = out
     return out
 Expression.translate = translate
 
@@ -186,7 +185,7 @@ def translate1(self, problem: Theory, vars={}) -> ExprRef:
     Args:
         problem (Theory): holds the context for the translation (e.g. a cache of translations).
 
-        vars (Dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
+        vars (dict[id, ExprRef], optional): mapping from Variable's id to Z3 translation.
             Filled in by AQuantifier.  Defaults to {}.
 
     Returns:

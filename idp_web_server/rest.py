@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,8 +54,6 @@ from .Inferences import explain, abstract
 from .IO import Output, metaJSON
 from .htmx import stateX, valuesX, explainX, wrap, render
 
-from typing import Dict
-
 import re
 
 from folint.folint.SCA import lint_fo
@@ -96,7 +94,7 @@ class HelloWorld(Resource):
 
 
 z3lock = threading.Lock()
-idps: Dict[str, IDP] = {}  # {code_string : idp}
+idps: dict[str, IDP] = {}  # {code_string : idp}
 
 
 def idpOf(code):

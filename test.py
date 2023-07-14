@@ -232,19 +232,22 @@ def api():
         fp.write(output)
     return error
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the tests')
     parser.add_argument('TEST', nargs='*', default=["generate", "api"])
     args = parser.parse_args()
 
-    error = 0
+    error, g_error, p_error, a_error = 0, 0, 0, 0
     if "generate" in args.TEST:
-        error = generate()
+        g_error = generate()
+        error = g_error
     if "pipeline" in args.TEST:
         p_error = pipeline()
         error = max(error, p_error)
     if "api" in args.TEST:
-        p_error = api()
-        error = max(error, p_error)
+        a_error = api()
+        error = max(error, a_error)
 
+    print(f'G: {g_error}, P: {p_error}, A: {a_error}')
     sys.exit(error)

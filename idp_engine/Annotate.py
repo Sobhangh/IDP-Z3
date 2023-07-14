@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,22 +24,21 @@ from __future__ import annotations
 from copy import copy, deepcopy
 from itertools import chain
 import string
-from typing import Dict
 
 from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
-    SymbolDeclaration, VarDeclaration, TheoryBlock, Definition, Rule,
-    Structure, SymbolInterpretation, Enumeration, FunctionEnum,
-    TupleIDP, ConstructedFrom, Display)
+                    SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
+                    Rule, Structure, SymbolInterpretation, Enumeration,
+                    FunctionEnum, TupleIDP, ConstructedFrom, Display)
 from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
-    Constructor, CONSTRUCTOR, AIfExpr, IF, AQuantification, Quantee,
-    ARImplication, AImplication, AEquivalence,
-    Operator, AComparison, AUnary, AAggregate,
-    AppliedSymbol, UnappliedSymbol, Variable, VARIABLE, Brackets,
-    FALSE, SymbolExpr, Number, NOT, EQUALS, AND, OR, FALSE, ZERO,
-    IMPLIES, FORALL, EXISTS)
+                         Constructor, CONSTRUCTOR, AIfExpr, IF,
+                         AQuantification, Quantee, ARImplication, AImplication,
+                         AEquivalence, Operator, AComparison, AUnary,
+                         AAggregate, AppliedSymbol, UnappliedSymbol, Variable,
+                         VARIABLE, Brackets, SymbolExpr, Number, NOT,
+                         EQUALS, AND, OR, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-    OrderedSet, Semantics)
+                    OrderedSet, Semantics)
 
 
 # Class Vocabulary  #######################################################
@@ -90,6 +89,7 @@ Vocabulary.annotate = annotate
 
 def annotate(self, voc):
     self.voc = voc
+    self.block = voc
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
@@ -191,7 +191,7 @@ def annotate(self, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
     # create level-mapping symbols, as needed
-    # self.level_symbols: Dict[SymbolDeclaration, Symbol]
+    # self.level_symbols: dict[SymbolDeclaration, Symbol]
     dependencies = set()
     for r in self.rules:
         symbs = {}
@@ -325,7 +325,7 @@ def annotate(self, voc, q_vars):
                 f"No support for intentional objects in the head of a rule: "
                 f"{self}")
     # create head variables
-    q_v = {**q_vars}  # copy
+    q_v = copy(q_vars)
     for q in self.quantees:
         q.annotate(voc, q_vars)
         for vars in q.vars:
@@ -341,7 +341,7 @@ def annotate(self, voc, q_vars):
     return self
 Rule.annotate = annotate
 
-def rename_args(self: Rule, subs: Dict[str, Expression]):
+def rename_args(self: Rule, subs: dict[str, Expression]):
     """replace old variables by new variables
         (ignoring arguments in the head before the it
     """
@@ -541,7 +541,7 @@ def annotate(self, voc, q_vars):
 
     Args:
         voc (Vocabulary): the vocabulary
-        q_vars (Dict[str, Variable]): the quantifier variables that may appear in the expression
+        q_vars (dict[str, Variable]): the quantifier variables that may appear in the expression
 
     Returns:
         Expression: an equivalent AST node, with updated type, .variables
@@ -575,14 +575,18 @@ AIfExpr.annotate1 = annotate1
 def annotate(self, voc, q_vars):
     Expression.annotate(self, voc, q_vars)
     for vars in self.vars:
-        self.check(not self.sub_exprs or len(vars)==len(self.sub_exprs[0].decl.sorts),
+        self.check(not self.sub_exprs
+                   or not self.sub_exprs[0].decl
+                   or len(vars)==len(self.sub_exprs[0].decl.sorts),
                     f"Incorrect arity for {self}")
         for i, var in enumerate(vars):
             self.check(var.name not in voc.symbol_decls
                         or type(voc.symbol_decls[var.name]) == VarDeclaration,
                 f"the quantified variable '{var.name}' cannot have"
                 f" the same name as another symbol")
-            var.sort = self.sub_exprs[0].decl.sorts[i] if self.sub_exprs else None
+            var.sort = (self.sub_exprs[0].decl.sorts[i]
+                        if self.sub_exprs and self.sub_exprs[0].decl
+                        else None)
             var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
             if self.subtype is None and var_decl:
                 subtype = var_decl.subtype
@@ -603,7 +607,7 @@ Quantee.annotate = annotate
 
 def annotate(self, voc, q_vars):
     # also called by AAgregate.annotate
-    q_v = {**q_vars}  # copy
+    q_v = copy(q_vars)
     for q in self.quantees:
         q.annotate(voc, q_v)
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
@@ -672,8 +676,6 @@ def annotate(self, voc, q_vars):
     out = AImplication.make(ops=['⇒'], operands=list(reversed(list(self.sub_exprs))),
                         annotations=None, parent=self)
     out.original = self
-    if hasattr(self, "block"):
-        out.block = self.block
     return out.annotate(voc, q_vars)
 ARImplication.annotate = annotate
 

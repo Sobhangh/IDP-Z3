@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ __all__ = ["Status", "Assignment", "Assignments"]
 
 from copy import copy, deepcopy
 from enum import Enum, auto
-from typing import Dict, Optional, Tuple, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING
 from z3 import BoolRef
 
 from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol
@@ -94,9 +94,9 @@ class Assignment(object):
         # First symbol in the sentence, preferably not starting with '_':
         # if no public symbol (not starting with '_') is found, the first
         # private one is used.
-        self.symbol_decl: SymbolDeclaration = None
+        self.symbol_decl: Optional[SymbolDeclaration] = None
         default = None
-        self.symbols: Dict[str, SymbolDeclaration] = \
+        self.symbols: dict[str, SymbolDeclaration] = \
             sentence.collect_symbols(co_constraints=False).values()
         for d in self.symbols:
             if not d.private:
@@ -171,6 +171,7 @@ class Assignment(object):
             [type]: returns an Assignment for the same sentence, but an opposite truth value.
         """
         assert self.sentence.type == BOOL, "Cannot negate a non-boolean assignment"
+        assert self.value is not None, "Cannot negate an assignment without value"
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
 
@@ -187,6 +188,7 @@ class Assignment(object):
             Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]: meaning "appSymb is (not) in enumeration"
         """
         (x, y, z) = self.sentence.as_set_condition()
+        assert self.value is not None, "Internal error"
         if x:
             return (x, y if self.value.same_as(TRUE) else not y, z)
         return (None, None, None)
@@ -204,17 +206,13 @@ class Assignments(dict):
     """Contains a set of Assignment"""
     def __init__(self, *arg, **kw):
         super(Assignments, self).__init__(*arg, **kw)
-        self.symbols: Dict[str, SymbolDeclaration] = {}
+        self.symbols: dict[str, SymbolDeclaration] = {}
         for a in self.values():
             if a.symbol_decl:
                 self.symbols[a.symbol_decl.name] = a.symbol_decl
 
     def copy(self, shallow: bool = False) -> "Assignments":
         return Assignments({k: v.copy(shallow) for k, v in self.items()})
-
-    def extend(self, more: "Assignments") -> None:
-        for v in more.values():
-            self.assert_(v.sentence, v.value, v.status, v.relevant)
 
     def assert__(self,
                  sentence: Expression,
@@ -247,7 +245,7 @@ class Assignments(dict):
         with the exception of nullary symbols, which are printed as
         `name := value`.
         """
-        out = {}
+        out : dict[SymbolDeclaration, dict[str, str]] = {}  # ordered set of strings
         nullary = set()
         for a in self.values():
             if type(a.sentence) == AppliedSymbol:

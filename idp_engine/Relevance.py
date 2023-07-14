@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ from __future__ import annotations
 from copy import copy
 
 from .Assignments import Status as S
-from .Expression import (AppliedSymbol, TRUE, Expression, AQuantification,
-                                   AConjunction, Brackets)
+from .Expression import (AppliedSymbol, Expression, AQuantification,
+                         AConjunction, Brackets)
 from .Theory import Theory
 from .utils import OrderedSet, RELEVANT
 

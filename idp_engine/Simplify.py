@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,23 +27,27 @@ from __future__ import annotations
 
 from copy import deepcopy
 import sys
-from typing import List
+from typing import List, Tuple, Optional, Generator
 
-from .Expression import (
-    Constructor, Expression, AIfExpr, IF, AQuantification, Quantee, Type,
-    Operator, AEquivalence, AImplication, ADisjunction,
-    AConjunction, AComparison, EQUALS, ASumMinus, AMultDiv, APower,
-    AUnary, AAggregate, SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
-    Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
-from .Parse import Symbol, Enumeration, TupleIDP, TypeDeclaration
+from .Expression import (Constructor, Expression, AIfExpr, IF,
+                         AQuantification, Operator, AEquivalence, AImplication,
+                         ADisjunction, AConjunction, AComparison, EQUALS,
+                         ASumMinus, AMultDiv, APower, AUnary, AAggregate,
+                         SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
+                         Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
+from .Parse import Symbol, Enumeration, TupleIDP
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, INT, DATE, CONCEPT, ABS, RESERVED_SYMBOLS
+from .utils import BOOL, INT, DATE, ABS
 
 
 # class Expression  ###########################################################
 
-def _change(self, sub_exprs=None, ops=None, simpler=None,
-            co_constraint=None):
+def _change(self: Expression,
+            sub_exprs: Optional[List[Expression]] = None,
+            ops : Optional[List[str]] = None,
+            simpler : Optional[Expression] = None,
+            co_constraint : Optional[Expression] = None
+            ) -> Expression:
     " change attributes of an expression, and resets derived attributes "
 
     if simpler is not None:
@@ -51,7 +55,6 @@ def _change(self, sub_exprs=None, ops=None, simpler=None,
         simpler.is_type_constraint_for = self.is_type_constraint_for
         if type(self) == AppliedSymbol:
             simpler.in_head = self.in_head
-        simpler.block = self.block if hasattr(self, "block") else None
         return simpler
 
     if sub_exprs is not None:
@@ -68,14 +71,16 @@ def _change(self, sub_exprs=None, ops=None, simpler=None,
 Expression._change = _change
 
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: Expression,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     """ change sub_exprs and simplify, while keeping relevant info. """
     #  default implementation, without simplification
     return self._change(sub_exprs=list(new_exprs))
 Expression.update_exprs = update_exprs
 
 
-def simplify1(self):
+def simplify1(self: Expression) -> Expression:
     return self.update_exprs(self.sub_exprs)
 Expression.simplify1 = simplify1
 
@@ -83,7 +88,9 @@ Expression.simplify1 = simplify1
 
 # Class AIfExpr  ###############################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: AIfExpr,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     sub_exprs = list(new_exprs)
     if_, then_, else_ = sub_exprs[0], sub_exprs[1], sub_exprs[2]
     if if_.same_as(TRUE):
@@ -112,7 +119,9 @@ AIfExpr.update_exprs = update_exprs
 
 # Class AQuantification  ######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: AQuantification,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     if self.q == '∀':
         return AConjunction.update_exprs(self, new_exprs, replace=False)
     else:
@@ -122,7 +131,9 @@ AQuantification.update_exprs = update_exprs
 
 # Class AImplication  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: AImplication,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     if type(new_exprs) == list:
         new_exprs = iter(new_exprs)
     exprs0 = next(new_exprs)
@@ -147,7 +158,9 @@ AImplication.update_exprs = update_exprs
 
 # Class AEquivalence  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: AEquivalence,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     exprs = list(new_exprs)
     if len(exprs) == 1:
         return self._change(simpler=exprs[1], sub_exprs=exprs)
@@ -164,7 +177,7 @@ AEquivalence.update_exprs = update_exprs
 
 # Class ADisjunction  #######################################################
 
-def update_exprs(self, new_exprs, replace=True):
+def update_exprs(self: Expression, new_exprs: Expression, replace=True) -> Expression:
     exprs, other = [], []
     simpler = None
     for expr in new_exprs:
@@ -185,7 +198,7 @@ ADisjunction.update_exprs = update_exprs
 # Class AConjunction  #######################################################
 
 # same as ADisjunction, with TRUE and FALSE swapped
-def update_exprs(self, new_exprs, replace=True):
+def update_exprs(self: Expression, new_exprs: Expression, replace=True) -> Expression:
     exprs, other = [], []
     simpler = None
     for expr in new_exprs:
@@ -205,7 +218,9 @@ AConjunction.update_exprs = update_exprs
 
 # Class AComparison  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: AComparison,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     operands = list(new_exprs)
 
     if len(operands) == 2 and self.operator == ["="]:
@@ -239,7 +254,7 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
 
-def as_set_condition(self):
+def as_set_condition(self: AComparison) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
     return ((None, None, None) if not self.is_assignment() else
             (self.sub_exprs[0], True,
              Enumeration(tuples=[TupleIDP(args=[self.sub_exprs[1]])])))
@@ -247,7 +262,7 @@ AComparison.as_set_condition = as_set_condition
 
 #############################################################
 
-def update_arith(self, family, operands):
+def update_arith(self: Expression, operands: List[Expression]) -> Expression:
     operands = list(operands)
     if all(e.is_value() for e in operands):
         self.check(all(hasattr(e, 'py_value') for e in operands),
@@ -270,14 +285,18 @@ def update_arith(self, family, operands):
 
 # Class ASumMinus  #######################################################
 
-def update_exprs(self, new_exprs):
-    return update_arith(self, '+', new_exprs)
+def update_exprs(self: ASumMinus,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
+    return update_arith(self, new_exprs)
 ASumMinus.update_exprs = update_exprs
 
 
 # Class AMultDiv  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: AMultDiv,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     operands = list(new_exprs)
     if any(op == '%' for op in self.operator):  # special case !
         if len(operands) == 2 and all(e.is_value() for e in operands):
@@ -285,13 +304,15 @@ def update_exprs(self, new_exprs):
             return Number(number=str(out))
         else:
             return self._change(sub_exprs=operands)
-    return update_arith(self, '⨯', operands)
+    return update_arith(self, operands)
 AMultDiv.update_exprs = update_exprs
 
 
 # Class APower  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: APower,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     operands = list(new_exprs)
     if len(operands) == 2 \
        and all(e.is_value() for e in operands):
@@ -304,7 +325,9 @@ APower.update_exprs = update_exprs
 
 # Class AUnary  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: AUnary,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     operand = list(new_exprs)[0]
     if self.operator == '¬':
         if operand.same_as(TRUE):
@@ -317,7 +340,7 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=[operand])
 AUnary.update_exprs = update_exprs
 
-def as_set_condition(self):
+def as_set_condition(self: AUnary) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
     (x, y, z) = self.sub_exprs[0].as_set_condition()
     return ((None, None, None) if x is None else
             (x, not y, z))
@@ -326,7 +349,9 @@ AUnary.as_set_condition = as_set_condition
 
 # Class AAggregate  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: AAggregate,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     operands = list(new_exprs)
     if self.annotated and not self.quantees:
         if all(e.is_value() for e in operands):
@@ -338,7 +363,9 @@ AAggregate.update_exprs = update_exprs
 
 # Class AppliedSymbol  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: AppliedSymbol,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     new_exprs = list(new_exprs)
     if not self.decl and type(self.symbol) == Symbol:
         self.decl = self.symbol.decl
@@ -370,7 +397,7 @@ def update_exprs(self, new_exprs):
     return self._change(sub_exprs=new_exprs)
 AppliedSymbol.update_exprs = update_exprs
 
-def as_set_condition(self):
+def as_set_condition(self: AppliedSymbol) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
     # determine core after substitutions
     core = AppliedSymbol.make(self.symbol, deepcopy(self.sub_exprs))
 
@@ -381,7 +408,9 @@ AppliedSymbol.as_set_condition = as_set_condition
 
 # Class SymbolExpr  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: SymbolExpr,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     symbol = list(new_exprs)[0]
     value = (symbol if self.eval == '' else
              symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
@@ -396,7 +425,9 @@ SymbolExpr.update_exprs = update_exprs
 
 # Class Brackets  #######################################################
 
-def update_exprs(self, new_exprs):
+def update_exprs(self: Brackets,
+                 new_exprs: Generator[Expression, None, None]
+                 ) -> Expression:
     return list(new_exprs)[0]
 Brackets.update_exprs = update_exprs
 

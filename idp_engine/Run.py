@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,10 +23,12 @@ using FO-dot knowledge bases:
 """
 from __future__ import annotations
 
+from copy import copy
+import gc
 import logging
 import time
 import types
-from typing import Any, Iterator, List, Union
+from typing import Any, Iterator, Union
 from z3 import Solver
 
 from .Parse import IDP, TheoryBlock, Structure
@@ -267,7 +269,10 @@ def execute(self: IDP) -> None:
     last_call = time.process_time()
     main = str(self.procedures['main'])
     mybuiltins = {}
-    mylocals = {**self.vocabularies, **self.theories, **self.structures}
+    mylocals = copy(self.vocabularies)
+    mylocals.update(self.theories)
+    mylocals.update(self.structures)
+    mylocals['gc'] = gc
     mylocals['logging'] = logging
     mylocals['model_check'] = model_check
     mylocals['model_expand'] = model_expand

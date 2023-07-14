@@ -6,10 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.10.10] - Unreleased yet
 
+The main feature of this release is performance improvements in the grounding of quantifications.
+
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * MR !319: improve some error messages
+* MR !321: performance improvements in the grounding of quantifications
 * issue #267: Use variable declaration for type inference in recursive definitions
 * issue #284: incorrect propagation when quantifying over infinite domain
 *

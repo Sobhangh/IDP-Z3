@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,14 +31,15 @@ from fractions import Fraction
 from re import findall
 from sys import intern
 from textx import get_location
-from typing import Optional, List, Union, Tuple, Dict, Set, Any, Callable, TYPE_CHECKING
+from typing import (Optional, List, Union, Tuple, Set, Callable, TYPE_CHECKING,
+                    Generator, Any)
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
-    from .Parse import Declaration, SymbolDeclaration, SymbolInterpretation, Enumeration
+    from .Parse import SymbolDeclaration, SymbolInterpretation, Enumeration
 
-from .utils import unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS, \
-    IDPZ3Error, Semantics
+from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
+                    RESERVED_SYMBOLS, IDPZ3Error, Semantics)
 
 
 class ASTNode(object):
@@ -65,18 +66,19 @@ class ASTNode(object):
             raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
 
     def dedup_nodes(self,
-                    kwargs: Dict[str, ASTNode],
+                    kwargs: dict[str, List[ASTNode]],
                     arg_name:str
-                    ) -> Dict[str, ASTNode]:
+                    ) -> dict[str, ASTNode]:
         """pops `arg_name` from kwargs as a list of named items
         and returns a mapping from name to items
 
         Args:
-            kwargs (Dict[str, ASTNode])
-            arg_name (str): name of the kwargs argument, e.g. "interpretations"
+            kwargs: dictionary mapping named arguments to list of ASTNodes
+
+            arg_name: name of the kwargs argument, e.g. "interpretations"
 
         Returns:
-            Dict[str, ASTNode]: mapping from `name` to AST nodes
+            dict[str, ASTNode]: mapping from `name` to AST nodes
 
         Raises:
             AssertionError: in case of duplicate name
@@ -85,6 +87,7 @@ class ASTNode(object):
         out = {}
         for i in ast_nodes:
             # can't get location here
+            assert hasattr(i, "name"), "internal error"
             assert i.name not in out, f"Duplicate '{i.name}' in {arg_name}"
             out[i.name] = i
         return out
@@ -92,10 +95,10 @@ class ASTNode(object):
     def annotate(self, idp):
         return  # monkey-patched
 
-    def annotate1(self, idp):
+    def annotate1(self):
         return  # monkey-patched
 
-    def interpret(self, problem: Theory) -> Expression:
+    def interpret(self, problem: Optional[Theory]) -> ASTNode:
         return self  # monkey-patched
 
     def EN(self):
@@ -116,7 +119,8 @@ def catch_error(func):
 class Annotations(ASTNode):
     def __init__(self, parent, annotations: List[str]):
 
-        self.annotations = {}
+        self.annotations : dict[str, Union[str, dict[str, Any]]] = {}
+        v: Union[str, dict[str, Any]]
         for s in annotations:
             p = s.split(':', 1)
             if len(p) == 2:
@@ -158,27 +162,29 @@ class Constructor(ASTNode):
         has been applied to some arguments (e.g., is_rgb)
 
         symbol (Symbol): only for Symbol constructors
+
+        range: the list of identifiers
     """
 
     def __init__(self, parent,
                  name: Union[UnappliedSymbol, str],
-                 args: List[Accessor]=None):
-        self.name = name
+                 args: Optional[List[Accessor]] = None):
+        self.name : str = (name.s.name if type(name) == UnappliedSymbol else
+                     name)
         self.sorts = args if args is not None else []
 
-        self.name = (self.name.s.name if type(self.name) == UnappliedSymbol else
-                     self.name)
         self.arity = len(self.sorts)
 
         self.type = None
         self.symbol = None
         self.tester = None
+        self.range: Optional[List[Expression]] = None
 
     def __str__(self):
         return (self.name if not self.sorts else
                 f"{self.name}({', '.join((str(a) for a in self.sorts))})" )
 
-def CONSTRUCTOR(name: Symbol, args=None) -> Constructor:
+def CONSTRUCTOR(name: str, args=None) -> Constructor:
     return Constructor(None, name, args)
 
 
@@ -192,10 +198,12 @@ class Accessor(ASTNode):
 
         decl (SymbolDeclaration): declaration of the accessor function
     """
-    def __init__(self, parent, type: UnappliedSymbol, accessor: UnappliedSymbol=None):
+    def __init__(self, parent,
+                 type: UnappliedSymbol,
+                 accessor: Optional[UnappliedSymbol] = None):
         self.accessor = accessor
         self.type = type.name
-        self.decl = None
+        self.decl: Optional[SymbolDeclaration] = None
 
     def __str__(self):
         return (self.type if not self.accessor else
@@ -233,7 +241,7 @@ class Expression(ASTNode):
             This is useful for definitions over infinite domains,
             as well as to compute relevant questions.
 
-        annotations (Dict[str, str]):
+        annotations (dict[str, str]):
             The set of annotations given by the expert in the IDP-Z3 program.
 
             ``annotations['reading']`` is the annotation
@@ -243,7 +251,7 @@ class Expression(ASTNode):
             The original expression, before propagation and simplification.
 
         variables (Set(string)):
-            The set of names of the variables in the expression.
+            The set of names of the variables in the expression, before interpretation.
 
         is_type_constraint_for (string):
             name of the symbol for which the expression is a type constraint
@@ -262,7 +270,7 @@ class Expression(ASTNode):
 
         self.code: str = intern(str(self))
         if not hasattr(self, 'annotations') or self.annotations == None:
-            self.annotations: Dict[str, str] = {'reading': self.code}
+            self.annotations: dict[str, str] = {'reading': self.code}
         elif type(self.annotations) == Annotations:
             self.annotations = self.annotations.annotations
         self.original: Expression = self
@@ -312,11 +320,14 @@ class Expression(ASTNode):
                 'str': self.str,
                 'co_constraint': self.co_constraint}
 
+    def has_variables(self) -> bool:
+        return any(e.has_variables() for e in self.sub_exprs)
+
     def collect(self,
                 questions: OrderedSet,
                 all_: bool=True,
                 co_constraints: bool=True
-                ) -> OrderedSet:
+                ):
         """collects the questions in self.
 
         `questions` is an OrderedSet of Expression
@@ -335,12 +346,13 @@ class Expression(ASTNode):
             e.collect(questions, all_, co_constraints)
 
     def collect_symbols(self,
-                        symbols: Dict[str, SymbolDeclaration]=None,
+                        symbols: Optional[dict[str, SymbolDeclaration]] = None,
                         co_constraints: bool=True
-                        ) -> Dict[str, Declaration]:
+                        ) -> dict[str, SymbolDeclaration]:
         """ returns the list of symbol declarations in self, ignoring type constraints
         """
         symbols = {} if symbols == None else symbols
+        assert symbols is not None, "Internal error"
         if self.is_type_constraint_for is None:  # ignore type constraints
             if (hasattr(self, 'decl') and self.decl
                 and self.decl.__class__.__name__ == "SymbolDeclaration"
@@ -364,7 +376,7 @@ class Expression(ASTNode):
             e.collect_nested_symbols(symbols, is_nested)
         return symbols
 
-    def generate_constructors(self, constructors: Dict[str, List[Constructor]]):
+    def generate_constructors(self, constructors: dict[str, List[Constructor]]):
         """ fills the list `constructors` with all constructors belonging to
         open types.
         """
@@ -417,7 +429,7 @@ class Expression(ASTNode):
         # vocabulary
         return any(e.has_decision() for e in self.sub_exprs)
 
-    def type_inference(self) -> Dict[Variable, Symbol]:
+    def type_inference(self) -> dict[str, Symbol]:
         # returns a dictionary {Variable : Symbol}
         try:
             return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
@@ -427,25 +439,34 @@ class Expression(ASTNode):
             else:
                 msg = f"Unknown error for {self}"
             self.check(False, msg)
+            return {}  # dead code
 
     def __str__(self) -> str:
         return ''  # monkey-patched
 
-    def update_exprs(self, new_exprs: List[Expression]) -> Expression:
+    def _change(self: Expression,
+                sub_exprs: Optional[List[Expression]] = None,
+                ops : Optional[List[str]] = None,
+                simpler : Optional[Expression] = None,
+                co_constraint : Optional[Expression] = None
+                ) -> Expression:
+        return self  # monkey-patched
+
+    def update_exprs(self, new_exprs: Generator[Expression, None, None]) -> Expression:
         return self  # monkey-patched
 
     def simplify1(self) -> Expression:
         return self  # monkey-patched
 
     def interpret(self,
-                  problem: Theory | None,
-                  subs: Dict[str, Expression]
+                  problem: Optional[Theory],
+                  subs: dict[str, Expression]
                   ) -> Expression:
         return self  # monkey-patched
 
-    def interpret1(self,
-                    problem: Theory | None,
-                    subs: Dict[str, Expression]
+    def _interpret(self,
+                    problem: Optional[Theory],
+                    subs: dict[str, Expression]
                     ) -> Expression:
         return self  # monkey-patched
 
@@ -501,7 +522,7 @@ class Expression(ASTNode):
         return out
 
     def add_level_mapping(self,
-                          level_symbols: Dict[SymbolDeclaration, Symbol],
+                          level_symbols: dict[SymbolDeclaration, Symbol],
                           head: AppliedSymbol,
                           pos_justification: bool,
                           polarity: bool,
@@ -511,7 +532,7 @@ class Expression(ASTNode):
          are added to atoms containing recursive symbols.
 
         Arguments:
-            - level_symbols (Dict[SymbolDeclaration, Symbol]): the level mapping
+            - level_symbols (dict[SymbolDeclaration, Symbol]): the level mapping
               symbols as well as their corresponding recursive symbols
             - head (AppliedSymbol): head of the rule we are adding level mapping
               symbols to.
@@ -525,8 +546,6 @@ class Expression(ASTNode):
                                    for e in self.sub_exprs))
                     .annotate1())  # update .variables
 
-Extension = Tuple[Optional[List[List[Expression]]],  # None if the extension is infinite (e.g., Int)
-                  Optional[Callable]]  # None if filtering is not required
 
 
 class Symbol(Expression):
@@ -542,7 +561,7 @@ class Symbol(Expression):
         self.name = unquote(name)
         self.name = Symbol.TO.get(self.name, self.name)
         self.sub_exprs = []
-        self.decl = None
+        self.decl: Optional[SymbolDeclaration] = None
         super().__init__()
         self.variables = set()
 
@@ -555,8 +574,8 @@ class Symbol(Expression):
     def is_value(self): return True
 
     def has_element(self, term: Expression,
-                    interpretations: Dict[str, SymbolInterpretation],
-                    extensions: Dict[str, Extension]
+                    interpretations: dict[str, SymbolInterpretation],
+                    extensions: dict[str, Extension]
                     ) -> Expression:
         """Returns an expression that says whether `term` is in the type/predicate denoted by `self`.
 
@@ -566,6 +585,7 @@ class Symbol(Expression):
         Returns:
             Expression: whether `term` is in the type denoted by `self`.
         """
+        assert self.decl is not None, "Internal error"
         self.check(self.decl.out.name == BOOL, "internal error")
         return self.decl.contains_element(term, interpretations, extensions)
 
@@ -588,8 +608,8 @@ class Type(Symbol):
 
     def __init__(self, parent,
                  name:str,
-                 ins: List[Type]=None,
-                 out: Type=None):
+                 ins: Optional[List[Type]] = None,
+                 out: Optional[Type] = None):
         self.ins = ins
         self.out = out
         super().__init__(parent, name)
@@ -608,15 +628,15 @@ class Type(Symbol):
                     all(s==o for s, o in zip(self.ins, other.ins)))))
 
     def extension(self,
-                  interpretations: Dict[str, SymbolInterpretation],
-                  extensions: Dict[str, Extension]
+                  interpretations: dict[str, SymbolInterpretation],
+                  extensions: dict[str, Extension]
                   ) -> Extension:
-        pass  # monkey-patched
+        return extensions[""]  # monkey-patched
 
     def has_element(self,
                     term: Expression,
-                    interpretations: Dict[str, SymbolInterpretation],
-                    extensions: Dict[str, Extension]
+                    interpretations: dict[str, SymbolInterpretation],
+                    extensions: dict[str, Extension]
                     ) -> Expression:
         """Returns an Expression that says whether `term` is in the type/predicate denoted by `self`.
 
@@ -627,10 +647,12 @@ class Type(Symbol):
             Expression: whether `term` `term` is in the type denoted by `self`.
         """
         if self.name == CONCEPT:
-            comparisons = [EQUALS([term, c[0]])
-                           for c in self.extension(interpretations, extensions)[0]]
+            extension = self.extension(interpretations, extensions)[0]
+            assert extension is not None, "Internal error"
+            comparisons = [EQUALS([term, c[0]]) for c in extension]
             return OR(comparisons)
         else:
+            assert self.decl is not None, "Internal error"
             self.check(self.decl.out.name == BOOL, "internal error")
             return self.decl.contains_element(term, interpretations, extensions)
 
@@ -648,7 +670,7 @@ class AIfExpr(Expression):
                  if_f: Expression,
                  then_f: Expression,
                  else_f: Expression
-                 ) -> AIfExpr:
+                 ):
         self.if_f = if_f
         self.then_f = then_f
         self.else_f = else_f
@@ -701,10 +723,9 @@ class Quantee(Expression):
         e.g., the declaration of `Color`
     """
     def __init__(self, parent,
-                 vars: List[List[Variable]],
-                 subtype: Type = None,
-                 sort: SymbolExpr = None):
-        self.vars = vars
+                 vars: Union[List[Variable], List[List[Variable]]],
+                 subtype: Optional[Type] = None,
+                 sort: Optional[SymbolExpr] = None):
         self.subtype = subtype
         sort = sort
         if self.subtype:
@@ -715,13 +736,15 @@ class Quantee(Expression):
                           [self.subtype] if self.subtype else
                           [])
         self.arity = None
-        for i, v in enumerate(self.vars):
+        self.vars : List[List[Variable]] = []
+        for i, v in enumerate(vars):
             if hasattr(v, 'vars'):  # varTuple
                 self.check(1 < len(v.vars), f"Can't have singleton in binary quantification")
-                self.vars[i] = v.vars
+                self.vars.append(v.vars)
                 self.arity = len(v.vars) if self.arity == None else self.arity
             else:
-                self.vars[i] = [v]
+                assert isinstance(v, Variable), "Internal error"
+                self.vars.append([v])
                 self.arity = 1 if self.arity == None else self.arity
 
         super().__init__()
@@ -733,8 +756,8 @@ class Quantee(Expression):
     @classmethod
     def make(cls,
              var: List[Variable],
-             subtype: Type = None,
-             sort: SymbolExpr = None
+             subtype: Optional[Type] = None,
+             sort: Optional[SymbolExpr] = None
              ) -> 'Quantee':
         out = (cls) (None, [var], subtype=subtype, sort=sort)
         return out.annotate1()
@@ -766,7 +789,7 @@ class AQuantification(Expression):
     """ASTNode representing a quantified formula
 
     Args:
-        annotations (Dict[str, str]):
+        annotations (dict[str, str]):
             The set of annotations given by the expert in the IDP-Z3 program.
 
             ``annotations['reading']`` is the annotation
@@ -777,13 +800,15 @@ class AQuantification(Expression):
         quantees (List[Quantee]): list of variable declarations
 
         f (Expression): the formula being quantified
+
+        supersets, new_quantees, vars1: attributes used in `interpret`
     """
     PRECEDENCE = 20
 
     def __init__(self, parent, annotations, q, quantees, f):
         self.annotations = annotations
         self.q = q
-        self.quantees = quantees
+        self.quantees: List[Quantee] = quantees
         self.f = f
 
         self.q = ('∀' if self.q in ['!', 'forall'] else
@@ -795,6 +820,9 @@ class AQuantification(Expression):
         super().__init__()
 
         self.type = BOOL
+        self.supersets: List[List[List[Union[Identifier, Variable]]]] = None
+        self.new_quantees: List[Quantee] = None
+        self.vars1 : List[Variable] = None
 
     @classmethod
     def make(cls,
@@ -849,7 +877,7 @@ def EXISTS(qs, expr, annotations=None):
 
 class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
-    MAP = dict()  # monkey-patched
+    MAP: dict[str, Callable] = dict()  # monkey-patched
     NORMAL = {
         "is strictly less than": "<",
         "is less than": "≤",
@@ -895,7 +923,7 @@ class Operator(Expression):
              operands: List[Expression],
              annotations=None,
              parent=None
-             ) -> 'Operator':
+             ) -> Expression:
         """ creates a BinaryOp
             beware: cls must be specific for ops !
         """
@@ -1026,7 +1054,7 @@ class APower(Operator):
 
 class AUnary(Expression):
     PRECEDENCE = 120
-    MAP = dict()  # monkey-patched
+    MAP : dict[str, Callable] = dict()  # monkey-patched
 
     def __init__(self, parent,
                  operators: List[str],
@@ -1068,12 +1096,11 @@ class AAggregate(Expression):
     def __init__(self, parent,
                  aggtype: str,
                  quantees: List[Quantee],
-                 lambda_: str=None,
-                 f: Expression = None,
-                 if_: Expression = None):
+                 lambda_: Optional[str] = None,
+                 f: Optional[Expression] = None,
+                 if_: Optional[Expression] = None):
         self.aggtype = aggtype
-        self.quantees = quantees
-        self.f = f
+        self.quantees: List[Quantee] = quantees
         self.lambda_ = lambda_
 
         self.aggtype = ("#" if self.aggtype == "card" else
@@ -1087,6 +1114,7 @@ class AAggregate(Expression):
             self.sub_exprs.append(if_)
         self.annotated = False  # cannot test q_vars, because aggregate may not have quantee
         self.q = ''
+        self.supersets, self.new_quantees, self.vars1 = None, None, None
         super().__init__()
 
     def __str__(self):
@@ -1264,6 +1292,7 @@ class AppliedSymbol(Expression):
     def generate_constructors(self, constructors: dict):
         symbol = self.symbol.sub_exprs[0]
         if hasattr(symbol, 'name') and symbol.name in ['unit', 'heading']:
+            assert type(self.sub_exprs[0]) == UnappliedSymbol, "Internal error"
             constructor = CONSTRUCTOR(self.sub_exprs[0].name)
             constructors[symbol.name].append(constructor)
 
@@ -1335,7 +1364,7 @@ class UnappliedSymbol(Expression):
         """
         out = (cls)(None, s=SYMBOL(constructor.name))
         out.decl = constructor
-        out.variables = {}
+        out.variables = set()
         return out
 
     def is_value(self): return True
@@ -1383,6 +1412,8 @@ class Variable(Expression):
 
     def annotate1(self): return self
 
+    def has_variables(self) -> bool: return True
+
 def VARIABLE(name: str, sort: Union[Type, Symbol]):
     return Variable(None, name, sort)
 
@@ -1397,6 +1428,7 @@ class Number(Expression):
 
         self.sub_exprs = []
         self.variables = set()
+        self.py_value = 0 # to get the type
 
         ops = self.number.split("/")
         if len(ops) == 2:  # possible with str_to_IDP on Z3 value
@@ -1496,3 +1528,6 @@ class RecDef(Expression):
                 f"{', '.join(str(v) for v in self.vars)}"
                 f") = {self.sub_exprs[0]}.")
 
+Identifier = Union[AppliedSymbol, UnappliedSymbol, Number, Date]
+Extension = Tuple[Optional[List[List[Identifier]]],  # None if the extension is infinite (e.g., Int)
+                  Optional[Callable]]  # None if filtering is not required

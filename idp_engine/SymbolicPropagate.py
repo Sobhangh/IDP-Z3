@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,21 +21,8 @@ Methods to simplify an expression using a set of assignments.
 """
 from __future__ import annotations
 
-from copy import copy, deepcopy
-from itertools import product
-from typing import Dict, List, Callable
 
-from .Assignments import Status as S
-from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
-    SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP, ConstructedFrom,
-    Definition, Rule)
-from .Expression import (catch_error, RecDef, Symbol, SYMBOL, AIfExpr, IF, SymbolExpr, Expression, Constructor,
-    AQuantification, Type, FORALL, IMPLIES, AND, AAggregate, AImplication, AConjunction,
-    EQUIV, EQUALS, OR, AppliedSymbol, UnappliedSymbol, Quantee,
-    Variable, VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
-from .Theory import Theory
-from .utils import (BOOL, INT, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
-                    GOAL_SYMBOL, EXPAND, CO_CONSTR_RECURSION_DEPTH, Semantics)
+from .Expression import (catch_error, Expression, AppliedSymbol, Variable)
 
 
 # class Expression  ###########################################################

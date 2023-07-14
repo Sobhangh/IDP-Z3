@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,9 +26,10 @@ from copy import copy
 
 from .Parse import IDP
 from .Parse import Definition, Rule
-from .Expression import (ASTNode, AIfExpr, Quantee, AQuantification, AAggregate,
-                         AImplication, ARImplication,
-                         Operator, AComparison, AUnary, AppliedSymbol, Brackets)
+from .Expression import (ASTNode, AIfExpr, Quantee, AQuantification,
+                         AAggregate, AImplication, ARImplication,
+                         Operator, AComparison, AUnary, AppliedSymbol,
+                         Brackets)
 from .Theory import Theory
 from .utils import NEWL
 

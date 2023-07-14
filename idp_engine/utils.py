@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,9 +19,8 @@
     Various utilities (in particular, OrderedSet)
 """
 from __future__ import annotations
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Iterator, Union, Optional
 
-from collections import ChainMap
 from collections.abc import Iterable
 from datetime import datetime
 from json import JSONEncoder
@@ -31,6 +30,7 @@ from enum import Enum, auto
 
 if TYPE_CHECKING:
     from .Expression import Expression
+    from .Parse import TupleIDP
 
 """
     Global Parameters:
@@ -115,25 +115,28 @@ class OrderedSet(dict):
         assert isinstance(els, Iterable), "Internal error in OrderedSet"
         super(OrderedSet, self).__init__(((el.code, el) for el in els))
 
-    def append(self, el: Expression):
+    def append(self, el: Union[Expression, TupleIDP]):
         if el not in self:
             self[el.code] = el
 
-    def __iter__(self) -> Iterator[Expression]:
+    def __iter__(self) -> Iterator[Union[Expression, TupleIDP]]:
         return iter(self.values())  # instead of keys()
 
-    def __contains__(self, expression: Expression) -> bool:
+    def __contains__(self,
+                     expression: Union[Expression, TupleIDP]
+                     ) -> bool:
         return super(OrderedSet, self).__contains__(expression.code)
 
-    def extend(self, more: Iterator[Expression]):
+    def extend(self,
+               more: Iterator[Union[Expression, TupleIDP]]):
         for el in more:
             self.append(el)
 
     # def items(self):
     #     return super(OrderedSet, self).items()
 
-    def pop(self, key: str, default: Expression = None) -> Expression:
-        return super(OrderedSet, self).pop(key.code, default)
+    def pop(self, key: str, default: Optional[Union[Expression, TupleIDP]] = None) -> Union[Expression, TupleIDP]:
+        return super(OrderedSet, self).pop(key, default)
 
     def __or__(self, other: OrderedSet) -> OrderedSet:
         """returns the union of self and other.  Use: `self | other`.

@@ -1,6 +1,6 @@
-# Copyright 2019 Ingmar Dasseville, Pierre Carbonnelle
+# Copyright 2019-2023 Ingmar Dasseville, Pierre Carbonnelle
 #
-# This file is part of Interactive_Consultant.
+# This file is part of IDP-Z3.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,25 +18,28 @@
 """
 Management of the State of problem solving with the Interactive Consultant.
 """
+from __future__ import annotations
 
+from typing import Optional
 
 from idp_engine.Assignments import Status as S
 from idp_engine.Run import Theory
-from idp_engine.utils import OrderedSet, NEWL, indented, DEFAULT
+from idp_engine.utils import OrderedSet, NEWL, indented
 from .IO import load_json
 import json
 
 # Types
 from idp_engine import IDP
-from typing import Dict, Tuple, Union
 
 
 class State(Theory):
     """ Contains a state of problem solving """
-    cache: Dict[str, 'State'] = {}
+    cache: dict[str, State] = {}
 
     @classmethod
-    def make(cls, idp: IDP, previous_active: str, active: str, ignore: str = None) -> "State":
+    def make(cls, idp: IDP, previous_active: str, active: str,
+             ignore: Optional[str] = None
+             ) -> "State":
         """Manage the cache of State
 
         Args:
@@ -84,6 +87,7 @@ class State(Theory):
 
         super().__init__(extended=True)
 
+        self.environment : Optional[Theory]
         if len(idp.theories) == 2:
             blocks = ([idp.theories['environment']]
                       + [struct for struct in idp.structures.values()
