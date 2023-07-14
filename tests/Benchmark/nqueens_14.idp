@@ -1,0 +1,16 @@
+vocabulary {
+    type N := {1..14}
+    queen: N * N -> Bool
+}
+
+theory {
+    !n1, n2 in N: queen(n1, n2) => ~(?n3 in N: n2 ~= n3 & queen(n1, n3)).
+    !n1, n2 in N: queen(n1, n2) => ~(?n3 in N: n1 ~= n3 & queen(n3, n2)).
+    !n1, n2 in N: queen(n1, n2) => ~(?n3 in N: ?n4 in N: n1 ~= n3 & n2 ~= n4 & n1 - n3 = n2 - n4 & queen(n3, n4)).
+    !n1, n2 in N: queen(n1, n2) => ~(?n3 in N: ?n4 in N: n1 ~= n3 & n2 ~= n4 & n1 - n3 = n4 - n2 & queen(n3, n4)).
+    !n1 in N: ?n2 in N: queen(n1, n2).
+}
+
+procedure main() {
+    pretty_print(model_expand(T, max=20))
+}
