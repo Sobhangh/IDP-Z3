@@ -1182,7 +1182,7 @@ class AppliedSymbol(Expression):
                  is_enumeration='',
                  in_enumeration=''):
         self.annotations = annotations
-        self.symbol = symbol
+        self.symbol : Symbol = symbol
         self.sub_exprs = sub_exprs
         self.is_enumerated = is_enumerated
         self.is_enumeration = is_enumeration

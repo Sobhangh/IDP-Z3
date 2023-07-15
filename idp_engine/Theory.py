@@ -41,7 +41,7 @@ from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, IDPZ3Error,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT,
                     NOT_SATISFIABLE)
-from .Z3_to_IDP import collect_questions
+from .Z3_to_IDP import collect_questions, get_interpretations
 
 
 class Propagation(Enum):
@@ -483,7 +483,7 @@ class Theory(object):
             and decl.arity == 1
             and decl.instances is None
             and not decl.name in RESERVED_SYMBOLS
-            and decl.name in self.z3):  # defined but not used in theory
+            and decl.name in self.z3):  # declared but not used in theory
                 interp = model[self.z3[decl.name]]
                 collect_questions(interp, decl, ass, out)
         return out
@@ -498,6 +498,7 @@ class Theory(object):
         """
         ass = copy(self.assignments)
         model = solver.model()
+        interps = get_interpretations(self, model)
         todo.extend(self._new_questions_from_model(model, ass))
         for q in todo:
             assert self.extended or not q.is_reified(), \
@@ -507,11 +508,17 @@ class Theory(object):
             if not self._is_defined(model, q):
                 a.value, a.tag, a.relevant = None, S.UNKNOWN, False
             else:
-                if complete or q.is_reified():
-                    val1 = model.eval(q.reified(self), model_completion=complete)
+                if type(q) == AppliedSymbol:
+                    assert q.symbol.name in interps
+                    maps = interps[q.symbol.name]
+                    val = maps.get(q.code, maps[""])
                 else:
-                    val1 = model.eval(q.translate(self), model_completion=complete)
-                val = str_to_IDP(q, str(val1))
+                    if complete or q.is_reified():
+                        val1 = model.eval(q.reified(self), model_completion=complete)
+                    else:
+                        val1 = model.eval(q.translate(self), model_completion=complete)
+                    val = str_to_IDP(q, str(val1))
+
                 if val is not None:
                     if q.is_assignment() and val == FALSE:  # consequence of the TRUE assignment
                         tag = (S.ENV_CONSQ if q.sub_exprs[0].decl.block.name == 'environment'

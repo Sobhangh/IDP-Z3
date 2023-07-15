@@ -4,7 +4,7 @@ Model 1
 group_of_Car := {1 -> G1, 2 -> G1, 3 -> G1, 4 -> G1, 5 -> G1, 6 -> G2, 7 -> G2, 8 -> G2, 9 -> G2, 10 -> G2, 11 -> G3, 12 -> G3, 13 -> G3}.
 make_of_Car := {1 -> Ford, 2 -> Ford, 3 -> Ford, 4 -> BMW, 5 -> Hyundai, 6 -> Ford, 7 -> Ford, 8 -> Ford, 9 -> Hyundai, 10 -> Hyundai, 11 -> Ford, 12 -> Hyundai, 13 -> Citroen}.
 model_of_Car := {1 -> Pickup, 2 -> T, 3 -> Taurus, 4 -> Mini, 5 -> Santa_Fe, 6 -> Pickup, 7 -> T, 8 -> Taurus, 9 -> Tucson, 10 -> Santa_Fe, 11 -> Pickup, 12 -> Santa_Fe, 13 -> deuxchevaux}.
-Make_and_Model_is_in_all_Groups := {(Ford, Pickup), (Ford, T), (Ford, Taurus), (BMW, Mini), (Hyundai, Santa_Fe), (Hyundai, Tucson), (Citroen, deuxchevaux)}.
+Make_and_Model_is_in_all_Groups := {}.
 
 
 More models may be available.  Change the max argument to see them.

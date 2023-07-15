@@ -22,12 +22,51 @@ routines to analyze Z3 expressions, e.g., the definition of a function in a mode
 """
 
 from __future__ import annotations
-from typing import List
-from z3 import FuncInterp, is_and, is_or, is_eq, is_not, AstRef
+from typing import List, TYPE_CHECKING, Optional
+from z3 import ModelRef, FuncInterp, is_and, is_or, is_eq, is_not, AstRef, DatatypeRef, BoolRef, IntNumRef
 
 from .Assignments import Assignments
 from .Expression import Expression, SYMBOL, AppliedSymbol
 from .Parse import str_to_IDP2, SymbolDeclaration
+from .utils import RESERVED_SYMBOLS
+if TYPE_CHECKING:
+    from .Theory import Theory
+
+def get_interpretations(theory: Theory, model: ModelRef
+                        ) -> dict[str, dict[str, Optional[Expression]]]:
+    """analyze the function interpretations in the model"""
+    out : dict[str, dict[str, Optional[Expression]]] = {}
+    for decl in theory.declarations.values():
+        if (type(decl) == SymbolDeclaration
+        and decl.name is not None
+        and not decl.name in RESERVED_SYMBOLS):
+            out.setdefault(decl.name, {})
+            map = out[decl.name]
+            if decl.name not in theory.z3:  # declared but not used in theory
+                map[""] = None  #TODO default value
+            else:
+                interp = model[theory.z3[decl.name]]
+                if interp is None:
+                    map[""] = None # can be any value
+                elif type(interp) == FuncInterp:
+                    try:
+                        a_list = interp.as_list()
+                    except:  # ast is null
+                        map[""] = None
+                        continue
+                    for args in a_list[:-1]:
+                        _args = args[:-1]
+                        val = args[-1]
+                        map[f"{decl.name}({','.join(str(a) for a in _args)})"] = str_to_IDP2("", decl.out.decl, str(val))
+                    try:
+                        map[""] = str_to_IDP2("", decl.out.decl, str(a_list[-1])) # else
+                    except:
+                        map[""] = None  # Var(0) => can be any value
+                elif type(interp) in [DatatypeRef, BoolRef, IntNumRef]:
+                    map[""] = str_to_IDP2("", decl.out.decl, str(interp))
+                else:
+                    assert False, "Internal error"
+    return out
 
 def collect_questions(z3_expr: AstRef,
                       decl: SymbolDeclaration,
