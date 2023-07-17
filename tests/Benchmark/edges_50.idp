@@ -1,16 +1,16 @@
 vocabulary V {
-type Node
-Edge: Node * Node -> Bool
+    type Node
+    edge: Node * Node -> Bool
 }
 
 structure S  {
-Node := {1..50}.
+    Node := {1..50}.
 }
 
 theory T:V  {
-!x,y: x ~= y => (Edge(x,y) | Edge(y,x)).
-!x,y: x ~= y => (~Edge(x,y) | ~Edge(y,x)).
-!x: ?y: x ~= y & Edge(x,y).
+    !x, y: x ~= y => (edge(x, y) | edge(y, x)).
+    !x, y: x ~= y => (~edge(x, y) | ~edge(y, x)).
+    !x: ?y: x ~= y & edge(x, y).
 }
 
 procedure main() {
