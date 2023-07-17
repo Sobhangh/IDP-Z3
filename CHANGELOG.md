@@ -24,7 +24,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #284: incorrect propagation when quantifying over infinite domain
 
 ### Interactive Consultant and Web IDE
-*
+* issue #283: Allow loading a default theory when theory is incorrect
 *
 *
 
