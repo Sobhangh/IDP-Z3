@@ -336,8 +336,20 @@ def _propagate_inner(self, tag, solver, todo):
 Theory._propagate_inner = _propagate_inner
 
 
-def _first_propagate(self, solver):
-    """ determine universals
+def _first_propagate(self, solver: Solver):
+    """ Determine universals (propagation)
+
+        This is the most complete method of propagation we currently have.
+        It works in the following way:
+            0. Prepare the solver by adding additional assignments
+            1. Generate a single model
+            2. For each assertion in the model:
+                * Add its inverse
+                * Check if satisfiable
+                * If unsat, the assertion is a consequence
+            3. Yield all consequences.
+
+        :arg solver: the solver that should be used.
 
         Raises:
             IDPZ3Error: if theory is unsatisfiable
@@ -357,11 +369,15 @@ def _first_propagate(self, solver):
         solver.pop()
         raise IDPZ3Error(NOT_SATISFIABLE)
 
-    assert res1 == sat, "Incorrect solver behavior"
+    assert res1 != unknown, "Incorrect solver behavior"
+
+    # Generate model, and build a set of questions and their values.
     model = solver.model()
     new_todo = list(todo.values())
     new_todo.extend(self._new_questions_from_model(model, self.assignments))
     valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
+
+    # For each question, invert its value and see if it is still satisfiable.
     for val1, q in valqs:
         assert self.extended or not q.is_reified(), \
                 "Reified atom should only appear in case of extended theories"
@@ -373,6 +389,9 @@ def _first_propagate(self, solver):
         solver.pop()
 
         assert res2 != unknown, "Incorrect solver behavior"
+        # If it is unsat, the value assignment is a consequence.
+        # I.e., there is no possible model in which the value of the question
+        # would be different.
         if res2 == unsat:
             val = str_to_IDP(q, str(val1))
 
@@ -408,6 +427,7 @@ Theory._propagate_ignored = _propagate_ignored
 
 def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     """generator of new propagated assignments.  Update self.assignments too.
+
     :arg given_todo: custom collection of assignments to check during propagation.
     given_todo is organized as a dictionary where the keys function to quickly
     check if a certain assignment is in the collection.
@@ -424,6 +444,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     if not self.previous_assignments:
         try:
             yield from self._first_propagate(solver)
+            # FIXME: should we return here in the case of CLI?
         except IDPZ3Error:
             yield NOT_SATISFIABLE
             # can't access solver.sexpr()
