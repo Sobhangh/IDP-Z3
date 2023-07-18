@@ -102,7 +102,7 @@ def generate():
     files.sort()
     out_dict, error = {}, 0
     for file in files:
-        if r"ignore" not in file:
+        if r"ignore" not in file and "Benchmark" not in file:
             print(file)
             # Log_file(file) # optional
             f = open(file, "r")
