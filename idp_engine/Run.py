@@ -34,7 +34,7 @@ from z3 import Solver
 from .Parse import IDP, TheoryBlock, Structure
 from .Theory import Theory
 from .Assignments import Status as S, Assignments
-from .utils import NEWL, IDPZ3Error
+from .utils import NEWL, IDPZ3Error, PROCESS_TIMINGS
 
 last_call = time.process_time()  # define it as global
 
@@ -49,7 +49,6 @@ def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
     Returns:
         str: ``sat``, ``unsat`` or ``unknown``
     """
-
     problem = Theory(*theories)
     z3_formula = problem.formula()
 
@@ -128,7 +127,12 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
     Yields:
         str
     """
+    ground_start = time.time()
+
     problem = Theory(*theories)
+    PROCESS_TIMINGS['ground'] += time.time() - ground_start
+
+    solve_start = time.time()
     if sort:
         ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE)]
         ms = sorted(ms[:-1]) + [ms[-1]]
@@ -138,6 +142,7 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
         yield out + f"{ms[-1]}"
     else:
         yield from problem._propagate(tag=S.CONSEQUENCE)
+    PROCESS_TIMINGS['solve'] += time.time() - solve_start
 
 def maximize(*theories: Union[TheoryBlock, Structure, Theory],
              term: str
