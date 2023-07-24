@@ -1,0 +1,31 @@
+vocabulary {
+    type Person
+    type Hobby
+    type Seat
+    type Gender := {f, m}
+
+    has_seat: Person -> Seat
+    has_hobby: Person * Hobby -> Bool
+    has_gender: Person -> Gender
+}
+
+structure {
+    // 16 people
+    Person := {1..16}.
+    Hobby := {1..3}.
+    Seat := {1..16}.
+    has_gender := {1 -> m, 2 -> f, 3 -> m, 4 -> m, 5 -> m, 6 -> m, 7 -> f, 8 -> m, 9 -> m, 10 -> m, 11 -> f, 12 -> f, 13 -> f, 14 -> f, 15 -> f, 16 -> f}.
+    has_hobby := {(1,2), (1,1), (1,3), (2,2), (2,1), (2,3), (3,3), (3,2), (4,3), (4,2), (4,1), (5,2), (5,1), (5,3), (6,2), (6,3), (6,1), (7,1), (7,2), (7,3), (8,3), (8,1), (9,2), (9,3), (9,1), (10,3), (10,2), (10,1), (11,1), (11,3), (11,2), (12,3), (12,1), (12,2), (13,2), (13,3), (14,1), (14,2), (14,3), (15,2), (15,3), (15,1), (16,2), (16,3)}.
+}
+
+theory {
+    !p1 in Person: !p2 in Person: ((p1 = 16 & p2 = 1) | (has_seat(p1) = has_seat(p2) + 1)) => ?h in Hobby: has_hobby(p1, h) & has_hobby(p2, h).
+    !p1 in Person: !p2 in Person: p1 ~= p2 => has_seat(p1) ~= has_seat(p2).
+
+    !p1 in Person: !i in Seat: (has_seat(p1) = 2 * i) => has_gender(p1) = f.
+    !p1 in Person: !i in Seat: (has_seat(p1) = (2 * i) - 1) => has_gender(p1) = m.
+}
+
+procedure main() {
+    pretty_print(model_expand(T,S,max=1,timeout_seconds=0))
+}

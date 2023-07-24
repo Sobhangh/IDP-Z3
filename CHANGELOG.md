@@ -15,6 +15,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * MR !321: performance improvements in the grounding of quantifications
 * issue #267: Use variable declaration for type inference in recursive definitions
 * issue #284: incorrect propagation when quantifying over infinite domain
+* issue #285: Develop benchmark suite
 *
 
 ### Interactive Consultant and Web IDE

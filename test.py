@@ -102,7 +102,7 @@ def generate():
     files.sort()
     out_dict, error = {}, 0
     for file in files:
-        if r"ignore" not in file:
+        if r"ignore" not in file and "Benchmark" not in file:
             print(file)
             # Log_file(file) # optional
             f = open(file, "r")
@@ -167,7 +167,7 @@ def pipeline():
     with z3lock:
         for file_name in test_files:
             # avoid files meant to raise an error
-            if '.error' not in file_name:
+            if '.error' not in file_name and "Benchmark" not in file_name:
                 try:
                     log(f"start /eval {file_name}")
                     with open(file_name, "r") as fp:
@@ -233,6 +233,52 @@ def api():
     return error
 
 
+def benchmark():
+    """
+    Benchmark known problems of increasing domain sizes.
+    """
+    import subprocess
+    benchmarks = {'nqueens': [4, 9, 14, 19, 24],
+                  'missmanners_fixed_gender': [16, 32, 64, 128],
+                  'pigeon': [100, 200, 300],
+                  'sudoku': [4, 9, 16],
+                  'edges': [50, 100, 150],
+                  }
+
+    timings = {}
+    for t_name in benchmarks:
+        if t_name not in timings:
+            timings[t_name] = {}
+
+        for t_size in benchmarks[t_name]:
+            start = time.time()
+            for i in range(0, 3):
+                print(f"Testing {t_name}_{t_size}: {i}")
+                subprocess.run(['python3', 'idp-engine.py',
+                                f'tests/Benchmark/{t_name}_{t_size}.idp'])
+            elapsed_time = (time.time()-start)/3
+            timings[t_name][t_size] = round(elapsed_time, 4)
+
+    try:
+        # If tabulate is installed, we can format easy-to-copy markdown tables.
+        import tabulate
+
+        # Get the current branch, to show it in the table.
+        branch = subprocess.run(['git', 'branch', '--show-current'],
+                                capture_output=True)
+        branch = branch.stdout.decode().strip('\n')
+
+        for t_name in benchmarks:
+            headers = [t_name] + benchmarks[t_name]
+            values = timings[t_name].values()
+            values = [branch] + list(values)
+            print('\n')
+            print(tabulate.tabulate([values], headers=headers,
+                                    tablefmt="github"))
+            print('\n')
+    except ModuleNotFoundError:
+        print(timings)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the tests')
     parser.add_argument('TEST', nargs='*', default=["generate", "api"])
@@ -248,6 +294,9 @@ if __name__ == "__main__":
     if "api" in args.TEST:
         a_error = api()
         error = max(error, a_error)
+
+    if "benchmark" in args.TEST:
+        benchmark()
 
     print(f'G: {g_error}, P: {p_error}, A: {a_error}')
     sys.exit(error)

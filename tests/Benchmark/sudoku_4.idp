@@ -1,0 +1,27 @@
+vocabulary {
+    type Row := {0..3}
+    type Col := {0..3}
+    type Value := {1..4}
+
+    cell_value: Row * Col -> Value
+    same_box: Row * Col * Row * Col -> Bool
+}
+
+theory {
+    !r in Row: !c1, c2 in Col: c1 ~= c2 => cell_value(r, c1) ~= cell_value(r, c2).
+
+    !c in Col: !r1, r2 in Col: r1 ~= r2 => cell_value(r1, c) ~= cell_value(r2, c).
+
+    !r1, r2 in Row: !c1, c2 in Col: same_box(r1, c1, r2, c2) => cell_value(r1, c1) ~= cell_value(r2, c2).
+
+    {
+    !r1, r2 in Row: !c1, c2 in Col: same_box(r1, c1, r2, c2) <- ~(r1 = r2 & c1 = c2) & (r1 - r1%2)/2 = (r2 - r2%2)/2 & (c1 - c1%2)/2 = (c2 - c2%2)/2.
+    }
+}
+
+structure {
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S, max=1))
+}
