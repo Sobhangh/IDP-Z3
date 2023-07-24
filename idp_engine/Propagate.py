@@ -308,24 +308,70 @@ def _propagate_inner(self, tag, solver, todo):
         new_todo = list(todo.values())
         new_todo.extend(self._new_questions_from_model(model, self.assignments))
         valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
+
+        propositions = []
+        prop_map = {}
+        i = 0
+        solver.push()
         while valqs:
             (val1, q) = valqs.pop()
             if str(val1) == str(q.reified(self)):
                 continue  # irrelevant
 
+            question = q.reified(self)
             is_certainly_undefined = self._is_undefined(solver, q)
             if q.code in self.assignments:
                 self.assignments[q.code].is_certainly_undefined = is_certainly_undefined
             if not is_certainly_undefined:
-                solver.push()
-                solver.add(Not(q.reified(self) == val1))
-                res2 = solver.check()
-                solver.pop()
+                i += 1
+                # Make a new proposition.
+                q_symbol = f'__question_{i}'
+                bool_q = Bool(q_symbol).translate(solver.ctx)
+                if q.type == BOOL:
+                    # In the case of a predicate
+                    solver.add(bool_q == (question == True))
+                elif str(question) == str(val1):
+                    # In the case of irrelevant value
+                    continue
+                else:
+                    solver.add(bool_q == (question == val1))
+            propositions.append(bool_q)
+            prop_map[q_symbol] = (val1, q)
 
-                assert res2 != unknown, "Incorrect solver behavior"
-                if res2 == unsat:
-                    val = str_to_IDP(q, str(val1))
-                    yield self.assignments.assert__(q, val, tag)
+        # Only query the propositions.
+        cons = solver.consequences([], propositions)
+        assert cons[0] == sat, 'Incorrect solver behavior'
+
+        # Each of the consequences represents a "fixed" value, and should thus be
+        # shown as propagated.
+        for con in cons[1]:
+            q_symbol = str(con.children()[1])
+            if q_symbol.startswith('Not('):
+                q_symbol = q_symbol[4:-1]
+            val1, q = prop_map[q_symbol]
+            val = str_to_IDP(q, str(val1))
+            yield self.assignments.assert__(q, val, tag)
+        solver.pop()
+
+
+        # while valqs:
+        #     (val1, q) = valqs.pop()
+        #     if str(val1) == str(q.reified(self)):
+        #         continue  # irrelevant
+
+        #     is_certainly_undefined = self._is_undefined(solver, q)
+        #     if q.code in self.assignments:
+        #         self.assignments[q.code].is_certainly_undefined = is_certainly_undefined
+        #     if not is_certainly_undefined:
+        #         solver.push()
+        #         solver.add(Not(q.reified(self) == val1))
+        #         res2 = solver.check()
+        #         solver.pop()
+
+        #         assert res2 != unknown, "Incorrect solver behavior"
+        #         if res2 == unsat:
+        #             val = str_to_IDP(q, str(val1))
+        #             yield self.assignments.assert__(q, val, tag)
 
         yield "No more consequences."
     elif res1 == unsat:
