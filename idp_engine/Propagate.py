@@ -33,7 +33,7 @@ import time
 from copy import copy
 from typing import Optional
 from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true,
-                is_not, is_eq)
+                is_not, is_eq, Bool)
 
 from .Assignments import Status as S, Assignments
 from .Expression import (Expression, AQuantification, ADisjunction,
@@ -41,7 +41,7 @@ from .Expression import (Expression, AQuantification, ADisjunction,
                          Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
 from .Theory import Theory
-from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
+from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE, BOOL
 
 start = time.process_time()
 
@@ -343,11 +343,17 @@ def _first_propagate(self, solver: Solver):
         It works in the following way:
             0. Prepare the solver by adding additional assignments
             1. Generate a single model
-            2. For each assertion in the model:
-                * Add its inverse
-                * Check if satisfiable
-                * If unsat, the assertion is a consequence
-            3. Yield all consequences.
+            2. For each assertion in the model, add a proposition to reflect
+                its inversie value.
+            3. Use Z3's `consequences` to derive which propagations are implied
+            4. Translate the propositions back and yield them.
+
+        This method could be extended by also adding a proposition for
+        every possible value of a function. Currently, it does not ouput
+        "impossible values" for formulas, such as "Not Belgium = Red".
+        Adding a proposition for each possibility would allow that, but would
+        also most likely make the process more time-intensive.
+        See `get_range` if you need such functionality.
 
         :arg solver: the solver that should be used.
 
@@ -378,29 +384,53 @@ def _first_propagate(self, solver: Solver):
     valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
 
     # For each question, invert its value and see if it is still satisfiable.
-    for val1, q in valqs:
-        assert self.extended or not q.is_reified(), \
-                "Reified atom should only appear in case of extended theories"
-        if str(val1) == str(q.reified(self)):
-            continue  # irrelevant
-        solver.push()
-        solver.add(Not(q.reified(self) == val1))
-        res2 = solver.check()
-        solver.pop()
+    # Now, we want to know if the inverse of each question can be satisfiable.
+    # If the inverse is never satisfied, we know that the question is fixed.
+    #
+    # We do this by introducing a proposition for each question to represent
+    # its inverse. We then use Z3's `consequences` to derive which propositions
+    # are now necessary.
+    propositions = []
+    prop_map = {}
+    for i, (val1, q) in enumerate(valqs):
+        question = q.reified(self)
 
-        assert res2 != unknown, "Incorrect solver behavior"
-        # If it is unsat, the value assignment is a consequence.
-        # I.e., there is no possible model in which the value of the question
-        # would be different.
-        if res2 == unsat:
-            val = str_to_IDP(q, str(val1))
+        # Make a new proposition.
+        q_symbol = f'__question_{i}'
+        bool_q = Bool(q_symbol).translate(solver.ctx)
+        if q.type == BOOL:
+            # In the case of a predicate
+            solver.add(bool_q == (question == True))
+        elif str(question) == str(val1):
+            # In the case of irrelevant value
+            continue
+        else:
+            solver.add(bool_q == (question == val1))
+        propositions.append(bool_q)
+        prop_map[q_symbol] = (val1, q)
 
-            ass = self.assignments.get(q.code, None)
-            if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
-            and not ass.value.same_as(val)):
-                solver.pop()
-                raise IDPZ3Error(NOT_SATISFIABLE)
-            yield self.assignments.assert__(q, val, S.UNIVERSAL)
+    # Only query the propositions.
+    cons = solver.consequences([], propositions)
+    assert cons[0] == sat, 'Incorrect solver behavior'
+
+    # Each of the consequences represents a "fixed" value, and should thus be
+    # shown as propagated.
+    for con in cons[1]:
+        q_symbol = str(con.children()[1])
+        if q_symbol.startswith('Not('):
+            q_symbol = q_symbol[4:-1]
+        try:
+            val1, q = prop_map[q_symbol]
+        except:
+            breakpoint()
+        val = str_to_IDP(q, str(val1))
+
+        ass = self.assignments.get(q.code, None)
+        if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
+           and not ass.value.same_as(val)):
+            solver.pop()
+            raise IDPZ3Error(NOT_SATISFIABLE)
+        yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
     solver.pop()
 Theory._first_propagate = _first_propagate
