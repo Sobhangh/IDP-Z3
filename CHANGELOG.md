@@ -19,7 +19,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 *
 
 ### Interactive Consultant and Web IDE
-*
+* issue #283: Allow loading a default theory when theory is incorrect
 *
 *
 
