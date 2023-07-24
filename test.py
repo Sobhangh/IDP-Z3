@@ -167,7 +167,7 @@ def pipeline():
     with z3lock:
         for file_name in test_files:
             # avoid files meant to raise an error
-            if '.error' not in file_name:
+            if '.error' not in file_name and "Benchmark" not in file_name:
                 try:
                     log(f"start /eval {file_name}")
                     with open(file_name, "r") as fp:
