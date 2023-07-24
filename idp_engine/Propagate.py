@@ -340,6 +340,7 @@ def _propagate_inner(self, tag, solver, todo):
 
         # Only query the propositions.
         cons = solver.consequences([], propositions)
+        solver.pop()
 
         if cons[0] == unknown:
             # It is possible that `consequences` cannot derive anything due to
@@ -347,6 +348,7 @@ def _propagate_inner(self, tag, solver, todo):
             # back on the "old" propagation. For some reason, working with models
             # does not have this limitation (but it is generally much slower).
             yield from self._propagate_through_models(solver, valqs)
+            yield "No more consequences."
             return
 
         assert cons[0] == sat, 'Incorrect solver behavior'
@@ -360,7 +362,6 @@ def _propagate_inner(self, tag, solver, todo):
             val1, q = prop_map[q_symbol]
             val = str_to_IDP(q, str(val1))
             yield self.assignments.assert__(q, val, tag)
-        solver.pop()
 
         yield "No more consequences."
     elif res1 == unsat:
@@ -434,6 +435,9 @@ def _first_propagate(self, solver: Solver):
         if q.type == BOOL:
             # In the case of a predicate
             solver.add(bool_q == (question == True))
+        elif str(question) == str(val1):
+            # In the case of irrelevant value
+            continue
         else:
             solver.add(bool_q == (question == val1))
         propositions.append(bool_q)
