@@ -29,15 +29,31 @@
   <p-toast></p-toast>
 </ng-container>
 
+<!-- In case an error occurs in the IC, we show the editor + the error message. -->
 <ng-container *ngIf="!idpService.ready()">
-  <h2>Oops</h2>
-  <div>
-    Something went wrong while trying to start the application. Please check your specification
-    and try to restart by clicking:
-    <button pButton (click)="idpService.reloadMeta()">Start App</button>
+  <div class="heading">
+    <img src='https://storage.googleapis.com/interactive-consultant/assets/KU%20Leuven%20logo.png'>
+    &nbsp;&nbsp;
+    <span class="titlespan">
+    <h1>{{ this.title }}</h1>
+      <p-progressSpinner [hidden]="idpService.openCalls == 0" [style]="{width: '40px', height: '40px', marginLeft: '2em'}"
+                      animationDuration=".5s"
+                      fill="#EEEEEE" strokeWidth="8"></p-progressSpinner>
+    </span>
   </div>
-
-  <app-editor></app-editor>
+      <h2>Oops</h2>
+      <div>
+        The application cannot start due to an error in your specification.
+        Please check the error message below and correct it.
+        Alternatively, you can load a default specification instead.
+      </div>
+      <div>
+        <button pButton (click)="idpService.reloadMeta()">Restart App</button>
+        &nbsp;
+        &nbsp;
+        <button pButton (click)="idpService.reload(this.specification_url)">Load default specification</button>
+      </div>
+      <app-editor></app-editor>
 </ng-container>
 
 <div class="footContainer" title="This research received funding from the Flemish Government under the “Onderzoeksprogramma Artificiële Intelligentie (AI) Vlaanderen” programme.">
