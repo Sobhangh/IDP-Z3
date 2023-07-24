@@ -419,10 +419,7 @@ def _first_propagate(self, solver: Solver):
         q_symbol = str(con.children()[1])
         if q_symbol.startswith('Not('):
             q_symbol = q_symbol[4:-1]
-        try:
-            val1, q = prop_map[q_symbol]
-        except:
-            breakpoint()
+        val1, q = prop_map[q_symbol]
         val = str_to_IDP(q, str(val1))
 
         ass = self.assignments.get(q.code, None)
