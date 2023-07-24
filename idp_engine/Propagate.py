@@ -340,6 +340,15 @@ def _propagate_inner(self, tag, solver, todo):
 
         # Only query the propositions.
         cons = solver.consequences([], propositions)
+
+        if cons[0] == unknown:
+            # It is possible that `consequences` cannot derive anything due to
+            # usage of infinite domains and rounding errors. In this case, we fall
+            # back on the "old" propagation. For some reason, working with models
+            # does not have this limitation (but it is generally much slower).
+            yield from self._propagate_through_models(solver, valqs)
+            return
+
         assert cons[0] == sat, 'Incorrect solver behavior'
 
         # Each of the consequences represents a "fixed" value, and should thus be
@@ -352,26 +361,6 @@ def _propagate_inner(self, tag, solver, todo):
             val = str_to_IDP(q, str(val1))
             yield self.assignments.assert__(q, val, tag)
         solver.pop()
-
-
-        # while valqs:
-        #     (val1, q) = valqs.pop()
-        #     if str(val1) == str(q.reified(self)):
-        #         continue  # irrelevant
-
-        #     is_certainly_undefined = self._is_undefined(solver, q)
-        #     if q.code in self.assignments:
-        #         self.assignments[q.code].is_certainly_undefined = is_certainly_undefined
-        #     if not is_certainly_undefined:
-        #         solver.push()
-        #         solver.add(Not(q.reified(self) == val1))
-        #         res2 = solver.check()
-        #         solver.pop()
-
-        #         assert res2 != unknown, "Incorrect solver behavior"
-        #         if res2 == unsat:
-        #             val = str_to_IDP(q, str(val1))
-        #             yield self.assignments.assert__(q, val, tag)
 
         yield "No more consequences."
     elif res1 == unsat:
@@ -389,8 +378,7 @@ def _first_propagate(self, solver: Solver):
         It works in the following way:
             0. Prepare the solver by adding additional assignments
             1. Generate a single model
-            2. For each assertion in the model, add a proposition to reflect
-                its inversie value.
+            2. For each assertion in the model, add a proposition.
             3. Use Z3's `consequences` to derive which propagations are implied
             4. Translate the propositions back and yield them.
 
@@ -429,17 +417,16 @@ def _first_propagate(self, solver: Solver):
     new_todo.extend(self._new_questions_from_model(model, self.assignments))
     valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
 
-    # For each question, invert its value and see if it is still satisfiable.
-    # Now, we want to know if the inverse of each question can be satisfiable.
-    # If the inverse is never satisfied, we know that the question is fixed.
-    #
-    # We do this by introducing a proposition for each question to represent
-    # its inverse. We then use Z3's `consequences` to derive which propositions
-    # are now necessary.
+    # Introduce a proposition for each question. We then use Z3's
+    # `consequences` to derive which propositions are now implied.
     propositions = []
     prop_map = {}
+    solver.push()
     for i, (val1, q) in enumerate(valqs):
         question = q.reified(self)
+
+        # if str(val1).endswith('?'):
+        #     continue
 
         # Make a new proposition.
         q_symbol = f'__question_{i}'
@@ -447,9 +434,6 @@ def _first_propagate(self, solver: Solver):
         if q.type == BOOL:
             # In the case of a predicate
             solver.add(bool_q == (question == True))
-        elif str(question) == str(val1):
-            # In the case of irrelevant value
-            continue
         else:
             solver.add(bool_q == (question == val1))
         propositions.append(bool_q)
@@ -457,6 +441,16 @@ def _first_propagate(self, solver: Solver):
 
     # Only query the propositions.
     cons = solver.consequences([], propositions)
+    solver.pop()
+
+    if cons[0] == unknown:
+        # It is possible that `consequences` cannot derive anything due to
+        # usage of infinite domains and rounding errors. In this case, we fall
+        # back on the "old" propagation. For some reason, working with models
+        # does not have this limitation (but it is generally much slower).
+        yield from self._propagate_through_models(solver, valqs)
+        solver.pop()
+        return
     assert cons[0] == sat, 'Incorrect solver behavior'
 
     # Each of the consequences represents a "fixed" value, and should thus be
@@ -477,6 +471,34 @@ def _first_propagate(self, solver: Solver):
 
     solver.pop()
 Theory._first_propagate = _first_propagate
+
+
+def _propagate_through_models(self, solver, valqs):
+    # For each question, invert its value and see if it is still satisfiable.
+    for val1, q in valqs:
+        assert self.extended or not q.is_reified(), \
+                "Reified atom should only appear in case of extended theories"
+        if str(val1) == str(q.reified(self)):
+            continue  # irrelevant
+        solver.push()
+        solver.add(Not(q.reified(self) == val1))
+        res2 = solver.check()
+        solver.pop()
+
+        assert res2 != unknown, "Incorrect solver behavior"
+        # If it is unsat, the value assignment is a consequence.
+        # I.e., there is no possible model in which the value of the question
+        # would be different.
+        if res2 == unsat:
+            val = str_to_IDP(q, str(val1))
+
+            ass = self.assignments.get(q.code, None)
+            if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
+            and not ass.value.same_as(val)):
+                raise IDPZ3Error(NOT_SATISFIABLE)
+            yield self.assignments.assert__(q, val, S.UNIVERSAL)
+
+Theory._propagate_through_models = _propagate_through_models
 
 
 def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
