@@ -22,6 +22,7 @@ routines to analyze Z3 expressions, e.g., the definition of a function in a mode
 """
 
 from __future__ import annotations
+import re
 from typing import List, TYPE_CHECKING, Optional
 from z3 import ModelRef, FuncInterp, is_and, is_or, is_eq, is_not, AstRef, DatatypeRef, BoolRef, IntNumRef
 
@@ -31,6 +32,8 @@ from .Parse import str_to_IDP2, SymbolDeclaration
 from .utils import RESERVED_SYMBOLS
 if TYPE_CHECKING:
     from .Theory import Theory
+
+TRUEFALSE = re.compile(r"\b(True|False)\b")
 
 def get_interpretations(theory: Theory, model: ModelRef
                         ) -> dict[str, dict[str, Optional[Expression]]]:
@@ -63,7 +66,10 @@ def get_interpretations(theory: Theory, model: ModelRef
                         map[""] = None
                         continue
                     for args in a_list[:-1]:
-                        applied = f"{decl.name}({', '.join(str(a) for a in args[:-1])})"
+                        _args = (str(a) for a in args[:-1])
+                        applied = f"{decl.name}({', '.join(_args)})"
+                        # Replace True by true, False by false
+                        applied = re.sub(TRUEFALSE, lambda m: m.group(1).lower(), applied)
                         val = args[-1]
                         map[applied] = str_to_IDP2("", decl.out.decl, str(val))
                     try:
