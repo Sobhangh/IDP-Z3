@@ -508,7 +508,8 @@ class Theory(object):
             if not self._is_defined(model, q):
                 a.value, a.tag, a.relevant = None, S.UNKNOWN, False
             else:
-                if type(q) == AppliedSymbol:
+                if (type(q) == AppliedSymbol
+                    and not (q.in_enumeration or q.is_enumerated)):
                     assert q.symbol.name in interps
                     maps = interps[q.symbol.name]
                     val = maps.get(q.code, maps[""])
