@@ -2,61 +2,13 @@
 Model 1
 ==========
 green := {B3}.
-right := {}.
+right := {(B1, B2), (B2, B3)}.
 
 
 Model 2
 ==========
-green := {B3}.
-right := {}.
+green := {B2, B3}.
+right := {(B1, B2), (B2, B3)}.
 
 
-Model 3
-==========
-green := {B3}.
-right := {}.
-
-
-Model 4
-==========
-green := {B3}.
-right := {}.
-
-
-Model 5
-==========
-green := {B3}.
-right := {}.
-
-
-Model 6
-==========
-green := {B3}.
-right := {}.
-
-
-Model 7
-==========
-green := {B3}.
-right := {}.
-
-
-Model 8
-==========
-green := {B3}.
-right := {}.
-
-
-Model 9
-==========
-green := {B3}.
-right := {}.
-
-
-Model 10
-==========
-green := {B3}.
-right := {}.
-
-
-More models may be available.  Change the max argument to see them.
+No more models.

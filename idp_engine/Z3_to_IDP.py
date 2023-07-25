@@ -63,7 +63,7 @@ def get_interpretations(theory: Theory, model: ModelRef
                         map[""] = None
                         continue
                     for args in a_list[:-1]:
-                        applied = f"{decl.name}({','.join(str(a) for a in args[:-1])})"
+                        applied = f"{decl.name}({', '.join(str(a) for a in args[:-1])})"
                         val = args[-1]
                         map[applied] = str_to_IDP2("", decl.out.decl, str(val))
                     try:

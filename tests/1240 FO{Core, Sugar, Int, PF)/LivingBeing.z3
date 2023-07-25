@@ -36,7 +36,7 @@ animal := {Cat, Dog, Frog}.
 person := {Alice, Bob, Tom}.
 married := {Alice, Bob}.
 spouse := {Alice -> Bob, Bob -> Alice}.
-affair := {}.
+affair := {(Alice, Alice)}.
 age := {Cat -> 21, Dog -> 21, Frog -> 21, Alice -> 21, Bob -> 21, Tom -> 21}.
 
 
