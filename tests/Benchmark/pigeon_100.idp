@@ -1,0 +1,14 @@
+vocabulary {
+    type Pigeon := {1..100}
+    type House := {1..100}
+
+    lives_in: Pigeon -> House
+}
+
+theory {
+    !p1, p2 in Pigeon: p1 ~= p2 => lives_in(p1) ~= lives_in(p2).
+}
+
+procedure main() {
+    pretty_print(model_expand(T, max=10))
+}

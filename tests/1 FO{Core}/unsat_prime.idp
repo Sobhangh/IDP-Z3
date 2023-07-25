@@ -1,0 +1,17 @@
+vocabulary V {
+    type N := {1, 2, 3}
+    prime : N → 𝔹
+}
+
+theory T:V {
+    prime(4).
+}
+
+structure S:V {
+    prime := {2}.
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S))
+}
+

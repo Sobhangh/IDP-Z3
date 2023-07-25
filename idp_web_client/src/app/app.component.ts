@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {IdpService} from '../services/idp.service';
 import {MessageService} from 'primeng/api';
 import { Title } from '@angular/platform-browser';
+import {AppSettings} from '../services/AppSettings';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,7 @@ import { Title } from '@angular/platform-browser';
 })
 export class AppComponent implements OnInit {
   title = '';
+  specification_url = '';
 
   constructor(public idpService: IdpService,
               private messageService: MessageService,
@@ -22,7 +24,10 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.title = this.idpService.IDE ? 'IDP webIDE' : 'Interactive Consultant';
-    this.titleService.setTitle( this.title );
+    this.titleService.setTitle( this.title )
+
+    this.specification_url = AppSettings.SPECIFICATION_URL;
+
     }
 
 }

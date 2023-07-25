@@ -13,12 +13,21 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 ### IDP-Z3
 * MR !319: improve some error messages
 * MR !321: performance improvements in the grounding of quantifications
+* issue #3: fix issue with out of bounds numbers
+* issue #32: added benchmark in MR !322
+* issue #38: typehints throughout code
+* issue #41: various quick syntax changes
+* issue #46: use flake8 linter
+* issue #67: reworked sliders in annotations
+* issue #129: 0 == 0.0 is now correct
 * issue #267: Use variable declaration for type inference in recursive definitions
 * issue #284: incorrect propagation when quantifying over infinite domain
+* issue #285: Develop benchmark suite
 *
 
+
 ### Interactive Consultant and Web IDE
-*
+* issue #283: Allow loading a default theory when theory is incorrect
 *
 *
 

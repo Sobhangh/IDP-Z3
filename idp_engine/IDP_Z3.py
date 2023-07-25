@@ -30,6 +30,7 @@ import time
 from idp_engine import IDP
 from contextlib import redirect_stdout
 from z3 import set_option
+from idp_engine.utils import PROCESS_TIMINGS
 
 
 def cli(args=None):
@@ -58,7 +59,9 @@ def cli(args=None):
         with open(file, "r") as f:
             theory = f.read()
 
+        parse_start = time.time()
         idp = IDP.from_str(theory)
+        PROCESS_TIMINGS['parse'] = time.time() - parse_start
         if not args.output:
             # Print output to stdout.
             idp.execute()
@@ -72,7 +75,10 @@ def cli(args=None):
                     print(exc)
                     error = 1
         if args.timing:
-            print("Elapsed time: {} seconds".format(time.time() - start_time))
+            print(f"Elapsed time: {round(time.time() - start_time, 4)}s"
+                  f" (Parse: {round(PROCESS_TIMINGS['parse'], 4)}s"
+                  f" | Ground: {round(PROCESS_TIMINGS['ground'], 4)}s"
+                  f" | Solve: {round(PROCESS_TIMINGS['solve'], 4)}s)")
     else:
         parser.print_help()
 

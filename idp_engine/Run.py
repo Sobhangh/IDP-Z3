@@ -34,7 +34,7 @@ from z3 import Solver
 from .Parse import IDP, TheoryBlock, Structure
 from .Theory import Theory
 from .Assignments import Status as S, Assignments
-from .utils import NEWL, IDPZ3Error
+from .utils import NEWL, IDPZ3Error, PROCESS_TIMINGS
 
 last_call = time.process_time()  # define it as global
 
@@ -49,9 +49,11 @@ def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
     Returns:
         str: ``sat``, ``unsat`` or ``unknown``
     """
-
+    ground_start = time.time()
     problem = Theory(*theories)
     z3_formula = problem.formula()
+    PROCESS_TIMINGS['ground'] += time.time() - ground_start
+
 
     solver = Solver(ctx=problem.ctx)
     solver.add(z3_formula)
@@ -95,7 +97,11 @@ def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
     Yields:
         str
     """
+    ground_start = time.time()
     problem = Theory(*theories, extended=extended)
+    PROCESS_TIMINGS['ground'] += time.time() - ground_start
+
+    solve_start = time.time()
     ms = list(problem.expand(max=max, timeout_seconds=timeout_seconds, complete=complete))
     if isinstance(ms[-1], str):
         ms, last = ms[:-1], ms[-1]
@@ -107,6 +113,7 @@ def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
     for i, m in enumerate(ms):
         out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
     yield out + last
+    PROCESS_TIMINGS['solve'] += time.time() - solve_start
 
 
 def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
@@ -128,7 +135,12 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
     Yields:
         str
     """
+    ground_start = time.time()
+
     problem = Theory(*theories)
+    PROCESS_TIMINGS['ground'] += time.time() - ground_start
+
+    solve_start = time.time()
     if sort:
         ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE)]
         ms = sorted(ms[:-1]) + [ms[-1]]
@@ -138,6 +150,7 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
         yield out + f"{ms[-1]}"
     else:
         yield from problem._propagate(tag=S.CONSEQUENCE)
+    PROCESS_TIMINGS['solve'] += time.time() - solve_start
 
 def maximize(*theories: Union[TheoryBlock, Structure, Theory],
              term: str
@@ -188,9 +201,14 @@ def decision_table(*theories: Union[TheoryBlock, Structure, Theory],
     Yields:
         a textual representation of each rule
     """
+    ground_start = time.time()
     problem = Theory(*theories, extended=True)
+    PROCESS_TIMINGS['ground'] += time.time() - ground_start
+
+    solve_start = time.time()
     models, timeout_hit = problem.decision_table(goal_string, timeout_seconds,
                                                  max_rows, first_hit, verify)
+    PROCESS_TIMINGS['solve'] += time.time() - solve_start
     for model in models:
         row = f'{NEWL}∧ '.join(str(a) for a in model
             if a.sentence.code != goal_string)
