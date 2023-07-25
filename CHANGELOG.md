@@ -6,13 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.10.10] - Unreleased yet
 
-The main feature of this release is performance improvements in the grounding of quantifications.
+The main feature of this release is performance improvements.
 
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * MR !319: improve some error messages
 * MR !321: performance improvements in the grounding of quantifications
+* MR !326: performance improvements in model expansion
 * issue #3: fix issue with out of bounds numbers
 * issue #32: added benchmark in MR !322
 * issue #38: typehints throughout code
