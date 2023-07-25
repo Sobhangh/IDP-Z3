@@ -13,6 +13,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 ### IDP-Z3
 * MR !319: improve some error messages
 * MR !321: performance improvements in the grounding of quantifications
+* MR !325: reimplement propagation using Z3's consequences
 * issue #267: Use variable declaration for type inference in recursive definitions
 * issue #284: incorrect propagation when quantifying over infinite domain
 * issue #285: Develop benchmark suite
