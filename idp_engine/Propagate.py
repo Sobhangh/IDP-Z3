@@ -327,10 +327,7 @@ def _propagate_inner(self, tag, solver, todo):
                 # Make a new proposition.
                 q_symbol = f'__question_{i}'
                 bool_q = Bool(q_symbol).translate(solver.ctx)
-                if q.type == BOOL:
-                    # In the case of a predicate
-                    solver.add(bool_q == (question == True))
-                elif str(question) == str(val1):
+                if str(question) == str(val1):
                     # In the case of irrelevant value
                     continue
                 else:
@@ -432,10 +429,7 @@ def _first_propagate(self, solver: Solver):
         # Make a new proposition.
         q_symbol = f'__question_{i}'
         bool_q = Bool(q_symbol).translate(solver.ctx)
-        if q.type == BOOL:
-            # In the case of a predicate
-            solver.add(bool_q == (question == True))
-        elif str(question) == str(val1):
+        if str(question) == str(val1):
             # In the case of irrelevant value
             continue
         else:
