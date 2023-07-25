@@ -34,7 +34,15 @@ if TYPE_CHECKING:
 
 def get_interpretations(theory: Theory, model: ModelRef
                         ) -> dict[str, dict[str, Optional[Expression]]]:
-    """analyze the function interpretations in the model"""
+    """analyze the Z3 function interpretations in the model
+
+    A Z3 interpretation maps some tuples of arguments to the value of the symbol applied to those tuples,
+    and uses a default (else) value for the value of the symbol applied to other tuples.
+
+    The function returns a mapping from symbol names
+    to a mapping from some applied symbols to their value in the model
+    and with "" mapped to the default value (or None if undetermined in the model).
+    """
     out : dict[str, dict[str, Optional[Expression]]] = {}
     for decl in theory.declarations.values():
         if (type(decl) == SymbolDeclaration
@@ -43,7 +51,7 @@ def get_interpretations(theory: Theory, model: ModelRef
             out.setdefault(decl.name, {})
             map = out[decl.name]
             if decl.name not in theory.z3:  # declared but not used in theory
-                map[""] = None  #TODO default value
+                map[""] = None
             else:
                 interp = model[theory.z3[decl.name]]
                 if interp is None:
@@ -55,9 +63,9 @@ def get_interpretations(theory: Theory, model: ModelRef
                         map[""] = None
                         continue
                     for args in a_list[:-1]:
-                        _args = args[:-1]
+                        applied = f"{decl.name}({','.join(str(a) for a in args[:-1])})"
                         val = args[-1]
-                        map[f"{decl.name}({','.join(str(a) for a in _args)})"] = str_to_IDP2("", decl.out.decl, str(val))
+                        map[applied] = str_to_IDP2("", decl.out.decl, str(val))
                     try:
                         map[""] = str_to_IDP2("", decl.out.decl, str(a_list[-1])) # else
                     except:

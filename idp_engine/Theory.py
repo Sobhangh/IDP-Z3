@@ -513,6 +513,8 @@ class Theory(object):
                     maps = interps[q.symbol.name]
                     val = maps.get(q.code, maps[""])
                 else:
+                    val = None
+                if val is None:
                     if complete or q.is_reified():
                         val1 = model.eval(q.reified(self), model_completion=complete)
                     else:
