@@ -22,6 +22,9 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #129: 0 == 0.0 is now correct
 * issue #267: Use variable declaration for type inference in recursive definitions
 * issue #284: incorrect propagation when quantifying over infinite domain
+* issue #285: Develop benchmark suite
+*
+
 
 ### Interactive Consultant and Web IDE
 * issue #283: Allow loading a default theory when theory is incorrect
