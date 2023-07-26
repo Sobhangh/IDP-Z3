@@ -315,23 +315,20 @@ def _propagate_inner(self, tag, solver, todo):
         solver.push()
         while valqs:
             (val1, q) = valqs.pop()
-            if str(val1) == str(q.reified(self)):
+            question = q.reified(self)
+            if str(val1) == str(question):
                 continue  # irrelevant
 
-            question = q.reified(self)
             is_certainly_undefined = self._is_undefined(solver, q)
             if q.code in self.assignments:
                 self.assignments[q.code].is_certainly_undefined = is_certainly_undefined
+
             if not is_certainly_undefined:
                 i += 1
                 # Make a new proposition.
                 q_symbol = f'__question_{i}'
                 bool_q = Bool(q_symbol).translate(solver.ctx)
-                if str(question) == str(val1):
-                    # In the case of irrelevant value
-                    continue
-                else:
-                    solver.add(bool_q == (question == val1))
+                solver.add(bool_q == (question == val1))
             propositions.append(bool_q)
             prop_map[q_symbol] = (val1, q)
 
@@ -422,18 +419,14 @@ def _first_propagate(self, solver: Solver):
     solver.push()
     for i, (val1, q) in enumerate(valqs):
         question = q.reified(self)
-
-        # if str(val1).endswith('?'):
-        #     continue
+        if str(question) == str(val1):
+            # In the case of irrelevant value
+            continue
 
         # Make a new proposition.
         q_symbol = f'__question_{i}'
         bool_q = Bool(q_symbol).translate(solver.ctx)
-        if str(question) == str(val1):
-            # In the case of irrelevant value
-            continue
-        else:
-            solver.add(bool_q == (question == val1))
+        solver.add(bool_q == (question == val1))
         propositions.append(bool_q)
         prop_map[q_symbol] = (val1, q)
 
@@ -447,7 +440,6 @@ def _first_propagate(self, solver: Solver):
         # back on the "old" propagation. For some reason, working with models
         # does not have this limitation (but it is generally much slower).
         yield from self._propagate_through_models(solver, valqs)
-        solver.pop()
         return
     assert cons[0] == sat, 'Incorrect solver behavior'
 
@@ -491,9 +483,11 @@ def _propagate_through_models(self, solver, valqs):
             val = str_to_IDP(q, str(val1))
 
             ass = self.assignments.get(q.code, None)
-            if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
-            and not ass.value.same_as(val)):
-                raise IDPZ3Error(NOT_SATISFIABLE)
+            # FIXME: do we need the test below?
+            # https://gitlab.com/krr/IDP-Z3/-/merge_requests/325#note_1487419405
+            # if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
+            # and not ass.value.same_as(val)):
+            #     raise IDPZ3Error(NOT_SATISFIABLE)
             yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
 Theory._propagate_through_models = _propagate_through_models
