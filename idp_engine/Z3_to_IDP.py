@@ -36,35 +36,29 @@ if TYPE_CHECKING:
 TRUEFALSE = re.compile(r"\b(True|False)\b")
 
 def get_interpretations(theory: Theory, model: ModelRef
-                        ) -> dict[str, dict[str, Optional[Expression]]]:
+                        ) -> dict[str, tuple[dict[str, Expression], Optional[Expression]]]:
     """analyze the Z3 function interpretations in the model
 
     A Z3 interpretation maps some tuples of arguments to the value of the symbol applied to those tuples,
-    and uses a default (else) value for the value of the symbol applied to other tuples.
+    and has a default (_else) value for the value of the symbol applied to other tuples.
 
     The function returns a mapping from symbol names
-    to a mapping from some applied symbols to their value in the model
-    and with "" mapped to the default value (or None if undetermined in the model).
+    to 1) a mapping from some applied symbols to their value in the model
+    and 2) a default value (or None if undetermined in the model).
     """
-    out : dict[str, dict[str, Optional[Expression]]] = {}
+    out : dict[str, tuple[dict[str, Expression], Optional[Expression]]] = {}
     for decl in theory.declarations.values():
         if (type(decl) == SymbolDeclaration
         and decl.name is not None
         and not decl.name in RESERVED_SYMBOLS):
-            out.setdefault(decl.name, {})
-            map = out[decl.name]
-            if decl.name not in theory.z3:  # declared but not used in theory
-                map[""] = None
-            else:
+            map, _else = {}, None
+            if decl.name in theory.z3:  # otherwise, declared but not used in theory
                 interp = model[theory.z3[decl.name]]
-                if interp is None:
-                    map[""] = None # can be any value
-                elif type(interp) == FuncInterp:
+                if type(interp) == FuncInterp:
                     try:
                         a_list = interp.as_list()
                     except:  # ast is null
-                        map[""] = None
-                        continue
+                        a_list = []
                     for args in a_list[:-1]:
                         _args = (str(a) for a in args[:-1])
                         applied = f"{decl.name}({', '.join(_args)})"
@@ -73,13 +67,14 @@ def get_interpretations(theory: Theory, model: ModelRef
                         val = args[-1]
                         map[applied] = str_to_IDP2("", decl.out.decl, str(val))
                     try:
-                        map[""] = str_to_IDP2("", decl.out.decl, str(a_list[-1])) # else
+                        _else = str_to_IDP2("", decl.out.decl, str(a_list[-1])) # else
                     except:
-                        map[""] = None  # Var(0) => can be any value
+                        pass # Var(0) => can be any value
                 elif type(interp) in [DatatypeRef, BoolRef, IntNumRef]:
-                    map[""] = str_to_IDP2("", decl.out.decl, str(interp))
+                    _else = str_to_IDP2("", decl.out.decl, str(interp))
                 else:
-                    assert False, "Internal error"
+                    assert interp is None, "Internal error"
+            out[decl.name] = (map, _else)
     return out
 
 def collect_questions(z3_expr: AstRef,

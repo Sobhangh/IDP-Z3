@@ -509,10 +509,10 @@ class Theory(object):
                 a.value, a.tag, a.relevant = None, S.UNKNOWN, False
             else:
                 if (type(q) == AppliedSymbol
-                    and not (q.in_enumeration or q.is_enumerated)):
+                and not (q.in_enumeration or q.is_enumerated)):
                     assert q.symbol.name in interps
-                    maps = interps[q.symbol.name]
-                    val = maps.get(q.code, maps[""])
+                    maps, _else = interps[q.symbol.name]
+                    val = maps.get(q.code, _else)
                 else:
                     val = None
                 if val is None:
