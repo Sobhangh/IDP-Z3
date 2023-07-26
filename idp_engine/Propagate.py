@@ -440,6 +440,7 @@ def _first_propagate(self, solver: Solver):
         # back on the "old" propagation. For some reason, working with models
         # does not have this limitation (but it is generally much slower).
         yield from self._propagate_through_models(solver, valqs)
+        solver.pop()
         return
     assert cons[0] == sat, 'Incorrect solver behavior'
 
@@ -452,11 +453,12 @@ def _first_propagate(self, solver: Solver):
         val1, q = prop_map[q_symbol]
         val = str_to_IDP(q, str(val1))
 
-        ass = self.assignments.get(q.code, None)
-        if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
-           and not ass.value.same_as(val)):
-            solver.pop()
-            raise IDPZ3Error(NOT_SATISFIABLE)
+        # FIXME: do we need the test below?
+        # ass = self.assignments.get(q.code, None)
+        # if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
+        #    and not ass.value.same_as(val)):
+        #     solver.pop()
+        #     raise IDPZ3Error(NOT_SATISFIABLE)
         yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
     solver.pop()
@@ -482,8 +484,8 @@ def _propagate_through_models(self, solver, valqs):
         if res2 == unsat:
             val = str_to_IDP(q, str(val1))
 
-            ass = self.assignments.get(q.code, None)
             # FIXME: do we need the test below?
+            # ass = self.assignments.get(q.code, None)
             # https://gitlab.com/krr/IDP-Z3/-/merge_requests/325#note_1487419405
             # if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
             # and not ass.value.same_as(val)):
