@@ -256,8 +256,10 @@ def benchmark():
                 print(f"Testing {t_name}_{t_size}: {i}")
                 subprocess.run(['python3', 'idp-engine.py',
                                 f'tests/Benchmark/{t_name}_{t_size}.idp'])
-            elapsed_time = (time.time()-start)/3
-            timings[t_name][t_size] = round(elapsed_time, 4)
+                if 120 < time.time()-start:  # max 2 minutes per size
+                    break
+            elapsed_time = (time.time()-start)/(i+1)
+            timings[t_name][t_size] = round(elapsed_time, 1)
 
     try:
         # If tabulate is installed, we can format easy-to-copy markdown tables.
@@ -268,14 +270,20 @@ def benchmark():
                                 capture_output=True)
         branch = branch.stdout.decode().strip('\n')
 
-        for t_name in benchmarks:
-            headers = [t_name] + benchmarks[t_name]
-            values = timings[t_name].values()
-            values = [branch] + list(values)
-            print('\n')
-            print(tabulate.tabulate([values], headers=headers,
-                                    tablefmt="github"))
-            print('\n')
+        with open('tests/Benchmark/results.md', 'w') as f:
+            for t_name in benchmarks:
+                headers = [t_name] + benchmarks[t_name]
+                values = timings[t_name].values()
+                values = [branch] + list(values)
+                print('\n')
+                print(tabulate.tabulate([values], headers=headers,
+                                        tablefmt="github"))
+                print('\n')
+
+                f.write('\n')
+                f.write(tabulate.tabulate([values], headers=headers,
+                                        tablefmt="github"))
+                f.write('\n')
     except ModuleNotFoundError:
         print(timings)
 

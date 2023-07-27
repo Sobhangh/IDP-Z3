@@ -13,6 +13,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 ### IDP-Z3
 * MR !319: improve some error messages
 * MR !321: performance improvements in the grounding of quantifications
+* MR !325: reimplement propagation using Z3's consequences
 * MR !326: performance improvements in model expansion
 * issue #3: fix issue with out of bounds numbers
 * issue #32: added benchmark in MR !322
