@@ -1,7 +1,7 @@
 vocabulary {
-    type Row := {0..8}
-    type Col := {0..8}
-    type Value := {1..9}
+    type Row := {0..3}
+    type Col := {0..3}
+    type Value := {1..4}
 
     cell_value: Row * Col -> Value
     same_box: Row * Col * Row * Col -> Bool
@@ -15,7 +15,7 @@ theory {
     !r1, r2 in Row: !c1, c2 in Col: same_box(r1, c1, r2, c2) => cell_value(r1, c1) ~= cell_value(r2, c2).
 
     {
-    !r1, r2 in Row: !c1, c2 in Col: same_box(r1, c1, r2, c2) <- ~(r1 = r2 & c1 = c2) & (r1 - r1%3)/3 = (r2 - r2%3)/3 & (c1 - c1%3)/3 = (c2 - c2%3)/3.
+    !r1, r2 in Row: !c1, c2 in Col: same_box(r1, c1, r2, c2) <- ~(r1 = r2 & c1 = c2) & (r1 - r1%2)/2 = (r2 - r2%2)/2 & (c1 - c1%2)/2 = (c2 - c2%2)/2.
     }
 }
 
@@ -23,5 +23,5 @@ structure {
 }
 
 procedure main() {
-    pretty_print(model_expand(T, S, max=1))
+    pretty_print(model_expand(T, S, max=1, timeout_seconds=120))
 }

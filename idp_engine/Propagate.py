@@ -33,7 +33,7 @@ import time
 from copy import copy
 from typing import Optional
 from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true,
-                is_not, is_eq)
+                is_not, is_eq, Bool)
 
 from .Assignments import Status as S, Assignments
 from .Expression import (Expression, AQuantification, ADisjunction,
@@ -41,7 +41,7 @@ from .Expression import (Expression, AQuantification, ADisjunction,
                          Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
 from .Theory import Theory
-from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
+from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE, BOOL
 
 start = time.process_time()
 
@@ -308,24 +308,52 @@ def _propagate_inner(self, tag, solver, todo):
         new_todo = list(todo.values())
         new_todo.extend(self._new_questions_from_model(model, self.assignments))
         valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
+
+        propositions = []
+        prop_map = {}
+        i = 0
         while valqs:
             (val1, q) = valqs.pop()
-            if str(val1) == str(q.reified(self)):
+            question = q.reified(self)
+            if str(val1) == str(question):
                 continue  # irrelevant
 
             is_certainly_undefined = self._is_undefined(solver, q)
             if q.code in self.assignments:
                 self.assignments[q.code].is_certainly_undefined = is_certainly_undefined
-            if not is_certainly_undefined:
-                solver.push()
-                solver.add(Not(q.reified(self) == val1))
-                res2 = solver.check()
-                solver.pop()
 
-                assert res2 != unknown, "Incorrect solver behavior"
-                if res2 == unsat:
-                    val = str_to_IDP(q, str(val1))
-                    yield self.assignments.assert__(q, val, tag)
+            if not is_certainly_undefined:
+                i += 1
+                # Make a new proposition.
+                q_symbol = f'__question_{i}'
+                bool_q = Bool(q_symbol).translate(solver.ctx)
+                solver.add(bool_q == (question == val1))
+            propositions.append(bool_q)
+            prop_map[q_symbol] = (val1, q)
+
+        # Only query the propositions.
+        cons = solver.consequences([], propositions)
+
+        if cons[0] == unknown:
+            # It is possible that `consequences` cannot derive anything due to
+            # usage of infinite domains and rounding errors. In this case, we fall
+            # back on the "old" propagation. For some reason, working with models
+            # does not have this limitation (but it is generally much slower).
+            yield from self._propagate_through_models(solver, valqs)
+            yield "No more consequences."
+            return
+
+        assert cons[0] == sat, 'Incorrect solver behavior'
+
+        # Each of the consequences represents a "fixed" value, and should thus be
+        # shown as propagated.
+        for con in cons[1]:
+            q_symbol = str(con.children()[1])
+            if q_symbol.startswith('Not('):
+                q_symbol = q_symbol[4:-1]
+            val1, q = prop_map[q_symbol]
+            val = str_to_IDP(q, str(val1))
+            yield self.assignments.assert__(q, val, tag)
 
         yield "No more consequences."
     elif res1 == unsat:
@@ -343,11 +371,16 @@ def _first_propagate(self, solver: Solver):
         It works in the following way:
             0. Prepare the solver by adding additional assignments
             1. Generate a single model
-            2. For each assertion in the model:
-                * Add its inverse
-                * Check if satisfiable
-                * If unsat, the assertion is a consequence
-            3. Yield all consequences.
+            2. For each assertion in the model, add a proposition.
+            3. Use Z3's `consequences` to derive which propagations are implied
+            4. Translate the propositions back and yield them.
+
+        This method could be extended by also adding a proposition for
+        every possible value of a function. Currently, it does not ouput
+        "impossible values" for formulas, such as "Not Belgium = Red".
+        Adding a proposition for each possibility would allow that, but would
+        also most likely make the process more time-intensive.
+        See `get_range` if you need such functionality.
 
         :arg solver: the solver that should be used.
 
@@ -377,6 +410,58 @@ def _first_propagate(self, solver: Solver):
     new_todo.extend(self._new_questions_from_model(model, self.assignments))
     valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
 
+    # Introduce a proposition for each question. We then use Z3's
+    # `consequences` to derive which propositions are now implied.
+    propositions = []
+    prop_map = {}
+    for i, (val1, q) in enumerate(valqs):
+        question = q.reified(self)
+        if str(question) == str(val1):
+            # In the case of irrelevant value
+            continue
+
+        # Make a new proposition.
+        q_symbol = f'__question_{i}'
+        bool_q = Bool(q_symbol).translate(solver.ctx)
+        solver.add(bool_q == (question == val1))
+        propositions.append(bool_q)
+        prop_map[q_symbol] = (val1, q)
+
+    # Only query the propositions.
+    cons = solver.consequences([], propositions)
+
+    if cons[0] == unknown:
+        # It is possible that `consequences` cannot derive anything due to
+        # usage of infinite domains and rounding errors. In this case, we fall
+        # back on the "old" propagation. For some reason, working with models
+        # does not have this limitation (but it is generally much slower).
+        yield from self._propagate_through_models(solver, valqs)
+        solver.pop()
+        return
+    assert cons[0] == sat, 'Incorrect solver behavior'
+
+    # Each of the consequences represents a "fixed" value, and should thus be
+    # shown as propagated.
+    for con in cons[1]:
+        q_symbol = str(con.children()[1])
+        if q_symbol.startswith('Not('):
+            q_symbol = q_symbol[4:-1]
+        val1, q = prop_map[q_symbol]
+        val = str_to_IDP(q, str(val1))
+
+        # FIXME: do we need the test below?
+        # ass = self.assignments.get(q.code, None)
+        # if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
+        #    and not ass.value.same_as(val)):
+        #     solver.pop()
+        #     raise IDPZ3Error(NOT_SATISFIABLE)
+        yield self.assignments.assert__(q, val, S.UNIVERSAL)
+
+    solver.pop()
+Theory._first_propagate = _first_propagate
+
+
+def _propagate_through_models(self, solver, valqs):
     # For each question, invert its value and see if it is still satisfiable.
     for val1, q in valqs:
         assert self.extended or not q.is_reified(), \
@@ -395,15 +480,15 @@ def _first_propagate(self, solver: Solver):
         if res2 == unsat:
             val = str_to_IDP(q, str(val1))
 
-            ass = self.assignments.get(q.code, None)
-            if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
-            and not ass.value.same_as(val)):
-                solver.pop()
-                raise IDPZ3Error(NOT_SATISFIABLE)
+            # FIXME: do we need the test below?
+            # ass = self.assignments.get(q.code, None)
+            # https://gitlab.com/krr/IDP-Z3/-/merge_requests/325#note_1487419405
+            # if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
+            # and not ass.value.same_as(val)):
+            #     raise IDPZ3Error(NOT_SATISFIABLE)
             yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
-    solver.pop()
-Theory._first_propagate = _first_propagate
+Theory._propagate_through_models = _propagate_through_models
 
 
 def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):

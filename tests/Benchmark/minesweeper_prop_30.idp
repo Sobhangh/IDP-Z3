@@ -1,0 +1,66 @@
+vocabulary V {
+    // we use an extended square to simplify computations:
+    // we add a 1-cell-wide border without mine
+
+    type Range
+    type Count := {0..8}
+    max: () → ℤ  // largest index of column / row
+    type PseudoBol := {0,1}
+    has_mine: Range ⨯ Range → PseudoBol
+    count: Range ⨯ Range → Count
+    clicked: Range ⨯ Range → 𝔹
+    shown: Range ⨯ Range → 𝔹
+}
+
+theory T:V {
+    // max() = max{c in Range: true : c}
+    ∃c ∈ Range: c = max().
+    ∀c ∈ Range: c ≤ max().
+
+    // borders don't have mine
+    ∀c ∈ Range: has_mine(c,0    )=0 ∧ has_mine(0    ,c)=0
+               ∧ has_mine(c,max())=0 ∧ has_mine(max(),c)=0.
+
+    // computation of count
+    ∀r,c ∈ Range: count(r,c) =
+        (if r=<0 ∨ r>=max() ∨ c=<0 ∨ c>=max() then
+            0 // not meaningful because out of bound
+        else
+            ( has_mine(r,c)
+
+            + has_mine(r-1, c-1)
+            + has_mine(r-1, c  )
+            + has_mine(r-1, c+1)
+
+            + has_mine(r+1, c-1)
+            + has_mine(r+1, c  )
+            + has_mine(r+1, c+1)
+
+            + has_mine(r, c-1)
+            + has_mine(r, c+1))).
+
+    // what is shown is determined by clicked
+    { ∀ r, c ∈ Range: shown(r,c) ←  // clicked is shown
+        ¬(r=<0 ∨ r>=max() ∨ c=<0 ∨ c>=max())  // unless out of bound
+        ∧ clicked(r,c).
+      ∀ r, c ∈ Range: shown(r,c) ←  // neighbours of shown 0 are shown
+        ¬(r=<0 ∨ r>=max() ∨ c=<0 ∨ c>=max())  // but borders are not shown
+        ∧ ( (shown(r-1,c-1) & count(r-1,c-1)=0)
+          ∨ (shown(r-1,c+1) & count(r-1,c+1)=0)
+          ∨ (shown(r+1,c-1) & count(r+1,c-1)=0)
+          ∨ (shown(r+1,c+1) & count(r+1,c+1)=0)
+          ∨ (shown(r-1,c  ) & count(r-1,c  )=0)
+          ∨ (shown(r+1,c  ) & count(r+1,c  )=0)
+          ∨ (shown(r  ,c-1) & count(r  ,c-1)=0)
+          ∨ (shown(r  ,c+1) & count(r  ,c+1)=0)
+          ).
+    }
+}
+
+structure S:V {
+    Range := {0..31}.
+}
+
+procedure main() {
+    pretty_print(model_propagate(T,S))
+}

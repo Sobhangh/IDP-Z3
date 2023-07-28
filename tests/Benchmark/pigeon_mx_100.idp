@@ -1,6 +1,6 @@
 vocabulary {
-    type Pigeon := {1..200}
-    type House := {1..200}
+    type Pigeon := {1..100}
+    type House := {1..100}
 
     lives_in: Pigeon -> House
 }
@@ -10,5 +10,5 @@ theory {
 }
 
 procedure main() {
-    pretty_print(model_expand(T, max=10))
+    pretty_print(model_expand(T, max=10, timeout_seconds=120))
 }
