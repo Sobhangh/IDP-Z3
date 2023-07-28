@@ -1,0 +1,18 @@
+vocabulary V {
+    type Node
+    edge: Node * Node -> Bool
+}
+
+structure S  {
+    Node := {1..100}.
+}
+
+theory T:V  {
+    !x, y: x ~= y => (edge(x, y) | edge(y, x)).
+    !x, y: x ~= y => (~edge(x, y) | ~edge(y, x)).
+    !x: ?y: x ~= y & edge(x,y).
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S, max=1, timeout_seconds=120))
+}

@@ -1,0 +1,19 @@
+vocabulary V {
+    type Node
+    edge: Node * Node -> Bool
+}
+
+structure S  {
+    Node := {1..150}.
+}
+
+theory T:V  {
+    !x, y: x ~= y => (edge(x, y) | edge(y, x)).
+    !x, y: x ~= y => (~edge(x, y) | ~edge(y, x)).
+    !x: ?y: x ~= y & edge(x, y).
+    !x, y: x = y + 10 => edge(x, y).
+}
+
+procedure main() {
+    pretty_print(model_propagate(T, S))
+}
