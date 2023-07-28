@@ -48,13 +48,13 @@ def get_interpretations(theory: Theory, model: ModelRef
     """
     out : dict[str, tuple[dict[str, Expression], Optional[Expression]]] = {}
     for decl in theory.declarations.values():
-        if (type(decl) == SymbolDeclaration
+        if (isinstance(decl, SymbolDeclaration)
         and decl.name is not None
         and not decl.name in RESERVED_SYMBOLS):
             map, _else = {}, None
             if decl.name in theory.z3:  # otherwise, declared but not used in theory
                 interp = model[theory.z3[decl.name]]
-                if type(interp) == FuncInterp:
+                if isinstance(interp, FuncInterp):
                     try:
                         a_list = interp.as_list()
                     except:  # ast is null
