@@ -501,7 +501,8 @@ class Theory(object):
         interps = get_interpretations(self, model)
         todo.extend(self._new_questions_from_model(model, ass))
         for q in todo:
-            assert self.extended or not q.is_reified(), \
+            q_is_reified = q.is_reified()
+            assert self.extended or not q_is_reified, \
                     "Reified atom should only appear in case of extended theories"
 
             a = ass[q.code] if q.code in ass else Assignment(q, None, None)
@@ -509,6 +510,7 @@ class Theory(object):
                 a.value, a.tag, a.relevant = None, S.UNKNOWN, False
             else:
                 if (isinstance(q, AppliedSymbol)
+                and not q_is_reified
                 and not (q.in_enumeration or q.is_enumerated)):
                     assert q.symbol.name in interps, "Internal error"
                     maps, _else = interps[q.symbol.name]
@@ -516,7 +518,7 @@ class Theory(object):
                 else:
                     val = None
                 if val is None:
-                    if complete or q.is_reified():
+                    if complete or q_is_reified:
                         val1 = model.eval(q.reified(self), model_completion=complete)
                     else:
                         val1 = model.eval(q.translate(self), model_completion=complete)
