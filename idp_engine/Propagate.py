@@ -312,7 +312,6 @@ def _propagate_inner(self, tag, solver, todo):
         propositions = []
         prop_map = {}
         i = 0
-        solver.push()
         while valqs:
             (val1, q) = valqs.pop()
             question = q.reified(self)
@@ -334,7 +333,6 @@ def _propagate_inner(self, tag, solver, todo):
 
         # Only query the propositions.
         cons = solver.consequences([], propositions)
-        solver.pop()
 
         if cons[0] == unknown:
             # It is possible that `consequences` cannot derive anything due to
@@ -416,7 +414,6 @@ def _first_propagate(self, solver: Solver):
     # `consequences` to derive which propositions are now implied.
     propositions = []
     prop_map = {}
-    solver.push()
     for i, (val1, q) in enumerate(valqs):
         question = q.reified(self)
         if str(question) == str(val1):
@@ -432,7 +429,6 @@ def _first_propagate(self, solver: Solver):
 
     # Only query the propositions.
     cons = solver.consequences([], propositions)
-    solver.pop()
 
     if cons[0] == unknown:
         # It is possible that `consequences` cannot derive anything due to
