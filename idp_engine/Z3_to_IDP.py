@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 TRUEFALSE = re.compile(r"\b(True|False)\b")
 
 def get_interpretations(theory: Theory, model: ModelRef
-                        ) -> dict[str, tuple[dict[str, Expression], Optional[Expression]]]:
+                        ) -> dict[str, tuple[dict[str, Expression], Optional[tuple[ExprRef, Expression]]]]:
     """analyze the Z3 function interpretations in the model
 
     A Z3 interpretation maps some tuples of arguments to the value of the symbol applied to those tuples,
@@ -46,7 +46,7 @@ def get_interpretations(theory: Theory, model: ModelRef
     to 1) a mapping from some applied symbols to their value in the model
     and 2) a default value (or None if undetermined in the model).
     """
-    out : dict[str, tuple[dict[str, ExprRef], Optional[ExprRef]]] = {}
+    out : dict[str, tuple[dict[str, ExprRef], Optional[tuple[ExprRef, Expression]]]] = {}
     for decl in theory.declarations.values():
         if (isinstance(decl, SymbolDeclaration)
         and decl.name is not None
@@ -69,12 +69,12 @@ def get_interpretations(theory: Theory, model: ModelRef
                             map[applied] = str_to_IDP2("", decl.out.decl, str(val))
                         try:
                             # use the else value if we can translate it
-                            str_to_IDP2("", decl.out.decl, str(a_list[-1]))
-                            _else = a_list[-1]
+                            val = str_to_IDP2("", decl.out.decl, str(a_list[-1]))
+                            _else = (a_list[-1], val)
                         except:
-                            _else = None # Var(0) => can be any value
+                            pass # Var(0) => can be any value
                 elif isinstance(interp, ExprRef):
-                    _else = interp
+                    _else = (interp, str_to_IDP2("", decl.out.decl, str(interp)))
                 else:
                     assert interp is None, "Internal error"
             out[decl.name] = (map, _else)

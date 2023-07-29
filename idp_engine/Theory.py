@@ -514,9 +514,7 @@ class Theory(object):
                 and not (q.in_enumeration or q.is_enumerated)):
                     assert q.symbol.name in interps, "Internal error"
                     maps, _else = interps[q.symbol.name]
-                    val = maps.get(q.code, _else)
-                    if val is not None:
-                        val = str_to_IDP2("", q.symbol.decl.out.decl, str(val))
+                    val = maps.get(q.code, _else if _else is None else _else[1])
                 else:
                     val = None
                 if val is None:
