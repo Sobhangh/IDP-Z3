@@ -24,7 +24,7 @@ routines to analyze Z3 expressions, e.g., the definition of a function in a mode
 from __future__ import annotations
 import re
 from typing import List, TYPE_CHECKING, Optional
-from z3 import ModelRef, FuncInterp, is_and, is_or, is_eq, is_not, AstRef, DatatypeRef, BoolRef, IntNumRef
+from z3 import ModelRef, FuncInterp, is_and, is_or, is_eq, is_not, AstRef, ExprRef
 
 from .Assignments import Assignments
 from .Expression import Expression, SYMBOL, AppliedSymbol
@@ -46,7 +46,7 @@ def get_interpretations(theory: Theory, model: ModelRef
     to 1) a mapping from some applied symbols to their value in the model
     and 2) a default value (or None if undetermined in the model).
     """
-    out : dict[str, tuple[dict[str, Expression], Optional[Expression]]] = {}
+    out : dict[str, tuple[dict[str, ExprRef], Optional[ExprRef]]] = {}
     for decl in theory.declarations.values():
         if (isinstance(decl, SymbolDeclaration)
         and decl.name is not None
@@ -59,19 +59,22 @@ def get_interpretations(theory: Theory, model: ModelRef
                         a_list = interp.as_list()
                     except:  # ast is null
                         a_list = []
-                    for args in a_list[:-1]:
-                        _args = (str(a) for a in args[:-1])
-                        applied = f"{decl.name}({', '.join(_args)})"
-                        # Replace True by true, False by false
-                        applied = re.sub(TRUEFALSE, lambda m: m.group(1).lower(), applied)
-                        val = args[-1]
-                        map[applied] = str_to_IDP2("", decl.out.decl, str(val))
-                    try:
-                        _else = str_to_IDP2("", decl.out.decl, str(a_list[-1])) # else
-                    except:
-                        pass # Var(0) => can be any value
-                elif type(interp) in [DatatypeRef, BoolRef, IntNumRef]:
-                    _else = str_to_IDP2("", decl.out.decl, str(interp))
+                    if a_list:
+                        for args in a_list[:-1]:
+                            _args = (str(a) for a in args[:-1])
+                            applied = f"{decl.name}({', '.join(_args)})"
+                            # Replace True by true, False by false
+                            applied = re.sub(TRUEFALSE, lambda m: m.group(1).lower(), applied)
+                            val = args[-1]
+                            map[applied] = str_to_IDP2("", decl.out.decl, str(val))
+                        try:
+                            # use the else value if we can translate it
+                            str_to_IDP2("", decl.out.decl, str(a_list[-1]))
+                            _else = a_list[-1]
+                        except:
+                            _else = None # Var(0) => can be any value
+                elif isinstance(interp, ExprRef):
+                    _else = interp
                 else:
                     assert interp is None, "Internal error"
             out[decl.name] = (map, _else)

@@ -158,7 +158,7 @@ def str_to_IDP2(type_string: str,
             elif typ.type == INT or enum_type == INT:
                 out = Number(number=str(eval(val_string)))
             else:
-                raise IDPZ3Error(f"unknown type for: {val_string}")
+                raise IDPZ3Error(f"unknown type for: {val_string}: {typ}")
     return out
 
 

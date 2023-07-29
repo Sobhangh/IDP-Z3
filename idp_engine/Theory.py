@@ -35,7 +35,7 @@ from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
                          EQUALS, NOT, Extension, AQuantification)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SYMBOL,
-                    TheoryBlock, Structure, Definition, str_to_IDP,
+                    TheoryBlock, Structure, Definition, str_to_IDP, str_to_IDP2,
                     SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, IDPZ3Error,
@@ -515,6 +515,8 @@ class Theory(object):
                     assert q.symbol.name in interps, "Internal error"
                     maps, _else = interps[q.symbol.name]
                     val = maps.get(q.code, _else)
+                    if val is not None:
+                        val = str_to_IDP2("", q.symbol.decl.out.decl, str(val))
                 else:
                     val = None
                 if val is None:
