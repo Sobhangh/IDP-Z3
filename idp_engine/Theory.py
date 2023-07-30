@@ -498,7 +498,7 @@ class Theory(object):
         """
         ass = copy(self.assignments)
         model = solver.model()
-        interps = get_interpretations(self, model)
+        interps = get_interpretations(self, model, as_z3=False)
         todo.extend(self._new_questions_from_model(model, ass))
         for q in todo:
             q_is_reified = q.is_reified()
@@ -514,7 +514,7 @@ class Theory(object):
                 and not (q.in_enumeration or q.is_enumerated)):
                     assert q.symbol.name in interps, "Internal error"
                     maps, _else = interps[q.symbol.name]
-                    val = maps.get(q.code, _else if _else is None else _else[1])
+                    val = maps.get(q.code, _else)
                 else:
                     val = None
                 if val is None:

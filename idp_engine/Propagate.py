@@ -41,7 +41,8 @@ from .Expression import (Expression, AQuantification, ADisjunction,
                          Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
 from .Theory import Theory
-from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE, BOOL
+from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
+from .Z3_to_IDP import get_interpretations
 
 start = time.process_time()
 
@@ -305,9 +306,22 @@ def _propagate_inner(self, tag, solver, todo):
 
     if res1 == sat:
         model = solver.model()
+        interps = get_interpretations(self, model, as_z3=True)
         new_todo = list(todo.values())
         new_todo.extend(self._new_questions_from_model(model, self.assignments))
-        valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
+        valqs = []
+        for q in new_todo:
+            if (isinstance(q, AppliedSymbol)
+            and not q.is_reified()
+            and not (q.in_enumeration or q.is_enumerated)):
+                assert q.symbol.name in interps, "Internal error"
+                maps, _else = interps[q.symbol.name]
+                val = maps.get(q.code, _else)  # val may be None
+            else:
+                val = None
+            if val is None:
+                val = model.eval(q.reified(self))
+            valqs.append((val, q))
 
         propositions = []
         prop_map = {}
@@ -406,9 +420,22 @@ def _first_propagate(self, solver: Solver):
 
     # Generate model, and build a set of questions and their values.
     model = solver.model()
+    interps = get_interpretations(self, model, as_z3=True)
     new_todo = list(todo.values())
     new_todo.extend(self._new_questions_from_model(model, self.assignments))
-    valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
+    valqs = []
+    for q in new_todo:
+        if (isinstance(q, AppliedSymbol)
+        and not q.is_reified()
+        and not (q.in_enumeration or q.is_enumerated)):
+            assert q.symbol.name in interps, "Internal error"
+            maps, _else = interps[q.symbol.name]
+            val = maps.get(q.code, _else)  # val may be None
+        else:
+            val = None
+        if val is None:
+            val = model.eval(q.reified(self))
+        valqs.append((val, q))
 
     # Introduce a proposition for each question. We then use Z3's
     # `consequences` to derive which propositions are now implied.
