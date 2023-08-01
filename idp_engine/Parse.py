@@ -138,7 +138,8 @@ def str_to_IDP2(type_string: str,
             out = AppliedSymbol.construct(constructor, new_args)
         else:
             if type(typ) == TypeDeclaration:
-                enum_type = typ.name
+                interp = getattr(typ.base_type, "interpretation", None)
+                enum_type = interp.enumeration.type if interp else typ.name
             else:
                 enum_type = typ.out.decl.name
 

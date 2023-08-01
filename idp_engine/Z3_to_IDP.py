@@ -74,7 +74,7 @@ def get_interpretations(theory: Theory, model: ModelRef, as_z3: bool
                             # use the else value if we can translate it
                             val = str_to_IDP2("", decl.out.decl, str(a_list[-1]))
                             _else = (a_list[-1] if as_z3 else val)
-                        except:
+                        except AssertionError:
                             pass # Var(0) => can be any value
                 elif isinstance(interp, ExprRef):
                     _else = (interp if as_z3 else
