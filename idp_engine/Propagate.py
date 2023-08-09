@@ -41,145 +41,11 @@ from .Expression import (Expression, AQuantification, ADisjunction,
                          Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
 from .Theory import Theory
-from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE, BOOL
+from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
+from .Z3_to_IDP import get_interpretations
 
 start = time.process_time()
 
-###############################################################################
-#
-#  Symbolic propagation
-#
-###############################################################################
-
-
-def _not(truth):
-    return FALSE if truth.same_as(TRUE) else TRUE
-
-
-# class Expression ############################################################
-
-def simplify_with(self: Expression, assignments: Assignments, co_constraints_too=True) -> Expression:
-    """ simplify the expression using the assignments """
-    simpler, new_e, co_constraint = None, None, None
-    if co_constraints_too and self.co_constraint is not None:
-        co_constraint = self.co_constraint.simplify_with(assignments, co_constraints_too)
-    new_e = [e.simplify_with(assignments, co_constraints_too) for e in self.sub_exprs]
-    self = copy(self)._change(sub_exprs=new_e, simpler=simpler, co_constraint=co_constraint)
-    # calculate ass.value on the changed expression, as simplified sub
-    # expressions may lead to stronger simplifications
-    # E.g., P(C()) where P := {0} and C := 0.
-    ass = assignments.get(self.str, None)
-    if ass and ass.value is not None:
-        return ass.value
-    return self.simplify1()
-Expression.simplify_with = simplify_with
-
-
-def symbolic_propagate(self,
-                       assignments: "Assignments",
-                       tag: "Status",
-                       truth: Optional[Expression] = TRUE
-                       ):
-    """updates assignments with the consequences of `self=truth`.
-
-    The consequences are obtained by symbolic processing (no calls to Z3).
-
-    Args:
-        assignments (Assignments):
-            The set of assignments to update.
-
-        truth (Expression, optional):
-            The truth value of the expression `self`. Defaults to TRUE.
-    """
-    if self.code in assignments:
-        assignments.assert__(self, truth, tag)
-    self.propagate1(assignments, tag, truth)
-Expression.symbolic_propagate = symbolic_propagate
-
-
-def propagate1(self, assignments, tag, truth):
-    " returns the list of symbolic_propagate of self, ignoring value and simpler "
-    return
-Expression.propagate1 = propagate1
-
-
-# class AQuantification  ######################################################
-
-def symbolic_propagate(self, assignments, tag, truth=TRUE):
-    if self.code in assignments:
-        assignments.assert__(self, truth, tag)
-    if not self.quantees:  # expanded, no variables  dead code ?
-        if self.q == '∀' and truth.same_as(TRUE):
-            AConjunction.symbolic_propagate(self, assignments, tag, truth)
-        elif truth.same_as(FALSE):
-            ADisjunction.symbolic_propagate(self, assignments, tag, truth)
-AQuantification.symbolic_propagate = symbolic_propagate
-
-
-# class ADisjunction  #########################################################
-
-def propagate1(self, assignments, tag, truth=TRUE):
-    if truth.same_as(FALSE):
-        for e in self.sub_exprs:
-            e.symbolic_propagate(assignments, tag, truth)
-ADisjunction.propagate1 = propagate1
-
-
-# class AConjunction  #########################################################
-
-def propagate1(self, assignments, tag, truth=TRUE):
-    if truth.same_as(TRUE):
-        for e in self.sub_exprs:
-            e.symbolic_propagate(assignments, tag, truth)
-AConjunction.propagate1 = propagate1
-
-
-# class AUnary  ############################################################
-
-def propagate1(self, assignments, tag, truth=TRUE):
-    if self.operator == '¬':
-        self.sub_exprs[0].symbolic_propagate(assignments, tag, _not(truth))
-AUnary.propagate1 = propagate1
-
-
-# class AppliedSymbol  ############################################################
-
-def propagate1(self, assignments, tag, truth=TRUE):
-    if self.as_disjunction:
-        self.as_disjunction.symbolic_propagate(assignments, tag, truth)
-    Expression.propagate1(self, assignments, tag, truth)
-AUnary.propagate1 = propagate1
-
-
-# class AComparison  ##########################################################
-
-def propagate1(self, assignments, tag, truth=TRUE):
-    if truth.same_as(TRUE) and len(self.sub_exprs) == 2 and self.operator == ['=']:
-        # generates both (x->0) and (x=0->True)
-        # generating only one from universals would make the second one
-        # a consequence, not a universal
-        if (type(self.sub_exprs[0]) == AppliedSymbol
-        and self.sub_exprs[1].is_value()):
-            assignments.assert__(self.sub_exprs[0], self.sub_exprs[1], tag)
-        elif (type(self.sub_exprs[1]) == AppliedSymbol
-        and self.sub_exprs[0].is_value()):
-            assignments.assert__(self.sub_exprs[1], self.sub_exprs[0], tag)
-AComparison.propagate1 = propagate1
-
-
-# class Brackets  ############################################################
-
-def symbolic_propagate(self, assignments, tag, truth=TRUE):
-    self.sub_exprs[0].symbolic_propagate(assignments, tag, truth)
-Brackets.symbolic_propagate = symbolic_propagate
-
-
-
-###############################################################################
-#
-#  Z3 propagation
-#
-###############################################################################
 
 def _set_consequences_get_changed_choices(self, tag):
     # clear consequences, as these might not be cleared by add_given when
@@ -305,9 +171,22 @@ def _propagate_inner(self, tag, solver, todo):
 
     if res1 == sat:
         model = solver.model()
+        interps = get_interpretations(self, model, as_z3=True)
         new_todo = list(todo.values())
         new_todo.extend(self._new_questions_from_model(model, self.assignments))
-        valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
+        valqs = []
+        for q in new_todo:
+            if (isinstance(q, AppliedSymbol)
+            and not q.is_reified()
+            and not (q.in_enumeration or q.is_enumerated)):
+                assert q.symbol.name in interps, "Internal error"
+                maps, _else = interps[q.symbol.name]
+                val = maps.get(q.code, _else)  # val may be None
+            else:
+                val = None
+            if val is None:
+                val = model.eval(q.reified(self))
+            valqs.append((val, q))
 
         propositions = []
         prop_map = {}
@@ -406,9 +285,22 @@ def _first_propagate(self, solver: Solver):
 
     # Generate model, and build a set of questions and their values.
     model = solver.model()
+    interps = get_interpretations(self, model, as_z3=True)
     new_todo = list(todo.values())
     new_todo.extend(self._new_questions_from_model(model, self.assignments))
-    valqs = [(model.eval(q.reified(self)), q) for q in new_todo]
+    valqs = []
+    for q in new_todo:
+        if (isinstance(q, AppliedSymbol)
+        and not q.is_reified()
+        and not (q.in_enumeration or q.is_enumerated)):
+            assert q.symbol.name in interps, "Internal error"
+            maps, _else = interps[q.symbol.name]
+            val = maps.get(q.code, _else)  # val may be None
+        else:
+            val = None
+        if val is None:
+            val = model.eval(q.reified(self))
+        valqs.append((val, q))
 
     # Introduce a proposition for each question. We then use Z3's
     # `consequences` to derive which propositions are now implied.

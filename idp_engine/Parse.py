@@ -137,9 +137,19 @@ def str_to_IDP2(type_string: str,
 
             out = AppliedSymbol.construct(constructor, new_args)
         else:
-            interp = getattr(getattr(typ, "base_type", None), "interpretation", None)
-            enum_type = interp.enumeration.type if interp else None
-            if type_string == DATE or enum_type == DATE:
+            if type(typ) == TypeDeclaration:
+                interp = getattr(typ.base_type, "interpretation", None)
+                enum_type = interp.enumeration.type if interp else typ.name
+            else:
+                enum_type = typ.out.decl.name
+
+            if type_string == BOOL or enum_type == BOOL:
+                out = (TRUE if val_string in ['true', 'True'] else
+                       FALSE if val_string in ['false', 'False'] else
+                       None)
+                if out is None:
+                    raise IDPZ3Error(f"wrong boolean value: {val_string}")
+            elif type_string == DATE or enum_type == DATE:
                 d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
                     date.fromisoformat(val_string[1:]))
                 out = Date(iso=f"#{d.isoformat()}")
@@ -149,7 +159,7 @@ def str_to_IDP2(type_string: str,
             elif typ.type == INT or enum_type == INT:
                 out = Number(number=str(eval(val_string)))
             else:
-                raise IDPZ3Error(f"unknown type for: {val_string}")
+                raise IDPZ3Error(f"unknown type for: {val_string}: {typ}")
     return out
 
 
