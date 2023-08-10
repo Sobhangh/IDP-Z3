@@ -1,0 +1,14 @@
+vocabulary V {
+    type color_T := {1..5}
+    color : color_T -> Bool  // a subset of 1..5
+    p: () -> Bool
+    c: () -> color
+}
+
+theory T:V {
+
+}
+
+procedure main() {
+    pretty_print(model_expand(T, max=1))
+}

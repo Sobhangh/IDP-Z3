@@ -137,11 +137,10 @@ def str_to_IDP2(type_string: str,
 
             out = AppliedSymbol.construct(constructor, new_args)
         else:
-            if type(typ) == TypeDeclaration:
-                interp = getattr(typ.base_type, "interpretation", None)
-                enum_type = interp.enumeration.type if interp else typ.name
-            else:
-                enum_type = typ.out.decl.name
+            interp = getattr(typ.base_type, "interpretation", None)
+            enum_type = (interp.enumeration.type if interp else
+                         typ.name if type(typ) == TypeDeclaration else
+                         typ.out.decl.name)
 
             if type_string == BOOL or enum_type == BOOL:
                 out = (TRUE if val_string in ['true', 'True'] else
