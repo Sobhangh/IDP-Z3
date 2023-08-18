@@ -117,12 +117,12 @@ if update_statics:
         run("poetry install")
         run("poetry build")
         print("Publishing to pypi (Username: krr)")
-        run("poetry publish --username krr")
+        run("poetry publish") #  use `poetry config http-basic.pypi <username> <password>` to set up
         run("rm -rf ./dist")
 
         # publish new version of folint on Pypi
-        run("python3.10 setup.py sdist bdist_wheel", cwd="folint")
-        run("poetry run python3.10 -m twine upload dist/*", cwd="folint")
+        run("python3.11 setup.py sdist bdist_wheel", cwd="folint")
+        run("poetry run python3.11 -m twine upload dist/*", cwd="folint")
 
     # if input("Deploy on Heroku ?") in "Yy":
     #     run("git push heroku main")
