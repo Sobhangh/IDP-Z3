@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
-## [0.10.10] - Unreleased yet
+## [0.10.10] - 2023-08-18
 
 The main feature of this release is performance improvements.
 
@@ -25,13 +25,10 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #267: Use variable declaration for type inference in recursive definitions
 * issue #284: incorrect propagation when quantifying over infinite domain
 * issue #285: Develop benchmark suite
-*
 
 
 ### Interactive Consultant and Web IDE
 * issue #283: Allow loading a default theory when theory is incorrect
-*
-*
 
 
 ## [0.10.9] - 2023-05-31
