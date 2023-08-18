@@ -160,7 +160,7 @@ class Theory(object):
         self._reif: Solver = None
         self._optmz_reif: Solver = None
 
-        self.expl_reifs: dict[BoolRef: (BoolRef,Expression)] = {}  # {reified: (constraint, original)}
+        self.expl_reifs: dict[BoolRef, Tuple[BoolRef,Expression]] = {}  # {reified: (constraint, original)}
         self.ignored_laws: set[str] = set()
 
     @property

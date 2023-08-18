@@ -54,12 +54,9 @@ run('python3 test.py generate')
 
 if query_user("Run benchmark? (Y/n)"):
     run('python3 test.py benchmark')
-    run('git push origin', check=True)
 
 update_statics = query_user("Update the '/IDP-Z3/idp_web_server/static' folder? (Y/n) ")
 if update_statics:
-
-    run('git pull origin', cwd='idp_web_client', check=True)
 
     # Generate static and commit.
     run('npm run-script build', cwd='idp_web_client', check=True)

@@ -94,7 +94,7 @@ class HelloWorld(Resource):
 
 
 z3lock = threading.Lock()
-idps: dict[str, IDP] = {}  # {code_string : idp}
+idps: "dict[str, IDP]" = {}  # {code_string : idp}
 
 
 def idpOf(code):
