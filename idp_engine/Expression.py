@@ -1301,10 +1301,11 @@ class AppliedSymbol(Expression):
                f"Internal error in level mapping: {self}"
         if (self.symbol.decl not in level_symbols
             or self.in_head
-            or mode in [Semantics.RECDATA, Semantics.COMPLETION]):
+            or mode in [Semantics.RECDATA, Semantics.COMPLETION]
+            or (mode == Semantics.STABLE and pos_justification != polarity)):
             return self
         else:
-            if mode == Semantics.WELLFOUNDED:
+            if mode in [Semantics.WELLFOUNDED, Semantics.STABLE]:
                 op = ('>' if pos_justification else '≥') \
                     if polarity else ('≤' if pos_justification else '<')
             elif mode == Semantics.KRIPKEKLEENE:
