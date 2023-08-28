@@ -1,0 +1,15 @@
+vocabulary V {
+    P,Q : () → 𝔹
+}
+
+theory T:V {
+    { (completion)
+        P() <- Q(). Q() <- P().
+    }
+}
+
+procedure main() {
+    pretty_print(Theory(T).formula())
+    pretty_print(model_expand(T))
+}
+

@@ -1301,7 +1301,7 @@ class AppliedSymbol(Expression):
                f"Internal error in level mapping: {self}"
         if (self.symbol.decl not in level_symbols
             or self.in_head
-            or mode == Semantics.RECDATA):
+            or mode in [Semantics.RECDATA, Semantics.COMPLETION]):
             return self
         else:
             if mode == Semantics.WELLFOUNDED:
