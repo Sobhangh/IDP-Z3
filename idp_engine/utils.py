@@ -46,6 +46,7 @@ class Semantics(Enum):
     KRIPKEKLEENE = auto()
     WELLFOUNDED = auto()
     COINDUCTION = auto()
+    STABLE = auto()
     RECDATA = auto()
 
 """

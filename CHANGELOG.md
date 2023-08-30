@@ -11,7 +11,7 @@ The main feature of this release is performance improvements.
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
-*
+* issue #293: add stable semantics + fix completion semantics
 *
 *
 

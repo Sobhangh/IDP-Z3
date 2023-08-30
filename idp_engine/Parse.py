@@ -691,6 +691,7 @@ class Definition(ASTNode):
                      S.COMPLETION if 'completion' in mode else
                      S.KRIPKEKLEENE if 'Kripke-Kleene' in mode else
                      S.COINDUCTION if 'co-induction' in mode else
+                     S.STABLE if 'stable' in mode else
                      S.RECDATA if 'recursive' in mode else
                      mode)
         assert type(self.mode) == S, f"Unsupported mode: {mode}"
