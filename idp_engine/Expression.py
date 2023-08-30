@@ -17,8 +17,9 @@
 
 """
 
+This module contains the ASTNode classes for expressions.
 
-(They are monkey-patched by other modules)
+(Many methods are monkey-patched by other modules)
 
 """
 from __future__ import annotations
@@ -366,15 +367,7 @@ class Expression(ASTNode):
                                symbols: Set[SymbolDeclaration],
                                is_nested: bool
                                ) -> Set[SymbolDeclaration]:
-        """ returns the set of symbol declarations that occur (in)directly
-        under an aggregate or some nested term, where is_nested is flipped
-        to True the moment we reach such an expression
-
-        returns {SymbolDeclaration}
-        """
-        for e in self.sub_exprs:
-            e.collect_nested_symbols(symbols, is_nested)
-        return symbols
+        return self  # monkey-patched
 
     def generate_constructors(self, constructors: dict[str, List[Constructor]]):
         """ fills the list `constructors` with all constructors belonging to
@@ -528,24 +521,7 @@ class Expression(ASTNode):
                           polarity: bool,
                           mode: Semantics
                           ) -> Expression:
-        """Returns an expression where level mapping atoms (e.g., lvl_p > lvl_q)
-         are added to atoms containing recursive symbols.
-
-        Arguments:
-            - level_symbols (dict[SymbolDeclaration, Symbol]): the level mapping
-              symbols as well as their corresponding recursive symbols
-            - head (AppliedSymbol): head of the rule we are adding level mapping
-              symbols to.
-            - pos_justification (Bool): whether we are adding symbols to the
-              direct positive justification (e.g., head => body) or direct
-              negative justification (e.g., body => head) part of the rule.
-            - polarity (Bool): whether the current expression occurs under
-              negation.
-        """
-        return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity, mode)
-                                   for e in self.sub_exprs))
-                    .annotate1())  # update .variables
-
+        return self  # monkey-patched
 
 
 class Symbol(Expression):
@@ -691,9 +667,6 @@ class AIfExpr(Expression):
         return (f"if {self.sub_exprs[AIfExpr.IF  ].str}"
                 f" then {self.sub_exprs[AIfExpr.THEN].str}"
                 f" else {self.sub_exprs[AIfExpr.ELSE].str}")
-
-    def collect_nested_symbols(self, symbols, is_nested):
-        return Expression.collect_nested_symbols(self, symbols, True)
 
 def IF(IF: Expression,
        THEN: Expression,
@@ -960,18 +933,8 @@ class Operator(Expression):
         for e in self.sub_exprs:
             e.collect(questions, all_, co_constraints)
 
-    def collect_nested_symbols(self, symbols, is_nested):
-        return Expression.collect_nested_symbols(self, symbols,
-                is_nested if self.operator[0] in ['∧','∨','⇒','⇐','⇔'] else True)
-
-
 class AImplication(Operator):
     PRECEDENCE = 50
-
-    def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
-        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity, mode),
-                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity, mode)]
-        return self.update_exprs(sub_exprs).annotate1()
 
 def IMPLIES(exprs, annotations=None):
     return AImplication.make('⇒', exprs, annotations)
@@ -997,10 +960,6 @@ def EQUIV(exprs, annotations=None):
 class ARImplication(Operator):
     PRECEDENCE = 30
 
-    def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
-        sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity, mode),
-                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity, mode)]
-        return self.update_exprs(sub_exprs).annotate1()
 
 def RIMPLIES(exprs, annotations):
     return ARImplication.make('⇐', exprs, annotations)
@@ -1077,15 +1036,6 @@ class AUnary(Expression):
     def __str__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
 
-    def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
-        sub_exprs = (e.add_level_mapping(level_symbols, head,
-                                         pos_justification,
-                                         not polarity
-                                         if self.operator == '¬' else polarity,
-                                         mode)
-                     for e in self.sub_exprs)
-        return self.update_exprs(sub_exprs).annotate1()
-
 def NOT(expr):
     return AUnary.make('¬', expr)
 
@@ -1148,9 +1098,6 @@ class AAggregate(Expression):
 
     def collect_symbols(self, symbols=None, co_constraints=True):
         return AQuantification.collect_symbols(self, symbols, co_constraints)
-
-    def collect_nested_symbols(self, symbols, is_nested):
-        return Expression.collect_nested_symbols(self, symbols, True)
 
 
 class AppliedSymbol(Expression):
@@ -1246,15 +1193,6 @@ class AppliedSymbol(Expression):
         self.symbol.collect_symbols(symbols, co_constraints)
         return symbols
 
-    def collect_nested_symbols(self, symbols, is_nested):
-        if is_nested and (hasattr(self, 'decl') and self.decl
-            and type(self.decl) != Constructor
-            and not self.decl.name in RESERVED_SYMBOLS):
-            symbols.add(self.decl)
-        for e in self.sub_exprs:
-            e.collect_nested_symbols(symbols, True)
-        return symbols
-
     def has_decision(self):
         return ((self.decl.block is not None and not self.decl.block.name == 'environment')
             or any(e.has_decision() for e in self.sub_exprs))
@@ -1295,34 +1233,6 @@ class AppliedSymbol(Expression):
             assert type(self.sub_exprs[0]) == UnappliedSymbol, "Internal error"
             constructor = CONSTRUCTOR(self.sub_exprs[0].name)
             constructors[symbol.name].append(constructor)
-
-    def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
-        assert head.symbol.decl in level_symbols, \
-               f"Internal error in level mapping: {self}"
-        if (self.symbol.decl not in level_symbols
-            or self.in_head
-            or mode in [Semantics.RECDATA, Semantics.COMPLETION]
-            or (mode == Semantics.STABLE and pos_justification != polarity)):
-            return self
-        else:
-            if mode in [Semantics.WELLFOUNDED, Semantics.STABLE]:
-                op = ('>' if pos_justification else '≥') \
-                    if polarity else ('≤' if pos_justification else '<')
-            elif mode == Semantics.KRIPKEKLEENE:
-                op = '>' if polarity else '≤'
-            else:
-                assert mode == Semantics.COINDUCTION, \
-                        f"Internal error: {mode}"
-                op = ('≥' if pos_justification else '>') \
-                    if polarity else ('<' if pos_justification else '≤')
-            comp = AComparison.make(op, [
-                AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs),
-                AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
-            ])
-            if polarity:
-                return AND([comp, self])
-            else:
-                return OR([comp, self])
 
 
 class SymbolExpr(Expression):
