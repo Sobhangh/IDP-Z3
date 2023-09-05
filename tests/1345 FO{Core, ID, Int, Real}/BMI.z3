@@ -68,15 +68,7 @@ weight() = 80
                a!6
                (and (= BMILevel Extreme_Obesity) (<= (to_real 40) bmi))))
       (a!19 (= (= BMILevel Underweight)
-               (or false
-                   (and (> (/ 37.0 2.0) bmi) (= sex Female))
-                   a!1
-                   false
-                   false
-                   false
-                   false
-                   false
-                   false))))
+               (or (and (> (/ 37.0 2.0) bmi) (= sex Female)) a!1))))
   (and (= (to_real 80) weight)
        (or (= BMILevel Obese_II)
            (= BMILevel Obese_I)
@@ -106,30 +98,16 @@ weight() = 80
            (and (= riskLevel Low) a!16))
        a!17
        a!18
-       (= (= BMILevel Normal)
-          (or false false false a!2 a!3 false false false false))
+       (= (= BMILevel Normal) (or a!2 a!3))
        (= (= BMILevel Severely_Underweight)
           (and (> (/ 37.0 2.0) bmi) (= sex Male)))
        a!19
        (= (= BMILevel Overweight) a!4)
        (= (= BMILevel Extreme_Obesity) (<= (to_real 40) bmi))
        a!20
-       (= (= riskLevel High)
-          (or false a!9 false a!11 a!12 false a!14 false false false false))
-       (= (= riskLevel Very_High)
-          (or false
-              false
-              false
-              false
-              false
-              a!13
-              false
-              a!15
-              (= BMILevel Obese_II)
-              false
-              false))
+       (= (= riskLevel High) (or a!9 a!11 a!12 a!14))
+       (= (= riskLevel Very_High) (or a!13 a!15 (= BMILevel Obese_II)))
        (= (= riskLevel Low) a!16)
-       (= (= riskLevel Increased)
-          (or a!8 false a!10 false false false false false false false false))
+       (= (= riskLevel Increased) (or a!8 a!10))
        (= (= riskLevel Extremely_High) (= BMILevel Extreme_Obesity))))))
 
