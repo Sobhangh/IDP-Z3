@@ -756,7 +756,8 @@ class Theory(object):
 
     def propagate(self,
                   tag: S = S.CONSEQUENCE,
-                  method: Propagation = Propagation.DEFAULT
+                  method: Propagation = Propagation.DEFAULT,
+                  complete=False
                   ) -> Theory:
         """Returns the theory with its ``assignments`` property updated
         with values for all terms and atoms that have the same value
@@ -779,7 +780,7 @@ class Theory(object):
             assert False, "dead code"
             out = list(self._z3_propagate(tag))
         else:
-            out = list(self._propagate(tag=tag))
+            out = list(self._propagate(tag=tag, complete=complete))
         self.satisfied = (out[0] != NOT_SATISFIABLE)
         return self
 

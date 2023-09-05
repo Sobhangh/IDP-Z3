@@ -117,7 +117,8 @@ def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
 
 
 def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
-                    sort: bool = False
+                    sort: bool = False,
+                    complete: bool = False,
                     ) -> Iterator[str]:
     """
     Returns a list of assignments that are true in any model of the combination of theories.
@@ -142,14 +143,15 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
 
     solve_start = time.time()
     if sort:
-        ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE)]
+        ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE,
+                                                 complete=complete)]
         ms = sorted(ms[:-1]) + [ms[-1]]
         out = ""
         for i, m in enumerate(ms[:-1]):
             out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
         yield out + f"{ms[-1]}"
     else:
-        yield from problem._propagate(tag=S.CONSEQUENCE)
+        yield from problem._propagate(tag=S.CONSEQUENCE, complete=complete)
     PROCESS_TIMINGS['solve'] += time.time() - solve_start
 
 def maximize(*theories: Union[TheoryBlock, Structure, Theory],

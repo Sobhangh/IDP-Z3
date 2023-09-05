@@ -429,7 +429,7 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
 Theory._propagate_ignored = _propagate_ignored
 
 
-def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
+def _propagate(self, tag=S.CONSEQUENCE, given_todo=None, complete=False):
     """generator of new propagated assignments.  Update self.assignments too.
 
     :arg given_todo: custom collection of assignments to check during propagation.
@@ -447,7 +447,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     solver = self.solver
     if not self.previous_assignments:
         try:
-            yield from self._first_propagate(solver)
+            yield from self._first_propagate(solver, complete=complete)
             # FIXME: should we return here in the case of CLI?
         except IDPZ3Error:
             yield NOT_SATISFIABLE
