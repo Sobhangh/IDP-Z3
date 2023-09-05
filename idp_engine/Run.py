@@ -132,6 +132,8 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
     Args:
         theories (Union[TheoryBlock, Structure, Theory]): 1 or more (data) theories.
         sort (bool, optional): True if the assignments should be in alphabetical order. Defaults to False.
+        complete (bool, optional): True when requiring a propagation including
+                 negated function value assignments. Defaults to False.
 
     Yields:
         str
