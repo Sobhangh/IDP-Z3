@@ -177,7 +177,10 @@ AEquivalence.update_exprs = update_exprs
 
 # Class ADisjunction  #######################################################
 
-def update_exprs(self: Expression, new_exprs: Expression, replace=True) -> Expression:
+def update_exprs(self: Expression,
+                 new_exprs: Generator[Expression, None, None],
+                 replace=True
+                 ) -> Expression:
     exprs = []
     simpler = None
     for expr in new_exprs:
@@ -197,7 +200,10 @@ ADisjunction.update_exprs = update_exprs
 # Class AConjunction  #######################################################
 
 # same as ADisjunction, with TRUE and FALSE swapped
-def update_exprs(self: Expression, new_exprs: Expression, replace=True) -> Expression:
+def update_exprs(self: Expression,
+                 new_exprs: Generator[Expression, None, None],
+                 replace=True
+                 ) -> Expression:
     exprs = []
     simpler = None
     for expr in new_exprs:
