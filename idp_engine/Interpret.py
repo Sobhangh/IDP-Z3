@@ -658,7 +658,8 @@ def _interpret(self: AppliedSymbol,
         if not out.in_head:
             # instantiate definition (for relevance)
             inst = [defin.instantiate_definition(out.decl, sub_exprs, problem)
-                    for defin in problem.definitions]
+                    for defin in problem.definitions
+                    if out.decl not in defin.level_symbols]  # exclude inductive definition
             inst = [x for x in inst if x]
             if inst:
                 co_constraint = AND(inst)
