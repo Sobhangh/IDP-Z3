@@ -78,16 +78,13 @@ And(Vehicle(o2),
     Or(_min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) ==
        weight(o1),
        _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) ==
-       weight(o2),
-       False),
+       weight(o2)),
     _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) <=
     weight(o1),
     _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) <=
     weight(o2),
-    Or(False,
-       False,
-       _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2) ==
-       weight(o3)),
+    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2) ==
+    weight(o3),
     _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2) <=
     weight(o3))
 

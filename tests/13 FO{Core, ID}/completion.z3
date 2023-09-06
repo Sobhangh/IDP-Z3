@@ -1,4 +1,4 @@
-And(Q == P, P == Q, P == Q, Q == P)
+And(P == Q, Q == P)
 
 Model 1
 ==========

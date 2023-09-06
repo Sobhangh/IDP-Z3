@@ -17,8 +17,9 @@ Authors: Pierre Carbonnelle, Simon Vandevelde
 """
 from distutils.dir_util import copy_tree
 import json
-import subprocess
 import re
+import requests
+import subprocess
 import sys
 
 
@@ -46,8 +47,22 @@ def query_user(query, default="y", get=False):
     else:
         return input(query) in "Nn"
 
+def running(url):
+    try:
+        response = requests.get(url)
+        return response.status_code == 200
+    except requests.exceptions.RequestException as e:
+        return False
+
 if not query_user("Did you do a 'poetry update'? (Y/n)"):
     sys.exit()
+
+# run Cypress tests
+if not running("http://localhost:5000"):
+    query_user("Please start web server.")
+if not running("http://localhost:4201"):
+    query_user("Please start web client.")
+run("npx cypress open")
 
 run('git pull origin', check=True)
 run('python3 test.py generate')
