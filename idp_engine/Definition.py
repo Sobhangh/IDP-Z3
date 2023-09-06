@@ -140,7 +140,8 @@ Definition.get_def_constraints = get_def_constraints
 @catch_error
 def instantiate_definition(self: Definition, decl, new_args, theory) -> Optional[Expression]:
     rule = self.clarks.get(decl, None)
-    if rule and self.mode != Semantics.RECDATA:
+    # exclude inductive and recursive definitions
+    if rule and self.mode != Semantics.RECDATA and decl not in self.level_symbols:
         instantiable = all(  # finite domain or not a variable
             s.extension(theory.interpretations, theory.extensions)[0] is not None
             or not v.has_variables()
