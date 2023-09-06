@@ -12,7 +12,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
 * issue #293: add stable semantics + fix completion semantics
-* issue #294: speed up transitive closure of graph
+* issue #294: speed up transitive closure of graph (+ fix import of deepcopy)
 *
 
 
