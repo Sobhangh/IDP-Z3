@@ -328,17 +328,17 @@ def _first_propagate(self, solver: Solver,
             # it will also tell us which function values are now _not_
             # possible, instead of only propagating if the value is fixed.
             values = [x for x in q.decl.range]
-            for j, val2 in enumerate(values):
+            for j, ast_val in enumerate(values):
                 q_symbol = f'__question_{i}_{j}_func'
                 bool_q = Bool(q_symbol).translate(solver.ctx)
                 try:
                     # Ensure that the value is in Z3 form.
-                    val2 = val2.translate(self)
+                    val2 = ast_val.translate(self)
                 except z3types.Z3Exception:
                     pass
                 solver.add(bool_q == (question == val2))
                 propositions.append(bool_q)
-                prop_map[q_symbol] = (val2, q)
+                prop_map[q_symbol] = (ast_val, q)
 
     # Only query the propositions.
     cons = solver.consequences([], propositions)
@@ -362,12 +362,13 @@ def _first_propagate(self, solver: Solver,
             q_symbol = q_symbol[4:-1]
             neg = True
 
-        if not q_symbol.endswith('_func'):
-            val1, q = prop_map[q_symbol]
-            val = str_to_IDP(q, str(val1))
-        else:
-            val1, q = prop_map[q_symbol]
-            val = str_to_IDP(q, str(val1))
+        val, q = prop_map[q_symbol]
+        # Convert to AST form if the value is in Z3 form.
+        val = str_to_IDP(q, str(val)) if not isinstance(val, Expression) else val
+
+        # In case of `complete=True`, convert the extra function values to
+        # comparisons.
+        if q_symbol.endswith('_func'):
             q = AComparison(self, '=', [q, val])
             val = FALSE if neg else TRUE
 
