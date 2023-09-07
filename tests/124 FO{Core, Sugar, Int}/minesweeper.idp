@@ -13,9 +13,6 @@ vocabulary V {
 }
 
 theory T:V {
-    // max() = max{c in Range: true : c}
-    ∃c ∈ Range: c = max().
-    ∀c ∈ Range: c ≤ max().
 
     // borders don't have mine
     ∀c ∈ Range: has_mine(c,0    )=0 ∧ has_mine(0    ,c)=0
@@ -58,7 +55,8 @@ theory T:V {
 }
 
 structure S:V {
-    Range := {0..4}.
+    Range := {0..2}.
+    max := 2.
 }
 
 procedure main() {
