@@ -30,7 +30,7 @@ This module monkey-patches the Expression and Theory classes and sub-classes.
 from __future__ import annotations
 
 import time
-from copy import copy
+from copy import copy, deepcopy
 from typing import Optional
 from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true,
                 is_not, is_eq, Bool, z3types)

@@ -177,20 +177,22 @@ AEquivalence.update_exprs = update_exprs
 
 # Class ADisjunction  #######################################################
 
-def update_exprs(self: Expression, new_exprs: Expression, replace=True) -> Expression:
-    exprs, other = [], []
+def update_exprs(self: Expression,
+                 new_exprs: Generator[Expression, None, None],
+                 replace=True
+                 ) -> Expression:
+    exprs = []
     simpler = None
     for expr in new_exprs:
         if expr.same_as(TRUE):
             return TRUE
-        exprs.append(expr)
         if not expr.same_as(FALSE):
-            other.append(expr)
+            exprs.append(expr)
 
-    if len(other) == 0:  # all disjuncts are False
+    if len(exprs) == 0:  # all disjuncts are False
         return FALSE
-    if replace and len(other) == 1:
-        simpler = other[0]
+    if replace and len(exprs) == 1:
+        simpler = exprs[0]
     return self._change(simpler=simpler, sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
 
@@ -198,20 +200,22 @@ ADisjunction.update_exprs = update_exprs
 # Class AConjunction  #######################################################
 
 # same as ADisjunction, with TRUE and FALSE swapped
-def update_exprs(self: Expression, new_exprs: Expression, replace=True) -> Expression:
-    exprs, other = [], []
+def update_exprs(self: Expression,
+                 new_exprs: Generator[Expression, None, None],
+                 replace=True
+                 ) -> Expression:
+    exprs = []
     simpler = None
     for expr in new_exprs:
         if expr.same_as(FALSE):
             return FALSE
-        exprs.append(expr)
         if not expr.same_as(TRUE):
-            other.append(expr)
+            exprs.append(expr)
 
-    if len(other) == 0:  # all conjuncts are True
+    if len(exprs) == 0:  # all conjuncts are True
         return TRUE
-    if replace and len(other) == 1:
-        simpler = other[0]
+    if replace and len(exprs) == 1:
+        simpler = exprs[0]
     return self._change(simpler=simpler, sub_exprs=exprs)
 AConjunction.update_exprs = update_exprs
 

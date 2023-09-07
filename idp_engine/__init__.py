@@ -12,3 +12,4 @@ from .SymbolicPropagate import Done
 from .Relevance import Done
 from .Assignments import Status, Assignment, Assignments
 from .EN import Done
+from .Definition import Done

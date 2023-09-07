@@ -1,10 +1,6 @@
 And(p(a),
     Or(next(a) == a, next(a) == b),
     Or(next(b) == a, next(b) == b),
-    p(a) ==
-    Or(And(next(a) == a, p(a)), And(next(a) == b, p(b))),
-    p(b) ==
-    Or(And(next(b) == a, p(a)), And(next(b) == b, p(b))),
     And(Or(Not(Or(And(next(a) == a,
                       Or(_8lvl_p(a) <= _8lvl_p(a), p(a))),
                   And(next(a) == b,
@@ -28,7 +24,7 @@ And(p(a),
 
 Model 1
 ==========
-next := {a -> a, b -> b}.
+next := {a -> a, b -> a}.
 p := {a, b}.
 
 

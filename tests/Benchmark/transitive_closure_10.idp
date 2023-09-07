@@ -1,0 +1,23 @@
+vocabulary {
+   type Node := {1..10}
+   edge: Node * Node -> Bool
+   reachable: Node * Node -> Bool
+}
+
+theory {
+
+{
+    !n1, n2 in Node: reachable(n1, n2) <- edge(n1, n2).
+    !n1, n3 in Node: reachable(n1, n3) <- ?n2 in Node: edge(n1, n2) & reachable(n2, n3).
+}
+
+}
+
+
+structure {
+edge := { (1, 1), (1, 5), (1, 8), (2, 7), (2, 6), (3, 3), (3, 7), (3, 1), (3, 5), (4, 10), (4, 4), (4, 1), (4, 6), (5, 7), (5, 5), (6, 10), (6, 7), (6, 5), (6, 4), (7, 2), (7, 3), (7, 1), (7, 4), (8, 8), (9, 9), (9, 3), (9, 1), (9, 6), (10, 3), (10, 6) }.
+
+}
+procedure main() {
+    pretty_print(model_expand(T,S,timeout_seconds=120))
+}
