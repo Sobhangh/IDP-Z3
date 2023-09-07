@@ -1,0 +1,13 @@
+vocabulary {
+    type color := {red, blue, green}
+    type country := {BE, FR, DE}
+    color_of : country  -> color
+}
+theory {
+    !c1: color_of(c1) ~= red.
+}
+
+procedure main() {
+    //pretty_print(model_expand(T))
+    pretty_print(model_propagate(T, complete=True))
+}

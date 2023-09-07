@@ -11,6 +11,7 @@ The main feature of this release is performance improvements.
 Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### IDP-Z3
+* MR !329: support full propagation of function values
 * issue #293: add stable semantics + fix completion semantics
 * issue #294: speed up transitive closure of graph (+ fix import of deepcopy)
 *

@@ -33,9 +33,9 @@ import time
 from copy import copy, deepcopy
 from typing import Optional
 from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true,
-                is_not, is_eq, Bool)
+                is_not, is_eq, Bool, z3types)
 
-from .Assignments import Status as S, Assignments
+from .Assignments import Status as S, Assignments, Assignment
 from .Expression import (Expression, AQuantification, ADisjunction,
                          AConjunction, AppliedSymbol, AComparison, AUnary,
                          Brackets, TRUE, FALSE)
@@ -243,7 +243,8 @@ def _propagate_inner(self, tag, solver, todo):
 Theory._propagate_inner = _propagate_inner
 
 
-def _first_propagate(self, solver: Solver):
+def _first_propagate(self, solver: Solver,
+                     complete: bool = False):
     """ Determine universals (propagation)
 
         This is the most complete method of propagation we currently have.
@@ -251,17 +252,19 @@ def _first_propagate(self, solver: Solver):
             0. Prepare the solver by adding additional assignments
             1. Generate a single model
             2. For each assertion in the model, add a proposition.
+            (Optionally, add a proposition for each function value (see below)
             3. Use Z3's `consequences` to derive which propagations are implied
             4. Translate the propositions back and yield them.
 
-        This method could be extended by also adding a proposition for
-        every possible value of a function. Currently, it does not ouput
-        "impossible values" for formulas, such as "Not Belgium = Red".
-        Adding a proposition for each possibility would allow that, but would
-        also most likely make the process more time-intensive.
-        See `get_range` if you need such functionality.
+        Optionally, you can set `complete = True` to get a complete
+        propagation, in which we also derive negative value assignments for
+        functions. By default, propagation won't derive consequences such as
+        `Not Belgium = Red`.  By enabling `complete`, this method will truly
+        derive every possible consequence, at the cost of speed.
 
         :arg solver: the solver that should be used.
+        :arg complete (bool, optional): whether negative value assignments for
+        functions should also be propagated.
 
         Raises:
             IDPZ3Error: if theory is unsatisfiable
@@ -319,6 +322,24 @@ def _first_propagate(self, solver: Solver):
         propositions.append(bool_q)
         prop_map[q_symbol] = (val1, q)
 
+        if complete and q.type not in ['𝔹', 'ℤ', 'ℝ']:
+            # If complete=True, we also want to propagate every possible value
+            # of a function. This is the most complete form of propagation, as
+            # it will also tell us which function values are now _not_
+            # possible, instead of only propagating if the value is fixed.
+            values = [x for x in q.decl.range]
+            for j, ast_val in enumerate(values):
+                q_symbol = f'__question_{i}_{j}_func'
+                bool_q = Bool(q_symbol).translate(solver.ctx)
+                try:
+                    # Ensure that the value is in Z3 form.
+                    val2 = ast_val.translate(self)
+                except z3types.Z3Exception:
+                    pass
+                solver.add(bool_q == (question == val2))
+                propositions.append(bool_q)
+                prop_map[q_symbol] = (ast_val, q)
+
     # Only query the propositions.
     cons = solver.consequences([], propositions)
 
@@ -336,10 +357,20 @@ def _first_propagate(self, solver: Solver):
     # shown as propagated.
     for con in cons[1]:
         q_symbol = str(con.children()[1])
+        neg = False
         if q_symbol.startswith('Not('):
             q_symbol = q_symbol[4:-1]
-        val1, q = prop_map[q_symbol]
-        val = str_to_IDP(q, str(val1))
+            neg = True
+
+        val, q = prop_map[q_symbol]
+        # Convert to AST form if the value is in Z3 form.
+        val = str_to_IDP(q, str(val)) if not isinstance(val, Expression) else val
+
+        # In case of `complete=True`, convert the extra function values to
+        # comparisons.
+        if q_symbol.endswith('_func'):
+            q = AComparison(self, '=', [q, val])
+            val = FALSE if neg else TRUE
 
         # FIXME: do we need the test below?
         # ass = self.assignments.get(q.code, None)
@@ -402,12 +433,16 @@ def _propagate_ignored(self, tag=S.CONSEQUENCE, given_todo=None):
 Theory._propagate_ignored = _propagate_ignored
 
 
-def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
+def _propagate(self, tag=S.CONSEQUENCE,
+               given_todo=None,
+               complete: bool = False):
     """generator of new propagated assignments.  Update self.assignments too.
 
     :arg given_todo: custom collection of assignments to check during propagation.
     given_todo is organized as a dictionary where the keys function to quickly
     check if a certain assignment is in the collection.
+    :arg complete (bool, optional): True when requiring a propagation
+    including negated function value assignments. Defaults to False.
     """
 
     global start
@@ -420,7 +455,7 @@ def _propagate(self, tag=S.CONSEQUENCE, given_todo=None):
     solver = self.solver
     if not self.previous_assignments:
         try:
-            yield from self._first_propagate(solver)
+            yield from self._first_propagate(solver, complete=complete)
             # FIXME: should we return here in the case of CLI?
         except IDPZ3Error:
             yield NOT_SATISFIABLE

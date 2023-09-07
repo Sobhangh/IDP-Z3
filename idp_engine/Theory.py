@@ -756,7 +756,8 @@ class Theory(object):
 
     def propagate(self,
                   tag: S = S.CONSEQUENCE,
-                  method: Propagation = Propagation.DEFAULT
+                  method: Propagation = Propagation.DEFAULT,
+                  complete: bool = False
                   ) -> Theory:
         """Returns the theory with its ``assignments`` property updated
         with values for all terms and atoms that have the same value
@@ -767,8 +768,12 @@ class Theory(object):
         Terms and propositions starting with ``_`` are ignored.
 
         Args:
-            tag (S): the status of propagated assignments
-            method (Propagation): the particular propagation to use
+            tag (S, optional): the status of propagated assignments.
+              Defaults to CONSEQUENCE.
+            method (Propagation, optional): the particular propagation to use.
+              Defaults to standard propagation.
+            complete (bool, optional): True when requiring a propagation
+              including negated function value assignments. Defaults to False.
         """
         if method == Propagation.BATCH:
             # NOTE: running this will confuse _directional_todo, not used right now
@@ -779,7 +784,7 @@ class Theory(object):
             assert False, "dead code"
             out = list(self._z3_propagate(tag))
         else:
-            out = list(self._propagate(tag=tag))
+            out = list(self._propagate(tag=tag, complete=complete))
         self.satisfied = (out[0] != NOT_SATISFIABLE)
         return self
 
