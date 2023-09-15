@@ -1,8 +1,8 @@
 
 Model 1
 ==========
-p := true.
 q := true.
+p := true.
 
 
 No more models.

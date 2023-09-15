@@ -50,5 +50,6 @@ theory {
 
 
 structure {
+    weight := 79.
 }
 
