@@ -277,9 +277,24 @@ class Theory(object):
         self.assignments = Assignments()
         self.extensions = {}  # reset the cache
 
-        for decl in self.declarations.values():
-            decl.interpret(self)
+        # Create a set of all the symbols which are defined in the theory.
+        defined_symbols = set()
+        for definition in self.definitions:
+            for symbol in definition.def_vars.keys():
+                defined_symbols.add(symbol)
 
+        # Interpret the vocabulary in two steps:
+        # 1. First, interpret all symbol declarations for symbols that are not
+        #   included in definitions.
+        # 2. Then, interpret the remaining symbol declarations.
+        # This ensures that all symbol declarations have been interpreted
+        # _before_ we interpret the definitions.
+        for symbol, decl in self.declarations.items():
+            if symbol not in defined_symbols:
+                decl.interpret(self)
+        # Then, interpret defined symbols.
+        for symbol in defined_symbols:
+            self.declarations[symbol].interpret(self)
         # remove RELEVANT constraints
         self.constraints = OrderedSet([v for k,v in self.constraints.items()
             if not(type(v) == AppliedSymbol
