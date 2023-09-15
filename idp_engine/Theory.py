@@ -282,6 +282,7 @@ class Theory(object):
         for definition in self.definitions:
             for symbol in definition.def_vars.keys():
                 defined_symbols.add(symbol)
+        defined_symbols = sorted(defined_symbols)
 
         # Interpret the vocabulary in two steps:
         # 1. First, interpret all symbol declarations for symbols that are not

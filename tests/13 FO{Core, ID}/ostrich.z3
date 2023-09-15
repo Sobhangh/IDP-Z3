@@ -1,14 +1,14 @@
 
 Model 1
 ==========
-YoungSuperOstrich := {Skippy}.
 AbFly := {Skippy}.
-SuperOstrich := {Skippy}.
-Parrot := {Coco}.
-Fly := {Coco}.
-Bird := {Coco, Skippy}.
-Ostrich := {Skippy}.
 AbOstrich := {Skippy}.
+Bird := {Coco, Skippy}.
+Fly := {Coco}.
+Ostrich := {Skippy}.
+Parrot := {Coco}.
+SuperOstrich := {Skippy}.
+YoungSuperOstrich := {Skippy}.
 
 
 No more models.
