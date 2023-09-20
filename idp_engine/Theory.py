@@ -272,17 +272,13 @@ class Theory(object):
                 self.def_constraints.update(
                     {k:deepcopy(v) for k,v in block.def_constraints.items()})
 
-        # apply the enumerations and definitions
-
+        ### apply the enumerations and definitions
         self.assignments = Assignments()
         self.extensions = {}  # reset the cache
 
         # Create a set of all the symbols which are defined in the theory.
-        defined_symbols = set()
-        for definition in self.definitions:
-            for symbol in definition.def_vars.keys():
-                defined_symbols.add(symbol)
-        defined_symbols = sorted(defined_symbols)
+        def_vars = [definition.def_vars.keys() for definition in self.definitions]
+        defined_symbols = {x: x for sublist in def_vars for x in sublist}
 
         # Interpret the vocabulary in two steps:
         # 1. First, interpret all symbol declarations for symbols that are not
@@ -290,6 +286,7 @@ class Theory(object):
         # 2. Then, interpret the remaining symbol declarations.
         # This ensures that all symbol declarations have been interpreted
         # _before_ we interpret the definitions.
+        # See https://gitlab.com/krr/IDP-Z3/-/issues/299
         for symbol, decl in self.declarations.items():
             if symbol not in defined_symbols:
                 decl.interpret(self)

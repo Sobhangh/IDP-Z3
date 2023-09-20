@@ -24,7 +24,7 @@ And(p(a),
 
 Model 1
 ==========
-next := {a -> a, b -> a}.
+next := {a -> b, b -> b}.
 p := {a, b}.
 
 
