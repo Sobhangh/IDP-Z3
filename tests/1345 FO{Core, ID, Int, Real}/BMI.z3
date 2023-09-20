@@ -2,14 +2,14 @@ weight() -> 80.0
 No more consequences.
 ['Male', 'Female']
 
+weight() -> 80.0
 bmi() -> 1/320
 riskLevel() -> Low
-weight() -> 80.0
 No more consequences.
 
 length() -> 160
-? BMILevel()
 ? sex()
+? BMILevel()
 ? BMILevel() = Severely_Underweight
 ? sex() = Male
 ? BMILevel() = Underweight
@@ -70,6 +70,7 @@ weight() = 80
       (a!19 (= (= BMILevel Underweight)
                (or (and (> (/ 37.0 2.0) bmi) (= sex Female)) a!1))))
   (and (= (to_real 80) weight)
+       (or (= sex Male) (= sex Female))
        (or (= BMILevel Obese_II)
            (= BMILevel Obese_I)
            (= BMILevel Normal)
@@ -77,7 +78,6 @@ weight() = 80
            (= BMILevel Underweight)
            (= BMILevel Overweight)
            (= BMILevel Extreme_Obesity))
-       (or (= sex Male) (= sex Female))
        (or (= riskLevel High)
            (= riskLevel Very_High)
            (= riskLevel Low)

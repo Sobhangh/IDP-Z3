@@ -1,0 +1,25 @@
+// File originally created for #299 (https://gitlab.com/krr/IDP-Z3/-/issues/299)
+// See https://gitlab.com/krr/IDP-Z3/-/merge_requests/331
+vocabulary {
+    type col := {blue, red}
+    opposite_again: -> col
+    opposite: -> col
+    chosen_col: -> col
+}
+structure {
+    chosen_col := red.
+}
+theory {
+    {
+        opposite() = blue <- chosen_col() = red.
+        opposite() = red <- chosen_col() = blue.
+    }
+    {
+        opposite_again() = red <- opposite() = blue.
+        opposite_again() = blue <- opposite() = red.   
+    }
+}
+procedure main() {
+    pretty_print(model_expand(T,S))
+}
+

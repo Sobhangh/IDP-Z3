@@ -272,14 +272,27 @@ class Theory(object):
                 self.def_constraints.update(
                     {k:deepcopy(v) for k,v in block.def_constraints.items()})
 
-        # apply the enumerations and definitions
-
+        ### apply the enumerations and definitions
         self.assignments = Assignments()
         self.extensions = {}  # reset the cache
 
-        for decl in self.declarations.values():
-            decl.interpret(self)
+        # Create a set of all the symbols which are defined in the theory.
+        def_vars = [definition.def_vars.keys() for definition in self.definitions]
+        defined_symbols = {x: x for sublist in def_vars for x in sublist}
 
+        # Interpret the vocabulary in two steps:
+        # 1. First, interpret all symbol declarations for symbols that are not
+        #   included in definitions.
+        # 2. Then, interpret the remaining symbol declarations.
+        # This ensures that all symbol declarations have been interpreted
+        # _before_ we interpret the definitions.
+        # See https://gitlab.com/krr/IDP-Z3/-/issues/299
+        for symbol, decl in self.declarations.items():
+            if symbol not in defined_symbols:
+                decl.interpret(self)
+        # Then, interpret defined symbols.
+        for symbol in defined_symbols:
+            self.declarations[symbol].interpret(self)
         # remove RELEVANT constraints
         self.constraints = OrderedSet([v for k,v in self.constraints.items()
             if not(type(v) == AppliedSymbol
