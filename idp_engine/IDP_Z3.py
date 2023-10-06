@@ -64,6 +64,7 @@ def cli(args=None):
         PROCESS_TIMINGS['parse'] = time.time() - parse_start
         if not args.output:
             # Print output to stdout.
+            PROCESS_TIMINGS['ground'] = time.time()
             idp.execute()
         else:
             # Print output to file.

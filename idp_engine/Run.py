@@ -97,9 +97,8 @@ def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
     Yields:
         str
     """
-    ground_start = time.time()
     problem = Theory(*theories, extended=extended)
-    PROCESS_TIMINGS['ground'] += time.time() - ground_start
+    PROCESS_TIMINGS['ground'] = time.time() - PROCESS_TIMINGS['ground']
 
     solve_start = time.time()
     ms = list(problem.expand(max=max, timeout_seconds=timeout_seconds, complete=complete))
@@ -142,7 +141,6 @@ def model_propagate(*theories: Union[TheoryBlock, Structure, Theory],
 
     problem = Theory(*theories)
     PROCESS_TIMINGS['ground'] += time.time() - ground_start
-
     solve_start = time.time()
     if sort:
         ms = [str(m) for m in problem._propagate(tag=S.CONSEQUENCE,
