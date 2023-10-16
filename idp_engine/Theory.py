@@ -710,7 +710,13 @@ class Theory(object):
             term (str): e.g., ``"Length(1)"``
             minimize (bool): ``True`` to minimize ``term``, ``False`` to maximize it
         """
-        assert term in self.assignments, "Internal error"
+        assert term in self.assignments, (f"Optimization term: \"{term}\" not"
+                                          " found in vocabulary (Tip: have you"
+                                          " forgotten brackets? e.g. P()).")
+        assert self.assignments[term].symbol_decl.out.name in {INT, REAL}, (
+            f"Incorrect optimization term: \"{term}\","
+            f" term must be of type {INT} or {REAL}."
+        )
         sentence = self.assignments[term].sentence
         s = sentence.translate(self)
 
