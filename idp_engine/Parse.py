@@ -673,8 +673,8 @@ class Definition(ASTNode):
         def_vars (dict[String, dict[String, Variable]]):
             Fresh variables for arguments and result
 
-        level_symbols (dict[SymbolDeclaration, Symbol]):
-            map of recursively defined symbols to level mapping symbols
+        inductive (set[SymbolDeclaration])
+            set of SymbolDeclaration with an inductive definition
 
         cache (dict[SymbolDeclaration, str, Expression]):
             cache of instantiation of the definition
@@ -696,12 +696,12 @@ class Definition(ASTNode):
                      mode)
         assert type(self.mode) == S, f"Unsupported mode: {mode}"
         self.annotations = annotations.annotations if annotations else {}
-        self.rules = rules
+        self.rules: List[Rule] = rules
         self.renamed = {}
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
         self.canonicals = {}
         self.def_vars = {}  # {String: {String: Variable}}
-        self.level_symbols = {}  # {SymbolDeclaration: Symbol}
+        self.inductive: set[SymbolDeclaration] = set()
         self.cache = {}  # {decl, str: Expression}
         self.inst_def_level = 0
 

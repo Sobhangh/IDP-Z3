@@ -313,7 +313,8 @@ class Theory(object):
                     self.constraints.append(constraint)
 
         # expand whole-domain definitions
-        for defin in self.definitions:
+        for i, defin in enumerate(self.definitions):
+            defin.id = i
             defin.interpret(self)
 
         # initialize assignments, co_constraints, questions

@@ -187,14 +187,14 @@ TheoryBlock.annotate = annotate
 
 # Class Definition  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Definition, voc, q_vars):
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
     # create level-mapping symbols, as needed
     # self.level_symbols: dict[SymbolDeclaration, Symbol]
     dependencies = set()
     for r in self.rules:
-        symbs = {}
+        symbs: dict[str, Symbol] = {}
         r.body.collect_symbols(symbs)
         for s in symbs.values():
             dependencies.add((r.definiendum.symbol.decl, s))
@@ -207,19 +207,14 @@ def annotate(self, voc, q_vars):
             break
         dependencies = closure_until_now
 
+    # check for nested recursive symbols
     symbs = {s for (s, ss) in dependencies if s == ss}
+    nested: set[SymbolDeclaration] = set()
     for r in self.rules:
-        key = r.definiendum.symbol.decl
-        if key not in symbs or key in self.level_symbols:
-            continue
-
-        real = TYPE(REAL)
-        real.decl = voc.symbol_decls[REAL]
-        symbdec = SymbolDeclaration.make(
-            "_"+str(self.id)+"lvl_"+key.name,
-            key.arity, key.sorts, real)
-        self.level_symbols[key] = SYMBOL(symbdec.name)
-        self.level_symbols[key].decl = symbdec
+        decl = r.definiendum.symbol.decl
+        r.body.collect_nested_symbols(nested, False)
+        if decl in symbs and decl not in self.inductive:
+            self.inductive.add(decl)
 
     if self.mode == Semantics.RECDATA:
         # check that the variables in r.out are in the arguments of definiendum
@@ -237,7 +232,7 @@ def annotate(self, voc, q_vars):
     nested = set()
     for r in self.rules:
         r.body.collect_nested_symbols(nested, False)
-    for decl in self.level_symbols.keys():
+    for decl in self.inductive:
         self.check(decl not in nested,
                     f"Inductively defined nested symbols are not supported yet: "
                     f"{decl.name}.")
