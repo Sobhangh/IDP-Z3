@@ -191,8 +191,7 @@ def _propagate_inner(self, tag, solver, todo):
         propositions = []
         prop_map = {}
         i = 0
-        while valqs:
-            (val1, q) = valqs.pop()
+        for (val1, q) in valqs:
             question = q.reified(self)
             if str(val1) == str(question):
                 continue  # irrelevant

@@ -19,7 +19,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 
 ### Interactive Consultant and Web IDE
-*
+* issue #301: Propagation error in IC for simple theory
 *
 *
 
