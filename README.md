@@ -51,7 +51,7 @@ To launch the Interactive Consultant in development mode:
 * open your browser at http://127.0.0.1:4201
 
 
-# documentation
+# Documentation
 
 The user manual is in the `/docs` folder and can be locally generated as follows:
 ~~~~
