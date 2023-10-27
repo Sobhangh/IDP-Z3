@@ -12,8 +12,27 @@ theory T:V {
     c() = lcm(2, 3).
 }
 
+vocabulary V2 {
+    type nat := {1..4}
+    type nat2 := {1..9}
+    lcm : Int * Int → Int
+    c: () -> Int
+}
+
+theory T2:V2 {
+
+    {  ! n, m in nat: lcm(n,m) = min{{k | k in nat2: (? j1 in nat: k = j1 * n) & (? j1 in nat: k = j1 * m) }}. }
+
+    c() = lcm(2, 3).
+}
+
 procedure main() {
     //print(Theory(T).formula())
     pretty_print(model_expand(T))
     pretty_print(Theory(T).explain())
+
+    print("")
+
+    pretty_print(model_expand(T2))
+    pretty_print(Theory(T2).explain())
 }

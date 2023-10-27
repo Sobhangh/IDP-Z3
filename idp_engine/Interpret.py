@@ -662,6 +662,9 @@ def _interpret(self: AppliedSymbol,
             inst = [x for x in inst if x]
             if inst:
                 co_constraint = AND(inst)
+            elif self.co_constraint:
+                co_constraint = self.co_constraint.interpret(problem, subs)
+
         out = (value if value else
                out._change(sub_exprs=sub_exprs, co_constraint=co_constraint))
     return out
