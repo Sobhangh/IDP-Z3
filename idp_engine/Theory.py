@@ -201,7 +201,7 @@ class Theory(object):
             for defin in self.definitions:
                 def_constraints.update(defin.get_def_constraints(self, for_explain=True))
 
-            for constraint in chain([c.interpret(self, {}) for c in self.constraints],
+            for constraint in chain(self.constraints, self.co_constraints,
                                     chain(*def_constraints.values())):
                 p = constraint.reified(self)
                 self.expl_reifs[p] = (constraint.translate(self), constraint)
@@ -313,7 +313,8 @@ class Theory(object):
                     self.constraints.append(constraint)
 
         # expand whole-domain definitions
-        for defin in self.definitions:
+        for i, defin in enumerate(self.definitions):
+            defin.id = i
             defin.interpret(self)
 
         # initialize assignments, co_constraints, questions

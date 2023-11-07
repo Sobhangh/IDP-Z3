@@ -26,9 +26,9 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import (Set, Tuple, List, Optional, TYPE_CHECKING)
 
-from .utils import (RESERVED_SYMBOLS, INT, BOOL, Semantics, CO_CONSTR_RECURSION_DEPTH)
-from .Expression import (Expression, catch_error, ZERO, TRUE, FALSE, RecDef,
-                         Constructor, Symbol, AppliedSymbol, Operator, AImplication,
+from .utils import (RESERVED_SYMBOLS, INT, BOOL, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
+from .Expression import (Expression, catch_error, ZERO, TRUE, FALSE, RecDef, TYPE,
+                         Constructor, Symbol, SYMBOL, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
                          IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND)
 from .Parse import Definition, Rule, SymbolDeclaration
@@ -76,16 +76,25 @@ def get_def_constraints(self: Definition,
             out[decl, self] = [expr]
         return out
 
+    # compute level symbols
+    level_symbols: dict[SymbolDeclaration, Symbol] = {}
+    for key in self.inductive:
+        real = TYPE(REAL)
+        real.decl = problem.declarations[REAL]
+        symbdec = SymbolDeclaration.make(
+            "_"+str(self.id)+"lvl_"+key.name,
+            key.arity, key.sorts, real)
+        level_symbols[key] = SYMBOL(symbdec.name)
+        level_symbols[key].decl = symbdec
+
     # add level mappings
     instantiables = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
         rule.has_finite_domain = all(s.extension(problem.interpretations, problem.extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
-        inductive = (self.mode != Semantics.COMPLETION
-            and rule.definiendum.symbol.decl in self.level_symbols)
 
-        if rule.has_finite_domain or inductive:
+        if rule.has_finite_domain or decl in self.inductive:
             # add a constraint containing the definition over the full domain
             if rule.out:
                 expr = AppliedSymbol.make(rule.definiendum.symbol,
@@ -100,7 +109,7 @@ def get_def_constraints(self: Definition,
             # determine reverse implications, if any
             bodies, implications = [], []
             for r in rules:
-                if not inductive:
+                if not decl in self.inductive:
                     bodies.append(r.body)
                     if for_explain and 1 < len(rules):  # not simplified -> no need to make copies
                         implications.append(IMPLIES([r.body, head], r.annotations))
@@ -108,22 +117,22 @@ def get_def_constraints(self: Definition,
                     new = r.body.split_equivalences()
                     bodies.append(new)
                     if for_explain:
-                        new = deepcopy(new).add_level_mapping(self.level_symbols,
+                        new = deepcopy(new).add_level_mapping(level_symbols,
                                              rule.definiendum, False, False, self.mode)
                         implications.append(IMPLIES([new, head], r.annotations))
 
             all_bodies = OR(bodies)
-            if not inductive:  # i.e., function with finite domain
+            if not decl in self.inductive:  # i.e., function with finite domain
                 if implications:  # already contains reverse implications
                     implications.append(IMPLIES([head, all_bodies], self.annotations))
                 else:
                     implications = [EQUIV([head, all_bodies], self.annotations)]
             else:  # i.e., predicate
                 if not implications:  # no reverse implication
-                    new = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
+                    new = deepcopy(all_bodies).add_level_mapping(level_symbols,
                                              rule.definiendum, False, False, self.mode)
                     implications = [IMPLIES([new, deepcopy(head)], self.annotations)]
-                all_bodies = deepcopy(all_bodies).add_level_mapping(self.level_symbols,
+                all_bodies = deepcopy(all_bodies).add_level_mapping(level_symbols,
                                         rule.definiendum, True, True, self.mode)
                 implications.append(IMPLIES([head, all_bodies], self.annotations))
             instantiables[decl] = implications
@@ -141,7 +150,7 @@ Definition.get_def_constraints = get_def_constraints
 def instantiate_definition(self: Definition, decl, new_args, theory) -> Optional[Expression]:
     rule = self.clarks.get(decl, None)
     # exclude inductive and recursive definitions
-    if rule and self.mode != Semantics.RECDATA and decl not in self.level_symbols:
+    if rule and self.mode != Semantics.RECDATA and decl not in self.inductive:
         instantiable = all(  # finite domain or not a variable
             s.extension(theory.interpretations, theory.extensions)[0] is not None
             or not v.has_variables()

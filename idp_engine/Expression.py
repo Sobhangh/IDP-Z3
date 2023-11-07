@@ -902,15 +902,18 @@ class Operator(Expression):
         """
         if len(operands) == 0:
             if cls == AConjunction:
-                return TRUE
-            if cls == ADisjunction:
-                return FALSE
-            assert False, "Internal error"
-        if len(operands) == 1:
+                out = copy(TRUE)
+            elif cls == ADisjunction:
+                out = copy(FALSE)
+            else:
+                assert False, "Internal error"
+        elif len(operands) == 1:
             return operands[0]
-        if isinstance(ops, str):
-            ops = [ops] * (len(operands)-1)
-        out = (cls)(parent, ops, operands, annotations)
+        else:
+            if isinstance(ops, str):
+                ops = [ops] * (len(operands)-1)
+            out = (cls)(parent, ops, operands, annotations)
+
         if parent:  # for error messages
             out._tx_position = parent. _tx_position
             out._tx_position_end = parent. _tx_position_end

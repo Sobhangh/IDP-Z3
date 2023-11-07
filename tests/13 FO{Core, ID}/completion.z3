@@ -1,4 +1,7 @@
-And(P == Q, Q == P)
+And(Or(Not(Q), P),
+    Or(Not(P), Q),
+    Or(Not(P), Q),
+    Or(Not(Q), P))
 
 Model 1
 ==========

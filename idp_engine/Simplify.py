@@ -25,7 +25,7 @@ This module monkey-patches the Expression class and sub-classes.
 """
 from __future__ import annotations
 
-from copy import deepcopy
+from copy import copy, deepcopy
 import sys
 from typing import List, Tuple, Optional, Generator
 
@@ -45,10 +45,16 @@ from .utils import BOOL, INT, DATE, ABS
 def _change(self: Expression,
             sub_exprs: Optional[List[Expression]] = None,
             ops : Optional[List[str]] = None,
+            value : Optional[Expression] = None,
             simpler : Optional[Expression] = None,
             co_constraint : Optional[Expression] = None
             ) -> Expression:
     " change attributes of an expression, and resets derived attributes "
+
+    if value:
+        out = copy(value)
+        out.annotations = self.annotations
+        return out
 
     if simpler is not None:
         simpler.original = self.original
@@ -139,18 +145,18 @@ def update_exprs(self: AImplication,
     exprs0 = next(new_exprs)
     simpler = None
     if exprs0.same_as(FALSE):  # (false => p) is true
-        return TRUE
+        return self._change(value=TRUE)
     elif exprs0.same_as(TRUE):  # (true => p) is p
         exprs1 = next(new_exprs)
         simpler = exprs1
     else:
         exprs1 = next(new_exprs)
         if exprs1.same_as(TRUE):  # (p => true) is true
-            return TRUE
+            return self._change(value=TRUE)
         elif exprs1.same_as(FALSE):  # (p => false) is ~p
             simpler = NOT(exprs0)
         elif exprs1.same_as(exprs0):  # (p => p) is true
-            return TRUE
+            return self._change(value=TRUE)
     return self._change(simpler=simpler,
                         sub_exprs=[exprs0, exprs1])
 AImplication.update_exprs = update_exprs
@@ -185,13 +191,13 @@ def update_exprs(self: Expression,
     simpler = None
     for expr in new_exprs:
         if expr.same_as(TRUE):
-            return TRUE
+            return self._change(value=TRUE)
         if not expr.same_as(FALSE):
             exprs.append(expr)
 
     if len(exprs) == 0:  # all disjuncts are False
-        return FALSE
-    if replace and len(exprs) == 1:
+        return self._change(value=FALSE)
+    elif replace and len(exprs) == 1:
         simpler = exprs[0]
     return self._change(simpler=simpler, sub_exprs=exprs)
 ADisjunction.update_exprs = update_exprs
@@ -208,12 +214,12 @@ def update_exprs(self: Expression,
     simpler = None
     for expr in new_exprs:
         if expr.same_as(FALSE):
-            return FALSE
+            return self._change(value=FALSE)
         if not expr.same_as(TRUE):
             exprs.append(expr)
 
     if len(exprs) == 0:  # all conjuncts are True
-        return TRUE
+        return self._change(value=TRUE)
     if replace and len(exprs) == 1:
         simpler = exprs[0]
     return self._change(simpler=simpler, sub_exprs=exprs)
@@ -230,7 +236,7 @@ def update_exprs(self: AComparison,
     if len(operands) == 2 and self.operator == ["="]:
         # a = a
         if operands[0].same_as(operands[1]):
-            return TRUE
+            return self._change(value=TRUE)
 
         # (if c then a else b) = d  ->  (if c then a=d else b=d)
         if type(operands[0]) == AIfExpr:
@@ -244,17 +250,17 @@ def update_exprs(self: AComparison,
     for op, expr in zip(self.operator, operands[1:]):
         if acc.is_value() and expr.is_value():
             if op in ["<", ">"] and acc.same_as(expr):
-                return FALSE
+                return self._change(value=FALSE)
             if op == "=" and not acc.same_as(expr):
-                return FALSE
+                return self._change(value=FALSE)
             if op == "≠":  # issue #246
                 if acc.same_as(expr):
-                    return FALSE
+                    return self._change(value=FALSE)
             elif not (Operator.MAP[op]) (acc.py_value, expr.py_value):
-                return FALSE
+                return self._change(value=FALSE)
         acc = expr
     if all(e.is_value() for e in operands):
-        return TRUE
+        return self._change(value=TRUE)
     return self._change(sub_exprs=operands)
 AComparison.update_exprs = update_exprs
 
@@ -335,9 +341,9 @@ def update_exprs(self: AUnary,
     operand = list(new_exprs)[0]
     if self.operator == '¬':
         if operand.same_as(TRUE):
-            return FALSE
+            return self._change(value=FALSE)
         if operand.same_as(FALSE):
-            return TRUE
+            return self._change(value=TRUE)
     else:  # '-'
         if operand.is_value() and type(operand) == Number:
             return Number(number=f"{-operand.py_value}")
@@ -396,7 +402,7 @@ def update_exprs(self: AppliedSymbol,
                        f"Incorrect expression: {self}")
             return self._change(simpler=new_exprs[0].sub_exprs[i], sub_exprs=new_exprs)
         if self.decl.name == new_exprs[0].decl.tester.name:
-            return TRUE
+            return self._change(value=TRUE)
 
     return self._change(sub_exprs=new_exprs)
 AppliedSymbol.update_exprs = update_exprs

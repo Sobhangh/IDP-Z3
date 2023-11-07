@@ -16,9 +16,9 @@ length() -> 160
 ? sex() = Female
 
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
-bmi() = bmi_ ⇔ bmi_ = weight() / (length() ⨯ length())
 definition of BMILevel
 weight() = 80
+bmi() = weight() / 25600
 
 (declare-datatypes ((BMILevelt_t 0)) (((Obese_II) (Obese_I) (Normal) (Severely_Underweight) (Underweight) (Overweight) (Extreme_Obesity))))
 (declare-datatypes ((riskLevelt_t 0)) (((High) (Very_High) (Low) (Increased) (Extremely_High))))
