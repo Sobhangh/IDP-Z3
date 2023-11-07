@@ -902,9 +902,9 @@ class Operator(Expression):
         """
         if len(operands) == 0:
             if cls == AConjunction:
-                out = TRUE
+                out = copy(TRUE)
             elif cls == ADisjunction:
-                out = FALSE
+                out = copy(FALSE)
             else:
                 assert False, "Internal error"
         elif len(operands) == 1:
