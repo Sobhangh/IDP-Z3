@@ -50,6 +50,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 
 ### Interactive Consultant and Web IDE
+* issue #248: detect error for incorrect entry in a Int range
 * issue #283: Allow loading a default theory when theory is incorrect
 
 
