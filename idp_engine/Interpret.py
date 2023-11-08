@@ -272,15 +272,26 @@ def interpret(self: SymbolInterpretation, problem: Theory):
         elif self.sign == '≜':
             # add condition that the interpretation is total over the domain
             # ! x in dom(f): enum.contains(x)
-            #TODO if the domain of the symbol is known, no need to create an Expression
             q_vars = { f"${sort.decl.name}!{str(i)}$":
                        VARIABLE(f"${sort.decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
             quantees = [Quantee.make(v, sort=v.sort) for v in q_vars.values()]
-            expr = self.enumeration.contains(list(q_vars.values()), True)
-            constraint = FORALL(quantees, expr).interpret(problem, {})
-            constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
-            problem.constraints.append(constraint)
+
+            # is the domain of `self` enumerable ?
+            constraint1 = FORALL(quantees, FALSE)
+            get_supersets(constraint1, problem)
+            if constraint1.sub_exprs[0] == FALSE:  # no filter added => check immediately
+                domain = set(str(flatten(d)) for d in product(*constraint1.supersets))
+                if type(self.enumeration) == FunctionEnum:
+                    enumeration = set(str(d.args[:-1]) for d in self.enumeration.tuples)
+                else:
+                    enumeration = set(str(d.args) for d in self.enumeration.tuples)
+                self.check(domain == enumeration, f"Enumeration of {self.name} should cover its domain")
+            else:  # add a constraint to the problem
+                expr = self.enumeration.contains(list(q_vars.values()), True)
+                constraint = FORALL(quantees, expr).interpret(problem, {})
+                constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
+                problem.constraints.append(constraint)
 SymbolInterpretation.interpret = interpret
 
 

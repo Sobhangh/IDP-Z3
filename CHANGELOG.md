@@ -15,8 +15,9 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #289: Unsatisfiable theory without explanation
 * issue #293: add stable semantics + fix completion semantics
 * issue #294: speed up transitive closure of graph (+ fix import of deepcopy)
+* issue #296: improve performance of theories with large enumerations
 * issue #299: Order of declarations matter for symbols in definitions
-*
+* issue #302: avoid "maximum recursion depth exceeded" error for large enumerations
 
 
 ### Interactive Consultant and Web IDE
