@@ -37,7 +37,7 @@ from typing import (Optional, List, Union, Tuple, Set, Callable, TYPE_CHECKING,
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
-    from .Parse import SymbolDeclaration, SymbolInterpretation, Enumeration
+    from .Parse import Vocabulary, SymbolDeclaration, SymbolInterpretation, Enumeration
 
 from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
                     RESERVED_SYMBOLS, IDPZ3Error, Semantics)
@@ -422,10 +422,10 @@ class Expression(ASTNode):
         # vocabulary
         return any(e.has_decision() for e in self.sub_exprs)
 
-    def type_inference(self) -> dict[str, Symbol]:
+    def type_inference(self, voc: Vocabulary) -> dict[str, Symbol]:
         # returns a dictionary {Variable : Symbol}
         try:
-            return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
+            return dict(ChainMap(*(e.type_inference(voc) for e in self.sub_exprs)))
         except AttributeError as e:
             if "has no attribute 'sorts'" in str(e):
                 msg = f"Incorrect arity for {self}"
@@ -1132,7 +1132,7 @@ class AppliedSymbol(Expression):
                  is_enumeration='',
                  in_enumeration=''):
         self.annotations = annotations
-        self.symbol : Symbol = symbol
+        self.symbol : SymbolExpr = symbol
         self.sub_exprs = sub_exprs
         self.is_enumerated = is_enumerated
         self.is_enumeration = is_enumeration
@@ -1200,18 +1200,22 @@ class AppliedSymbol(Expression):
         return ((self.decl.block is not None and not self.decl.block.name == 'environment')
             or any(e.has_decision() for e in self.sub_exprs))
 
-    def type_inference(self):
-        if self.symbol.decl:
-            self.check(self.symbol.decl.arity == len(self.sub_exprs),
+    def type_inference(self, voc: Vocabulary):
+        decl = (voc.symbol_decls.get(self.symbol.s.name, None)
+                 if voc and hasattr(voc, "symbol_decls")
+                 and type(self.symbol) == SymbolExpr and not self.symbol.eval
+                 else None)
+        if decl:
+            self.check(decl.arity == len(self.sub_exprs),
                 f"Incorrect number of arguments in {self}: "
-                f"should be {self.symbol.decl.arity}")
+                f"should be {decl.arity}")
         try:
             out = {}
             for i, e in enumerate(self.sub_exprs):
-                if self.decl and isinstance(e, Variable):
-                    out[e.name] = self.decl.sorts[i]
+                if decl and type(e) in [Variable, UnappliedSymbol]:
+                    out[e.name] = decl.sorts[i]
                 else:
-                    out.update(e.type_inference())
+                    out.update(e.type_inference(voc))
             return out
         except AttributeError as e:
             #
@@ -1241,6 +1245,7 @@ class AppliedSymbol(Expression):
 class SymbolExpr(Expression):
     def __init__(self, parent, s, eval=''):
         self.eval = eval
+        self.s = s
         self.sub_exprs = [s]
         self.decl = self.sub_exprs[0].decl if not self.eval else None
         super().__init__()

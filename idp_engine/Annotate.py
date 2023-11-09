@@ -276,8 +276,9 @@ def annotate(self: Definition, voc, q_vars):
 
         canonical = deepcopy(renamed)
 
+        inferred = renamed.body.type_inference(voc)
         for v in vars.values():
-            renamed.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {})],
+            renamed.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {}, inferred)],
                                   renamed.body)
         self.renamed.setdefault(decl, []).append(renamed)
 
@@ -292,8 +293,9 @@ def annotate(self: Definition, voc, q_vars):
                 eq = EQUALS([nv, arg])
                 canonical.body = AND([eq, canonical.body])
 
+        inferred = canonical.body.type_inference(voc)
         for v in vars.values():
-            canonical.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {})],
+            canonical.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {}, inferred)],
                                     canonical.body)
 
         canonical.definiendum.sub_exprs = new_vars[:-1] if r.out else new_vars
@@ -321,8 +323,10 @@ def annotate(self, voc, q_vars):
                 f"{self}")
     # create head variables
     q_v = copy(q_vars)
+    inferred = self.definiendum.type_inference(voc)
+    inferred.update(self.body.type_inference(voc))
     for q in self.quantees:
-        q.annotate(voc, q_vars)
+        q.annotate(voc, q_vars, inferred)
         for vars in q.vars:
             for var in vars:
                 var.sort = q.sub_exprs[0] if q.sub_exprs else None
@@ -567,7 +571,7 @@ AIfExpr.annotate1 = annotate1
 
 # Class Quantee  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self, voc, q_vars, inferred):
     Expression.annotate(self, voc, q_vars)
     for vars in self.vars:
         self.check(not self.sub_exprs
@@ -579,21 +583,28 @@ def annotate(self, voc, q_vars):
                         or type(voc.symbol_decls[var.name]) == VarDeclaration,
                 f"the quantified variable '{var.name}' cannot have"
                 f" the same name as another symbol")
-            var.sort = (self.sub_exprs[0].decl.sorts[i]
+            # 1. get variable sort from the quantee, if possible
+            var.sort = (self.sub_exprs[0].decl.sorts[i]  # `!x in p` or `! (x,y) in p` or `!x in Concept[...]`
                         if self.sub_exprs and self.sub_exprs[0].decl
                         else None)
+            # 2. compare with variable declaration, if any
             var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
-            if self.subtype is None and var_decl:
+            if var_decl and type(var_decl) == VarDeclaration:
                 subtype = var_decl.subtype
-                self.check(var.sort is None
-                            or var.sort.name == subtype.name,
-                    f"Can't use declared {var.name} as a "
-                    f"{var.sort.name if var.sort else ''}")
-                if var.sort is None:
+                if var.sort:
+                    self.check(var.sort.name == subtype.name,
+                        f"Can't use declared {var.name} as a "
+                        f"{var.sort.name if var.sort else ''}")
+                else:
                     self.sub_exprs = [subtype.annotate(voc, {})]
                     var.sort = self.sub_exprs[0]
+            # 3. use type inference if still not found
+            if var.sort is None:
+                var.sort = inferred.get(var.name) if inferred else None
             var.type = var.sort.decl.name if var.sort and var.sort.decl else ''
             q_vars[var.name] = var
+    if not self.sub_exprs and var.sort:
+        self.sub_exprs = [var.sort]
     return self
 Quantee.annotate = annotate
 
@@ -603,8 +614,9 @@ Quantee.annotate = annotate
 def annotate(self, voc, q_vars):
     # also called by AAgregate.annotate
     q_v = copy(q_vars)
+    inferred = self.sub_exprs[0].type_inference(voc)
     for q in self.quantees:
-        q.annotate(voc, q_v)
+        q.annotate(voc, q_v, inferred)  # adds inner variables to q_v
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.annotate1()
 AQuantification.annotate = annotate
@@ -764,7 +776,8 @@ def annotate(self, voc, q_vars):
                     coc2 = FORALL(deepcopy(self.quantees), comp)
 
                     coc = AND([coc1, coc2])
-                    quantees = [Quantee.make(v, sort=v.sort).annotate(voc, {})
+                    inferred = coc.type_inference(voc)
+                    quantees = [Quantee.make(v, sort=v.sort).annotate(voc, {}, inferred)
                                 for v in q_vars.values()]
                     applied.co_constraint = (
                         coc if not quantees else

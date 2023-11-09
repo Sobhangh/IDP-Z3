@@ -380,18 +380,6 @@ def _prepare_interpret(self: Expression,
         _prepare_interpret(e, problem, subs)
 
     if isinstance(self, AQuantification) or isinstance(self, AAggregate):
-        # type inference
-        if 0 < len(self.sub_exprs):  # in case it was simplified away
-            inferred = self.sub_exprs[0].type_inference()
-            for q in self.quantees:
-                if not q.sub_exprs:
-                    assert len(q.vars) == 1 and q.arity == 1, \
-                        f"Internal error: interpret {q}"
-                    var = q.vars[0][0]
-                    self.check(var.name in inferred,
-                                f"can't infer type of {var.name}")
-                    var.sort = inferred[var.name]
-                    q.sub_exprs = [inferred[var.name]]
         get_supersets(self, problem)
 
 
