@@ -238,8 +238,7 @@ def benchmark():
     Benchmark known problems of increasing domain sizes.
     """
     import subprocess
-    benchmarks = {'domain': [1],
-                  'nqueens_mx': [4, 9, 14, 19, 24],
+    benchmarks = {'nqueens_mx': [4, 9, 14, 19, 24],
                   'missmanners_fixed_gender_mx': [16, 32, 64, 128],
                   'pigeon_mx': [100, 200, 300],
                   'sudoku_mx': [4, 9, 16],
@@ -247,6 +246,7 @@ def benchmark():
                   'edges_prop': [50, 100, 150],
                   'minesweeper_prop': [10, 20, 30],
                   'transitive_closure': [10, 50, 90],
+                  'adhesive': [50, 100, 150],
                   }
 
     timings = {}
