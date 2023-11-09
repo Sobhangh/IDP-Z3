@@ -270,8 +270,9 @@ def interpret(self: SymbolInterpretation, problem: Theory):
                             problem.assignments.assert__(e.formula(), TRUE, status)
 
         elif self.sign == '≜':
-            # add condition that the interpretation is total over the domain
-            # ! x in dom(f): enum.contains(x)
+            # add condition that the interpretation is total
+            # over the domain specified by the type signature
+            # ! x in domain(f): enum.contains(x)
             q_vars = { f"${sort.decl.name}!{str(i)}$":
                        VARIABLE(f"${sort.decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
@@ -280,14 +281,16 @@ def interpret(self: SymbolInterpretation, problem: Theory):
             # is the domain of `self` enumerable ?
             constraint1 = FORALL(quantees, FALSE)
             get_supersets(constraint1, problem)
-            if constraint1.sub_exprs[0] == FALSE:  # no filter added => check immediately
+            if constraint1.sub_exprs[0] == FALSE:  # no filter added
+                # the domain is enumerable => do the check immediately
                 domain = set(str(flatten(d)) for d in product(*constraint1.supersets))
                 if type(self.enumeration) == FunctionEnum:
                     enumeration = set(str(d.args[:-1]) for d in self.enumeration.tuples)
                 else:
                     enumeration = set(str(d.args) for d in self.enumeration.tuples)
                 self.check(domain == enumeration, f"Enumeration of {self.name} should cover its domain")
-            else:  # add a constraint to the problem
+            else:  # add a constraint to the problem, to be solved by Z3
+                # test case: tests/1240 FO{Core, Sugar, Int, PF)/LivingBeing.idp
                 expr = self.enumeration.contains(list(q_vars.values()), True)
                 constraint = FORALL(quantees, expr).interpret(problem, {})
                 constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
@@ -482,8 +485,22 @@ Type.extension = extension
 # Class AQuantification  ######################################################
 
 def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory]):
-    """determine the domain of the variables, if possible,
-    and add filter to the quantified expression if needed
+    """determine the extent of the variables, if possible,
+    and add a filter to the quantified expression if needed.
+    This is used to ground quantification over unary predicates.
+
+    Example:
+        type T := {1,2,3}
+        p : T -> Bool  // p is a subset of T
+        !x in p: q(x)
+
+        The formula is equivalent to `!x in T: p(x) => q(x).`
+        -> The superset of `p` is `{1,2,3}`, the filter is `p(x)`.
+        The grounding is `(p(1)=>q(1)) & (p(2)=>q(2)) & (p(3)=>q(3))`
+
+        If p is enumerated (`p:={1,2}`) in a structure, however,
+        the superset is now {1,2} and there is no need for a filter.
+        The grounding is `q(1) & q(2)`
     """
     self.new_quantees, self.vars1, self.supersets = [], [], []
     for q in self.quantees:
