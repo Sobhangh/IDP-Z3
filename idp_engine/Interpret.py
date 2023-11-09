@@ -501,6 +501,10 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
         If p is enumerated (`p:={1,2}`) in a structure, however,
         the superset is now {1,2} and there is no need for a filter.
         The grounding is `q(1) & q(2)`
+
+    Result:
+        `self.supersets` is updated to contain the supersets
+        `self.sub_exprs` are updated with the appropriate filters
     """
     self.new_quantees, self.vars1, self.supersets = [], [], []
     for q in self.quantees:
