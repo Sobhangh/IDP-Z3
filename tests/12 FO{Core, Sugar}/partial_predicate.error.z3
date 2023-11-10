@@ -16,9 +16,9 @@ Traceback (most recent call last):
   File "textx/model.py", line ??, in _end_model_construction
     obj.__init__(**attrs)
   File "idp_engine/Parse.py", line ??, in __init__
-    struct.annotate(self)
-  File "idp_engine/Annotate.py", line ??, in annotate
-    i.annotate(self)
+    struct.annotate_block(self)
+  File "idp_engine/Annotate.py", line ??, in annotate_block
+    i.annotate(self, {})
   File "idp_engine/Annotate.py", line ??, in annotate
     self.check(not(self.symbol.decl.out.decl.base_type.name == BOOL
   File "idp_engine/Expression.py", line ??, in check

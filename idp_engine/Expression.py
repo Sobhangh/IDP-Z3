@@ -37,7 +37,8 @@ from typing import (Optional, List, Union, Tuple, Set, Callable, TYPE_CHECKING,
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
-    from .Parse import Vocabulary, SymbolDeclaration, SymbolInterpretation, Enumeration
+    from .Parse import IDP, Vocabulary, SymbolDeclaration, SymbolInterpretation, Enumeration
+    from .Annotate import Annotated, Warnings
 
 from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
                     RESERVED_SYMBOLS, IDPZ3Error, Semantics)
@@ -93,11 +94,15 @@ class ASTNode(object):
             out[i.name] = i
         return out
 
-    def annotate(self, idp):
-        return  # monkey-patched
+    def annotate_block(self,
+                       idp: IDP,
+                       ) -> Warnings:
+        raise IDPZ3Error("Internal error") # monkey-patched
 
-    def set_variables(self: Expression) -> Expression:
-        return  self # monkey-patched
+    def annotate_declaration(self,
+                             voc: Vocabulary,
+                             ) -> ASTNode:
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def interpret(self, problem: Optional[Theory]) -> ASTNode:
         return self  # monkey-patched
@@ -145,48 +150,6 @@ class Annotations(ASTNode):
             self.check(k not in self.annotations,
                        f"Duplicate annotation: [{k}: {v}]")
             self.annotations[k] = v
-
-
-class Constructor(ASTNode):
-    """Constructor declaration
-
-    Attributes:
-        name (string): name of the constructor
-
-        sorts (List[Symbol]): types of the arguments of the constructor
-
-        type (string): name of the type that contains this constructor
-
-        arity (Int): number of arguments of the constructor
-
-        tester (SymbolDeclaration): function to test if the constructor
-        has been applied to some arguments (e.g., is_rgb)
-
-        symbol (Symbol): only for Symbol constructors
-
-        range: the list of identifiers
-    """
-
-    def __init__(self, parent,
-                 name: Union[UnappliedSymbol, str],
-                 args: Optional[List[Accessor]] = None):
-        self.name : str = (name.s.name if type(name) == UnappliedSymbol else
-                     name)
-        self.sorts = args if args is not None else []
-
-        self.arity = len(self.sorts)
-
-        self.type = None
-        self.symbol = None
-        self.tester = None
-        self.range: Optional[List[Expression]] = None
-
-    def __str__(self):
-        return (self.name if not self.sorts else
-                f"{self.name}({', '.join((str(a) for a in self.sorts))})" )
-
-def CONSTRUCTOR(name: str, args=None) -> Constructor:
-    return Constructor(None, name, args)
 
 
 class Accessor(ASTNode):
@@ -321,6 +284,22 @@ class Expression(ASTNode):
                 'str': self.str,
                 'co_constraint': self.co_constraint}
 
+    def annotate(self,
+                 voc: Vocabulary,
+                 q_vars: dict[str, Variable],
+                 ) -> Annotated:
+        raise IDPZ3Error("Internal error") # monkey-patched
+
+    def annotate_quantee(self,
+                 voc: Vocabulary,
+                 q_vars: dict[str, Variable],
+                 inferred: dict[str, Symbol]
+                 ) -> Annotated:
+        raise IDPZ3Error("Internal error") # monkey-patched
+
+    def set_variables(self: Expression) -> Expression:
+        return  self # monkey-patched
+
     def has_variables(self) -> bool:
         return any(e.has_variables() for e in self.sub_exprs)
 
@@ -435,7 +414,7 @@ class Expression(ASTNode):
             return {}  # dead code
 
     def __str__(self) -> str:
-        return ''  # monkey-patched
+        raise IDPZ3Error("Internal error")  # monkey-patched
 
     def _change(self: Expression,
                 sub_exprs: Optional[List[Expression]] = None,
@@ -522,6 +501,48 @@ class Expression(ASTNode):
                           mode: Semantics
                           ) -> Expression:
         return self  # monkey-patched
+
+
+class Constructor(Expression):
+    """Constructor declaration
+
+    Attributes:
+        name (string): name of the constructor
+
+        sorts (List[Symbol]): types of the arguments of the constructor
+
+        type (string): name of the type that contains this constructor
+
+        arity (Int): number of arguments of the constructor
+
+        tester (SymbolDeclaration): function to test if the constructor
+        has been applied to some arguments (e.g., is_rgb)
+
+        symbol (Symbol): only for Symbol constructors
+
+        range: the list of identifiers
+    """
+
+    def __init__(self, parent,
+                 name: Union[UnappliedSymbol, str],
+                 args: Optional[List[Accessor]] = None):
+        self.name : str = (name.s.name if type(name) == UnappliedSymbol else
+                     name)
+        self.sorts = args if args is not None else []
+
+        self.arity = len(self.sorts)
+
+        self.type = None
+        self.symbol = None
+        self.tester = None
+        self.range: Optional[List[Expression]] = None
+
+    def __str__(self):
+        return (self.name if not self.sorts else
+                f"{self.name}({', '.join((str(a) for a in self.sorts))})" )
+
+def CONSTRUCTOR(name: str, args=None) -> Constructor:
+    return Constructor(None, name, args)
 
 
 class Symbol(Expression):
@@ -1360,6 +1381,7 @@ class Number(Expression):
         else:
             self.py_value = int(self.number)
             self.type = INT
+        self.decl = None
 
     def __str__(self): return self.number
 

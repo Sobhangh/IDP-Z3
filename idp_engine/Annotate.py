@@ -23,13 +23,14 @@ from __future__ import annotations
 
 from copy import copy, deepcopy
 from itertools import chain
-import string
+from typing import Union, List, NamedTuple, Optional
+import string  # .digits
 
-from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
+from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
+from .Expression import (ASTNode, Expression, Symbol, SYMBOL, Type, TYPE,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, Operator, AComparison, AUnary,
@@ -40,14 +41,31 @@ from .Expression import (Expression, Symbol, SYMBOL, Type, TYPE,
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, Semantics)
 
+class Warning(NamedTuple):
+    type: str
+    line: int
+    colStart: int
+    colEnd: int
+    details: str
+Warnings = Union[Warning, List["Warnings"]]  # nested list of Warning
+
+Annotated = Expression
+# class Annotated(NamedTuple):
+#     node: Expression
+#     wdf: Expression
+#     warnings: Warnings
+
 
 # Class Vocabulary  #######################################################
 
-def annotate(self, idp):
+def annotate_block(self: ASTNode,
+                   idp: IDP,
+                   ) -> Warnings:
+    assert isinstance(self, Vocabulary), "Internal error"
     self.idp = idp
 
     # process Import and determine the constructors of CONCEPT
-    temp = {}  # contains the new self.declarations
+    temp: dict[str, Declaration] = {}  # contains the new self.declarations
     for s in self.declarations:
         if isinstance(s, Import):
             other = self.idp.vocabularies[s.name]
@@ -71,7 +89,7 @@ def annotate(self, idp):
 
     # annotate declarations
     for s in self.declarations:
-        s.annotate(self)  # updates self.symbol_decls
+        s.annotate_declaration(self)  # updates self.symbol_decls
 
     concepts = self.symbol_decls[CONCEPT]
     for constructor in concepts.constructors:
@@ -82,13 +100,16 @@ def annotate(self, idp):
     for c in concepts.constructors:
         assert not c.sorts, "Internal error"
         concepts.map[str(c)] = UnappliedSymbol.construct(c)
-Vocabulary.annotate = annotate
+    return []
+Vocabulary.annotate_block = annotate_block
 
 
 # Class TypeDeclaration  #######################################################
 
-def annotate(self, voc):
-    self.voc = voc
+def annotate_declaration(self: ASTNode,
+                         voc: Vocabulary,
+                         ) -> ASTNode:
+    assert isinstance(self, TypeDeclaration), "Internal error"
     self.block = voc
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
@@ -102,13 +123,16 @@ def annotate(self, voc):
                     f"duplicate '{c.name}' constructor for '{self.name}' type")
         voc.symbol_decls[c.name] = c
     if self.interpretation:
-        self.interpretation.annotate(voc)
-TypeDeclaration.annotate = annotate
+        self.interpretation.annotate(voc, {})
+    return self
+TypeDeclaration.annotate_declaration = annotate_declaration
 
 
 # Class SymbolDeclaration  #######################################################
 
-def annotate(self, voc):
+def annotate_declaration(self: SymbolDeclaration,
+                         voc: Vocabulary,
+                         ) -> ASTNode:
     self.voc = voc
     self.check(self.name is not None, "Internal error")
     self.check(self.name not in voc.symbol_decls,
@@ -125,12 +149,15 @@ def annotate(self, voc):
     self.base_type = (None if self.out.name != BOOL or self.arity != 1 else
                       self.sorts[0].decl.base_type)
     return self
-SymbolDeclaration.annotate = annotate
+SymbolDeclaration.annotate_declaration = annotate_declaration
 
 
 # Class VarDeclaration  #######################################################
 
-def annotate(self, voc):
+def annotate_declaration(self: ASTNode,
+                         voc: Vocabulary,
+                         ) -> ASTNode:
+    assert isinstance(self, VarDeclaration), "Internal error"
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     self.check(self.name == self.name.rstrip(string.digits),
@@ -138,12 +165,16 @@ def annotate(self, voc):
     voc.symbol_decls[self.name] = self
     self.subtype.annotate(voc, {})
     return self
-VarDeclaration.annotate = annotate
+VarDeclaration.annotate_declaration = annotate_declaration
 
 
 # Class Symbol  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
+    assert isinstance(self, Symbol), "Internal error"
     if self.name in q_vars:
         return q_vars[self.name]
 
@@ -158,7 +189,11 @@ Symbol.annotate = annotate
 
 # Class Type  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
+    assert isinstance(self, Type), "Internal error"
     Symbol.annotate(self, voc, q_vars)
     if self.out:
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
@@ -169,25 +204,33 @@ Type.annotate = annotate
 
 # Class TheoryBlock  #######################################################
 
-def annotate(self, idp):
+def annotate_block(self: ASTNode,
+                   idp: IDP,
+                   ) -> Warnings:
+    assert isinstance(self, TheoryBlock), "Internal error"
     self.check(self.vocab_name in idp.vocabularies,
                 f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
 
     for i in self.interpretations.values():
-        i.annotate(self)
+        i.annotate(self, {})
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self.voc, {}) for e in self.definitions]
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])
-TheoryBlock.annotate = annotate
+    return []
+TheoryBlock.annotate_block = annotate_block
 
 
 # Class Definition  #######################################################
 
-def annotate(self: Definition, voc, q_vars):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
+    assert isinstance(self, Definition), "Internal error"
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
     # create level-mapping symbols, as needed
@@ -278,7 +321,8 @@ def annotate(self: Definition, voc, q_vars):
 
         inferred = renamed.body.type_inference(voc)
         for v in vars.values():
-            renamed.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {}, inferred)],
+            renamed.body = EXISTS([Quantee.make(v, sort=v.sort)
+                                   .annotate_quantee(voc, {}, inferred)],
                                   renamed.body)
         self.renamed.setdefault(decl, []).append(renamed)
 
@@ -295,7 +339,8 @@ def annotate(self: Definition, voc, q_vars):
 
         inferred = canonical.body.type_inference(voc)
         for v in vars.values():
-            canonical.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {}, inferred)],
+            canonical.body = EXISTS([Quantee.make(v, sort=v.sort)
+                                     .annotate_quantee(voc, {}, inferred)],
                                     canonical.body)
 
         canonical.definiendum.sub_exprs = new_vars[:-1] if r.out else new_vars
@@ -316,7 +361,11 @@ Definition.annotate = annotate
 
 # Class Rule  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
+    assert isinstance(self, Rule), "Internal error"
     self.original = copy(self)
     self.check(not self.definiendum.symbol.is_intentional(),
                 f"No support for intentional objects in the head of a rule: "
@@ -326,7 +375,7 @@ def annotate(self, voc, q_vars):
     inferred = self.definiendum.type_inference(voc)
     inferred.update(self.body.type_inference(voc))
     for q in self.quantees:
-        q.annotate(voc, q_vars, inferred)
+        q.annotate_quantee(voc, q_vars, inferred)
         for vars in q.vars:
             for var in vars:
                 var.sort = q.sub_exprs[0] if q.sub_exprs else None
@@ -354,7 +403,9 @@ def rename_args(self: Rule, subs: dict[str, Expression]):
 
 # Class Structure  #######################################################
 
-def annotate(self, idp):
+def annotate_block(self: ASTNode,
+                   idp: IDP,
+                   ) -> Warnings:
     """
     Annotates the structure with the enumerations found in it.
     Every enumeration is converted into an assignment, which is added to
@@ -363,24 +414,30 @@ def annotate(self, idp):
     :arg idp: a `Parse.IDP` object.
     :returns None:
     """
+    assert isinstance(self, Structure), "Internal error"
     self.check(self.vocab_name in idp.vocabularies,
                f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
     for i in self.interpretations.values():
-        i.annotate(self)
+        i.annotate(self, {})
     self.voc.add_voc_to_block(self)
-Structure.annotate = annotate
+    return []
+Structure.annotate_block = annotate_block
 
 
 # Class SymbolInterpretation  #######################################################
 
-def annotate(self, block):
+def annotate(self: Expression,
+             block: ASTNode,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     """
     Annotate the symbol.
 
     :arg block: a Structure object
     :returns None:
     """
+    assert isinstance(self, SymbolInterpretation), "Internal error"
     voc = block.voc
     self.block = block
     self.symbol = SYMBOL(self.name).annotate(voc, {})
@@ -396,7 +453,7 @@ def annotate(self, block):
                     f"duplicate '{c.name}' constructor for '{self.name}' symbol")
             voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
 
-    enumeration.annotate(voc)
+    enumeration.annotate(voc, q_vars)
 
     self.check(self.is_type_enumeration
                 or all(s.name not in [INT, REAL, DATE]  # finite domain #TODO
@@ -417,31 +474,46 @@ def annotate(self, block):
         self.check(self.default.is_value(),
                    f"Value for '{self.name}' may only use numerals,"
                    f" identifiers or constructors: '{self.default}'")
+    return self
 SymbolInterpretation.annotate = annotate
 
 
 # Class Enumeration  #######################################################
 
-def annotate(self, voc):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
+    assert isinstance(self, Enumeration), "Internal error"
     if self.tuples:
         for t in self.tuples:
-            t.annotate(voc)
+            t.annotate(voc, q_vars)
+    return self
 Enumeration.annotate = annotate
 
 
 # Class TupleIDP  #######################################################
 
-def annotate(self, voc):
-    self.args = [arg.annotate(voc, {}) for arg in self.args]
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
+    assert isinstance(self, TupleIDP), "Internal error"
+    self.args = [arg.annotate(voc, q_vars) for arg in self.args]
     self.check(all(a.is_value() for a in self.args),
                f"Interpretation may only contain numerals,"
                f" identifiers or constructors: '{self}'")
+    return self
 TupleIDP.annotate = annotate
 
 
 # Class ConstructedFrom  #######################################################
 
-def annotate(self, voc):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
+    assert isinstance(self, ConstructedFrom), "Internal error"
     for c in self.constructors:
         for i, ts in enumerate(c.sorts):
             if ts.accessor is None:
@@ -451,31 +523,40 @@ def annotate(self, voc):
                            "Accessors used at incompatible indices")
             else:
                 self.accessors[ts.accessor.name] = i
-        c.annotate(voc)
+        c.annotate(voc, q_vars)
+    return self
 ConstructedFrom.annotate = annotate
 
 
 # Class Constructor  #######################################################
 
-def annotate(self, voc):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
+    assert isinstance(self, Constructor), "Internal error"
     for a in self.sorts:
         self.check(a.type in voc.symbol_decls,
                    f"Unknown type: {a.type}" )
         a.decl = SymbolDeclaration(annotations='', name=a.accessor,
                                    sorts=[TYPE(self.type)],
                                    out=TYPE(a.type))
-        a.decl.annotate(voc)
+        a.decl.annotate_declaration(voc)
     self.tester = SymbolDeclaration(annotations='',
                                     name=SYMBOL(f"is_{self.name}"),
                                     sorts=[TYPE(self.type)],
                                     out=TYPE(BOOL))
-    self.tester.annotate(voc)
+    self.tester.annotate_declaration(voc)
+    return self
 Constructor.annotate = annotate
 
 
 # Class Display  #######################################################
 
-def annotate(self, idp):
+def annotate_block(self: ASTNode,
+                   idp: IDP,
+                   ) -> Warnings:
+    assert isinstance(self, Display), "Internal error"
     self.voc = idp.vocabulary
 
     # add display predicates
@@ -483,7 +564,7 @@ def annotate(self, idp):
     viewType = TypeDeclaration(name='_ViewType',
         constructors=[CONSTRUCTOR('normal'),
                         CONSTRUCTOR('expanded')])
-    viewType.annotate(self.voc)
+    viewType.annotate_declaration(self.voc)
 
     # Check the AST for any constructors that belong to open types.
     # For now, the only open types are `unit` and `heading`.
@@ -492,7 +573,7 @@ def annotate(self, idp):
         constraint.generate_constructors(open_constructors)
 
     # Next, we convert the list of constructors to actual types.
-    open_types = {}
+    open_types: dict[str, Optional[Symbol]] = {}
     for name, constructors in open_constructors.items():
         # If no constructors were found, then the type is not used.
         if not constructors:
@@ -502,7 +583,7 @@ def annotate(self, idp):
         type_name = name.capitalize()  # e.g. type Unit (not unit)
         open_type = TypeDeclaration(name=type_name,
                                     constructors=constructors)
-        open_type.annotate(self.voc)
+        open_type.annotate_declaration(self.voc)
         open_types[name] = SYMBOL(type_name)
 
     for name, out in [
@@ -521,19 +602,23 @@ def annotate(self, idp):
         symbol_decl = SymbolDeclaration(annotations='',
                                         name=SYMBOL(name),
                                         sorts=[], out=out)
-        symbol_decl.annotate(self.voc)
+        symbol_decl.annotate_declaration(self.voc)
 
     # annotate constraints and interpretations
     for constraint in self.constraints:
         constraint.annotate(self.voc, {})
     for i in self.interpretations.values():
-        i.annotate(self)
-Display.annotate = annotate
+        i.annotate(self, {})
+    return []
+Display.annotate_block = annotate_block
 
 
 # Class Expression  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     """annotate tree after parsing
 
     Resolve names and determine type as well as variables in the expression
@@ -571,7 +656,12 @@ AIfExpr.set_variables = set_variables
 
 # Class Quantee  #######################################################
 
-def annotate(self, voc, q_vars, inferred:dict[str, Symbol]):
+def annotate_quantee(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable],
+             inferred: dict[str, Symbol]
+             ) -> Annotated:
+    assert isinstance(self, Quantee), "Internal error"
     Expression.annotate(self, voc, q_vars)
     for vars in self.vars:
         self.check(not self.sub_exprs
@@ -606,17 +696,21 @@ def annotate(self, voc, q_vars, inferred:dict[str, Symbol]):
     if not self.sub_exprs and var.sort:
         self.sub_exprs = [var.sort]
     return self
-Quantee.annotate = annotate
+Quantee.annotate_quantee = annotate_quantee
 
 
 # Class AQuantification  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     # also called by AAgregate.annotate
+    assert isinstance(self, AQuantification) or isinstance(self, AAggregate), "Internal error"
     q_v = copy(q_vars)
     inferred = self.sub_exprs[0].type_inference(voc)
     for q in self.quantees:
-        q.annotate(voc, q_v, inferred)  # adds inner variables to q_v
+        q.annotate_quantee(voc, q_v, inferred)  # adds inner variables to q_v
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
     return self.set_variables()
 AQuantification.annotate = annotate
@@ -636,7 +730,10 @@ AQuantification.set_variables = set_variables
 
 # Class Operator  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Operator,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     self = Expression.annotate(self, voc, q_vars)
 
     for e in self.sub_exprs:
@@ -677,7 +774,10 @@ AEquivalence.set_variables = set_variables
 
 # Class ARImplication  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: ARImplication,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     # reverse the implication
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     out = AImplication.make(ops=['⇒'], operands=list(reversed(list(self.sub_exprs))),
@@ -689,7 +789,10 @@ ARImplication.annotate = annotate
 
 # Class AComparison  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: AComparison,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     out = Operator.annotate(self, voc, q_vars)
     out.type = BOOL
 
@@ -725,7 +828,11 @@ AUnary.set_variables = set_variables
 
 # Class AAggregate  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Expression,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
+    assert isinstance(self, AAggregate), "Internal error"
     if not self.annotated:
 
         self = AQuantification.annotate(self, voc, q_vars)
@@ -756,7 +863,7 @@ def annotate(self, voc, q_vars):
                         "_"+self.str, # name `_ *`
                         len(q_vars),  # arity
                         [TYPE(v.sort.code) for v in q_vars.values()],
-                        TYPE(self.type)).annotate(voc)    # output_domain
+                        TYPE(self.type)).annotate_declaration(voc)    # output_domain
                     to_create = True
                 symbol = SYMBOL(symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
@@ -777,7 +884,8 @@ def annotate(self, voc, q_vars):
 
                     coc = AND([coc1, coc2])
                     inferred = coc.type_inference(voc)
-                    quantees = [Quantee.make(v, sort=v.sort).annotate(voc, {}, inferred)
+                    quantees = [Quantee.make(v, sort=v.sort)
+                                .annotate_quantee(voc, {}, inferred)
                                 for v in q_vars.values()]
                     applied.co_constraint = (
                         coc if not quantees else
@@ -792,7 +900,10 @@ AAggregate.set_variables = AQuantification.set_variables
 
 # Class AppliedSymbol  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: AppliedSymbol,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     self.symbol = self.symbol.annotate(voc, q_vars)
     if self.symbol.decl:
         self.check(self.symbol.decl.arity == len(self.sub_exprs)
@@ -804,7 +915,7 @@ def annotate(self, voc, q_vars):
                f"Constructor `{self.symbol}` cannot be applied to argument(s)")
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
-        self.in_enumeration.annotate(voc)
+        self.in_enumeration.annotate(voc, q_vars)
     out = self.set_variables()
 
     # move the negation out
@@ -830,7 +941,10 @@ AppliedSymbol.set_variables = set_variables
 
 # Class SymbolExpr  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: SymbolExpr,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     out = Expression.annotate(self, voc, q_vars)
     return out.simplify1()
 SymbolExpr.annotate = annotate
@@ -838,7 +952,10 @@ SymbolExpr.annotate = annotate
 
 # Class Variable  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Variable,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     self.type = self.sort.decl.name if self.sort and self.sort.decl else ''
     return self
 Variable.annotate = annotate
@@ -846,7 +963,10 @@ Variable.annotate = annotate
 
 # Class Number  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: Number,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     self.decl = voc.symbol_decls[self.type]
     return self
 Number.annotate = annotate
@@ -854,7 +974,10 @@ Number.annotate = annotate
 
 # Class UnappliedSymbol  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self: UnappliedSymbol,
+             voc: Vocabulary,
+             q_vars: dict[str, Variable]
+             ) -> Annotated:
     if self.name in q_vars:  # ignore VarDeclaration
         return q_vars[self.name]
     if self.name in voc.symbol_decls:
@@ -867,9 +990,10 @@ def annotate(self, voc, q_vars):
     #     out = AppliedSymbol.make(self.s, self.sub_exprs)
     #     return out.annotate(voc, q_vars)
     # If this code is reached, an undefined symbol was present.
-    if self.name.rstrip(string.digits) in q_vars:  # after considering it as a declared symbol
-        return self
-    self.check(False, f"Symbol not in vocabulary: {self}")
+      # after considering it as a declared symbol
+    self.check(self.name.rstrip(string.digits) in q_vars,
+               f"Symbol not in vocabulary: {self}")
+    return self
 UnappliedSymbol.annotate = annotate
 
 

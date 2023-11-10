@@ -198,11 +198,11 @@ class IDP(ASTNode):
         self.display = displays[0] if len(displays) == 1 else None
 
         for voc in self.vocabularies.values():
-            voc.annotate(self)
+            voc.annotate_block(self)
         for t in self.theories.values():
-            t.annotate(self)
+            t.annotate_block(self)
         for struct in self.structures.values():
-            struct.annotate(self)
+            struct.annotate_block(self)
 
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
@@ -294,7 +294,7 @@ class Vocabulary(ASTNode):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
         self.idp = None  # parent object
-        self.symbol_decls: dict[str, Declaration] = {}
+        self.symbol_decls: dict[str, Union[Declaration, VarDeclaration]] = {}
 
         self.name = 'V' if not self.name else self.name
         self.voc = self
@@ -503,7 +503,7 @@ class SymbolDeclaration(ASTNode):
         optimizable (bool):
             whether this symbol should get optimize buttons in the IC
 
-        voc (Vocabulary): the vocabulary block that contains it
+        block (Vocabulary): the vocabulary block that contains it
     """
 
     def __init__(self, **kwargs):
@@ -645,12 +645,13 @@ class TheoryBlock(ASTNode):
         for definition in self.definitions:
             for rule in definition.rules:
                 rule.block = self
+        self.voc = None
 
     def __str__(self):
         return self.name
 
 
-class Definition(ASTNode):
+class Definition(Expression):
     """ The class of AST nodes representing an inductive definition.
         id (num): unique identifier for each definition
 
@@ -730,7 +731,7 @@ class Definition(ASTNode):
         pass # monkey-patched
 
 
-class Rule(ASTNode):
+class Rule(Expression):
     def __init__(self, **kwargs):
         self.annotations = kwargs.pop('annotations')
         self.quantees = kwargs.pop('quantees')
@@ -755,6 +756,8 @@ class Rule(ASTNode):
         return (f"{quant}{self.definiendum} "
                 f"{(' = ' + str(self.out)) if self.out else ''}"
                 f"← {str(self.body)}")
+
+    def __str__(self): return repr(self)
 
     def __deepcopy__(self, memo):
         out = copy(self)
@@ -796,7 +799,7 @@ class Structure(ASTNode):
         return self.name
 
 
-class SymbolInterpretation(ASTNode):
+class SymbolInterpretation(Expression):
     """
     AST node representing `<symbol> := { <identifiers*> } else <default>.`
 
@@ -901,7 +904,7 @@ class SymbolInterpretation(ASTNode):
             return out
 
 
-class Enumeration(ASTNode):
+class Enumeration(Expression):
     """Represents an enumeration of tuples of expressions.
     Used for predicates, or types without n-ary constructors.
 
@@ -1054,7 +1057,7 @@ class ConstructedFrom(Enumeration):
                 (None, filter))
 
 
-class TupleIDP(ASTNode):
+class TupleIDP(Expression):
     def __init__(self, **kwargs):
         self.args: List[Identifier] = kwargs.pop('args')
         self.code = intern(",".join([str(a) for a in self.args]))
@@ -1156,7 +1159,7 @@ class Ranges(Enumeration):
         return(None, filter)
 
 
-class RangeElement(ASTNode):
+class RangeElement(Expression):
     def __init__(self, **kwargs):
         self.fromI = kwargs.pop('fromI')
         self.toI = kwargs.pop('toI')
@@ -1213,6 +1216,7 @@ class Display(ASTNode):
         self.optionalRelevance = False
         self.manualRelevance = False
         self.name = "display"
+        self.voc = None
 
     def run(self, idp):
         """apply the display block to the idp theory"""

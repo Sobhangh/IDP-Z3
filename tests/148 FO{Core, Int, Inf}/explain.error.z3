@@ -16,8 +16,8 @@ Traceback (most recent call last):
   File "textx/model.py", line ??, in _end_model_construction
     obj.__init__(**attrs)
   File "idp_engine/Parse.py", line ??, in __init__
-    t.annotate(self)
-  File "idp_engine/Annotate.py", line ??, in annotate
+    t.annotate_block(self)
+  File "idp_engine/Annotate.py", line ??, in annotate_block
     self.definitions = [e.annotate(self.voc, {}) for e in self.definitions]
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in <listcomp>
