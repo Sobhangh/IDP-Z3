@@ -220,6 +220,9 @@ def lint_fo(idp_file, timing=True, print_ast=False):
         total += number
         output_str += extra_str
 
+        output_str += "\n".join(f"Warning: line {msg.line} - colStart {msg.colStart} - colEnd {msg.colEnd} => {msg.details}"
+                                for msg in idp.warnings)
+
         output_str += f"\n---------- Total number detections: {total} ----------\n"
 
     except IDPZ3Error as e1:

@@ -44,7 +44,7 @@ from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR,
                          TRUE, FALSE, EQUALS, AND, OR)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
-                    MAX_QUANTIFIER_EXPANSION, Semantics as S)
+                    MAX_QUANTIFIER_EXPANSION, Semantics as S, flatten)
 
 if TYPE_CHECKING:
     from .Theory import Theory
@@ -184,6 +184,8 @@ class IDP(ASTNode):
         procedures (dict[str, Procedure]): list of procedure blocks, by name
 
         display (Display, Optional): display block, if any
+
+        warnings (Warnings): list of warnings
     """
     def __init__(self, **kwargs):
         # log("parsing done")
@@ -199,8 +201,8 @@ class IDP(ASTNode):
 
         for voc in self.vocabularies.values():
             voc.annotate_block(self)
-        for t in self.theories.values():
-            t.annotate_block(self)
+        self.warnings = flatten(t.annotate_block(self)
+                                for t in self.theories.values())
         for struct in self.structures.values():
             struct.annotate_block(self)
 

@@ -19,7 +19,7 @@
     Various utilities (in particular, OrderedSet)
 """
 from __future__ import annotations
-from typing import TYPE_CHECKING, Iterator, Union, Optional
+from typing import TYPE_CHECKING, Iterator, Union, Optional, List
 
 from collections.abc import Iterable
 from datetime import datetime
@@ -106,6 +106,12 @@ def unquote(s: str) -> str:
         return s[1:-1]
     return s
 
+def flatten(a: List) -> List:
+    # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
+    out = []
+    for sublist in a:
+        out.extend(sublist)
+    return out
 
 # OrderedSet  #############################################
 

@@ -47,7 +47,7 @@ from .Expression import (catch_error, RecDef, Symbol, SYMBOL, AIfExpr, IF,
                          VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
 from .Theory import Theory
 from .utils import (BOOL, INT, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
-                    GOAL_SYMBOL, EXPAND, CO_CONSTR_RECURSION_DEPTH, Semantics)
+                    GOAL_SYMBOL, EXPAND, flatten)
 
 
 # class Import  ###########################################################
@@ -560,12 +560,6 @@ def _add_filter(q: str, expr: Expression, filter: Callable, args: List[Variable]
             out = IF(applied, expr, Number(number="0"))
     return out
 
-def flatten(a):
-    # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
-    out = []
-    for sublist in a:
-        out.extend(sublist)
-    return out
 
 @clone_when_necessary
 def _interpret(self: AQuantification | AAggregate,

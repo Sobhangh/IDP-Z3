@@ -42,7 +42,6 @@ from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, Semantics)
 
 class Warning(NamedTuple):
-    type: str
     line: int
     colStart: int
     colEnd: int
@@ -219,7 +218,7 @@ def annotate_block(self: ASTNode,
 
     self.constraints = OrderedSet([e.annotate(self.voc, {})
                                     for e in self.constraints])
-    return []
+    return [Warning(1, 1, 10, "Hello")]
 TheoryBlock.annotate_block = annotate_block
 
 
