@@ -546,27 +546,27 @@ def annotate(self, voc, q_vars):
         Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-    return self.annotate1()
+    return self.set_variables()
 Expression.annotate = annotate
 
 
-def annotate1(self):
+def set_variables(self: Expression) -> Expression:
     " annotations that are common to __init__ and make() "
     self.variables = set()
     for e in self.sub_exprs:
         self.variables.update(e.variables)
     return self
-Expression.annotate1 = annotate1
+Expression.set_variables = set_variables
 
 
 # Class AIfExpr  #######################################################
 
-def annotate1(self):
+def set_variables(self: AIfExpr) -> Expression:
     self.type = self.sub_exprs[AIfExpr.THEN].type
     if not self.type:
         self.type = self.sub_exprs[AIfExpr.ELSE].type
-    return Expression.annotate1(self)
-AIfExpr.annotate1 = annotate1
+    return Expression.set_variables(self)
+AIfExpr.set_variables = set_variables
 
 
 # Class Quantee  #######################################################
@@ -618,11 +618,11 @@ def annotate(self, voc, q_vars):
     for q in self.quantees:
         q.annotate(voc, q_v, inferred)  # adds inner variables to q_v
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-    return self.annotate1()
+    return self.set_variables()
 AQuantification.annotate = annotate
 
-def annotate1(self):
-    Expression.annotate1(self)
+def set_variables(self: AQuantification) -> Expression:
+    Expression.set_variables(self)
     for q in self.quantees:  # remove declared variables
         for vs in q.vars:
             for v in vs:
@@ -631,7 +631,7 @@ def annotate1(self):
         for sort in q.sub_exprs:
             self.variables.update(sort.variables)
     return self
-AQuantification.annotate1 = annotate1
+AQuantification.set_variables = set_variables
 
 
 # Class Operator  #######################################################
@@ -646,34 +646,34 @@ def annotate(self, voc, q_vars):
     return self
 Operator.annotate = annotate
 
-def annotate1(self):
+def set_variables(self: Operator) -> Expression:
     if self.type is None:  # not a BOOL operator
         self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
                 else INT if any(e.type == INT for e in self.sub_exprs) \
                 else DATE if any(e.type == DATE for e in self.sub_exprs) \
                 else self.sub_exprs[0].type  # constructed type, without arithmetic
-    return Expression.annotate1(self)
-Operator.annotate1 = annotate1
+    return Expression.set_variables(self)
+Operator.set_variables = set_variables
 
 
 # Class AImplication  #######################################################
 
-def annotate1(self):
+def set_variables(self: AImplication) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Implication is not associative.  Please use parenthesis.")
     self.type = BOOL
-    return Expression.annotate1(self)
-AImplication.annotate1 = annotate1
+    return Expression.set_variables(self)
+AImplication.set_variables = set_variables
 
 
 # Class AEquivalence  #######################################################
 
-def annotate1(self):
+def set_variables(self: AEquivalence) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Equivalence is not associative.  Please use parenthesis.")
     self.type = BOOL
-    return Expression.annotate1(self)
-AEquivalence.annotate1 = annotate1
+    return Expression.set_variables(self)
+AEquivalence.set_variables = set_variables
 
 # Class ARImplication  #######################################################
 
@@ -715,12 +715,12 @@ AComparison.annotate = annotate
 
 # Class AUnary  #######################################################
 
-def annotate1(self):
+def set_variables(self: AUnary) -> Expression:
     if len(self.operators) % 2 == 0: # negation of negation
         return self.sub_exprs[0]
     self.type = self.sub_exprs[0].type
-    return Expression.annotate1(self)
-AUnary.annotate1 = annotate1
+    return Expression.set_variables(self)
+AUnary.set_variables = set_variables
 
 
 # Class AAggregate  #######################################################
@@ -733,7 +733,7 @@ def annotate(self, voc, q_vars):
         if self.aggtype == "sum" and len(self.sub_exprs) == 2:
             self.original = copy(self)
             self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
-                                    self.sub_exprs[0], ZERO).annotate1()]
+                                    self.sub_exprs[0], ZERO).set_variables()]
 
         if self.aggtype == "#":
             self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
@@ -787,7 +787,7 @@ def annotate(self, voc, q_vars):
         self.annotated = True
     return self
 AAggregate.annotate = annotate
-AAggregate.annotate1 = AQuantification.annotate1
+AAggregate.set_variables = AQuantification.set_variables
 
 
 # Class AppliedSymbol  #######################################################
@@ -805,7 +805,7 @@ def annotate(self, voc, q_vars):
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc)
-    out = self.annotate1()
+    out = self.set_variables()
 
     # move the negation out
     if 'not' in self.is_enumerated:
@@ -820,12 +820,12 @@ def annotate(self, voc, q_vars):
     return out
 AppliedSymbol.annotate = annotate
 
-def annotate1(self):
-    out = Expression.annotate1(self)
-    out.symbol = out.symbol.annotate1()
+def set_variables(self: AppliedSymbol) -> Expression:
+    out = Expression.set_variables(self)
+    out.symbol = out.symbol.set_variables()
     out.variables.update(out.symbol.variables)
     return out.simplify1()
-AppliedSymbol.annotate1 = annotate1
+AppliedSymbol.set_variables = set_variables
 
 
 # Class SymbolExpr  #######################################################
@@ -875,7 +875,7 @@ UnappliedSymbol.annotate = annotate
 
 # Class Brackets  #######################################################
 
-def annotate1(self):
+def set_variables(self: Brackets) -> Expression:
     if not self.annotations:
         return self.sub_exprs[0]  # remove the bracket
     self.type = self.sub_exprs[0].type
@@ -883,7 +883,7 @@ def annotate1(self):
         self.sub_exprs[0].annotations = self.annotations
     self.variables = self.sub_exprs[0].variables
     return self
-Brackets.annotate1 = annotate1
+Brackets.set_variables = set_variables
 
 
 Done = True

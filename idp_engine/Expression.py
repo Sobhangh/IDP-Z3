@@ -96,8 +96,8 @@ class ASTNode(object):
     def annotate(self, idp):
         return  # monkey-patched
 
-    def annotate1(self):
-        return  # monkey-patched
+    def set_variables(self: Expression) -> Expression:
+        return  self # monkey-patched
 
     def interpret(self, problem: Optional[Theory]) -> ASTNode:
         return self  # monkey-patched
@@ -661,7 +661,7 @@ class AIfExpr(Expression):
              else_f: Expression
              ) -> 'AIfExpr':
         out = (cls)(None, if_f=if_f, then_f=then_f, else_f=else_f)
-        return out.annotate1().simplify1()
+        return out.set_variables().simplify1()
 
     def __str__(self):
         return (f"if {self.sub_exprs[AIfExpr.IF  ].str}"
@@ -733,7 +733,7 @@ class Quantee(Expression):
              sort: Optional[SymbolExpr] = None
              ) -> 'Quantee':
         out = (cls) (None, [var], subtype=subtype, sort=sort)
-        return out.annotate1()
+        return out.set_variables()
 
     def __str__(self):
         signature = ("" if len(self.sub_exprs) <= 1 else
@@ -806,7 +806,7 @@ class AQuantification(Expression):
              ) -> 'AQuantification':
         "make and annotate a quantified formula"
         out = cls(None, annotations, q, quantees, f)
-        return out.annotate1()
+        return out.set_variables()
 
     def __str__(self):
         if len(self.sub_exprs) == 0:
@@ -919,7 +919,7 @@ class Operator(Expression):
             out._tx_position_end = parent. _tx_position_end
         if annotations:
             out.annotations = annotations
-        return out.annotate1().simplify1()
+        return out.set_variables().simplify1()
 
     def __str__(self):
         def parenthesis(precedence, x):
@@ -1034,7 +1034,7 @@ class AUnary(Expression):
     @classmethod
     def make(cls, op: str, expr: Expression) -> AUnary:
         out = AUnary(None, operators=[op], f=expr)
-        return out.annotate1().simplify1()
+        return out.set_variables().simplify1()
 
     def __str__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
@@ -1156,7 +1156,7 @@ class AppliedSymbol(Expression):
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
-        return out.annotate1()
+        return out.set_variables()
 
     @classmethod
     def construct(cls, constructor, args):
@@ -1329,7 +1329,7 @@ class Variable(Expression):
     def __deepcopy__(self, memo):
         return self
 
-    def annotate1(self): return self
+    def set_variables(self: Expression) -> Expression: return self
 
     def has_variables(self) -> bool: return True
 
