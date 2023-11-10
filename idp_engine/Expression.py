@@ -1224,7 +1224,7 @@ class AppliedSymbol(Expression):
             or any(e.has_decision() for e in self.sub_exprs))
 
     def type_inference(self, voc: Vocabulary):
-        decl = (voc.symbol_decls.get(self.symbol.s.name, None)
+        decl = (voc.symbol_decls[self.symbol.s.name]
                  if voc and hasattr(voc, "symbol_decls")
                  and type(self.symbol) == SymbolExpr and not self.symbol.eval
                  else None)
@@ -1232,21 +1232,14 @@ class AppliedSymbol(Expression):
             self.check(decl.arity == len(self.sub_exprs),
                 f"Incorrect number of arguments in {self}: "
                 f"should be {decl.arity}")
-        try:
-            out = {}
-            for i, e in enumerate(self.sub_exprs):
-                if decl and type(e) in [Variable, UnappliedSymbol]:
-                    out[e.name] = decl.sorts[i]
-                else:
-                    out.update(e.type_inference(voc))
-            return out
-        except AttributeError as e:
-            #
-            if "object has no attribute 'sorts'" in str(e):
-                msg = f"Unexpected arity for symbol {self}"
+        # try:
+        out = {}
+        for i, e in enumerate(self.sub_exprs):
+            if decl and type(e) in [Variable, UnappliedSymbol]:
+                out[e.name] = decl.sorts[i]
             else:
-                msg = f"Unknown error for symbol {self}"
-            self.check(False, msg)
+                out.update(e.type_inference(voc))
+        return out
 
     def is_value(self) -> bool:
         # independent of is_enumeration and in_enumeration !
