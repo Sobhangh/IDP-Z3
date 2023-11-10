@@ -329,14 +329,16 @@ class Expression(ASTNode):
                         symbols: Optional[dict[str, SymbolDeclaration]] = None,
                         co_constraints: bool=True
                         ) -> dict[str, SymbolDeclaration]:
-        """ returns the list of symbol declarations in self, ignoring type constraints
+        """ returns the list of symbols occurring in self,
+        ignoring type constraints and symbols created by aggregates
         """
         symbols = {} if symbols == None else symbols
         assert symbols is not None, "Internal error"
         if self.is_type_constraint_for is None:  # ignore type constraints
             if (hasattr(self, 'decl') and self.decl
                 and self.decl.__class__.__name__ == "SymbolDeclaration"
-                and not self.decl.name in RESERVED_SYMBOLS):
+                and not self.decl.name in RESERVED_SYMBOLS
+                and not self.decl.name.startswith('__')):  # min/max aggregates
                 symbols[self.decl.name] = self.decl
             for e in self.sub_exprs:
                 e.collect_symbols(symbols, co_constraints)

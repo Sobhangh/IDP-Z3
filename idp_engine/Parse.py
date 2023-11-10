@@ -503,7 +503,7 @@ class SymbolDeclaration(ASTNode):
         optimizable (bool):
             whether this symbol should get optimize buttons in the IC
 
-        block (Vocabulary): the vocabulary block that contains it
+        by_z3 (Bool): True if the symbol is created by z3 (testers and accessors of constructors)
     """
 
     def __init__(self, **kwargs):
@@ -535,8 +535,9 @@ class SymbolDeclaration(ASTNode):
         self.base_type : Optional[TypeDeclaration]= None
         self.range : List[AppliedSymbol]= None  # all possible terms.  Used in get_range and IO.py
         self.instances : dict[str, AppliedSymbol]= None  # not starting with '_'
-        self.block: Optional[Block] = None  # vocabulary where it is declared
+        self.block: Optional[ASTNode] = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
+        self.by_z3 = False
 
     @classmethod
     def make(cls, strname, arity, sorts, out):

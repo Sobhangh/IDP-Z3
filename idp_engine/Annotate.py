@@ -110,7 +110,6 @@ def annotate_declaration(self: ASTNode,
                          voc: Vocabulary,
                          ) -> ASTNode:
     assert isinstance(self, TypeDeclaration), "Internal error"
-    self.block = voc
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
@@ -133,7 +132,6 @@ TypeDeclaration.annotate_declaration = annotate_declaration
 def annotate_declaration(self: SymbolDeclaration,
                          voc: Vocabulary,
                          ) -> ASTNode:
-    self.voc = voc
     self.check(self.name is not None, "Internal error")
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
@@ -541,11 +539,13 @@ def annotate(self: Expression,
         a.decl = SymbolDeclaration(annotations='', name=a.accessor,
                                    sorts=[TYPE(self.type)],
                                    out=TYPE(a.type))
+        a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
     self.tester = SymbolDeclaration(annotations='',
                                     name=SYMBOL(f"is_{self.name}"),
                                     sorts=[TYPE(self.type)],
                                     out=TYPE(BOOL))
+    self.tester.by_z3 = True
     self.tester.annotate_declaration(voc)
     return self
 Constructor.annotate = annotate
@@ -854,13 +854,13 @@ def annotate(self: Expression,
                 #     !y in T: ( ?x in type: cond(x,y) & term(x) = _*(y)
                 #                !x in type: cond(x,y) => term(x) =< _*(y).
                 self.check(self.type, f"Can't infer type of {self}")
-                name = "_" + self.str
+                name = "__" + self.str
                 if name in voc.symbol_decls:
                     symbol_decl = voc.symbol_decls[name]
                     to_create = False
                 else:
                     symbol_decl = SymbolDeclaration.make(
-                        "_"+self.str, # name `_ *`
+                        "__"+self.str, # name `__ *`
                         len(q_vars),  # arity
                         [TYPE(v.sort.code) for v in q_vars.values()],
                         TYPE(self.type)).annotate_declaration(voc)    # output_domain

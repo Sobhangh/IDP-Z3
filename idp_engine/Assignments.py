@@ -99,8 +99,8 @@ class Assignment(object):
         self.symbols: dict[str, SymbolDeclaration] = \
             sentence.collect_symbols(co_constraints=False).values()
         for d in self.symbols:
-            if not d.private:
-                if d.block:  # ignore accessors and testers
+            if not d.name.startswith('_'):
+                if not d.by_z3:  # ignore accessors and testers
                     self.symbol_decl = d
                     break
             elif default is None:

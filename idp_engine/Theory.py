@@ -524,9 +524,8 @@ class Theory(object):
                 a.value, a.tag, a.relevant = None, S.UNKNOWN, False
             else:
                 if (isinstance(q, AppliedSymbol)
-                and not q_is_reified
-                and not (q.in_enumeration or q.is_enumerated)):
-                    assert q.symbol.name in interps, "Internal error"
+                and not (q.in_enumeration or q.is_enumerated)
+                and q.symbol.name in interps):
                     maps, _else = interps[q.symbol.name]
                     val = maps.get(q.code, _else)
                 else:
