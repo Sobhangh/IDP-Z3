@@ -211,7 +211,8 @@ def annotate_block(self: ASTNode,
     self.voc = idp.vocabularies[self.vocab_name]
 
     for i in self.interpretations.values():
-        i.annotate(self, {})
+        i.block = self
+        i.annotate(self.voc, {})
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self.voc, {}) for e in self.definitions]
@@ -417,7 +418,8 @@ def annotate_block(self: ASTNode,
                f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
     for i in self.interpretations.values():
-        i.annotate(self, {})
+        i.block = self
+        i.annotate(self.voc, {})
     self.voc.add_voc_to_block(self)
     return []
 Structure.annotate_block = annotate_block
@@ -426,7 +428,7 @@ Structure.annotate_block = annotate_block
 # Class SymbolInterpretation  #######################################################
 
 def annotate(self: Expression,
-             block: ASTNode,
+             voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
     """
@@ -436,8 +438,6 @@ def annotate(self: Expression,
     :returns None:
     """
     assert isinstance(self, SymbolInterpretation), "Internal error"
-    voc = block.voc
-    self.block = block
     self.symbol = SYMBOL(self.name).annotate(voc, {})
     enumeration = self.enumeration  # shorthand
 
@@ -608,7 +608,8 @@ def annotate_block(self: ASTNode,
     for constraint in self.constraints:
         constraint.annotate(self.voc, {})
     for i in self.interpretations.values():
-        i.annotate(self, {})
+        i.block = self
+        i.annotate(self.voc, {})
     return []
 Display.annotate_block = annotate_block
 
@@ -828,11 +829,10 @@ AUnary.set_variables = set_variables
 
 # Class AAggregate  #######################################################
 
-def annotate(self: Expression,
+def annotate(self: AAggregate,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    assert isinstance(self, AAggregate), "Internal error"
     if not self.annotated:
 
         self = AQuantification.annotate(self, voc, q_vars)
@@ -982,7 +982,7 @@ def annotate(self: UnappliedSymbol,
         return q_vars[self.name]
     if self.name in voc.symbol_decls:
         self.decl = voc.symbol_decls[self.name]
-        self.variables = {}
+        self.variables = set()
         self.check(type(self.decl) == Constructor,
                    f"{self} should be applied to arguments (or prefixed with a back-tick)")
         return self

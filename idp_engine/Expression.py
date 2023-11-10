@@ -1185,7 +1185,7 @@ class AppliedSymbol(Expression):
     def construct(cls, constructor, args):
         out= cls.make(SYMBOL(constructor.name), args)
         out.decl = constructor
-        out.variables = {}
+        out.variables = set()
         return out
 
     def __str__(self):

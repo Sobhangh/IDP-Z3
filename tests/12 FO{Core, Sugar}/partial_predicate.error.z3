@@ -18,7 +18,7 @@ Traceback (most recent call last):
   File "idp_engine/Parse.py", line ??, in __init__
     struct.annotate_block(self)
   File "idp_engine/Annotate.py", line ??, in annotate_block
-    i.annotate(self, {})
+    i.annotate(self.voc, {})
   File "idp_engine/Annotate.py", line ??, in annotate
     self.check(not(self.symbol.decl.out.decl.base_type.name == BOOL
   File "idp_engine/Expression.py", line ??, in check
