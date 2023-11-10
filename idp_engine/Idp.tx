@@ -52,12 +52,11 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
                 | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?;
             Variable: name=/`?[^\d\W]\w*\b/;
             VarTuple: '(' vars+=Variable[','] ')';
-            Type: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
-              ( '['
-                ( '(' ins*=Type[/[*⨯]/] ')' | ins*=Type[/[*⨯]/] )
-                ('->' | '→') out=Type
-                ']'
-              )?;
+            Type: ( name='Concept' '['
+                          ( '(' ins*=Type[/[*⨯]/] ')' | ins*=Type[/[*⨯]/] )
+                          ('->' | '→') out=Type ']'
+                  )
+                | name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
 
   Axiom: annotations=Annotations expr=Expression '.';
 

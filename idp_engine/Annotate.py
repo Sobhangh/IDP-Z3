@@ -571,7 +571,7 @@ AIfExpr.annotate1 = annotate1
 
 # Class Quantee  #######################################################
 
-def annotate(self, voc, q_vars, inferred):
+def annotate(self, voc, q_vars, inferred:dict[str, Symbol]):
     Expression.annotate(self, voc, q_vars)
     for vars in self.vars:
         self.check(not self.sub_exprs
