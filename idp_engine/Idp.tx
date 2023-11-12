@@ -44,7 +44,7 @@ TheoryBlock: 'theory' (ltc='LTC')? (name=ID ':' vocab_name=ID)? '{'
     Mode: ('(' ('well-founded' | 'completion' | 'Kripke-Kleene' | 'co-induction' | 'stable' | 'recursive' ) ')')?;
     Rule: annotations=Annotations
           (('!'|'∀'| 'for' 'all') quantees+=Quantee[','] ':' )*
-          definiendum=/(AppliedSymbol | StartAppliedSymbol | NowAppliedSymbol | NextAppliedSymbol)/
+          definiendum=(AppliedSymbol | StartAppliedSymbol | NowAppliedSymbol | NextAppliedSymbol)
           (('=' |DefEqOp) out=SumMinus)?
           (('<-'|'←' | 'if' ) body=Expression)? '.' ;
         Quantee:  subtype=Type !'in' !'∈' vars+=Variable[',']
