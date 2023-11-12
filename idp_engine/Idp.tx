@@ -25,7 +25,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=Enumeration
             | enumeration=ConstructedFrom))?;
 
-    SymbolDeclaration:  (temp='Temporal')? annotations=Annotations symbols+=Symbol[','] ':'
+    SymbolDeclaration:  temp='Temporal'? annotations=Annotations symbols+=Symbol[','] ':'
           ( '(' sorts*=Type[/[*⨯]/] ')' | sorts*=Type[/[*⨯]/] )
           ('->' | '→') out=Type;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
