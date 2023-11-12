@@ -514,6 +514,7 @@ class SymbolDeclaration(ASTNode):
         self.symbols : Optional[List[Symbol]]
         self.name : Optional[str]
         #self.temp = True if temp_symbol else False
+        self.temp= False
         if 'symbols' in kwargs:
             self.symbols = kwargs.pop('symbols')
             self.name = None
