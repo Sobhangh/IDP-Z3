@@ -118,6 +118,7 @@ class Theory(object):
             The string matches Expression.code in expl_reifs.
 
     """
+
     def __init__(self,
                  *theories: Union[TheoryBlock, Structure, Theory],
                  extended: bool = False
@@ -1227,6 +1228,9 @@ class Theory(object):
     def _first_propagate(self, solver):
         """monkey-patched"""
         print()
+        pass
+
+    def EN(self) -> str:
         pass
 
 Done = True

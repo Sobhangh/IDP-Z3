@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from copy import copy
 from fractions import Fraction
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef, Function,
                 RecFunction, Const, FreshConst, BoolSort, IntSort, RealSort,
                 Or, Not, And, ForAll, Exists, Sum, If, BoolVal, RatVal, IntVal,
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 # class TypeDeclaration  ###########################################################
 
 @catch_error
-def translate(self, problem: Theory):
+def translate(self, problem: Theory) -> ExprRef:
     out = problem.z3.get(self.name, None)
     if out is None:
         if self.name == BOOL:
@@ -94,7 +94,7 @@ TypeDeclaration.translate = translate
 # class SymbolDeclaration  ###########################################################
 
 @catch_error
-def translate(self, problem: Theory):
+def translate(self, problem: Theory) -> ExprRef:
     out = problem.z3.get(self.name, None)
     if out is None:
         recursive = any(self in def_.clarks
@@ -115,14 +115,14 @@ SymbolDeclaration.translate = translate
 # class TupleIDP  ###########################################################
 
 @catch_error
-def translate(self, problem: Theory):
+def translate(self, problem: Theory) -> ExprRef:
     return [arg.translate(problem) for arg in self.args]
 TupleIDP.translate = translate
 
 # class Constructor  ###########################################################
 
 @catch_error
-def translate(self, problem: Theory):
+def translate(self, problem: Theory) -> ExprRef:
     return problem.z3[self.name]
 Constructor.translate = translate
 
@@ -162,7 +162,7 @@ Expression.reified = reified
 # class Type  ###############################################################
 
 @catch_error
-def translate(self, problem: Theory, vars={}):
+def translate(self, problem: Theory, vars={}) -> ExprRef:
     if self.name == BOOL:
         return BoolSort(problem.ctx)
     elif self.name == INT:
@@ -200,7 +200,7 @@ AIfExpr.translate1 = translate1
 # Class Quantee  ######################################################
 
 @catch_error
-def translate(self, problem: Theory, vars={}):
+def translate(self, problem: Theory, vars={}) -> ExprRef:
     out = {}
     for vars in self.vars:
         for v in vars:
@@ -212,7 +212,7 @@ Quantee.translate = translate
 # Class AQuantification  ######################################################
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     local_vars = {}
     for q in self.quantees:
         local_vars.update(q.translate(problem, vars))
@@ -259,7 +259,7 @@ Operator.MAP = {'∧': lambda x, y: And(x, y),
 
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     out = self.sub_exprs[0].translate(problem, vars)
 
     for i in range(1, len(self.sub_exprs)):
@@ -275,7 +275,7 @@ Operator.translate1 = translate1
 # Class ADisjunction  #######################################################
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate(problem, vars)
     else:
@@ -287,7 +287,7 @@ ADisjunction.translate1 = translate1
 # Class AConjunction  #######################################################
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate(problem, vars)
     else:
@@ -299,10 +299,10 @@ AConjunction.translate1 = translate1
 # Class AComparison  #######################################################
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     assert not self.operator == ['≠'],f"Internal error: {self}"
     # chained comparisons -> And()
-    out = []
+    out: List[ExprRef] = []
     for i in range(1, len(self.sub_exprs)):
         x = self.sub_exprs[i-1].translate(problem, vars)
         assert x is not None, f"Internal error: {x} is None"
@@ -328,7 +328,7 @@ AUnary.MAP = {'-': lambda x: 0 - x,
               }
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     out = self.sub_exprs[0].translate(problem, vars)
     function = AUnary.MAP[self.operator]
     try:
@@ -341,7 +341,7 @@ AUnary.translate1 = translate1
 # Class AAggregate  #######################################################
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     assert self.annotated and not self.quantees, f"Cannot expand {self.code}"
     return Sum([f.translate(problem, vars) for f in self.sub_exprs])
 AAggregate.translate1 = translate1
@@ -350,7 +350,7 @@ AAggregate.translate1 = translate1
 # Class AppliedSymbol  #######################################################
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     if self.as_disjunction:
         return self.as_disjunction.translate(problem, vars)
     self.check(self.decl, f"Unknown symbol: {self.symbol}.\n"
@@ -402,7 +402,7 @@ AppliedSymbol.reified = reified
 # Class UnappliedSymbol  #######################################################
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     return problem.z3[self.name]
 UnappliedSymbol.translate1 = translate1
 
@@ -410,7 +410,7 @@ UnappliedSymbol.translate1 = translate1
 # Class Variable  #######################################################
 
 @catch_error
-def translate(self, problem: Theory, vars={}):
+def translate(self, problem: Theory, vars={}) -> ExprRef:
     return vars[self.str]
 Variable.translate = translate
 
@@ -418,7 +418,7 @@ Variable.translate = translate
 # Class Number  #######################################################
 
 @catch_error
-def translate(self, problem: Theory, vars={}):
+def translate(self, problem: Theory, vars={}) -> ExprRef:
     out = problem.z3.get(self.str, None)
     if out is None:
         out = (RatVal(self.py_value.numerator, self.py_value.denominator,
@@ -433,7 +433,7 @@ Number.translate = translate
 # Class Date  #######################################################
 
 @catch_error
-def translate(self, problem: Theory, vars={}):
+def translate(self, problem: Theory, vars={}) -> ExprRef:
     out = problem.z3.get(self.str, None)
     if out is None:
         out = IntVal(self.py_value, problem.ctx)
@@ -444,7 +444,7 @@ Date.translate = translate
 
 # Class Brackets  #######################################################
 
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     return self.sub_exprs[0].translate(problem, vars)
 Brackets.translate1 = translate1
 
@@ -452,7 +452,7 @@ Brackets.translate1 = translate1
 # Class RecDef  #######################################################
 
 @catch_error
-def translate1(self, problem: Theory, vars={}):
+def translate1(self, problem: Theory, vars={}) -> ExprRef:
     local_vars = {}
     for v in self.vars:
         translated = FreshConst(v.sort.decl.base_type.translate(problem))

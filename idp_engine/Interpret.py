@@ -34,7 +34,7 @@ from __future__ import annotations
 
 from copy import copy, deepcopy
 from itertools import product
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, Union
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
@@ -44,7 +44,7 @@ from .Expression import (catch_error, AIfExpr, IF,
                          SymbolExpr, Expression, Constructor, AQuantification,
                          Type, FORALL, IMPLIES, AND, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Quantee, Variable,
-                         VARIABLE, TRUE, FALSE, Number, Extension)
+                         VARIABLE, TRUE, FALSE, Number, Extension, Identifier)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND, flatten)

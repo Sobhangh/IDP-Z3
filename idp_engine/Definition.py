@@ -28,7 +28,7 @@ from typing import (Set, Tuple, List, Optional)
 
 from .utils import (RESERVED_SYMBOLS, INT, BOOL, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
 from .Expression import (Expression, catch_error, ZERO, TRUE, FALSE, RecDef, TYPE,
-                         Constructor, TYPE, AppliedSymbol, Operator, AImplication,
+                         Constructor, TYPE, Type, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
                          IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND)
 from .Parse import Definition, Rule, SymbolDeclaration

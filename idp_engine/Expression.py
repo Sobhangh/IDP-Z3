@@ -783,9 +783,9 @@ class AQuantification(Expression):
         super().__init__()
 
         self.type = BOOL
-        self.supersets: List[List[List[Union[Identifier, Variable]]]] = None
-        self.new_quantees: List[Quantee] = None
-        self.vars1 : List[Variable] = None
+        self.supersets: Optional[List[List[List[Union[Identifier, Variable]]]]] = None
+        self.new_quantees: Optional[List[Quantee]] = None
+        self.vars1 : Optional[List[Variable]] = None
 
     @classmethod
     def make(cls,
@@ -865,6 +865,7 @@ class Operator(Expression):
         "*": "⨯",
         "is": "=",
     }
+    EN_map: dict[str, str] = None
 
     def __init__(self, parent, operator, sub_exprs, annotations=None):
         self.operator = operator

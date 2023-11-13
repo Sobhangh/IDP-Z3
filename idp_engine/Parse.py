@@ -292,9 +292,10 @@ class IDP(ASTNode):
 class Vocabulary(ASTNode):
     """The class of AST nodes representing a vocabulary block.
     """
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
-        self.declarations = kwargs.pop('declarations')
+    def __init__(self, parent: ASTNode,
+                 name: str,
+                 declarations: List[Union[Declaration, VarDeclaration, Import]]):
+        self.name = name
         self.idp = None  # parent object
         self.symbol_decls: dict[str, Union[Declaration, VarDeclaration]] = {}
 
@@ -303,17 +304,16 @@ class Vocabulary(ASTNode):
 
         # expand multi-symbol declarations
         temp = []
-        for decl in self.declarations:
-            if not isinstance(decl, SymbolDeclaration):
-                decl.private = decl.name.startswith('_')
-                temp.append(decl)
-            else:
+        for decl in declarations:
+            if isinstance(decl, SymbolDeclaration):
                 for symbol in decl.symbols:
                     new = copy(decl)  # shallow copy !
                     new.name = intern(symbol)
                     new.private = new.name.startswith('_')
                     new.symbols = None
                     temp.append(new)
+            else:
+                temp.append(decl)
         self.declarations = temp
 
         # define built-in types: Bool, Int, Real, Symbols
@@ -599,6 +599,9 @@ class SymbolDeclaration(ASTNode):
         else:
             out = TRUE
         return out
+
+    def translate(self, problem: Theory):
+        pass # monkey-patched
 
 class VarDeclaration(ASTNode):
     """ represents a declaration of variable (IEP 24)
