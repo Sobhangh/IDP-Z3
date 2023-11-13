@@ -1121,6 +1121,8 @@ class AppliedSymbol(Expression):
         decl (Declaration): the declaration of the symbol, if known
 
         in_head (Bool): True if the AppliedSymbol occurs in the head of a rule
+
+        in_temp (Bool): whether it is used inside second order temporal predicate
     """
     PRECEDENCE = 200
 
@@ -1145,6 +1147,7 @@ class AppliedSymbol(Expression):
         self.as_disjunction = None
         self.decl = None
         self.in_head = False
+        self.in_temp = False
 
     @classmethod
     def make(cls,
@@ -1236,6 +1239,217 @@ class AppliedSymbol(Expression):
             assert type(self.sub_exprs[0]) == UnappliedSymbol, "Internal error"
             constructor = CONSTRUCTOR(self.sub_exprs[0].name)
             constructors[symbol.name].append(constructor)
+
+class StartAppliedSymbol(Expression):
+    """Represents a Start symbol applied to  another applied symbol 
+
+    Args:
+        arg (AppliedSymbol): the applied symbol 
+
+        in_head (Bool): True if the AppliedSymbol occurs in the head of a rule
+    """
+    PRECEDENCE = 200
+
+    def __init__(self, parent,
+                 arg):
+        self.symbol : Symbol = SYMBOL('Start')
+        self.sub_expr: AppliedSymbol  = arg
+
+        super().__init__()
+
+        #self.as_disjunction = None
+        #self.decl = None
+        self.in_head = False
+
+    @classmethod
+    def make(cls,
+             symbol: Symbol,
+             arg: AppliedSymbol,
+             ) -> StartAppliedSymbol:
+        out = cls(None, symbol, arg)
+        out.sub_exprs = [arg]
+        # annotate
+        out.decl = symbol.decl
+        return out.annotate1()
+
+    #@classmethod
+    #def construct(cls, constructor, args):
+
+    def __str__(self):
+        out = f"{self.symbol}({self.sub_expr.str})"
+        return (f"{out}")
+
+    def __deepcopy__(self, memo):
+        out = super().__deepcopy__(memo)
+        out.symbol = deepcopy(out.symbol)
+        #out.as_disjunction = deepcopy(out.as_disjunction)
+        return out
+
+    def collect(self, questions, all_=True, co_constraints=True):
+        self.sub_expr.collect(questions,all,co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        self.symbol.collect_symbols(symbols, co_constraints)
+        return symbols
+
+    def has_decision(self):
+        return self.sub_expr.has_decision()
+
+    #def type_inference(self):
+        
+
+    def is_value(self) -> bool:
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_value()
+
+    def is_reified(self):
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_reified()
+
+    def generate_constructors(self, constructors: dict):
+        self.sub_expr.generate_constructors(constructors,dict)
+
+class NowAppliedSymbol(Expression):
+    """Represents a Start symbol applied to  another applied symbol 
+
+    Args:
+        arg (AppliedSymbol): the applied symbol 
+
+        in_head (Bool): True if the AppliedSymbol occurs in the head of a rule
+    """
+    PRECEDENCE = 200
+
+    def __init__(self, parent,
+                 arg):
+        self.symbol : Symbol = SYMBOL('Now')
+        self.sub_expr: AppliedSymbol  = arg
+
+        super().__init__()
+
+        #self.as_disjunction = None
+        #self.decl = None
+        self.in_head = False
+
+    @classmethod
+    def make(cls,
+             symbol: Symbol,
+             arg: AppliedSymbol,
+             ) -> StartAppliedSymbol:
+        out = cls(None, symbol, arg)
+        out.sub_exprs = [arg]
+        # annotate
+        out.decl = symbol.decl
+        return out.annotate1()
+
+    #@classmethod
+    #def construct(cls, constructor, args):
+
+    def __str__(self):
+        out = f"{self.symbol}({self.sub_expr.str})"
+        return (f"{out}")
+
+    def __deepcopy__(self, memo):
+        out = super().__deepcopy__(memo)
+        out.symbol = deepcopy(out.symbol)
+        #out.as_disjunction = deepcopy(out.as_disjunction)
+        return out
+
+    def collect(self, questions, all_=True, co_constraints=True):
+        self.sub_expr.collect(questions,all,co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        self.symbol.collect_symbols(symbols, co_constraints)
+        return symbols
+
+    def has_decision(self):
+        return self.sub_expr.has_decision()
+
+    #def type_inference(self):
+        
+
+    def is_value(self) -> bool:
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_value()
+
+    def is_reified(self):
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_reified()
+
+    def generate_constructors(self, constructors: dict):
+        self.sub_expr.generate_constructors(constructors,dict)
+
+class NextAppliedSymbol(Expression):
+    """Represents a Start symbol applied to  another applied symbol 
+
+    Args:
+        arg (AppliedSymbol): the applied symbol 
+
+        in_head (Bool): True if the AppliedSymbol occurs in the head of a rule
+    """
+    PRECEDENCE = 200
+
+    def __init__(self, parent,
+                 arg):
+        self.symbol : Symbol = SYMBOL('Next')
+        self.sub_expr: AppliedSymbol  = arg
+
+        super().__init__()
+
+        #self.as_disjunction = None
+        #self.decl = None
+        self.in_head = False
+
+    @classmethod
+    def make(cls,
+             symbol: Symbol,
+             arg: AppliedSymbol,
+             ) -> StartAppliedSymbol:
+        out = cls(None, symbol, arg)
+        out.sub_exprs = [arg]
+        # annotate
+        out.decl = symbol.decl
+        return out.annotate1()
+
+    #@classmethod
+    #def construct(cls, constructor, args):
+
+    def __str__(self):
+        out = f"{self.symbol}({self.sub_expr.str})"
+        return (f"{out}")
+
+    def __deepcopy__(self, memo):
+        out = super().__deepcopy__(memo)
+        out.symbol = deepcopy(out.symbol)
+        #out.as_disjunction = deepcopy(out.as_disjunction)
+        return out
+
+    def collect(self, questions, all_=True, co_constraints=True):
+        self.sub_expr.collect(questions,all,co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        self.symbol.collect_symbols(symbols, co_constraints)
+        return symbols
+
+    def has_decision(self):
+        return self.sub_expr.has_decision()
+
+    #def type_inference(self):
+        
+
+    def is_value(self) -> bool:
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_value()
+
+    def is_reified(self):
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_reified()
+
+    def generate_constructors(self, constructors: dict):
+        self.sub_expr.generate_constructors(constructors,dict)
+
 
 
 class SymbolExpr(Expression):

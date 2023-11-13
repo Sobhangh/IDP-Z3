@@ -295,6 +295,7 @@ class Vocabulary(ASTNode):
         self.declarations = kwargs.pop('declarations')
         self.idp = None  # parent object
         self.symbol_decls: dict[str, Declaration] = {}
+        self.contains_temporal = False
 
         self.name = 'V' if not self.name else self.name
         self.voc = self
@@ -321,6 +322,7 @@ class Vocabulary(ASTNode):
             TypeDeclaration(name=INT, enumeration=IntRange()),
             TypeDeclaration(name=REAL, enumeration=RealRange()),
             TypeDeclaration(name=DATE, enumeration=DateRange()),
+            TypeDeclaration(name='Tijd', enumeration=IntRange()),
             TypeDeclaration(
                 name=CONCEPT,
                 constructors=[]),
@@ -507,9 +509,12 @@ class SymbolDeclaration(ASTNode):
     """
 
     def __init__(self, **kwargs):
+        #temp_symbol = kwargs.pop('temp')
         self.annotations : Annotations = kwargs.pop('annotations')
         self.symbols : Optional[List[Symbol]]
         self.name : Optional[str]
+        #self.temp = True if temp_symbol else False
+        self.temp= False
         if 'symbols' in kwargs:
             self.symbols = kwargs.pop('symbols')
             self.name = None
@@ -629,6 +634,7 @@ class TheoryBlock(ASTNode):
         constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
+        self.ltc = True if kwargs.pop('ltc') else False
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -1173,6 +1179,20 @@ class IntRange(Ranges):
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         return (None, None)
+
+#For natural numbers  
+class NatRange(Ranges):
+    def __init__(self):
+        Ranges.__init__(self, elements=[])
+        self.type = ABS
+        self.tuples = None
+
+    def extensionE(self,
+                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
+                   extensions: Optional[dict[str, Extension]] = None
+                  ) -> Extension:
+        return (None, None)
+
 
 
 class RealRange(Ranges):
