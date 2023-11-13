@@ -148,7 +148,7 @@ VarDeclaration.annotate = annotate
 
 # Class Symbol  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self, voc, q_vars,ltc=False):
     if self.name in q_vars:
         return q_vars[self.name]
 
@@ -165,7 +165,7 @@ Symbol.annotate = annotate
 
 # Class Type  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self, voc, q_vars,ltc=False):
     Symbol.annotate(self, voc, q_vars)
     if self.out:
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
@@ -864,7 +864,7 @@ Variable.annotate = annotate
 
 # Class Number  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self, voc, q_vars,ltc=False):
     self.decl = voc.symbol_decls[self.type]
     return self
 Number.annotate = annotate
@@ -872,7 +872,7 @@ Number.annotate = annotate
 
 # Class UnappliedSymbol  #######################################################
 
-def annotate(self, voc, q_vars):
+def annotate(self, voc, q_vars,ltc=False):
     if self.name in q_vars:  # ignore VarDeclaration
         return q_vars[self.name]
     if self.name in voc.symbol_decls:
