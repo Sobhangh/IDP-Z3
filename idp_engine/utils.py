@@ -146,36 +146,36 @@ class OrderedSet(dict):
     # def items(self):
     #     return super(OrderedSet, self).items()
 
-    def pop(self, key: str, default: Optional[Union[Expression, TupleIDP]] = None) -> Union[Expression, TupleIDP]:
-        return super(OrderedSet, self).pop(key, default)
+    # def pop(self, key: str, default: Optional[Union[Expression, TupleIDP]] = None) -> Union[Expression, TupleIDP]:
+    #     return super(OrderedSet, self).pop(key, default)
 
-    def __or__(self, other: OrderedSet) -> OrderedSet:
-        """returns the union of self and other.  Use: `self | other`.
+    # def __or__(self, other: OrderedSet) -> OrderedSet:
+    #     """returns the union of self and other.  Use: `self | other`.
 
-        Returns:
-            OrderedSet: the union of self and other
-        """
-        out = OrderedSet(self) # makes a copy
-        out.extend(other)
-        return out
+    #     Returns:
+    #         OrderedSet: the union of self and other
+    #     """
+    #     out = OrderedSet(self) # makes a copy
+    #     out.extend(other)
+    #     return out
 
-    def __and__(self, other: OrderedSet) -> OrderedSet:
-        """returns the intersection of self and other.  Use: `self & other`.
+    # def __and__(self, other: OrderedSet) -> OrderedSet:
+    #     """returns the intersection of self and other.  Use: `self & other`.
 
-        Returns:
-            OrderedSet: the intersection of self and other
-        """
-        out = OrderedSet({v for v in self if v in other})
-        return out
+    #     Returns:
+    #         OrderedSet: the intersection of self and other
+    #     """
+    #     out = OrderedSet({v for v in self if v in other})
+    #     return out
 
-    def __xor__(self, other: OrderedSet) -> OrderedSet:
-        """returns the self minus other.  Use: `self ^ other`.
+    # def __xor__(self, other: OrderedSet) -> OrderedSet:
+    #     """returns the self minus other.  Use: `self ^ other`.
 
-        Returns:
-            OrderedSet: self minus other
-        """
-        out = OrderedSet({v for v in self if v not in other})
-        return out
+    #     Returns:
+    #         OrderedSet: self minus other
+    #     """
+    #     out = OrderedSet({v for v in self if v not in other})
+    #     return out
 
 
 # redirection #############################################

@@ -267,7 +267,8 @@ AComparison.update_exprs = update_exprs
 def as_set_condition(self: AComparison) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
     return ((None, None, None) if not self.is_assignment() else
             (self.sub_exprs[0], True,
-             Enumeration(tuples=[TupleIDP(args=[self.sub_exprs[1]])])))
+             Enumeration(parent=self,
+                         tuples=[TupleIDP(args=[self.sub_exprs[1]])])))
 AComparison.as_set_condition = as_set_condition
 
 #############################################################
@@ -481,7 +482,7 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     out = AppliedSymbol.make(
                         symbol=x.symbol, args=x.sub_exprs,
                         is_enumeration='in',
-                        in_enumeration=Enumeration(tuples=new_tuples)
+                        in_enumeration=Enumeration(parent=self, tuples=new_tuples)
                     )
 
                     core = deepcopy(AppliedSymbol.make(out.symbol, out.sub_exprs))

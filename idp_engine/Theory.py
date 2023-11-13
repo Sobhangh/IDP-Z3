@@ -349,7 +349,7 @@ class Theory(object):
                 code: str,
                 value: Any,
                 status: S = S.GIVEN
-                ) -> Theory:
+                ):
         """asserts that an expression has a value (or not), e.g. ``theory.assert_("p()", True)``
 
         Args:

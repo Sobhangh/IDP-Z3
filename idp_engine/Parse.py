@@ -826,7 +826,7 @@ class SymbolInterpretation(Expression):
         self.default = kwargs.pop('default')
 
         if not self.enumeration:
-            self.enumeration = Enumeration(tuples=[])
+            self.enumeration = Enumeration(parent=self, tuples=[])
 
         self.sign = ('⊇' if self.sign == '>>' else
                      '≜' if self.sign == ':=' else self.sign)
@@ -921,10 +921,9 @@ class Enumeration(Expression):
 
         constructors (List[Constructor], optional): List of Constructor
     """
-    def __init__(self, **kwargs):
-        self.tuples = kwargs.pop('tuples')
-        self.sorted_tuples = sorted(self.tuples, key=lambda t: t.code)  # do not change dropdown order
-        self.tuples = OrderedSet(self.tuples)
+    def __init__(self, parent:ASTNode, tuples: List[TupleIDP]):
+        self.sorted_tuples = sorted(tuples, key=lambda t: t.code)  # do not change dropdown order
+        self.tuples = OrderedSet(tuples)
 
         self.lookup = {}
         self.constructors: List[Constructor]
@@ -1088,7 +1087,7 @@ class CSVTuple(TupleIDP):
 
 
 class Ranges(Enumeration):
-    def __init__(self, **kwargs):
+    def __init__(self, parent:ASTNode, **kwargs):
         self.elements = kwargs.pop('elements')
 
         tuples = []
@@ -1121,7 +1120,7 @@ class Ranges(Enumeration):
                         tuples.append(TupleIDP(args=[d]))
                 else:
                     self.check(False, f"Incorrect value {x.toI} for {self.type}")
-        Enumeration.__init__(self, tuples=tuples)
+        Enumeration.__init__(self, parent=parent, tuples=tuples)
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
                  interpretations: Optional[dict[str, SymbolInterpretation]] = None,
@@ -1171,7 +1170,7 @@ class RangeElement(Expression):
 
 class IntRange(Ranges):
     def __init__(self):
-        Ranges.__init__(self, elements=[])
+        Ranges.__init__(self, parent=self, elements=[])
         self.type = INT
         self.tuples = None
 
@@ -1184,7 +1183,7 @@ class IntRange(Ranges):
 
 class RealRange(Ranges):
     def __init__(self):
-        Ranges.__init__(self, elements=[])
+        Ranges.__init__(self, parent=self, elements=[])
         self.type = REAL
         self.tuples = None
 
@@ -1197,7 +1196,7 @@ class RealRange(Ranges):
 
 class DateRange(Ranges):
     def __init__(self):
-        Ranges.__init__(self, elements=[])
+        Ranges.__init__(self, parent=self, elements=[])
         self.type = DATE
         self.tuples = None
 
