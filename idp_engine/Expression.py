@@ -156,17 +156,17 @@ class Accessor(ASTNode):
     """represents an accessor and a type
 
     Attributes:
-        accessor (UnappliedSymbol, Optional): name of accessor function
+        accessor (str, Optional): name of accessor function
 
-        type (string): name of the output type of the accessor
+        out (Type): name of the output type of the accessor
 
         decl (SymbolDeclaration): declaration of the accessor function
     """
     def __init__(self, parent,
-                 type: Type,
-                 accessor: Optional[UnappliedSymbol] = None):
+                 out: Type,
+                 accessor: Optional[str] = None):
         self.accessor = accessor
-        self.type = type.name
+        self.out = out
         self.decl: Optional[SymbolDeclaration] = None
 
     def __str__(self):
@@ -526,10 +526,9 @@ class Constructor(Expression):
     """
 
     def __init__(self, parent,
-                 name: Union[UnappliedSymbol, str],
+                 name: str,
                  args: Optional[List[Accessor]] = None):
-        self.name : str = (name.s.name if type(name) == UnappliedSymbol else
-                     name)
+        self.name : str = name
         self.sorts = args if args is not None else []
 
         self.arity = len(self.sorts)

@@ -75,7 +75,7 @@ def translate(self, problem: Theory):
                 if c.tester:
                     problem.z3[c.tester.name] = out.__dict__[f"is_{c.name}"]
                 for a in c.sorts:
-                    problem.z3[a.decl.name] = out.__dict__[a.accessor.name]
+                    problem.z3[a.decl.name] = out.__dict__[a.accessor]
                 if not c.sorts:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
                 elif c.range:

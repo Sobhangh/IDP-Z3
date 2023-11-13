@@ -513,13 +513,13 @@ def annotate(self: Expression,
     assert isinstance(self, ConstructedFrom), "Internal error"
     for c in self.constructors:
         for i, ts in enumerate(c.sorts):
-            if ts.accessor is None:
-                ts.accessor = SYMBOL(f"{c.name}_{i}")
-            if ts.accessor.name in self.accessors:
-                self.check(self.accessors[ts.accessor.name] == i,
+            if not ts.accessor:
+                ts.accessor = f"{c.name}_{i}"
+            if ts.accessor in self.accessors:
+                self.check(self.accessors[ts.accessor] == i,
                            "Accessors used at incompatible indices")
             else:
-                self.accessors[ts.accessor.name] = i
+                self.accessors[ts.accessor] = i
         c.annotate(voc, q_vars)
     return self
 ConstructedFrom.annotate = annotate
@@ -533,11 +533,11 @@ def annotate(self: Expression,
              ) -> Annotated:
     assert isinstance(self, Constructor), "Internal error"
     for a in self.sorts:
-        self.check(a.type in voc.symbol_decls,
-                   f"Unknown type: {a.type}" )
-        a.decl = SymbolDeclaration(annotations='', name=a.accessor,
+        self.check(a.out.name in voc.symbol_decls,
+                   f"Unknown type: {a.out}" )
+        a.decl = SymbolDeclaration(annotations='', name=SYMBOL(a.accessor),
                                    sorts=[TYPE(self.type)],
-                                   out=TYPE(a.type))
+                                   out=a.out)
         a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
     self.tester = SymbolDeclaration(annotations='',

@@ -328,7 +328,7 @@ def interpret(self: Constructor, problem: Theory) -> Constructor:
     # assert all(s.decl and isinstance(s.decl.out, Type) for s in self.sorts), 'Internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
-    elif any(s.type == self.type for s in self.sorts):  # recursive data type
+    elif any(s.out.name == self.type for s in self.sorts):  # recursive data type
         self.range = None
     else:
         # assert all(isinstance(s.decl, SymbolDeclaration) for s in self.sorts), "Internal error"

@@ -150,8 +150,8 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
 
   ConstructedFrom: constructed=/constructed\s+from/?
                    '{' constructors*=Constructor[',']  '}';
-    Constructor: name=UnappliedSymbol ('(' args+=Accessor[','] ')' )?;
-    Accessor: (accessor=UnappliedSymbol ':')? type=Type;
+    Constructor: name=ID ('(' args+=Accessor[','] ')' )?;
+    Accessor: (accessor=ID ':')? out=Type;
 
   Identifier: AppliedSymbol | UnappliedSymbol | Number | Date;
 
