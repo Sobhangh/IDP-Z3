@@ -118,7 +118,7 @@ def annotate(self, voc):
     voc.symbol_decls[self.name] = self
     if self.temp :
         self.arity +=1
-        self.sorts.push(SYMBOL('Time'))
+        self.sorts.push(SYMBOL('Tijd'))
     for s in self.sorts:
         s.annotate(voc, {})
     self.out.annotate(voc, {})
@@ -793,7 +793,8 @@ AAggregate.annotate1 = AQuantification.annotate1
 def annotate(self, voc, q_vars,ltc=False):
     self.symbol = self.symbol.annotate(voc, q_vars)
     if self.symbol.decl:
-        self.check(self.in_temp or (not self.symbol.decl.temp) ,f"{self.symbol} has to be used inside a temporal second order predicate")
+        if isinstance(self.symbol.decl, SymbolDeclaration):
+            self.check(self.in_temp or (not self.symbol.decl.temp) ,f"{self.symbol} has to be used inside a temporal second order predicate")
         self.check(self.symbol.decl.arity == len(self.sub_exprs)
                    or self.symbol.decl.name in ['hide', 'unit', 'heading', 'noOptimization'],
             f"Incorrect number of arguments in {self}: "
@@ -837,7 +838,7 @@ def replace(self, voc, q_vars):
     t: Variable = VARIABLE('time')
     self.sub_expr.sub_exprs.push(t)
     #Is this type the correct time type?
-    time: Type = TYPE('Time')
+    time: Type = TYPE('Tijd')
     qt: Quantee = Quantee.make([t],time) 
     return AQuantification.make('forall',[qt],self.sub_expr)
 
