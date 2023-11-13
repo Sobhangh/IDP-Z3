@@ -25,12 +25,13 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=Enumeration
             | enumeration=ConstructedFrom))?;
 
-    SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
+    SymbolDeclaration: annotations=Annotations
+          symbols+= /`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/ [','] ':'
           ( '(' sorts*=Type[/[*⨯]/] ')' | sorts*=Type[/[*⨯]/] )
           ('->' | '→') out=Type;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
 
-    VarDeclaration: 'var' name=Symbol ('in' | '∈') subtype=Type;
+    VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ ('in' | '∈') subtype=Type;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 

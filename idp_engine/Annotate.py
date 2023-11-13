@@ -535,13 +535,13 @@ def annotate(self: Expression,
     for a in self.sorts:
         self.check(a.out.name in voc.symbol_decls,
                    f"Unknown type: {a.out}" )
-        a.decl = SymbolDeclaration(annotations='', name=SYMBOL(a.accessor),
+        a.decl = SymbolDeclaration(annotations='', name=a.accessor,
                                    sorts=[TYPE(self.type)],
                                    out=a.out)
         a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
     self.tester = SymbolDeclaration(annotations='',
-                                    name=SYMBOL(f"is_{self.name}"),
+                                    name=f"is_{self.name}",
                                     sorts=[TYPE(self.type)],
                                     out=TYPE(BOOL))
     self.tester.by_z3 = True
@@ -599,7 +599,7 @@ def annotate_block(self: ASTNode,
         ('noOptimization', SYMBOL(BOOL))
     ]:
         symbol_decl = SymbolDeclaration(annotations='',
-                                        name=SYMBOL(name),
+                                        name=name,
                                         sorts=[], out=out)
         symbol_decl.annotate_declaration(self.voc)
 

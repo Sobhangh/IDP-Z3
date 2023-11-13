@@ -310,7 +310,7 @@ class Vocabulary(ASTNode):
             else:
                 for symbol in decl.symbols:
                     new = copy(decl)  # shallow copy !
-                    new.name = intern(symbol.name)
+                    new.name = intern(symbol)
                     new.private = new.name.startswith('_')
                     new.symbols = None
                     temp.append(new)
@@ -326,15 +326,15 @@ class Vocabulary(ASTNode):
             TypeDeclaration(
                 name=CONCEPT,
                 constructors=[]),
-            SymbolDeclaration(annotations='', name=SYMBOL(GOAL_SYMBOL),
+            SymbolDeclaration(annotations='', name=GOAL_SYMBOL,
                               sorts=[TYPE(CONCEPT, ins=[],
                                              out=TYPE(BOOL))],
                               out=TYPE(BOOL)),
-            SymbolDeclaration(annotations='', name=SYMBOL(RELEVANT),
+            SymbolDeclaration(annotations='', name=RELEVANT,
                               sorts=[TYPE(CONCEPT, ins=[],
                                              out=TYPE(BOOL))],
                               out=TYPE(BOOL)),
-            SymbolDeclaration(annotations='', name=SYMBOL(ABS),
+            SymbolDeclaration(annotations='', name=ABS,
                                 sorts=[TYPE(INT)],
                                 out=TYPE(INT)),
             ] + self.declarations
@@ -518,7 +518,7 @@ class SymbolDeclaration(ASTNode):
         else:
             self.symbols = None
             if 'name' in kwargs:
-                self.name = intern(kwargs.pop('name').name)
+                self.name = intern(kwargs.pop('name'))
             else:
                 self.name = intern(kwargs.pop('strname'))
         self.sorts : List[Type] = kwargs.pop('sorts')
@@ -611,7 +611,7 @@ class VarDeclaration(ASTNode):
     """
 
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name').name
+        self.name = kwargs.pop('name')
         self.subtype = kwargs.pop('subtype')
 
     def __str__(self):
