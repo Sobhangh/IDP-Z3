@@ -25,7 +25,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=Enumeration
             | enumeration=ConstructedFrom))?;
 
-    SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
+    SymbolDeclaration:  temp='Temporal'? annotations=Annotations symbols+=Symbol[','] ':'
           ( '(' sorts*=Type[/[*⨯]/] ')' | sorts*=Type[/[*⨯]/] )
           ('->' | '→') out=Type;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
@@ -34,7 +34,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
-TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
+TheoryBlock: 'theory' (ltc='LTC')? (name=ID ':' vocab_name=ID)? '{'
              ( definitions=Definition*
                constraints=Axiom*
                interpretations=SymbolInterpretation*
@@ -44,9 +44,10 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
     Mode: ('(' ('well-founded' | 'completion' | 'Kripke-Kleene' | 'co-induction' | 'stable' | 'recursive' ) ')')?;
     Rule: annotations=Annotations
           (('!'|'∀'| 'for' 'all') quantees+=Quantee[','] ':' )*
-          definiendum=AppliedSymbol
+          definiendum=GeneralAppliedSymbol
           (('=' |DefEqOp) out=SumMinus)?
           (('<-'|'←' | 'if' ) body=Expression)? '.' ;
+        GeneralAppliedSymbol: AppliedSymbol | StartAppliedSymbol | NowAppliedSymbol | NextAppliedSymbol;
         Quantee:  subtype=Type !'in' !'∈' vars+=Variable[',']
                 | vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
                 | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?;
@@ -112,7 +113,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
     UnaryOperator:   '-' | '~' | '¬' | 'not' ;
 
 
-    Base:  AQuantification | AppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
+    Base:  AQuantification | AppliedSymbol | StartAppliedSymbol | NowAppliedSymbol | NextAppliedSymbol |UnappliedSymbol | Number | Date | Brackets;
 
       AppliedSymbol: annotations=Annotations
               symbol=SymbolExpr
@@ -120,6 +121,9 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
               ( is_enumerated=/is\s+enumerated/
               | is_enumeration=/in|∈/ in_enumeration=Enumeration)?;
         SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
+      StartAppliedSymbol: 'Start(' arg=AppliedSymbol ')';
+      NowAppliedSymbol: 'Now(' arg=AppliedSymbol ')';
+      NextAppliedSymbol: 'Next(' arg=AppliedSymbol ')';
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
