@@ -28,7 +28,7 @@ from copy import copy
 import itertools
 
 from .Assignments import Assignments
-from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
+from .Expression import (Annotations, ASTNode, Constructor, Accessor, SymbolExpr,
                          Expression, AIfExpr, IF, AQuantification, Type, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,

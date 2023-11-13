@@ -34,7 +34,7 @@ from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR,
-                         Accessor, Symbol, SYMBOL, SymbolExpr, Expression,
+                         Accessor, TYPE, SymbolExpr, Expression,
                          AIfExpr, IF, AQuantification, split_quantees, Type,
                          TYPE, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
@@ -382,7 +382,7 @@ class TypeDeclaration(ASTNode):
 
         sorts (List[Type]): the types of the arguments
 
-        out (Type): the Boolean Symbol
+        out (Type): the Boolean type
 
         type (string): Z3 type of an element of the type; same as `name`
 
@@ -415,7 +415,7 @@ class TypeDeclaration(ASTNode):
         self.map : dict[str, Expression]= {}
 
         self.interpretation : Optional[SymbolInterpretation] = (None if enumeration is None else
-            SymbolInterpretation(name=SYMBOL(self.name), sign='≜',
+            SymbolInterpretation(name=TYPE(self.name), sign='≜',
                                  enumeration=enumeration, default=None))
 
     def __str__(self):
@@ -472,15 +472,15 @@ class SymbolDeclaration(ASTNode):
             `annotations['reading']` is the annotation
             giving the intended meaning of the expression (in English).
 
-        symbols ([Symbol]): the symbols being defined, before expansion
+        symbols ([str]): the symbols being defined, before expansion
 
         name (string): the identifier of the symbol, after expansion of the node
 
         arity (int): the number of arguments
 
-        sorts (List[Symbol]): the types of the arguments
+        sorts (List[Type]): the types of the arguments
 
-        out (Symbol): the type of the symbol
+        out (Type): the type of the symbol
 
         type (string): name of the Z3 type of an instance of the symbol
 
@@ -510,7 +510,7 @@ class SymbolDeclaration(ASTNode):
 
     def __init__(self, **kwargs):
         self.annotations : Annotations = kwargs.pop('annotations')
-        self.symbols : Optional[List[Symbol]]
+        self.symbols : Optional[List[str]]
         self.name : Optional[str]
         if 'symbols' in kwargs:
             self.symbols = kwargs.pop('symbols')
@@ -524,7 +524,7 @@ class SymbolDeclaration(ASTNode):
         self.sorts : List[Type] = kwargs.pop('sorts')
         self.out : Type = kwargs.pop('out')
         if self.out is None:
-            self.out = SYMBOL(BOOL)
+            self.out = TYPE(BOOL)
 
         self.arity = len(self.sorts)
         self.annotations : Annotations = self.annotations.annotations if self.annotations else {}
@@ -1369,7 +1369,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
 
                                          Vocabulary, Import, VarDeclaration,
                                          TypeDeclaration, Accessor, Type,
-                                         SymbolDeclaration, Symbol,
+                                         SymbolDeclaration,
                                          SymbolExpr,
 
                                          TheoryBlock, Definition, Rule, AIfExpr,

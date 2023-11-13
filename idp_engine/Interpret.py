@@ -34,19 +34,19 @@ from __future__ import annotations
 
 from copy import copy, deepcopy
 from itertools import product
-from typing import List, Callable, Optional, Tuple
+from typing import List, Callable, Optional
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
                     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP,
-                    ConstructedFrom, Definition, Rule)
-from .Expression import (catch_error, RecDef, Symbol, AIfExpr, IF,
+                    ConstructedFrom, Definition)
+from .Expression import (catch_error, AIfExpr, IF,
                          SymbolExpr, Expression, Constructor, AQuantification,
                          Type, FORALL, IMPLIES, AND, AAggregate,
-                         OR, AppliedSymbol, UnappliedSymbol, Quantee, Variable,
-                         VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
+                         AppliedSymbol, UnappliedSymbol, Quantee, Variable,
+                         VARIABLE, TRUE, FALSE, Number, Extension)
 from .Theory import Theory
-from .utils import (BOOL, INT, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
+from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND, flatten)
 
 

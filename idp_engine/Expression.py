@@ -293,7 +293,7 @@ class Expression(ASTNode):
     def annotate_quantee(self,
                  voc: Vocabulary,
                  q_vars: dict[str, Variable],
-                 inferred: dict[str, Symbol]
+                 inferred: dict[str, Type]
                  ) -> Annotated:
         raise IDPZ3Error("Internal error") # monkey-patched
 
@@ -403,8 +403,7 @@ class Expression(ASTNode):
         # vocabulary
         return any(e.has_decision() for e in self.sub_exprs)
 
-    def type_inference(self, voc: Vocabulary) -> dict[str, Symbol]:
-        # returns a dictionary {Variable : Symbol}
+    def type_inference(self, voc: Vocabulary) -> dict[str, Type]:
         try:
             return dict(ChainMap(*(e.type_inference(voc) for e in self.sub_exprs)))
         except AttributeError as e:
@@ -496,7 +495,7 @@ class Expression(ASTNode):
         return out
 
     def add_level_mapping(self,
-                          level_symbols: dict[SymbolDeclaration, Symbol],
+                          level_symbols: dict[SymbolDeclaration, Type],
                           head: AppliedSymbol,
                           pos_justification: bool,
                           polarity: bool,
@@ -511,7 +510,7 @@ class Constructor(Expression):
     Attributes:
         name (string): name of the constructor
 
-        sorts (List[Symbol]): types of the arguments of the constructor
+        sorts (List[Type]): types of the arguments of the constructor
 
         type (string): name of the type that contains this constructor
 
@@ -520,7 +519,7 @@ class Constructor(Expression):
         tester (SymbolDeclaration): function to test if the constructor
         has been applied to some arguments (e.g., is_rgb)
 
-        symbol (Symbol): only for Symbol constructors
+        symbol (Type): only for Symbol constructors
 
         range: the list of identifiers
     """
@@ -546,75 +545,38 @@ def CONSTRUCTOR(name: str, args=None) -> Constructor:
     return Constructor(None, name, args)
 
 
-class Symbol(Expression):
-    """Represents a Symbol.  Handles synonyms.
-
-    Attributes:
-        name (string): name of the symbol
-    """
-    TO = {'Bool': BOOL, 'Int': INT, 'Real': REAL,
-          '`Bool': '`'+BOOL, '`Int': '`'+INT, '`Real': '`'+REAL,}
-
-    def __init__(self, parent, name: str):
-        self.name = unquote(name)
-        self.name = Symbol.TO.get(self.name, self.name)
-        self.sub_exprs = []
-        self.decl: Optional[SymbolDeclaration] = None
-        super().__init__()
-        self.variables = set()
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return str(self)
-
-    def is_value(self): return True
-
-    def has_element(self, term: Expression,
-                    interpretations: dict[str, SymbolInterpretation],
-                    extensions: dict[str, Extension]
-                    ) -> Expression:
-        """Returns an expression that says whether `term` is in the type/predicate denoted by `self`.
-
-        Args:
-            term (Expression): the argument to be checked
-
-        Returns:
-            Expression: whether `term` is in the type denoted by `self`.
-        """
-        assert self.decl is not None, "Internal error"
-        self.check(self.decl.out.name == BOOL, "internal error")
-        return self.decl.contains_element(term, interpretations, extensions)
-
-def SYMBOL(name: str) -> Symbol:
-    return Symbol(None, name)
-
-
-class Type(Symbol):
+class Type(Expression):
     """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
 
-    Inherits from Symbol
+    Inherits from Expression
 
     Args:
-        name (Symbol): name of the concept
+        name (str): name of the concept
 
-        ins (List[Symbol], Optional): domain of the Concept signature, e.g., `[T, T]`
+        ins (List[Type], Optional): domain of the Concept signature, e.g., `[T, T]`
 
-        out (Symbol, Optional): range of the Concept signature, e.g., `Bool`
+        out (Type, Optional): range of the Concept signature, e.g., `Bool`
+
+        decl (Declaration, Optional): declaration of the type
     """
 
     def __init__(self, parent,
                  name:str,
                  ins: Optional[List[Type]] = None,
                  out: Optional[Type] = None):
+        self.name = unquote(name)
         self.ins = ins
         self.out = out
-        super().__init__(parent, name)
+        self.sub_exprs = []
+        self.decl: Optional[SymbolDeclaration] = None
+        super().__init__(self)
 
     def __str__(self):
         return self.name + ("" if not self.out else
                             f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
+
+    def __repr__(self):
+        return str(self)
 
     def __eq__(self, other):
         self.check(self.name != CONCEPT or self.out,
@@ -630,6 +592,8 @@ class Type(Symbol):
                   extensions: dict[str, Extension]
                   ) -> Extension:
         return extensions[""]  # monkey-patched
+
+    def is_value(self): return True
 
     def has_element(self,
                     term: Expression,
@@ -1170,7 +1134,7 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def make(cls,
-             symbol: Symbol,
+             symbol: SymbolExpr,
              args: List[Expression],
              **kwargs
              ) -> AppliedSymbol:
@@ -1278,7 +1242,7 @@ class SymbolExpr(Expression):
                  name: Optional[str],
                  eval: Optional[str],
                  s: Optional[Expression]):
-        self.name = name
+        self.name = unquote(name) if name else name
         self.eval = eval
         self.s = s
         self.sub_exprs = [s] if s is not None else []
@@ -1301,9 +1265,8 @@ class UnappliedSymbol(Expression):
     """
     PRECEDENCE = 200
 
-    def __init__(self, parent, s):
-        self.s = s
-        self.name = self.s.name
+    def __init__(self, parent, name):
+        self.name = unquote(name)
 
         Expression.__init__(self)
 
@@ -1317,7 +1280,7 @@ class UnappliedSymbol(Expression):
     def construct(cls, constructor: Constructor):
         """Create an UnappliedSymbol from a constructor
         """
-        out = (cls)(None, s=SYMBOL(constructor.name))
+        out = (cls)(None, name=constructor.name)
         out.decl = constructor
         out.variables = set()
         return out
@@ -1341,17 +1304,17 @@ class Variable(Expression):
     Args:
         name (str): name of the variable
 
-        sort (Optional[Union[Type, Symbol]]): sort of the variable, if known
+        sort (Optional[Union[Type]]): sort of the variable, if known
     """
     PRECEDENCE = 200
 
     def __init__(self, parent,
                  name:str,
-                 sort: Optional[Union[Type, Symbol]]=None):
+                 sort: Optional[Type]=None):
         self.name = name
         sort = sort
         self.sort = sort
-        assert sort is None or isinstance(sort, Type) or isinstance(sort, Symbol), \
+        assert sort is None or isinstance(sort, Type), \
             f"Internal error: {self}"
 
         super().__init__()
@@ -1369,7 +1332,7 @@ class Variable(Expression):
 
     def has_variables(self) -> bool: return True
 
-def VARIABLE(name: str, sort: Union[Type, Symbol]):
+def VARIABLE(name: str, sort: Type):
     return Variable(None, name, sort)
 
 

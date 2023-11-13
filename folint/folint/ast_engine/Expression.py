@@ -78,8 +78,7 @@ def SCA_Check(self,detections):
         sub.SCA_Check(detections)
 Expression.SCA_Check = SCA_Check
 
-## class Symbol(Expression):
-## class Subtype(Symbol):
+## class Type(Expression):
 
 ##  class AIfExpr(Expression):
 

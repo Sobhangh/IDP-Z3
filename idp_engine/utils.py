@@ -100,11 +100,13 @@ class IDPZ3Error(Exception):
     """ raised whenever an error occurs in the conversion from AST to Z3 """
     pass
 
+TO = {'Bool': BOOL, 'Int': INT, 'Real': REAL,
+        '`Bool': '`'+BOOL, '`Int': '`'+INT, '`Real': '`'+REAL,}
 
 def unquote(s: str) -> str:
     if s[0] == "'" and s[-1] == "'":
         return s[1:-1]
-    return s
+    return TO.get(s, s)
 
 def flatten(a: List) -> List:
     # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists

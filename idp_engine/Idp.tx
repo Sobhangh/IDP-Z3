@@ -29,7 +29,6 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
           symbols+= /`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/ [','] ':'
           ( '(' sorts*=Type[/[*⨯]/] ')' | sorts*=Type[/[*⨯]/] )
           ('->' | '→') out=Type;
-      Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
 
     VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ ('in' | '∈') subtype=Type;
 
@@ -121,7 +120,7 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
               | is_enumeration=/in|∈/ in_enumeration=Enumeration)?;
         SymbolExpr: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
                   | eval='$' '(' s=Expression ')';
-      UnappliedSymbol: s=Symbol;
+      UnappliedSymbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
       Number: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       Date: iso=/#\d{4}-\d{2}-\d{2}/

@@ -30,7 +30,7 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ASTNode, Expression, Symbol, SYMBOL, Type, TYPE,
+from .Expression import (ASTNode, Expression, TYPE, Type,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, Operator, AComparison, AUnary,
@@ -92,7 +92,7 @@ def annotate_block(self: ASTNode,
 
     concepts = self.symbol_decls[CONCEPT]
     for constructor in concepts.constructors:
-        constructor.symbol = (SYMBOL(constructor.name[1:])
+        constructor.symbol = (TYPE(constructor.name[1:])
                                 .annotate(self, {}))
 
     # populate .map of CONCEPT
@@ -165,25 +165,6 @@ def annotate_declaration(self: ASTNode,
 VarDeclaration.annotate_declaration = annotate_declaration
 
 
-# Class Symbol  #######################################################
-
-def annotate(self: Expression,
-             voc: Vocabulary,
-             q_vars: dict[str, Variable]
-             ) -> Annotated:
-    assert isinstance(self, Symbol), "Internal error"
-    if self.name in q_vars:
-        return q_vars[self.name]
-
-    self.check(self.name in voc.symbol_decls,
-               f'Undeclared symbol name: "{self.name}"')
-
-    self.decl = voc.symbol_decls[self.name]
-    self.type = self.decl.type
-    return self
-Symbol.annotate = annotate
-
-
 # Class Type  #######################################################
 
 def annotate(self: Expression,
@@ -191,7 +172,15 @@ def annotate(self: Expression,
              q_vars: dict[str, Variable]
              ) -> Annotated:
     assert isinstance(self, Type), "Internal error"
-    Symbol.annotate(self, voc, q_vars)
+    if self.name in q_vars:
+        return q_vars[self.name]
+
+    self.check(self.name in voc.symbol_decls,
+               f'Undeclared symbol name: "{self.name}"')
+
+    self.decl = voc.symbol_decls[self.name]
+    self.variables = set()
+    self.type = self.decl.type
     if self.out:
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
         self.out = self.out.annotate(voc, q_vars)
@@ -232,10 +221,10 @@ def annotate(self: Expression,
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
     # create level-mapping symbols, as needed
-    # self.level_symbols: dict[SymbolDeclaration, Symbol]
+    # self.level_symbols: dict[SymbolDeclaration, Type]
     dependencies = set()
     for r in self.rules:
-        symbs: dict[str, Symbol] = {}
+        symbs: dict[str, SymbolDeclaration] = {}
         r.body.collect_symbols(symbs)
         for s in symbs.values():
             dependencies.add((r.definiendum.symbol.decl, s))
@@ -437,7 +426,7 @@ def annotate(self: Expression,
     :returns None:
     """
     assert isinstance(self, SymbolInterpretation), "Internal error"
-    self.symbol = SYMBOL(self.name).annotate(voc, {})
+    self.symbol = TYPE(self.name).annotate(voc, {})
     enumeration = self.enumeration  # shorthand
 
     # create constructors if it is a type enumeration
@@ -572,7 +561,7 @@ def annotate_block(self: ASTNode,
         constraint.generate_constructors(open_constructors)
 
     # Next, we convert the list of constructors to actual types.
-    open_types: dict[str, Optional[Symbol]] = {}
+    open_types: dict[str, Optional[Type]] = {}
     for name, constructors in open_constructors.items():
         # If no constructors were found, then the type is not used.
         if not constructors:
@@ -583,20 +572,20 @@ def annotate_block(self: ASTNode,
         open_type = TypeDeclaration(name=type_name,
                                     constructors=constructors)
         open_type.annotate_declaration(self.voc)
-        open_types[name] = SYMBOL(type_name)
+        open_types[name] = TYPE(type_name)
 
     for name, out in [
-        ('expand', SYMBOL(BOOL)),
-        ('hide', SYMBOL(BOOL)),
-        ('view', SYMBOL('_ViewType')),
-        ('moveSymbols', SYMBOL(BOOL)),
-        ('optionalPropagation', SYMBOL(BOOL)),
-        ('manualPropagation', SYMBOL(BOOL)),
-        ('optionalRelevance', SYMBOL(BOOL)),
-        ('manualRelevance', SYMBOL(BOOL)),
+        ('expand', TYPE(BOOL)),
+        ('hide', TYPE(BOOL)),
+        ('view', TYPE('_ViewType')),
+        ('moveSymbols', TYPE(BOOL)),
+        ('optionalPropagation', TYPE(BOOL)),
+        ('manualPropagation', TYPE(BOOL)),
+        ('optionalRelevance', TYPE(BOOL)),
+        ('manualRelevance', TYPE(BOOL)),
         ('unit', open_types['unit']),
         ('heading', open_types['heading']),
-        ('noOptimization', SYMBOL(BOOL))
+        ('noOptimization', TYPE(BOOL))
     ]:
         symbol_decl = SymbolDeclaration(annotations='',
                                         name=name,
@@ -659,7 +648,7 @@ AIfExpr.set_variables = set_variables
 def annotate_quantee(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             inferred: dict[str, Symbol]
+             inferred: dict[str, Type]
              ) -> Annotated:
     assert isinstance(self, Quantee), "Internal error"
     Expression.annotate(self, voc, q_vars)
