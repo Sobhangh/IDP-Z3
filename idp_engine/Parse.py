@@ -509,9 +509,12 @@ class SymbolDeclaration(ASTNode):
     """
 
     def __init__(self, **kwargs):
-        #temp_symbol  = kwargs.pop('temp')
+        #temp_symbol  = kwargs.pop('temporal')
         self.annotations : Annotations = kwargs.pop('annotations')
-        self.temp = True if kwargs.pop('temp') == 'Temporal' else False
+        if kwargs.pop('temporal') == 'Temporal':
+            self.temp = True
+        else:
+            self.temp=False
         self.symbols : Optional[List[Symbol]]
         self.name : Optional[str]
         
