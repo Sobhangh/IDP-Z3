@@ -380,9 +380,9 @@ class TypeDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Symbol]): the types of the arguments
+        sorts (List[Type]): the types of the arguments
 
-        out (Symbol): the Boolean Symbol
+        out (Type): the Boolean Symbol
 
         type (string): Z3 type of an element of the type; same as `name`
 
@@ -405,8 +405,8 @@ class TypeDeclaration(ASTNode):
                             kwargs.pop('enumeration'))
 
         self.arity : int = 1
-        self.sorts : List[Symbol] = [SYMBOL(self.name)]
-        self.out : Symbol = SYMBOL(BOOL)
+        self.sorts : List[Type] = [Type(None, self.name)]
+        self.out : Type = Type(None, BOOL)
         self.type : str = (self.name if type(enumeration) != Ranges else
                      enumeration.type)  # INT or REAL or DATE
         self.base_type : TypeDeclaration = self
@@ -656,6 +656,8 @@ class TheoryBlock(ASTNode):
 
 class Definition(Expression):
     """ The class of AST nodes representing an inductive definition.
+
+    Attributes:
         id (num): unique identifier for each definition
 
         rules ([Rule]):
@@ -1253,7 +1255,7 @@ class Display(ASTNode):
                 raise IDPZ3Error(f"Unknown enumeration in display: {interpretation}")
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
-                self.check(type(constraint.symbol) == Symbol,
+                self.check(constraint.symbol.name,
                            f"Invalid syntax: {constraint}")  # SymbolExpr $()
                 name = constraint.symbol.name
                 symbols = base_symbols(name, constraint.sub_exprs)
@@ -1288,7 +1290,7 @@ class Display(ASTNode):
                                      f" {constraint}")
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
-                self.check(type(constraint.sub_exprs[0].symbol) == Symbol,
+                self.check(constraint.sub_exprs[0].symbol.name,
                            f"Invalid syntax: {constraint}")
                 if constraint.sub_exprs[0].symbol.name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':

@@ -40,9 +40,9 @@ from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
                     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP,
                     ConstructedFrom, Definition, Rule)
-from .Expression import (catch_error, RecDef, Symbol, SYMBOL, AIfExpr, IF,
+from .Expression import (catch_error, RecDef, Symbol, AIfExpr, IF,
                          SymbolExpr, Expression, Constructor, AQuantification,
-                         Type, FORALL, IMPLIES, AND, AAggregate, EQUIV, EQUALS,
+                         Type, FORALL, IMPLIES, AND, AAggregate,
                          OR, AppliedSymbol, UnappliedSymbol, Quantee, Variable,
                          VARIABLE, TRUE, FALSE, Number, ZERO, Extension)
 from .Theory import Theory
@@ -112,7 +112,7 @@ TypeDeclaration.interpret = interpret
 def interpret(self: SymbolDeclaration, problem: Theory):
     assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
 
-    symbol = SYMBOL(self.name)
+    symbol = SymbolExpr.make(self.name)
     symbol.decl = self
     symbol.type = symbol.decl.type
 
@@ -503,12 +503,13 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
                 (superset, filter) = domain.extension(problem.interpretations,
                                                     problem.extensions)
             elif type(domain) == SymbolExpr:
-                return
-            elif type(domain) == Symbol and domain.decl:
-                self.check(domain.decl.out.type == BOOL,
-                            f"{domain} is not a type or predicate")
-                assert domain.decl.name in problem.extensions, "internal error"
-                (superset, filter) = problem.extensions[domain.decl.name]
+                if domain.decl:
+                    self.check(domain.decl.out.type == BOOL,
+                                f"{domain} is not a type or predicate")
+                    assert domain.decl.name in problem.extensions, "internal error"
+                    (superset, filter) = problem.extensions[domain.decl.name]
+                else:
+                    return  # can't get supersets of $(..)
             else:
                 self.check(False, f"Can't resolve the domain of {str(q.vars)}")
         else:
@@ -621,9 +622,9 @@ def _interpret(self: AppliedSymbol,
                subs: dict[str, Expression]
                ) -> Expression:
     # interpret the symbol expression, if any
-    if type(self.symbol) == SymbolExpr and self.symbol.is_intentional():  # $(x)()
+    if type(self.symbol) == SymbolExpr and not self.symbol.name:  # $(x)()
         self.symbol = self.symbol._interpret(problem, subs)
-        if type(self.symbol) == Symbol:  # found $(x)
+        if self.symbol.name:  # found $(x)
             self.check(len(self.sub_exprs) == len(self.symbol.decl.sorts),
                         f"Incorrect arity for {self.code}")
             kwargs = ({'is_enumerated': self.is_enumerated} if self.is_enumerated else
@@ -657,7 +658,7 @@ def _interpret(self: AppliedSymbol,
                     value = out.as_disjunction
                 out.as_disjunction.annotations = out.annotations
         elif out.in_enumeration:
-            # re-create original Applied Symbol
+            # re-create original AppliedSymbol
             core = deepcopy(AppliedSymbol.make(out.symbol, sub_exprs))
             out.as_disjunction = out.in_enumeration.contains([core], False,
                         interpretations=problem.interpretations, extensions=problem.extensions)

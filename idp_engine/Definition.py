@@ -24,7 +24,7 @@ This module contains methods and functions for the handling of definitions
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import (Set, Tuple, List, Optional, TYPE_CHECKING)
+from typing import (Set, Tuple, List, Optional)
 
 from .utils import (RESERVED_SYMBOLS, INT, BOOL, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
 from .Expression import (Expression, catch_error, ZERO, TRUE, FALSE, RecDef, TYPE,

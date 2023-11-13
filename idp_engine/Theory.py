@@ -34,7 +34,7 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not,
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
                          EQUALS, NOT, Extension, AQuantification)
-from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SYMBOL,
+from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SymbolExpr,
                     TheoryBlock, Structure, Definition, str_to_IDP, str_to_IDP2,
                     SymbolInterpretation)
 from .Simplify import join_set_conditions
@@ -306,7 +306,7 @@ class Theory(object):
                 symbol = t.args[0]
                 decl = self.declarations[symbol.name[1:]]
                 assert decl.instances, f"goal {decl.name} must be instantiable."
-                relevant = SYMBOL(RELEVANT)
+                relevant = SymbolExpr.make(RELEVANT)
                 relevant.decl = self.declarations[RELEVANT]
                 for i in decl.instances.values():
                     constraint = AppliedSymbol.make(relevant, [i])

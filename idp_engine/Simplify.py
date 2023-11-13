@@ -377,7 +377,7 @@ def update_exprs(self: AppliedSymbol,
                  new_exprs: Generator[Expression, None, None]
                  ) -> Expression:
     new_exprs = list(new_exprs)
-    if not self.decl and type(self.symbol) == Symbol:
+    if not self.decl and self.symbol.name:
         self.decl = self.symbol.decl
     self.type = (BOOL if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
@@ -421,15 +421,19 @@ AppliedSymbol.as_set_condition = as_set_condition
 def update_exprs(self: SymbolExpr,
                  new_exprs: Generator[Expression, None, None]
                  ) -> Expression:
-    symbol = list(new_exprs)[0]
-    value = (symbol if self.eval == '' else
-             symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
-             None)
-    if value is not None:
-        self.check(type(value) != Variable,
-                f"Variable `{value}` cannot be applied to argument(s).")
-        return value
-    return self._change(sub_exprs=[symbol])
+    if not self.name:  # $(..)
+        symbol = list(new_exprs)[0]
+        value = (symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
+                None)
+        if value is not None:
+            self.check(type(value) != Variable,
+                    f"Variable `{value}` cannot be applied to argument(s).")
+            out = SymbolExpr.make(name=symbol.decl.symbol.name)
+            out.decl = symbol.decl.symbol.decl
+            out.variables = set()
+            return out
+        return self._change(sub_exprs=[symbol])
+    return self
 SymbolExpr.update_exprs = update_exprs
 
 

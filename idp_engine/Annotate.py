@@ -365,7 +365,7 @@ def annotate(self: Expression,
              ) -> Annotated:
     assert isinstance(self, Rule), "Internal error"
     self.original = copy(self)
-    self.check(not self.definiendum.symbol.is_intentional(),
+    self.check(self.definiendum.symbol.name,
                 f"No support for intentional objects in the head of a rule: "
                 f"{self}")
     # create head variables
@@ -864,7 +864,7 @@ def annotate(self: AAggregate,
                         [TYPE(v.sort.code) for v in q_vars.values()],
                         TYPE(self.type)).annotate_declaration(voc)    # output_domain
                     to_create = True
-                symbol = SYMBOL(symbol_decl.name)
+                symbol = SymbolExpr.make(symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
 
@@ -944,6 +944,7 @@ def annotate(self: SymbolExpr,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
+    self.decl = voc.symbol_decls.get(self.name, None)
     out = Expression.annotate(self, voc, q_vars)
     return out.simplify1()
 SymbolExpr.annotate = annotate

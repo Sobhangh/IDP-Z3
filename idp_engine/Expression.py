@@ -37,7 +37,7 @@ from typing import (Optional, List, Union, Tuple, Set, Callable, TYPE_CHECKING,
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
-    from .Parse import IDP, Vocabulary, SymbolDeclaration, SymbolInterpretation, Enumeration
+    from .Parse import IDP, Vocabulary, Declaration, SymbolDeclaration, SymbolInterpretation, Enumeration
     from .Annotate import Annotated, Warnings
 
 from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
@@ -1182,7 +1182,7 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def construct(cls, constructor, args):
-        out= cls.make(SYMBOL(constructor.name), args)
+        out= cls.make(SymbolExpr.make(constructor.name), args)
         out.decl = constructor
         out.variables = set()
         return out
@@ -1223,9 +1223,8 @@ class AppliedSymbol(Expression):
             or any(e.has_decision() for e in self.sub_exprs))
 
     def type_inference(self, voc: Vocabulary):
-        decl = (voc.symbol_decls[self.symbol.s.name]
+        decl = (voc.symbol_decls.get(self.symbol.name, None)
                  if voc and hasattr(voc, "symbol_decls")
-                 and type(self.symbol) == SymbolExpr and not self.symbol.eval
                  else None)
         if decl:
             self.check(decl.arity == len(self.sub_exprs),
@@ -1250,27 +1249,49 @@ class AppliedSymbol(Expression):
         return (not all (e.is_value() for e in self.sub_exprs))
 
     def generate_constructors(self, constructors: dict):
-        symbol = self.symbol.sub_exprs[0]
-        if hasattr(symbol, 'name') and symbol.name in ['unit', 'heading']:
+        assert self.symbol.name, "Can't use concepts here"
+        symbol = self.symbol.name
+        if symbol in ['unit', 'heading']:
             assert type(self.sub_exprs[0]) == UnappliedSymbol, "Internal error"
             constructor = CONSTRUCTOR(self.sub_exprs[0].name)
-            constructors[symbol.name].append(constructor)
+            constructors[symbol].append(constructor)
 
 
 class SymbolExpr(Expression):
-    def __init__(self, parent, s, eval=''):
+    """ represents either a type name, a symbol name
+    or a `$(..)` expression evaluating to a type or symbol name
+
+    Attributes:
+
+        name (Optional[str]): name of the type or symbol, or None
+
+        eval (Optional[str]): `$` or None
+
+        s (Optional[Expression]): argument of the `$`.
+
+        decl (Optional[Declaration]): the declaration of the symbol
+
+    Either `name` and `decl`are not None, or `eval` and `s` are not None.
+    When `eval` is None, `s` is None too.
+    """
+    def __init__(self, parent,
+                 name: Optional[str],
+                 eval: Optional[str],
+                 s: Optional[Expression]):
+        self.name = name
         self.eval = eval
         self.s = s
-        self.sub_exprs = [s]
-        self.decl = self.sub_exprs[0].decl if not self.eval else None
+        self.sub_exprs = [s] if s is not None else []
+        self.decl: Optional[Declaration] = None
         super().__init__()
+
+    @classmethod
+    def make(cls, name: str) -> SymbolExpr:
+        return (cls)(None, name, None, None)
 
     def __str__(self):
         return (f"$({self.sub_exprs[0]})" if self.eval else
-                f"{self.sub_exprs[0]}")
-
-    def is_intentional(self):
-        return self.eval
+                f"{self.name}")
 
 class UnappliedSymbol(Expression):
     """The result of parsing a symbol not applied to arguments.

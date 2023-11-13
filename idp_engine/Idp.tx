@@ -119,7 +119,8 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
               '(' sub_exprs*=Expression[','] ')'
               ( is_enumerated=/is\s+enumerated/
               | is_enumeration=/in|∈/ in_enumeration=Enumeration)?;
-        SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
+        SymbolExpr: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
+                  | eval='$' '(' s=Expression ')';
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;

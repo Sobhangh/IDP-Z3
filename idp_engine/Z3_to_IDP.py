@@ -27,7 +27,7 @@ from typing import List, TYPE_CHECKING, Optional, Union
 from z3 import ModelRef, FuncInterp, is_and, is_or, is_eq, is_not, AstRef, ExprRef
 
 from .Assignments import Assignments
-from .Expression import Expression, SYMBOL, AppliedSymbol
+from .Expression import Expression, SymbolExpr, AppliedSymbol
 from .Parse import str_to_IDP2, SymbolDeclaration
 from .utils import RESERVED_SYMBOLS
 if TYPE_CHECKING:
@@ -124,7 +124,7 @@ def collect_questions(z3_expr: AstRef,
         atom_string = f"{decl.name}({arg_string})"
         if atom_string not in ass:
             arg = str_to_IDP2(typ.name, typ, arg_string)
-            symb = SYMBOL(decl.name)
+            symb = SymbolExpr.make(decl.name)
             symb.decl = decl
             atom = AppliedSymbol.make(symb, [arg])
             out.append(atom)
