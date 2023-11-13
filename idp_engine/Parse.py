@@ -521,8 +521,8 @@ class SymbolDeclaration(ASTNode):
                 self.name = intern(kwargs.pop('name').name)
             else:
                 self.name = intern(kwargs.pop('strname'))
-        self.sorts : List[Symbol] = kwargs.pop('sorts')
-        self.out : Symbol = kwargs.pop('out')
+        self.sorts : List[Type] = kwargs.pop('sorts')
+        self.out : Type = kwargs.pop('out')
         if self.out is None:
             self.out = SYMBOL(BOOL)
 

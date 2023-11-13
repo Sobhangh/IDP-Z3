@@ -1336,7 +1336,7 @@ class Variable(Expression):
 
         super().__init__()
 
-        self.type = sort.decl.name if sort and sort.decl else ''
+        self.type = sort.name if sort else ''
         self.sub_exprs = []
         self.variables = set([self.name])
 

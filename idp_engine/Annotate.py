@@ -445,7 +445,7 @@ def annotate(self: Expression,
     if self.is_type_enumeration and enumeration.constructors:
         # create Constructors before annotating the tuples
         for c in enumeration.constructors:
-            c.type = self.name
+            c.type = self.symbol.name
             self.check(c.name not in voc.symbol_decls,
                     f"duplicate '{c.name}' constructor for '{self.name}' symbol")
             voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
@@ -691,7 +691,7 @@ def annotate_quantee(self: Expression,
             # 3. use type inference if still not found
             if var.sort is None:
                 var.sort = inferred.get(var.name) if inferred else None
-            var.type = var.sort.decl.name if var.sort and var.sort.decl else ''
+            var.type = var.sort.name if var.sort else ''
             q_vars[var.name] = var
     if not self.sub_exprs and var.sort:
         self.sub_exprs = [var.sort]
@@ -955,7 +955,7 @@ def annotate(self: Variable,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    self.type = self.sort.decl.name if self.sort and self.sort.decl else ''
+    self.type = self.sort.name if self.sort else ''
     return self
 Variable.annotate = annotate
 
