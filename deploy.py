@@ -2,6 +2,12 @@
 Script to deploy the IDP-Z3 project, to be used whenever there is a new version
 ready.
 
+To run it:
+    * commit your last changes in the repository
+    * `poetry env use 3.11 & poetry update`
+    * start the web and client servers
+    * `poetry run python3.11 deploy.py`
+
 It does the following things:
     * add a tag in git;
     * update version in pyproject.toml;
