@@ -81,9 +81,8 @@ def get_def_constraints(self: Definition,
     for key in self.inductive:
         real = TYPE(REAL)
         real.decl = problem.declarations[REAL]
-        symbdec = SymbolDeclaration.make(
-            "_"+str(self.id)+"lvl_"+key.name,
-            key.arity, key.sorts, real)
+        symbdec = SymbolDeclaration.make(self,
+            "_"+str(self.id)+"lvl_"+key.name, key.sorts, real)
         level_symbols[key] = TYPE(symbdec.name)
         level_symbols[key].decl = symbdec
 

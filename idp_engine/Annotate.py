@@ -524,15 +524,12 @@ def annotate(self: Expression,
     for a in self.sorts:
         self.check(a.out.name in voc.symbol_decls,
                    f"Unknown type: {a.out}" )
-        a.decl = SymbolDeclaration(annotations='', name=a.accessor,
-                                   sorts=[TYPE(self.type)],
-                                   out=a.out)
+        a.decl = SymbolDeclaration.make(self,
+            name=a.accessor, sorts=[TYPE(self.type)], out=a.out)
         a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
-    self.tester = SymbolDeclaration(annotations='',
-                                    name=f"is_{self.name}",
-                                    sorts=[TYPE(self.type)],
-                                    out=TYPE(BOOL))
+    self.tester = SymbolDeclaration.make(self,
+            name=f"is_{self.name}", sorts=[TYPE(self.type)], out=TYPE(BOOL))
     self.tester.by_z3 = True
     self.tester.annotate_declaration(voc)
     return self
@@ -587,8 +584,7 @@ def annotate_block(self: ASTNode,
         ('heading', open_types['heading']),
         ('noOptimization', TYPE(BOOL))
     ]:
-        symbol_decl = SymbolDeclaration(annotations='',
-                                        name=name,
+        symbol_decl = SymbolDeclaration.make(self, name=name,
                                         sorts=[], out=out)
         symbol_decl.annotate_declaration(self.voc)
 
@@ -847,9 +843,8 @@ def annotate(self: AAggregate,
                     symbol_decl = voc.symbol_decls[name]
                     to_create = False
                 else:
-                    symbol_decl = SymbolDeclaration.make(
+                    symbol_decl = SymbolDeclaration.make(self,
                         "__"+self.str, # name `__ *`
-                        len(q_vars),  # arity
                         [TYPE(v.sort.code) for v in q_vars.values()],
                         TYPE(self.type)).annotate_declaration(voc)    # output_domain
                     to_create = True

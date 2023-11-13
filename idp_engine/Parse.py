@@ -323,20 +323,15 @@ class Vocabulary(ASTNode):
             TypeDeclaration(name=INT, enumeration=IntRange()),
             TypeDeclaration(name=REAL, enumeration=RealRange()),
             TypeDeclaration(name=DATE, enumeration=DateRange()),
-            TypeDeclaration(
-                name=CONCEPT,
-                constructors=[]),
-            SymbolDeclaration(annotations='', name=GOAL_SYMBOL,
-                              sorts=[TYPE(CONCEPT, ins=[],
-                                             out=TYPE(BOOL))],
-                              out=TYPE(BOOL)),
-            SymbolDeclaration(annotations='', name=RELEVANT,
-                              sorts=[TYPE(CONCEPT, ins=[],
-                                             out=TYPE(BOOL))],
-                              out=TYPE(BOOL)),
-            SymbolDeclaration(annotations='', name=ABS,
-                                sorts=[TYPE(INT)],
-                                out=TYPE(INT)),
+            TypeDeclaration(name=CONCEPT, constructors=[]),
+            SymbolDeclaration.make(self, name=GOAL_SYMBOL,
+                            sorts=[TYPE(CONCEPT, ins=[], out=TYPE(BOOL))],
+                            out=TYPE(BOOL)),
+            SymbolDeclaration.make(self, name=RELEVANT,
+                            sorts=[TYPE(CONCEPT, ins=[], out=TYPE(BOOL))],
+                            out=TYPE(BOOL)),
+            SymbolDeclaration.make(self, name=ABS,
+                            sorts=[TYPE(INT)], out=TYPE(INT)),
             ] + self.declarations
 
     def __str__(self):
@@ -508,21 +503,24 @@ class SymbolDeclaration(ASTNode):
         by_z3 (Bool): True if the symbol is created by z3 (testers and accessors of constructors)
     """
 
-    def __init__(self, **kwargs):
-        self.annotations : Annotations = kwargs.pop('annotations')
+    def __init__(self,
+                 parent,
+                 annotations: Annotations,
+                 sorts: List[Type],
+                 out: Type,
+                 symbols: Optional[List[str]] = None,
+                 name: Optional[str] = None):
+        self.annotations = annotations
         self.symbols : Optional[List[str]]
         self.name : Optional[str]
-        if 'symbols' in kwargs:
-            self.symbols = kwargs.pop('symbols')
+        if symbols:
+            self.symbols = symbols
             self.name = None
         else:
             self.symbols = None
-            if 'name' in kwargs:
-                self.name = intern(kwargs.pop('name'))
-            else:
-                self.name = intern(kwargs.pop('strname'))
-        self.sorts : List[Type] = kwargs.pop('sorts')
-        self.out : Type = kwargs.pop('out')
+            self.name = name
+        self.sorts : List[Type] = sorts
+        self.out : Type = out
         if self.out is None:
             self.out = TYPE(BOOL)
 
@@ -542,8 +540,8 @@ class SymbolDeclaration(ASTNode):
         self.by_z3 = False
 
     @classmethod
-    def make(cls, strname, arity, sorts, out):
-        o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
+    def make(cls, parent, name, sorts, out):
+        o = cls(parent=parent, name=name, sorts=sorts, out=out, annotations={})
         return o
 
     def __str__(self):
