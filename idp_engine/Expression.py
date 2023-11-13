@@ -163,7 +163,7 @@ class Accessor(ASTNode):
         decl (SymbolDeclaration): declaration of the accessor function
     """
     def __init__(self, parent,
-                 type: UnappliedSymbol,
+                 type: Type,
                  accessor: Optional[UnappliedSymbol] = None):
         self.accessor = accessor
         self.type = type.name
