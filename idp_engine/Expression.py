@@ -227,7 +227,7 @@ class Expression(ASTNode):
                  'is_type_constraint_for', 'co_constraint',
                  'questions', 'relevant')
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[ASTNode]=None):
         if parent:
             self.parent = parent
         self.sub_exprs: List[Expression]
@@ -764,10 +764,14 @@ class AQuantification(Expression):
     """
     PRECEDENCE = 20
 
-    def __init__(self, parent, annotations, q, quantees, f):
+    def __init__(self, parent: ASTNode,
+                 annotations: Annotations,
+                 q: str,
+                 quantees: List[Quantee],
+                 f: Expression):
         self.annotations = annotations
         self.q = q
-        self.quantees: List[Quantee] = quantees
+        self.quantees = quantees
         self.f = f
 
         self.q = ('∀' if self.q in ['!', 'forall'] else

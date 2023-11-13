@@ -546,7 +546,7 @@ def annotate_block(self: ASTNode,
 
     # add display predicates
 
-    viewType = TypeDeclaration(name='_ViewType',
+    viewType = TypeDeclaration(self, name='_ViewType',
         constructors=[CONSTRUCTOR('normal'),
                         CONSTRUCTOR('expanded')])
     viewType.annotate_declaration(self.voc)
@@ -566,7 +566,7 @@ def annotate_block(self: ASTNode,
             continue
 
         type_name = name.capitalize()  # e.g. type Unit (not unit)
-        open_type = TypeDeclaration(name=type_name,
+        open_type = TypeDeclaration(self, name=type_name,
                                     constructors=constructors)
         open_type.annotate_declaration(self.voc)
         open_types[name] = TYPE(type_name)

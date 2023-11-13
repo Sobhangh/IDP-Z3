@@ -365,7 +365,7 @@ class Theory(object):
             self.assignments.assert__(atom, val, status)
         self._formula = None
 
-    def enable_law(self, code: str) -> Theory:
+    def enable_law(self, code: str):
         """Enables a law, represented as a code string taken from the output of explain(...).
 
         The law should not result from a structure (e.g., from ``p:=true.``)
@@ -383,7 +383,7 @@ class Theory(object):
                 f"Cannot enable an unknown law: {code}"
         self.ignored_laws.remove(code)
 
-    def disable_law(self, code: str) -> Theory:
+    def disable_law(self, code: str):
         """Disables a law, represented as a code string taken from the output of explain(...).
 
         The law should not result from a structure (e.g., from ``p:=true.``)

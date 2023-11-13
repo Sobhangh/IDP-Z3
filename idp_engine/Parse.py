@@ -318,12 +318,12 @@ class Vocabulary(ASTNode):
 
         # define built-in types: Bool, Int, Real, Symbols
         self.declarations = [
-            TypeDeclaration(
+            TypeDeclaration(self,
                 name=BOOL, constructors=[TRUEC, FALSEC]),
-            TypeDeclaration(name=INT, enumeration=IntRange()),
-            TypeDeclaration(name=REAL, enumeration=RealRange()),
-            TypeDeclaration(name=DATE, enumeration=DateRange()),
-            TypeDeclaration(name=CONCEPT, constructors=[]),
+            TypeDeclaration(self, name=INT, enumeration=IntRange()),
+            TypeDeclaration(self, name=REAL, enumeration=RealRange()),
+            TypeDeclaration(self, name=DATE, enumeration=DateRange()),
+            TypeDeclaration(self, name=CONCEPT, constructors=[]),
             SymbolDeclaration.make(self, name=GOAL_SYMBOL,
                             sorts=[TYPE(CONCEPT, ins=[], out=TYPE(BOOL))],
                             out=TYPE(BOOL)),
@@ -392,12 +392,13 @@ class TypeDeclaration(ASTNode):
         block (Vocabulary): the vocabulary block that contains it
     """
 
-    def __init__(self, **kwargs):
-        self.name : str = kwargs.pop('name')
-        self.constructors : List[Constructor] = ([] if 'constructors' not in kwargs else
-                             kwargs.pop('constructors'))
-        enumeration: Optional[Enumeration] = (None if 'enumeration' not in kwargs else
-                            kwargs.pop('enumeration'))
+    def __init__(self, parent,
+                 name: str,
+                 constructors: Optional[List[Constructor]] = None,
+                 enumeration: Optional[Enumeration] = None):
+        self.name = name
+        self.constructors = constructors if constructors else []
+        enumeration = enumeration
 
         self.arity : int = 1
         self.sorts : List[Type] = [Type(None, self.name)]
@@ -527,14 +528,14 @@ class SymbolDeclaration(ASTNode):
         self.arity = len(self.sorts)
         self.annotations : Annotations = self.annotations.annotations if self.annotations else {}
         self.private = None
-        self.unit: str = None
-        self.heading: str = None
+        self.unit: Optional[str] = None
+        self.heading: Optional[str] = None
         self.optimizable: bool = True
 
-        self.type : str = None  # a string
+        self.type : Optional[str] = None  # a string
         self.base_type : Optional[TypeDeclaration]= None
-        self.range : List[AppliedSymbol]= None  # all possible terms.  Used in get_range and IO.py
-        self.instances : dict[str, AppliedSymbol]= None  # not starting with '_'
+        self.range : Optional[List[AppliedSymbol]]= None  # all possible terms.  Used in get_range and IO.py
+        self.instances : Optional[dict[str, AppliedSymbol]]= None  # not starting with '_'
         self.block: Optional[ASTNode] = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
         self.by_z3 = False
