@@ -793,7 +793,7 @@ AAggregate.annotate1 = AQuantification.annotate1
 def annotate(self, voc, q_vars,ltc=False):
     self.symbol = self.symbol.annotate(voc, q_vars)
     if self.symbol.decl:
-        self.check((not self.in_temp) and  self.symbol.decl.temp ,f"{self.symbol} has to be used inside a temporal second order predicate")
+        self.check(self.in_temp or (not self.symbol.decl.temp) ,f"{self.symbol} has to be used inside a temporal second order predicate")
         self.check(self.symbol.decl.arity == len(self.sub_exprs)
                    or self.symbol.decl.name in ['hide', 'unit', 'heading', 'noOptimization'],
             f"Incorrect number of arguments in {self}: "
@@ -832,7 +832,7 @@ AppliedSymbol.annotate1 = annotate1
 def replace(self, voc, q_vars):
     self.sub_expr.in_temp = True
     symb : Symbol= self.sub_expr.symbol.annotate(voc, q_vars)
-    self.check(not symb.decl.temp,f"{symb} is not a temporal predicate")
+    self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
     #is the name of this variable ok??
     t: Variable = VARIABLE('time')
     self.sub_expr.sub_exprs.push(t)
