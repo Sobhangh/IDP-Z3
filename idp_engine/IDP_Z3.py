@@ -35,7 +35,7 @@ from idp_engine.utils import PROCESS_TIMINGS
 
 def cli(args=None):
     parser = argparse.ArgumentParser(description='IDP-Z3')
-    parser.add_argument('--version', '-v', action='version', version='0.10.11')
+    parser.add_argument('--version', '-v', action='version', version='0.10.12')
     parser.add_argument('FILE', help='path to the .idp file', type=str)
     parser.add_argument('-o', '--output', help='name of the output file',
                         type=str)

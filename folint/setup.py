@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="folint",
-    version="1.0.7",
+    version="1.0.8",
     description="Linter for FO-dot, used in the IDP-Z3 system",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -25,7 +25,7 @@ setup(
         'Topic :: Software Development :: Quality Assurance'
       ],
     packages=find_packages(),
-    install_requires=["idp_engine>=0.10.11"],
+    install_requires=["idp_engine>=0.10.12"],
     entry_points={
       'console_scripts': ['folint=folint.SCA:main']
     }
