@@ -26,11 +26,11 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=ConstructedFrom))?;
 
     SymbolDeclaration: annotations=Annotations
-          symbols+= /`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/ [','] ':'
+          symbols+= NAME [','] ':'
           ( '(' sorts*=Type[/[*⨯]/] ')' | sorts*=Type[/[*⨯]/] )
           ('->' | '→') out=Type;
 
-    VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ ('in' | '∈') subtype=Type;
+    VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ IN subtype=Type;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
@@ -47,16 +47,16 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
           definiendum=AppliedSymbol
           (('=' |DefEqOp) out=SumMinus)?
           (('<-'|'←' | 'if' ) body=Expression)? '.' ;
-        Quantee:  subtype=Type !'in' !'∈' vars+=Variable[',']
-                | vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
-                | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?;
+        Quantee:  subtype=Type !IN vars+=Variable[',']
+                | vars+=Variable[','] ( IN (subtype=Type | sort=SymbolExpr) )?
+                | vars+=VarTuple[','] ( IN (subtype=Type | sort=SymbolExpr) )?;
             Variable: name=/`?[^\d\W]\w*\b/;
             VarTuple: '(' vars+=Variable[','] ')';
             Type: ( name='Concept' '['
                           ( '(' ins*=Type[/[*⨯]/] ')' | ins*=Type[/[*⨯]/] )
                           ('->' | '→') out=Type ']'
                   )
-                | name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
+                | name=NAME;
 
   Axiom: annotations=Annotations expr=Expression '.';
 
@@ -118,11 +118,11 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
               '(' sub_exprs*=Expression[','] ')'
               ( is_enumerated=/is\s+enumerated/
               | is_enumeration=/in|∈/ in_enumeration=Enumeration)?;
-        SymbolExpr: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
+        SymbolExpr: name=SYMBOL
                   | eval='$' '(' s=Expression ')';
-      UnappliedSymbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
+      UnappliedSymbol: name=SYMBOL;
       Number: number=IDPFLOAT | number=INT;
-        IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
+IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       Date: iso=/#\d{4}-\d{2}-\d{2}/
           | iso='#TODAY' ( '(' y=INT ',' m=INT ',' d=INT ')' )?;
       Brackets: annotations=Annotations '(' f=Expression ')';
@@ -176,4 +176,6 @@ Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}'
   String: literal=/f?"(\.|[^"])*"/;
   PyList: '[' elements*=PyExpr[','] ']';
 
-
+NAME: /[^\d\W]\w*\b|'(\.|[^'])*'/;
+SYMBOL: /`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
+IN: /in|∈/;
