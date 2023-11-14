@@ -319,7 +319,9 @@ def SCA_Check(self,detections):
             if isinstance(self.decl, Constructor):
                 # Constructors.
                 expected_type = self.decl.sorts[i].decl.type
-            elif len(self.decl.sorts[i].decl.sorts) == 1 and self.decl.sorts[i].decl.sorts[0].type == self.decl.sorts[i].type and self.decl.sorts[i].type != '𝔹':
+            elif (len(self.decl.sorts[i].decl.sorts) == 1
+            and self.decl.sorts[i].decl.sorts[0].type == self.decl.sorts[i].type
+            and self.decl.sorts[i].type != BOOL):
                 # Normal types
                 expected_type = self.decl.sorts[i].type
             else:

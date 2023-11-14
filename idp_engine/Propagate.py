@@ -41,7 +41,7 @@ from .Expression import (Expression, AQuantification, ADisjunction,
                          Brackets, TRUE, FALSE)
 from .Parse import str_to_IDP
 from .Theory import Theory
-from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
+from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE, BOOL, INT, REAL
 from .Z3_to_IDP import get_interpretations
 
 start = time.process_time()
@@ -321,7 +321,7 @@ def _first_propagate(self, solver: Solver,
         propositions.append(bool_q)
         prop_map[q_symbol] = (val1, q)
 
-        if complete and q.type not in ['𝔹', 'ℤ', 'ℝ']:
+        if complete and q.type not in [BOOL, INT, REAL]:
             # If complete=True, we also want to propagate every possible value
             # of a function. This is the most complete form of propagation, as
             # it will also tell us which function values are now _not_

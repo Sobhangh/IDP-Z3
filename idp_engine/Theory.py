@@ -938,18 +938,20 @@ class Theory(object):
             for ass in out.assignments.values():
                 if (ass.value
                 and (( type(ass.sentence) == AComparison
-                       and (any(e.type in [INT, REAL, DATE] for e in ass.sentence.sub_exprs)
+                       and (any(e.type in [INT, REAL, DATE]
+                                for e in ass.sentence.sub_exprs)
                             or any(op in '<>≤≥' for op in ass.sentence.operator)))
                     or type(ass.sentence) == AQuantification)):
 
                     questions = OrderedSet()
                     ass.sentence.collect(questions, all_=True, co_constraints=False)
                     if (1 < len(ass.symbols)  # more than 1 symbol or 1 question
-                    or 1 < len([q for q in questions.values() if type(q)==AppliedSymbol])):
+                    or 1 < len([q for q in questions.values()
+                                if type(q)==AppliedSymbol])):
                         ass.status = S.UNKNOWN
                         ass.value = None
 
-        new_constraints: List[Expression] = []
+        new_constraints: OrderedSet = OrderedSet()
         for constraint in out.constraints:
             if constraint.code not in self.ignored_laws:
                 new_constraint = constraint.simplify_with(out.assignments,
