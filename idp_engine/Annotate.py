@@ -117,7 +117,7 @@ def annotate(self, voc):
             if d.name == self.symbol.name:
                 d.temp = True
                 d.arity +=1
-                d.sorts.push(SYMBOL('Tijd'))
+                d.sorts.append(SYMBOL('Tijd'))
                 break
     
 TemporalDeclaration.annotate = annotate
@@ -133,7 +133,7 @@ def annotate(self, voc):
     voc.symbol_decls[self.name] = self
 #    if self.temp :
 #        self.arity +=1
-#        self.sorts.push(SYMBOL('Tijd'))
+#        self.sorts.append(SYMBOL('Tijd'))
     for s in self.sorts:
         s.annotate(voc, {})
     self.out.annotate(voc, {})
@@ -344,7 +344,7 @@ def annotate(self, voc, q_vars, ltc=False):
     if not isinstance(self.definiendum, AppliedSymbol):
         d : AQuantification = self.definiendum.replace(voc,q_vars)
         self.definiendum =d.f
-        self.quantees.push(d.quantees)
+        self.quantees.append(d.quantees)
     # create head variables
     q_v = copy(q_vars)
     for q in self.quantees:
@@ -851,7 +851,7 @@ def replace(self, voc, q_vars):
     self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
     #is the name of this variable ok??
     t: Variable = VARIABLE('time')
-    self.sub_expr.sub_exprs.push(t)
+    self.sub_expr.sub_exprs.append(t)
     #Is this type the correct time type?
     time: Type = TYPE('Tijd')
     qt: Quantee = Quantee.make([t],time) 
