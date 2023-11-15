@@ -622,12 +622,11 @@ class VarDeclaration(ASTNode):
         return f"var {self.name} ∈ {self.subtype}"
     
 class TemporalDeclaration(ASTNode):
-    """ represents a declaration of variable (IEP 24)
+    """ represents a declaration of Temporal predicate (IEP 24)
 
     Attributes:
-        name (str): name of the variable
+        symbol (Symbol): symbol of the variable
 
-        subtype (Type): type of the variable
     """
 
     def __init__(self, **kwargs):
