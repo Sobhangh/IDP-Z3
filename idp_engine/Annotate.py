@@ -29,7 +29,7 @@ from .Parse import (TemporalDeclaration, Vocabulary, Import, TypeDeclaration, De
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (Expression, StartAppliedSymbol, Symbol, SYMBOL, Type, TYPE,
+from .Expression import (Expression, NowAppliedSymbol, StartAppliedSymbol, Symbol, SYMBOL, Type, TYPE,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, Operator, AComparison, AUnary,
@@ -843,7 +843,7 @@ def annotate1(self):
 AppliedSymbol.annotate1 = annotate1
 
 
-# Class StartAppliedSymbol  #######################################################
+# Class NowAppliedSymbol  #######################################################
 
 def replace(self, voc, q_vars):
     self.sub_expr.in_temp = True
@@ -861,7 +861,7 @@ def annotate(self, voc, q_vars,ltc=False):
     expanded: AQuantification = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc)
    
-StartAppliedSymbol.annotate = annotate
+NowAppliedSymbol.annotate = annotate
 # Class SymbolExpr  #######################################################
 
 def annotate(self, voc, q_vars,ltc=False):
