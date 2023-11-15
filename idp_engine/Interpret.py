@@ -114,7 +114,6 @@ def interpret(self: SymbolDeclaration, problem: Theory):
 
     symbol = SymbolExpr.make(self.name)
     symbol.decl = self
-    symbol.type = symbol.decl.type
 
     # determine the extension, i.e., (superset, filter)
     extensions = [s.extension(problem.interpretations, problem.extensions)

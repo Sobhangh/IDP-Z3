@@ -519,7 +519,7 @@ class Constructor(Expression):
         tester (SymbolDeclaration): function to test if the constructor
         has been applied to some arguments (e.g., is_rgb)
 
-        symbol (Type): only for Symbol constructors
+        symbol (Type): only for Concept constructors
 
         range: the list of identifiers
     """
@@ -546,7 +546,7 @@ def CONSTRUCTOR(name: str, args=None) -> Constructor:
 
 
 class Type(Expression):
-    """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
+    """ASTNode representing a (sub-)type or a `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
 
     Inherits from Expression
 
@@ -1270,7 +1270,7 @@ class UnappliedSymbol(Expression):
     """
     PRECEDENCE = 200
 
-    def __init__(self, parent, name):
+    def __init__(self, parent: Optional[ASTNode], name: str):
         self.name = unquote(name)
 
         Expression.__init__(self)

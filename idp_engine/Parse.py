@@ -411,7 +411,9 @@ class TypeDeclaration(ASTNode):
         self.map : dict[str, Expression]= {}
 
         self.interpretation : Optional[SymbolInterpretation] = (None if enumeration is None else
-            SymbolInterpretation(name=TYPE(self.name), sign='≜',
+            SymbolInterpretation(parent=None,
+                                 name=UnappliedSymbol(None, self.name),
+                                 sign='≜',
                                  enumeration=enumeration, default=None))
 
     def __str__(self):
@@ -813,7 +815,7 @@ class SymbolInterpretation(Expression):
     Attributes:
         name (string): name of the symbol being enumerated.
 
-        symbol (Symbol): symbol being enumerated
+        symbol (Type): symbol being enumerated
 
         enumeration ([Enumeration]): enumeration.
 
@@ -822,11 +824,15 @@ class SymbolInterpretation(Expression):
         is_type_enumeration (Bool): True if the enumeration is for a type symbol.
 
     """
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name').name
-        self.sign = kwargs.pop('sign')
-        self.enumeration : Enumeration = kwargs.pop('enumeration')
-        self.default = kwargs.pop('default')
+    def __init__(self, parent,
+                 name: UnappliedSymbol,
+                 sign: str,
+                 enumeration: Enumeration,
+                 default: Optional[Expression]):
+        self.name = name.name
+        self.sign = sign
+        self.enumeration = enumeration
+        self.default = default
 
         if not self.enumeration:
             self.enumeration = Enumeration(parent=self, tuples=[])
@@ -837,7 +843,7 @@ class SymbolInterpretation(Expression):
                    (type(self.enumeration) == FunctionEnum and self.default is None),
                    "'⊇' can only be used with a functional enumeration ('→') without else clause")
 
-        self.symbol = None
+        self.symbol: Optional[Type] = None
         self.is_type_enumeration = None
         self.block = None
 
