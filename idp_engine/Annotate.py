@@ -855,7 +855,7 @@ def replace(self, voc, q_vars):
     t: Variable = VARIABLE('time',time)
     self.sub_expr.sub_exprs.append(t)
     qt: Quantee = Quantee.make(t,time) 
-    return AQuantification.make('forall',[qt],self.sub_expr)
+    return AQuantification(q='forall',quantees=[qt],f=self.sub_expr)
 NowAppliedSymbol.replace = replace
 def annotate(self, voc, q_vars,ltc=False):
     expanded: AQuantification = self.replace(voc,q_vars)
