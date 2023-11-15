@@ -856,7 +856,7 @@ def replace(self, voc, q_vars):
     time: Type = TYPE('Tijd')
     qt: Quantee = Quantee.make([t],time) 
     return AQuantification.make('forall',[qt],self.sub_expr)
-
+NowAppliedSymbol.replace = replace
 def annotate(self, voc, q_vars,ltc=False):
     expanded: AQuantification = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc)
