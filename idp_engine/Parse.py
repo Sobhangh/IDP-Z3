@@ -293,6 +293,7 @@ class Vocabulary(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.declarations = kwargs.pop('declarations')
+        self.tempdcl = kwargs.pop('tempdcl')
         self.idp = None  # parent object
         self.symbol_decls: dict[str, Declaration] = {}
         self.contains_temporal = False
@@ -622,6 +623,21 @@ class VarDeclaration(ASTNode):
 
     def __str__(self):
         return f"var {self.name} ∈ {self.subtype}"
+    
+class TemporalDeclaration(ASTNode):
+    """ represents a declaration of variable (IEP 24)
+
+    Attributes:
+        name (str): name of the variable
+
+        subtype (Type): type of the variable
+    """
+
+    def __init__(self, **kwargs):
+        self.symbol = kwargs.pop('name')
+
+    def __str__(self):
+        return f"Temporal {self.symbol} "
 
 Declaration = Union[TypeDeclaration, SymbolDeclaration]
 

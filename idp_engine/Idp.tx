@@ -13,7 +13,7 @@ Comment:
 
 Shebang: '#!' /.*$/;
 
-Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
+Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* (tempdcl=TemporalDeclaration)* '}';
   Declaration: TypeDeclaration | SymbolDeclaration | VarDeclaration |Import;
 
     Import: 'import' (name=ID);
@@ -25,10 +25,12 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=Enumeration
             | enumeration=ConstructedFrom))?;
 
-    SymbolDeclaration: annotations=Annotations  symbols+=Symbol[','] ':'('['temporal='Temporal' ']')?
+    SymbolDeclaration: annotations=Annotations  symbols+=Symbol[','] ':'
           ( '(' sorts*=Type[/[*⨯]/] ')' | sorts*=Type[/[*⨯]/] )
           ('->' | '→') out=Type ;
       Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
+    
+    TemporalDeclaration: 'Temporal' name=Symbol;
 
     VarDeclaration: 'var' name=Symbol ('in' | '∈') subtype=Type;
 

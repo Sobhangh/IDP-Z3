@@ -25,7 +25,7 @@ from copy import copy, deepcopy
 from itertools import chain
 import string
 
-from .Parse import (Vocabulary, Import, TypeDeclaration, Declaration,
+from .Parse import (TemporalDeclaration, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
@@ -71,6 +71,8 @@ def annotate(self, idp):
                                  and type(s) in Declaration.__args__])
     self.declarations = list(temp.values())
 
+    for t in self.tempdcl:
+        t.annotate(self)
     # annotate declarations
     for s in self.declarations:
         s.annotate(self)  # updates self.symbol_decls
@@ -106,6 +108,20 @@ def annotate(self, voc):
     if self.interpretation:
         self.interpretation.annotate(voc)
 TypeDeclaration.annotate = annotate
+
+# Class TemporalDeclaration  #######################################################
+
+def annotate(self, voc):
+    for d in voc.declarations:
+        if isinstance(d,SymbolDeclaration) and (not d.temp):
+            for s in d.symbols:
+                if s.name == self.symbol.name:
+                    d.temp = True
+                    d.arity +=1
+                    d.sorts.push(SYMBOL('Tijd'))
+                    break
+    
+TemporalDeclaration.annotate = annotate
 
 
 # Class SymbolDeclaration  #######################################################
