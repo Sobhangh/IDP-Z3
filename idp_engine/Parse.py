@@ -34,7 +34,7 @@ from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR,
-                         Accessor, Symbol, SYMBOL, SymbolExpr, Expression,
+                         Accessor, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, Symbol, SYMBOL, SymbolExpr, Expression,
                          AIfExpr, IF, AQuantification, split_quantees, Type,
                          TYPE, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
@@ -1398,7 +1398,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
 
                                          Vocabulary, Import, VarDeclaration,
                                          TypeDeclaration, Accessor, Type,
-                                         SymbolDeclaration, Symbol,
+                                         SymbolDeclaration,TemporalDeclaration, Symbol,
                                          SymbolExpr,
 
                                          TheoryBlock, Definition, Rule, AIfExpr,
@@ -1407,7 +1407,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          ADisjunction, AConjunction,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
-                                         AppliedSymbol, UnappliedSymbol,
+                                         AppliedSymbol, UnappliedSymbol,StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol,
                                          Number, Brackets, Date, Variable,
 
                                          Structure, SymbolInterpretation,
