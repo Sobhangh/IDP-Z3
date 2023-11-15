@@ -850,10 +850,10 @@ def replace(self, voc, q_vars):
     symb : Symbol= self.sub_expr.symbol.annotate(voc, q_vars)
     self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
     #is the name of this variable ok??
-    t: Variable = VARIABLE('time')
-    self.sub_expr.sub_exprs.append(t)
     #Is this type the correct time type?
     time: Type = TYPE('Tijd')
+    t: Variable = VARIABLE('time',time)
+    self.sub_expr.sub_exprs.append(t)
     qt: Quantee = Quantee.make([t],time) 
     return AQuantification.make('forall',[qt],self.sub_expr)
 NowAppliedSymbol.replace = replace

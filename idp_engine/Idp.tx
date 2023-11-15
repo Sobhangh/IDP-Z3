@@ -123,9 +123,9 @@ TheoryBlock: 'theory' (ltc='LTC')? (name=ID ':' vocab_name=ID)? '{'
               ( is_enumerated=/is\s+enumerated/
               | is_enumeration=/in|∈/ in_enumeration=Enumeration)?;
         SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
-      StartAppliedSymbol: 'Start(' arg=AppliedSymbol ')';
+      StartAppliedSymbol: 'Start[' arg=AppliedSymbol ']';
       NowAppliedSymbol: 'Now[' arg=AppliedSymbol ']';
-      NextAppliedSymbol: 'Next(' arg=AppliedSymbol ')';
+      NextAppliedSymbol: 'Next[' arg=AppliedSymbol ']';
       UnappliedSymbol: s=Symbol;
       Number: number=IDPFLOAT | number=INT;
         IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
