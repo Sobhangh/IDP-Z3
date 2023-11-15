@@ -1,0 +1,11 @@
+vocabulary V {
+    type T := {a,b}
+    type U := {c,d}
+}
+theory  T:V {
+    T(a).
+    ~T(c).
+}
+procedure main() {
+    pretty_print(model_expand(T))
+}

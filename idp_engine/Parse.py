@@ -410,11 +410,13 @@ class TypeDeclaration(ASTNode):
 
         self.map : dict[str, Expression]= {}
 
-        self.interpretation : Optional[SymbolInterpretation] = (None if enumeration is None else
-            SymbolInterpretation(parent=None,
+        self.interpretation : Optional[SymbolInterpretation] = None
+        if enumeration:
+            self.interpretation = SymbolInterpretation(parent=None,
                                  name=UnappliedSymbol(None, self.name),
                                  sign='≜',
-                                 enumeration=enumeration, default=None))
+                                 enumeration=enumeration, default=FALSE)
+            self.interpretation.block = parent
 
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
@@ -884,8 +886,8 @@ class SymbolInterpretation(Expression):
                 key = ",".join(a.code for a in args)
                 if key in self.enumeration.lookup:
                     return self.enumeration.lookup[key]
-                elif self.enumeration.parent.sign == '≜':  # can use default
-                    return self.enumeration.parent.default
+                elif self.sign == '≜':  # can use default
+                    return self.default
 
         if rank == self.symbol.decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:

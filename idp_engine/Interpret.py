@@ -74,6 +74,8 @@ def interpret(self: TypeDeclaration, problem: Theory):
                    f'Expected an interpretation for type {self.name}')
 
         enum = interpretation.enumeration.interpret(problem)
+        if enum.constructors:
+            enum.lookup = {k.name: TRUE for k in enum.constructors}
         self.interpretation = interpretation
         self.constructors = enum.constructors
         self.translate(problem)
