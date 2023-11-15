@@ -716,7 +716,8 @@ class Quantee(Expression):
                 self.vars.append(v.vars)
                 self.arity = len(v.vars) if self.arity == None else self.arity
             else:
-                assert isinstance(v, Variable), "Internal error1"
+                inst = isinstance(v, Variable)
+                assert isinstance(v, Variable), "Internal error1 {inst}"
                 self.vars.append([v])
                 self.arity = 1 if self.arity == None else self.arity
 
