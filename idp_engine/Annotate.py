@@ -132,9 +132,9 @@ def annotate(self, voc):
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
-    if self.temp :
-        self.arity +=1
-        self.sorts.push(SYMBOL('Tijd'))
+#    if self.temp :
+#        self.arity +=1
+#        self.sorts.push(SYMBOL('Tijd'))
     for s in self.sorts:
         s.annotate(voc, {})
     self.out.annotate(voc, {})
