@@ -114,12 +114,11 @@ TypeDeclaration.annotate = annotate
 def annotate(self, voc):
     for d in voc.declarations:
         if isinstance(d,SymbolDeclaration) and (not d.temp):
-            for s in d.symbols:
-                if s.name == self.symbol.name:
-                    d.temp = True
-                    d.arity +=1
-                    d.sorts.push(SYMBOL('Tijd'))
-                    break
+            if d.name == self.symbol.name:
+                d.temp = True
+                d.arity +=1
+                d.sorts.push(SYMBOL('Tijd'))
+                break
     
 TemporalDeclaration.annotate = annotate
 
