@@ -1322,7 +1322,7 @@ class NowAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol : Symbol = SYMBOL('Now')
+        self.symbol : Symbol = SYMBOL('Now[]')
         self.sub_expr: AppliedSymbol  = arg
 
         super().__init__()
