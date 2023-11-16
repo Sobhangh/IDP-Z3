@@ -379,9 +379,9 @@ class TypeDeclaration(ASTNode):
 
         out (Type): the Boolean type
 
-        type (string): Z3 type of an element of the type; same as `name`
+        type (string): BOOL
 
-        base_type : self
+        base_type (TypeDeclaration, optional): bool, int, real or self
 
         constructors ([Constructor]): list of constructors in the enumeration
 
@@ -403,9 +403,8 @@ class TypeDeclaration(ASTNode):
         self.arity : int = 1
         self.sorts : List[Type] = [Type(None, self.name)]
         self.out : Type = Type(None, BOOL)
-        self.type : str = (self.name if type(enumeration) != Ranges else
-                     enumeration.type)  # INT or REAL or DATE
-        self.base_type : TypeDeclaration = self
+        self.type : str = BOOL
+        self.base_type : Optional[TypeDeclaration] = None
         self.block: Optional[Block] = None
 
         self.map : dict[str, Expression]= {}
@@ -481,9 +480,9 @@ class SymbolDeclaration(ASTNode):
 
         out (Type): the type of the symbol
 
-        type (string): name of the Z3 type of an instance of the symbol
+        type (string): type of an applied symbol; = self.out.name
 
-        base_type (TypeDeclaration): base type of the unary predicate (None otherwise)
+        base_type (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
 
         instances (dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of

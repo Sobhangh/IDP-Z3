@@ -28,7 +28,7 @@ import string  # .digits
 
 from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
-                    Rule, Structure, SymbolInterpretation, Enumeration,
+                    Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
 from .Expression import (ASTNode, Expression, TYPE, Type,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
@@ -122,6 +122,11 @@ def annotate_declaration(self: ASTNode,
         voc.symbol_decls[c.name] = c
     if self.interpretation:
         self.interpretation.annotate(voc, {})
+        base_type = (self.name if type(self.interpretation.enumeration) != Ranges else
+                        self.interpretation.enumeration.type)  # INT or REAL or DATE
+        self.base_type = voc.symbol_decls[base_type]
+    else:
+        self.base_type = self
     return self
 TypeDeclaration.annotate_declaration = annotate_declaration
 
@@ -784,9 +789,8 @@ def annotate(self: AComparison,
     for e in self.sub_exprs:
         if self.operator[0] in "<>≤≥":
             decl = voc.symbol_decls.get(e.type, None)
-            self.check(e.type != BOOL,
-                        f"Expected numeric formula, got {e.type}: {e}")
-            self.check(e.type is None or e.type in ['', INT, REAL, DATE]
+            self.check(e.type is None
+                       or voc.symbol_decls[e.type].base_type.name in ['', INT, REAL, DATE]
                        or decl.type in [INT, REAL, DATE]
                        or (hasattr(decl, 'interpretation')
                            and decl.interpretation is None)
