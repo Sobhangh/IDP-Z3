@@ -34,10 +34,11 @@ from .Expression import (Constructor, Expression, AIfExpr, IF,
                          ADisjunction, AConjunction, AComparison, EQUALS,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                          SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
-                         Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
+                         Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR,
+                         BOOLT, INTT, DATET)
 from .Parse import Enumeration, TupleIDP
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, INT, DATE, ABS
+from .utils import BOOL, ABS
 
 
 # class Expression  ###########################################################
@@ -284,11 +285,11 @@ def update_arith(self: Expression, operands: List[Expression]) -> Expression:
         for op, e in zip(self.operator, operands[1:]):
             function = Operator.MAP[op]
 
-            if op == '/' and self.type == INT:  # integer division
+            if op == '/' and self.type == INTT:  # integer division
                 out //= e.py_value
             else:
                 out = function(out, e.py_value)
-        value = (Number(number=str(out)) if operands[0].type != DATE else
+        value = (Number(number=str(out)) if operands[0].type != DATET else
                  Date.make(out))
         return value
     return self._change(sub_exprs=operands)
@@ -380,7 +381,7 @@ def update_exprs(self: AppliedSymbol,
     new_exprs = list(new_exprs)
     if not self.decl and self.symbol.name:
         self.decl = self.symbol.decl
-    self.type = (BOOL if self.is_enumerated or self.in_enumeration else
+    self.type = (BOOLT if self.is_enumerated or self.in_enumeration else
             self.decl.type if self.decl else None)
     if self.decl and type(self.decl) == Constructor:
         if all(e.is_value() for e in new_exprs):

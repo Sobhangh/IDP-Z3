@@ -20,11 +20,11 @@ from idp_engine.Expression import *
 # help functies voor SCA
 #####################################################
 def type_symbol_to_str(type1):    # zet type symbol om in str
-    if type1 == "ℤ":
+    if type1.name == "ℤ":
         return "Int"
-    if type1 == "𝔹":
+    if type1.name == "𝔹":
         return "Bool"
-    if type1 == "ℝ":
+    if type1.name == "ℝ":
         return "Real"
     return type1
 def builtIn_type(elem):     #kijkt of het meegegeven type builtIn type is (return true or false)
@@ -321,7 +321,7 @@ def SCA_Check(self,detections):
                 expected_type = self.decl.sorts[i].decl.type
             elif (len(self.decl.sorts[i].decl.sorts) == 1
             and self.decl.sorts[i].decl.sorts[0].type == self.decl.sorts[i].type
-            and self.decl.sorts[i].type != BOOL):
+            and self.decl.sorts[i].type != BOOLT):
                 # Normal types
                 expected_type = self.decl.sorts[i].type
             else:
@@ -358,7 +358,11 @@ def SCA_Check(self,detections):
     if self.is_enumeration =='in':
         for i in self.in_enumeration.tuples :
             if self.decl.type != i.args[0].get_type():
-                detections.append((i.args[0],f"Element of wrong type : expected type= {type_symbol_to_str(self.decl.type)} but given type= {type_symbol_to_str(i.args[0].get_type())}","Error"))
+                detections.append((i.args[0],
+                    f"Element of wrong type : "
+                    f"expected type= {type_symbol_to_str(self.decl.type)} "
+                    f"but given type= {type_symbol_to_str(i.args[0].get_type())}"
+                    ,"Error"))
                 break
 
     Expression.SCA_Check(self, detections)

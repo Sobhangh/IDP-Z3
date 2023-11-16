@@ -26,11 +26,11 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import (Set, Tuple, List, Optional)
 
-from .utils import (RESERVED_SYMBOLS, INT, BOOL, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
+from .utils import (RESERVED_SYMBOLS, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
 from .Expression import (Expression, catch_error, ZERO, TRUE, FALSE, RecDef, TYPE,
                          Constructor, TYPE, Type, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
-                         IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND)
+                         IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOLT, INTT)
 from .Parse import Definition, Rule, SymbolDeclaration
 from .Theory import Theory
 
@@ -61,17 +61,17 @@ def get_def_constraints(self: Definition,
         out = {}
         for decl in self.renamed:
             # expr = nested if expression, for each rule
-            decl.check(decl.out.name in [INT, BOOL],
-                       f"Recursive functions of type {decl.out.name} are not supported yet")
-            expr = (ZERO if decl.out.name == INT else
-                    FALSE if decl.out.name == BOOL else
+            decl.check(decl.out in [INTT, BOOLT],
+                       f"Recursive functions of type {decl.out} are not supported yet")
+            expr = (ZERO if decl.out == INTT else
+                    FALSE if decl.out == BOOLT else
                     FALSE ) # todo: pick a value in type enumeration
             for rule in self.renamed[decl]:
                 val = rule.out if rule.out is not None else TRUE
                 expr = IF(rule.body, val, expr)
 
             vars = sorted(list(self.def_vars[decl.name].values()), key=lambda v: v.name)
-            vars = vars[:-1] if decl.out.name != BOOL else vars
+            vars = vars[:-1] if decl.out != BOOLT else vars
             expr = RecDef(self, decl.name, vars, expr.interpret(problem, {}))
             out[decl, self] = [expr]
         return out
@@ -199,7 +199,7 @@ def instantiate_definition(self: Rule,
                 "Internal error")
     subs = dict(zip([e.name for e in self.definiendum.sub_exprs], new_args))
 
-    if self.definiendum.decl.type == BOOL:  # a predicate
+    if self.definiendum.type == BOOLT:  # a predicate
         out = EQUIV([instance, out])
     else:
         subs[self.out.name] = instance

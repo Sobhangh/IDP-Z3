@@ -33,12 +33,13 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not,
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
-                         EQUALS, NOT, Extension, AQuantification)
+                         EQUALS, NOT, Extension, AQuantification,
+                         BOOLT, INTT, REALT, DATET)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SymbolExpr,
                     TheoryBlock, Structure, Definition, str_to_IDP, str_to_IDP2,
                     SymbolInterpretation)
 from .Simplify import join_set_conditions
-from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, IDPZ3Error,
+from .utils import (OrderedSet, NEWL, INT, REAL, DATE, IDPZ3Error,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT,
                     NOT_SATISFIABLE)
 from .Z3_to_IDP import collect_questions, get_interpretations
@@ -890,7 +891,7 @@ class Theory(object):
             to_explain = self.assignments[consequence].sentence
 
             # rules used in justification
-            if to_explain.type != BOOL:  # determine numeric value
+            if to_explain.type != BOOLT:  # determine numeric value
                 val = self.assignments[consequence].value
                 if val is None:  # can't explain an expanded value
                     solver.pop()
@@ -938,7 +939,7 @@ class Theory(object):
             for ass in out.assignments.values():
                 if (ass.value
                 and (( type(ass.sentence) == AComparison
-                       and (any(e.type in [INT, REAL, DATE]
+                       and (any(e.type in [INTT, REALT, DATET]
                                 for e in ass.sentence.sub_exprs)
                             or any(op in '<>≤≥' for op in ass.sentence.operator)))
                     or type(ass.sentence) == AQuantification)):
@@ -1094,7 +1095,7 @@ class Theory(object):
             goal = None
             for atom in questions.values():
                 assignment = self.assignments.get(atom.code, None)
-                if assignment and assignment.value is None and atom.type == BOOL:
+                if assignment and assignment.value is None and atom.type == BOOLT:
                     if not atom.is_reified():
                         val1 = model.eval(atom.translate(self))
                     else:

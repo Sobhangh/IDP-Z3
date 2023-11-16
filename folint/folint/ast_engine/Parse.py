@@ -35,7 +35,7 @@ from .Expression import (Annotations, ASTNode, Constructor, Accessor, SymbolExpr
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date, Extension,
-                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
+                         Variable, TRUEC, FALSEC, TRUE, FALSE, INTT, REALT, DATET)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
@@ -167,13 +167,13 @@ def SCA_Check(self, detections):
             if str(value) not in ['true', 'false']:
                 err_str = (f'{message} {str(value)} should be Bool')
         elif type.name == REAL:
-            if value.type not in [REAL, INT]:
+            if value.type not in [REALT, INTT]:
                 err_str = (f'{message} {str(value)} should be Real')
         elif type.name == INT:
-            if value.type != INT:
+            if value.type != INTT:
                 err_str = (f'{message} {str(value)} should be Int')
         elif type.name == DATE:
-            if value.type != DATE:
+            if value.type != DATET:
                 err_str = (f'{message} {str(value)} should be Date')
         else:
             if type and str(value) not in values:

@@ -38,8 +38,8 @@ from .Expression import (catch_error, Constructor, Expression, AIfExpr,
                          Quantee, AQuantification, Operator, Type,
                          ADisjunction, AConjunction, AComparison, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Number,
-                         Date, Brackets, Variable, TRUE, RecDef)
-from .utils import (BOOL, INT, REAL, DATE,
+                         Date, Brackets, Variable, TRUE, RecDef, BOOLT, INTT, REALT, DATET)
+from .utils import (BOOL,
                     GOAL_SYMBOL, RELEVANT, RESERVED_SYMBOLS, Semantics)
 
 if TYPE_CHECKING:
@@ -53,8 +53,6 @@ def translate(self, problem: Theory) -> ExprRef:
     if out is None:
         if self.name == BOOL:
             out = BoolSort(problem.ctx)
-            self.constructors[0].type = BOOL
-            self.constructors[1].type = BOOL
             problem.z3[self.constructors[0].name] = BoolVal(True, problem.ctx)
             problem.z3[self.constructors[1].name] = BoolVal(False, problem.ctx)
             self.constructors[0].py_value = True
@@ -82,7 +80,7 @@ def translate(self, problem: Theory) -> ExprRef:
                     for e in c.range:
                         self.map[str(e)] = e
         elif type(self.interpretation.enumeration) in [Ranges, IntRange, RealRange, DateRange]: # list of numbers
-            out = (IntSort(problem.ctx) if self.interpretation.enumeration.type in [INT, DATE] else
+            out = (IntSort(problem.ctx) if self.interpretation.enumeration.type in [INTT, DATET] else
                    RealSort(problem.ctx))
         else:  # empty type --> don't care
             out = IntSort(problem.ctx)
@@ -163,11 +161,11 @@ Expression.reified = reified
 
 @catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
-    if self.name == BOOL:
+    if self == BOOLT:
         return BoolSort(problem.ctx)
-    elif self.name == INT:
+    elif self == INTT:
         return IntSort(problem.ctx)
-    elif self.name == REAL:
+    elif self == REALT:
         return RealSort(problem.ctx)
     else:
         return self.decl.translate(problem,)

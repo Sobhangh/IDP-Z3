@@ -30,7 +30,7 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ASTNode, Expression, TYPE, Type,
+from .Expression import (ASTNode, Expression, TYPE, Type, BOOLT, INTT, REALT, DATET,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, Operator, AComparison, AUnary,
@@ -90,6 +90,11 @@ def annotate_block(self: ASTNode,
     for s in self.declarations:
         s.annotate_declaration(self)  # updates self.symbol_decls
 
+    BOOLT.annotate(self, {})
+    INTT.annotate(self, {})
+    REALT.annotate(self, {})
+    DATET.annotate(self, {})
+
     concepts = self.symbol_decls[CONCEPT]
     for constructor in concepts.constructors:
         constructor.symbol = (TYPE(constructor.name[1:])
@@ -116,14 +121,14 @@ def annotate_declaration(self: ASTNode,
         s.annotate(voc, {})
     self.out.annotate(voc, {})
     for c in self.constructors:
-        c.type = self.name
+        c.type = self
         self.check(c.name not in voc.symbol_decls or self.name == CONCEPT,
                     f"duplicate '{c.name}' constructor for '{self.name}' type")
         voc.symbol_decls[c.name] = c
     if self.interpretation:
         self.interpretation.annotate(voc, {})
         base_type = (self.name if type(self.interpretation.enumeration) != Ranges else
-                        self.interpretation.enumeration.type)  # INT or REAL or DATE
+                        self.interpretation.enumeration.type.name)  # INT or REAL or DATE
         self.base_type = voc.symbol_decls[base_type]
     else:
         self.base_type = self
@@ -143,12 +148,12 @@ def annotate_declaration(self: SymbolDeclaration,
     for s in self.sorts:
         s.annotate(voc, {})
     self.out.annotate(voc, {})
-    self.type = self.out.name
+    self.type = self.out
 
     for s in chain(self.sorts, [self.out]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
                    f"`Concept` must be qualified with a type signature in {self}")
-    self.base_type = (None if self.out.name != BOOL or self.arity != 1 else
+    self.base_type = (None if self.out != BOOLT or self.arity != 1 else
                       self.sorts[0].decl.base_type)
     return self
 SymbolDeclaration.annotate_declaration = annotate_declaration
@@ -272,7 +277,7 @@ def annotate(self: Expression,
                     f"Inductively defined nested symbols are not supported yet: "
                     f"{decl.name}.")
         if self.mode != Semantics.RECDATA:
-            self.check(decl.out.name == BOOL,
+            self.check(decl.out == BOOLT,
                         f"Inductively defined functions are not supported yet: "
                         f"{decl.name}.")
 
@@ -286,7 +291,7 @@ def annotate(self: Expression,
             q_v = {f"{decl.name}{str(i)}_":
                     VARIABLE(f"{decl.name}{str(i)}_", sort)
                     for i, sort in enumerate(decl.sorts)}
-            if decl.out.name != BOOL:
+            if decl.out != BOOLT:
                 q_v[name] = VARIABLE(name, decl.out)
             self.def_vars[decl.name] = q_v
 
@@ -439,7 +444,7 @@ def annotate(self: Expression,
     if self.is_type_enumeration and enumeration.constructors:
         # create Constructors before annotating the tuples
         for c in enumeration.constructors:
-            c.type = self.symbol.name
+            c.type = self.symbol
             self.check(c.name not in voc.symbol_decls,
                     f"duplicate '{c.name}' constructor for '{self.name}' symbol")
             voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
@@ -447,12 +452,12 @@ def annotate(self: Expression,
     enumeration.annotate(voc, q_vars)
 
     self.check(self.is_type_enumeration
-                or all(s.name not in [INT, REAL, DATE]  # finite domain #TODO
+                or all(s not in [INTT, REALT, DATET]  # finite domain #TODO
                         for s in self.symbol.decl.sorts)
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
-    self.check(not(self.symbol.decl.out.decl.base_type.name == BOOL
+    self.check(not(self.symbol.decl.out.decl.base_type == BOOLT
                    and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
@@ -530,11 +535,11 @@ def annotate(self: Expression,
         self.check(a.out.name in voc.symbol_decls,
                    f"Unknown type: {a.out}" )
         a.decl = SymbolDeclaration.make(self,
-            name=a.accessor, sorts=[TYPE(self.type)], out=a.out)
+            name=a.accessor, sorts=[self.type], out=a.out)
         a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
     self.tester = SymbolDeclaration.make(self,
-            name=f"is_{self.name}", sorts=[TYPE(self.type)], out=TYPE(BOOL))
+            name=f"is_{self.name}", sorts=[self.type], out=BOOLT)
     self.tester.by_z3 = True
     self.tester.annotate_declaration(voc)
     return self
@@ -577,17 +582,17 @@ def annotate_block(self: ASTNode,
         open_types[name] = TYPE(type_name)
 
     for name, out in [
-        ('expand', TYPE(BOOL)),
-        ('hide', TYPE(BOOL)),
-        ('view', TYPE('_ViewType')),
-        ('moveSymbols', TYPE(BOOL)),
-        ('optionalPropagation', TYPE(BOOL)),
-        ('manualPropagation', TYPE(BOOL)),
-        ('optionalRelevance', TYPE(BOOL)),
-        ('manualRelevance', TYPE(BOOL)),
+        ('expand', BOOLT),
+        ('hide', BOOLT),
+        ('view', BOOLT),
+        ('moveSymbols', BOOLT),
+        ('optionalPropagation', BOOLT),
+        ('manualPropagation', BOOLT),
+        ('optionalRelevance', BOOLT),
+        ('manualRelevance', BOOLT),
         ('unit', open_types['unit']),
         ('heading', open_types['heading']),
-        ('noOptimization', TYPE(BOOL))
+        ('noOptimization', BOOLT)
     ]:
         symbol_decl = SymbolDeclaration.make(self, name=name,
                                         sorts=[], out=out)
@@ -681,7 +686,7 @@ def annotate_quantee(self: Expression,
             # 3. use type inference if still not found
             if var.sort is None:
                 var.sort = inferred.get(var.name) if inferred else None
-            var.type = var.sort.name if var.sort else ''
+            var.type = var.sort
             q_vars[var.name] = var
     if not self.sub_exprs and var.sort:
         self.sub_exprs = [var.sort]
@@ -728,16 +733,16 @@ def annotate(self: Operator,
 
     for e in self.sub_exprs:
         if self.operator[0] in '&|∧∨⇒⇐⇔':
-            self.check(e.type is None or e.type == BOOL or e.str in ['true', 'false'],
+            self.check(e.type is None or e.type == BOOLT or e.str in ['true', 'false'],
                        f"Expected boolean formula, got {e.type}: {e}")
     return self
 Operator.annotate = annotate
 
 def set_variables(self: Operator) -> Expression:
     if self.type is None:  # not a BOOL operator
-        self.type = REAL if any(e.type == REAL for e in self.sub_exprs) \
-                else INT if any(e.type == INT for e in self.sub_exprs) \
-                else DATE if any(e.type == DATE for e in self.sub_exprs) \
+        self.type = REALT if any(e.type == REALT for e in self.sub_exprs) \
+                else INTT if any(e.type == INTT for e in self.sub_exprs) \
+                else DATET if any(e.type == DATET for e in self.sub_exprs) \
                 else self.sub_exprs[0].type  # constructed type, without arithmetic
     return Expression.set_variables(self)
 Operator.set_variables = set_variables
@@ -748,7 +753,7 @@ Operator.set_variables = set_variables
 def set_variables(self: AImplication) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Implication is not associative.  Please use parenthesis.")
-    self.type = BOOL
+    self.type = BOOLT
     return Expression.set_variables(self)
 AImplication.set_variables = set_variables
 
@@ -758,7 +763,7 @@ AImplication.set_variables = set_variables
 def set_variables(self: AEquivalence) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Equivalence is not associative.  Please use parenthesis.")
-    self.type = BOOL
+    self.type = BOOLT
     return Expression.set_variables(self)
 AEquivalence.set_variables = set_variables
 
@@ -784,14 +789,13 @@ def annotate(self: AComparison,
              q_vars: dict[str, Variable]
              ) -> Annotated:
     out = Operator.annotate(self, voc, q_vars)
-    out.type = BOOL
+    out.type = BOOLT
 
     for e in self.sub_exprs:
-        if self.operator[0] in "<>≤≥":
-            decl = voc.symbol_decls.get(e.type, None)
-            self.check(e.type is None
-                       or voc.symbol_decls[e.type].base_type.name in ['', INT, REAL, DATE]
-                       or decl.type in [INT, REAL, DATE]
+        if self.operator[0] in "<>≤≥" and e.type:
+            decl = voc.symbol_decls.get(e.type.name, None)
+            self.check(voc.symbol_decls[e.type.name].base_type in [INTT, REALT, DATET]
+                       or decl.type in [INTT, REALT, DATET]
                        or (hasattr(decl, 'interpretation')
                            and decl.interpretation is None)
                        or not hasattr(decl, 'enumeration')
@@ -833,7 +837,7 @@ def annotate(self: AAggregate,
         if self.aggtype == "#":
             self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
                                  Number(number='0'))]
-            self.type = INT
+            self.type = INTT
         else:
             self.type = self.sub_exprs[0].type
             if self.aggtype in ["min", "max"]:
@@ -850,7 +854,7 @@ def annotate(self: AAggregate,
                     symbol_decl = SymbolDeclaration.make(self,
                         "__"+self.str, # name `__ *`
                         [TYPE(v.sort.code) for v in q_vars.values()],
-                        TYPE(self.type)).annotate_declaration(voc)    # output_domain
+                        self.type).annotate_declaration(voc)    # output_domain
                     to_create = True
                 symbol = SymbolExpr.make(symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
@@ -944,7 +948,7 @@ def annotate(self: Variable,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    self.type = self.sort.name if self.sort else ''
+    self.type = self.sort
     return self
 Variable.annotate = annotate
 
@@ -955,7 +959,7 @@ def annotate(self: Number,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    self.decl = voc.symbol_decls[self.type]
+    self.decl = voc.symbol_decls[self.type.name]
     return self
 Number.annotate = annotate
 

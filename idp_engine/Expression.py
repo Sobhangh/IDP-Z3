@@ -170,8 +170,8 @@ class Accessor(ASTNode):
         self.decl: Optional[SymbolDeclaration] = None
 
     def __str__(self):
-        return (self.type if not self.accessor else
-                f"{self.accessor}: {self.type}" )
+        return (self.out.name if not self.accessor else
+                f"{self.accessor}: {self.out.name}" )
 
 
 class Expression(ASTNode):
@@ -190,8 +190,8 @@ class Expression(ASTNode):
 
             The list may be reduced by simplification.
 
-        type (string):
-            The name of the type of the expression, e.g., ``bool``.
+        type (Type, Optional):
+            The type of the expression, e.g., ``bool``.
 
         co_constraint (Expression, optional):
             A constraint attached to the node.
@@ -241,7 +241,7 @@ class Expression(ASTNode):
 
         self.str: str = self.code
         self.variables: Optional[Set[str]] = None
-        self.type: Optional[str] = None
+        self.type: Optional[Type] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional[Expression] = None
 
@@ -512,19 +512,19 @@ class Constructor(Expression):
 
         sorts (List[Type]): types of the arguments of the constructor
 
-        type (string): name of the type that contains this constructor
+        type (Type): type that contains this constructor
 
         arity (Int): number of arguments of the constructor
 
-        tester (SymbolDeclaration): function to test if the constructor
+        tester (SymbolDeclaration, Optional): function to test if the constructor
         has been applied to some arguments (e.g., is_rgb)
 
-        symbol (Type): only for Concept constructors
+        symbol (Type, Optional): only for Concept constructors; =Type(name[1:])
 
         range: the list of identifiers
     """
 
-    def __init__(self, parent,
+    def __init__(self, parent: Optional[ASTNode],
                  name: str,
                  args: Optional[List[Accessor]] = None):
         self.name : str = name
@@ -532,9 +532,9 @@ class Constructor(Expression):
 
         self.arity = len(self.sorts)
 
-        self.type = None
-        self.symbol = None
-        self.tester = None
+        self.type: Optional[Type] = None
+        self.symbol: Optional[Type] = None
+        self.tester: Optional[SymbolDeclaration] = None
         self.range: Optional[List[Expression]] = None
 
     def __str__(self):
@@ -581,7 +581,7 @@ class Type(Expression):
     def __eq__(self, other):
         self.check(self.name != CONCEPT or self.out,
                    f"`Concept` must be qualified with a type signature")
-        return (self.name == other.name and
+        return (other and self.name == other.name and
                 (not self.out or (
                     self.out == other.out and
                     len(self.ins) == len(other.ins) and
@@ -611,12 +611,16 @@ class Type(Expression):
             return OR(comparisons)
         else:
             assert self.decl is not None, "Internal error"
-            self.check(self.decl.out.name == BOOL, "internal error")
+            self.check(self.decl.out == BOOLT, "internal error")
             return self.decl.contains_element(term, extensions)
 
 def TYPE(name: str, ins=None, out=None) -> Type:
     return Type(None, name, ins, out)
 
+BOOLT = TYPE(BOOL)
+INTT = TYPE(INT)
+REALT = TYPE(REAL)
+DATET = TYPE(DATE)
 
 class AIfExpr(Expression):
     PRECEDENCE = 10
@@ -778,7 +782,7 @@ class AQuantification(Expression):
         self.sub_exprs = [self.f]
         super().__init__()
 
-        self.type = BOOL
+        self.type = BOOLT
         self.supersets: Optional[List[List[List[Union[Identifier, Variable]]]]] = None
         self.new_quantees: Optional[List[Quantee]] = None
         self.vars1 : Optional[List[Variable]] = None
@@ -873,8 +877,8 @@ class Operator(Expression):
 
         super().__init__(parent)
 
-        self.type = BOOL if self.operator[0] in '&|∧∨⇒⇐⇔' \
-               else BOOL if self.operator[0] in '=<>≤≥≠' \
+        self.type = BOOLT if self.operator[0] in '&|∧∨⇒⇐⇔' \
+               else BOOLT if self.operator[0] in '=<>≤≥≠' \
                else None
 
     @classmethod
@@ -1296,7 +1300,9 @@ TRUEC = CONSTRUCTOR('true')
 FALSEC = CONSTRUCTOR('false')
 
 TRUE = UnappliedSymbol.construct(TRUEC)
+TRUE.type = BOOLT
 FALSE = UnappliedSymbol.construct(FALSEC)
+FALSE.type = BOOLT
 
 
 class Variable(Expression):
@@ -1320,7 +1326,7 @@ class Variable(Expression):
 
         super().__init__()
 
-        self.type = sort.name if sort else ''
+        self.type = sort
         self.sub_exprs = []
         self.variables = set([self.name])
 
@@ -1352,21 +1358,21 @@ class Number(Expression):
         ops = self.number.split("/")
         if len(ops) == 2:  # possible with str_to_IDP on Z3 value
             self.py_value = Fraction(self.number)
-            self.type = REAL
+            self.type = REALT
         elif '.' in self.number:
             self.py_value = Fraction(self.number if not self.number.endswith('?') else
                                      self.number[:-1])
-            self.type = REAL
+            self.type = REALT
         else:
             self.py_value = int(self.number)
-            self.type = INT
+            self.type = INTT
         self.decl = None
 
     def __str__(self): return self.number
 
     def real(self):
         """converts the INT number to REAL"""
-        self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
+        self.check(self.type in [INTT, REALT], f"Can't convert {self} to {REAL}")
         return Number(number=str(float(self.py_value)))
 
     def is_value(self): return True
@@ -1398,7 +1404,7 @@ class Date(Expression):
         self.variables = set()
 
         self.py_value = int(self.date.toordinal())
-        self.type = DATE
+        self.type = DATET
 
     @classmethod
     def make(cls, value: int) -> Date:

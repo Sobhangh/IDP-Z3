@@ -41,7 +41,7 @@ from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Number, Brackets,
                          Date, Extension, Identifier, Variable, TRUEC, FALSEC,
-                         TRUE, FALSE, EQUALS, AND, OR)
+                         TRUE, FALSE, EQUALS, AND, OR, BOOLT, INTT, REALT, DATET)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     MAX_QUANTIFIER_EXPANSION, Semantics as S, flatten)
@@ -69,20 +69,20 @@ def str_to_IDP(atom: Expression, val_string: str) -> Optional[Expression]:
     # determine the type declaration if possible
     assert atom.type, "Internal error"
     type_ = atom.type
-    decl = (None if not hasattr(atom, 'decl') or atom.type == BOOL else
+    decl = (None if not hasattr(atom, 'decl') or atom.type == BOOLT else
            atom.decl.out.decl)
-    assert decl is None or decl.name == type_, f"{atom}: {decl.name} != {type_}"
+    assert decl is None or atom.decl.out == type_, f"{atom}: {decl.name} != {type_}"
     return str_to_IDP2(type_, decl, val_string)
 
 
-def str_to_IDP2(type_: str,
+def str_to_IDP2(type_: Type,
                 decl: Optional[Declaration],
                 val_string: str
                 ) -> Expression:
     """recursive function to decode a val_string of type type_ and type
 
     Args:
-        type_ (str):
+        type_ (Type):
         decl (Declaration, Optional): declaration of the value string
         val_string (str): value_string
 
@@ -93,7 +93,7 @@ def str_to_IDP2(type_: str,
         Expression: the internal representation of the value
     """
     if decl is None:
-        assert type_ == BOOL, "Internal error"
+        assert type_ == BOOLT, "Internal error"
         out = (TRUE if val_string == 'true' else
             FALSE if val_string == 'false' else
             None)
@@ -133,29 +133,29 @@ def str_to_IDP2(type_: str,
             new_args = []
             for a, acc in zip(args, constructor.sorts):
                 assert acc.decl is not None, "Internal error"
-                new_args.append(str_to_IDP2(acc.decl.out.name, acc.decl.out.decl, a))
+                new_args.append(str_to_IDP2(acc.decl.out, acc.decl.out.decl, a))
 
             out = AppliedSymbol.construct(constructor, new_args)
         else:
             interp = getattr(decl.base_type, "interpretation", None)
-            enum_type = (interp.enumeration.type if interp else
+            enum_type = (interp.enumeration.type.name if interp else
                          decl.name if type(decl) == TypeDeclaration else
-                         decl.type)
+                         decl.type.name)
 
-            if type_ == BOOL or enum_type == BOOL:
+            if type_ == BOOLT or enum_type == BOOL:
                 out = (TRUE if val_string in ['true', 'True'] else
                        FALSE if val_string in ['false', 'False'] else
                        None)
                 if out is None:
                     raise IDPZ3Error(f"wrong boolean value: {val_string}")
-            elif type_ == DATE or enum_type == DATE:
+            elif type_ == DATET or enum_type == DATE:
                 d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
                     date.fromisoformat(val_string[1:]))
                 out = Date(iso=f"#{d.isoformat()}")
-            elif decl.type == REAL or enum_type == REAL:
+            elif type_ == REALT or enum_type == REAL:
                 out = Number(number= val_string if '/' in val_string else
                             str(float(eval(val_string.replace('?', '')))))
-            elif decl.type == INT or enum_type == INT:
+            elif type_ == INTT or enum_type == INT:
                 out = Number(number=str(eval(val_string)))
             else:
                 raise IDPZ3Error(f"unknown type for: {val_string}: {decl}")
@@ -331,7 +331,7 @@ class Vocabulary(ASTNode):
                             sorts=[TYPE(CONCEPT, ins=[], out=TYPE(BOOL))],
                             out=TYPE(BOOL)),
             SymbolDeclaration.make(self, name=ABS,
-                            sorts=[TYPE(INT)], out=TYPE(INT)),
+                            sorts=[INTT], out=INTT),
             ] + self.declarations
 
     def __str__(self):
@@ -379,7 +379,7 @@ class TypeDeclaration(ASTNode):
 
         out (Type): the Boolean type
 
-        type (string): BOOL
+        type (Type): BOOL
 
         base_type (TypeDeclaration, optional): bool, int, real or self
 
@@ -402,8 +402,8 @@ class TypeDeclaration(ASTNode):
 
         self.arity : int = 1
         self.sorts : List[Type] = [Type(None, self.name)]
-        self.out : Type = Type(None, BOOL)
-        self.type : str = BOOL
+        self.out : Type = BOOLT
+        self.type : Type = BOOLT
         self.base_type : Optional[TypeDeclaration] = None
         self.block: Optional[Block] = None
 
@@ -480,7 +480,7 @@ class SymbolDeclaration(ASTNode):
 
         out (Type): the type of the symbol
 
-        type (string): type of an applied symbol; = self.out.name
+        type (Type, optional): type of an applied symbol; = self.out
 
         base_type (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
 
@@ -534,7 +534,7 @@ class SymbolDeclaration(ASTNode):
         self.heading: Optional[str] = None
         self.optimizable: bool = True
 
-        self.type : Optional[str] = None  # a string
+        self.type : Optional[Type] = None  # a string
         self.base_type : Optional[TypeDeclaration]= None
         self.range : Optional[List[AppliedSymbol]]= None  # all possible terms.  Used in get_range and IO.py
         self.instances : Optional[dict[str, AppliedSymbol]]= None  # not starting with '_'
@@ -588,7 +588,7 @@ class SymbolDeclaration(ASTNode):
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` satisfies the predicate
         """
-        assert self.type == BOOL and self.name is not None, "Internal error"
+        assert self.type == BOOLT and self.name is not None, "Internal error"
         (superset, filter) = extensions[self.name]
         if superset is not None:
             # superset.sort(key=lambda t: str(t))
@@ -1109,8 +1109,8 @@ class Ranges(Enumeration):
             self.type = self.elements[0].fromI.type
             for x in self.elements:
                 if x.fromI.type != self.type:
-                    if self.type in [INT, REAL] and x.fromI.type in [INT, REAL]:
-                        self.type = REAL  # convert to REAL
+                    if self.type in [INTT, REALT] and x.fromI.type in [INTT, REALT]:
+                        self.type = REALT  # convert to REAL
                         tuples = [TupleIDP(args=[n.args[0].real()])
                                   for n in tuples]
                     else:
@@ -1119,15 +1119,15 @@ class Ranges(Enumeration):
 
                 if x.toI is None:
                     tuples.append(TupleIDP(args=[x.fromI]))
-                elif self.type == INT and x.fromI.type == INT and x.toI.type == INT:
+                elif self.type == INTT and x.fromI.type == INTT and x.toI.type == INTT:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         tuples.append(TupleIDP(args=[Number(number=str(i))]))
-                elif self.type == REAL and x.fromI.type == INT and x.toI.type == INT:
+                elif self.type == REALT and x.fromI.type == INTT and x.toI.type == INTT:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         tuples.append(TupleIDP(args=[Number(number=str(float(i)))]))
-                elif self.type == REAL:
+                elif self.type == REALT:
                     self.check(False, f"Can't have a range over real: {x.fromI}..{x.toI}")
-                elif self.type == DATE and x.fromI.type == DATE and x.toI.type == DATE:
+                elif self.type == DATET and x.fromI.type == DATET and x.toI.type == DATET:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         d = Date(iso=f"#{date.fromordinal(i).isoformat()}")
                         tuples.append(TupleIDP(args=[d]))
@@ -1186,7 +1186,7 @@ class RangeElement(Expression):
 class IntRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, parent=self, elements=[])
-        self.type = INT
+        self.type = INTT
         self.tuples = None
 
     def extensionE(self,
@@ -1199,7 +1199,7 @@ class IntRange(Ranges):
 class RealRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, parent=self, elements=[])
-        self.type = REAL
+        self.type = REALT
         self.tuples = None
 
     def extensionE(self,
@@ -1212,7 +1212,7 @@ class RealRange(Ranges):
 class DateRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, parent=self, elements=[])
-        self.type = DATE
+        self.type = DATET
         self.tuples = None
 
     def extensionE(self,

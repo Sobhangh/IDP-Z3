@@ -44,7 +44,7 @@ from .Expression import (catch_error, AIfExpr, IF,
                          SymbolExpr, Expression, Constructor, AQuantification,
                          Type, FORALL, IMPLIES, AND, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Quantee, Variable,
-                         VARIABLE, TRUE, FALSE, Number, Extension, Identifier)
+                         VARIABLE, TRUE, FALSE, Number, Extension, BOOLT)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND, flatten)
@@ -129,11 +129,11 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     def filter(args):
         out = AND([f([deepcopy(t)]) if f is not None else TRUE
                     for f, t in zip(filters, args)])
-        if self.out.decl.name == BOOL:
+        if self.out == BOOLT:
             out = AND([out, deepcopy(AppliedSymbol.make(symbol, args))])
         return out
 
-    if self.out.decl.name == BOOL:
+    if self.out == BOOLT:
         problem.extensions[self.name] = (superset, filter)
 
     (range, _) = self.out.extension(problem.extensions)
@@ -155,7 +155,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         problem.interpretations[self.name].interpret(problem)
 
     # create type constraints
-    if type(self.instances) == dict and self.out.decl.name != BOOL:
+    if type(self.instances) == dict and self.out != BOOLT:
         for expr in self.instances.values():
             # add type constraints to problem.constraints
             # ! (x,y) in domain: range(f(x,y))
@@ -196,7 +196,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
         decl = problem.declarations[self.name]
         assert isinstance(decl, SymbolDeclaration), "Internal error"
         # update problem.extensions
-        if self.symbol.decl.out.decl.name == BOOL:  # predicate
+        if self.symbol.decl.out == BOOLT:  # predicate
             extension = [t.args for t in self.enumeration.tuples]
             problem.extensions[self.symbol.name] = (extension, None)
 
@@ -267,7 +267,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
                         e = problem.assignments.assert__(expr, self.default, status)
                         if (status == S.DEFAULT  # for proper display in IC
                             and type(self.enumeration) == FunctionEnum
-                            and self.default.type != BOOL):
+                            and self.default.type != BOOLT):
                             problem.assignments.assert__(e.formula(), TRUE, status)
 
         elif self.sign == '≜':
@@ -329,7 +329,7 @@ def interpret(self: Constructor, problem: Theory) -> Constructor:
     # assert all(s.decl and isinstance(s.decl.out, Type) for s in self.sorts), 'Internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
-    elif any(s.out.name == self.type for s in self.sorts):  # recursive data type
+    elif any(s.out == self.type for s in self.sorts):  # recursive data type
         self.range = None
     else:
         # assert all(isinstance(s.decl, SymbolDeclaration) for s in self.sorts), "Internal error"
@@ -502,7 +502,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
                 (superset, filter) = domain.extension(problem.extensions)
             elif type(domain) == SymbolExpr:
                 if domain.decl:
-                    self.check(domain.decl.out.type == BOOL,
+                    self.check(domain.decl.out.type == BOOLT,
                                 f"{domain} is not a type or predicate")
                     assert domain.decl.name in problem.extensions, "internal error"
                     (superset, filter) = problem.extensions[domain.decl.name]
@@ -643,7 +643,7 @@ def _interpret(self: AppliedSymbol,
     value, co_constraint = None, None
     if out.decl and problem:
         if out.is_enumerated:
-            assert out.decl.type != BOOL, \
+            assert out.decl.type != BOOLT, \
                 f"Can't use 'is enumerated' with predicate {out.decl.name}."
             if out.decl.name in problem.interpretations:
                 interpretation = problem.interpretations[out.decl.name]

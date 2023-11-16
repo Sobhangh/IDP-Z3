@@ -69,16 +69,16 @@ def get_interpretations(theory: Theory, model: ModelRef, as_z3: bool
                             applied = re.sub(TRUEFALSE, lambda m: m.group(1).lower(), applied)
                             val = args[-1]
                             map[applied] = (val if as_z3 else
-                                            str_to_IDP2("", decl.out.decl, str(val)))
+                                            str_to_IDP2(None, decl.out.decl, str(val)))
                         try:
                             # use the else value if we can translate it
-                            val = str_to_IDP2("", decl.out.decl, str(a_list[-1]))
+                            val = str_to_IDP2(None, decl.out.decl, str(a_list[-1]))
                             _else = (a_list[-1] if as_z3 else val)
                         except AssertionError:
                             pass # Var(0) => can be any value
                 elif isinstance(interp, ExprRef):
                     _else = (interp if as_z3 else
-                             str_to_IDP2("", decl.out.decl, str(interp)))
+                             str_to_IDP2(None, decl.out.decl, str(interp)))
                 else:
                     assert interp is None, "Internal error"
             out[decl.name] = (map, _else)
@@ -119,11 +119,11 @@ def collect_questions(z3_expr: AstRef,
         for e in z3_expr.children():
             collect_questions(e, decl, ass, out)
     elif is_eq(z3_expr):
-        typ = decl.sorts[0].decl
+        typ = decl.sorts[0]
         arg_string = str(z3_expr.children()[1])
         atom_string = f"{decl.name}({arg_string})"
         if atom_string not in ass:
-            arg = str_to_IDP2(typ.name, typ, arg_string)
+            arg = str_to_IDP2(typ, decl.sorts[0].decl, arg_string)
             symb = SymbolExpr.make(decl.name)
             symb.decl = decl
             atom = AppliedSymbol.make(symb, [arg])

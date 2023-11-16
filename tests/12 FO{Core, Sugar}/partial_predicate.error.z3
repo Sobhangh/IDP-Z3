@@ -20,7 +20,7 @@ Traceback (most recent call last):
   File "idp_engine/Annotate.py", line ??, in annotate_block
     i.annotate(self.voc, {})
   File "idp_engine/Annotate.py", line ??, in annotate
-    self.check(not(self.symbol.decl.out.decl.base_type.name == BOOL
+    self.check(not(self.symbol.decl.out.decl.base_type == BOOLT
   File "idp_engine/Expression.py", line ??, in check
     raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
 idp_engine.utils.IDPZ3Error: Error on line ??, col 5: Can't use function enumeration for predicates 'c' (yet)

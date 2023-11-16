@@ -19,8 +19,7 @@ import os
 import urllib.parse
 
 from idp_engine.Assignments import Status as S
-from idp_engine.Expression import TRUE, FALSE
-from idp_engine.utils import BOOL, INT, REAL, DATE
+from idp_engine.Expression import TRUE, FALSE, BOOLT, INTT, REALT
 
 from fast_html import (table, render, div, form, ul, li, a, span, input_,
                        label, p, i, tr, td)
@@ -58,7 +57,7 @@ def ass_head(ass, state, id=None):
         if ass.status not in [S.GIVEN, S.UNKNOWN, S.DEFAULT]:
              yield i("info", class_="material-icons")
 
-    if ass.sentence.type == BOOL:
+    if ass.sentence.type == BOOLT:
         yield span([
             i("check" if ass.value.same_as(TRUE) else "clear",
               class_="material-icons") if ass.value is not None else "",
@@ -72,7 +71,7 @@ def ass_head(ass, state, id=None):
                    i=[sanitize(ass.sentence.code),
                       f" = {ass.value}" if ass.value else "",
                       info() ])
-    elif ass.sentence.type in [INT, REAL]:
+    elif ass.sentence.type in [INTT, REALT]:
         yield span([
             sanitize(ass.sentence.code),
             f" = {float(ass.value.py_value)}" if ass.value else "",
@@ -88,7 +87,7 @@ def ass_head(ass, state, id=None):
 
 def ass_body(ass, state):
     """generator for the body of an assignment"""
-    if ass.sentence.type == BOOL:
+    if ass.sentence.type == BOOLT:
 
         def checkbox(val, checked):
             yield from input_(name=ass.sentence.code, type="checkbox",
@@ -127,7 +126,7 @@ def ass_body(ass, state):
                     if a.status in [S.GIVEN, S.DEFAULT] and a.value.same_as(FALSE)
                     and a.sentence.code.startswith(ass.sentence.code + " = ")]
         ])
-    elif ass.sentence.type in [INT, REAL]:
+    elif ass.sentence.type in [INTT, REALT]:
         if ass.status in [S.GIVEN, S.UNKNOWN, S.DEFAULT] or is_env(state, ass):
             yield input_(name=ass.sentence.code, type="number",
                         value=str(float(ass.value.py_value)) if ass.value else None,
@@ -246,7 +245,7 @@ def stateX(state, update=False):
 
 def ass_explain(ass, hidden=False):
     """generator for the body of an assignment for explanation"""
-    if ass.sentence.type == BOOL:
+    if ass.sentence.type == BOOLT:
         yield   label( style="display: none" if hidden else None, i=[
                     input_(name=ass.sentence.code, type="checkbox",
                           value="true" if ass.value.same_as(TRUE) else "false",
@@ -264,7 +263,7 @@ def ass_explain(ass, hidden=False):
                     span(f"{sanitize(ass.sentence.code)} = {ass.value}",
                          style="color: black;")
                 ])
-    elif ass.sentence.type in [INT, REAL]:
+    elif ass.sentence.type in [INTT, REALT]:
         yield   label( style="display: none" if hidden else None, i=[
                     input_(name=ass.sentence.code, type="checkbox",
                           value=str(float(ass.value.py_value)),
