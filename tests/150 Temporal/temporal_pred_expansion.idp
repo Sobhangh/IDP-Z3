@@ -14,5 +14,5 @@ structure S:V {
 }
 
 procedure main () {
-    view() = expanded
+    view() = expanded.
 }
