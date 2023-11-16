@@ -91,6 +91,10 @@ def simplify1(self: Expression) -> Expression:
     return self.update_exprs(self.sub_exprs)
 Expression.simplify1 = simplify1
 
+# for type checking
+def as_set_condition(self: Expression) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
+    return (None, None, None)
+Expression.as_set_condition = as_set_condition
 
 
 # Class AIfExpr  ###############################################################
@@ -274,7 +278,7 @@ AComparison.as_set_condition = as_set_condition
 
 #############################################################
 
-def update_arith(self: Expression, operands: List[Expression]) -> Expression:
+def update_arith(self: Operator, operands: List[Expression]) -> Expression:
     operands = list(operands)
     if all(e.is_value() for e in operands):
         self.check(all(hasattr(e, 'py_value') for e in operands),
@@ -480,16 +484,16 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     # sort again
                     new_tuples = list(new_tuples.values())
 
-                    out = AppliedSymbol.make(
+                    symb = AppliedSymbol.make(
                         symbol=x.symbol, args=x.sub_exprs,
                         is_enumeration='in',
                         in_enumeration=Enumeration(parent=None, tuples=new_tuples)
                     )
 
-                    core = deepcopy(AppliedSymbol.make(out.symbol, out.sub_exprs))
-                    out.as_disjunction = out.in_enumeration.contains([core])
+                    core = deepcopy(AppliedSymbol.make(symb.symbol, symb.sub_exprs))
+                    symb.as_disjunction = symb.in_enumeration.contains([core])
 
-                    out = Assignment(out,
+                    out = Assignment(symb,
                                      TRUE if belongs else FALSE,
                                      S.UNKNOWN)
 

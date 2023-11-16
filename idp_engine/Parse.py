@@ -33,7 +33,7 @@ from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 
 
 from .Assignments import Assignments
-from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR,
+from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUCTOR,
                          Accessor, TYPE, SymbolExpr, Expression,
                          AIfExpr, IF, AQuantification, split_quantees, Type,
                          TYPE, Quantee, ARImplication, AEquivalence,
@@ -508,12 +508,12 @@ class SymbolDeclaration(ASTNode):
 
     def __init__(self,
                  parent,
-                 annotations: Annotations,
+                 annotations: Optional[Annotations],
                  sorts: List[Type],
                  out: Type,
                  symbols: Optional[List[str]] = None,
                  name: Optional[str] = None):
-        self.annotations = annotations
+        self.annotations : Annotation = annotations.annotations if annotations else {}
         self.symbols : Optional[List[str]]
         self.name : Optional[str]
         if symbols:
@@ -528,7 +528,6 @@ class SymbolDeclaration(ASTNode):
             self.out = TYPE(BOOL)
 
         self.arity = len(self.sorts)
-        self.annotations : Annotations = self.annotations.annotations if self.annotations else {}
         self.private = None
         self.unit: Optional[str] = None
         self.heading: Optional[str] = None
@@ -544,7 +543,7 @@ class SymbolDeclaration(ASTNode):
 
     @classmethod
     def make(cls, parent, name, sorts, out):
-        o = cls(parent=parent, name=name, sorts=sorts, out=out, annotations={})
+        o = cls(parent=parent, name=name, sorts=sorts, out=out, annotations=None)
         return o
 
     def __str__(self):
@@ -632,7 +631,7 @@ class TheoryBlock(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
-        constraints = kwargs.pop('constraints')
+        constraints: List[Expression] = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
 
@@ -693,7 +692,7 @@ class Definition(Expression):
     """
     definition_id = 0  # intentional static variable so that no two definitions get the same ID
 
-    def __init__(self, parent, annotations, mode, rules):
+    def __init__(self, parent, annotations: Optional[Annotations], mode, rules):
         Definition.definition_id += 1
         self.id = Definition.definition_id
         self.mode = (S.WELLFOUNDED if mode is None or 'well-founded' in mode else
@@ -704,7 +703,7 @@ class Definition(Expression):
                      S.RECDATA if 'recursive' in mode else
                      mode)
         assert type(self.mode) == S, f"Unsupported mode: {mode}"
-        self.annotations = annotations.annotations if annotations else {}
+        self.annotations : Annotation = annotations.annotations if annotations else {}
         self.rules: List[Rule] = rules
         self.renamed = {}
         self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
@@ -740,19 +739,22 @@ class Definition(Expression):
 
 
 class Rule(Expression):
-    def __init__(self, **kwargs):
-        self.annotations = kwargs.pop('annotations')
-        self.quantees = kwargs.pop('quantees')
-        self.definiendum = kwargs.pop('definiendum')
-        self.out = kwargs.pop('out')
-        self.body = kwargs.pop('body')
+    def __init__(self, parent,
+                 annotations: Annotations,
+                 quantees: List[Quantee],
+                 definiendum: AppliedSymbol,
+                 out: Expression,
+                 body: Expression):
+        self.annotations: Annotation = (annotations.annotations if annotations else
+                            {'reading': str(self)})
+        self.quantees = quantees
+        self.definiendum = definiendum
+        self.out = out
+        self.body = body
         self.has_finite_domain = None  # Bool
         self.block = None  # theory where it occurs
 
         split_quantees(self)
-
-        self.annotations = (self.annotations.annotations if self.annotations else
-                            {'reading': str(self)})
 
         if self.body is None:
             self.body = TRUE
@@ -931,10 +933,10 @@ class Enumeration(Expression):
     """
     def __init__(self, parent:ASTNode, tuples: List[TupleIDP]):
         self.sorted_tuples = sorted(tuples, key=lambda t: t.code)  # do not change dropdown order
-        self.tuples = OrderedSet(tuples)
+        self.tuples: Optional[OrderedSet] = OrderedSet(tuples)
 
-        self.lookup = {}
-        self.constructors: List[Constructor]
+        self.lookup: dict[str, Expression] = {}
+        self.constructors: Optional[List[Constructor]]
         if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
                for c in self.tuples):
             self.constructors = [CONSTRUCTOR(c.args[0].name)
@@ -985,7 +987,6 @@ class Enumeration(Expression):
             return out
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, "SymbolInterpretation"]]=None,
                    extensions: Optional[dict[str, Extension]]=None
                   ) -> Extension:
         """computes the extension of an enumeration, i.e., a set of tuples and a filter
@@ -1004,7 +1005,6 @@ class Enumeration(Expression):
 
 class FunctionEnum(Enumeration):
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         self.check(False,
@@ -1055,7 +1055,6 @@ class ConstructedFrom(Enumeration):
         return OR(out)
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         def filter(args):
@@ -1103,7 +1102,7 @@ class Ranges(Enumeration):
     def __init__(self, parent:ASTNode, **kwargs):
         self.elements = kwargs.pop('elements')
 
-        tuples = []
+        tuples: List[TupleIDP] = []
         self.type = None
         if self.elements:
             self.type = self.elements[0].fromI.type
@@ -1158,7 +1157,6 @@ class Ranges(Enumeration):
         return OR(sub_exprs)
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         if not self.elements:
@@ -1190,7 +1188,6 @@ class IntRange(Ranges):
         self.tuples = None
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         return (None, None)
@@ -1203,7 +1200,6 @@ class RealRange(Ranges):
         self.tuples = None
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         return (None, None)
@@ -1216,7 +1212,6 @@ class DateRange(Ranges):
         self.tuples = None
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         return (None, None)

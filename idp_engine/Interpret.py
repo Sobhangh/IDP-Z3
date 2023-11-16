@@ -85,7 +85,7 @@ def interpret(self: TypeDeclaration, problem: Theory):
                 c.interpret(problem)
 
         # update problem.extensions
-        ext = enum.extensionE(problem.interpretations, problem.extensions)
+        ext = enum.extensionE(problem.extensions)
         problem.extensions[self.name] = ext
 
         # needed ?
@@ -292,7 +292,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
                 self.check(domain == enumeration, f"Enumeration of {self.name} should cover its domain")
             else:  # add a constraint to the problem, to be solved by Z3
                 # test case: tests/1240 FO{Core, Sugar, Int, PF)/LivingBeing.idp
-                expr = self.enumeration.contains(list(q_vars.values()))
+                expr = self.enumeration.contains(list(q_vars.values()), theory=problem)
                 constraint = FORALL(quantees, expr).interpret(problem, {})
                 constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
                 problem.constraints.append(constraint)

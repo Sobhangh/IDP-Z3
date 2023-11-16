@@ -33,7 +33,7 @@ from re import findall
 from sys import intern
 from textx import get_location
 from typing import (Optional, List, Union, Tuple, Set, Callable, TYPE_CHECKING,
-                    Generator, Any)
+                    Generator, Any, Dict)
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
@@ -121,11 +121,12 @@ def catch_error(func):
             self.check(False, str(e))
     return inner_function
 
+Annotation = Dict[str, Union[str, Dict[str, Any]]]
 
 class Annotations(ASTNode):
     def __init__(self, parent, annotations: List[str]):
 
-        self.annotations : dict[str, Union[str, dict[str, Any]]] = {}
+        self.annotations : Annotation = {}
         v: Union[str, dict[str, Any]]
         for s in annotations:
             p = s.split(':', 1)
@@ -227,17 +228,16 @@ class Expression(ASTNode):
                  'is_type_constraint_for', 'co_constraint',
                  'questions', 'relevant')
 
-    def __init__(self, parent: Optional[ASTNode]=None):
+    def __init__(self, parent: Optional[ASTNode]=None,
+                 annotations: Optional[Annotations]=None):
         if parent:
             self.parent = parent
         self.sub_exprs: List[Expression]
 
         self.code: str = intern(str(self))
-        if not hasattr(self, 'annotations') or self.annotations == None:
-            self.annotations: dict[str, str] = {'reading': self.code}
-        elif type(self.annotations) == Annotations:
-            self.annotations = self.annotations.annotations
-        self.original: Expression = self
+        self.annotations: Annotation = (
+            annotations.annotations if annotations else {'reading': self.code})
+        self.original: Optional[Expression] = self
 
         self.str: str = self.code
         self.variables: Optional[Set[str]] = None
@@ -764,12 +764,11 @@ class AQuantification(Expression):
     """
     PRECEDENCE = 20
 
-    def __init__(self, parent: ASTNode,
-                 annotations: Annotations,
+    def __init__(self, parent: Optional[ASTNode],
+                 annotations: Optional[Annotations],
                  q: str,
                  quantees: List[Quantee],
                  f: Expression):
-        self.annotations = annotations
         self.q = q
         self.quantees = quantees
         self.f = f
@@ -780,7 +779,7 @@ class AQuantification(Expression):
         split_quantees(self)
 
         self.sub_exprs = [self.f]
-        super().__init__()
+        super().__init__(annotations=annotations)
 
         self.type = BOOLT
         self.supersets: Optional[List[List[List[Union[Identifier, Variable]]]]] = None
@@ -792,10 +791,12 @@ class AQuantification(Expression):
              q: str,
              quantees: List[Quantee],
              f: Expression,
-             annotations=None
+             annotations: Optional[Annotation]=None
              ) -> 'AQuantification':
         "make and annotate a quantified formula"
-        out = cls(None, annotations, q, quantees, f)
+        out = cls(None, None, q, quantees, f)
+        if annotations:
+            out.annotations = annotations
         return out.set_variables()
 
     def __str__(self):
@@ -865,9 +866,10 @@ class Operator(Expression):
         "*": "⨯",
         "is": "=",
     }
-    EN_map: dict[str, str] = None
+    EN_map: Optional[dict[str, str]] = None
 
-    def __init__(self, parent, operator, sub_exprs, annotations=None):
+    def __init__(self, parent, operator, sub_exprs,
+                 annotations:Optional[Annotations]=None):
         self.operator = operator
         self.sub_exprs = sub_exprs
 
@@ -875,7 +877,7 @@ class Operator(Expression):
             lambda op: Operator.NORMAL.get(op, op)
             , self.operator))
 
-        super().__init__(parent)
+        super().__init__(parent, annotations=annotations)
 
         self.type = BOOLT if self.operator[0] in '&|∧∨⇒⇐⇔' \
                else BOOLT if self.operator[0] in '=<>≤≥≠' \
@@ -885,7 +887,7 @@ class Operator(Expression):
     def make(cls,
              ops: Union[str, List[str]],
              operands: List[Expression],
-             annotations=None,
+             annotations: Optional[Annotation] =None,
              parent=None
              ) -> Expression:
         """ creates a BinaryOp
@@ -903,13 +905,13 @@ class Operator(Expression):
         else:
             if isinstance(ops, str):
                 ops = [ops] * (len(operands)-1)
-            out = (cls)(parent, ops, operands, annotations)
+            out = (cls)(parent, ops, operands)
+        if annotations:
+            out.annotations = annotations
 
         if parent:  # for error messages
             out._tx_position = parent. _tx_position
             out._tx_position_end = parent. _tx_position_end
-        if annotations:
-            out.annotations = annotations
         return out.set_variables().simplify1()
 
     def __str__(self):
@@ -1118,11 +1120,10 @@ class AppliedSymbol(Expression):
     def __init__(self, parent,
                  symbol,
                  sub_exprs,
-                 annotations=None,
+                 annotations: Optional[Annotations] =None,
                  is_enumerated='',
                  is_enumeration='',
                  in_enumeration=''):
-        self.annotations = annotations
         self.symbol : SymbolExpr = symbol
         self.sub_exprs = sub_exprs
         self.is_enumerated = is_enumerated
@@ -1131,7 +1132,7 @@ class AppliedSymbol(Expression):
             self.is_enumeration = 'not'
         self.in_enumeration = in_enumeration
 
-        super().__init__()
+        super().__init__(annotations=annotations)
 
         self.as_disjunction = None
         self.decl = None
@@ -1420,14 +1421,13 @@ class Date(Expression):
 class Brackets(Expression):
     PRECEDENCE = 200
 
-    def __init__(self, **kwargs):
-        self.f = kwargs.pop('f')
-        self.annotations = kwargs.pop('annotations')
-        if not self.annotations:
-            self.annotations = {'reading': self.f.annotations['reading']}
+    def __init__(self, parent, f, annotations: Optional[Annotations]=None):
+        self.f = f
         self.sub_exprs = [self.f]
 
         super().__init__()
+        self.annotations = (annotations.annotations if annotations else
+            {'reading': self.f.annotations['reading']})
 
 
     # don't @use_value, to have parenthesis
