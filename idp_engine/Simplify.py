@@ -483,7 +483,7 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     out = AppliedSymbol.make(
                         symbol=x.symbol, args=x.sub_exprs,
                         is_enumeration='in',
-                        in_enumeration=Enumeration(parent=self, tuples=new_tuples)
+                        in_enumeration=Enumeration(parent=None, tuples=new_tuples)
                     )
 
                     core = deepcopy(AppliedSymbol.make(out.symbol, out.sub_exprs))
