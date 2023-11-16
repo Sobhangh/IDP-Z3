@@ -486,7 +486,7 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     )
 
                     core = deepcopy(AppliedSymbol.make(out.symbol, out.sub_exprs))
-                    out.as_disjunction = out.in_enumeration.contains([core], False)
+                    out.as_disjunction = out.in_enumeration.contains([core])
 
                     out = Assignment(out,
                                      TRUE if belongs else FALSE,

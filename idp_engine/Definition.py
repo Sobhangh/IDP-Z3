@@ -90,7 +90,7 @@ def get_def_constraints(self: Definition,
     instantiables = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.has_finite_domain = all(s.extension(problem.interpretations, problem.extensions)[0] is not None
+        rule.has_finite_domain = all(s.extension(problem.extensions)[0] is not None
                                    for s in rule.definiendum.decl.sorts)
 
         if rule.has_finite_domain or decl in self.inductive:
@@ -151,7 +151,7 @@ def instantiate_definition(self: Definition, decl, new_args, theory) -> Optional
     # exclude inductive and recursive definitions
     if rule and self.mode != Semantics.RECDATA and decl not in self.inductive:
         instantiable = all(  # finite domain or not a variable
-            s.extension(theory.interpretations, theory.extensions)[0] is not None
+            s.extension(theory.extensions)[0] is not None
             or not v.has_variables()
             for s, v in zip(rule.definiendum.decl.sorts, new_args))
 

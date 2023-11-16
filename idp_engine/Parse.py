@@ -68,22 +68,22 @@ def str_to_IDP(atom: Expression, val_string: str) -> Optional[Expression]:
 
     # determine the type declaration if possible
     assert atom.type, "Internal error"
-    type_string = atom.type
-    typ = (None if not hasattr(atom, 'decl') or atom.type == BOOL else
+    type_ = atom.type
+    decl = (None if not hasattr(atom, 'decl') or atom.type == BOOL else
            atom.decl.out.decl)
-    assert typ is None or typ.name == type_string, f"{atom}: {typ.name} != {type_string}"
-    return str_to_IDP2(type_string, typ, val_string)
+    assert decl is None or decl.name == type_, f"{atom}: {decl.name} != {type_}"
+    return str_to_IDP2(type_, decl, val_string)
 
 
-def str_to_IDP2(type_string: str,
-                typ: Union[TypeDeclaration, SymbolDeclaration, None],
+def str_to_IDP2(type_: str,
+                decl: Optional[Declaration],
                 val_string: str
                 ) -> Expression:
-    """recursive function to decode a val_string of type type_string and type
+    """recursive function to decode a val_string of type type_ and type
 
     Args:
-        type_string (str):
-        typ (TypeDeclaration): type declaration of the value string
+        type_ (str):
+        decl (Declaration, Optional): declaration of the value string
         val_string (str): value_string
 
     Raises:
@@ -92,19 +92,19 @@ def str_to_IDP2(type_string: str,
     Returns:
         Expression: the internal representation of the value
     """
-    if typ is None:
-        assert type_string == BOOL, "Internal error"
+    if decl is None:
+        assert type_ == BOOL, "Internal error"
         out = (TRUE if val_string == 'true' else
             FALSE if val_string == 'false' else
             None)
         if out is None:
             raise IDPZ3Error(f"wrong boolean value: {val_string}")
     else:
-        if (typ.base_type and hasattr(typ.base_type, 'map')
-            and val_string in typ.base_type.map):  # constructor
-            out = typ.base_type.map[val_string]
+        if (decl.base_type and hasattr(decl.base_type, 'map')
+            and val_string in decl.base_type.map):  # constructor
+            out = decl.base_type.map[val_string]
         elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
-            assert hasattr(typ, 'interpretation'), "Internal error"
+            assert hasattr(decl, 'interpretation'), "Internal error"
 
             # find constructor name and its arguments in val_string
             stack : List[int] = []
@@ -124,11 +124,11 @@ def str_to_IDP2(type_string: str,
 
             # find the constructor
             constructor = None
-            assert type(typ.interpretation) == SymbolInterpretation, "Internal error"
-            for cons in typ.interpretation.enumeration.constructors:
+            assert type(decl.interpretation) == SymbolInterpretation, "Internal error"
+            for cons in decl.interpretation.enumeration.constructors:
                 if cons.name == name:
                     constructor = cons
-            assert constructor is not None, f"wrong constructor name '{name}' for {type_string}"
+            assert constructor is not None, f"wrong constructor name '{name}' for {type_}"
 
             new_args = []
             for a, acc in zip(args, constructor.sorts):
@@ -137,28 +137,28 @@ def str_to_IDP2(type_string: str,
 
             out = AppliedSymbol.construct(constructor, new_args)
         else:
-            interp = getattr(typ.base_type, "interpretation", None)
+            interp = getattr(decl.base_type, "interpretation", None)
             enum_type = (interp.enumeration.type if interp else
-                         typ.name if type(typ) == TypeDeclaration else
-                         typ.out.decl.name)
+                         decl.name if type(decl) == TypeDeclaration else
+                         decl.type)
 
-            if type_string == BOOL or enum_type == BOOL:
+            if type_ == BOOL or enum_type == BOOL:
                 out = (TRUE if val_string in ['true', 'True'] else
                        FALSE if val_string in ['false', 'False'] else
                        None)
                 if out is None:
                     raise IDPZ3Error(f"wrong boolean value: {val_string}")
-            elif type_string == DATE or enum_type == DATE:
+            elif type_ == DATE or enum_type == DATE:
                 d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
                     date.fromisoformat(val_string[1:]))
                 out = Date(iso=f"#{d.isoformat()}")
-            elif typ.type == REAL or enum_type == REAL:
+            elif decl.type == REAL or enum_type == REAL:
                 out = Number(number= val_string if '/' in val_string else
                             str(float(eval(val_string.replace('?', '')))))
-            elif typ.type == INT or enum_type == INT:
+            elif decl.type == INT or enum_type == INT:
                 out = Number(number=str(eval(val_string)))
             else:
-                raise IDPZ3Error(f"unknown type for: {val_string}: {typ}")
+                raise IDPZ3Error(f"unknown type for: {val_string}: {decl}")
     return out
 
 
@@ -431,7 +431,6 @@ class TypeDeclaration(ASTNode):
         return (f"type {self.name} {'' if not enumeration else ':= ' + enumeration}")
 
     def contains_element(self, term: Expression,
-                     interpretations: dict[str, "SymbolInterpretation"],
                      extensions: dict[str, Extension]
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` is in the type
@@ -574,7 +573,7 @@ class SymbolDeclaration(ASTNode):
         """
         assert len(self.sorts) == len(args), \
             f"Incorrect arity of {str(args)} for {self.name}"
-        return AND([typ.has_element(term, interpretations, extensions)
+        return AND([typ.has_element(term, extensions)
                    for typ, term in zip(self.sorts, args)])
 
     def has_in_range(self, value: Expression,
@@ -583,10 +582,9 @@ class SymbolDeclaration(ASTNode):
                      ) -> Expression:
         """Returns an expression that says whether `value` is in the range of the symbol.
         """
-        return self.out.has_element(value, interpretations, extensions)
+        return self.out.has_element(value, extensions)
 
     def contains_element(self, term: Expression,
-                     interpretations: dict[str, "SymbolInterpretation"],
                      extensions: dict[str, Extension]
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` satisfies the predicate
@@ -949,9 +947,11 @@ class Enumeration(Expression):
         return (f'{{{", ".join([repr(t) for t in self.tuples])}}}' if self.tuples else
                 f'{{{", ".join([repr(t) for t in self.constructors])}}}')
 
-    def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Optional[dict[str, SymbolInterpretation]]=None,
-                 extensions: Optional[dict[str, Extension]]=None
+    def contains(self, args,
+                 arity: Optional[int] = None,
+                 rank: int = 0,
+                 tuples: Optional[List[TupleIDP]] = None,
+                 theory: Optional[Theory] = None
                  ) -> Expression:
         """ returns an Expression that says whether Tuple args is in the enumeration """
 
@@ -967,8 +967,8 @@ class Enumeration(Expression):
         if args[rank].is_value():
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
-                    return self.contains(args, function, arity, rank+1, list(tuples2),
-                                interpretations=interpretations, extensions=extensions)
+                    return self.contains(args, arity, rank+1, list(tuples2),
+                                theory=theory)
             return FALSE
         else:
             if rank + 1 == arity:  # use OR
@@ -981,8 +981,7 @@ class Enumeration(Expression):
             for val, tuples2 in groups:
                 tuples = list(tuples2)
                 out = IF(EQUALS([args[rank], tuples[0].args[rank]]),
-                    self.contains(args, function, arity, rank+1, tuples,
-                            interpretations=interpretations, extensions=extensions),
+                    self.contains(args, arity, rank+1, tuples, theory),
                     out)
             return out
 
@@ -1022,21 +1021,25 @@ class ConstructedFrom(Enumeration):
     """Represents a 'constructed from' enumeration of constructors
 
     Attributes:
-        tuples (OrderedSet[TupleIDP]): OrderedSet of tuples of Expression
+        tuples (OrderedSet[TupleIDP], Optional): OrderedSet of tuples of Expression
 
         constructors (List[Constructor]): List of Constructor
 
-        accessors (dict[str, Int]): index of the accessor in the constructors
+        accessors (dict[str, int]): index of the accessor in the constructors
     """
-    def __init__(self, **kwargs):
-        self.constructed = kwargs.pop('constructed')
-        self.constructors = kwargs.pop('constructors')
-        self.tuples = None
-        self.accessors = dict()
+    def __init__(self, parent: Optional[ASTNode],
+                 constructed: str,
+                 constructors: List[Constructor]):
+        self.constructed = constructed
+        self.constructors = constructors
+        self.tuples: Optional[OrderedSet] = None
+        self.accessors: dict[str, int] = dict()
 
-    def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Optional[dict[str, SymbolInterpretation]] = None,
-                 extensions: Optional[dict[str, Extension]] = None
+    def contains(self, args,
+                 arity: Optional[int] = None,
+                 rank: int = 0,
+                 tuples: Optional[List[TupleIDP]] = None,
+                 theory: Optional[Theory] = None
                  ) -> Expression:
         """returns True if args belong to the type enumeration"""
         # args must satisfy the tester of one of the constructors
@@ -1046,7 +1049,7 @@ class ConstructedFrom(Enumeration):
                        f"Incorrect type of {args[0]} for {self.parent.name}")
             self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
                        f"Incorrect arity")
-            return AND([t.decl.out.has_element(e, interpretations, extensions)
+            return AND([t.decl.out.has_element(e, theory.extensions)
                         for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
         out = [AppliedSymbol.construct(constructor.tester, args)
                 for constructor in self.constructors]
@@ -1062,7 +1065,7 @@ class ConstructedFrom(Enumeration):
                         f"Incorrect type of {args[0]} for {self.parent.name}")
                 self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
                         f"Incorrect arity")
-                return AND([t.decl.out.has_element(e, interpretations, extensions)
+                return AND([t.decl.out.has_element(e, extensions)
                             for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
             out = [AppliedSymbol.construct(constructor.tester, args)
                     for constructor in self.constructors]
@@ -1133,9 +1136,11 @@ class Ranges(Enumeration):
                     self.check(False, f"Incorrect value {x.toI} for {self.type}")
         Enumeration.__init__(self, parent=parent, tuples=tuples)
 
-    def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Optional[dict[str, SymbolInterpretation]] = None,
-                 extensions: Optional[dict[str, Extension]] = None
+    def contains(self, args,
+                 arity: Optional[int] = None,
+                 rank: int = 0,
+                 tuples: Optional[List[TupleIDP]] = None,
+                 theory: Optional[Theory] = None
                  ) -> Expression:
         var = args[0]
         if not self.elements:

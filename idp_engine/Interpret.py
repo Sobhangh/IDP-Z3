@@ -118,7 +118,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     symbol.decl = self
 
     # determine the extension, i.e., (superset, filter)
-    extensions = [s.extension(problem.interpretations, problem.extensions)
+    extensions = [s.extension(problem.extensions)
                 for s in self.sorts]
     if any(e[0] is None for e in extensions):
         superset = None
@@ -136,7 +136,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     if self.out.decl.name == BOOL:
         problem.extensions[self.name] = (superset, filter)
 
-    (range, _) = self.out.extension(problem.interpretations, problem.extensions)
+    (range, _) = self.out.extension(problem.extensions)
     if range is None:
         self.range = []
     else:
@@ -160,7 +160,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
             # add type constraints to problem.constraints
             # ! (x,y) in domain: range(f(x,y))
             range_condition = self.out.has_element(deepcopy(expr),
-                                problem.interpretations, problem.extensions)
+                                problem.extensions)
             if range_condition.same_as(TRUE):
                 break
             range_condition = range_condition.interpret(problem, {})
@@ -292,7 +292,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
                 self.check(domain == enumeration, f"Enumeration of {self.name} should cover its domain")
             else:  # add a constraint to the problem, to be solved by Z3
                 # test case: tests/1240 FO{Core, Sugar, Int, PF)/LivingBeing.idp
-                expr = self.enumeration.contains(list(q_vars.values()), True)
+                expr = self.enumeration.contains(list(q_vars.values()))
                 constraint = FORALL(quantees, expr).interpret(problem, {})
                 constraint.annotations['reading'] = f"Enumeration of {self.name} should cover its domain"
                 problem.constraints.append(constraint)
@@ -333,7 +333,7 @@ def interpret(self: Constructor, problem: Theory) -> Constructor:
         self.range = None
     else:
         # assert all(isinstance(s.decl, SymbolDeclaration) for s in self.sorts), "Internal error"
-        extensions = [s.decl.out.extension(problem.interpretations, problem.extensions)
+        extensions = [s.decl.out.extension(problem.extensions)
                       for s in self.sorts]
         if any(e[0] is None for e in extensions):
             self.range = None
@@ -434,9 +434,7 @@ def _finalize(self: Expression, subs: dict[str, Expression]):
 # class Type ###########################################################
 
 @catch_error
-def extension(self, interpretations: dict[str, SymbolInterpretation],
-              extensions: dict[str, Extension]
-              ) -> Extension:
+def extension(self, extensions: dict[str, Extension]) -> Extension:
     """returns the extension of a Type, given some interpretations.
 
     Normally, the extension is already in `extensions`.
@@ -501,8 +499,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
 
         if problem:
             if isinstance(domain, Type):  # quantification over type / Concepts
-                (superset, filter) = domain.extension(problem.interpretations,
-                                                    problem.extensions)
+                (superset, filter) = domain.extension(problem.extensions)
             elif type(domain) == SymbolExpr:
                 if domain.decl:
                     self.check(domain.decl.out.type == BOOL,
@@ -653,16 +650,15 @@ def _interpret(self: AppliedSymbol,
                 if interpretation.default is not None:
                     out.as_disjunction = TRUE
                 else:
-                    out.as_disjunction = interpretation.enumeration.contains(sub_exprs, True,
-                        interpretations=problem.interpretations, extensions=problem.extensions)
+                    out.as_disjunction = interpretation.enumeration.contains(
+                        sub_exprs, theory=problem)
                 if out.as_disjunction.same_as(TRUE) or out.as_disjunction.same_as(FALSE):
                     value = out.as_disjunction
                 out.as_disjunction.annotations = out.annotations
         elif out.in_enumeration:
             # re-create original AppliedSymbol
             core = deepcopy(AppliedSymbol.make(out.symbol, sub_exprs))
-            out.as_disjunction = out.in_enumeration.contains([core], False,
-                        interpretations=problem.interpretations, extensions=problem.extensions)
+            out.as_disjunction = out.in_enumeration.contains([core], theory=problem)
             if out.as_disjunction.same_as(TRUE) or out.as_disjunction.same_as(FALSE):
                 value = out.as_disjunction
             out.as_disjunction.annotations = out.annotations

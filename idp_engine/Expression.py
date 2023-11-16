@@ -587,17 +587,13 @@ class Type(Expression):
                     len(self.ins) == len(other.ins) and
                     all(s==o for s, o in zip(self.ins, other.ins)))))
 
-    def extension(self,
-                  interpretations: dict[str, SymbolInterpretation],
-                  extensions: dict[str, Extension]
-                  ) -> Extension:
+    def extension(self, extensions: dict[str, Extension]) -> Extension:
         return extensions[""]  # monkey-patched
 
     def is_value(self): return True
 
     def has_element(self,
                     term: Expression,
-                    interpretations: dict[str, SymbolInterpretation],
                     extensions: dict[str, Extension]
                     ) -> Expression:
         """Returns an Expression that says whether `term` is in the type/predicate denoted by `self`.
@@ -609,14 +605,14 @@ class Type(Expression):
             Expression: whether `term` `term` is in the type denoted by `self`.
         """
         if self.name == CONCEPT:
-            extension = self.extension(interpretations, extensions)[0]
+            extension = self.extension(extensions)[0]
             assert extension is not None, "Internal error"
             comparisons = [EQUALS([term, c[0]]) for c in extension]
             return OR(comparisons)
         else:
             assert self.decl is not None, "Internal error"
             self.check(self.decl.out.name == BOOL, "internal error")
-            return self.decl.contains_element(term, interpretations, extensions)
+            return self.decl.contains_element(term, extensions)
 
 def TYPE(name: str, ins=None, out=None) -> Type:
     return Type(None, name, ins, out)
