@@ -14,5 +14,5 @@ structure S:V {
 }
 
 procedure main () {
-    pretty_print(Theory(T).formula())
+    pretty_print(T)
 }
