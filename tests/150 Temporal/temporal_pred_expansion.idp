@@ -13,6 +13,6 @@ structure S:V {
     // here comes the interpretation of some symbols
 }
 
-display {
-    view() = expanded.
+procedure main () {
+    pretty_print(T)
 }
