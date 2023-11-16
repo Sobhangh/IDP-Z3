@@ -29,7 +29,7 @@ from .Parse import (TemporalDeclaration, Vocabulary, Import, TypeDeclaration, De
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (Expression, NowAppliedSymbol, StartAppliedSymbol, Symbol, SYMBOL, Type, TYPE,
+from .Expression import (ONE, ASumMinus, Expression, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, Symbol, SYMBOL, Type, TYPE,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, Operator, AComparison, AUnary,
@@ -163,7 +163,7 @@ VarDeclaration.annotate = annotate
 
 # Class Symbol  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     if self.name in q_vars:
         return q_vars[self.name]
 
@@ -180,7 +180,7 @@ Symbol.annotate = annotate
 
 # Class Type  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     Symbol.annotate(self, voc, q_vars)
     if self.out:
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
@@ -209,7 +209,7 @@ TheoryBlock.annotate = annotate
 
 # Class Definition  #######################################################
 
-def annotate(self: Definition, voc, q_vars,ltc=False):
+def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     self.rules = [r.annotate(voc, q_vars,ltc) for r in self.rules]
 
     # create level-mapping symbols, as needed
@@ -341,10 +341,22 @@ def annotate(self, voc, q_vars, ltc=False):
     self.check(not self.definiendum.symbol.is_intentional(),
                 f"No support for intentional objects in the head of a rule: "
                 f"{self}")
+    temporal_head =0
     if not isinstance(self.definiendum, AppliedSymbol):
-        d : AQuantification = self.definiendum.replace(voc,q_vars)
-        self.definiendum =d.f
-        self.quantees.append(d.quantees)
+        if not ltc:
+            temporal_head =0
+        elif isinstance(self.definiendum,StartAppliedSymbol):
+            temporal_head =1
+        elif isinstance(self.definiendum,NowAppliedSymbol):
+            temporal_head =2
+        else:
+            temporal_head=3
+        d  = self.definiendum.replace(voc,q_vars)
+        if isinstance(d,AQuantification):
+            self.definiendum =d.f
+            self.quantees.append(d.quantees)
+        else:
+            self.definiendum =d
     # create head variables
     q_v = copy(q_vars)
     for q in self.quantees:
@@ -355,7 +367,7 @@ def annotate(self, voc, q_vars, ltc=False):
                 q_v[var.name] = var
 
     self.definiendum = self.definiendum.annotate(voc, q_v,ltc)
-    self.body = self.body.annotate(voc, q_v,ltc)
+    self.body = self.body.annotate(voc, q_v,ltc,temporal_head)
     if self.out:
         self.out = self.out.annotate(voc, q_v,ltc)
 
@@ -555,7 +567,7 @@ Display.annotate = annotate
 
 # Class Expression  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     """annotate tree after parsing
 
     Resolve names and determine type as well as variables in the expression
@@ -567,7 +579,7 @@ def annotate(self, voc, q_vars,ltc=False):
     Returns:
         Expression: an equivalent AST node, with updated type, .variables
     """
-    self.sub_exprs = [e.annotate(voc, q_vars,ltc) for e in self.sub_exprs]
+    self.sub_exprs = [e.annotate(voc, q_vars,ltc,temporal_head) for e in self.sub_exprs]
     return self.annotate1()
 Expression.annotate = annotate
 
@@ -593,7 +605,7 @@ AIfExpr.annotate1 = annotate1
 
 # Class Quantee  #######################################################
 
-def annotate(self, voc, q_vars ,ltc=False):
+def annotate(self, voc, q_vars ,ltc=False,temporal_head=0):
     Expression.annotate(self, voc, q_vars)
     for vars in self.vars:
         self.check(not self.sub_exprs
@@ -626,12 +638,12 @@ Quantee.annotate = annotate
 
 # Class AQuantification  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     # also called by AAgregate.annotate
     q_v = copy(q_vars)
     for q in self.quantees:
         q.annotate(voc, q_v)
-    self.sub_exprs = [e.annotate(voc, q_v,ltc) for e in self.sub_exprs]
+    self.sub_exprs = [e.annotate(voc, q_v,ltc,temporal_head) for e in self.sub_exprs]
     return self.annotate1()
 AQuantification.annotate = annotate
 
@@ -650,7 +662,7 @@ AQuantification.annotate1 = annotate1
 
 # Class Operator  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     self = Expression.annotate(self, voc, q_vars)
 
     for e in self.sub_exprs:
@@ -691,9 +703,9 @@ AEquivalence.annotate1 = annotate1
 
 # Class ARImplication  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     # reverse the implication
-    self.sub_exprs = [e.annotate(voc, q_vars,ltc) for e in self.sub_exprs]
+    self.sub_exprs = [e.annotate(voc, q_vars,ltc,temporal_head) for e in self.sub_exprs]
     out = AImplication.make(ops=['⇒'], operands=list(reversed(list(self.sub_exprs))),
                         annotations=None, parent=self)
     out.original = self
@@ -703,7 +715,7 @@ ARImplication.annotate = annotate
 
 # Class AComparison  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     out = Operator.annotate(self, voc, q_vars)
     out.type = BOOL
 
@@ -739,10 +751,10 @@ AUnary.annotate1 = annotate1
 
 # Class AAggregate  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     if not self.annotated:
 
-        self = AQuantification.annotate(self, voc, q_vars,ltc)
+        self = AQuantification.annotate(self, voc, q_vars,ltc,temporal_head)
 
         if self.aggtype == "sum" and len(self.sub_exprs) == 2:
             self.original = copy(self)
@@ -774,7 +786,7 @@ def annotate(self, voc, q_vars,ltc=False):
                     to_create = True
                 symbol = SYMBOL(symbol_decl.name)
                 applied = AppliedSymbol.make(symbol, q_vars.values())
-                applied = applied.annotate(voc, q_vars,ltc)
+                applied = applied.annotate(voc, q_vars,ltc,temporal_head)
 
                 if to_create:
                     eq = EQUALS([deepcopy(applied), self.sub_exprs[0]])
@@ -794,7 +806,7 @@ def annotate(self, voc, q_vars,ltc=False):
                                 for v in q_vars.values()]
                     applied.co_constraint = (
                         coc if not quantees else
-                        FORALL(quantees, coc).annotate(voc, q_vars,ltc))
+                        FORALL(quantees, coc).annotate(voc, q_vars,ltc,temporal_head))
                     applied.co_constraint.annotations['reading'] = f"Calculation of {self.code}"
                 return applied
         self.annotated = True
@@ -805,7 +817,7 @@ AAggregate.annotate1 = AQuantification.annotate1
 
 # Class AppliedSymbol  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     self.symbol = self.symbol.annotate(voc, q_vars)
     if self.symbol.decl:
         if isinstance(self.symbol.decl, SymbolDeclaration):
@@ -817,7 +829,7 @@ def annotate(self, voc, q_vars,ltc=False):
     self.check((not self.symbol.decl or type(self.symbol.decl) != Constructor
                 or 0 < self.symbol.decl.arity),
                f"Constructor `{self.symbol}` cannot be applied to argument(s)")
-    self.sub_exprs = [e.annotate(voc, q_vars,ltc) for e in self.sub_exprs]
+    self.sub_exprs = [e.annotate(voc, q_vars,ltc,temporal_head) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc)
     out = self.annotate1()
@@ -852,19 +864,71 @@ def replace(self, voc, q_vars):
     #is the name of this variable ok??
     #Is this type the correct time type?
     time: Type = TYPE('Tijd')
-    t: Variable = VARIABLE('time',time)
+    t: Variable = VARIABLE(v_time,time)
+    if v_time in q_vars and q_vars[v_time].sort == time:
+        return self.sub_expr.sub_exprs.append(t)
     self.sub_expr.sub_exprs.append(t)
     qt: Quantee = Quantee.make(t,time) 
     return AQuantification(parent=None,annotations=None,q='forall',quantees=[qt],f=self.sub_expr)
+
 NowAppliedSymbol.replace = replace
-def annotate(self, voc, q_vars,ltc=False):
-    expanded: AQuantification = self.replace(voc,q_vars)
-    return expanded.annotate(voc,q_vars,ltc)
-   
+v_time = '0time'
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
+    if ltc:
+        self.check(temporal_head!=1, f"Not allowed to use Now[]")
+    expanded = self.replace(voc,q_vars)
+    return expanded.annotate(voc,q_vars,ltc,temporal_head)
+
 NowAppliedSymbol.annotate = annotate
+
+# Class NextAppliedSymbol  #######################################################
+
+def replace(self, voc, q_vars):
+    self.sub_expr.in_temp = True
+    symb : Symbol= self.sub_expr.symbol.annotate(voc, q_vars)
+    self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
+    #is the name of this variable ok??
+    #Is this type the correct time type?
+    time: Type = TYPE('Tijd')
+    t: Variable = VARIABLE(v_time,time)
+    if v_time in q_vars and q_vars[v_time].sort == time:
+        return self.sub_expr.sub_exprs.append(ASumMinus.make('+',[t,ONE],None,None))
+    self.sub_expr.sub_exprs.append(ASumMinus.make('+',[t,ONE],None,None))
+    qt: Quantee = Quantee.make(t,time) 
+    return AQuantification(parent=None,annotations=None,q='forall',quantees=[qt],f=self.sub_expr)
+
+NextAppliedSymbol.replace = replace
+
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
+    if ltc:
+        self.check(temporal_head==0 or temporal_head ==3, f"Not allowed to use Next[]")
+    expanded = self.replace(voc,q_vars)
+    return expanded.annotate(voc,q_vars,ltc,temporal_head)
+
+NextAppliedSymbol.annotate = annotate
+
+# Class StartAppliedSymbol  #######################################################
+
+def replace(self, voc, q_vars):
+    self.sub_expr.in_temp = True
+    symb : Symbol= self.sub_expr.symbol.annotate(voc, q_vars)
+    self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
+    self.sub_expr.sub_exprs.append(ZERO)
+    return self.sub_expr
+
+StartAppliedSymbol.replace = replace
+
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
+    if ltc:
+        self.check(temporal_head<=1, f"Not allowed to use Start[]")
+    expanded = self.replace(voc,q_vars)
+    return expanded.annotate(voc,q_vars,ltc,temporal_head)
+   
+StartAppliedSymbol.annotate = annotate
+
 # Class SymbolExpr  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     out = Expression.annotate(self, voc, q_vars)
     return out.simplify1()
 SymbolExpr.annotate = annotate
@@ -872,7 +936,7 @@ SymbolExpr.annotate = annotate
 
 # Class Variable  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     self.type = self.sort.decl.name if self.sort and self.sort.decl else ''
     return self
 Variable.annotate = annotate
@@ -880,7 +944,7 @@ Variable.annotate = annotate
 
 # Class Number  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     self.decl = voc.symbol_decls[self.type]
     return self
 Number.annotate = annotate
@@ -888,7 +952,7 @@ Number.annotate = annotate
 
 # Class UnappliedSymbol  #######################################################
 
-def annotate(self, voc, q_vars,ltc=False):
+def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     if self.name in q_vars:  # ignore VarDeclaration
         return q_vars[self.name]
     if self.name in voc.symbol_decls:
