@@ -34,9 +34,9 @@ from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 
 from .Assignments import Assignments
 from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUCTOR,
-                         Accessor, TYPE, SymbolExpr, Expression,
+                         Accessor, SymbolExpr, Expression,
                          AIfExpr, IF, AQuantification, split_quantees, Set_,
-                         TYPE, Quantee, ARImplication, AEquivalence,
+                         SET_, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Number, Brackets,
@@ -325,11 +325,11 @@ class Vocabulary(ASTNode):
             TypeDeclaration(self, name=DATE, enumeration=DateRange()),
             TypeDeclaration(self, name=CONCEPT, constructors=[]),
             SymbolDeclaration.make(self, name=GOAL_SYMBOL,
-                            sorts=[TYPE(CONCEPT, ins=[], out=TYPE(BOOL))],
-                            out=TYPE(BOOL)),
+                            sorts=[SET_(CONCEPT, ins=[], out=SET_(BOOL))],
+                            out=SET_(BOOL)),
             SymbolDeclaration.make(self, name=RELEVANT,
-                            sorts=[TYPE(CONCEPT, ins=[], out=TYPE(BOOL))],
-                            out=TYPE(BOOL)),
+                            sorts=[SET_(CONCEPT, ins=[], out=SET_(BOOL))],
+                            out=SET_(BOOL)),
             SymbolDeclaration.make(self, name=ABS,
                             sorts=[INTT], out=INTT),
             ] + self.declarations
@@ -525,7 +525,7 @@ class SymbolDeclaration(ASTNode):
         self.sorts : List[Set_] = sorts
         self.out : Set_ = out
         if self.out is None:
-            self.out = TYPE(BOOL)
+            self.out = SET_(BOOL)
 
         self.arity = len(self.sorts)
         self.private = None

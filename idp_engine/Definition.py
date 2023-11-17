@@ -27,8 +27,8 @@ from copy import deepcopy
 from typing import (Set, Tuple, List, Optional)
 
 from .utils import (RESERVED_SYMBOLS, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
-from .Expression import (Expression, catch_error, ZERO, TRUE, FALSE, RecDef, TYPE,
-                         Constructor, TYPE, Set_, AppliedSymbol, Operator, AImplication,
+from .Expression import (Expression, catch_error, ZERO, TRUE, FALSE, RecDef,
+                         Constructor, SET_, Set_, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
                          IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOLT, INTT)
 from .Parse import Definition, Rule, SymbolDeclaration
@@ -79,11 +79,11 @@ def get_def_constraints(self: Definition,
     # compute level symbols
     level_symbols: dict[SymbolDeclaration, Set_] = {}
     for key in self.inductive:
-        real = TYPE(REAL)
+        real = SET_(REAL)
         real.decl = problem.declarations[REAL]
         symbdec = SymbolDeclaration.make(self,
             "_"+str(self.id)+"lvl_"+key.name, key.sorts, real)
-        level_symbols[key] = TYPE(symbdec.name)
+        level_symbols[key] = SET_(symbdec.name)
         level_symbols[key].decl = symbdec
 
     # add level mappings

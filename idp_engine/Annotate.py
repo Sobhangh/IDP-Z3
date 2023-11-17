@@ -30,7 +30,7 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ASTNode, Expression, TYPE, Set_, BOOLT, INTT, REALT, DATET,
+from .Expression import (ASTNode, Expression, SET_, Set_, BOOLT, INTT, REALT, DATET,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, Operator, AComparison, AUnary,
@@ -92,7 +92,7 @@ def annotate_block(self: ASTNode,
 
     concepts = self.symbol_decls[CONCEPT]
     for constructor in concepts.constructors:
-        constructor.symbol = (TYPE(constructor.name[1:])
+        constructor.symbol = (SET_(constructor.name[1:])
                                 .annotate(self, {}))
 
     # populate .map of CONCEPT
@@ -437,7 +437,7 @@ def annotate(self: Expression,
     :returns None:
     """
     assert isinstance(self, SymbolInterpretation), "Internal error"
-    self.symbol = TYPE(self.name).annotate(voc, {})
+    self.symbol = SET_(self.name).annotate(voc, {})
     enumeration = self.enumeration  # shorthand
 
     # create constructors if it is a type enumeration
@@ -580,7 +580,7 @@ def annotate_block(self: ASTNode,
         open_type = TypeDeclaration(self, name=type_name,
                                     constructors=constructors)
         open_type.annotate_declaration(self.voc)
-        open_types[name] = TYPE(type_name)
+        open_types[name] = SET_(type_name)
 
     for name, out in [
         ('expand', BOOLT),
@@ -854,7 +854,7 @@ def annotate(self: AAggregate,
                 else:
                     symbol_decl = SymbolDeclaration.make(self,
                         "__"+self.str, # name `__ *`
-                        [TYPE(v.sort.code) for v in q_vars.values()],
+                        [SET_(v.sort.code) for v in q_vars.values()],
                         self.type).annotate_declaration(voc)    # output_domain
                     to_create = True
                 symbol = SymbolExpr.make(symbol_decl.name)

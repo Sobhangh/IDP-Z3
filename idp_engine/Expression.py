@@ -623,13 +623,13 @@ class Set_(Expression):
             self.check(self.decl.out == BOOLT, "internal error")
             return self.decl.contains_element(term, extensions)
 
-def TYPE(name: str, ins=None, out=None) -> Set_:
+def SET_(name: str, ins=None, out=None) -> Set_:
     return Set_(None, name, ins, out)
 
-BOOLT = TYPE(BOOL)
-INTT = TYPE(INT)
-REALT = TYPE(REAL)
-DATET = TYPE(DATE)
+BOOLT = SET_(BOOL)
+INTT = SET_(INT)
+REALT = SET_(REAL)
+DATET = SET_(DATE)
 
 class AIfExpr(Expression):
     PRECEDENCE = 10
