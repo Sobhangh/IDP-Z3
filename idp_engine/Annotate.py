@@ -116,7 +116,7 @@ def annotate_declaration(self: ASTNode,
         s.annotate(voc, {})
     self.out.annotate(voc, {})
     for c in self.constructors:
-        c.type = self
+        c.type = self.sorts[0]
         self.check(c.name not in voc.symbol_decls or self.name == CONCEPT,
                     f"duplicate '{c.name}' constructor for '{self.name}' type")
         voc.symbol_decls[c.name] = c
@@ -740,6 +740,7 @@ def annotate(self: Operator,
 Operator.annotate = annotate
 
 def set_variables(self: Operator) -> Expression:
+    assert all(e.type for e in self.sub_exprs)
     if self.type is None:  # not a BOOL operator
         self.type = REALT if any(e.type == REALT for e in self.sub_exprs) \
                 else INTT if any(e.type == INTT for e in self.sub_exprs) \
@@ -854,7 +855,7 @@ def annotate(self: AAggregate,
                 else:
                     symbol_decl = SymbolDeclaration.make(self,
                         "__"+self.str, # name `__ *`
-                        [SET_(v.type.code) for v in q_vars.values()],
+                        [SET_(v.type.name) for v in q_vars.values()],
                         self.type).annotate_declaration(voc)    # output_domain
                     to_create = True
                 symbol = SymbolExpr.make(symbol_decl.name)
@@ -927,9 +928,14 @@ def set_variables(self: AppliedSymbol) -> Expression:
     out = Expression.set_variables(self)
     out.symbol = out.symbol.set_variables()
     out.variables.update(out.symbol.variables)
+    if not out.decl and out.symbol.name:
+        out.decl = out.symbol.decl
+    out.type = (BOOLT if out.is_enumerated or out.in_enumeration else
+            out.decl.type if out.decl and out.decl.type else
+            out.symbol.sub_exprs[0].type.out if type(out.symbol)==SymbolExpr and out.symbol.eval else
+            out.type)
     return out.simplify1()
 AppliedSymbol.set_variables = set_variables
-
 
 # Class SymbolExpr  #######################################################
 
@@ -974,6 +980,7 @@ def annotate(self: UnappliedSymbol,
         return q_vars[self.name]
     if self.name in voc.symbol_decls:
         self.decl = voc.symbol_decls[self.name]
+        self.type = self.decl.type
         self.variables = set()
         self.check(type(self.decl) == Constructor,
                    f"{self} should be applied to arguments (or prefixed with a back-tick)")

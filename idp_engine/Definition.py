@@ -30,7 +30,7 @@ from .utils import (RESERVED_SYMBOLS, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL
 from .Expression import (Expression, ZERO, TRUE, FALSE, RecDef,
                          Constructor, SET_, Set_, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
-                         IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOLT, INTT)
+                         IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOLT, INTT, REALT)
 from .Parse import Definition, Rule, SymbolDeclaration
 from .Theory import Theory
 
@@ -335,8 +335,8 @@ def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mo
             op = ('≥' if pos_justification else '>') \
                 if polarity else ('<' if pos_justification else '≤')
         comp = AComparison.make(op, [
-            AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs),
-            AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
+            AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs, type_=REALT),
+            AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs, type_=REALT)
         ])
         if polarity:
             return AND([comp, self])

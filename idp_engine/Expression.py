@@ -1133,25 +1133,32 @@ class AppliedSymbol(Expression):
         super().__init__(annotations=annotations)
 
         self.as_disjunction = None
-        self.decl = None
+        self.decl: Optional[Declaration] = None
         self.in_head = False
 
     @classmethod
     def make(cls,
              symbol: SymbolExpr,
              args: List[Expression],
-             **kwargs
+             type_: Optional[Set_] = None,
+             annotations: Optional[Annotations] =None,
+             is_enumerated='',
+             is_enumeration='',
+             in_enumeration=''
              ) -> AppliedSymbol:
-        out = cls(None, symbol, args, **kwargs)
+        out = cls(None, symbol, args, annotations,
+                  is_enumerated, is_enumeration, in_enumeration)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
+        out.type = type_
         return out.set_variables()
 
     @classmethod
     def construct(cls, constructor, args):
         out= cls.make(SymbolExpr.make(constructor.name), args)
         out.decl = constructor
+        out.type = constructor.type
         out.variables = set()
         return out
 
@@ -1286,6 +1293,7 @@ class UnappliedSymbol(Expression):
         """
         out = (cls)(None, name=constructor.name)
         out.decl = constructor
+        out.type = constructor.type
         out.variables = set()
         return out
 

@@ -296,7 +296,7 @@ class Vocabulary(ASTNode):
                  name: str,
                  declarations: List[Union[Declaration, VarDeclaration, Import]]):
         self.name = name
-        self.idp = None  # parent object
+        self.idp : Optional[IDP] = None  # parent object
         self.symbol_decls: dict[str, Union[Declaration, VarDeclaration, Constructor]] = {}
 
         self.name = 'V' if not self.name else self.name

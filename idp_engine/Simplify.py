@@ -383,13 +383,6 @@ def update_exprs(self: AppliedSymbol,
                  new_exprs: Generator[Expression, None, None]
                  ) -> Expression:
     new_exprs = list(new_exprs)
-    if not self.decl and self.symbol.name:
-        self.decl = self.symbol.decl
-    self.type = (BOOLT if self.is_enumerated or self.in_enumeration else
-            self.decl.type if self.decl else None)
-    if self.decl and type(self.decl) == Constructor:
-        if all(e.is_value() for e in new_exprs):
-            return self._change(sub_exprs=new_exprs)
 
     # simplify abs()
     if (self.decl and self.decl.name == ABS and len(new_exprs) == 1
