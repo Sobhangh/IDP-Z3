@@ -872,7 +872,7 @@ def replace(self, voc, q_vars):
     return AQuantification(parent=None,annotations=None,q='forall',quantees=[qt],f=self.sub_expr)
 
 NowAppliedSymbol.replace = replace
-v_time = '0time'
+v_time = 'time'
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     if ltc:
         self.check(temporal_head!=1, f"Not allowed to use Now[]")

@@ -17,5 +17,6 @@ structure S:V {
 }
 
 procedure main () {
+    print(Theory(T).formula())
     pretty_print(model_expand(T,S,max=5))
 }
