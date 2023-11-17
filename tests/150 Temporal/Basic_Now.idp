@@ -6,8 +6,7 @@ vocabulary V {
 
 theory T:V {
     // here comes the definitions and constraints
-    not Now[p()].
-    Start[p()].
+    Now[p()].
 }
 
 structure S:V {
