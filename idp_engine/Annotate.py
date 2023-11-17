@@ -339,6 +339,7 @@ Definition.annotate = annotate
 def annotate(self, voc, q_vars, ltc=False):
     self.original = copy(self)
     temporal_head =0
+    d = None
     if not isinstance(self.definiendum, AppliedSymbol):
         if not ltc:
             temporal_head =0
@@ -353,7 +354,7 @@ def annotate(self, voc, q_vars, ltc=False):
             self.definiendum = d.f
             self.quantees += d.quantees
         else:
-            self.definiendum =d
+            self.definiendum = d
     self.check(not self.definiendum.symbol.is_intentional(),
                 f"No support for intentional objects in the head of a rule: "
                 f"{self}")
@@ -367,7 +368,8 @@ def annotate(self, voc, q_vars, ltc=False):
                 q_v[var.name] = var
 
     self.definiendum = self.definiendum.annotate(voc, q_v,ltc)
-    self.body = self.body.annotate(voc, q_v,ltc,temporal_head)
+    if self.body:
+        self.body = self.body.annotate(voc, q_v,ltc,temporal_head)
     if self.out:
         self.out = self.out.annotate(voc, q_v,ltc)
 
@@ -628,7 +630,8 @@ def annotate(self, voc, q_vars ,ltc=False,temporal_head=0):
                     f"Can't use declared {var.name} as a "
                     f"{var.sort.name if var.sort else ''}")
                 if var.sort is None:
-                    self.sub_exprs = [subtype.annotate(voc, {})]
+                    if subtype:
+                        self.sub_exprs = [subtype.annotate(voc, {})]
                     var.sort = self.sub_exprs[0]
             var.type = var.sort.decl.name if var.sort and var.sort.decl else ''
             q_vars[var.name] = var
