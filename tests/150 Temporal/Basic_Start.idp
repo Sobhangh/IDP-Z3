@@ -8,7 +8,7 @@ vocabulary V {
 
 theory T:V {
     // here comes the definitions and constraints
-    not Start[p()].
+    Start[p()].
     !i in Int : i<10 => q(i).
 }
 
