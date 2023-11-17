@@ -6,7 +6,7 @@ vocabulary V {
 
 theory T:V {
     // here comes the definitions and constraints
-    Next[p()]
+    Next[p()].
 //    {
 //        Next[p()]<-not Now[p()].
 //    }
