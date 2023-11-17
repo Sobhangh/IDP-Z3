@@ -117,7 +117,7 @@ def annotate(self, voc):
             if d.name == self.symbol.name:
                 d.temp = True
                 d.arity +=1
-                d.sorts.append(SYMBOL('Tijd'))
+                d.sorts.append(TYPE('Tijd'))
                 break
     
 TemporalDeclaration.annotate = annotate
