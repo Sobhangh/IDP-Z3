@@ -105,10 +105,10 @@ class ASTNode(object):
         raise IDPZ3Error("Internal error") # monkey-patched
 
     def interpret(self, problem: Optional[Theory]) -> ASTNode:
-        return self  # monkey-patched
+        return self
 
     def EN(self):
-        pass  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
 
 def catch_error(func):
@@ -298,7 +298,7 @@ class Expression(ASTNode):
         raise IDPZ3Error("Internal error") # monkey-patched
 
     def set_variables(self: Expression) -> Expression:
-        return  self # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def has_variables(self) -> bool:
         return any(e.has_variables() for e in self.sub_exprs)
@@ -348,7 +348,7 @@ class Expression(ASTNode):
                                symbols: Set[SymbolDeclaration],
                                is_nested: bool
                                ) -> Set[SymbolDeclaration]:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def generate_constructors(self, constructors: dict[str, List[Constructor]]):
         """ fills the list `constructors` with all constructors belonging to
@@ -423,58 +423,58 @@ class Expression(ASTNode):
                 simpler : Optional[Expression] = None,
                 co_constraint : Optional[Expression] = None
                 ) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def update_exprs(self, new_exprs: Generator[Expression, None, None]) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def simplify1(self) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def interpret(self,
                   problem: Optional[Theory],
                   subs: dict[str, Expression]
                   ) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def _interpret(self,
                     problem: Optional[Theory],
                     subs: dict[str, Expression]
                     ) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def substitute(self,
                    e0: Expression,
                    e1: Expression,
                    assignments: Assignments,
                    tag=None) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def simplify_with(self, assignments: Assignments, co_constraints_too=True) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def symbolic_propagate(self,
                            assignments: Assignments,
                            tag: Status,
                            truth: Optional[Expression] = None
                            ):
-        return  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def propagate1(self,
                    assignments: Assignments,
                    tag: Status,
                    truth: Optional[Expression] = None
                    ):
-        return  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def translate(self, problem: Theory, vars={}):
-        pass  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def reified(self, problem: Theory):
-        pass  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def translate1(self, problem: Theory, vars={}):
-        pass  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def as_set_condition(self) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
         """Returns an equivalent expression of the type "x in y", or None
@@ -501,7 +501,12 @@ class Expression(ASTNode):
                           polarity: bool,
                           mode: Semantics
                           ) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
+
+    def SCA_Check(self,detections):
+        raise IDPZ3Error("Internal error") # monkey-patched
+    def get_type(self):
+        raise IDPZ3Error("Internal error") # monkey-patched
 
 
 class Constructor(Expression):
@@ -588,7 +593,7 @@ class Type(Expression):
                     all(s==o for s, o in zip(self.ins, other.ins)))))
 
     def extension(self, extensions: dict[str, Extension]) -> Extension:
-        return extensions[""]  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def is_value(self): return True
 

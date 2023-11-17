@@ -963,8 +963,7 @@ class Theory(object):
         return out
 
     def determine_relevance(self) -> Theory:
-        # monkey-patched
-        pass
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def _generalize(self,
                     conjuncts: List[Assignment],
@@ -1229,9 +1228,7 @@ class Theory(object):
         return (models, timeout_hit)
 
     def _first_propagate(self, solver):
-        """monkey-patched"""
-        print()
-        pass
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def EN(self) -> str:
         pass

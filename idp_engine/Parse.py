@@ -283,7 +283,7 @@ class IDP(ASTNode):
         return out
 
     def execute(self) -> None:
-        pass  # monkey patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
 
 ################################ Vocabulary  ##############################
@@ -601,7 +601,7 @@ class SymbolDeclaration(ASTNode):
         return out
 
     def translate(self, problem: Theory):
-        pass # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
 class VarDeclaration(ASTNode):
     """ represents a declaration of variable (IEP 24)
@@ -732,10 +732,10 @@ class Definition(Expression):
                             problem,
                             for_explain: bool = False
                             ) -> dict[Tuple[SymbolDeclaration, Definition], List[Expression]]:
-        return {} # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def instantiate_definition(self, decl, new_args, theory):
-        pass # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
 
 class Rule(Expression):
@@ -778,7 +778,7 @@ class Rule(Expression):
         return out
 
     def instantiate_definition(self, new_args, theory):
-        pass # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
 
 # Expressions : see Expression.py
