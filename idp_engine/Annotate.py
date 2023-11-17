@@ -338,9 +338,6 @@ Definition.annotate = annotate
 
 def annotate(self, voc, q_vars, ltc=False):
     self.original = copy(self)
-    self.check(not self.definiendum.symbol.is_intentional(),
-                f"No support for intentional objects in the head of a rule: "
-                f"{self}")
     temporal_head =0
     if not isinstance(self.definiendum, AppliedSymbol):
         if not ltc:
@@ -357,6 +354,9 @@ def annotate(self, voc, q_vars, ltc=False):
             self.quantees.append(d.quantees)
         else:
             self.definiendum =d
+    self.check(not self.definiendum.symbol.is_intentional(),
+                f"No support for intentional objects in the head of a rule: "
+                f"{self}")
     # create head variables
     q_v = copy(q_vars)
     for q in self.quantees:
