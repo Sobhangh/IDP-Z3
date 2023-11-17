@@ -110,7 +110,7 @@ TypeDeclaration.interpret = interpret
 
 @catch_error
 def interpret(self: SymbolDeclaration, problem: Theory):
-    assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
+    assert all(isinstance(s, Type) for s in self.sorts), 'internal error3'
 
     symbol = SYMBOL(self.name)
     symbol.decl = self
@@ -449,10 +449,10 @@ def extension(self, interpretations: dict[str, SymbolInterpretation],
         whether the arguments are in the extension of self
     """
     if self.code not in extensions:
-        self.check(self.name == CONCEPT, "internal error")
+        self.check(self.name == CONCEPT, "internal error4")
         assert (self.out
                 and extensions is not None
-                and extensions[CONCEPT] is not None), "internal error"  # Concept[T->T]
+                and extensions[CONCEPT] is not None), "internal error5"  # Concept[T->T]
         ext = extensions[CONCEPT][0]
         assert isinstance(ext, List) , "Internal error"
         out = [v for v in ext
@@ -487,7 +487,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
             elif type(domain) == Symbol and domain.decl:
                 self.check(domain.decl.out.type == BOOL,
                             f"{domain} is not a type or predicate")
-                assert domain.decl.name in problem.extensions, "internal error"
+                assert domain.decl.name in problem.extensions, "internal error6"
                 (superset, filter) = problem.extensions[domain.decl.name]
             else:
                 self.check(False, f"Can't resolve the domain of {str(q.vars)}")

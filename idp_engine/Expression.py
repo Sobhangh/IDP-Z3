@@ -562,7 +562,7 @@ class Symbol(Expression):
             Expression: whether `term` is in the type denoted by `self`.
         """
         assert self.decl is not None, "Internal error"
-        self.check(self.decl.out.name == BOOL, "internal error")
+        self.check(self.decl.out.name == BOOL, "internal error1")
         return self.decl.contains_element(term, interpretations, extensions)
 
 def SYMBOL(name: str) -> Symbol:
@@ -629,7 +629,7 @@ class Type(Symbol):
             return OR(comparisons)
         else:
             assert self.decl is not None, "Internal error"
-            self.check(self.decl.out.name == BOOL, "internal error")
+            self.check(self.decl.out.name == BOOL, "internal error2")
             return self.decl.contains_element(term, interpretations, extensions)
 
 def TYPE(name: str, ins=None, out=None) -> Type:
