@@ -6,11 +6,11 @@ vocabulary V {
 
 theory T:V {
     // here comes the definitions and constraints
-    Next[p()].
-//    {
-//        Next[p()]<-not Now[p()].
-//    }
-//    Start[p()].
+    
+    {
+        Next[p()] <- not Now[p()].
+    }
+    Start[p()].
 }
 
 structure S:V {
