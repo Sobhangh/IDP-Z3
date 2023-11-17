@@ -376,7 +376,7 @@ def annotate(self: Expression,
         q.annotate_quantee(voc, q_vars, inferred)
         for vars in q.vars:
             for var in vars:
-                var.sort = q.sub_exprs[0] if q.sub_exprs else None
+                var.type = q.sub_exprs[0] if q.sub_exprs else None
                 q_v[var.name] = var
 
     self.definiendum = self.definiendum.annotate(voc, q_v)
@@ -670,27 +670,27 @@ def annotate_quantee(self: Expression,
                 f"the quantified variable '{var.name}' cannot have"
                 f" the same name as another symbol")
             # 1. get variable sort from the quantee, if possible
-            var.sort = (self.sub_exprs[0].decl.sorts[i]  # `!x in p` or `! (x,y) in p` or `!x in Concept[...]`
+            var.type = (self.sub_exprs[0].decl.sorts[i]  # `!x in p` or `! (x,y) in p` or `!x in Concept[...]`
                         if self.sub_exprs and self.sub_exprs[0].decl
                         else None)
             # 2. compare with variable declaration, if any
             var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
             if var_decl and type(var_decl) == VarDeclaration:
                 subtype = var_decl.subtype
-                if var.sort:
-                    self.check(var.sort.name == subtype.name,
+                if var.type:
+                    self.check(var.type.name == subtype.name,
                         f"Can't use declared {var.name} as a "
-                        f"{var.sort.name if var.sort else ''}")
+                        f"{var.type.name if var.type else ''}")
                 else:
                     self.sub_exprs = [subtype.annotate(voc, {})]
-                    var.sort = self.sub_exprs[0]
+                    var.type = self.sub_exprs[0]
             # 3. use type inference if still not found
-            if var.sort is None:
-                var.sort = inferred.get(var.name) if inferred else None
-            var.type = var.sort
+            if var.type is None:
+                var.type = inferred.get(var.name) if inferred else None
+            var.type = var.type
             q_vars[var.name] = var
-    if not self.sub_exprs and var.sort:
-        self.sub_exprs = [var.sort]
+    if not self.sub_exprs and var.type:
+        self.sub_exprs = [var.type]
     return self
 Quantee.annotate_quantee = annotate_quantee
 
@@ -854,7 +854,7 @@ def annotate(self: AAggregate,
                 else:
                     symbol_decl = SymbolDeclaration.make(self,
                         "__"+self.str, # name `__ *`
-                        [SET_(v.sort.code) for v in q_vars.values()],
+                        [SET_(v.type.code) for v in q_vars.values()],
                         self.type).annotate_declaration(voc)    # output_domain
                     to_create = True
                 symbol = SymbolExpr.make(symbol_decl.name)
@@ -949,7 +949,6 @@ def annotate(self: Variable,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    self.type = self.sort
     return self
 Variable.annotate = annotate
 
