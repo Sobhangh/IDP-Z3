@@ -869,6 +869,7 @@ def replace(self, voc, q_vars):
     time: Type = TYPE('Tijd')
     t: Variable = VARIABLE(v_time,time)
     if v_time in q_vars and q_vars[v_time].sort == time:
+        f"now passed"
         self.sub_expr.sub_exprs.append(t)
         return self.sub_expr
     self.sub_expr.sub_exprs.append(t)
@@ -896,6 +897,7 @@ def replace(self, voc, q_vars):
     time: Type = TYPE('Tijd')
     t: Variable = VARIABLE(v_time,time)
     if v_time in q_vars and q_vars[v_time].sort == time:
+        f"Next passed"
         self.sub_expr.sub_exprs.append(ASumMinus.make('+',[t,ONE],None,None))
         return self.sub_expr
     self.sub_expr.sub_exprs.append(ASumMinus.make('+',[t,ONE],None,None))
