@@ -323,7 +323,7 @@ class Vocabulary(ASTNode):
             TypeDeclaration(name=INT, enumeration=IntRange()),
             TypeDeclaration(name=REAL, enumeration=RealRange()),
             TypeDeclaration(name=DATE, enumeration=DateRange()),
-            TypeDeclaration(name='Tijd', enumeration=RangeElement(fromI=0,toI=5)),
+            TypeDeclaration(name='Tijd', enumeration=NatRange()),
             TypeDeclaration(
                 name=CONCEPT,
                 constructors=[]),
@@ -1200,7 +1200,7 @@ class IntRange(Ranges):
 #For natural numbers  
 class NatRange(Ranges):
     def __init__(self):
-        Ranges.__init__(self, elements=[])
+        Ranges.__init__(self, fromI =0 , toI=5)
         self.type = ABS
         self.tuples = None
 
