@@ -9,7 +9,7 @@ vocabulary V {
 theory T:V {
     // here comes the definitions and constraints
     not Start[p()].
-    !i in Int : q(i).
+    !i in Int : i<10 => q(i).
 }
 
 structure S:V {
@@ -17,5 +17,5 @@ structure S:V {
 }
 
 procedure main () {
-    pretty_print(model_expand(T,S,max=1))
+    pretty_print(model_expand(T,S,max=5))
 }
