@@ -78,7 +78,7 @@ def SCA_Check(self,detections):
         sub.SCA_Check(detections)
 Expression.SCA_Check = SCA_Check
 
-## class Set(Expression):
+## class Set_(Expression):
 
 ##  class AIfExpr(Expression):
 
@@ -92,7 +92,7 @@ AIfExpr.get_type = get_type
 
 def SCA_Check(self, detections):
     vars = set()
-    # First, get all variables in quantification. (E.g. 'x' for !x in Set)
+    # First, get all variables in quantification. (E.g. 'x' for !x in Type)
     for q in self.quantees:
         for q2 in q.vars:
             vars.add(q2[0].str)
@@ -235,7 +235,7 @@ def SCA_Check(self, detections):
         # multi/div only possible with "Int","Real" and "Bool" or numerical
         # subtypes.
         if not(type_symbol_to_str(self.sub_exprs[i-1].get_type()) in lijst):
-            detections.append((self.sub_exprs[i-1],f"Set '{type_symbol_to_str(self.sub_exprs[i-1].get_type())}' might not be allowed in multiplication or divison ","Warning"))
+            detections.append((self.sub_exprs[i-1],f"Type '{type_symbol_to_str(self.sub_exprs[i-1].get_type())}' might not be allowed in multiplication or divison ","Warning"))
         if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():        #vermenigvuldigen of delen van elementen van verschillende types
             type1 = type_symbol_to_str(self.sub_exprs[i-1].get_type())
             type2 = type_symbol_to_str(self.sub_exprs[i].get_type())
@@ -332,7 +332,7 @@ def SCA_Check(self,detections):
             if (hasattr(self.sub_exprs[i], 'sort') and
                     self.sub_exprs[i].sort and
                     len(self.sub_exprs[i].sort.decl.sorts) >= 1 and
-                    isinstance(self.sub_exprs[i].sort.decl.sorts[0], Set)):
+                    isinstance(self.sub_exprs[i].sort.decl.sorts[0], Set_)):
                 # In the case of a partial function interpretation, the type is actually
                 # the argument.
                 # found_type = str(self.sub_exprs[i].sort.decl.sorts[i])

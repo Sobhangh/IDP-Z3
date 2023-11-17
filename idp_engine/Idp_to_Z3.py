@@ -35,7 +35,7 @@ from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef, Function,
 from .Parse import (TypeDeclaration, SymbolDeclaration, TupleIDP, Ranges,
                     IntRange, RealRange, DateRange)
 from .Expression import (catch_error, Constructor, Expression, AIfExpr,
-                         Quantee, AQuantification, Operator, Set,
+                         Quantee, AQuantification, Operator, Set_,
                          ADisjunction, AConjunction, AComparison, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Number,
                          Date, Brackets, Variable, TRUE, RecDef, BOOLT, INTT, REALT, DATET)
@@ -157,7 +157,7 @@ def reified(self, problem: Theory) -> DatatypeRef:
 Expression.reified = reified
 
 
-# class Set  ###############################################################
+# class Set_  ###############################################################
 
 @catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
@@ -169,7 +169,7 @@ def translate(self, problem: Theory, vars={}) -> ExprRef:
         return RealSort(problem.ctx)
     else:
         return self.decl.translate(problem,)
-Set.translate=translate
+Set_.translate=translate
 
 
 # Class AIfExpr  ###############################################################

@@ -42,7 +42,7 @@ from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
                     ConstructedFrom, Definition)
 from .Expression import (catch_error, AIfExpr, IF,
                          SymbolExpr, Expression, Constructor, AQuantification,
-                         Set, FORALL, IMPLIES, AND, AAggregate,
+                         Set_, FORALL, IMPLIES, AND, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Quantee, Variable,
                          VARIABLE, TRUE, FALSE, Number, Extension, BOOLT)
 from .Theory import Theory
@@ -112,7 +112,7 @@ TypeDeclaration.interpret = interpret
 
 @catch_error
 def interpret(self: SymbolDeclaration, problem: Theory):
-    assert all(isinstance(s, Set) for s in self.sorts), 'internal error'
+    assert all(isinstance(s, Set_) for s in self.sorts), 'internal error'
 
     symbol = SymbolExpr.make(self.name)
     symbol.decl = self
@@ -326,7 +326,7 @@ ConstructedFrom.interpret = interpret
 
 @catch_error
 def interpret(self: Constructor, problem: Theory) -> Constructor:
-    # assert all(s.decl and isinstance(s.decl.out, Set) for s in self.sorts), 'Internal error'
+    # assert all(s.decl and isinstance(s.decl.out, Set_) for s in self.sorts), 'Internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
     elif any(s.out == self.type for s in self.sorts):  # recursive data type
@@ -431,11 +431,11 @@ def _finalize(self: Expression, subs: dict[str, Expression]):
     return self
 
 
-# class Set ###########################################################
+# class Set_ ###########################################################
 
 @catch_error
 def extension(self, extensions: dict[str, Extension]) -> Extension:
-    """returns the extension of a Set, given some interpretations.
+    """returns the extension of a Set_, given some interpretations.
 
     Normally, the extension is already in `extensions`.
     However, for Concept[T->T], an additional filtering is applied.
@@ -467,7 +467,7 @@ def extension(self, extensions: dict[str, Extension]) -> Extension:
                                         self.ins))]
         extensions[self.code] = (out, None)
     return extensions[self.code]
-Set.extension = extension
+Set_.extension = extension
 
 # Class AQuantification  ######################################################
 
@@ -498,7 +498,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
         domain = q.sub_exprs[0]
 
         if problem:
-            if isinstance(domain, Set):  # quantification over type / Concepts
+            if isinstance(domain, Set_):  # quantification over type / Concepts
                 (superset, filter) = domain.extension(problem.extensions)
             elif type(domain) == SymbolExpr:
                 if domain.decl:

@@ -8,25 +8,27 @@ For typing:
 ```{mermaid}
 erDiagram
     Declaration ||--o{ Declaration : base_decl
-    Declaration |o--o{ Set : sorts
-    Declaration |o--|| Set: out
-    Set }o--|| Declaration: decl
-    Set |o--o{ Set: ins
-    Set |o--o| Set: out
-    Set |o--o{ Expression: type
+    Declaration |o--o{ Set_ : sorts
+    Declaration |o--|| Set_: out
+    Declaration |o--|| Set_: type
+    Set_ }o--|| Declaration: decl
+    Set_ |o--o{ Set_: ins
+    Set_ |o--o| Set_: out
+    Set_ |o--o{ Expression: type
 
     Declaration {
         Declaration base_decl
-        List[Set] sorts
-        Set out
+        List[Set_] sorts
+        Set_ out
+        Set_ type
     }
-    Set {
+    Set_ {
         Declaration decl
-        List[Set] ins
-        Set out
+        List[Set_] ins
+        Set_ out
     }
     Expression {
-        Set type
+        Set_ type
     }
 ```
 

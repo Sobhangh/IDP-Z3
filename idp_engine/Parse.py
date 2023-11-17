@@ -35,7 +35,7 @@ from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 from .Assignments import Assignments
 from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUCTOR,
                          Accessor, TYPE, SymbolExpr, Expression,
-                         AIfExpr, IF, AQuantification, split_quantees, Set,
+                         AIfExpr, IF, AQuantification, split_quantees, Set_,
                          TYPE, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
@@ -75,14 +75,14 @@ def str_to_IDP(atom: Expression, val_string: str) -> Optional[Expression]:
     return str_to_IDP2(type_, decl, val_string)
 
 
-def str_to_IDP2(type_: Set,
+def str_to_IDP2(type_: Set_,
                 decl: Optional[Declaration],
                 val_string: str
                 ) -> Expression:
     """recursive function to decode a val_string of type type_ and type
 
     Args:
-        type_ (Set):
+        type_ (Set_):
         decl (Declaration, Optional): declaration of the value string
         val_string (str): value_string
 
@@ -297,7 +297,7 @@ class Vocabulary(ASTNode):
                  declarations: List[Union[Declaration, VarDeclaration, Import]]):
         self.name = name
         self.idp = None  # parent object
-        self.symbol_decls: dict[str, Union[Declaration, VarDeclaration]] = {}
+        self.symbol_decls: dict[str, Union[Declaration, VarDeclaration, Constructor]] = {}
 
         self.name = 'V' if not self.name else self.name
         self.voc = self
@@ -375,11 +375,11 @@ class TypeDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Set]): the types of the arguments
+        sorts (List[Set_]): the types of the arguments
 
-        out (Set): the Boolean type
+        out (Set_): the Boolean type
 
-        type (Set): BOOLT
+        type (Set_): BOOLT
 
         base_decl (TypeDeclaration, optional): bool, int, real or self
 
@@ -401,9 +401,9 @@ class TypeDeclaration(ASTNode):
         enumeration = enumeration
 
         self.arity : int = 1
-        self.sorts : List[Set] = [Set(None, self.name)]
-        self.out : Set = BOOLT
-        self.type : Set = BOOLT
+        self.sorts : List[Set_] = [Set_(None, self.name)]
+        self.out : Set_ = BOOLT
+        self.type : Set_ = BOOLT
         self.base_decl : Optional[TypeDeclaration] = None
         self.block: Optional[Block] = None
 
@@ -476,11 +476,11 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Set]): the types of the arguments
+        sorts (List[Set_]): the types of the arguments
 
-        out (Set): the type of the symbol
+        out (Set_): the type of the symbol
 
-        type (Set, optional): type of an applied symbol; = self.out
+        type (Set_, optional): type of an applied symbol; = self.out
 
         base_decl (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
 
@@ -509,8 +509,8 @@ class SymbolDeclaration(ASTNode):
     def __init__(self,
                  parent,
                  annotations: Optional[Annotations],
-                 sorts: List[Set],
-                 out: Set,
+                 sorts: List[Set_],
+                 out: Set_,
                  symbols: Optional[List[str]] = None,
                  name: Optional[str] = None):
         self.annotations : Annotation = annotations.annotations if annotations else {}
@@ -522,8 +522,8 @@ class SymbolDeclaration(ASTNode):
         else:
             self.symbols = None
             self.name = name
-        self.sorts : List[Set] = sorts
-        self.out : Set = out
+        self.sorts : List[Set_] = sorts
+        self.out : Set_ = out
         if self.out is None:
             self.out = TYPE(BOOL)
 
@@ -533,7 +533,7 @@ class SymbolDeclaration(ASTNode):
         self.heading: Optional[str] = None
         self.optimizable: bool = True
 
-        self.type : Optional[Set] = None  # a string
+        self.type : Optional[Set_] = None  # a string
         self.base_decl : Optional[TypeDeclaration]= None
         self.range : Optional[List[AppliedSymbol]]= None  # all possible terms.  Used in get_range and IO.py
         self.instances : Optional[dict[str, AppliedSymbol]]= None  # not starting with '_'
@@ -609,7 +609,7 @@ class VarDeclaration(ASTNode):
     Attributes:
         name (str): name of the variable
 
-        subtype (Set): type of the variable
+        subtype (Set_): type of the variable
     """
 
     def __init__(self, **kwargs):
@@ -816,7 +816,7 @@ class SymbolInterpretation(Expression):
     Attributes:
         name (string): name of the symbol being enumerated.
 
-        symbol (Set): symbol being enumerated
+        symbol (Set_): symbol being enumerated
 
         enumeration ([Enumeration]): enumeration.
 
@@ -844,7 +844,7 @@ class SymbolInterpretation(Expression):
                    (type(self.enumeration) == FunctionEnum and self.default is None),
                    "'⊇' can only be used with a functional enumeration ('→') without else clause")
 
-        self.symbol: Optional[Set] = None
+        self.symbol: Optional[Set_] = None
         self.is_type_enumeration = None
         self.block = None
 
@@ -1376,7 +1376,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Import, VarDeclaration,
-                                         TypeDeclaration, Accessor, Set,
+                                         TypeDeclaration, Accessor, Set_,
                                          SymbolDeclaration,
                                          SymbolExpr,
 

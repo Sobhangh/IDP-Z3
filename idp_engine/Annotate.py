@@ -30,7 +30,7 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ASTNode, Expression, TYPE, Set, BOOLT, INTT, REALT, DATET,
+from .Expression import (ASTNode, Expression, TYPE, Set_, BOOLT, INTT, REALT, DATET,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, Operator, AComparison, AUnary,
@@ -170,13 +170,13 @@ def annotate_declaration(self: ASTNode,
 VarDeclaration.annotate_declaration = annotate_declaration
 
 
-# Class Set  #######################################################
+# Class Set_  #######################################################
 
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    assert isinstance(self, Set), "Internal error"
+    assert isinstance(self, Set_), "Internal error"
     if self.name in q_vars:
         return q_vars[self.name]
 
@@ -190,7 +190,7 @@ def annotate(self: Expression,
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
         self.out = self.out.annotate(voc, q_vars)
     return self
-Set.annotate = annotate
+Set_.annotate = annotate
 
 
 # Class TheoryBlock  #######################################################
@@ -232,7 +232,7 @@ def annotate(self: Expression,
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
     # create level-mapping symbols, as needed
-    # self.level_symbols: dict[SymbolDeclaration, Set]
+    # self.level_symbols: dict[SymbolDeclaration, Set_]
     dependencies = set()
     for r in self.rules:
         symbs: dict[str, SymbolDeclaration] = {}
@@ -506,7 +506,7 @@ TupleIDP.annotate = annotate
 
 # Class ConstructedFrom  #######################################################
 
-def annotate(self: Expression,
+def annotate(self: ASTNode,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
@@ -569,7 +569,7 @@ def annotate_block(self: ASTNode,
         constraint.generate_constructors(open_constructors)
 
     # Next, we convert the list of constructors to actual types.
-    open_types: dict[str, Optional[Set]] = {}
+    open_types: dict[str, Optional[Set_]] = {}
     for name, constructors in open_constructors.items():
         # If no constructors were found, then the type is not used.
         if not constructors:
@@ -655,7 +655,7 @@ AIfExpr.set_variables = set_variables
 def annotate_quantee(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             inferred: dict[str, Set]
+             inferred: dict[str, Set_]
              ) -> Annotated:
     assert isinstance(self, Quantee), "Internal error"
     Expression.annotate(self, voc, q_vars)
