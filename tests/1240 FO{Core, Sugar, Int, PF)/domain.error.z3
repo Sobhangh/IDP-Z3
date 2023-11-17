@@ -23,6 +23,6 @@ Traceback (most recent call last):
   File "idp_engine/Interpret.py", line ??, in interpret
     self.check(not condition.same_as(FALSE),
   File "idp_engine/Expression.py", line ??, in check
-    raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
-idp_engine.utils.IDPZ3Error: Error on line ??, col 2: Alice is not in the domain of spouse
+    raise IDPZ3Error(msg, self)
+idp_engine.utils.IDPZ3Error: Error: line 11 - colStart 2 - colEnd 2 => Alice is not in the domain of spouse
 

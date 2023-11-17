@@ -41,25 +41,20 @@ from .Expression import (ASTNode, Expression, TYPE, Set, BOOLT, INTT, REALT, DAT
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, Semantics)
 
-class Warning(NamedTuple):
-    line: int
-    colStart: int
-    colEnd: int
-    details: str
-Warnings = Union[Warning, List["Warnings"]]  # nested list of Warning
+Exceptions = Union[Exception, List["Exceptions"]]  # nested list of Exceptions
 
 Annotated = Expression
 # class Annotated(NamedTuple):
 #     node: Expression
 #     wdf: Expression
-#     warnings: Warnings
+#     warnings: Exceptions
 
 
 # Class Vocabulary  #######################################################
 
 def annotate_block(self: ASTNode,
                    idp: IDP,
-                   ) -> Warnings:
+                   ) -> Exceptions:
     assert isinstance(self, Vocabulary), "Internal error"
     self.idp = idp
 
@@ -202,7 +197,8 @@ Set.annotate = annotate
 
 def annotate_block(self: ASTNode,
                    idp: IDP,
-                   ) -> Warnings:
+                   ) -> Exceptions:
+    out = []
     assert isinstance(self, TheoryBlock), "Internal error"
     self.check(self.vocab_name in idp.vocabularies,
                 f"Unknown vocabulary: {self.vocab_name}")
@@ -215,9 +211,14 @@ def annotate_block(self: ASTNode,
 
     self.definitions = [e.annotate(self.voc, {}) for e in self.definitions]
 
-    self.constraints = OrderedSet([e.annotate(self.voc, {})
-                                    for e in self.constraints])
-    return [Warning(1, 1, 10, "Hello")]
+    constraints = OrderedSet()
+    for c in self.constraints:
+        c1 = c.annotate(self.voc, {})
+        c1.check(c1.type is None or c1.type == BOOLT,
+                    f"{c.code} must be boolean")
+        constraints.append(c1)
+    self.constraints = constraints
+    return out
 TheoryBlock.annotate_block = annotate_block
 
 
@@ -402,7 +403,7 @@ def rename_args(self: Rule, subs: dict[str, Expression]):
 
 def annotate_block(self: ASTNode,
                    idp: IDP,
-                   ) -> Warnings:
+                   ) -> Exceptions:
     """
     Annotates the structure with the enumerations found in it.
     Every enumeration is converted into an assignment, which is added to
@@ -550,7 +551,7 @@ Constructor.annotate = annotate
 
 def annotate_block(self: ASTNode,
                    idp: IDP,
-                   ) -> Warnings:
+                   ) -> Exceptions:
     assert isinstance(self, Display), "Internal error"
     self.voc = idp.vocabulary
 

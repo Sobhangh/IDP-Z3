@@ -22,6 +22,6 @@ Traceback (most recent call last):
   File "idp_engine/Annotate.py", line ??, in annotate
     self.check(not(self.symbol.decl.out.decl.base_decl == BOOLT
   File "idp_engine/Expression.py", line ??, in check
-    raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
-idp_engine.utils.IDPZ3Error: Error on line ??, col 5: Can't use function enumeration for predicates 'c' (yet)
+    raise IDPZ3Error(msg, self)
+idp_engine.utils.IDPZ3Error: Error: line 12 - colStart 5 - colEnd 5 => Can't use function enumeration for predicates 'c' (yet)
 

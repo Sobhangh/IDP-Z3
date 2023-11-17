@@ -55,6 +55,6 @@ Traceback (most recent call last):
   File "idp_engine/Idp_to_Z3.py", line ??, in translate1
     self.check(False, msg)
   File "idp_engine/Expression.py", line ??, in check
-    raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
-idp_engine.utils.IDPZ3Error: Error on line ??, col 5: Incorrect symbol application: spouseOf(red)
+    raise IDPZ3Error(msg, self)
+idp_engine.utils.IDPZ3Error: Error: line 8 - colStart 5 - colEnd 17 => Incorrect symbol application: spouseOf(red)
 

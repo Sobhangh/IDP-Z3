@@ -29,7 +29,7 @@ import tempfile
 from enum import Enum, auto
 
 if TYPE_CHECKING:
-    from .Expression import Expression
+    from .Expression import ASTNode, Expression
     from .Parse import TupleIDP
 
 """
@@ -98,7 +98,23 @@ def log(action):
 
 class IDPZ3Error(Exception):
     """ raised whenever an error occurs in the conversion from AST to Z3 """
-    pass
+    def __init__(self,
+                 msg: str,
+                 node: Optional[ASTNode] = None,
+                 error: Optional[bool] = True):
+        self.node = node
+        self.message = msg
+        self.error = error
+        super().__init__(msg)
+
+    def __str__(self):
+        try:
+            location = self.node.location()
+        except:
+            return self.message
+        return (f"{'Error' if self.error else 'Warning'}: "
+                f"line {location['line']} - colStart {location['col']} "
+                f"- colEnd {location['end']} => {self.message}")
 
 TO = {'Bool': BOOL, 'Int': INT, 'Real': REAL,
         '`Bool': '`'+BOOL, '`Int': '`'+INT, '`Real': '`'+REAL,}

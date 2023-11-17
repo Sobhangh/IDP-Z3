@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
     from .Parse import IDP, Vocabulary, Declaration, SymbolDeclaration, SymbolInterpretation, Enumeration
-    from .Annotate import Annotated, Warnings
+    from .Annotate import Annotated, Exceptions
 
 from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
                     RESERVED_SYMBOLS, IDPZ3Error, Semantics)
@@ -47,6 +47,16 @@ from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
 class ASTNode(object):
     """superclass of all AST nodes
     """
+
+    def location(self):
+        try:
+            location = get_location(self)
+            location['end'] = (location['col'] +
+                (len(self.code) - 1 if hasattr(self, "code") else 0))
+            return location
+        except:
+            return {'line': 1, 'col': 1, 'end': 1}
+
 
     def check(self, condition: bool, msg: str):
         """raises an exception if `condition` is not True
@@ -59,13 +69,7 @@ class ASTNode(object):
             IDPZ3Error: when `condition` is not met
         """
         if not condition:
-            try:
-                location = get_location(self)
-            except:
-                raise IDPZ3Error(f"{msg}")
-            line = location['line']
-            col = location['col']
-            raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
+            raise IDPZ3Error(msg, self)
 
     def dedup_nodes(self,
                     kwargs: dict[str, List[ASTNode]],
@@ -96,7 +100,7 @@ class ASTNode(object):
 
     def annotate_block(self,
                        idp: IDP,
-                       ) -> Warnings:
+                       ) -> Exceptions:
         raise IDPZ3Error("Internal error") # monkey-patched
 
     def annotate_declaration(self,

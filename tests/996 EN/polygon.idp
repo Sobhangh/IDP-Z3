@@ -101,7 +101,7 @@ theory {
     perimeter() = the sum of length(n) for all Side_Nr n.
 
     [The sum of the angles is 180° for a triangle, and 360° for a quadrilateral]
-    the sum of angle(n) for all Side_Nr n such that 0=< n = (nr_of_sides()-2)*180.
+    (the sum of angle(n) for all Side_Nr n such that 0=< n) = (nr_of_sides()-2)*180.
 
     [Lengths are positive numbers]
     ∀x ∈ Side_Nr: 0 ≤ length(x).

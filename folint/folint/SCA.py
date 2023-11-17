@@ -220,19 +220,12 @@ def lint_fo(idp_file, timing=True, print_ast=False):
         total += number
         output_str += extra_str
 
-        output_str += "\n".join(f"Warning: line {msg.line} - colStart {msg.colStart} - colEnd {msg.colEnd} => {msg.details}"
-                                for msg in idp.warnings)
+        output_str += "\n".join(str(msg) for msg in idp.warnings)
 
         output_str += f"\n---------- Total number detections: {total} ----------\n"
 
     except IDPZ3Error as e1:
-        res1 = e1.args[0].split(': ', 1)
-        res = res1[0].split()
-        output_str += "\n---------- Syntax Error ----------\n"
-        if res1[0].startswith("Error on line") and 6 <= len(res):
-            output_str += f"{res[0]}: line {res[3].strip(',')} - colStart {res[5].strip(':')} - colEnd {res[5].strip(':')} => {res1[1]}\n"
-        else:
-            output_str += e1.args[0]
+        output_str += "\n---------- Syntax Error ----------\n" + str(e1) + "\n"
 
     except KeyError as e2:  # In case of KeyError
         output_str += f"Error: line {0} - colStart {0} - colEnd {0} => Key Error {e2}\n"

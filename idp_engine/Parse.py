@@ -185,7 +185,7 @@ class IDP(ASTNode):
 
         display (Display, Optional): display block, if any
 
-        warnings (Warnings): list of warnings
+        warnings (Exceptions): list of warnings
     """
     def __init__(self, **kwargs):
         # log("parsing done")
