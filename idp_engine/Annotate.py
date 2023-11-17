@@ -350,8 +350,8 @@ def annotate(self, voc, q_vars, ltc=False):
             temporal_head=3
         d  = self.definiendum.replace(voc,q_vars)
         if isinstance(d,AQuantification):
-            self.definiendum =d.f
-            self.quantees.append(d.quantees)
+            self.definiendum = d.f
+            self.quantees += d.quantees
         else:
             self.definiendum =d
     self.check(not self.definiendum.symbol.is_intentional(),
