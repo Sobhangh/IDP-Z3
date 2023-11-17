@@ -366,10 +366,9 @@ def annotate(self, voc, q_vars, ltc=False):
             for var in vars:
                 var.sort = q.sub_exprs[0] if q.sub_exprs else None
                 q_v[var.name] = var
-    if self.definiendum:
-        self.definiendum = self.definiendum.annotate(voc, q_v,ltc)
-    if self.body:
-        self.body = self.body.annotate(voc, q_v,ltc,temporal_head)
+        
+    self.definiendum = self.definiendum.annotate(voc, q_v,ltc)
+    self.body = self.body.annotate(voc, q_v,ltc,temporal_head)
     if self.out:
         self.out = self.out.annotate(voc, q_v,ltc)
 
@@ -870,7 +869,8 @@ def replace(self, voc, q_vars):
     time: Type = TYPE('Tijd')
     t: Variable = VARIABLE(v_time,time)
     if v_time in q_vars and q_vars[v_time].sort == time:
-        return self.sub_expr.sub_exprs.append(t)
+        self.sub_expr.sub_exprs.append(t)
+        return self.sub_expr
     self.sub_expr.sub_exprs.append(t)
     qt: Quantee = Quantee.make(t,time) 
     return AQuantification(parent=None,annotations=None,q='forall',quantees=[qt],f=self.sub_expr)
@@ -896,7 +896,8 @@ def replace(self, voc, q_vars):
     time: Type = TYPE('Tijd')
     t: Variable = VARIABLE(v_time,time)
     if v_time in q_vars and q_vars[v_time].sort == time:
-        return self.sub_expr.sub_exprs.append(ASumMinus.make('+',[t,ONE],None,None))
+        self.sub_expr.sub_exprs.append(ASumMinus.make('+',[t,ONE],None,None))
+        return self.sub_expr
     self.sub_expr.sub_exprs.append(ASumMinus.make('+',[t,ONE],None,None))
     qt: Quantee = Quantee.make(t,time) 
     return AQuantification(parent=None,annotations=None,q='forall',quantees=[qt],f=self.sub_expr)
