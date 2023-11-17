@@ -323,7 +323,7 @@ class Vocabulary(ASTNode):
             TypeDeclaration(name=INT, enumeration=IntRange()),
             TypeDeclaration(name=REAL, enumeration=RealRange()),
             TypeDeclaration(name=DATE, enumeration=DateRange()),
-            TypeDeclaration(name='Tijd', enumeration=IntRange()),
+            TypeDeclaration(name='Tijd', enumeration=RangeElement(fromI=0,toI=5)),
             TypeDeclaration(
                 name=CONCEPT,
                 constructors=[]),

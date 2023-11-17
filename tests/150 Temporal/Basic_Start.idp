@@ -1,14 +1,14 @@
 vocabulary V {
     // here comes the specification of the vocabulary
-    //p: () → Bool
+    p: () → Bool
     q: Int -> Bool
-    //Temporal p
+    Temporal p
     
 }
 
 theory T:V {
     // here comes the definitions and constraints
-    //not Start[p()].
+    not Start[p()].
     !i in Int : i<10 => q(i).
 }
 
