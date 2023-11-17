@@ -366,8 +366,8 @@ def annotate(self, voc, q_vars, ltc=False):
             for var in vars:
                 var.sort = q.sub_exprs[0] if q.sub_exprs else None
                 q_v[var.name] = var
-
-    self.definiendum = self.definiendum.annotate(voc, q_v,ltc)
+    if self.definiendum:
+        self.definiendum = self.definiendum.annotate(voc, q_v,ltc)
     if self.body:
         self.body = self.body.annotate(voc, q_v,ltc,temporal_head)
     if self.out:
@@ -821,7 +821,8 @@ AAggregate.annotate1 = AQuantification.annotate1
 # Class AppliedSymbol  #######################################################
 
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
-    self.symbol = self.symbol.annotate(voc, q_vars)
+    if self.symbol:
+        self.symbol = self.symbol.annotate(voc, q_vars)
     if self.symbol.decl:
         if isinstance(self.symbol.decl, SymbolDeclaration):
             self.check(self.in_temp or (not self.symbol.decl.temp) ,f"{self.symbol} has to be used inside a temporal second order predicate")
