@@ -1200,7 +1200,7 @@ class IntRange(Ranges):
 #For natural numbers  
 class NatRange(Ranges):
     def __init__(self):
-        Ranges.__init__(self, fromI =0 , toI=5)
+        Ranges.__init__(self, fromI =0 , toI=5,elements=[])
         self.type = ABS
         self.tuples = None
 
