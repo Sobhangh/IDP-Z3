@@ -27,7 +27,7 @@ from copy import deepcopy
 from typing import (Set, Tuple, List, Optional)
 
 from .utils import (RESERVED_SYMBOLS, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
-from .Expression import (Expression, catch_error, ZERO, TRUE, FALSE, RecDef,
+from .Expression import (Expression, ZERO, TRUE, FALSE, RecDef,
                          Constructor, SET_, Set_, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
                          IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOLT, INTT)
@@ -37,7 +37,6 @@ from .Theory import Theory
 
 # class Definition  ###########################################################
 
-@catch_error
 def get_def_constraints(self: Definition,
                         problem: Theory,
                         for_explain: bool = False
@@ -145,7 +144,6 @@ def get_def_constraints(self: Definition,
     return out
 Definition.get_def_constraints = get_def_constraints
 
-@catch_error
 def instantiate_definition(self: Definition, decl, new_args, theory) -> Optional[Expression]:
     rule = self.clarks.get(decl, None)
     # exclude inductive and recursive definitions
@@ -178,7 +176,6 @@ Definition.instantiate_definition = instantiate_definition
 
 # class Rule  ###########################################################
 
-@catch_error
 def instantiate_definition(self: Rule,
                            new_args: List[Expression],
                            theory: Theory

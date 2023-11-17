@@ -114,17 +114,6 @@ class ASTNode(object):
     def EN(self):
         raise IDPZ3Error("Internal error") # monkey-patched
 
-
-def catch_error(func):
-    def inner_function(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-        except IDPZ3Error as e:
-            raise e
-        except Exception as e:
-            self.check(False, str(e))
-    return inner_function
-
 Annotation = Dict[str, Union[str, Dict[str, Any]]]
 
 class Annotations(ASTNode):

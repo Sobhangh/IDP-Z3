@@ -40,7 +40,7 @@ from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
                     SymbolInterpretation, FunctionEnum, Enumeration, TupleIDP,
                     ConstructedFrom, Definition)
-from .Expression import (catch_error, AIfExpr, IF,
+from .Expression import (AIfExpr, IF,
                          SymbolExpr, Expression, Constructor, AQuantification,
                          Set_, FORALL, IMPLIES, AND, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Quantee, Variable,
@@ -52,7 +52,6 @@ from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
 
 # class Import  ###########################################################
 
-@catch_error
 def interpret(self: Import, problem: Theory):
     pass
 Import.interpret = interpret
@@ -60,7 +59,6 @@ Import.interpret = interpret
 
 # class TypeDeclaration  ###########################################################
 
-@catch_error
 def interpret(self: TypeDeclaration, problem: Theory):
     interpretation = problem.interpretations.get(self.name, None)
     if self.name in [BOOL, CONCEPT]:
@@ -110,7 +108,6 @@ TypeDeclaration.interpret = interpret
 
 # class SymbolDeclaration  ###########################################################
 
-@catch_error
 def interpret(self: SymbolDeclaration, problem: Theory):
     assert all(isinstance(s, Set_) for s in self.sorts), 'internal error'
 
@@ -173,7 +170,6 @@ SymbolDeclaration.interpret = interpret
 
 # class Definition  ###########################################################
 
-@catch_error
 def interpret(self: Definition, problem: Theory):
     """updates problem.def_constraints, by expanding the definitions
 
@@ -188,7 +184,6 @@ Definition.interpret = interpret
 
 # class SymbolInterpretation  ###########################################################
 
-@catch_error
 def interpret(self: SymbolInterpretation, problem: Theory):
     status = S.DEFAULT if self.block.name == DEFAULT else S.STRUCTURE
     assert not self.is_type_enumeration, "Internal error"
@@ -301,7 +296,6 @@ SymbolInterpretation.interpret = interpret
 
 # class Enumeration  ###########################################################
 
-@catch_error
 def interpret(self: Enumeration, problem: Theory) -> Enumeration:
     return self
 Enumeration.interpret = interpret
@@ -309,7 +303,6 @@ Enumeration.interpret = interpret
 
 # class ConstructedFrom  ###########################################################
 
-@catch_error
 def interpret(self: ConstructedFrom, problem: Theory) -> ConstructedFrom:
     self.tuples = OrderedSet()
     for c in self.constructors:
@@ -324,7 +317,6 @@ ConstructedFrom.interpret = interpret
 
 # class Constructor  ###########################################################
 
-@catch_error
 def interpret(self: Constructor, problem: Theory) -> Constructor:
     # assert all(s.decl and isinstance(s.decl.out, Set_) for s in self.sorts), 'Internal error'
     if not self.sorts:
@@ -386,7 +378,6 @@ def _prepare_interpret(self: Expression,
 
 
 def clone_when_necessary(func):
-    @catch_error
     def inner_function(self, problem, subs):
         if self.is_value():
             return self
@@ -422,7 +413,6 @@ def _interpret(self: Expression,
     return out
 Expression._interpret = _interpret
 
-@catch_error
 def _finalize(self: Expression, subs: dict[str, Expression]):
     """update self.variables and reading"""
     if subs:
@@ -433,7 +423,6 @@ def _finalize(self: Expression, subs: dict[str, Expression]):
 
 # class Set_ ###########################################################
 
-@catch_error
 def extension(self, extensions: dict[str, Extension]) -> Extension:
     """returns the extension of a Set_, given some interpretations.
 
@@ -685,7 +674,6 @@ AppliedSymbol._interpret = _interpret
 
 # Class Variable  #######################################################
 
-@catch_error
 def _interpret(self: Variable,
               problem: Optional[Theory],
               subs: dict[str, Expression]

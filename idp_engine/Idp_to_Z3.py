@@ -34,7 +34,7 @@ from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef, Function,
 
 from .Parse import (TypeDeclaration, SymbolDeclaration, TupleIDP, Ranges,
                     IntRange, RealRange, DateRange)
-from .Expression import (catch_error, Constructor, Expression, AIfExpr,
+from .Expression import (Constructor, Expression, AIfExpr,
                          Quantee, AQuantification, Operator, Set_,
                          ADisjunction, AConjunction, AComparison, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Number,
@@ -47,7 +47,6 @@ if TYPE_CHECKING:
 
 # class TypeDeclaration  ###########################################################
 
-@catch_error
 def translate(self, problem: Theory) -> ExprRef:
     out = problem.z3.get(self.name, None)
     if out is None:
@@ -91,7 +90,6 @@ TypeDeclaration.translate = translate
 
 # class SymbolDeclaration  ###########################################################
 
-@catch_error
 def translate(self, problem: Theory) -> ExprRef:
     out = problem.z3.get(self.name, None)
     if out is None:
@@ -112,14 +110,12 @@ SymbolDeclaration.translate = translate
 
 # class TupleIDP  ###########################################################
 
-@catch_error
 def translate(self, problem: Theory) -> ExprRef:
     return [arg.translate(problem) for arg in self.args]
 TupleIDP.translate = translate
 
 # class Constructor  ###########################################################
 
-@catch_error
 def translate(self, problem: Theory) -> ExprRef:
     return problem.z3[self.name]
 Constructor.translate = translate
@@ -159,7 +155,6 @@ Expression.reified = reified
 
 # class Set_  ###############################################################
 
-@catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
     if self == BOOLT:
         return BoolSort(problem.ctx)
@@ -174,7 +169,6 @@ Set_.translate=translate
 
 # Class AIfExpr  ###############################################################
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     """Converts the syntax tree to a Z3 expression, without lookup in problem.z3
 
@@ -197,7 +191,6 @@ AIfExpr.translate1 = translate1
 
 # Class Quantee  ######################################################
 
-@catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
     out = {}
     for vars in self.vars:
@@ -209,7 +202,6 @@ Quantee.translate = translate
 
 # Class AQuantification  ######################################################
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     local_vars = {}
     for q in self.quantees:
@@ -256,7 +248,6 @@ Operator.MAP = {'∧': lambda x, y: And(x, y),
                 }
 
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     out = self.sub_exprs[0].translate(problem, vars)
 
@@ -272,7 +263,6 @@ Operator.translate1 = translate1
 
 # Class ADisjunction  #######################################################
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate(problem, vars)
@@ -284,7 +274,6 @@ ADisjunction.translate1 = translate1
 
 # Class AConjunction  #######################################################
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     if len(self.sub_exprs) == 1:
         out = self.sub_exprs[0].translate(problem, vars)
@@ -296,7 +285,6 @@ AConjunction.translate1 = translate1
 
 # Class AComparison  #######################################################
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     assert not self.operator == ['≠'],f"Internal error: {self}"
     # chained comparisons -> And()
@@ -325,7 +313,6 @@ AUnary.MAP = {'-': lambda x: 0 - x,
               '¬': lambda x: Not(x)
               }
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     out = self.sub_exprs[0].translate(problem, vars)
     function = AUnary.MAP[self.operator]
@@ -338,7 +325,6 @@ AUnary.translate1 = translate1
 
 # Class AAggregate  #######################################################
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     assert self.annotated and not self.quantees, f"Cannot expand {self.code}"
     return Sum([f.translate(problem, vars) for f in self.sub_exprs])
@@ -347,7 +333,6 @@ AAggregate.translate1 = translate1
 
 # Class AppliedSymbol  #######################################################
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     if self.as_disjunction:
         return self.as_disjunction.translate(problem, vars)
@@ -399,7 +384,6 @@ AppliedSymbol.reified = reified
 
 # Class UnappliedSymbol  #######################################################
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     return problem.z3[self.name]
 UnappliedSymbol.translate1 = translate1
@@ -407,7 +391,6 @@ UnappliedSymbol.translate1 = translate1
 
 # Class Variable  #######################################################
 
-@catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
     return vars[self.str]
 Variable.translate = translate
@@ -415,7 +398,6 @@ Variable.translate = translate
 
 # Class Number  #######################################################
 
-@catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
     out = problem.z3.get(self.str, None)
     if out is None:
@@ -430,7 +412,6 @@ Number.translate = translate
 
 # Class Date  #######################################################
 
-@catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
     out = problem.z3.get(self.str, None)
     if out is None:
@@ -449,7 +430,6 @@ Brackets.translate1 = translate1
 
 # Class RecDef  #######################################################
 
-@catch_error
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     local_vars = {}
     for v in self.vars:
