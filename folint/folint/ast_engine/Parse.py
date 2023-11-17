@@ -29,7 +29,7 @@ import itertools
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, Accessor, SymbolExpr,
-                         Expression, AIfExpr, IF, AQuantification, Type, Quantee,
+                         Expression, AIfExpr, IF, AQuantification, Set, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
@@ -204,7 +204,7 @@ def SCA_Check(self, detections):
     if out_type.name in [BOOL, INT, REAL, DATE]:
         out_type_values = []
     elif out_type.decl.enumeration is None:
-        # Type interpretation in Struct.
+        # Set interpretation in Struct.
         out_type_interpretation = self.parent.interpretations.get(out_type.str, [])
 
         if out_type_interpretation != []:
@@ -213,7 +213,7 @@ def SCA_Check(self, detections):
             detections.append((self, f'Symbol has an uninterpreted type: "{out_type.str}". Cannot verify correctness', "Error"))
             return
     else:
-        # Type interpretation in Voc.
+        # Set interpretation in Voc.
         out_type_values = list(out_type.decl.enumeration.tuples.keys())
 
 

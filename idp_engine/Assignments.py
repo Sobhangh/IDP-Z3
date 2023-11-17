@@ -281,7 +281,7 @@ class Assignments(dict):
                     val = f"// {val}"
             else:
                 sign = ':=' if k.instances or k.out == BOOLT else '>>'
-                # TODO improve sign detection (using base_type/extension, interpretation)
+                # TODO improve sign detection (using base_decl/extension, interpretation)
                 # needs access to the theory !
                 finite_domain = all(s.name not in [INT, REAL, DATE]
                         for s in k.sorts)

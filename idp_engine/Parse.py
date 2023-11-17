@@ -35,7 +35,7 @@ from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 from .Assignments import Assignments
 from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUCTOR,
                          Accessor, TYPE, SymbolExpr, Expression,
-                         AIfExpr, IF, AQuantification, split_quantees, Type,
+                         AIfExpr, IF, AQuantification, split_quantees, Set,
                          TYPE, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
@@ -75,14 +75,14 @@ def str_to_IDP(atom: Expression, val_string: str) -> Optional[Expression]:
     return str_to_IDP2(type_, decl, val_string)
 
 
-def str_to_IDP2(type_: Type,
+def str_to_IDP2(type_: Set,
                 decl: Optional[Declaration],
                 val_string: str
                 ) -> Expression:
     """recursive function to decode a val_string of type type_ and type
 
     Args:
-        type_ (Type):
+        type_ (Set):
         decl (Declaration, Optional): declaration of the value string
         val_string (str): value_string
 
@@ -100,9 +100,9 @@ def str_to_IDP2(type_: Type,
         if out is None:
             raise IDPZ3Error(f"wrong boolean value: {val_string}")
     else:
-        if (decl.base_type and hasattr(decl.base_type, 'map')
-            and val_string in decl.base_type.map):  # constructor
-            out = decl.base_type.map[val_string]
+        if (decl.base_decl and hasattr(decl.base_decl, 'map')
+            and val_string in decl.base_decl.map):  # constructor
+            out = decl.base_decl.map[val_string]
         elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
             assert hasattr(decl, 'interpretation'), "Internal error"
 
@@ -137,7 +137,7 @@ def str_to_IDP2(type_: Type,
 
             out = AppliedSymbol.construct(constructor, new_args)
         else:
-            interp = getattr(decl.base_type, "interpretation", None)
+            interp = getattr(decl.base_decl, "interpretation", None)
             enum_type = (interp.enumeration.type.name if interp else
                          decl.name if type(decl) == TypeDeclaration else
                          decl.type.name)
@@ -375,13 +375,13 @@ class TypeDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Type]): the types of the arguments
+        sorts (List[Set]): the types of the arguments
 
-        out (Type): the Boolean type
+        out (Set): the Boolean type
 
-        type (Type): BOOL
+        type (Set): BOOLT
 
-        base_type (TypeDeclaration, optional): bool, int, real or self
+        base_decl (TypeDeclaration, optional): bool, int, real or self
 
         constructors ([Constructor]): list of constructors in the enumeration
 
@@ -401,10 +401,10 @@ class TypeDeclaration(ASTNode):
         enumeration = enumeration
 
         self.arity : int = 1
-        self.sorts : List[Type] = [Type(None, self.name)]
-        self.out : Type = BOOLT
-        self.type : Type = BOOLT
-        self.base_type : Optional[TypeDeclaration] = None
+        self.sorts : List[Set] = [Set(None, self.name)]
+        self.out : Set = BOOLT
+        self.type : Set = BOOLT
+        self.base_decl : Optional[TypeDeclaration] = None
         self.block: Optional[Block] = None
 
         self.map : dict[str, Expression]= {}
@@ -476,13 +476,13 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Type]): the types of the arguments
+        sorts (List[Set]): the types of the arguments
 
-        out (Type): the type of the symbol
+        out (Set): the type of the symbol
 
-        type (Type, optional): type of an applied symbol; = self.out
+        type (Set, optional): type of an applied symbol; = self.out
 
-        base_type (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
+        base_decl (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
 
         instances (dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of
@@ -509,8 +509,8 @@ class SymbolDeclaration(ASTNode):
     def __init__(self,
                  parent,
                  annotations: Optional[Annotations],
-                 sorts: List[Type],
-                 out: Type,
+                 sorts: List[Set],
+                 out: Set,
                  symbols: Optional[List[str]] = None,
                  name: Optional[str] = None):
         self.annotations : Annotation = annotations.annotations if annotations else {}
@@ -522,8 +522,8 @@ class SymbolDeclaration(ASTNode):
         else:
             self.symbols = None
             self.name = name
-        self.sorts : List[Type] = sorts
-        self.out : Type = out
+        self.sorts : List[Set] = sorts
+        self.out : Set = out
         if self.out is None:
             self.out = TYPE(BOOL)
 
@@ -533,8 +533,8 @@ class SymbolDeclaration(ASTNode):
         self.heading: Optional[str] = None
         self.optimizable: bool = True
 
-        self.type : Optional[Type] = None  # a string
-        self.base_type : Optional[TypeDeclaration]= None
+        self.type : Optional[Set] = None  # a string
+        self.base_decl : Optional[TypeDeclaration]= None
         self.range : Optional[List[AppliedSymbol]]= None  # all possible terms.  Used in get_range and IO.py
         self.instances : Optional[dict[str, AppliedSymbol]]= None  # not starting with '_'
         self.block: Optional[ASTNode] = None  # vocabulary where it is declared
@@ -609,7 +609,7 @@ class VarDeclaration(ASTNode):
     Attributes:
         name (str): name of the variable
 
-        subtype (Type): type of the variable
+        subtype (Set): type of the variable
     """
 
     def __init__(self, **kwargs):
@@ -816,7 +816,7 @@ class SymbolInterpretation(Expression):
     Attributes:
         name (string): name of the symbol being enumerated.
 
-        symbol (Type): symbol being enumerated
+        symbol (Set): symbol being enumerated
 
         enumeration ([Enumeration]): enumeration.
 
@@ -844,7 +844,7 @@ class SymbolInterpretation(Expression):
                    (type(self.enumeration) == FunctionEnum and self.default is None),
                    "'⊇' can only be used with a functional enumeration ('→') without else clause")
 
-        self.symbol: Optional[Type] = None
+        self.symbol: Optional[Set] = None
         self.is_type_enumeration = None
         self.block = None
 
@@ -1376,7 +1376,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Import, VarDeclaration,
-                                         TypeDeclaration, Accessor, Type,
+                                         TypeDeclaration, Accessor, Set,
                                          SymbolDeclaration,
                                          SymbolExpr,
 

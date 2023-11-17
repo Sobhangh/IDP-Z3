@@ -35,7 +35,7 @@ from z3 import (Z3Exception, Datatype, DatatypeRef, ExprRef, Function,
 from .Parse import (TypeDeclaration, SymbolDeclaration, TupleIDP, Ranges,
                     IntRange, RealRange, DateRange)
 from .Expression import (catch_error, Constructor, Expression, AIfExpr,
-                         Quantee, AQuantification, Operator, Type,
+                         Quantee, AQuantification, Operator, Set,
                          ADisjunction, AConjunction, AComparison, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Number,
                          Date, Brackets, Variable, TRUE, RecDef, BOOLT, INTT, REALT, DATET)
@@ -99,10 +99,10 @@ def translate(self, problem: Theory) -> ExprRef:
                         for _, def_ in problem.def_constraints.keys()
                         if def_.mode == Semantics.RECDATA)
         if len(self.sorts) == 0:
-            out = Const(self.name, self.out.decl.base_type.translate(problem))
+            out = Const(self.name, self.out.decl.base_decl.translate(problem))
         else:
-            types = ( [x.decl.base_type.translate(problem) for x in self.sorts]
-                    + [self.out.decl.base_type.translate(problem)])
+            types = ( [x.decl.base_decl.translate(problem) for x in self.sorts]
+                    + [self.out.decl.base_decl.translate(problem)])
             out = (Function(self.name, types) if not recursive else
                    RecFunction(self.name, types))
         problem.z3[self.name] = out
@@ -157,7 +157,7 @@ def reified(self, problem: Theory) -> DatatypeRef:
 Expression.reified = reified
 
 
-# class Type  ###############################################################
+# class Set  ###############################################################
 
 @catch_error
 def translate(self, problem: Theory, vars={}) -> ExprRef:
@@ -169,7 +169,7 @@ def translate(self, problem: Theory, vars={}) -> ExprRef:
         return RealSort(problem.ctx)
     else:
         return self.decl.translate(problem,)
-Type.translate=translate
+Set.translate=translate
 
 
 # Class AIfExpr  ###############################################################
@@ -202,7 +202,7 @@ def translate(self, problem: Theory, vars={}) -> ExprRef:
     out = {}
     for vars in self.vars:
         for v in vars:
-            translated = FreshConst(v.sort.decl.base_type.translate(problem))
+            translated = FreshConst(v.type.decl.base_decl.translate(problem))
             out[v.str] = translated
     return out
 Quantee.translate = translate
@@ -388,7 +388,7 @@ def reified(self, problem: Theory, vars={}) -> DatatypeRef:
         out = problem.z3.get(str, None)
         if out is None:
             sort = (BoolSort(problem.ctx) if self.in_enumeration or self.is_enumerated else
-                    self.decl.out.decl.base_type.translate(problem))
+                    self.decl.out.decl.base_decl.translate(problem))
             out = Const(str, sort)
             problem.z3[str] = out
     else:
@@ -453,7 +453,7 @@ Brackets.translate1 = translate1
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     local_vars = {}
     for v in self.vars:
-        translated = FreshConst(v.sort.decl.base_type.translate(problem))
+        translated = FreshConst(v.type.decl.base_decl.translate(problem))
         local_vars[v.str] = translated
     all_vars = copy(vars)
     all_vars.update(local_vars)

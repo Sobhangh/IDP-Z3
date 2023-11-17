@@ -27,10 +27,10 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
     SymbolDeclaration: annotations=Annotations
           symbols+= NAME [','] ':'
-          ( '(' sorts*=Type[/[*⨯]/] ')' | sorts*=Type[/[*⨯]/] )
-          ('->' | '→') out=Type;
+          ( '(' sorts*=Set[/[*⨯]/] ')' | sorts*=Set[/[*⨯]/] )
+          ('->' | '→') out=Set;
 
-    VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ IN subtype=Type;
+    VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ IN subtype=Set;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
@@ -47,14 +47,14 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
           definiendum=AppliedSymbol
           (('=' |DefEqOp) out=SumMinus)?
           (('<-'|'←' | 'if' ) body=Expression)? '.' ;
-        Quantee:  subtype=Type !IN vars+=Variable[',']
-                | vars+=Variable[','] ( IN (subtype=Type | sort=SymbolExpr) )?
-                | vars+=VarTuple[','] ( IN (subtype=Type | sort=SymbolExpr) )?;
+        Quantee:  subtype=Set !IN vars+=Variable[',']
+                | vars+=Variable[','] ( IN (subtype=Set | sort=SymbolExpr) )?
+                | vars+=VarTuple[','] ( IN (subtype=Set | sort=SymbolExpr) )?;
             Variable: name=/`?[^\d\W]\w*\b/;
             VarTuple: '(' vars+=Variable[','] ')';
-            Type: ( name='Concept' '['
-                          ( '(' ins*=Type[/[*⨯]/] ')' | ins*=Type[/[*⨯]/] )
-                          ('->' | '→') out=Type ']'
+            Set: ( name='Concept' '['
+                          ( '(' ins*=Set[/[*⨯]/] ')' | ins*=Set[/[*⨯]/] )
+                          ('->' | '→') out=Set ']'
                   )
                 | name=NAME;
 
@@ -152,7 +152,7 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   ConstructedFrom: constructed=/constructed\s+from/?
                    '{' constructors*=Constructor[',']  '}';
     Constructor: name=ID ('(' args+=Accessor[','] ')' )?;
-    Accessor: (accessor=ID ':')? out=Type;
+    Accessor: (accessor=ID ':')? out=Set;
 
   Identifier: AppliedSymbol | UnappliedSymbol | Number | Date;
 

@@ -42,7 +42,7 @@ from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
                     ConstructedFrom, Definition)
 from .Expression import (catch_error, AIfExpr, IF,
                          SymbolExpr, Expression, Constructor, AQuantification,
-                         Type, FORALL, IMPLIES, AND, AAggregate,
+                         Set, FORALL, IMPLIES, AND, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Quantee, Variable,
                          VARIABLE, TRUE, FALSE, Number, Extension, BOOLT)
 from .Theory import Theory
@@ -112,7 +112,7 @@ TypeDeclaration.interpret = interpret
 
 @catch_error
 def interpret(self: SymbolDeclaration, problem: Theory):
-    assert all(isinstance(s, Type) for s in self.sorts), 'internal error'
+    assert all(isinstance(s, Set) for s in self.sorts), 'internal error'
 
     symbol = SymbolExpr.make(self.name)
     symbol.decl = self
@@ -277,7 +277,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
             q_vars = { f"${sort.decl.name}!{str(i)}$":
                        VARIABLE(f"${sort.decl.name}!{str(i)}$", sort)
                        for i, sort in enumerate(decl.sorts)}
-            quantees = [Quantee.make(v, sort=v.sort) for v in q_vars.values()]
+            quantees = [Quantee.make(v, sort=v.type) for v in q_vars.values()]
 
             # is the domain of `self` enumerable ?
             constraint1 = FORALL(quantees, FALSE)
@@ -326,7 +326,7 @@ ConstructedFrom.interpret = interpret
 
 @catch_error
 def interpret(self: Constructor, problem: Theory) -> Constructor:
-    # assert all(s.decl and isinstance(s.decl.out, Type) for s in self.sorts), 'Internal error'
+    # assert all(s.decl and isinstance(s.decl.out, Set) for s in self.sorts), 'Internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
     elif any(s.out == self.type for s in self.sorts):  # recursive data type
@@ -339,7 +339,7 @@ def interpret(self: Constructor, problem: Theory) -> Constructor:
             self.range = None
         else:
             self.check(all(e[1] is None for e in extensions),  # no filter in the extension
-                       f"Type signature of constructor {self.name} must have a given interpretation")
+                       f"Set signature of constructor {self.name} must have a given interpretation")
             self.range = [AppliedSymbol.construct(self, es)
                           for es in product(*[[ee[0] for ee in e[0]] for e in extensions])]
     return self
@@ -431,11 +431,11 @@ def _finalize(self: Expression, subs: dict[str, Expression]):
     return self
 
 
-# class Type ###########################################################
+# class Set ###########################################################
 
 @catch_error
 def extension(self, extensions: dict[str, Extension]) -> Extension:
-    """returns the extension of a Type, given some interpretations.
+    """returns the extension of a Set, given some interpretations.
 
     Normally, the extension is already in `extensions`.
     However, for Concept[T->T], an additional filtering is applied.
@@ -467,7 +467,7 @@ def extension(self, extensions: dict[str, Extension]) -> Extension:
                                         self.ins))]
         extensions[self.code] = (out, None)
     return extensions[self.code]
-Type.extension = extension
+Set.extension = extension
 
 # Class AQuantification  ######################################################
 
@@ -498,7 +498,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
         domain = q.sub_exprs[0]
 
         if problem:
-            if isinstance(domain, Type):  # quantification over type / Concepts
+            if isinstance(domain, Set):  # quantification over type / Concepts
                 (superset, filter) = domain.extension(problem.extensions)
             elif type(domain) == SymbolExpr:
                 if domain.decl:
@@ -690,8 +690,8 @@ def _interpret(self: Variable,
               problem: Optional[Theory],
               subs: dict[str, Expression]
               ) -> Expression:
-    if self.sort:
-        self.sort = self.sort._interpret(problem, subs)
+    if self.type:
+        self.type = self.type._interpret(problem, subs)
     out = subs.get(self.code, self)
     return out
 Variable._interpret = _interpret

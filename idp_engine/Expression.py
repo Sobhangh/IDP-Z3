@@ -159,12 +159,12 @@ class Accessor(ASTNode):
     Attributes:
         accessor (str, Optional): name of accessor function
 
-        out (Type): name of the output type of the accessor
+        out (Set): name of the output type of the accessor
 
         decl (SymbolDeclaration): declaration of the accessor function
     """
     def __init__(self, parent,
-                 out: Type,
+                 out: Set,
                  accessor: Optional[str] = None):
         self.accessor = accessor
         self.out = out
@@ -191,7 +191,7 @@ class Expression(ASTNode):
 
             The list may be reduced by simplification.
 
-        type (Type, Optional):
+        type (Set, Optional):
             The type of the expression, e.g., ``bool``.
 
         co_constraint (Expression, optional):
@@ -241,7 +241,7 @@ class Expression(ASTNode):
 
         self.str: str = self.code
         self.variables: Optional[Set[str]] = None
-        self.type: Optional[Type] = None
+        self.type: Optional[Set] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional[Expression] = None
 
@@ -293,7 +293,7 @@ class Expression(ASTNode):
     def annotate_quantee(self,
                  voc: Vocabulary,
                  q_vars: dict[str, Variable],
-                 inferred: dict[str, Type]
+                 inferred: dict[str, Set]
                  ) -> Annotated:
         raise IDPZ3Error("Internal error") # monkey-patched
 
@@ -403,7 +403,7 @@ class Expression(ASTNode):
         # vocabulary
         return any(e.has_decision() for e in self.sub_exprs)
 
-    def type_inference(self, voc: Vocabulary) -> dict[str, Type]:
+    def type_inference(self, voc: Vocabulary) -> dict[str, Set]:
         try:
             return dict(ChainMap(*(e.type_inference(voc) for e in self.sub_exprs)))
         except AttributeError as e:
@@ -495,7 +495,7 @@ class Expression(ASTNode):
         return out
 
     def add_level_mapping(self,
-                          level_symbols: dict[SymbolDeclaration, Type],
+                          level_symbols: dict[SymbolDeclaration, Set],
                           head: AppliedSymbol,
                           pos_justification: bool,
                           polarity: bool,
@@ -515,16 +515,16 @@ class Constructor(Expression):
     Attributes:
         name (string): name of the constructor
 
-        sorts (List[Type]): types of the arguments of the constructor
+        sorts (List[Set]): types of the arguments of the constructor
 
-        type (Type): type that contains this constructor
+        type (Set): type that contains this constructor
 
         arity (Int): number of arguments of the constructor
 
         tester (SymbolDeclaration, Optional): function to test if the constructor
         has been applied to some arguments (e.g., is_rgb)
 
-        symbol (Type, Optional): only for Concept constructors; =Type(name[1:])
+        symbol (Set, Optional): only for Concept constructors; =Set(name[1:])
 
         range: the list of identifiers
     """
@@ -537,8 +537,8 @@ class Constructor(Expression):
 
         self.arity = len(self.sorts)
 
-        self.type: Optional[Type] = None
-        self.symbol: Optional[Type] = None
+        self.type: Optional[Set] = None
+        self.symbol: Optional[Set] = None
         self.tester: Optional[SymbolDeclaration] = None
         self.range: Optional[List[Expression]] = None
 
@@ -550,7 +550,7 @@ def CONSTRUCTOR(name: str, args=None) -> Constructor:
     return Constructor(None, name, args)
 
 
-class Type(Expression):
+class Set(Expression):
     """ASTNode representing a (sub-)type or a `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
 
     Inherits from Expression
@@ -558,17 +558,17 @@ class Type(Expression):
     Args:
         name (str): name of the concept
 
-        ins (List[Type], Optional): domain of the Concept signature, e.g., `[T, T]`
+        ins (List[Set], Optional): domain of the Concept signature, e.g., `[T, T]`
 
-        out (Type, Optional): range of the Concept signature, e.g., `Bool`
+        out (Set, Optional): range of the Concept signature, e.g., `Bool`
 
         decl (Declaration, Optional): declaration of the type
     """
 
     def __init__(self, parent,
                  name:str,
-                 ins: Optional[List[Type]] = None,
-                 out: Optional[Type] = None):
+                 ins: Optional[List[Set]] = None,
+                 out: Optional[Set] = None):
         self.name = unquote(name)
         self.ins = ins
         self.out = out
@@ -619,8 +619,8 @@ class Type(Expression):
             self.check(self.decl.out == BOOLT, "internal error")
             return self.decl.contains_element(term, extensions)
 
-def TYPE(name: str, ins=None, out=None) -> Type:
-    return Type(None, name, ins, out)
+def TYPE(name: str, ins=None, out=None) -> Set:
+    return Set(None, name, ins, out)
 
 BOOLT = TYPE(BOOL)
 INTT = TYPE(INT)
@@ -674,7 +674,7 @@ class Quantee(Expression):
     Attributes:
         vars (List[List[Variable]]): the (tuples of) variables being quantified
 
-        subtype (Type, Optional): a literal Type to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
+        subtype (Set, Optional): a literal Set to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
 
         sort (SymbolExpr, Optional): a dereferencing expression, e.g.,. `$(i)`.
 
@@ -688,7 +688,7 @@ class Quantee(Expression):
     """
     def __init__(self, parent,
                  vars: Union[List[Variable], List[List[Variable]]],
-                 subtype: Optional[Type] = None,
+                 subtype: Optional[Set] = None,
                  sort: Optional[SymbolExpr] = None):
         self.subtype = subtype
         sort = sort
@@ -720,7 +720,7 @@ class Quantee(Expression):
     @classmethod
     def make(cls,
              var: List[Variable],
-             subtype: Optional[Type] = None,
+             subtype: Optional[Set] = None,
              sort: Optional[SymbolExpr] = None
              ) -> 'Quantee':
         out = (cls) (None, [var], subtype=subtype, sort=sort)
@@ -1317,22 +1317,20 @@ class Variable(Expression):
     Args:
         name (str): name of the variable
 
-        sort (Optional[Union[Type]]): sort of the variable, if known
+        type (Optional[Union[Set]]): sort of the variable, if known
     """
     PRECEDENCE = 200
 
     def __init__(self, parent,
                  name:str,
-                 sort: Optional[Type]=None):
+                 type: Optional[Set]=None):
         self.name = name
-        sort = sort
-        self.sort = sort
-        assert sort is None or isinstance(sort, Type), \
+        assert type is None or isinstance(type, Set), \
             f"Internal error: {self}"
 
         super().__init__()
 
-        self.type = sort
+        self.type = type
         self.sub_exprs = []
         self.variables = set([self.name])
 
@@ -1345,8 +1343,8 @@ class Variable(Expression):
 
     def has_variables(self) -> bool: return True
 
-def VARIABLE(name: str, sort: Type):
-    return Variable(None, name, sort)
+def VARIABLE(name: str, type: Set):
+    return Variable(None, name, type)
 
 
 class Number(Expression):

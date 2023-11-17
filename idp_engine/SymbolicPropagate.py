@@ -204,8 +204,8 @@ AComparison.propagate1 = propagate1
 # @log  # decorator patched in by tests/main.py
 @catch_error
 def substitute(self, e0, e1, assignments, tag=None):
-    if self.sort:
-        self.sort = self.sort.substitute(e0,e1, assignments, tag)
+    if self.type:
+        self.type = self.type.substitute(e0,e1, assignments, tag)
     return e1 if self.code == e0.code else self
 Variable.substitute = substitute
 

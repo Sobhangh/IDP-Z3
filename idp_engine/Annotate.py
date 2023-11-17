@@ -30,7 +30,7 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ASTNode, Expression, TYPE, Type, BOOLT, INTT, REALT, DATET,
+from .Expression import (ASTNode, Expression, TYPE, Set, BOOLT, INTT, REALT, DATET,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, Operator, AComparison, AUnary,
@@ -127,11 +127,11 @@ def annotate_declaration(self: ASTNode,
         voc.symbol_decls[c.name] = c
     if self.interpretation:
         self.interpretation.annotate(voc, {})
-        base_type = (self.name if type(self.interpretation.enumeration) != Ranges else
+        base_decl = (self.name if type(self.interpretation.enumeration) != Ranges else
                         self.interpretation.enumeration.type.name)  # INT or REAL or DATE
-        self.base_type = voc.symbol_decls[base_type]
+        self.base_decl = voc.symbol_decls[base_decl]
     else:
-        self.base_type = self
+        self.base_decl = self
     return self
 TypeDeclaration.annotate_declaration = annotate_declaration
 
@@ -153,8 +153,8 @@ def annotate_declaration(self: SymbolDeclaration,
     for s in chain(self.sorts, [self.out]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
                    f"`Concept` must be qualified with a type signature in {self}")
-    self.base_type = (None if self.out != BOOLT or self.arity != 1 else
-                      self.sorts[0].decl.base_type)
+    self.base_decl = (None if self.out != BOOLT or self.arity != 1 else
+                      self.sorts[0].decl.base_decl)
     return self
 SymbolDeclaration.annotate_declaration = annotate_declaration
 
@@ -175,13 +175,13 @@ def annotate_declaration(self: ASTNode,
 VarDeclaration.annotate_declaration = annotate_declaration
 
 
-# Class Type  #######################################################
+# Class Set  #######################################################
 
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    assert isinstance(self, Type), "Internal error"
+    assert isinstance(self, Set), "Internal error"
     if self.name in q_vars:
         return q_vars[self.name]
 
@@ -195,7 +195,7 @@ def annotate(self: Expression,
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
         self.out = self.out.annotate(voc, q_vars)
     return self
-Type.annotate = annotate
+Set.annotate = annotate
 
 
 # Class TheoryBlock  #######################################################
@@ -231,7 +231,7 @@ def annotate(self: Expression,
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
     # create level-mapping symbols, as needed
-    # self.level_symbols: dict[SymbolDeclaration, Type]
+    # self.level_symbols: dict[SymbolDeclaration, Set]
     dependencies = set()
     for r in self.rules:
         symbs: dict[str, SymbolDeclaration] = {}
@@ -318,7 +318,7 @@ def annotate(self: Expression,
 
         inferred = renamed.body.type_inference(voc)
         for v in vars.values():
-            renamed.body = EXISTS([Quantee.make(v, sort=v.sort)
+            renamed.body = EXISTS([Quantee.make(v, sort=v.type)
                                    .annotate_quantee(voc, {}, inferred)],
                                   renamed.body)
         self.renamed.setdefault(decl, []).append(renamed)
@@ -336,13 +336,13 @@ def annotate(self: Expression,
 
         inferred = canonical.body.type_inference(voc)
         for v in vars.values():
-            canonical.body = EXISTS([Quantee.make(v, sort=v.sort)
+            canonical.body = EXISTS([Quantee.make(v, sort=v.type)
                                      .annotate_quantee(voc, {}, inferred)],
                                     canonical.body)
 
         canonical.definiendum.sub_exprs = new_vars[:-1] if r.out else new_vars
         canonical.out = new_vars[-1] if r.out else None
-        canonical.quantees = [Quantee.make(v, sort=v.sort) for v in new_vars]
+        canonical.quantees = [Quantee.make(v, sort=v.type) for v in new_vars]
 
         self.canonicals.setdefault(decl, []).append(canonical)
 
@@ -457,7 +457,7 @@ def annotate(self: Expression,
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
-    self.check(not(self.symbol.decl.out.decl.base_type == BOOLT
+    self.check(not(self.symbol.decl.out.decl.base_decl == BOOLT
                    and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
@@ -568,7 +568,7 @@ def annotate_block(self: ASTNode,
         constraint.generate_constructors(open_constructors)
 
     # Next, we convert the list of constructors to actual types.
-    open_types: dict[str, Optional[Type]] = {}
+    open_types: dict[str, Optional[Set]] = {}
     for name, constructors in open_constructors.items():
         # If no constructors were found, then the type is not used.
         if not constructors:
@@ -654,7 +654,7 @@ AIfExpr.set_variables = set_variables
 def annotate_quantee(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             inferred: dict[str, Type]
+             inferred: dict[str, Set]
              ) -> Annotated:
     assert isinstance(self, Quantee), "Internal error"
     Expression.annotate(self, voc, q_vars)
@@ -794,7 +794,7 @@ def annotate(self: AComparison,
     for e in self.sub_exprs:
         if self.operator[0] in "<>≤≥" and e.type:
             decl = voc.symbol_decls.get(e.type.name, None)
-            self.check(voc.symbol_decls[e.type.name].base_type in [INTT, REALT, DATET]
+            self.check(voc.symbol_decls[e.type.name].base_decl in [INTT, REALT, DATET]
                        or decl.type in [INTT, REALT, DATET]
                        or (hasattr(decl, 'interpretation')
                            and decl.interpretation is None)
@@ -875,7 +875,7 @@ def annotate(self: AAggregate,
 
                     coc = AND([coc1, coc2])
                     inferred = coc.type_inference(voc)
-                    quantees = [Quantee.make(v, sort=v.sort)
+                    quantees = [Quantee.make(v, sort=v.type)
                                 .annotate_quantee(voc, {}, inferred)
                                 for v in q_vars.values()]
                     applied.co_constraint = (
