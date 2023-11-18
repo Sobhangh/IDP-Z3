@@ -595,6 +595,14 @@ def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
         Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars,ltc,temporal_head) for e in self.sub_exprs]
+    #self.sub_exprs =[]
+    #for e in self.sub_exprs:
+    #    self.sub_exprs.append(e.annotate(voc, q_vars,ltc,temporal_head))
+    if isinstance(self,AUnary):
+        if(isinstance(self.sub_exprs[0],NowAppliedSymbol)):
+            print("now applied 2")
+        else:
+            print("type is right??")
     return self.annotate1()
 Expression.annotate = annotate
 
