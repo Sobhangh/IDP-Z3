@@ -1,6 +1,6 @@
 vocabulary V {
     // here comes the specification of the vocabulary
-    //type test is {0..5}
+    type test is {0..5}
     p: () → Bool
     q: test -> Bool
     Temporal p
