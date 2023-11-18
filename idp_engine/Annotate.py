@@ -299,6 +299,8 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
             else:
                 eq = EQUALS([nv, arg])
                 renamed.body = AND([eq, renamed.body])
+                print("And rename")
+                print(renamed)
 
         canonical = deepcopy(renamed)
 
