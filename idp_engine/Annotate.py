@@ -895,7 +895,7 @@ def replace(self, voc, q_vars):
     #Is this type the correct time type?
     time: Type = TYPE('Tijd')
     t: Variable = VARIABLE(v_time,time)
-    print("inside")
+    print(q_vars)
     if v_time in q_vars and q_vars[v_time].sort == time:
         self.sub_expr.sub_exprs.append(ASumMinus.make('+',[t,ONE],None,None))
         return self.sub_expr
