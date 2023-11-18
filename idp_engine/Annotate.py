@@ -298,6 +298,8 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
                 rename_args(renamed, {arg.name: nv})
             else:
                 eq = EQUALS([nv, arg])
+                print("before And rename")
+                print(renamed)
                 renamed.body = AND([eq, renamed.body])
                 print("And rename")
                 print(renamed)
@@ -305,8 +307,6 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
         canonical = deepcopy(renamed)
 
         for v in vars.values():
-            print("rename2")
-            print(renamed.body)
             renamed.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {},ltc)],
                                   renamed.body)
             print("renamed:")
