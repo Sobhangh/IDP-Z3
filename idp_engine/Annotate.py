@@ -212,7 +212,8 @@ TheoryBlock.annotate = annotate
 
 def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     self.rules = [r.annotate(voc, q_vars,ltc) for r in self.rules]
-
+    print("rules:")
+    print(self.rules)
     # create level-mapping symbols, as needed
     # self.level_symbols: dict[SymbolDeclaration, Symbol]
     dependencies = set()
