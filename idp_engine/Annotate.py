@@ -218,7 +218,7 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     dependencies = set()
     for r in self.rules:
         if isinstance(r.body,AUnary):
-            if isinstance(renamed.body.f,NowAppliedSymbol):
+            if isinstance(r.body.f,NowAppliedSymbol):
                 print("now applied1")
             else:
                 print("not nowapplied1")
