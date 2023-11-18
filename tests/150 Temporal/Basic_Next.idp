@@ -2,7 +2,7 @@ vocabulary V {
     // here comes the specification of the vocabulary
     //type test is {0..5}
     p: () → Bool
-    //q: test -> Bool
+    q: test -> Bool
     Temporal p
 }
 
@@ -13,12 +13,12 @@ theory T:V {
         //Start[p()].
         //Next[p()] <- not Now[p()].
     //}
-    //{
-        //q(0).
-        //!i in test: q(i+1) <- not q(i). 
-    //}
-    Start[p()].
-    ((Now[p()] or Next[p()]) and not (Now[p()] and Next[p()])).
+    {
+        q(0).
+        !i in test: q(i+1) <- not q(i). 
+    }
+    //Start[p()].
+    //((Now[p()] or Next[p()]) and not (Now[p()] and Next[p()])).
     
 }
 
