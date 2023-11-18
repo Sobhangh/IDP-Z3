@@ -212,8 +212,8 @@ TheoryBlock.annotate = annotate
 
 def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     self.rules = [r.annotate(voc, q_vars,ltc) for r in self.rules]
-    print("rules:")
-    print(self.rules)
+    #print("rules:")
+    #print(self.rules)
     # create level-mapping symbols, as needed
     # self.level_symbols: dict[SymbolDeclaration, Symbol]
     dependencies = set()
@@ -303,6 +303,8 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
         for v in vars.values():
             renamed.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {},ltc)],
                                   renamed.body)
+            print("renamed:")
+            print(renamed)
         self.renamed.setdefault(decl, []).append(renamed)
 
         # rename the variable for the value of the definiendum
@@ -319,6 +321,8 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
         for v in vars.values():
             canonical.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {},ltc)],
                                     canonical.body)
+            print("canonical")
+            print(canonical)
 
         canonical.definiendum.sub_exprs = new_vars[:-1] if r.out else new_vars
         canonical.out = new_vars[-1] if r.out else None
