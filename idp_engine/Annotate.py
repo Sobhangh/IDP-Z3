@@ -201,6 +201,7 @@ def annotate(self, idp):
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self.voc, {},self.ltc) for e in self.definitions]
+    print(self.definitions)
 
     self.constraints = OrderedSet([e.annotate(self.voc, {},self.ltc)
                                     for e in self.constraints])
