@@ -256,8 +256,6 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     nested = set()
     for r in self.rules:
         r.body.collect_nested_symbols(nested, False)
-        print("r.body")
-        print(r.body)
     for decl in self.inductive:
         self.check(decl not in nested,
                     f"Inductively defined nested symbols are not supported yet: "
@@ -305,6 +303,8 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
         canonical = deepcopy(renamed)
 
         for v in vars.values():
+            print("rename2")
+            print(renamed.body)
             renamed.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {},ltc)],
                                   renamed.body)
             print("renamed:")
