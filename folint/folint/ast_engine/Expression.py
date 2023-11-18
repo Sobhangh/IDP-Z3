@@ -82,11 +82,6 @@ Expression.SCA_Check = SCA_Check
 
 ##  class AIfExpr(Expression):
 
-def get_type(self):
-    return self.then_f.type
-AIfExpr.get_type = get_type
-
-
 ## class Quantee(Expression):
 ## class AQuantification(Expression):
 
@@ -132,51 +127,11 @@ AQuantification.SCA_Check = SCA_Check
 
 
 ## class Operator(Expression):
-
-def get_type(self):
-    return self.type    #return type of Operator and subclasses (in 'str')
-Operator.get_type = get_type
-
-
 ## class AImplication(Operator):
 ## class AEquivalence(Operator):
 ## class ADisjunction(Operator):
 ## class AConjunction(Operator):
-
-
 ## class AComparison(Operator):
-
-def SCA_Check(self,detections):
-    """ Compare types: 4 categories
-        (1) Both are the same type
-        (2) They are different, but can be compared (e.g. Int <> Real)
-        (3) Cannot be compared, but are allowed by IDP-Z3. This also
-        happens when a numerical type is interpreted in the structure (warning)
-        (4) Cannot be compared at all. (error)
-    """
-    # Get types and convert to String.
-    type1 = self.sub_exprs[0].get_type()
-    type2 = self.sub_exprs[1].get_type()
-    type1 = type_symbol_to_str(type1)
-    type2 = type_symbol_to_str(type2)
-
-    if type1 != type2:  # Cat 2, 3 and 4
-        if type1 is None:
-            detections.append((self.sub_exprs[0],f"Could not determine the type of {self.sub_exprs[0]} ","Warning"))
-        elif type2 is None:
-            detections.append((self.sub_exprs[1],f"Could not determine the type of {self.sub_exprs[1]} ","Warning"))
-        else:
-            cat = typesVergelijken(type1,type2)
-            if cat == 3:  #cat(3) WARNING
-                detections.append((self,f"Comparison of 2 possibly incompatible types: {type1} and {type2}","Warning"))
-            if cat == 4:  #cat(4) ERROR
-                detections.append((self,f"Comparison of 2 incompatble types: {type1} and {type2}","Error"))
-    if (type1 is None and type2 is None):   #beide types zijn unknown
-        detections.append((self.sub_exprs[0],f"Comparison of 2 unknown types: {type1} and {type2}","Warning"))
-
-    Expression.SCA_Check(self, detections)
-AComparison.SCA_Check = SCA_Check
-
 
 ## class ASumMinus(Operator):
 
@@ -206,23 +161,6 @@ def SCA_Check(self, detections):
     return Operator.SCA_Check(self, detections)
 ASumMinus.SCA_Check = SCA_Check
 
-def get_type(self):
-    help = 0
-    for i in range(0,len(self.sub_exprs)):
-        if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():
-            help = help + 1
-    if help == 0: # als alle elementen van hetzelfde type zijn return dit type
-        return self.sub_exprs[0].get_type()
-    else :  #elementen van versschillende types
-        lijst = ["Int","Real"]
-        for i in self.sub_exprs:
-            if type_symbol_to_str(i.get_type()) in lijst:
-                continue
-            else:
-                return None
-        return "Int"    #als alle type van oftwel Int of Real zijn
-ASumMinus.get_type = get_type
-
 
 ## class AMultDiv(Operator):
 
@@ -247,23 +185,6 @@ def SCA_Check(self, detections):
     return Operator.SCA_Check(self, detections)
 AMultDiv.SCA_Check = SCA_Check
 
-def get_type(self):
-    help = 0
-    for i in range(0,len(self.sub_exprs)):
-        if self.sub_exprs[i].get_type() != self.sub_exprs[0].get_type():
-            help = help + 1
-    if help == 0: # als alle elementen van hetzelfde type zijn return dit type, anders return None
-        return self.sub_exprs[0].get_type()
-    else :  #elementen van versschillende types
-        lijst = ["Int","Real"]
-        for i in self.sub_exprs:
-            if type_symbol_to_str(i.get_type()) in lijst:
-                continue
-            else:
-                return None
-        return "Int"    #als alle type van oftwel Int of Real zijn
-AMultDiv.get_type = get_type
-
 
 ## class APower(Operator):
 #TODO ?
@@ -280,10 +201,6 @@ def SCA_Check(self,detections):
     Expression.SCA_Check(self, detections)
 AUnary.SCA_Check = SCA_Check
 
-def get_type(self):
-    return self.type
-AUnary.get_type = get_type
-
 
 ## class AAggregate(Expression):
 
@@ -293,11 +210,6 @@ def SCA_Check(self,detections):
         detections.append((self,f"Please use the new syntax for aggregates","Warning"))
     Expression.SCA_Check(self, detections)
 AAggregate.SCA_Check = SCA_Check
-
-def get_type(self):
-    # return "Int"        #Sum zou altijd Int moeten zijn
-    return self.type    #return type of AAggregate (in 'str')
-AAggregate.get_type = get_type
 
 ## class AppliedSymbol(Expression):
 
@@ -314,20 +226,8 @@ def SCA_Check(self,detections):
         # We make a distinction between normal types, partial functions and
         # constructors.
         for i in range(self.decl.arity):
-            expected_type = None
+            expected_type = self.decl.sorts[i]
             found_type = None
-            if isinstance(self.decl, Constructor):
-                # Constructors.
-                expected_type = self.decl.sorts[i].decl.type
-            elif (len(self.decl.sorts[i].decl.sorts) == 1
-            and self.decl.sorts[i].decl.sorts[0].type == self.decl.sorts[i].type
-            and self.decl.sorts[i].type != BOOLT):
-                # Normal types
-                expected_type = self.decl.sorts[i].type
-            else:
-                # Partial functions
-                continue
-                expected_type = self.decl.sorts[i].decl.sorts[i].type
 
             if (hasattr(self.sub_exprs[i], 'sort') and
                     self.sub_exprs[i].sort and
@@ -368,48 +268,11 @@ def SCA_Check(self,detections):
     Expression.SCA_Check(self, detections)
 AppliedSymbol.SCA_Check = SCA_Check
 
-def get_type(self):
-    """
-    Return the type of the symbol.
-    Constructors are handled differently here.
-    """
-    if isinstance(self.decl, Constructor):
-        return self.decl.type
-    return self.decl.out.decl.type
-AppliedSymbol.get_type = get_type
-
-
-## class SymbolExpr(Expression):
-
+## class SymbolExpr(Expression)
 ## class UnappliedSymbol(Expression):
-
-def get_type(self):
-    return self.decl.type          #geeft type terug (als 'str')
-UnappliedSymbol.get_type = get_type
-
-
 ## class Variable(Expression):
-
-def get_type(self):
-    if self.sort is None:
-        return self.sort        #return None als self.sort onbekend is
-    return self.sort.type       #returns specifieker type of Variable (als 'str')
-Variable.get_type = get_type
-
-
 ## class Number(Expression):
-
-def get_type(self):
-    return self.type    #return type of number
-Number.get_type = get_type
-
-
 ## class Date(Expression):
-
-def get_type(self):
-    return self.type    #return type of date
-Date.get_type = get_type
-
 
 ## class Brackets(Expression):
 
@@ -419,7 +282,3 @@ def SCA_Check(self, detections):
         detections.append((self,f"Style guide, redundant brackets","Warning"))
     return Expression.SCA_Check(self, detections)
 Brackets.SCA_Check = SCA_Check
-
-def get_type(self):
-    return self.f.get_type()     #return type van regel tussen haakjes
-Brackets.get_type = get_type

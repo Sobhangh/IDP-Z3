@@ -1,5 +1,5 @@
 vocabulary V {
-    type T
+    T: Int -> Bool
     p : (T*T) → 𝔹
     r : (T) → 𝔹
     s : (T*T) → 𝔹

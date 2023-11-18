@@ -52,7 +52,7 @@ class ASTNode(object):
         try:
             location = get_location(self)
             location['end'] = (location['col'] +
-                (len(self.code) - 1 if hasattr(self, "code") else 0))
+                (len(self.code) if hasattr(self, "code") else 0))
             return location
         except:
             return {'line': 1, 'col': 1, 'end': 1}
@@ -498,8 +498,9 @@ class Expression(ASTNode):
 
     def SCA_Check(self,detections):
         raise IDPZ3Error("Internal error") # monkey-patched
+
     def get_type(self):
-        raise IDPZ3Error("Internal error") # monkey-patched
+        return self.type
 
 
 class Constructor(ASTNode):

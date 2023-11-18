@@ -585,7 +585,7 @@ def annotate_block(self: ASTNode,
     for name, out in [
         ('expand', BOOLT),
         ('hide', BOOLT),
-        ('view', BOOLT),
+        ('view', SET_('_ViewType')),
         ('moveSymbols', BOOLT),
         ('optionalPropagation', BOOLT),
         ('manualPropagation', BOOLT),
@@ -726,6 +726,38 @@ AQuantification.set_variables = set_variables
 
 # Class Operator  #######################################################
 
+def base_type(exprs: List[Expression]) -> Optional[Set_]:
+    """ Determines the Set_ of the elements of a list of expressions;
+    raises an error if the expressions have incompatible Set_.
+    Returns None if the list is empty.
+
+    A mix of Int and Real (or Int and Date) is allowed.
+    """
+    if not exprs:
+        return None
+    if exprs[0].type and exprs[0].type.decl and exprs[0].type.decl.base_decl:
+        base = exprs[0].type.decl.base_decl
+        bases = set([base.name])
+        if base.name in [REAL, DATE]:
+            bases.add(INT)  # also accept INT for REAL and DATE
+        for e in exprs:
+            if e.type and e.type.decl and e.type.decl.base_decl:
+                b = e.type.decl.base_decl
+                if b.name not in bases:
+                    if base.name == INT and b.name in [REAL, DATE]:
+                        base = b
+                        bases.add(b.name)
+                    else:
+                        e.check(False, f"Invalid type {b.name} (expecting {base.name})")
+                # else continue
+            else:
+                e.check(False, f"Can't determine the type of {e}")
+        assert type(base) == TypeDeclaration, "Internal error"
+        return base.sorts[0]
+    else:
+        exprs[0].check(False, f"Can't determine the type of {exprs[0]}")
+
+
 def annotate(self: Operator,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
@@ -736,16 +768,13 @@ def annotate(self: Operator,
         if self.operator[0] in '&|∧∨⇒⇐⇔':
             self.check(e.type is None or e.type == BOOLT or e.str in ['true', 'false'],
                        f"Expected boolean formula, got {e.type}: {e}")
-    return self
+    return self.set_variables()
 Operator.annotate = annotate
 
 def set_variables(self: Operator) -> Expression:
     assert all(e.type for e in self.sub_exprs)
-    if self.type is None:  # not a BOOL operator
-        self.type = REALT if any(e.type == REALT for e in self.sub_exprs) \
-                else INTT if any(e.type == INTT for e in self.sub_exprs) \
-                else DATET if any(e.type == DATET for e in self.sub_exprs) \
-                else self.sub_exprs[0].type  # constructed type, without arithmetic
+    self.type = base_type(self.sub_exprs)
+    self.check(self.type is not None, "Type error")
     return Expression.set_variables(self)
 Operator.set_variables = set_variables
 
@@ -790,8 +819,13 @@ def annotate(self: AComparison,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
+
     out = Operator.annotate(self, voc, q_vars)
-    out.type = BOOLT
+
+    # a≠b --> Not(a=b)
+    if len(self.sub_exprs) == 2 and self.operator == ['≠']:
+        out = NOT(EQUALS(self.sub_exprs)).annotate(voc, q_vars)
+        return out
 
     for e in self.sub_exprs:
         if self.operator[0] in "<>≤≥" and e.type:
@@ -803,12 +837,14 @@ def annotate(self: AComparison,
                        or not hasattr(decl, 'enumeration')
                        or decl.enumeration is None,
                         f"Expected numeric formula, got {e.type}: {e}")
-
-    # a≠b --> Not(a=b)
-    if len(self.sub_exprs) == 2 and self.operator == ['≠']:
-        out = NOT(EQUALS(self.sub_exprs))
     return out
 AComparison.annotate = annotate
+
+def set_variables(self: AppliedSymbol) -> Expression:
+    out = Operator.set_variables(self)
+    self.type = self.type if self.operator[0] in "+-⨯/" else BOOLT
+    return self
+AComparison.set_variables = set_variables
 
 
 # Class AUnary  #######################################################
