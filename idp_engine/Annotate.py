@@ -298,6 +298,8 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
                 eq = EQUALS([nv, arg])
                 print("eq")
                 print(eq)
+                print(renamed.body.sub_exprs)
+                print(renamed.body.sub_exprs[0])
                 if isinstance(renamed.body.sub_exprs[0],AppliedSymbol):
                     print("appliedsymbol")
                 elif isinstance(renamed.body.sub_exprs[0],NowAppliedSymbol):
