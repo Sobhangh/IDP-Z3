@@ -283,8 +283,6 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
         new_vars_dict = self.def_vars[decl.name]
         new_vars = list(new_vars_dict.values())
         renamed = deepcopy(r)
-        print("renamed1")
-        print(renamed)
 
         vars = {var.name : var for q in renamed.quantees for vars in q.vars for var in vars}
         args = renamed.definiendum.sub_exprs + ([renamed.out] if r.out else [])
@@ -298,8 +296,9 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
                 rename_args(renamed, {arg.name: nv})
             else:
                 eq = EQUALS([nv, arg])
-                print("before And rename")
-                print(renamed)
+                print("eq")
+                print(eq)
+                print(renamed.body.type)
                 renamed.body = AND([eq, renamed.body])
                 print("And rename")
                 print(renamed)
@@ -309,8 +308,6 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
         for v in vars.values():
             renamed.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {},ltc)],
                                   renamed.body)
-            print("renamed:")
-            print(renamed)
         self.renamed.setdefault(decl, []).append(renamed)
 
         # rename the variable for the value of the definiendum
