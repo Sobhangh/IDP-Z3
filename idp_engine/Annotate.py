@@ -217,11 +217,6 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     # self.level_symbols: dict[SymbolDeclaration, Symbol]
     dependencies = set()
     for r in self.rules:
-        if isinstance(r.body,AUnary):
-            if isinstance(r.body.f,NowAppliedSymbol):
-                print("now applied1")
-            else:
-                print("not nowapplied1")
         symbs: dict[str, Symbol] = {}
         r.body.collect_symbols(symbs)
         for s in symbs.values():
@@ -600,6 +595,9 @@ def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
         Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars,ltc,temporal_head) for e in self.sub_exprs]
+    if isinstance(self,AUnary):
+        if(isinstance(self.f,NowAppliedSymbol)):
+            print("now applied 2")
     return self.annotate1()
 Expression.annotate = annotate
 
