@@ -256,6 +256,8 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     nested = set()
     for r in self.rules:
         r.body.collect_nested_symbols(nested, False)
+        print("r.body")
+        print(r.body)
     for decl in self.inductive:
         self.check(decl not in nested,
                     f"Inductively defined nested symbols are not supported yet: "
@@ -283,6 +285,8 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
         new_vars_dict = self.def_vars[decl.name]
         new_vars = list(new_vars_dict.values())
         renamed = deepcopy(r)
+        print("renamed1")
+        print(renamed)
 
         vars = {var.name : var for q in renamed.quantees for vars in q.vars for var in vars}
         args = renamed.definiendum.sub_exprs + ([renamed.out] if r.out else [])
@@ -321,8 +325,6 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
         for v in vars.values():
             canonical.body = EXISTS([Quantee.make(v, sort=v.sort).annotate(voc, {},ltc)],
                                     canonical.body)
-            print("canonical")
-            print(canonical)
 
         canonical.definiendum.sub_exprs = new_vars[:-1] if r.out else new_vars
         canonical.out = new_vars[-1] if r.out else None
