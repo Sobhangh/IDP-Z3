@@ -32,8 +32,6 @@ And(Or(Not(married(Alice)), 20 < age(Bob)),
 
 Model 1
 ==========
-animal := {Cat, Dog, Frog}.
-person := {Alice, Bob, Tom}.
 married := {Alice, Bob}.
 spouse := {Alice -> Bob, Bob -> Alice}.
 affair := {(Alice, Alice)}.

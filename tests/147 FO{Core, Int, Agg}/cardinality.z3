@@ -91,7 +91,6 @@ And(Vehicle(o2),
 Model 1
 ==========
 Vehicle := {o2, o3}.
-fleetOf := {o1 -> f1, o2 -> f1, o3 -> f2}.
 weight := {o1 -> 3, o2 -> 4, o3 -> 5}.
 total := 9.
 min := 3.

@@ -26,6 +26,7 @@ from __future__ import annotations
 __all__ = ["Status", "Assignment", "Assignments"]
 
 
+from collections import defaultdict
 from copy import copy, deepcopy
 from enum import Enum, auto
 from typing import Optional, Tuple, TYPE_CHECKING
@@ -246,9 +247,12 @@ class Assignments(dict):
         `name := value`.
         """
         out : dict[SymbolDeclaration, dict[str, str]] = {}  # ordered set of strings
+        enumerated : dict[SymbolDeclaration, bool] = defaultdict(lambda: True)
         nullary = set()
         for a in self.values():
             if type(a.sentence) == AppliedSymbol:
+                if a.status not in [Status.DEFAULT, Status.STRUCTURE]:
+                    enumerated[a.symbol_decl] = False
                 args = ", ".join(str(e) for e in a.sentence.sub_exprs)
                 args = f"({args})" if 1 < len(a.sentence.sub_exprs) else args
 
@@ -288,5 +292,6 @@ class Assignments(dict):
                 sign = ':=' if finite_domain or k.out == BOOLT else '>>'
                 val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
                 val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
-            model_str += val
+            if not enumerated[k]:
+                model_str += val
         return model_str
