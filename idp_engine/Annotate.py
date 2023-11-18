@@ -300,7 +300,7 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
                 print(eq)
                 print(renamed)
                 print(renamed.body)
-                if isinstance(renamed.body,UnAppliedSymbol):
+                if isinstance(renamed.body,UnappliedSymbol):
                     print("unappliedsymbol")
                 elif isinstance(renamed.body,NowAppliedSymbol):
                     print("now applied")
