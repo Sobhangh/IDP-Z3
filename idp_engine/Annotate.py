@@ -595,9 +595,6 @@ def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
         Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars,ltc,temporal_head) for e in self.sub_exprs]
-    if isinstance(self,AUnary):
-        if(isinstance(self.f,NowAppliedSymbol)):
-            print("now applied 2")
     return self.annotate1()
 Expression.annotate = annotate
 
@@ -888,8 +885,10 @@ def replace(self, voc, q_vars):
     print(q_vars)
     if v_time in q_vars and q_vars[v_time].sort == time:
         self.sub_expr.sub_exprs.append(t)
-        print(self.sub_expr)
-        return self.sub_expr
+        if isinstance(self.sub_expr,NowAppliedSymbol):
+            print("it is the wrong type")
+        content: AppliedSymbol = self.sub_expr
+        return content
     self.sub_expr.sub_exprs.append(t)
     qt: Quantee = Quantee.make(t,time) 
     return AQuantification(parent=None,annotations=None,q='forall',quantees=[qt],f=self.sub_expr)
