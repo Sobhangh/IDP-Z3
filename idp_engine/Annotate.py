@@ -298,7 +298,12 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
                 eq = EQUALS([nv, arg])
                 print("eq")
                 print(eq)
-                print(type(renamed.body.sub_exprs[0]).__name__)
+                if isinstance(renamed.body.sub_exprs[0],AppliedSymbol):
+                    print("appliedsymbol")
+                elif isinstance(renamed.body.sub_exprs[0],NowAppliedSymbol):
+                    print("now applied")
+                else:
+                    print("other")
                 renamed.body = AND([eq, renamed.body])
                 print("And rename")
                 print(renamed)
