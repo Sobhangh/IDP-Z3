@@ -116,7 +116,7 @@ def annotate_declaration(self: ASTNode,
         s.annotate(voc, {})
     self.out.annotate(voc, {})
     for c in self.constructors:
-        c.type = self.sorts[0]
+        c.out = self.sorts[0]
         self.check(c.name not in voc.symbol_decls or self.name == CONCEPT,
                     f"duplicate '{c.name}' constructor for '{self.name}' type")
         voc.symbol_decls[c.name] = c
@@ -143,7 +143,6 @@ def annotate_declaration(self: SymbolDeclaration,
     for s in self.sorts:
         s.annotate(voc, {})
     self.out.annotate(voc, {})
-    self.type = self.out
 
     for s in chain(self.sorts, [self.out]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
@@ -185,7 +184,7 @@ def annotate(self: Expression,
 
     self.decl = voc.symbol_decls[self.name]
     self.variables = set()
-    self.type = self.decl.type
+    self.type = self.decl.out
     if self.out:
         self.ins = [s.annotate(voc, q_vars) for s in self.ins]
         self.out = self.out.annotate(voc, q_vars)
@@ -445,7 +444,7 @@ def annotate(self: Expression,
     if self.is_type_enumeration and enumeration.constructors:
         # create Constructors before annotating the tuples
         for c in enumeration.constructors:
-            c.type = self.symbol
+            c.out = self.symbol
             self.check(c.name not in voc.symbol_decls,
                     f"duplicate '{c.name}' constructor for '{self.name}' symbol")
             voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
@@ -536,11 +535,11 @@ def annotate(self: Expression,
         self.check(a.out.name in voc.symbol_decls,
                    f"Unknown type: {a.out}" )
         a.decl = SymbolDeclaration.make(self,
-            name=a.accessor, sorts=[self.type], out=a.out)
+            name=a.accessor, sorts=[self.out], out=a.out)
         a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
     self.tester = SymbolDeclaration.make(self,
-            name=f"is_{self.name}", sorts=[self.type], out=BOOLT)
+            name=f"is_{self.name}", sorts=[self.out], out=BOOLT)
     self.tester.by_z3 = True
     self.tester.annotate_declaration(voc)
     return self
@@ -772,7 +771,7 @@ def annotate(self: Operator,
 Operator.annotate = annotate
 
 def set_variables(self: Operator) -> Expression:
-    assert all(e.type for e in self.sub_exprs)
+    assert all(e.type for e in self.sub_exprs), "Can't handle nested concepts yet."
     self.type = base_type(self.sub_exprs)
     self.check(self.type is not None, "Type error")
     return Expression.set_variables(self)
@@ -830,12 +829,7 @@ def annotate(self: AComparison,
     for e in self.sub_exprs:
         if self.operator[0] in "<>≤≥" and e.type:
             decl = voc.symbol_decls.get(e.type.name, None)
-            self.check(voc.symbol_decls[e.type.name].base_decl in [INTT, REALT, DATET]
-                       or decl.type in [INTT, REALT, DATET]
-                       or (hasattr(decl, 'interpretation')
-                           and decl.interpretation is None)
-                       or not hasattr(decl, 'enumeration')
-                       or decl.enumeration is None,
+            self.check(voc.symbol_decls[e.type.name].base_decl in [INTT, REALT, DATET],
                         f"Expected numeric formula, got {e.type}: {e}")
     return out
 AComparison.annotate = annotate
@@ -967,7 +961,7 @@ def set_variables(self: AppliedSymbol) -> Expression:
     if not out.decl and out.symbol.name:
         out.decl = out.symbol.decl
     out.type = (BOOLT if out.is_enumerated or out.in_enumeration else
-            out.decl.type if out.decl and out.decl.type else
+            out.decl.out if out.decl and out.decl.out else
             out.symbol.sub_exprs[0].type.out if type(out.symbol)==SymbolExpr and out.symbol.eval else
             out.type)
     return out.simplify1()
@@ -1016,7 +1010,7 @@ def annotate(self: UnappliedSymbol,
         return q_vars[self.name]
     if self.name in voc.symbol_decls:
         self.decl = voc.symbol_decls[self.name]
-        self.type = self.decl.type
+        self.type = self.decl.out
         self.variables = set()
         self.check(type(self.decl) == Constructor,
                    f"{self} should be applied to arguments (or prefixed with a back-tick)")

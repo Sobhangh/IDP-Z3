@@ -321,7 +321,7 @@ def interpret(self: Constructor, problem: Theory) -> Constructor:
     # assert all(s.decl and isinstance(s.decl.out, Set_) for s in self.sorts), 'Internal error'
     if not self.sorts:
         self.range = [UnappliedSymbol.construct(self)]
-    elif any(s.out == self.type for s in self.sorts):  # recursive data type
+    elif any(s.out == self.out for s in self.sorts): # recursive data type
         self.range = None
     else:
         # assert all(isinstance(s.decl, SymbolDeclaration) for s in self.sorts), "Internal error"
@@ -632,7 +632,7 @@ def _interpret(self: AppliedSymbol,
     value, co_constraint = None, None
     if out.decl and problem:
         if out.is_enumerated:
-            assert out.decl.type != BOOLT, \
+            assert out.decl.out != BOOLT, \
                 f"Can't use 'is enumerated' with predicate {out.decl.name}."
             if out.decl.name in problem.interpretations:
                 interpretation = problem.interpretations[out.decl.name]

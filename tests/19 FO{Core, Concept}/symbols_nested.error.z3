@@ -45,6 +45,6 @@ Traceback (most recent call last):
     return self.set_variables()
            ^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in set_variables
-    assert all(e.type for e in self.sub_exprs)
-AssertionError
+    assert all(e.type for e in self.sub_exprs), "Can't handle nested concepts yet."
+AssertionError: Can't handle nested concepts yet.
 

@@ -11,20 +11,18 @@ erDiagram
     Set_ }o--|| Declaration: decl
     Declaration |o--o{ Set_ : sorts
     Declaration |o--|| Set_: out
-    Declaration |o--|| Set_: type
     Declaration |o--o{ Expression: decl
-    Set_ }o--|| Declaration: decl
     Set_ |o--o{ Set_: ins
     Set_ |o--o| Set_: out
     Set_ ||--o{ Expression: type
-    Constructor }|--|| Set_ : type
+    Constructor }o--o{ Set_ : sorts
+    Constructor }o--|| Set_ : out
     Declaration ||--o{ Constructor: constructors
 
     Declaration {
         Declaration base_decl
         List[Set_] sorts
         Set_ out
-        Set_ type
         List[Constructor] constructors
     }
     Set_ {
@@ -37,7 +35,8 @@ erDiagram
         Set_ type
     }
     Constructor {
-        Set_ type
+        List[Set_] sorts
+        Set_ out
     }
 ```
 

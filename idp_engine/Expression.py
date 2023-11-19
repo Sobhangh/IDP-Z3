@@ -511,7 +511,7 @@ class Constructor(ASTNode):
 
         sorts (List[Set_]): types of the arguments of the constructor
 
-        type (Set_): type that contains this constructor
+        out (Set_): type that contains this constructor
 
         arity (Int): number of arguments of the constructor
 
@@ -531,7 +531,7 @@ class Constructor(ASTNode):
 
         self.arity = len(self.sorts)
 
-        self.type: Optional[Set_] = None
+        self.out: Optional[Set_] = None
         self.symbol: Optional[Set_] = None
         self.tester: Optional[SymbolDeclaration] = None
         self.range: Optional[List[Expression]] = None
@@ -1159,7 +1159,7 @@ class AppliedSymbol(Expression):
     def construct(cls, constructor, args):
         out= cls.make(SymbolExpr.make(constructor.name), args)
         out.decl = constructor
-        out.type = constructor.type
+        out.type = constructor.out
         out.variables = set()
         return out
 
@@ -1294,7 +1294,7 @@ class UnappliedSymbol(Expression):
         """
         out = (cls)(None, name=constructor.name)
         out.decl = constructor
-        out.type = constructor.type
+        out.type = constructor.out
         out.variables = set()
         return out
 

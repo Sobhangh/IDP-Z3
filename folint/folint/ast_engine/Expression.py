@@ -257,10 +257,10 @@ def SCA_Check(self,detections):
     # check if elementen in enumeratie are of correct type, vb Lijn() in {Belgie}. expected type Kleur, Belgie is of type Land
     if self.is_enumeration =='in':
         for i in self.in_enumeration.tuples :
-            if self.decl.type != i.args[0].get_type():
+            if self.decl.out != i.args[0].get_type():
                 detections.append((i.args[0],
                     f"Element of wrong type : "
-                    f"expected type= {type_symbol_to_str(self.decl.type)} "
+                    f"expected type= {type_symbol_to_str(self.decl.out)} "
                     f"but given type= {type_symbol_to_str(i.args[0].get_type())}"
                     ,"Error"))
                 break

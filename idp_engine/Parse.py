@@ -140,7 +140,7 @@ def str_to_IDP2(type_: Set_,
             interp = getattr(decl.base_decl, "interpretation", None)
             enum_type = (interp.enumeration.type.name if interp else
                          decl.name if type(decl) == TypeDeclaration else
-                         decl.type.name)
+                         decl.out.name)
 
             if type_ == BOOLT or enum_type == BOOL:
                 out = (TRUE if val_string in ['true', 'True'] else
@@ -379,8 +379,6 @@ class TypeDeclaration(ASTNode):
 
         out (Set_): the Boolean type
 
-        type (Set_): BOOLT
-
         base_decl (TypeDeclaration, optional): bool, int, real or self
 
         constructors ([Constructor]): list of constructors in the enumeration
@@ -403,7 +401,6 @@ class TypeDeclaration(ASTNode):
         self.arity : int = 1
         self.sorts : List[Set_] = [Set_(None, self.name)]
         self.out : Set_ = BOOLT
-        self.type : Set_ = BOOLT
         self.base_decl : Optional[TypeDeclaration] = None
         self.block: Optional[Block] = None
 
@@ -480,8 +477,6 @@ class SymbolDeclaration(ASTNode):
 
         out (Set_): the type of the symbol
 
-        type (Set_, optional): type of an applied symbol; = self.out
-
         base_decl (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
 
         instances (dict[string, Expression]):
@@ -533,7 +528,6 @@ class SymbolDeclaration(ASTNode):
         self.heading: Optional[str] = None
         self.optimizable: bool = True
 
-        self.type : Optional[Set_] = None  # a string
         self.base_decl : Optional[TypeDeclaration]= None
         self.range : Optional[List[AppliedSymbol]]= None  # all possible terms.  Used in get_range and IO.py
         self.instances : Optional[dict[str, AppliedSymbol]]= None  # not starting with '_'
@@ -587,7 +581,7 @@ class SymbolDeclaration(ASTNode):
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` satisfies the predicate
         """
-        assert self.type == BOOLT and self.name is not None, "Internal error"
+        assert self.out == BOOLT and self.name is not None, "Internal error"
         (superset, filter) = extensions[self.name]
         if superset is not None:
             # superset.sort(key=lambda t: str(t))
@@ -1042,9 +1036,10 @@ class ConstructedFrom(Enumeration):
                  ) -> Expression:
         """returns True if args belong to the type enumeration"""
         # args must satisfy the tester of one of the constructors
+        #TODO add tests
         assert len(args) == 1, f"Incorrect arity in {self.parent.name}{args}"
         if type(args[0].decl) == Constructor:  # try to simplify it
-            self.check(self.parent.name == args[0].decl.type,
+            self.check(self.parent.name == args[0].decl.out,
                        f"Incorrect type of {args[0]} for {self.parent.name}")
             self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
                        f"Incorrect arity")
@@ -1059,7 +1054,8 @@ class ConstructedFrom(Enumeration):
                   ) -> Extension:
         def filter(args):
             if type(args[0]) != Variable and type(args[0].decl) == Constructor:  # try to simplify it
-                self.check(self.parent.name == args[0].decl.type,
+                #TODO add tests
+                self.check(self.parent.name == args[0].decl.out,
                         f"Incorrect type of {args[0]} for {self.parent.name}")
                 self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
                         f"Incorrect arity")
