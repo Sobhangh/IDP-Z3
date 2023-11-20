@@ -719,6 +719,9 @@ def set_variables(self: AQuantification) -> Expression:
     for q in self.quantees:  # add variables in sort expression
         for sort in q.sub_exprs:
             self.variables.update(sort.variables)
+    if type(self) == AQuantification:
+        for e in self.sub_exprs:
+            e.check(e.type == BOOLT, f"Quantified formula must be boolean (instead of {e.type})")
     return self
 AQuantification.set_variables = set_variables
 
@@ -863,10 +866,19 @@ def annotate(self: AAggregate,
 
         if self.aggtype == "sum" and len(self.sub_exprs) == 2:
             self.original = copy(self)
+            self.sub_exprs[0].check(
+                self.sub_exprs[0].type.decl.base_decl.name in [INT, REAL],
+                f"Must be numeric: {self.sub_exprs[0]}")
+            self.sub_exprs[1].check(
+                self.sub_exprs[1].type.decl.base_decl.name == BOOL,
+                f"Must be boolean: {self.sub_exprs[1]}")
             self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
                                     self.sub_exprs[0], ZERO).set_variables()]
 
         if self.aggtype == "#":
+            self.sub_exprs[0].check(
+                self.sub_exprs[0].type.decl.base_decl.name == BOOL,
+                f"Must be boolean: {self.sub_exprs[0]}")
             self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
                                  Number(number='0'))]
             self.type = INTT

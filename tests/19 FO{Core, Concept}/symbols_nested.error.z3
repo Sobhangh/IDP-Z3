@@ -33,18 +33,11 @@ Traceback (most recent call last):
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
                       ^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in <listcomp>
-    self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-                      ^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in annotate
-    self = Expression.annotate(self, voc, q_vars)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in annotate
     return self.set_variables()
            ^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in set_variables
-    assert all(e.type for e in self.sub_exprs), "Can't handle nested concepts yet."
-AssertionError: Can't handle nested concepts yet.
+    e.check(e.type == BOOLT, f"Quantified formula must be boolean (instead of {e.type})")
+  File "idp_engine/Expression.py", line ??, in check
+    raise IDPZ3Error(msg, self)
+idp_engine.utils.IDPZ3Error: Error: line 7 - colStart 69 - colEnd 76 => Quantified formula must be boolean (instead of None)
 
