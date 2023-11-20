@@ -201,7 +201,6 @@ def annotate(self, idp):
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self.voc, {},self.ltc) for e in self.definitions]
-    print(self.definitions)
 
     self.constraints = OrderedSet([e.annotate(self.voc, {},self.ltc)
                                     for e in self.constraints])
@@ -295,26 +294,7 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
                 rename_args(renamed, {arg.name: nv})
             else:
                 eq = EQUALS([nv, arg])
-                print("eq")
-                print(eq)
-                print(renamed)
-                print(renamed.body)
-                if isinstance(renamed.body,AUnary):
-                    if isinstance(renamed.body.f,NowAppliedSymbol):
-                        print("now applied")
-                    elif isinstance(renamed.body.f,AppliedSymbol):
-                        print("applied")
-                        print("sub expr len")
-                        print(len(renamed.body.sub_exprs))
-                    elif isinstance(renamed.body.f,UnappliedSymbol):
-                        print("unapplied")
-                    else:
-                        print("other type")
-                else:
-                    print("other type")
                 renamed.body = AND([eq, renamed.body])
-                print("And rename")
-                print(renamed)
 
         canonical = deepcopy(renamed)
 
@@ -605,11 +585,6 @@ def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     #self.sub_exprs =[]
     #for e in self.sub_exprs:
     #    self.sub_exprs.append(e.annotate(voc, q_vars,ltc,temporal_head))
-    if isinstance(self,AUnary):
-        if(isinstance(self.sub_exprs[0],NowAppliedSymbol)):
-            print("now applied 2")
-        else:
-            print("type is right??")
     return self.annotate1()
 Expression.annotate = annotate
 
@@ -899,11 +874,8 @@ def replace(self, voc, q_vars):
     #Is this type the correct time type?
     time: Type = TYPE('Tijd')
     t: Variable = VARIABLE(v_time,time)
-    print(q_vars)
     if v_time in q_vars and q_vars[v_time].sort == time:
         self.sub_expr.sub_exprs.append(t)
-        if isinstance(self.sub_expr,NowAppliedSymbol):
-            print("it is the wrong type")
         content: AppliedSymbol = self.sub_expr
         return content
     self.sub_expr.sub_exprs.append(t)
