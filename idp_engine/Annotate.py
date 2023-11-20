@@ -349,6 +349,8 @@ def annotate(self, voc, q_vars, ltc=False):
             temporal_head =2
         else:
             temporal_head=3
+        print("temporal_head")
+        print(temporal_head)
         d  = self.definiendum.replace(voc,q_vars)
         if isinstance(d,AQuantification):
             self.definiendum = d.f
@@ -886,6 +888,7 @@ NowAppliedSymbol.replace = replace
 v_time = 'time'
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     if ltc:
+        print("inside right place")
         self.check(temporal_head!=1, f"Not allowed to use Now[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)

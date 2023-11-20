@@ -650,8 +650,8 @@ class TheoryBlock(ASTNode):
         constraints = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
-        #self.ltc = True if kwargs.pop('ltc') else False
-        self.ltc = False
+        self.ltc = True if kwargs.pop('ltc') else False
+        #self.ltc = False
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
