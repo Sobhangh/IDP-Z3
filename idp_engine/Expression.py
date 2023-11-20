@@ -1335,7 +1335,7 @@ class NowAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = None
+        self.symbol  = SYMBOL('N')
         self.sub_expr: AppliedSymbol  = arg
 
         super().__init__()
