@@ -9,7 +9,7 @@ vocabulary V {
 theory T:V {
     // here comes the definitions and constraints
     Now[p()].
-    !i in test: q(i).
+    !i in Int: q(i).
 }
 
 structure S:V {
