@@ -917,13 +917,15 @@ class Operator(Expression):
         else:
             if isinstance(ops, str):
                 ops = [ops] * (len(operands)-1)
-            if isinstance(cls,AConjunction):
+            if cls==AConjunction:
                 print("And operands")
                 print(operands)
             out = (cls)(parent, ops, operands, annotations)
             if isinstance(out,AConjunction):
                 print("And out:")
                 print(out)
+                print("And operands2")
+                print(operands)
 
         if parent:  # for error messages
             out._tx_position = parent. _tx_position

@@ -13,10 +13,10 @@ theory T:V {
         Start[p()].
         Next[p()] <- not Now[p()].
     }
-    {
-        q(0).
-        !i in test: q(i+1) <- not q(i). 
-    }
+    //{
+        //q(0).
+        //!i in test: q(i+1) <- not q(i). 
+    //}
     //Start[p()].
     //((Now[p()] or Next[p()]) and not (Now[p()] and Next[p()])).
     
