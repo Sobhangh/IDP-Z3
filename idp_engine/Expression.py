@@ -568,7 +568,7 @@ class Set_(Expression):
         self.out = out
         self.sub_exprs = []
         self.decl: Optional[SymbolDeclaration] = None
-        super().__init__(self)
+        super().__init__(parent)
 
     def __str__(self):
         return self.name + ("" if not self.out else
