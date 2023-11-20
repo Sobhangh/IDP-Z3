@@ -522,7 +522,8 @@ class Expression(ASTNode):
                           mode: Semantics
                           ) -> Expression:
         return self  # monkey-patched
-
+    def propagate_changes(self):
+        return
 
 class Symbol(Expression):
     """Represents a Symbol.  Handles synonyms.
@@ -841,6 +842,10 @@ class AQuantification(Expression):
         for q in self.quantees:
             q.collect_symbols(symbols, co_constraints)
         return symbols
+    
+    def propagate_changes(self):
+        self.f = self.sub_exprs[0]
+        return super().propagate_changes()
 
 def FORALL(qs, expr, annotations=None):
     return AQuantification.make('∀', qs, expr, annotations)
@@ -1038,6 +1043,10 @@ class AUnary(Expression):
 
     def __str__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
+    
+    def propagate_changes(self):
+        self.f = self.sub_exprs[0]
+        return super().propagate_changes()
 
 def NOT(expr):
     return AUnary.make('¬', expr)
@@ -1101,6 +1110,10 @@ class AAggregate(Expression):
 
     def collect_symbols(self, symbols=None, co_constraints=True):
         return AQuantification.collect_symbols(self, symbols, co_constraints)
+    
+    def propagate_changes(self):
+        self.f = self.sub_exprs[0]
+        return super().propagate_changes()
 
 
 class AppliedSymbol(Expression):
@@ -1634,6 +1647,10 @@ class Brackets(Expression):
 
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
+
+    def propagate_changes(self):
+        self.f = self.sub_exprs[0]
+        return super().propagate_changes()
 
 
 class RecDef(Expression):

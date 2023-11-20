@@ -595,6 +595,7 @@ def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
         Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars,ltc,temporal_head) for e in self.sub_exprs]
+    self.propagate_changes()
     #self.sub_exprs =[]
     #for e in self.sub_exprs:
     #    self.sub_exprs.append(e.annotate(voc, q_vars,ltc,temporal_head))
@@ -668,6 +669,7 @@ def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     for q in self.quantees:
         q.annotate(voc, q_v)
     self.sub_exprs = [e.annotate(voc, q_v,ltc,temporal_head) for e in self.sub_exprs]
+    self.propagate_changes()
     return self.annotate1()
 AQuantification.annotate = annotate
 
@@ -730,6 +732,7 @@ AEquivalence.annotate1 = annotate1
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     # reverse the implication
     self.sub_exprs = [e.annotate(voc, q_vars,ltc,temporal_head) for e in self.sub_exprs]
+    self.propagate_changes()
     out = AImplication.make(ops=['⇒'], operands=list(reversed(list(self.sub_exprs))),
                         annotations=None, parent=self)
     out.original = self
