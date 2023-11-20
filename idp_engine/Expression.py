@@ -888,7 +888,13 @@ class Operator(Expression):
         self.operator = list(map(
             lambda op: Operator.NORMAL.get(op, op)
             , self.operator))
-
+        if isinstance(self,AConjunction):
+            print("AND Class in operator")
+            print(self)
+            print("parent")
+            print(parent)
+            print("sub expres")
+            print(sub_exprs)
         super().__init__(parent)
 
         self.type = BOOL if self.operator[0] in '&|∧∨⇒⇐⇔' \
@@ -917,15 +923,10 @@ class Operator(Expression):
         else:
             if isinstance(ops, str):
                 ops = [ops] * (len(operands)-1)
-            if cls==AConjunction:
-                print("And operands")
-                print(operands)
             out = (cls)(parent, ops, operands, annotations)
             if isinstance(out,AConjunction):
                 print("And out:")
                 print(out)
-                print("And operands2")
-                print(operands)
 
         if parent:  # for error messages
             out._tx_position = parent. _tx_position
