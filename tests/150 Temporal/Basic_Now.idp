@@ -1,12 +1,15 @@
 vocabulary V {
     // here comes the specification of the vocabulary
+    type test is {0..5}
     p: () → Bool
+    q: test -> Bool
     Temporal p
 }
 
 theory T:V {
     // here comes the definitions and constraints
     Now[p()].
+    !i in test: q(i).
 }
 
 structure S:V {
