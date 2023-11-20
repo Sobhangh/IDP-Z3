@@ -304,6 +304,8 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
                         print("now applied")
                     elif isinstance(renamed.body.f,AppliedSymbol):
                         print("applied")
+                        print("sub expr len")
+                        print(len(renamed.body.sub_exprs))
                     elif isinstance(renamed.body.f,UnappliedSymbol):
                         print("unapplied")
                     else:

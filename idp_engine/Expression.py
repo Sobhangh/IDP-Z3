@@ -891,8 +891,6 @@ class Operator(Expression):
         if isinstance(self,AConjunction):
             print("AND Class in operator")
             print(self)
-            print("parent")
-            print(parent)
             print("sub expres")
             print(sub_exprs)
         super().__init__(parent)
