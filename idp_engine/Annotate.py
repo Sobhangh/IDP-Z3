@@ -302,8 +302,12 @@ def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
                 if isinstance(renamed.body,AUnary):
                     if isinstance(renamed.body.f,NowAppliedSymbol):
                         print("now applied")
+                    elif isinstance(renamed.body.f,AppliedSymbol):
+                        print("applied")
+                    elif isinstance(renamed.body.f,UnappliedSymbol):
+                        print("unapplied")
                     else:
-                        print("not nowapplied")
+                        print("other type")
                 else:
                     print("other type")
                 renamed.body = AND([eq, renamed.body])
