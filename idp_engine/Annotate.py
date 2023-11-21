@@ -273,7 +273,7 @@ def wrapping_quantifier(constraint):
     if isinstance(constraint, AppliedSymbol):
         return 0       
     if isinstance(constraint,AQuantification):
-        if e.q == '∃':
+        if constraint.q == '∃':
             quant = True
     for e in constraint.sub_exprs:
         r = wrapping_quantifier(e)
