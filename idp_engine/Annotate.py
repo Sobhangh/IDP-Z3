@@ -211,8 +211,6 @@ TheoryBlock.annotate = annotate
 
 def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     self.rules = [r.annotate(voc, q_vars,ltc) for r in self.rules]
-    print("rules")
-    print(self.rules)
     
 
     # create level-mapping symbols, as needed
@@ -352,8 +350,6 @@ def annotate(self, voc, q_vars, ltc=False):
             temporal_head =2
         else:
             temporal_head=3
-        print("temporal head")
-        print(temporal_head)
         d  = self.definiendum.replace(voc,q_vars)
         if isinstance(d,AQuantification):
             self.definiendum = d.f
@@ -616,7 +612,7 @@ AIfExpr.annotate1 = annotate1
 # Class Quantee  #######################################################
 
 def annotate(self, voc, q_vars ,ltc=False,temporal_head=0):
-    Expression.annotate(self, voc, q_vars)
+    Expression.annotate(self, voc, q_vars,ltc,temporal_head)
     for vars in self.vars:
         self.check(not self.sub_exprs
                    or not self.sub_exprs[0].decl
@@ -938,8 +934,6 @@ StartAppliedSymbol.replace = replace
 
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     if ltc:
-        print("Start temporal head")
-        print(temporal_head)
         self.check(temporal_head<=1, f"Not allowed to use Start[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
