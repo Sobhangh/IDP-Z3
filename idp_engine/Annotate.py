@@ -202,27 +202,29 @@ def annotate(self, idp):
 
     self.definitions = [e.annotate(self.voc, {},self.ltc) for e in self.definitions]
 
-    #if there is Start present then now and next should not be
-    for e in self.constraints:
-        r = check_start(e)
-        self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
-
-    # now or next cannot be inside negation (first part of an implication also but check if they dont cancel each other out)
-    # is it possible to say that negeation outside start/now/next will be pushed inside quantification? yes , so if the negation is placed outside of the wraping quantifier then it is not acceptable otherwise it is.
-
     constraints = OrderedSet()
-    time: Type = TYPE('Tijd')
-    t: Variable = VARIABLE(v_time,time)
-    qt: Quantee = Quantee.make(t,time) 
-    #if there is now or next wrap the rest around a quantifier containing time.(if there is an existential quantifier which has next/now inside then returns an error)
-    for e in self.constraints:
-        r = wrapping_quantifier(e)
-        self.check(r != -1 , f"Can not have Now/Next inside the scope of existential quantifier")
-        if r == 1:
-            constraints.append(AQuantification(None,None,'forall',[qt],e))
-        else:
-            constraints.append(e)
-    
+    if self.ltc:
+        #if there is Start present then now and next should not be
+        for e in self.constraints:
+            r = check_start(e)
+            self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
+
+        # now or next cannot be inside negation (first part of an implication also but check if they dont cancel each other out)
+        # is it possible to say that negeation outside start/now/next will be pushed inside quantification? yes , so if the negation is placed outside of the wraping quantifier then it is not acceptable otherwise it is.
+        time: Type = TYPE('Tijd')
+        t: Variable = VARIABLE(v_time,time)
+        qt: Quantee = Quantee.make(t,time) 
+        #if there is now or next wrap the rest around a quantifier containing time.(if there is an existential quantifier which has next/now inside then returns an error)
+        for e in self.constraints:
+            r = wrapping_quantifier(e)
+            self.check(r != -1 , f"Can not have Now/Next inside the scope of existential quantifier")
+            if r == 1:
+                constraints.append(AQuantification(None,None,'forall',[qt],e))
+            else:
+                constraints.append(e)
+    else:
+        for e in self.constraints:
+            constraints.append(e)    
     #changed self.constraints to constraints
     self.constraints = OrderedSet([e.annotate(self.voc, {},self.ltc)
                                     for e in constraints])
