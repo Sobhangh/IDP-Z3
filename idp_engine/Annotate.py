@@ -644,7 +644,7 @@ Expression.set_variables = set_variables
 def set_variables(self: AIfExpr) -> Expression:
     self.sub_exprs[0].check(self.sub_exprs[0].type == BOOLT,
         f"Boolean expected ({self.sub_exprs[0].type} found)")
-    self.type = base_type([self.sub_exprs[1], self.sub_exprs[2]])
+    self.type = base_type(self.sub_exprs[1:])
     return Expression.set_variables(self)
 AIfExpr.set_variables = set_variables
 
@@ -724,7 +724,8 @@ def set_variables(self: AQuantification) -> Expression:
             self.variables.update(sort.variables)
     if type(self) == AQuantification:
         for e in self.sub_exprs:
-            e.check(e.type == BOOLT, f"Quantified formula must be boolean (instead of {e.type})")
+            e.check(e.type == BOOLT,
+                f"Quantified formula must be boolean (instead of {e.type})")
     return self
 AQuantification.set_variables = set_variables
 
@@ -789,8 +790,9 @@ Operator.set_variables = set_variables
 def set_variables(self: AImplication) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Implication is not associative.  Please use parenthesis.")
-    self.type = base_type(self.sub_exprs)
-    self.check(self.type == BOOLT, "Booleans expected ({self.type} found)")
+    for e in self.sub_exprs:
+        e.check(e.type == BOOLT,
+                f"Formula must be boolean (instead of {e.type})")
     return Expression.set_variables(self)
 AImplication.set_variables = set_variables
 
@@ -800,7 +802,9 @@ AImplication.set_variables = set_variables
 def set_variables(self: AEquivalence) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Equivalence is not associative.  Please use parenthesis.")
-    self.type = BOOLT
+    for e in self.sub_exprs:
+        e.check(e.type == BOOLT,
+                f"Formula must be boolean (instead of {e.type})")
     return Expression.set_variables(self)
 AEquivalence.set_variables = set_variables
 
@@ -843,7 +847,11 @@ AComparison.annotate = annotate
 
 def set_variables(self: AppliedSymbol) -> Expression:
     out = Operator.set_variables(self)
-    self.type = self.type if self.operator[0] in "+-⨯/" else BOOLT
+    self.type = base_type(self.sub_exprs)  # check equality of types
+    self.check(self.type in [INTT, REALT, DATET]
+               or all(e not in "<>≤≥" for e in self.operator),
+            f"Comparison must be between numbers (instead of {self.type})")
+    self.type = BOOLT
     return self
 AComparison.set_variables = set_variables
 
@@ -932,6 +940,9 @@ def annotate(self: AAggregate,
                     applied.co_constraint.annotations['reading'] = f"Calculation of {self.code}"
                 return applied
         self.annotated = True
+        self.type = base_type(self.sub_exprs)
+        self.sub_exprs[0].check(self.type in [INTT, REALT, DATET],
+            f"Aggregate formula must be numeric (instead of {self.type})")
     return self
 AAggregate.annotate = annotate
 AAggregate.set_variables = AQuantification.set_variables
