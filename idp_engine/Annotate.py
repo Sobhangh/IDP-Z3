@@ -211,6 +211,9 @@ TheoryBlock.annotate = annotate
 
 def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     self.rules = [r.annotate(voc, q_vars,ltc) for r in self.rules]
+    print("rules")
+    print(self.rules)
+    
 
     # create level-mapping symbols, as needed
     # self.level_symbols: dict[SymbolDeclaration, Symbol]
@@ -672,7 +675,7 @@ AQuantification.annotate1 = annotate1
 # Class Operator  #######################################################
 
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
-    self = Expression.annotate(self, voc, q_vars)
+    self = Expression.annotate(self, voc, q_vars,ltc,temporal_head)
 
     for e in self.sub_exprs:
         if self.operator[0] in '&|∧∨⇒⇐⇔':
