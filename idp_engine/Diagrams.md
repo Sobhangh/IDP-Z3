@@ -5,7 +5,7 @@ Datamodels
 
 For typing:
 
-```{mermaid}
+```mermaid
 erDiagram
     Declaration ||--o{ Declaration : base_decl
     Set_ }o--|| Declaration: decl
