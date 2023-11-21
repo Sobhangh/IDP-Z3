@@ -230,51 +230,58 @@ TheoryBlock.annotate = annotate
 
 # if there is no temporal returns 0, if start only 1, if now or next 2, if start and (now or next) then 3
 def check_start(constraint,start=False,now_or_next = False):
-
+    s = False
+    n =False
+    if isinstance(constraint,StartAppliedSymbol):
+        if now_or_next:
+            return 3
+        return 1
+    elif isinstance(constraint,NowAppliedSymbol) or isinstance(e,NextAppliedSymbol):
+        if start:
+            return 3
+        return 2
+    elif isinstance(constraint,AppliedSymbol):
+        return 0
     for e in constraint.sub_exprs:
-        if isinstance(e,StartAppliedSymbol):
-            if now_or_next:
-                return 3
+        r = check_start(e,start,now_or_next)
+        if r == 3:
+            return 3
+        elif r == 1:
             start = True
-        elif isinstance(e,NowAppliedSymbol) or isinstance(e,NextAppliedSymbol):
-            if start:
-                return 3
-            now_or_next = True
-        elif isinstance(e,AppliedSymbol):
-            return 0
-        else:
-            r = check_start(e,start,now_or_next)
-            if r == 3:
-                return 3
-            elif r == 1:
-                start = True
-            elif r == 2:
-                now_or_next=True
+        elif r == 2:
+            now_or_next=True
+        if start and now_or_next:
+            return 3
+    if start and now_or_next:
+        return 3
+    if start:
+        return 1
+    if now_or_next:
+        return 2
     return 0
 
 # returns 1 if there is now/next; if now/next  is inside existential quantifer -1; otherwise 0
 def wrapping_quantifier(constraint):
     temporal = False
+    quant = False
     if not isinstance(constraint,Expression):
             return 0
+    if isinstance(constraint,NowAppliedSymbol) or isinstance(e,NextAppliedSymbol):
+        return 1
+    if isinstance(constraint, AppliedSymbol):
+        return 0       
+    if isinstance(constraint,AQuantification):
+        if e.q == '∃':
+            quant = True
     for e in constraint.sub_exprs:
-        if isinstance(e,NowAppliedSymbol) or isinstance(e,NextAppliedSymbol):
-            return 1
-        if isinstance(e, AppliedSymbol):
-            return 0
-        if isinstance(e,AQuantification):
-            if e.q == '∃':
-                r = wrapping_quantifier(e)
-                if r == 1 or r ==-1:
-                    return -1
-                    #return 0
-        else:       
-            r = wrapping_quantifier(e)
-            if r == -1:
-                return -1
-            if r == 1:
-                temporal = True
+        r = wrapping_quantifier(e)
+        if r == -1:
+            return -1
+        if r == 1:
+            temporal = True
     if temporal:
+        if quant:
+            return -1
         return 1
     return 0
 
