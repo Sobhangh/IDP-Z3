@@ -685,7 +685,6 @@ class Quantee(Expression):
                  subtype: Optional[Set_] = None,
                  sort: Optional[SymbolExpr] = None):
         self.subtype = subtype
-        sort = sort
         if self.subtype:
             self.check(self.subtype.name == CONCEPT or self.subtype.out is None,
                    f"Can't use signature after predicate {self.subtype.name}")

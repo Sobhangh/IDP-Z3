@@ -642,9 +642,9 @@ Expression.set_variables = set_variables
 # Class AIfExpr  #######################################################
 
 def set_variables(self: AIfExpr) -> Expression:
-    self.type = self.sub_exprs[AIfExpr.THEN].type
-    if not self.type:
-        self.type = self.sub_exprs[AIfExpr.ELSE].type
+    self.sub_exprs[0].check(self.sub_exprs[0].type == BOOLT,
+        f"Boolean expected ({self.sub_exprs[0].type} found)")
+    self.type = base_type([self.sub_exprs[1], self.sub_exprs[2]])
     return Expression.set_variables(self)
 AIfExpr.set_variables = set_variables
 
@@ -669,9 +669,12 @@ def annotate_quantee(self: Expression,
                 f"the quantified variable '{var.name}' cannot have"
                 f" the same name as another symbol")
             # 1. get variable sort from the quantee, if possible
-            var.type = (self.sub_exprs[0].decl.sorts[i]  # `!x in p` or `! (x,y) in p` or `!x in Concept[...]`
-                        if self.sub_exprs and self.sub_exprs[0].decl
-                        else None)
+            if len(vars) == 1 and self.sub_exprs and type(self.sub_exprs[0]) == Set_:
+                var.type = self.sub_exprs[0]   # `!x in p` or `!x in Concept[...]`
+            elif self.sub_exprs and self.sub_exprs[0].decl:
+                var.type = self.sub_exprs[0].decl.sorts[i]  # `! (x,y) in p` or `in $(p)`
+            else:
+                var.type = None
             # 2. compare with variable declaration, if any
             var_decl = voc.symbol_decls.get(var.name.rstrip(string.digits), None)
             if var_decl and type(var_decl) == VarDeclaration:
@@ -786,7 +789,8 @@ Operator.set_variables = set_variables
 def set_variables(self: AImplication) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Implication is not associative.  Please use parenthesis.")
-    self.type = BOOLT
+    self.type = base_type(self.sub_exprs)
+    self.check(self.type == BOOLT, "Booleans expected ({self.type} found)")
     return Expression.set_variables(self)
 AImplication.set_variables = set_variables
 
@@ -968,14 +972,25 @@ AppliedSymbol.annotate = annotate
 
 def set_variables(self: AppliedSymbol) -> Expression:
     out = Expression.set_variables(self)
+    assert type(out) == AppliedSymbol, "Internal error"
     out.symbol = out.symbol.set_variables()
     out.variables.update(out.symbol.variables)
     if not out.decl and out.symbol.name:
         out.decl = out.symbol.decl
-    out.type = (BOOLT if out.is_enumerated or out.in_enumeration else
-            out.decl.out if out.decl and out.decl.out else
-            out.symbol.sub_exprs[0].type.out if type(out.symbol)==SymbolExpr and out.symbol.eval else
-            out.type)
+
+    if out.is_enumerated or out.in_enumeration:
+        out.type = BOOLT
+    elif out.decl and out.decl.out:
+        out.type = out.decl.out
+    elif type(out.symbol)==SymbolExpr and out.symbol.eval:
+        type_ = out.symbol.sub_exprs[0].type
+        if type_.name == CONCEPT:
+            out.type = type_.out
+        else:
+            while not type_.out:  # type is a subset of a concept
+                type_ = type_.decl.sorts[0]
+            out.type = type_.out
+
     return out.simplify1()
 AppliedSymbol.set_variables = set_variables
 
