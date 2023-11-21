@@ -6,7 +6,7 @@ vocabulary V {
 
 theory LTC T:V {
     // here comes the definitions and constraints
-    Now[p()].
+    //Now[p()].
 }
 
 structure S:V {
