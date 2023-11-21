@@ -231,15 +231,16 @@ TheoryBlock.annotate = annotate
 
 # if there is no temporal returns 0, if start only 1, if now or next 2, if start and (now or next) then 3
 def check_start(constraint,start=False,now_or_next = False):
+
     for e in constraint.sub_exprs:
         if isinstance(e,StartAppliedSymbol):
             if now_or_next:
                 return 3
-            return 1
+            start = True
         elif isinstance(e,NowAppliedSymbol) or isinstance(e,NextAppliedSymbol):
             if start:
                 return 3
-            return 2
+            now_or_next = True
         elif isinstance(e,AppliedSymbol):
             return 0
         else:
@@ -265,16 +266,18 @@ def wrapping_quantifier(constraint):
         if isinstance(e,AQuantification):
             if e.q == '∃':
                 r = wrapping_quantifier(e)
-                if r == 1:
+                if r == 1 or r ==-1:
                     return -1
-                return 0
-        r = wrapping_quantifier(e)
-        if r == -1:
-            return -1
-        if r == 1:
-            temporal = True
+                    #return 0
+        else:       
+            r = wrapping_quantifier(e)
+            if r == -1:
+                return -1
+            if r == 1:
+                temporal = True
     if temporal:
         return 1
+    return 0
 
 # Class Definition  #######################################################
 
