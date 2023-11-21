@@ -238,7 +238,7 @@ def check_start(constraint,start=False,now_or_next = False):
         if now_or_next:
             return 3
         return 1
-    elif isinstance(constraint,NowAppliedSymbol) or isinstance(e,NextAppliedSymbol):
+    elif isinstance(constraint,NowAppliedSymbol) or isinstance(constraint,NextAppliedSymbol):
         if start:
             return 3
         return 2
@@ -268,7 +268,7 @@ def wrapping_quantifier(constraint):
     quant = False
     if not isinstance(constraint,Expression):
             return 0
-    if isinstance(constraint,NowAppliedSymbol) or isinstance(e,NextAppliedSymbol):
+    if isinstance(constraint,NowAppliedSymbol) or isinstance(constraint,NextAppliedSymbol):
         return 1
     if isinstance(constraint, AppliedSymbol):
         return 0       
