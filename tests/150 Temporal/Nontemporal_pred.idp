@@ -1,0 +1,20 @@
+vocabulary V {
+    // here comes the specification of the vocabulary
+    p: () → Bool
+    q: Int -> Bool
+    Temporal p
+}
+
+theory T:V {
+    // here comes the definitions and constraints
+    Now[q()].
+}
+
+structure S:V {
+    // here comes the interpretation of some symbols
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}
