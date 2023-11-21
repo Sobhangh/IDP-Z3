@@ -1267,7 +1267,7 @@ class StartAppliedSymbol(Expression):
                  arg):
         self.symbol  = None
         self.sub_expr: AppliedSymbol  = arg
-
+        self.sub_exprs = [arg]
         super().__init__()
 
         #self.as_disjunction = None
@@ -1337,7 +1337,7 @@ class NowAppliedSymbol(Expression):
                  arg):
         self.symbol  = SYMBOL('N')
         self.sub_expr: AppliedSymbol  = arg
-
+        self.sub_exprs = [arg]
         super().__init__()
 
         #self.as_disjunction = None
@@ -1407,7 +1407,8 @@ class NextAppliedSymbol(Expression):
                  arg):
         self.symbol  = None
         self.sub_expr: AppliedSymbol  = arg
-
+        self.sub_exprs = [arg]
+        
         super().__init__()
 
         #self.as_disjunction = None
