@@ -6,7 +6,7 @@ vocabulary V {
 
 theory LTC T:V {
     // here comes the definitions and constraints
-    Start[p()] and Next[p()] or Now[p()].
+    (Start[p()] and  (Next[p()])) or Now[p()].
 }
 
 structure S:V {

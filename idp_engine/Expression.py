@@ -784,6 +784,7 @@ class AQuantification(Expression):
         self.q = q
         self.quantees: List[Quantee] = quantees
         self.f = f
+        self.wrapper = False
 
         self.q = ('∀' if self.q in ['!', 'forall'] else
                   '∃' if self.q in ["?", "thereisa"] else

@@ -202,10 +202,79 @@ def annotate(self, idp):
 
     self.definitions = [e.annotate(self.voc, {},self.ltc) for e in self.definitions]
 
+    # now or next cannot be inside negation (first part of an implication also but check if they dont cancel each other out)
+    # is it possible to say that negeation outside start/now/next will be pushed inside quantification? yes , so if the negation is placed outside of the wraping quantifier then it is not acceptable otherwise it is.
+
+    constraints = OrderedSet()
+    time: Type = TYPE('Tijd')
+    t: Variable = VARIABLE(v_time,time)
+    qt: Quantee = Quantee.make(t,time) 
+    #if there is now or next wrap the rest around a quantifier containing time.(if there is an existential quantifier which has next/now inside then returns an error)
+    for e in self.constraints:
+        r = wrapping_quantifier(e)
+        self.check(r != -1 , f"Can not have Now/Next inside the scope of existential quantifier")
+        if r == 1:
+            constraints.append(AQuantification(None,None,'forall',[qt],e))
+        else:
+            constraints.append(e)
+
+    #if there is Start present then now and next should not be
+    for e in constraints:
+        r = check_start(e)
+        self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
+
+    
+    #changed self.constraints to constraints
     self.constraints = OrderedSet([e.annotate(self.voc, {},self.ltc)
-                                    for e in self.constraints])
+                                    for e in constraints])
 TheoryBlock.annotate = annotate
 
+# if there is no temporal returns 0, if start only 1, if now or next 2, if start and (now or next) then 3
+def check_start(constraint,start=False,now_or_next = False):
+    for e in constraint.sub_exprs:
+        if isinstance(e,StartAppliedSymbol):
+            if now_or_next:
+                return 3
+            return 1
+        elif isinstance(e,NowAppliedSymbol) or isinstance(e,NextAppliedSymbol):
+            if start:
+                return 3
+            return 2
+        elif isinstance(e,AppliedSymbol):
+            return 0
+        else:
+            r = check_start(e,start,now_or_next)
+            if r == 3:
+                return 3
+            elif r == 1:
+                start = True
+            elif r == 2:
+                now_or_next=True
+    return 0
+
+# returns 1 if there is now/next; if now/next  is inside existential quantifer -1; otherwise 0
+def wrapping_quantifier(constraint):
+    temporal = False
+    if not isinstance(constraint,Expression):
+            return 0
+    for e in constraint.sub_exprs:
+        if isinstance(e,NowAppliedSymbol) or isinstance(e,NextAppliedSymbol):
+            return 1
+        if isinstance(e, AppliedSymbol):
+            return 0
+        if isinstance(e,AQuantification):
+            if e.q == '∃':
+                r = wrapping_quantifier(e)
+                if r == 1:
+                    return -1
+                return 0
+        r = wrapping_quantifier(e)
+        if r == -1:
+            return -1
+        if r == 1:
+            temporal = True
+    if temporal:
+        return 1
 
 # Class Definition  #######################################################
 
@@ -339,11 +408,12 @@ Definition.annotate = annotate
 
 def annotate(self, voc, q_vars, ltc=False):
     self.original = copy(self)
+    #temporal head 0 means it is not in a definition, 1 is start head, 2 now, 3 next, -1 no temporal predicate.
     temporal_head =0
     d = None
     if not isinstance(self.definiendum, AppliedSymbol):
         if not ltc:
-            temporal_head =0
+            temporal_head =-1
         elif isinstance(self.definiendum,StartAppliedSymbol):
             temporal_head =1
         elif isinstance(self.definiendum,NowAppliedSymbol):
@@ -915,6 +985,7 @@ NextAppliedSymbol.replace = replace
 
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     if ltc:
+        # for the head temporal =0 is not Ok
         self.check(temporal_head==0 or temporal_head ==3, f"Not allowed to use Next[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
