@@ -8,7 +8,7 @@ theory LTC T:V {
     // here comes the definitions and constraints
     
     {
-        Now[p()] <- Now[p()] and Start[p()].
+        Now[p()] <- (Now[p()] and Start[p()]).
     }
     
 }
