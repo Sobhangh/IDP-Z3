@@ -8,7 +8,7 @@ vocabulary V {
 
 theory LTC T:V {
     // here comes the definitions and constraints
-    (q() and  (? i in Int: i < 10 and r(i) and  not Next[p()])) or Now[p()].
+    (q() and  (? i in Int: (i < 10 and r(i) and  not Next[p()]))) or Now[p()].
 }
 
 structure S:V {

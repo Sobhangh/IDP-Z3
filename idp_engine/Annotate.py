@@ -202,6 +202,11 @@ def annotate(self, idp):
 
     self.definitions = [e.annotate(self.voc, {},self.ltc) for e in self.definitions]
 
+    #if there is Start present then now and next should not be
+    for e in self.constraints:
+        r = check_start(e)
+        self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
+
     # now or next cannot be inside negation (first part of an implication also but check if they dont cancel each other out)
     # is it possible to say that negeation outside start/now/next will be pushed inside quantification? yes , so if the negation is placed outside of the wraping quantifier then it is not acceptable otherwise it is.
 
@@ -217,12 +222,6 @@ def annotate(self, idp):
             constraints.append(AQuantification(None,None,'forall',[qt],e))
         else:
             constraints.append(e)
-
-    #if there is Start present then now and next should not be
-    for e in constraints:
-        r = check_start(e)
-        self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
-
     
     #changed self.constraints to constraints
     self.constraints = OrderedSet([e.annotate(self.voc, {},self.ltc)
