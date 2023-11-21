@@ -11,7 +11,7 @@ theory LTC T:V {
 
 structure S:V {
     // here comes the interpretation of some symbols
-    p := {0}
+    p := {0}.
 }
 
 procedure main () {
