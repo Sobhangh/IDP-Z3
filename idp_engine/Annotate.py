@@ -116,6 +116,7 @@ def annotate(self, voc):
         if isinstance(d,SymbolDeclaration) and (not d.temp):
             if d.name == self.symbol.name:
                 print("temporal decl symbols")
+                print(d.name)
                 print(d.symbols)
                 d.temp = True
                 d.arity +=1
