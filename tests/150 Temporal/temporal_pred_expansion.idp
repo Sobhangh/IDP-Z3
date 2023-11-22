@@ -1,5 +1,5 @@
 vocabulary V {
-    // here comes the specification of the vocabulary
+    r,q: () → Bool
     p: () → Bool
     Temporal p
 }

@@ -364,6 +364,14 @@ class Vocabulary(ASTNode):
                             f"in vocabulary and block {block.name}")
                 block.interpretations[s.name] = s.interpretation
 
+    def generate_now_voc(self):
+        nowvoc = deepcopy(self)
+        nowvoc.tempdcl = []
+        return nowvoc
+    def generate_next_voc(self):
+        nowvoc = deepcopy(self)
+        nowvoc.tempdcl = []
+        return nowvoc
 
 class Import(ASTNode):
     def __init__(self, **kwargs):
@@ -530,7 +538,8 @@ class SymbolDeclaration(ASTNode):
         self.out : Symbol = kwargs.pop('out')
         if self.out is None:
             self.out = SYMBOL(BOOL)
-
+        print("SYMbol declaration name")
+        print(self.name)
         self.arity = len(self.sorts)
         self.annotations : Annotations = self.annotations.annotations if self.annotations else {}
         self.private = None

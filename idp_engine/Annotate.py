@@ -968,7 +968,7 @@ def replace(self, voc, q_vars):
 NowAppliedSymbol.replace = replace
 v_time = 'time'
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
-    if ltc:
+    if ltc and temporal_head != 0:
         self.check(temporal_head!=1, f"Not allowed to use Now[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
@@ -996,9 +996,9 @@ def replace(self, voc, q_vars):
 NextAppliedSymbol.replace = replace
 
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
-    if ltc:
+    if ltc and temporal_head != 0:
         # for the head temporal =0 is not Ok
-        self.check(temporal_head==0 or temporal_head ==3, f"Not allowed to use Next[]")
+        self.check(temporal_head ==3, f"Not allowed to use Next[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
 
@@ -1016,7 +1016,7 @@ def replace(self, voc, q_vars):
 StartAppliedSymbol.replace = replace
 
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
-    if ltc:
+    if ltc and temporal_head != 0:
         self.check(temporal_head<=1, f"Not allowed to use Start[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
