@@ -368,8 +368,17 @@ class Vocabulary(ASTNode):
         nowvoc = deepcopy(self)
         nowvoc.tempdcl = []
         return nowvoc
+    
     def generate_next_voc(self):
         nowvoc = deepcopy(self)
+        for t in nowvoc.tempdcl:
+            for d in nowvoc.declarations:
+                if isinstance(d,SymbolDeclaration):
+                    if d.name == t.symbol.name:
+                        d.arity -=1
+                        d.sorts.pop()
+                        next_d = deepcopy(d)
+                        next_d.name = d.name + "_next"
         nowvoc.tempdcl = []
         return nowvoc
 

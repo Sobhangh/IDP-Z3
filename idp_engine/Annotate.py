@@ -46,8 +46,6 @@ from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
 def annotate(self, idp):
     self.idp = idp
 
-    print("symbol dec name")
-    print(self.declarations)
     # process Import and determine the constructors of CONCEPT
     temp = {}  # contains the new self.declarations
     for s in self.declarations:
@@ -117,8 +115,8 @@ def annotate(self, voc):
     for d in voc.declarations:
         if isinstance(d,SymbolDeclaration) and (not d.temp):
             if d.name == self.symbol.name:
-                print("temporal declarations")
-                print(d)
+                print("temporal decl symbols")
+                print(d.symbols)
                 d.temp = True
                 d.arity +=1
                 d.sorts.append(TYPE('Tijd'))
@@ -135,9 +133,6 @@ def annotate(self, voc):
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
-#    if self.temp :
-#        self.arity +=1
-#        self.sorts.append(SYMBOL('Tijd'))
     for s in self.sorts:
         s.annotate(voc, {})
     self.out.annotate(voc, {})
