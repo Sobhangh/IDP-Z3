@@ -44,8 +44,8 @@ def metaJSON(state):
     symbols = []
     for decl in state.assignments.symbols.values():
         if not decl.private:
-            typ = decl.out
-            symbol_type = "proposition" if typ == BOOLT and decl.sorts == [] else "function"
+            typ = decl.codomain
+            symbol_type = "proposition" if typ == BOOLT and decl.domains == [] else "function"
             d = {
                 "idpname": str(decl.name),
                 "type": symbol_type,
@@ -231,7 +231,7 @@ class Output(object):
                             s[key]["value"] = True if value.same_as(TRUE) else \
                                              False if value.same_as(FALSE) else \
                                              str(value)
-                        if ((0 < len(symb.range) or hasattr(symb.out.decl, 'enumeration')) and atom.type != BOOLT):
+                        if ((0 < len(symb.range) or hasattr(symb.codomain.decl, 'enumeration')) and atom.type != BOOLT):
                             # allow display of the value in drop box
                             s[key]["values"] = [s[key]["value"]]
                     else:

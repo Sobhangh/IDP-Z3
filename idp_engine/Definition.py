@@ -60,17 +60,17 @@ def get_def_constraints(self: Definition,
         out = {}
         for decl in self.renamed:
             # expr = nested if expression, for each rule
-            decl.check(decl.out in [INTT, BOOLT],
-                       f"Recursive functions of type {decl.out} are not supported yet")
-            expr = (ZERO if decl.out == INTT else
-                    FALSE if decl.out == BOOLT else
+            decl.check(decl.codomain in [INTT, BOOLT],
+                       f"Recursive functions of type {decl.codomain} are not supported yet")
+            expr = (ZERO if decl.codomain == INTT else
+                    FALSE if decl.codomain == BOOLT else
                     FALSE ) # todo: pick a value in type enumeration
             for rule in self.renamed[decl]:
                 val = rule.out if rule.out is not None else TRUE
                 expr = IF(rule.body, val, expr)
 
             vars = sorted(list(self.def_vars[decl.name].values()), key=lambda v: v.name)
-            vars = vars[:-1] if decl.out != BOOLT else vars
+            vars = vars[:-1] if decl.codomain != BOOLT else vars
             expr = RecDef(self, decl.name, vars, expr.interpret(problem, {}))
             out[decl, self] = [expr]
         return out
@@ -78,10 +78,8 @@ def get_def_constraints(self: Definition,
     # compute level symbols
     level_symbols: dict[SymbolDeclaration, Set_] = {}
     for key in self.inductive:
-        real = SET_(REAL)
-        real.decl = problem.declarations[REAL]
         symbdec = SymbolDeclaration.make(self,
-            "_"+str(self.id)+"lvl_"+key.name, key.sorts, real)
+            "_"+str(self.id)+"lvl_"+key.name, key.domains, REALT)
         level_symbols[key] = SET_(symbdec.name)
         level_symbols[key].decl = symbdec
 
@@ -90,7 +88,7 @@ def get_def_constraints(self: Definition,
     for decl, rules in self.canonicals.items():
         rule = rules[0]
         rule.has_finite_domain = all(s.extension(problem.extensions)[0] is not None
-                                   for s in rule.definiendum.decl.sorts)
+                                   for s in rule.definiendum.decl.domains)
 
         if rule.has_finite_domain or decl in self.inductive:
             # add a constraint containing the definition over the full domain
@@ -151,7 +149,7 @@ def instantiate_definition(self: Definition, decl, new_args, theory) -> Optional
         instantiable = all(  # finite domain or not a variable
             s.extension(theory.extensions)[0] is not None
             or not v.has_variables()
-            for s, v in zip(rule.definiendum.decl.sorts, new_args))
+            for s, v in zip(rule.definiendum.decl.domains, new_args))
 
         if not instantiable:
             return None

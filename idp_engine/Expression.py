@@ -152,7 +152,7 @@ class Accessor(ASTNode):
     Attributes:
         accessor (str, Optional): name of accessor function
 
-        out (Set_): name of the output type of the accessor
+        codomain (Set_): name of the output type of the accessor
 
         decl (SymbolDeclaration): declaration of the accessor function
     """
@@ -160,12 +160,12 @@ class Accessor(ASTNode):
                  out: Set_,
                  accessor: Optional[str] = None):
         self.accessor = accessor
-        self.out = out
+        self.codomain = out
         self.decl: Optional[SymbolDeclaration] = None
 
     def __str__(self):
-        return (self.out.name if not self.accessor else
-                f"{self.accessor}: {self.out.name}" )
+        return (self.codomain.name if not self.accessor else
+                f"{self.accessor}: {self.codomain.name}" )
 
 
 class Expression(ASTNode):
@@ -530,11 +530,11 @@ class Constructor(ASTNode):
                  args: Optional[List[Accessor]] = None):
         self.name : str = name
         self.args = args if args else []  #TODO avoid self.args by defining Accessor as subclass of Set_
-        self.sorts = [a.out for a in self.args]
+        self.domains = [a.codomain for a in self.args]
 
-        self.arity = len(self.sorts)
+        self.arity = len(self.domains)
 
-        self.out: Optional[Set_] = None
+        self.codomain: Optional[Set_] = None
         self.symbol: Optional[Set_] = None
         self.tester: Optional[SymbolDeclaration] = None
         self.range: Optional[List[Expression]] = None
@@ -557,7 +557,7 @@ class Set_(Expression):
 
         ins (List[Set_], Optional): domain of the Concept signature, e.g., `[T, T]`
 
-        out (Set_, Optional): range of the Concept signature, e.g., `Bool`
+        codomain (Set_, Optional): range of the Concept signature, e.g., `Bool`
 
         decl (Declaration, Optional): declaration of the type
     """
@@ -567,27 +567,27 @@ class Set_(Expression):
                  ins: Optional[List[Set_]] = None,
                  out: Optional[Set_] = None):
         self.name = unquote(name)
-        self.ins = ins
-        self.out = out
+        self.concept_domains = ins
+        self.codomain = out
         self.sub_exprs = []
         self.decl: Optional[SymbolDeclaration] = None
         super().__init__(parent)
 
     def __str__(self):
-        return self.name + ("" if not self.out else
-                            f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
+        return self.name + ("" if not self.codomain else
+                            f"[{'*'.join(str(s) for s in self.concept_domains)}->{self.codomain}]")
 
     def __repr__(self):
         return str(self)
 
     def __eq__(self, other):
-        self.check(self.name != CONCEPT or self.out,
+        self.check(self.name != CONCEPT or self.codomain,
                    f"`Concept` must be qualified with a type signature")
         return (other and self.name == other.name and
-                (not self.out or (
-                    self.out == other.out and
-                    len(self.ins) == len(other.ins) and
-                    all(s==o for s, o in zip(self.ins, other.ins)))))
+                (not self.codomain or (
+                    self.codomain == other.codomain and
+                    len(self.concept_domains) == len(other.concept_domains) and
+                    all(s==o for s, o in zip(self.concept_domains, other.concept_domains)))))
 
     def extension(self, extensions: dict[str, Extension]) -> Extension:
         raise IDPZ3Error("Internal error") # monkey-patched
@@ -613,7 +613,7 @@ class Set_(Expression):
             return OR(comparisons)
         else:
             assert self.decl is not None, "Internal error"
-            self.check(self.decl.out == BOOLT, "internal error")
+            self.check(self.decl.codomain == BOOLT, "internal error")
             return self.decl.contains_element(term, extensions)
 
 def SET_(name: str, ins=None, out=None) -> Set_:
@@ -689,7 +689,7 @@ class Quantee(Expression):
                  sort: Optional[SymbolExpr] = None):
         self.subtype = subtype
         if self.subtype:
-            self.check(self.subtype.name == CONCEPT or self.subtype.out is None,
+            self.check(self.subtype.name == CONCEPT or self.subtype.codomain is None,
                    f"Can't use signature after predicate {self.subtype.name}")
 
         self.sub_exprs = ([sort] if sort else
@@ -1161,7 +1161,7 @@ class AppliedSymbol(Expression):
     def construct(cls, constructor, args):
         out= cls.make(SymbolExpr.make(constructor.name), args)
         out.decl = constructor
-        out.type = constructor.out
+        out.type = constructor.codomain
         out.variables = set()
         return out
 
@@ -1212,7 +1212,7 @@ class AppliedSymbol(Expression):
         out = {}
         for i, e in enumerate(self.sub_exprs):
             if decl and type(e) in [Variable, UnappliedSymbol]:
-                out[e.name] = decl.sorts[i]
+                out[e.name] = decl.domains[i]
             else:
                 out.update(e.type_inference(voc))
         return out
@@ -1296,7 +1296,7 @@ class UnappliedSymbol(Expression):
         """
         out = (cls)(None, name=constructor.name)
         out.decl = constructor
-        out.type = constructor.out
+        out.type = constructor.codomain
         out.variables = set()
         return out
 

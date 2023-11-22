@@ -70,8 +70,8 @@ def str_to_IDP(atom: Expression, val_string: str) -> Optional[Expression]:
     assert atom.type, "Internal error"
     type_ = atom.type
     decl = (None if not hasattr(atom, 'decl') or atom.type == BOOLT else
-           atom.decl.out.decl)
-    assert decl is None or atom.decl.out == type_, f"{atom}: {decl.name} != {type_}"
+           atom.decl.codomain.decl)
+    assert decl is None or atom.decl.codomain == type_, f"{atom}: {decl.name} != {type_}"
     return str_to_IDP2(type_, decl, val_string)
 
 
@@ -131,7 +131,7 @@ def str_to_IDP2(type_: Set_,
             assert constructor is not None, f"wrong constructor name '{name}' for {type_}"
 
             new_args = []
-            for a, s in zip(args, constructor.sorts):
+            for a, s in zip(args, constructor.domains):
                 assert s.decl is not None, "Internal error"
                 new_args.append(str_to_IDP2(s, s.decl, a))
 
@@ -140,7 +140,7 @@ def str_to_IDP2(type_: Set_,
             interp = getattr(decl.base_decl, "interpretation", None)
             enum_type = (interp.enumeration.type.name if interp else
                          decl.name if type(decl) == TypeDeclaration else
-                         decl.out.name)
+                         decl.codomain.name)
 
             if type_ == BOOLT or enum_type == BOOL:
                 out = (TRUE if val_string in ['true', 'True'] else
@@ -375,9 +375,9 @@ class TypeDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Set_]): the types of the arguments
+        domains (List[Set_]): the types of the arguments
 
-        out (Set_): the Boolean type
+        codomain (Set_): the Boolean type
 
         base_decl (TypeDeclaration, optional): bool, int, real or self
 
@@ -399,8 +399,8 @@ class TypeDeclaration(ASTNode):
         enumeration = enumeration
 
         self.arity : int = 1
-        self.sorts : List[Set_] = [Set_(None, self.name)]
-        self.out : Set_ = BOOLT
+        self.domains : List[Set_] = [Set_(None, self.name)]
+        self.codomain : Set_ = BOOLT
         self.base_decl : Optional[TypeDeclaration] = None
         self.block: Optional[Block] = None
 
@@ -419,7 +419,7 @@ class TypeDeclaration(ASTNode):
             return ''
         enumeration = self.enumeration if hasattr(self, 'enumeration') and self.enumeration else ""
         constructors = enumeration.constructors if enumeration else None
-        constructed = ("" if not bool(constructors) or all(0 == len(c.sorts) for c in constructors)
+        constructed = ("" if not bool(constructors) or all(0 == len(c.domains) for c in constructors)
                        else "constructed from ")
         enumeration = (f"{constructed}{{{', '.join(str(c) for c in constructors)}}}" if constructors else
                        f"{self.interpretation}" if self.interpretation else
@@ -473,9 +473,9 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Set_]): the types of the arguments
+        domains (List[Set_]): the types of the arguments
 
-        out (Set_): the type of the symbol
+        codomain (Set_): the type of the symbol
 
         base_decl (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
 
@@ -517,12 +517,12 @@ class SymbolDeclaration(ASTNode):
         else:
             self.symbols = None
             self.name = name
-        self.sorts : List[Set_] = sorts
-        self.out : Set_ = out
-        if self.out is None:
-            self.out = SET_(BOOL)
+        self.domains : List[Set_] = sorts
+        self.codomain : Set_ = out
+        if self.codomain is None:
+            self.codomain = SET_(BOOL)
 
-        self.arity = len(self.sorts)
+        self.arity = len(self.domains)
         self.private = None
         self.unit: Optional[str] = None
         self.heading: Optional[str] = None
@@ -543,10 +543,10 @@ class SymbolDeclaration(ASTNode):
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
             return ''
-        args = '⨯'.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
+        args = '⨯'.join(map(str, self.domains)) if 0 < len(self.domains) else ''
         return (f"{self.name}: "
                 f"{ '('+args+')' if args else '()'}"
-                f" → {self.out.name}")
+                f" → {self.codomain.name}")
 
     def __repr__(self):
         return str(self)
@@ -563,10 +563,10 @@ class SymbolDeclaration(ASTNode):
         Returns:
             Expression: whether `(1,2)` is in the domain of the symbol
         """
-        assert len(self.sorts) == len(args), \
+        assert len(self.domains) == len(args), \
             f"Incorrect arity of {str(args)} for {self.name}"
         return AND([typ.has_element(term, extensions)
-                   for typ, term in zip(self.sorts, args)])
+                   for typ, term in zip(self.domains, args)])
 
     def has_in_range(self, value: Expression,
                      interpretations: dict[str, "SymbolInterpretation"],
@@ -574,14 +574,14 @@ class SymbolDeclaration(ASTNode):
                      ) -> Expression:
         """Returns an expression that says whether `value` is in the range of the symbol.
         """
-        return self.out.has_element(value, extensions)
+        return self.codomain.has_element(value, extensions)
 
     def contains_element(self, term: Expression,
                      extensions: dict[str, Extension]
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` satisfies the predicate
         """
-        assert self.out == BOOLT and self.name is not None, "Internal error"
+        assert self.codomain == BOOLT and self.name is not None, "Internal error"
         (superset, filter) = extensions[self.name]
         if superset is not None:
             # superset.sort(key=lambda t: str(t))
@@ -1039,12 +1039,12 @@ class ConstructedFrom(Enumeration):
         #TODO add tests
         assert len(args) == 1, f"Incorrect arity in {self.parent.name}{args}"
         if type(args[0].decl) == Constructor:  # try to simplify it
-            self.check(self.parent.name == args[0].decl.out,
+            self.check(self.parent.name == args[0].decl.codomain,
                        f"Incorrect type of {args[0]} for {self.parent.name}")
-            self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
+            self.check(len(args[0].sub_exprs) == len(args[0].decl.domains),
                        f"Incorrect arity")
-            return AND([t.decl.out.has_element(e, theory.extensions)
-                        for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
+            return AND([t.decl.codomain.has_element(e, theory.extensions)
+                        for e,t in zip(args[0].sub_exprs, args[0].decl.domains)])
         out = [AppliedSymbol.construct(constructor.tester, args)
                 for constructor in self.constructors]
         return OR(out)
@@ -1055,12 +1055,12 @@ class ConstructedFrom(Enumeration):
         def filter(args):
             if type(args[0]) != Variable and type(args[0].decl) == Constructor:  # try to simplify it
                 #TODO add tests
-                self.check(self.parent.name == args[0].decl.out,
+                self.check(self.parent.name == args[0].decl.codomain,
                         f"Incorrect type of {args[0]} for {self.parent.name}")
-                self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
+                self.check(len(args[0].sub_exprs) == len(args[0].decl.domains),
                         f"Incorrect arity")
-                return AND([t.decl.out.has_element(e, extensions)
-                            for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
+                return AND([t.decl.codomain.has_element(e, extensions)
+                            for e,t in zip(args[0].sub_exprs, args[0].decl.domains)])
             out = [AppliedSymbol.construct(constructor.tester, args)
                     for constructor in self.constructors]
             return OR(out)  # return of filter()

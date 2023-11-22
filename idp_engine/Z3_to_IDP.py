@@ -69,16 +69,16 @@ def get_interpretations(theory: Theory, model: ModelRef, as_z3: bool
                             applied = re.sub(TRUEFALSE, lambda m: m.group(1).lower(), applied)
                             val = args[-1]
                             map[applied] = (val if as_z3 else
-                                            str_to_IDP2(None, decl.out.decl, str(val)))
+                                            str_to_IDP2(None, decl.codomain.decl, str(val)))
                         try:
                             # use the else value if we can translate it
-                            val = str_to_IDP2(None, decl.out.decl, str(a_list[-1]))
+                            val = str_to_IDP2(None, decl.codomain.decl, str(a_list[-1]))
                             _else = (a_list[-1] if as_z3 else val)
                         except AssertionError:
                             pass # Var(0) => can be any value
                 elif isinstance(interp, ExprRef):
                     _else = (interp if as_z3 else
-                             str_to_IDP2(None, decl.out.decl, str(interp)))
+                             str_to_IDP2(None, decl.codomain.decl, str(interp)))
                 else:
                     assert interp is None, "Internal error"
             out[decl.name] = (map, _else)
@@ -121,7 +121,7 @@ def collect_questions(z3_expr: AstRef,
     elif is_eq(z3_expr) and decl.arity == 1:  #TODO higher arity
         left, right = z3_expr.children()
         if str(left).startswith("Var(0)"):  # Var(0) = value
-            typ = decl.sorts[0]
+            typ = decl.domains[0]
             arg_string = str(right)
             atom_string = f"{decl.name}({arg_string})"  # p(value)
             if atom_string not in ass:

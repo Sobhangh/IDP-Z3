@@ -226,16 +226,16 @@ def SCA_Check(self,detections):
         # We make a distinction between normal types, partial functions and
         # constructors.
         for i in range(self.decl.arity):
-            expected_type = self.decl.sorts[i]
+            expected_type = self.decl.domains[i]
             found_type = None
 
             if (hasattr(self.sub_exprs[i], 'sort') and
                     self.sub_exprs[i].sort and
-                    len(self.sub_exprs[i].sort.decl.sorts) >= 1 and
-                    isinstance(self.sub_exprs[i].sort.decl.sorts[0], Set_)):
+                    len(self.sub_exprs[i].sort.decl.domains) >= 1 and
+                    isinstance(self.sub_exprs[i].sort.decl.domains[0], Set_)):
                 # In the case of a partial function interpretation, the type is actually
                 # the argument.
-                # found_type = str(self.sub_exprs[i].sort.decl.sorts[i])
+                # found_type = str(self.sub_exprs[i].sort.decl.domains[i])
                 continue
                 found_type = self.sub_exprs[i].get_type() #TODO dead code ?
             elif not hasattr(self.sub_exprs[i], 'name'):
@@ -257,10 +257,10 @@ def SCA_Check(self,detections):
     # check if elementen in enumeratie are of correct type, vb Lijn() in {Belgie}. expected type Kleur, Belgie is of type Land
     if self.is_enumeration =='in':
         for i in self.in_enumeration.tuples :
-            if self.decl.out != i.args[0].get_type():
+            if self.decl.codomain != i.args[0].get_type():
                 detections.append((i.args[0],
                     f"Element of wrong type : "
-                    f"expected type= {type_symbol_to_str(self.decl.out)} "
+                    f"expected type= {type_symbol_to_str(self.decl.codomain)} "
                     f"but given type= {type_symbol_to_str(i.args[0].get_type())}"
                     ,"Error"))
                 break

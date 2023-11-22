@@ -284,12 +284,12 @@ class Assignments(dict):
                 if "*" in val:
                     val = f"// {val}"
             else:
-                sign = ':=' if k.instances or k.out == BOOLT else '>>'
+                sign = ':=' if k.instances or k.codomain == BOOLT else '>>'
                 # TODO improve sign detection (using base_decl/extension, interpretation)
                 # needs access to the theory !
                 finite_domain = all(s.name not in [INT, REAL, DATE]
-                        for s in k.sorts)
-                sign = ':=' if finite_domain or k.out == BOOLT else '>>'
+                        for s in k.domains)
+                sign = ':=' if finite_domain or k.codomain == BOOLT else '>>'
                 val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
                 val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
             if not enumerated[k]:

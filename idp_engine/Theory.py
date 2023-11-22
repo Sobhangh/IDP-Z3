@@ -462,7 +462,7 @@ class Theory(object):
         # determine if the expression is defined
         defined = True
         if type(q) == AppliedSymbol:
-            if any(type(T.decl) != TypeDeclaration for T in q.decl.sorts):
+            if any(type(T.decl) != TypeDeclaration for T in q.decl.domains):
                 in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
                 if in_domain.same_as(FALSE):
                     defined = False
@@ -478,7 +478,7 @@ class Theory(object):
         # determine if the expression is certainly undefined
         result = False
         if type(q) == AppliedSymbol:
-            if any(type(T.decl) != TypeDeclaration for T in q.decl.sorts):
+            if any(type(T.decl) != TypeDeclaration for T in q.decl.domains):
                 in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
                 if in_domain.same_as(FALSE):
                     result = True
@@ -715,7 +715,7 @@ class Theory(object):
         assert term in self.assignments, (f"Optimization term: \"{term}\" not"
                                           " found in vocabulary (Tip: have you"
                                           " forgotten brackets? e.g. P()).")
-        assert self.assignments[term].symbol_decl.out.name in {INT, REAL}, (
+        assert self.assignments[term].symbol_decl.codomain.name in {INT, REAL}, (
             f"Incorrect optimization term: \"{term}\","
             f" term must be of type {INT} or {REAL}."
         )

@@ -97,7 +97,7 @@ def annotate_block(self: ASTNode,
 
     # populate .map of CONCEPT
     for c in concepts.constructors:
-        assert not c.sorts, "Internal error"
+        assert not c.domains, "Internal error"
         concepts.map[str(c)] = UnappliedSymbol.construct(c)
     return []
 Vocabulary.annotate_block = annotate_block
@@ -112,11 +112,11 @@ def annotate_declaration(self: ASTNode,
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
-    for s in self.sorts:
+    for s in self.domains:
         s.annotate(voc, {})
-    self.out.annotate(voc, {})
+    self.codomain.annotate(voc, {})
     for c in self.constructors:
-        c.out = self.sorts[0]
+        c.codomain = self.domains[0]
         self.check(c.name not in voc.symbol_decls or self.name == CONCEPT,
                     f"duplicate '{c.name}' constructor for '{self.name}' type")
         voc.symbol_decls[c.name] = c
@@ -140,15 +140,15 @@ def annotate_declaration(self: SymbolDeclaration,
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
     voc.symbol_decls[self.name] = self
-    for s in self.sorts:
+    for s in self.domains:
         s.annotate(voc, {})
-    self.out.annotate(voc, {})
+    self.codomain.annotate(voc, {})
 
-    for s in chain(self.sorts, [self.out]):
+    for s in chain(self.domains, [self.codomain]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
                    f"`Concept` must be qualified with a type signature in {self}")
-    self.base_decl = (None if self.out != BOOLT or self.arity != 1 else
-                      self.sorts[0].decl.base_decl)
+    self.base_decl = (None if self.codomain != BOOLT or self.arity != 1 else
+                      self.domains[0].decl.base_decl)
     return self
 SymbolDeclaration.annotate_declaration = annotate_declaration
 
@@ -184,10 +184,10 @@ def annotate(self: Expression,
 
     self.decl = voc.symbol_decls[self.name]
     self.variables = set()
-    self.type = self.decl.out
-    if self.out:
-        self.ins = [s.annotate(voc, q_vars) for s in self.ins]
-        self.out = self.out.annotate(voc, q_vars)
+    self.type = self.decl.codomain
+    if self.codomain:
+        self.concept_domains = [s.annotate(voc, q_vars) for s in self.concept_domains]
+        self.codomain = self.codomain.annotate(voc, q_vars)
     return self
 Set_.annotate = annotate
 
@@ -277,7 +277,7 @@ def annotate(self: Expression,
                     f"Inductively defined nested symbols are not supported yet: "
                     f"{decl.name}.")
         if self.mode != Semantics.RECDATA:
-            self.check(decl.out == BOOLT,
+            self.check(decl.codomain == BOOLT,
                         f"Inductively defined functions are not supported yet: "
                         f"{decl.name}.")
 
@@ -290,9 +290,9 @@ def annotate(self: Expression,
             name = f"{decl.name}_"
             q_v = {f"{decl.name}{str(i)}_":
                     VARIABLE(f"{decl.name}{str(i)}_", sort)
-                    for i, sort in enumerate(decl.sorts)}
-            if decl.out != BOOLT:
-                q_v[name] = VARIABLE(name, decl.out)
+                    for i, sort in enumerate(decl.domains)}
+            if decl.codomain != BOOLT:
+                q_v[name] = VARIABLE(name, decl.codomain)
             self.def_vars[decl.name] = q_v
 
         # rename the variables in the arguments of the definiendum
@@ -444,7 +444,7 @@ def annotate(self: Expression,
     if self.is_type_enumeration and enumeration.constructors:
         # create Constructors before annotating the tuples
         for c in enumeration.constructors:
-            c.out = self.symbol
+            c.codomain = self.symbol
             self.check(c.name not in voc.symbol_decls,
                     f"duplicate '{c.name}' constructor for '{self.name}' symbol")
             voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
@@ -453,11 +453,11 @@ def annotate(self: Expression,
 
     self.check(self.is_type_enumeration
                 or all(s not in [INTT, REALT, DATET]  # finite domain #TODO
-                        for s in self.symbol.decl.sorts)
+                        for s in self.symbol.decl.domains)
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
-    self.check(not(self.symbol.decl.out.decl.base_decl == BOOLT
+    self.check(not(self.symbol.decl.codomain.decl.base_decl == BOOLT
                    and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
@@ -532,16 +532,16 @@ def annotate(self: Expression,
              ) -> Annotated:
     assert isinstance(self, Constructor), "Internal error"
     for a in self.args:
-        self.check(a.out.name in voc.symbol_decls,
-                   f"Unknown type: {a.out}" )
+        self.check(a.codomain.name in voc.symbol_decls,
+                   f"Unknown type: {a.codomain}" )
         a.decl = SymbolDeclaration.make(self,
-            name=a.accessor, sorts=[self.out], out=a.out)
+            name=a.accessor, sorts=[self.codomain], out=a.codomain)
         a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
-    for s in self.sorts:
+    for s in self.domains:
         s.annotate(voc, {})
     self.tester = SymbolDeclaration.make(self,
-            name=f"is_{self.name}", sorts=[self.out], out=BOOLT)
+            name=f"is_{self.name}", sorts=[self.codomain], out=BOOLT)
     self.tester.by_z3 = True
     self.tester.annotate_declaration(voc)
     return self
@@ -663,7 +663,7 @@ def annotate_quantee(self: Expression,
     for vars in self.vars:
         self.check(not self.sub_exprs
                    or not self.sub_exprs[0].decl
-                   or len(vars)==len(self.sub_exprs[0].decl.sorts),
+                   or len(vars)==len(self.sub_exprs[0].decl.domains),
                     f"Incorrect arity for {self}")
         for i, var in enumerate(vars):
             self.check(var.name not in voc.symbol_decls
@@ -674,7 +674,7 @@ def annotate_quantee(self: Expression,
             if len(vars) == 1 and self.sub_exprs and type(self.sub_exprs[0]) == Set_:
                 var.type = self.sub_exprs[0]   # `!x in p` or `!x in Concept[...]`
             elif self.sub_exprs and self.sub_exprs[0].decl:
-                var.type = self.sub_exprs[0].decl.sorts[i]  # `! (x,y) in p` or `in $(p)`
+                var.type = self.sub_exprs[0].decl.domains[i]  # `! (x,y) in p` or `in $(p)`
             else:
                 var.type = None
             # 2. compare with variable declaration, if any
@@ -761,7 +761,7 @@ def base_type(exprs: List[Expression]) -> Optional[Set_]:
             else:
                 e.check(False, f"Can't determine the type of {e}")
         assert type(base) == TypeDeclaration, "Internal error"
-        return base.sorts[0]
+        return base.domains[0]
     else:
         exprs[0].check(False, f"Can't determine the type of {exprs[0]}")
 
@@ -993,27 +993,27 @@ def set_variables(self: AppliedSymbol) -> Expression:
 
     # ¢heck type of arguments
     if out.decl:
-        for e, s in zip(self.sub_exprs, out.decl.sorts):
+        for e, s in zip(self.sub_exprs, out.decl.domains):
             if not type(s.decl) == TypeDeclaration:  # Type predicates accept anything
                 type_ = e.type
                 # while type_ != s:  # handle case where e_type is a subset of s
-                #     e.check(type_ != type_.decl.sorts[0],
+                #     e.check(type_ != type_.decl.domains[0],
                 #             f"{s} expected ({e.type} found: {e})")
-                #     type_ = type_.decl.sorts[0]
+                #     type_ = type_.decl.domains[0]
 
     # determine type
     if out.is_enumerated or out.in_enumeration:
         out.type = BOOLT
-    elif out.decl and out.decl.out:
-        out.type = out.decl.out
+    elif out.decl and out.decl.codomain:
+        out.type = out.decl.codomain
     elif type(out.symbol)==SymbolExpr and out.symbol.eval:
         type_ = out.symbol.sub_exprs[0].type
         if type_.name == CONCEPT:
-            out.type = type_.out
+            out.type = type_.codomain
         else:
-            while not type_.out:  # type is a subset of a concept
-                type_ = type_.decl.sorts[0]
-            out.type = type_.out
+            while not type_.codomain:  # type is a subset of a concept
+                type_ = type_.decl.domains[0]
+            out.type = type_.codomain
 
     return out.simplify1()
 AppliedSymbol.set_variables = set_variables
@@ -1061,7 +1061,7 @@ def annotate(self: UnappliedSymbol,
         return q_vars[self.name]
     if self.name in voc.symbol_decls:
         self.decl = voc.symbol_decls[self.name]
-        self.type = self.decl.out
+        self.type = self.decl.codomain
         self.variables = set()
         self.check(type(self.decl) == Constructor,
                    f"{self} should be applied to arguments (or prefixed with a back-tick)")

@@ -109,14 +109,14 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self: SymbolDeclaration, problem: Theory):
-    assert all(isinstance(s, Set_) for s in self.sorts), 'internal error'
+    assert all(isinstance(s, Set_) for s in self.domains), 'internal error'
 
     symbol = SymbolExpr.make(self.name)
     symbol.decl = self
 
     # determine the extension, i.e., (superset, filter)
     extensions = [s.extension(problem.extensions)
-                for s in self.sorts]
+                for s in self.domains]
     if any(e[0] is None for e in extensions):
         superset = None
     else:
@@ -126,14 +126,14 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     def filter(args):
         out = AND([f([deepcopy(t)]) if f is not None else TRUE
                     for f, t in zip(filters, args)])
-        if self.out == BOOLT:
+        if self.codomain == BOOLT:
             out = AND([out, deepcopy(AppliedSymbol.make(symbol, args))])
         return out
 
-    if self.out == BOOLT:
+    if self.codomain == BOOLT:
         problem.extensions[self.name] = (superset, filter)
 
-    (range, _) = self.out.extension(problem.extensions)
+    (range, _) = self.codomain.extension(problem.extensions)
     if range is None:
         self.range = []
     else:
@@ -152,11 +152,11 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         problem.interpretations[self.name].interpret(problem)
 
     # create type constraints
-    if type(self.instances) == dict and self.out != BOOLT:
+    if type(self.instances) == dict and self.codomain != BOOLT:
         for expr in self.instances.values():
             # add type constraints to problem.constraints
             # ! (x,y) in domain: range(f(x,y))
-            range_condition = self.out.has_element(deepcopy(expr),
+            range_condition = self.codomain.has_element(deepcopy(expr),
                                 problem.extensions)
             if range_condition.same_as(TRUE):
                 break
@@ -191,7 +191,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
         decl = problem.declarations[self.name]
         assert isinstance(decl, SymbolDeclaration), "Internal error"
         # update problem.extensions
-        if self.symbol.decl.out == BOOLT:  # predicate
+        if self.symbol.decl.codomain == BOOLT:  # predicate
             extension = [t.args for t in self.enumeration.tuples]
             problem.extensions[self.symbol.name] = (extension, None)
 
@@ -271,7 +271,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
             # ! x in domain(f): enum.contains(x)
             q_vars = { f"${sort.decl.name}!{str(i)}$":
                        VARIABLE(f"${sort.decl.name}!{str(i)}$", sort)
-                       for i, sort in enumerate(decl.sorts)}
+                       for i, sort in enumerate(decl.domains)}
             quantees = [Quantee.make(v, sort=v.type) for v in q_vars.values()]
 
             # is the domain of `self` enumerable ?
@@ -318,14 +318,14 @@ ConstructedFrom.interpret = interpret
 # class Constructor  ###########################################################
 
 def interpret(self: Constructor, problem: Theory) -> Constructor:
-    # assert all(s.decl and isinstance(s.decl.out, Set_) for s in self.sorts), 'Internal error'
-    if not self.sorts:
+    # assert all(s.decl and isinstance(s.decl.codomain, Set_) for s in self.domains), 'Internal error'
+    if not self.domains:
         self.range = [UnappliedSymbol.construct(self)]
-    elif any(s == self.out for s in self.sorts): # recursive data type
+    elif any(s == self.codomain for s in self.domains): # recursive data type
         self.range = None
     else:
-        # assert all(isinstance(s.decl, SymbolDeclaration) for s in self.sorts), "Internal error"
-        extensions = [s.decl.out.extension(problem.extensions)
+        # assert all(isinstance(s.decl, SymbolDeclaration) for s in self.domains), "Internal error"
+        extensions = [s.decl.codomain.extension(problem.extensions)
                       for s in self.args]
         if any(e[0] is None for e in extensions):
             self.range = None
@@ -440,20 +440,20 @@ def extension(self, extensions: dict[str, Extension]) -> Extension:
     """
     if self.code not in extensions:
         self.check(self.name == CONCEPT, "internal error")
-        assert (self.out
+        assert (self.codomain
                 and extensions is not None
                 and extensions[CONCEPT] is not None), "internal error"  # Concept[T->T]
         ext = extensions[CONCEPT][0]
         assert isinstance(ext, List) , "Internal error"
         out = [v for v in ext
                 if type(v[0]) == UnappliedSymbol
-                and v[0].decl.symbol.decl.arity == len(self.ins)
+                and v[0].decl.symbol.decl.arity == len(self.concept_domains)
                 and isinstance(v[0].decl.symbol.decl, SymbolDeclaration)
-                and v[0].decl.symbol.decl.out == self.out
-                and len(v[0].decl.symbol.decl.sorts) == len(self.ins)
+                and v[0].decl.symbol.decl.codomain == self.codomain
+                and len(v[0].decl.symbol.decl.domains) == len(self.concept_domains)
                 and all(s == q
-                        for s, q in zip(v[0].decl.symbol.decl.sorts,
-                                        self.ins))]
+                        for s, q in zip(v[0].decl.symbol.decl.domains,
+                                        self.concept_domains))]
         extensions[self.code] = (out, None)
     return extensions[self.code]
 Set_.extension = extension
@@ -491,7 +491,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
                 (superset, filter) = domain.extension(problem.extensions)
             elif type(domain) == SymbolExpr:
                 if domain.decl:
-                    self.check(domain.decl.out.type == BOOLT,
+                    self.check(domain.decl.codomain.type == BOOLT,
                                 f"{domain} is not a type or predicate")
                     assert domain.decl.name in problem.extensions, "internal error"
                     (superset, filter) = problem.extensions[domain.decl.name]
@@ -612,7 +612,7 @@ def _interpret(self: AppliedSymbol,
     if type(self.symbol) == SymbolExpr and not self.symbol.name:  # $(x)()
         self.symbol = self.symbol._interpret(problem, subs)
         if self.symbol.name:  # found $(x)
-            self.check(len(self.sub_exprs) == len(self.symbol.decl.sorts),
+            self.check(len(self.sub_exprs) == len(self.symbol.decl.domains),
                         f"Incorrect arity for {self.code}")
             kwargs = ({'is_enumerated': self.is_enumerated} if self.is_enumerated else
                         {'in_enumeration': self.in_enumeration} if self.in_enumeration else
@@ -632,7 +632,7 @@ def _interpret(self: AppliedSymbol,
     value, co_constraint = None, None
     if out.decl and problem:
         if out.is_enumerated:
-            assert out.decl.out != BOOLT, \
+            assert out.decl.codomain != BOOLT, \
                 f"Can't use 'is enumerated' with predicate {out.decl.name}."
             if out.decl.name in problem.interpretations:
                 interpretation = problem.interpretations[out.decl.name]

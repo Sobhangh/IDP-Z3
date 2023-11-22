@@ -61,7 +61,7 @@ def translate(self, problem: Theory) -> ExprRef:
             for c in self.constructors:
                 sort.declare(c.name,
                              *[(a.decl.name,
-                                a.decl.out.translate(problem) if a.decl.out.name != self.name else
+                                a.decl.codomain.translate(problem) if a.decl.codomain.name != self.name else
                                 sort)  # recursive data type
                                for a in c.args])
             out = sort.create()
@@ -73,7 +73,7 @@ def translate(self, problem: Theory) -> ExprRef:
                     problem.z3[c.tester.name] = out.__dict__[f"is_{c.name}"]
                 for a in c.args:
                     problem.z3[a.decl.name] = out.__dict__[a.accessor]
-                if not c.sorts:
+                if not c.domains:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
                 elif c.range:
                     for e in c.range:
@@ -96,11 +96,11 @@ def translate(self, problem: Theory) -> ExprRef:
         recursive = any(self in def_.clarks
                         for _, def_ in problem.def_constraints.keys()
                         if def_.mode == Semantics.RECDATA)
-        if len(self.sorts) == 0:
-            out = Const(self.name, self.out.decl.base_decl.translate(problem))
+        if len(self.domains) == 0:
+            out = Const(self.name, self.codomain.decl.base_decl.translate(problem))
         else:
-            types = ( [x.decl.base_decl.translate(problem) for x in self.sorts]
-                    + [self.out.decl.base_decl.translate(problem)])
+            types = ( [x.decl.base_decl.translate(problem) for x in self.domains]
+                    + [self.codomain.decl.base_decl.translate(problem)])
             out = (Function(self.name, types) if not recursive else
                    RecFunction(self.name, types))
         problem.z3[self.name] = out
@@ -373,7 +373,7 @@ def reified(self, problem: Theory, vars={}) -> DatatypeRef:
         out = problem.z3.get(str, None)
         if out is None:
             sort = (BoolSort(problem.ctx) if self.in_enumeration or self.is_enumerated else
-                    self.decl.out.decl.base_decl.translate(problem))
+                    self.decl.codomain.decl.base_decl.translate(problem))
             out = Const(str, sort)
             problem.z3[str] = out
     else:

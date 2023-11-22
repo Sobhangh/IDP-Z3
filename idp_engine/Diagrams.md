@@ -9,34 +9,34 @@ For typing:
 erDiagram
     Declaration ||--o{ Declaration : base_decl
     Set_ }o--|| Declaration: decl
-    Declaration |o--o{ Set_ : sorts
-    Declaration |o--|| Set_: out
+    Declaration |o--o{ Set_ : domains
+    Declaration |o--|| Set_: codomain
     Declaration |o--o{ Expression: decl
-    Set_ |o--o{ Set_: ins
-    Set_ |o--o| Set_: out
+    Set_ |o--o{ Set_: concept_domains
+    Set_ |o--o| Set_: codomain
     Set_ ||--o{ Expression: type
-    Constructor }o--o{ Set_ : sorts
-    Constructor }o--|| Set_ : out
+    Constructor }o--o{ Set_ : domains
+    Constructor }o--|| Set_ : codomain
     Declaration ||--o{ Constructor: constructors
 
     Declaration {
         Declaration base_decl
-        List[Set_] sorts
-        Set_ out
+        List[Set_] domains
+        Set_ codomain
         List[Constructor] constructors
     }
     Set_ {
         Declaration decl
-        List[Set_] ins
-        Set_ out
+        List[Set_] concept_domains
+        Set_ codomain
     }
     Expression {
         Declaration decl
         Set_ type
     }
     Constructor {
-        List[Set_] sorts
-        Set_ out
+        List[Set_] domains
+        Set_ codomain
     }
 ```
 
