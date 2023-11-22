@@ -1147,7 +1147,8 @@ class AppliedSymbol(Expression):
              annotations: Optional[Annotations] =None,
              is_enumerated='',
              is_enumeration='',
-             in_enumeration=''
+             in_enumeration='',
+             type_check=True
              ) -> AppliedSymbol:
         out = cls(None, symbol, args, annotations,
                   is_enumerated, is_enumeration, in_enumeration)
@@ -1155,7 +1156,7 @@ class AppliedSymbol(Expression):
         # annotate
         out.decl = symbol.decl
         out.type = type_
-        return out.set_variables()
+        return out.set_variables(type_check)
 
     @classmethod
     def construct(cls, constructor, args):

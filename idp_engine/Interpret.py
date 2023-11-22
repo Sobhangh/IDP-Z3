@@ -127,7 +127,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         out = AND([f([deepcopy(t)]) if f is not None else TRUE
                     for f, t in zip(filters, args)])
         if self.codomain == BOOLT:
-            out = AND([out, deepcopy(AppliedSymbol.make(symbol, args))])
+            out = AND([out, deepcopy(AppliedSymbol.make(symbol, args, type_check=False))])
         return out
 
     if self.codomain == BOOLT:
@@ -143,7 +143,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     if self.name not in RESERVED_SYMBOLS and superset is not None:
         self.instances = {}
         for args in superset:
-            expr = AppliedSymbol.make(symbol, args)
+            expr = AppliedSymbol.make(symbol, args, type_check=False)
             self.instances[expr.code] = expr
             problem.assignments.assert__(expr, None, S.UNKNOWN)
 
@@ -242,7 +242,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
                 problem.constraints.append(condition)
 
             # check duplicates
-            expr = AppliedSymbol.make(self.symbol, args)
+            expr = AppliedSymbol.make(self.symbol, args, type_check=False)
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == S.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")

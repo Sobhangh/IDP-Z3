@@ -983,7 +983,7 @@ def annotate(self: AppliedSymbol,
     return out
 AppliedSymbol.annotate = annotate
 
-def set_variables(self: AppliedSymbol) -> Expression:
+def set_variables(self: AppliedSymbol, type_check=True) -> Expression:
     out = Expression.set_variables(self)
     assert type(out) == AppliedSymbol, "Internal error"
     out.symbol = out.symbol.set_variables()
@@ -992,7 +992,7 @@ def set_variables(self: AppliedSymbol) -> Expression:
         out.decl = out.symbol.decl
 
     # ¢heck type of arguments
-    if out.decl:
+    if out.decl and type_check:
         for e, s in zip(self.sub_exprs, out.decl.domains):
             if not type(s.decl) == TypeDeclaration:  # Type predicates accept anything
                 type_ = e.type
