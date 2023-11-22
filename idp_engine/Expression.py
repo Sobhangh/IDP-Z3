@@ -1265,7 +1265,7 @@ class StartAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = None
+        self.symbol  = SYMBOL('Start')
         self.sub_expr: AppliedSymbol  = arg
         self.sub_exprs = [arg]
         super().__init__()
@@ -1335,7 +1335,7 @@ class NowAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = SYMBOL('N')
+        self.symbol  = SYMBOL('Now')
         self.sub_expr: AppliedSymbol  = arg
         self.sub_exprs = [arg]
         super().__init__()
@@ -1405,10 +1405,10 @@ class NextAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = None
+        self.symbol  = SYMBOL('Next')
         self.sub_expr: AppliedSymbol  = arg
         self.sub_exprs = [arg]
-        
+
         super().__init__()
 
         #self.as_disjunction = None

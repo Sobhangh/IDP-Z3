@@ -1,0 +1,19 @@
+vocabulary V {
+    // here comes the specification of the vocabulary
+    p: () → Bool
+    q: Int -> Bool
+}
+
+theory T:V {
+    // here comes the definitions and constraints
+    !i in Int: q(i).
+}
+
+structure S:V {
+    // here comes the interpretation of some symbols
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}
