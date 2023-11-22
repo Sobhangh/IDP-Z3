@@ -511,7 +511,7 @@ def annotate(self: ASTNode,
              ) -> Annotated:
     assert isinstance(self, ConstructedFrom), "Internal error"
     for c in self.constructors:
-        for i, ts in enumerate(c.sorts):
+        for i, ts in enumerate(c.args):
             if not ts.accessor:
                 ts.accessor = f"{c.name}_{i}"
             if ts.accessor in self.accessors:
@@ -531,13 +531,15 @@ def annotate(self: Expression,
              q_vars: dict[str, Variable]
              ) -> Annotated:
     assert isinstance(self, Constructor), "Internal error"
-    for a in self.sorts:
+    for a in self.args:
         self.check(a.out.name in voc.symbol_decls,
                    f"Unknown type: {a.out}" )
         a.decl = SymbolDeclaration.make(self,
             name=a.accessor, sorts=[self.out], out=a.out)
         a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
+    for s in self.sorts:
+        s.annotate(voc, {})
     self.tester = SymbolDeclaration.make(self,
             name=f"is_{self.name}", sorts=[self.out], out=BOOLT)
     self.tester.by_z3 = True
@@ -989,6 +991,17 @@ def set_variables(self: AppliedSymbol) -> Expression:
     if not out.decl and out.symbol.name:
         out.decl = out.symbol.decl
 
+    # ¢heck type of arguments
+    if out.decl:
+        for e, s in zip(self.sub_exprs, out.decl.sorts):
+            if not type(s.decl) == TypeDeclaration:  # Type predicates accept anything
+                type_ = e.type
+                # while type_ != s:  # handle case where e_type is a subset of s
+                #     e.check(type_ != type_.decl.sorts[0],
+                #             f"{s} expected ({e.type} found: {e})")
+                #     type_ = type_.decl.sorts[0]
+
+    # determine type
     if out.is_enumerated or out.in_enumeration:
         out.type = BOOLT
     elif out.decl and out.decl.out:

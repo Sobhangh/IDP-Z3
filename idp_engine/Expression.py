@@ -509,6 +509,8 @@ class Constructor(ASTNode):
     Attributes:
         name (string): name of the constructor
 
+        args (List[Accessor])
+
         sorts (List[Set_]): types of the arguments of the constructor
 
         out (Set_): type that contains this constructor
@@ -527,7 +529,8 @@ class Constructor(ASTNode):
                  name: str,
                  args: Optional[List[Accessor]] = None):
         self.name : str = name
-        self.sorts = args if args is not None else []
+        self.args = args if args else []  #TODO avoid self.args by defining Accessor as subclass of Set_
+        self.sorts = [a.out for a in self.args]
 
         self.arity = len(self.sorts)
 
@@ -537,8 +540,8 @@ class Constructor(ASTNode):
         self.range: Optional[List[Expression]] = None
 
     def __str__(self):
-        return (self.name if not self.sorts else
-                f"{self.name}({', '.join((str(a) for a in self.sorts))})" )
+        return (self.name if not self.args else
+                f"{self.name}({', '.join((str(a) for a in self.args))})" )
 
 def CONSTRUCTOR(name: str, args=None) -> Constructor:
     return Constructor(None, name, args)

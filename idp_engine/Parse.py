@@ -131,9 +131,9 @@ def str_to_IDP2(type_: Set_,
             assert constructor is not None, f"wrong constructor name '{name}' for {type_}"
 
             new_args = []
-            for a, acc in zip(args, constructor.sorts):
-                assert acc.decl is not None, "Internal error"
-                new_args.append(str_to_IDP2(acc.decl.out, acc.decl.out.decl, a))
+            for a, s in zip(args, constructor.sorts):
+                assert s.decl is not None, "Internal error"
+                new_args.append(str_to_IDP2(s, s.decl, a))
 
             out = AppliedSymbol.construct(constructor, new_args)
         else:

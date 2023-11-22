@@ -91,17 +91,17 @@ def collect_questions(z3_expr: AstRef,
     """ determines the function applications that should be evaluated/propagated
     based on the function interpretation in `z3_expr` (obtained from a Z3 model).
 
-    i.e., add `<decl>(<value>)` to `out`
+    i.e., add `p(value)` to `out`
        for each occurrence of `var(0) = value`
-       in the else clause of a Z3 function interpretation.
+       in the else clause of the Z3 interpretation of unary `p`.
 
-    example: the interpretation of opgenomen is `z3_expr`, i.e. `
+    example: the interpretation of p is `z3_expr`, i.e. `
             [else ->
                 Or(Var(0) == 12,
                     And(Not(Var(0) == 12), Not(Var(0) == 11), Var(0) == 13),
                     And(Not(Var(0) == 12), Var(0) == 11))]`
 
-    result: `[opgenomen(11), opgenomen(12), opgenomen(13)]` is added to `out`
+    result: `[p(11), p(12), p(13)]` is added to `out`
 
     Args:
         z3_expr (AstRef): the function interpretation in a model of Z3
@@ -118,14 +118,16 @@ def collect_questions(z3_expr: AstRef,
     elif is_and(z3_expr) or is_or(z3_expr) or is_not(z3_expr):
         for e in z3_expr.children():
             collect_questions(e, decl, ass, out)
-    elif is_eq(z3_expr):
-        typ = decl.sorts[0]
-        arg_string = str(z3_expr.children()[1])
-        atom_string = f"{decl.name}({arg_string})"
-        if atom_string not in ass:
-            arg = str_to_IDP2(typ, decl.sorts[0].decl, arg_string)
-            symb = SymbolExpr.make(decl.name)
-            symb.decl = decl
-            atom = AppliedSymbol.make(symb, [arg])
-            out.append(atom)
+    elif is_eq(z3_expr) and decl.arity == 1:  #TODO higher arity
+        left, right = z3_expr.children()
+        if str(left).startswith("Var(0)"):  # Var(0) = value
+            typ = decl.sorts[0]
+            arg_string = str(right)
+            atom_string = f"{decl.name}({arg_string})"  # p(value)
+            if atom_string not in ass:
+                arg = str_to_IDP2(typ, typ.decl, arg_string)
+                symb = SymbolExpr.make(decl.name)
+                symb.decl = decl
+                atom = AppliedSymbol.make(symb, [arg])  # p(value)
+                out.append(atom)
     return

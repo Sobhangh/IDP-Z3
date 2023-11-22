@@ -63,7 +63,7 @@ def translate(self, problem: Theory) -> ExprRef:
                              *[(a.decl.name,
                                 a.decl.out.translate(problem) if a.decl.out.name != self.name else
                                 sort)  # recursive data type
-                               for a in c.sorts])
+                               for a in c.args])
             out = sort.create()
 
             for c in self.constructors:
@@ -71,7 +71,7 @@ def translate(self, problem: Theory) -> ExprRef:
                 problem.z3[c.name] = c.py_value
                 if c.tester:
                     problem.z3[c.tester.name] = out.__dict__[f"is_{c.name}"]
-                for a in c.sorts:
+                for a in c.args:
                     problem.z3[a.decl.name] = out.__dict__[a.accessor]
                 if not c.sorts:
                     self.map[str(c)] = UnappliedSymbol.construct(c)
