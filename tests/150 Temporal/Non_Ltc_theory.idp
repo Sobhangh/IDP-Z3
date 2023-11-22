@@ -1,0 +1,19 @@
+vocabulary V {
+    p: () → Bool
+    Temporal p
+}
+
+theory T:V {
+   // Check that it is allowed to used temporal predicate in FO form in non Ltc theories.
+   ? i in Int: p(i).
+    
+}
+
+structure S:V {
+    
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

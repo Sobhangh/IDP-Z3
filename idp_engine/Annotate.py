@@ -912,7 +912,8 @@ def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
         self.symbol = self.symbol.annotate(voc, q_vars)
     if self.symbol.decl:
         if isinstance(self.symbol.decl, SymbolDeclaration):
-            self.check(self.in_temp or (not self.symbol.decl.temp) ,f"{self.symbol} has to be used inside a temporal second order predicate")
+            if ltc:
+                self.check(self.in_temp or (not self.symbol.decl.temp) ,f"{self.symbol} has to be used inside a temporal second order predicate")
         self.check(self.symbol.decl.arity == len(self.sub_exprs)
                    or self.symbol.decl.name in ['hide', 'unit', 'heading', 'noOptimization'],
             f"Incorrect number of arguments in {self}: "
