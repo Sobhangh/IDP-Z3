@@ -538,8 +538,6 @@ class SymbolDeclaration(ASTNode):
         self.out : Symbol = kwargs.pop('out')
         if self.out is None:
             self.out = SYMBOL(BOOL)
-        print("SYMbol declaration name")
-        print(self.name)
         self.arity = len(self.sorts)
         self.annotations : Annotations = self.annotations.annotations if self.annotations else {}
         self.private = None

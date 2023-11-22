@@ -57,6 +57,8 @@ def annotate(self, idp):
                             f"Inconsistent declaration for {s1.name}")
                 temp[s1.name] = s1
         else:
+            print("symbol dec name")
+            print(s.name)
             s.block = self
             s.check(s.name not in temp or s.name in RESERVED_SYMBOLS,
                     f"Duplicate declaration of {s.name}")
