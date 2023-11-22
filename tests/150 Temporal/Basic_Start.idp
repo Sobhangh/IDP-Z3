@@ -1,5 +1,4 @@
 vocabulary V {
-    // here comes the specification of the vocabulary
     p: () → Bool
     q: Int -> Bool
     Temporal p
@@ -7,13 +6,13 @@ vocabulary V {
 }
 
 theory T:V {
-    // here comes the definitions and constraints
+    // Check the formula generate by Start
     Start[p()].
-    !i in Int : i<10 => q(i).
+    //!i in Int : i<10 => q(i).
 }
 
 structure S:V {
-    // here comes the interpretation of some symbols
+    
 }
 
 procedure main () {

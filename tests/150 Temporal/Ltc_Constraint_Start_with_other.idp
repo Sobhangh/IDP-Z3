@@ -1,11 +1,10 @@
 vocabulary V {
-    // here comes the specification of the vocabulary
     p: () → Bool
     Temporal p
 }
 
 theory LTC T:V {
-    // here comes the definitions and constraints
+    // Should give an error since Start is used with Now/Next
     (Start[p()] and  (Next[p()])) or Now[p()].
 }
 

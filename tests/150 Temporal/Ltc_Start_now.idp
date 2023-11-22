@@ -1,11 +1,10 @@
 vocabulary V {
-    // here comes the specification of the vocabulary
     p: () → Bool
     Temporal p
 }
 
 theory LTC T:V {
-    // here comes the definitions and constraints
+    // Check if it gives error because of Now
     
     {
         Start[p()] <- Now[p()].
@@ -14,7 +13,7 @@ theory LTC T:V {
 }
 
 structure S:V {
-    // here comes the interpretation of some symbols
+    
 }
 
 procedure main () {

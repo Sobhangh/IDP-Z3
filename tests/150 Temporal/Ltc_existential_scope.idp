@@ -1,5 +1,4 @@
 vocabulary V {
-    // here comes the specification of the vocabulary
     q: () → Bool
     p: () → Bool
     r: Int → Bool
@@ -7,12 +6,12 @@ vocabulary V {
 }
 
 theory LTC T:V {
-    // here comes the definitions and constraints
+    // Should give an error since Next is inside existential quantifier
     (q() and  (? i in Int: (i < 10 and r(i) and  not Next[p()]))) or Now[p()].
 }
 
 structure S:V {
-    // here comes the interpretation of some symbols
+    
 }
 
 procedure main () {

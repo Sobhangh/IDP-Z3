@@ -7,13 +7,13 @@ vocabulary V {
 }
 
 theory T:V {
-    // here comes the definitions and constraints
+    // Check if the formula generated is the same as explicit time.
     Now[p()].
     !i in Int: q(i).
 }
 
 structure S:V {
-    // here comes the interpretation of some symbols
+    
 }
 
 procedure main () {

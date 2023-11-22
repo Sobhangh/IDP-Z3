@@ -1,16 +1,14 @@
 vocabulary V {
-    // here comes the specification of the vocabulary
     p: () → Bool
     Temporal p
 }
 
 theory LTC T:V {
-    // here comes the definitions and constraints
     //Now[p()].
 }
 
 structure S:V {
-    // here comes the interpretation of some symbols
+    // Check if the partial assignment of structure works with temporal predicate
     p := {0}.
 }
 

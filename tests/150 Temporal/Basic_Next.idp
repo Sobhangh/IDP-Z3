@@ -1,24 +1,21 @@
 vocabulary V {
-    // here comes the specification of the vocabulary
     type test is {0..5}
     p: () → Bool
     q: Int -> Bool
-    //Temporal p
+    Temporal p
 }
 
 theory T:V {
-    // here comes the definitions and constraints
+    // To check if the formula resulted form the definition works; the same as the one where time is explicit
     
-    //{
-        //Start[p()].
-        //Next[p()] <- not Now[p()].
-    //}
+    {
+        Start[p()].
+        Next[p()] <- not Now[p()].
+    }
     {
         q(0).
         !i in Int: q(i+1) <- not q(i). 
     }
-    //Start[p()].
-    //((Now[p()] or Next[p()]) and not (Now[p()] and Next[p()])).
     
 }
 

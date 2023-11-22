@@ -1,17 +1,15 @@
 vocabulary V {
-    // here comes the specification of the vocabulary
     p: () → Bool
     q: Int -> Bool
     Temporal p
 }
 
 theory T:V {
-    // here comes the definitions and constraints
+    // To check if it gives error when a non temporal predicate is placed inside Now/Next/Start
     Now[q()].
 }
 
 structure S:V {
-    // here comes the interpretation of some symbols
 }
 
 procedure main () {

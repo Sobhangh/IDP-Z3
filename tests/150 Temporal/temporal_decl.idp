@@ -1,12 +1,11 @@
 vocabulary V {
-    // here comes the specification of the vocabulary
+    // Check if it the resulting vocabulary is as expected.
     p: () → Bool
     Temporal p
 }
 
 theory T:V {
-    // here comes the definitions and constraints
-    //p().
+    // Check if it gives error when p is used outside of Start/Now/Next
 }
 
 structure S:V {
