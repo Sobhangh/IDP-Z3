@@ -218,6 +218,7 @@ class Expression(ASTNode):
     """
 
 
+
     def __init__(self, parent: Optional[ASTNode]=None,
                  annotations: Optional[Annotations]=None):
         if parent:
@@ -240,6 +241,7 @@ class Expression(ASTNode):
         self.relevant: Optional[bool] = None
 
     def __deepcopy__(self, memo):
+        """ copies everyting but .original """
         cls = self.__class__ # Extract the class of the object
         out = cls.__new__(cls) # Create a new instance of the object based on extracted class
         memo[id(self)] = out
