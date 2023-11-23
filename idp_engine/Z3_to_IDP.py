@@ -27,8 +27,8 @@ from typing import List, TYPE_CHECKING, Optional, Union
 from z3 import ModelRef, FuncInterp, is_and, is_or, is_eq, is_not, AstRef, ExprRef
 
 from .Assignments import Assignments
-from .Expression import Expression, SymbolExpr, AppliedSymbol
-from .Parse import str_to_IDP2, SymbolDeclaration
+from .Expression import Expression, AppliedSymbol
+from .Parse import str_to_IDP, SymbolDeclaration
 from .utils import RESERVED_SYMBOLS
 if TYPE_CHECKING:
     from .Theory import Theory
@@ -69,16 +69,16 @@ def get_interpretations(theory: Theory, model: ModelRef, as_z3: bool
                             applied = re.sub(TRUEFALSE, lambda m: m.group(1).lower(), applied)
                             val = args[-1]
                             map[applied] = (val if as_z3 else
-                                            str_to_IDP2(decl.codomain, decl.codomain.decl, str(val)))
+                                            str_to_IDP(str(val), decl.codomain))
                         try:
                             # use the else value if we can translate it
-                            val = str_to_IDP2(decl.codomain, decl.codomain.decl, str(a_list[-1]))
+                            val = str_to_IDP(str(a_list[-1]), decl.codomain)
                             _else = (a_list[-1] if as_z3 else val)
                         except AssertionError:
                             pass # Var(0) => can be any value
                 elif isinstance(interp, ExprRef):
                     _else = (interp if as_z3 else
-                             str_to_IDP2(decl.codomain, decl.codomain.decl, str(interp)))
+                             str_to_IDP(str(interp), decl.codomain))
                 else:
                     assert interp is None, "Internal error"
             out[decl.name] = (map, _else)
@@ -125,7 +125,7 @@ def collect_questions(z3_expr: AstRef,
             arg_string = str(right)
             atom_string = f"{decl.name}({arg_string})"  # p(value)
             if atom_string not in ass:
-                arg = str_to_IDP2(typ, typ.decl, arg_string)
+                arg = str_to_IDP(arg_string, typ)
                 symb = decl.symbol_expr
                 symb.decl = decl
                 atom = AppliedSymbol.make(symb, [arg])  # p(value)

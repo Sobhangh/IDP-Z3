@@ -47,7 +47,7 @@ from idp_engine.utils import log, RUN_FILE
 
 from idp_engine.Assignments import Status as S
 from idp_engine.Expression import EQUALS
-from idp_engine.Parse import TypeDeclaration, str_to_IDP
+from idp_engine.Parse import str_to_IDP
 from idp_engine.utils import redirect_stdout, redirect_stderr_to_stdout
 from .State import State
 from .Inferences import explain, abstract
@@ -413,13 +413,13 @@ def get_state(request):
             else:  # (k1=v1) = false --> create an entry for (k1=v1)
                 k1, v1 = terms[0], terms[1]
                 expr = state.assignments[k1].sentence
-                val = str_to_IDP(expr, v1)
+                val = str_to_IDP(v1, expr.type)
                 expr = EQUALS([expr, val])
                 state.assignments.assert__(expr, None, None)
 
         if v:
             sentence = state.assignments[k].sentence
-            value = str_to_IDP(sentence, v)
+            value = str_to_IDP(v, sentence.type)
             state.assert_(k, value)
             if state.environment and k in state.environment.assignments:
                 state.environment.assert_(k, value)
@@ -452,7 +452,7 @@ def state_explain():
         # create an entry in state.assignments if it does not occur in the theory
         if sentence + " = " + value not in state.assignments:
             expr = state.assignments[sentence].sentence
-            val = str_to_IDP(expr, value)
+            val = str_to_IDP(value, expr.type)
             to_explain = EQUALS([expr, val])
             state.assignments.assert__(to_explain, None, None)
         sentence = sentence + " = " + value

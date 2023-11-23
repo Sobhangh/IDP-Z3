@@ -36,7 +36,7 @@ from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
                          EQUALS, NOT, Extension, AQuantification,
                          BOOLT, INTT, REALT, DATET)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SymbolExpr,
-                    TheoryBlock, Structure, Definition, str_to_IDP, str_to_IDP2,
+                    TheoryBlock, Structure, Definition, str_to_IDP,
                     SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, INT, REAL, DATE, IDPZ3Error,
@@ -363,7 +363,7 @@ class Theory(object):
         if value is None:
             self.assignments.assert__(atom, None, S.UNKNOWN)
         else:
-            val = str_to_IDP(atom, str(value))
+            val = str_to_IDP(str(value), atom.type)
             self.assignments.assert__(atom, val, status)
         self._formula = None
 
@@ -537,7 +537,8 @@ class Theory(object):
                         val1 = model.eval(q.reified(self), model_completion=complete)
                     else:
                         val1 = model.eval(q.translate(self), model_completion=complete)
-                    val = str_to_IDP(q, str(val1))
+                    val = (None if str(q) in [str(val1), str(val1)+"()"] else
+                           str_to_IDP(str(val1), q.type))
 
                 if val is not None:
                     if q.is_assignment() and val == FALSE:  # consequence of the TRUE assignment
@@ -751,7 +752,7 @@ class Theory(object):
                 break
         solver.pop()
 
-        val_IDP = str_to_IDP(sentence, str(val))
+        val_IDP = str_to_IDP(str(val), sentence.type)
         if val_IDP is not None:
             self.assert_(str(sentence), val_IDP, S.GIVEN)
             ass = str(EQUALS([sentence, val_IDP]))

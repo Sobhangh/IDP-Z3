@@ -131,7 +131,7 @@ def load_json(assignments, jsonstr: str, keep_defaults: bool):
                             status_map[json_atom["status"]])
 
                     if json_atom["value"] != '' and atom.status == S.UNKNOWN:
-                        value = str_to_IDP(sentence, str(json_atom["value"]))
+                        value = str_to_IDP(str(json_atom["value"]), sentence.type)
                         assignments.assert__(sentence, value, status)
                         if json_atom["typ"] != "Bool":  # needed for default structure
                             code = f"{sentence.code} = {str(value)}"

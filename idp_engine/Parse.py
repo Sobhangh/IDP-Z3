@@ -49,42 +49,15 @@ from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
 if TYPE_CHECKING:
     from .Theory import Theory
 
-def str_to_IDP(atom: Expression, val_string: str) -> Optional[Expression]:
-    """cast a string value for 'atom into an Expr object, or None
 
-    used to convert Z3 models or json data from GUI
-
-    Args:
-        atom (Expression): the atom whose value must be converted
-        val_string (str): the string representation of the value
-
-    Returns:
-        Expression: the value cast as Expression, or None if unknown
-    """
-
-    val_string = val_string.replace('True', 'true').replace('False', 'false')
-    if val_string == str(atom) or val_string+"()" == str(atom):
-        return None  # Z3 means the value is unknown
-
-    # determine the type declaration if possible
-    assert atom.type, "Internal error"
-    type_ = atom.type
-    decl = (None if not hasattr(atom, 'decl') or atom.type == BOOLT else
-           atom.decl.codomain.decl)
-    assert decl is None or atom.decl.codomain == type_, f"{atom}: {decl.name} != {type_}"
-    return str_to_IDP2(type_, decl, val_string)
-
-
-def str_to_IDP2(type_: Set_,
-                decl: Optional[Declaration],
-                val_string: str
+def str_to_IDP(val_string: str,
+               type_: Set_,
                 ) -> Expression:
-    """recursive function to decode a val_string of type type_ and type
+    """recursive function to decode a val_string in set `type_`
 
     Args:
-        type_ (Set_):
-        decl (Declaration, Optional): declaration of the value string
-        val_string (str): value_string
+        type_ (Set_): set containing the value
+        val_string (str): a string containing a value
 
     Raises:
         IDPZ3Error: if wrong value
@@ -92,73 +65,72 @@ def str_to_IDP2(type_: Set_,
     Returns:
         Expression: the internal representation of the value
     """
-    if decl is None:
+    if type_.decl is None:
         assert type_ == BOOLT, "Internal error"
-        out = (TRUE if val_string == 'true' else
-            FALSE if val_string == 'false' else
+        out = (TRUE if val_string in [TRUE, 'True'] else
+            FALSE if val_string in [FALSE, 'False']  else
             None)
         if out is None:
             raise IDPZ3Error(f"wrong boolean value: {val_string}")
+    elif (hasattr(type_.root_set.decl, 'map')
+        and val_string in type_.root_set.decl.map):  # constructor
+        out = type_.root_set.decl.map[val_string]
+    elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
+        assert hasattr(type_.decl, 'interpretation'), "Internal error"
+
+        # find constructor name and its arguments in val_string
+        stack : List[int] = []
+        args : List[str] = []
+        for i, c in enumerate(val_string):
+            if c == '(':
+                name : str = val_string[:i].strip() if len(stack) == 0 else name
+                stack.append(i+1)
+            elif c == ',' and len(stack) == 1:
+                start = stack.pop()
+                args.append(val_string[start: i])
+                stack.append(i+2)
+            elif c == ')':
+                start = stack.pop()
+                if len(stack) == 0:
+                    args.append(val_string[start: i])  # TODO construct the AppliedSymbol here, rather than later
+
+        # find the constructor
+        constructor = None
+        assert type(type_.decl.interpretation) == SymbolInterpretation, "Internal error"
+        for cons in type_.decl.interpretation.enumeration.constructors:
+            if cons.name == name:
+                constructor = cons
+        assert constructor is not None, f"wrong constructor name '{name}' for {type_}"
+
+        new_args = []
+        for a, s in zip(args, constructor.domains):
+            assert s.decl is not None, "Internal error"
+            new_args.append(str_to_IDP(a, s))
+
+        out = AppliedSymbol.construct(constructor, new_args)
     else:
-        if (hasattr(type_.root_set.decl, 'map')
-            and val_string in type_.root_set.decl.map):  # constructor
-            out = type_.root_set.decl.map[val_string]
-        elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
-            assert hasattr(decl, 'interpretation'), "Internal error"
+        interp = getattr(type_.root_set.decl, "interpretation", None)
+        enum_type = (interp.enumeration.type.name if interp else
+                        type_.decl.name if type(type_.decl) == TypeDeclaration else
+                        type_.decl.codomain.name)
 
-            # find constructor name and its arguments in val_string
-            stack : List[int] = []
-            args : List[str] = []
-            for i, c in enumerate(val_string):
-                if c == '(':
-                    name : str = val_string[:i].strip() if len(stack) == 0 else name
-                    stack.append(i+1)
-                elif c == ',' and len(stack) == 1:
-                    start = stack.pop()
-                    args.append(val_string[start: i])
-                    stack.append(i+2)
-                elif c == ')':
-                    start = stack.pop()
-                    if len(stack) == 0:
-                        args.append(val_string[start: i])  # TODO construct the AppliedSymbol here, rather than later
-
-            # find the constructor
-            constructor = None
-            assert type(decl.interpretation) == SymbolInterpretation, "Internal error"
-            for cons in decl.interpretation.enumeration.constructors:
-                if cons.name == name:
-                    constructor = cons
-            assert constructor is not None, f"wrong constructor name '{name}' for {type_}"
-
-            new_args = []
-            for a, s in zip(args, constructor.domains):
-                assert s.decl is not None, "Internal error"
-                new_args.append(str_to_IDP2(s, s.decl, a))
-
-            out = AppliedSymbol.construct(constructor, new_args)
+        if type_ == BOOLT or enum_type == BOOL:
+            out = (TRUE if val_string in [TRUE, 'True'] else
+                    FALSE if val_string in [FALSE, 'False'] else
+                    None)
+            if out is None:
+                raise IDPZ3Error(f"wrong boolean value: {val_string}")
+        elif type_ == DATET or enum_type == DATE:
+            d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
+                date.fromisoformat(val_string[1:]))
+            out = Date(iso=f"#{d.isoformat()}")
+        elif type_ == REALT or enum_type == REAL:
+            out = Number(number= val_string if '/' in val_string else
+                        str(float(eval(val_string.replace('?', '')))))
+        elif type_ == INTT or enum_type == INT:
+            out = Number(number=str(eval(val_string)))
         else:
-            interp = getattr(type_.root_set.decl, "interpretation", None)
-            enum_type = (interp.enumeration.type.name if interp else
-                         decl.name if type(decl) == TypeDeclaration else
-                         decl.codomain.name)
-
-            if type_ == BOOLT or enum_type == BOOL:
-                out = (TRUE if val_string in ['true', 'True'] else
-                       FALSE if val_string in ['false', 'False'] else
-                       None)
-                if out is None:
-                    raise IDPZ3Error(f"wrong boolean value: {val_string}")
-            elif type_ == DATET or enum_type == DATE:
-                d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
-                    date.fromisoformat(val_string[1:]))
-                out = Date(iso=f"#{d.isoformat()}")
-            elif type_ == REALT or enum_type == REAL:
-                out = Number(number= val_string if '/' in val_string else
-                            str(float(eval(val_string.replace('?', '')))))
-            elif type_ == INTT or enum_type == INT:
-                out = Number(number=str(eval(val_string)))
-            else:
-                raise IDPZ3Error(f"unknown type for: {val_string}: {decl}")
+            raise IDPZ3Error(f"unknown type for: {val_string}: {type_.decl}")
     return out
 
 
