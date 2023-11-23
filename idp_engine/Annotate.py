@@ -174,6 +174,15 @@ VarDeclaration.annotate_declaration = annotate_declaration
 
 # Class Set_  #######################################################
 
+def root_set(s: Set_) -> Set_:
+    if type(s.decl) == TypeDeclaration:
+        if s.decl.interpretation and hasattr(s.decl.interpretation.enumeration, "type"):
+            return s.decl.interpretation.enumeration.type  # numeric type of the interpretation
+        return s
+    elif s.name == CONCEPT:
+        return s
+    return root_set(s.decl.domains[0])
+
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
@@ -188,7 +197,8 @@ def annotate(self: Expression,
     self.decl = voc.symbol_decls[self.name]
     self.variables = set()
     self.type = self.decl.codomain
-    if self.codomain:
+    self.root_set = root_set(self)
+    if self.codomain:  # a concept domain
         self.concept_domains = [s.annotate(voc, q_vars) for s in self.concept_domains]
         self.codomain = self.codomain.annotate(voc, q_vars)
     return self
@@ -676,9 +686,12 @@ def annotate_quantee(self: Expression,
                 f" the same name as another symbol")
             # 1. get variable sort from the quantee, if possible
             if len(vars) == 1 and self.sub_exprs and type(self.sub_exprs[0]) == Set_:
-                var.type = self.sub_exprs[0]   # `!x in p` or `!x in Concept[...]`
-            elif self.sub_exprs and self.sub_exprs[0].decl:
-                var.type = self.sub_exprs[0].decl.domains[i]  # `! (x,y) in p` or `in $(p)`
+                var.type = self.sub_exprs[0]   # `x in p` or `x in Concept[...]`
+            elif self.sub_exprs:
+                if self.sub_exprs[0].decl:  # `(x,y) in p`
+                    var.type = self.sub_exprs[0].decl.domains[i]
+                elif self.sub_exprs[0].sub_exprs[0].type:  #  `x in $(p)`
+                    var.type = self.sub_exprs[0].sub_exprs[0].type.root_set.concept_domains[0]
             else:
                 var.type = None
             # 2. compare with variable declaration, if any
@@ -998,7 +1011,9 @@ def set_variables(self: AppliedSymbol, type_check=True) -> Expression:
     # ¢heck type of arguments
     if out.decl and type_check:
         for e, s in zip(self.sub_exprs, out.decl.domains):
-            if not type(s.decl) == TypeDeclaration:  # Type predicates accept anything
+            if not type(out.decl) == TypeDeclaration:  # Type predicates accept anything
+                e.check(e.type.root_set == s.root_set,
+                        f"{s.root_set} expected ({e.type.root_set} found: {e})")
                 type_ = e.type
                 # while type_ != s:  # handle case where e_type is a subset of s
                 #     e.check(type_ != type_.decl.domains[0],

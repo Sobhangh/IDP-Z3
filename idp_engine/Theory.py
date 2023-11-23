@@ -311,7 +311,7 @@ class Theory(object):
                 relevant = SymbolExpr.make(RELEVANT)
                 relevant.decl = self.declarations[RELEVANT]
                 for i in decl.instances.values():
-                    constraint = AppliedSymbol.make(relevant, [i])
+                    constraint = AppliedSymbol.make(relevant, [i], type_check=False)
                     self.constraints.append(constraint)
 
         # expand whole-domain definitions

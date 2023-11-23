@@ -561,6 +561,8 @@ class Set_(Expression):
         codomain (Set_, Optional): range of the Concept signature, e.g., `Bool`
 
         decl (Declaration, Optional): declaration of the type
+
+        root_set (Set_, Optional): a Type or a Concept with signature (Concept[T->T])
     """
 
     def __init__(self, parent,
@@ -572,6 +574,7 @@ class Set_(Expression):
         self.codomain = out
         self.sub_exprs = []
         self.decl: Optional[SymbolDeclaration] = None
+        self.root_set: Optional[Set_] = None
         super().__init__(parent)
 
     def __str__(self):

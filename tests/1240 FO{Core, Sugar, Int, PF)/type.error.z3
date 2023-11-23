@@ -33,17 +33,17 @@ Traceback (most recent call last):
     self = Expression.annotate(self, voc, q_vars)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    return self.set_variables()
-           ^^^^^^^^^^^^^^^^^^^^
+    self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in <listcomp>
+    self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in annotate
+    out = self.set_variables()
+          ^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in set_variables
-    out = Operator.set_variables(self)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in set_variables
-    self.type = base_type(self.sub_exprs)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in base_type
-    e.check(False, f"Invalid type {b.name} (expecting {base.name})")
+    e.check(e.type.root_set == s.root_set,
   File "idp_engine/Expression.py", line ??, in check
     raise IDPZ3Error(msg, self)
-idp_engine.utils.IDPZ3Error: Error: line 8 - colStart 21 - colEnd 25 => Invalid type Color (expecting LivingBeing)
+idp_engine.utils.IDPZ3Error: Error: line 8 - colStart 14 - colEnd 17 => LivingBeing expected (Color found: red)
 
