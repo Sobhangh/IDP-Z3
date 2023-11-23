@@ -757,7 +757,11 @@ class Rule(ASTNode):
                 f"← {str(self.body)}")
 
     def __deepcopy__(self, memo):
-        out = copy(self)
+        cls = self.__class__ # Extract the class of the object
+        out = cls.__new__(cls) # Create a new instance of the object based on extracted class
+        memo[id(self)] = out
+        out.__dict__.update(self.__dict__)
+
         out.definiendum = deepcopy(self.definiendum)
         out.definiendum.sub_exprs = [deepcopy(e) for e in self.definiendum.sub_exprs]
         out.out = deepcopy(self.out)

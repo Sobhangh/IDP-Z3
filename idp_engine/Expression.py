@@ -258,11 +258,7 @@ class Expression(ASTNode):
             name of the symbol for which the expression is a type constraint
 
     """
-    # slots for marginally faster code
-    __slots__ = ('sub_exprs', 'code',
-                 'annotations', 'original', 'str', 'variables', 'type',
-                 'is_type_constraint_for', 'co_constraint',
-                 'questions', 'relevant')
+
 
     def __init__(self, parent=None):
         if parent:
@@ -287,19 +283,15 @@ class Expression(ASTNode):
         self.relevant: Optional[bool] = None
 
     def __deepcopy__(self, memo):
-        """ copies everyting but .original """
-        key = str(self)
-        val = memo.get(key, None)
-        if val is not None:
-            return val
-        if self.is_value():
-            return self
-        out = copy(self)
-        out.sub_exprs = [deepcopy(e, memo) for e in out.sub_exprs]
-        out.variables = deepcopy(out.variables, memo)
-        out.co_constraint = deepcopy(out.co_constraint, memo)
+        cls = self.__class__ # Extract the class of the object
+        out = cls.__new__(cls) # Create a new instance of the object based on extracted class
+        memo[id(self)] = out
+        out.__dict__.update(self.__dict__)
+
+        out.sub_exprs = [deepcopy(e, memo) for e in self.sub_exprs]
+        out.variables = deepcopy(self.variables, memo)
+        out.co_constraint = deepcopy(self.co_constraint, memo)
         out.questions = deepcopy(self.questions, memo)
-        memo[key] = out
         return out
 
     def same_as(self, other: Expression):
@@ -824,9 +816,8 @@ class AQuantification(Expression):
             return body
 
     def __deecopy__(self, memo):
-        # also called by AAgregate
-        out = Expression.__deecopy__(self, memo)
-        out.quantees = [deepcopy(q, memo) for q in out.quantees]
+        out = super().__deepcopy__(memo)
+        out.quantees = [deepcopy(q, memo) for q in self.quantees]
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -1091,7 +1082,9 @@ class AAggregate(Expression):
         return out
 
     def __deepcopy__(self, memo):
-        return super().__deepcopy__(memo)
+        out = super().__deepcopy__(memo)
+        out.quantees = [deepcopy(q, memo) for q in self.quantees]
+        return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
@@ -1175,8 +1168,8 @@ class AppliedSymbol(Expression):
 
     def __deepcopy__(self, memo):
         out = super().__deepcopy__(memo)
-        out.symbol = deepcopy(out.symbol)
-        out.as_disjunction = deepcopy(out.as_disjunction)
+        out.symbol = deepcopy(self.symbol, memo)
+        out.as_disjunction = deepcopy(self.as_disjunction, memo)
         return out
 
     def collect(self, questions, all_=True, co_constraints=True):
