@@ -481,6 +481,8 @@ class SymbolDeclaration(ASTNode):
 
         base_decl (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
 
+        symbol_expr (SymbolExpr, Optional): a SymbolExpr of the same name
+
         instances (dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of
             arguments to its parsed AST

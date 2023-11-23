@@ -73,12 +73,6 @@ def annotate_block(self: ASTNode,
             s.check(s.name not in temp or s.name in RESERVED_SYMBOLS,
                     f"Duplicate declaration of {s.name}")
             temp[s.name] = s
-    temp[CONCEPT].constructors=([CONSTRUCTOR(f"`{s}")
-                                 for s in [BOOL, INT, REAL, DATE, CONCEPT]]
-                               +[CONSTRUCTOR(f"`{s.name}")
-                                 for s in temp.values()
-                                 if s.name not in RESERVED_SYMBOLS
-                                 and type(s) in Declaration.__args__])
     self.declarations = list(temp.values())
 
     # annotate declarations
@@ -91,12 +85,18 @@ def annotate_block(self: ASTNode,
     DATET.annotate(self, {})
 
     concepts = self.symbol_decls[CONCEPT]
-    for constructor in concepts.constructors:
-        constructor.concept_decl = self.symbol_decls[constructor.name[1:]]
-
-    # populate .map of CONCEPT
+    concepts.constructors=([CONSTRUCTOR(f"`{s}")
+                            for s in [BOOL, INT, REAL, DATE, CONCEPT]]
+                          +[CONSTRUCTOR(f"`{s.name}")
+                            for s in temp.values()
+                            if s.name not in RESERVED_SYMBOLS
+                            and type(s) in Declaration.__args__])
     for c in concepts.constructors:
-        assert not c.domains, "Internal error"
+        c.concept_decl = self.symbol_decls[c.name[1:]]
+        c.codomain = Set_(self, CONCEPT, c.concept_decl.domains,
+                          c.concept_decl.codomain).annotate(self, {})
+
+        self.symbol_decls[c.name] = c
         concepts.map[str(c)] = UnappliedSymbol.construct(c)
     return []
 Vocabulary.annotate_block = annotate_block
