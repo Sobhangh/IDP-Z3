@@ -7,11 +7,10 @@ For typing:
 
 ```mermaid
 erDiagram
-    Declaration ||--o{ Declaration : base_decl
-    Set_ }o--|| Declaration: decl
     Declaration |o--o{ Set_ : domains
     Declaration |o--|| Set_: codomain
     Declaration |o--o{ Expression: decl
+    Set_ }o--|| Declaration: decl
     Set_ |o--o{ Set_: concept_domains
     Set_ |o--o| Set_: codomain
     Set_ ||--o{ Expression: type
@@ -22,7 +21,6 @@ erDiagram
     Declaration ||--o{ Constructor: constructors
 
     Declaration {
-        Declaration base_decl
         List[Set_] domains
         Set_ codomain
         List[Constructor] constructors

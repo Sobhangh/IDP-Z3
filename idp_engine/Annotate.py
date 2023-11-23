@@ -121,11 +121,6 @@ def annotate_declaration(self: ASTNode,
         voc.symbol_decls[c.name] = c
     if self.interpretation:
         self.interpretation.annotate(voc, {})
-        base_decl = (self.name if type(self.interpretation.enumeration) != Ranges else
-                        self.interpretation.enumeration.type.name)  # INT or REAL or DATE
-        self.base_decl = voc.symbol_decls[base_decl]
-    else:
-        self.base_decl = self
     return self
 TypeDeclaration.annotate_declaration = annotate_declaration
 
@@ -149,9 +144,6 @@ def annotate_declaration(self: SymbolDeclaration,
 
     self.symbol_expr = SymbolExpr.make(self.name)
     self.symbol_expr.decl = self
-
-    self.base_decl = (None if self.codomain != BOOLT or self.arity != 1 else
-                      self.domains[0].decl.base_decl)
     return self
 SymbolDeclaration.annotate_declaration = annotate_declaration
 
@@ -471,7 +463,7 @@ def annotate(self: Expression,
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
-    self.check(not(self.symbol_decl.codomain.decl.base_decl == BOOLT
+    self.check(not(self.symbol_decl.codomain.root_set == BOOLT
                    and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
@@ -760,14 +752,14 @@ def base_type(exprs: List[Expression]) -> Optional[Set_]:
     """
     if not exprs:
         return None
-    if exprs[0].type and exprs[0].type.decl and exprs[0].type.decl.base_decl:
-        base = exprs[0].type.decl.base_decl
+    if exprs[0].type:
+        base = exprs[0].type.root_set
         bases = set([base.name])
-        if base.name in [REAL, DATE]:
+        if base in [REALT, DATET]:
             bases.add(INT)  # also accept INT for REAL and DATE
         for e in exprs:
-            if e.type and e.type.decl and e.type.decl.base_decl:
-                b = e.type.decl.base_decl
+            if e.type:
+                b = e.type.root_set
                 if b.name not in bases:
                     if base.name == INT and b.name in [REAL, DATE]:
                         base = b
@@ -777,8 +769,7 @@ def base_type(exprs: List[Expression]) -> Optional[Set_]:
                 # else continue
             else:
                 e.check(False, f"Can't determine the type of {e}")
-        assert type(base) == TypeDeclaration, "Internal error"
-        return base.domains[0]
+        return base
     else:
         exprs[0].check(False, f"Can't determine the type of {exprs[0]}")
 
@@ -859,7 +850,7 @@ def annotate(self: AComparison,
     for e in self.sub_exprs:
         if self.operator[0] in "<>≤≥" and e.type:
             decl = voc.symbol_decls.get(e.type.name, None)
-            self.check(voc.symbol_decls[e.type.name].base_decl in [INTT, REALT, DATET],
+            self.check(e.type.root_set in [INTT, REALT, DATET],
                         f"Expected numeric formula, got {e.type}: {e}")
     return out
 AComparison.annotate = annotate
@@ -898,17 +889,17 @@ def annotate(self: AAggregate,
         if self.aggtype == "sum" and len(self.sub_exprs) == 2:
             self.original = copy(self)
             self.sub_exprs[0].check(
-                self.sub_exprs[0].type.decl.base_decl.name in [INT, REAL],
+                self.sub_exprs[0].type.root_set in [INTT, REALT],
                 f"Must be numeric: {self.sub_exprs[0]}")
             self.sub_exprs[1].check(
-                self.sub_exprs[1].type.decl.base_decl.name == BOOL,
+                self.sub_exprs[1].type.root_set == BOOLT,
                 f"Must be boolean: {self.sub_exprs[1]}")
             self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
                                     self.sub_exprs[0], ZERO).set_variables()]
 
         if self.aggtype == "#":
             self.sub_exprs[0].check(
-                self.sub_exprs[0].type.decl.base_decl.name == BOOL,
+                self.sub_exprs[0].type.root_set == BOOLT,
                 f"Must be boolean: {self.sub_exprs[0]}")
             self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
                                  Number(number='0'))]

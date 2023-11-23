@@ -100,9 +100,9 @@ def str_to_IDP2(type_: Set_,
         if out is None:
             raise IDPZ3Error(f"wrong boolean value: {val_string}")
     else:
-        if (decl.base_decl and hasattr(decl.base_decl, 'map')
-            and val_string in decl.base_decl.map):  # constructor
-            out = decl.base_decl.map[val_string]
+        if (hasattr(type_.root_set.decl, 'map')
+            and val_string in type_.root_set.decl.map):  # constructor
+            out = type_.root_set.decl.map[val_string]
         elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
             assert hasattr(decl, 'interpretation'), "Internal error"
 
@@ -137,7 +137,7 @@ def str_to_IDP2(type_: Set_,
 
             out = AppliedSymbol.construct(constructor, new_args)
         else:
-            interp = getattr(decl.base_decl, "interpretation", None)
+            interp = getattr(type_.root_set.decl, "interpretation", None)
             enum_type = (interp.enumeration.type.name if interp else
                          decl.name if type(decl) == TypeDeclaration else
                          decl.codomain.name)
@@ -379,8 +379,6 @@ class TypeDeclaration(ASTNode):
 
         codomain (Set_): the Boolean type
 
-        base_decl (TypeDeclaration, optional): bool, int, real or self
-
         constructors ([Constructor]): list of constructors in the enumeration
 
         interpretation (SymbolInterpretation): the symbol interpretation
@@ -401,7 +399,6 @@ class TypeDeclaration(ASTNode):
         self.arity : int = 1
         self.domains : List[Set_] = [Set_(None, self.name)]
         self.codomain : Set_ = BOOLT
-        self.base_decl : Optional[TypeDeclaration] = None
         self.block: Optional[Block] = None
 
         self.map : dict[str, Expression]= {}
@@ -479,8 +476,6 @@ class SymbolDeclaration(ASTNode):
 
         symbol_expr (SymbolExpr, Optional): symbol expression of the same name
 
-        base_decl (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
-
         symbol_expr (SymbolExpr, Optional): a SymbolExpr of the same name
 
         instances (dict[string, Expression]):
@@ -533,7 +528,6 @@ class SymbolDeclaration(ASTNode):
         self.heading: Optional[str] = None
         self.optimizable: bool = True
 
-        self.base_decl : Optional[TypeDeclaration]= None
         self.range : Optional[List[AppliedSymbol]]= None  # all possible terms.  Used in get_range and IO.py
         self.instances : Optional[dict[str, AppliedSymbol]]= None  # not starting with '_'
         self.block: Optional[ASTNode] = None  # vocabulary where it is declared

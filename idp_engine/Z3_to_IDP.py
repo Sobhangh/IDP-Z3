@@ -69,16 +69,16 @@ def get_interpretations(theory: Theory, model: ModelRef, as_z3: bool
                             applied = re.sub(TRUEFALSE, lambda m: m.group(1).lower(), applied)
                             val = args[-1]
                             map[applied] = (val if as_z3 else
-                                            str_to_IDP2(None, decl.codomain.decl, str(val)))
+                                            str_to_IDP2(decl.codomain, decl.codomain.decl, str(val)))
                         try:
                             # use the else value if we can translate it
-                            val = str_to_IDP2(None, decl.codomain.decl, str(a_list[-1]))
+                            val = str_to_IDP2(decl.codomain, decl.codomain.decl, str(a_list[-1]))
                             _else = (a_list[-1] if as_z3 else val)
                         except AssertionError:
                             pass # Var(0) => can be any value
                 elif isinstance(interp, ExprRef):
                     _else = (interp if as_z3 else
-                             str_to_IDP2(None, decl.codomain.decl, str(interp)))
+                             str_to_IDP2(decl.codomain, decl.codomain.decl, str(interp)))
                 else:
                     assert interp is None, "Internal error"
             out[decl.name] = (map, _else)
