@@ -17,6 +17,7 @@ erDiagram
     Set_ ||--o{ Expression: type
     Constructor }o--o{ Set_ : domains
     Constructor }o--|| Set_ : codomain
+    Constructor |o--o| Declaration: concept_decl
     Declaration ||--o{ Constructor: constructors
 
     Declaration {
@@ -37,6 +38,7 @@ erDiagram
     Constructor {
         List[Set_] domains
         Set_ codomain
+        Declaration concept_decl
     }
 ```
 

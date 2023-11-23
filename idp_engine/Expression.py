@@ -520,7 +520,8 @@ class Constructor(ASTNode):
         tester (SymbolDeclaration, Optional): function to test if the constructor
         has been applied to some arguments (e.g., is_rgb)
 
-        symbol (Set_, Optional): only for Concept constructors; =Set_(name[1:])
+        concept_decl (SymbolDeclaration, Optional): declaration with name[1:],
+        only for Concept constructors.
 
         range: the list of identifiers
     """
@@ -535,7 +536,7 @@ class Constructor(ASTNode):
         self.arity = len(self.domains)
 
         self.codomain: Optional[Set_] = None
-        self.symbol: Optional[Set_] = None
+        self.concept_decl: Optional[SymbolDeclaration] = None
         self.tester: Optional[SymbolDeclaration] = None
         self.range: Optional[List[Expression]] = None
 
@@ -555,7 +556,7 @@ class Set_(Expression):
     Args:
         name (str): name of the concept
 
-        ins (List[Set_], Optional): domain of the Concept signature, e.g., `[T, T]`
+        concept_domains (List[Set_], Optional): domain of the Concept signature, e.g., `[T, T]`
 
         codomain (Set_, Optional): range of the Concept signature, e.g., `Bool`
 

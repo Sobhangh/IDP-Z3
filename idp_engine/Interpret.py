@@ -34,7 +34,7 @@ from __future__ import annotations
 
 from copy import copy, deepcopy
 from itertools import product
-from typing import List, Callable, Optional, Union
+from typing import List, Callable, Optional
 
 from .Assignments import Status as S
 from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
@@ -443,13 +443,13 @@ def extension(self, extensions: dict[str, Extension]) -> Extension:
         ext = extensions[CONCEPT][0]
         assert isinstance(ext, List) , "Internal error"
         out = [v for v in ext
-                if type(v[0]) == UnappliedSymbol
-                and v[0].decl.symbol.decl.arity == len(self.concept_domains)
-                and isinstance(v[0].decl.symbol.decl, SymbolDeclaration)
-                and v[0].decl.symbol.decl.codomain == self.codomain
-                and len(v[0].decl.symbol.decl.domains) == len(self.concept_domains)
+                if isinstance(v[0], UnappliedSymbol)  # for type checking
+                and isinstance(v[0].decl.concept_decl, SymbolDeclaration)
+                and v[0].decl.concept_decl.arity == len(self.concept_domains) # real test
+                and v[0].decl.concept_decl.codomain == self.codomain
+                and len(v[0].decl.concept_decl.domains) == len(self.concept_domains)
                 and all(s == q
-                        for s, q in zip(v[0].decl.symbol.decl.domains,
+                        for s, q in zip(v[0].decl.concept_decl.domains,
                                         self.concept_domains))]
         extensions[self.code] = (out, None)
     return extensions[self.code]

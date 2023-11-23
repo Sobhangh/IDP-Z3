@@ -92,8 +92,7 @@ def annotate_block(self: ASTNode,
 
     concepts = self.symbol_decls[CONCEPT]
     for constructor in concepts.constructors:
-        constructor.symbol = (SET_(constructor.name[1:])
-                                .annotate(self, {}))
+        constructor.concept_decl = self.symbol_decls[constructor.name[1:]]
 
     # populate .map of CONCEPT
     for c in concepts.constructors:

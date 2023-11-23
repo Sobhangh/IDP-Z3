@@ -38,7 +38,7 @@ from .Expression import (Constructor, Expression, AIfExpr, IF,
                          BOOLT, INTT, DATET)
 from .Parse import Enumeration, TupleIDP
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, ABS
+from .utils import ABS
 
 
 # class Expression  ###########################################################
@@ -423,11 +423,10 @@ def update_exprs(self: SymbolExpr,
     if not self.name:  # $(..)
         symbol = list(new_exprs)[0]
         if type(symbol) == UnappliedSymbol and symbol.decl:
-            value = symbol.decl.symbol
-            self.check(type(value) != Variable,
-                    f"Variable `{value}` cannot be applied to argument(s).")
-            out = SymbolExpr.make(name=value.name)
-            out.decl = value.decl
+            assert type(symbol.decl) == Constructor, "Internal error"
+            concept_decl = symbol.decl.concept_decl
+            out = SymbolExpr.make(name=concept_decl.name)
+            out.decl = concept_decl
             out.variables = set()
             return out
         else:
