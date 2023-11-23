@@ -215,13 +215,13 @@ AAggregate.SCA_Check = SCA_Check
 
 def SCA_Check(self,detections):
     # Check for the correct number of arguments.
-    if self.decl.arity != len(self.sub_exprs):
+    if self.decl and self.decl.arity != len(self.sub_exprs):
         if self.code != str(self.original):
             if abs(self.decl.arity - len(self.sub_exprs))!=1:  # For definitions
                 detections.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
         else:
             detections.append((self,f"Wrong number of arguments: given {len(self.sub_exprs)} but expected {self.decl.arity}","Error"))
-    else:
+    elif self.decl:
         # For each argument, find the expected type and the found type.
         # We make a distinction between normal types, partial functions and
         # constructors.

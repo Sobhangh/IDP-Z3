@@ -126,7 +126,7 @@ def collect_questions(z3_expr: AstRef,
             atom_string = f"{decl.name}({arg_string})"  # p(value)
             if atom_string not in ass:
                 arg = str_to_IDP2(typ, typ.decl, arg_string)
-                symb = SymbolExpr.make(decl.name)
+                symb = decl.symbol_expr
                 symb.decl = decl
                 atom = AppliedSymbol.make(symb, [arg])  # p(value)
                 out.append(atom)

@@ -813,7 +813,7 @@ class SymbolInterpretation(Expression):
     Attributes:
         name (string): name of the symbol being enumerated.
 
-        symbol (Set_): symbol being enumerated
+        symbol_decl (SymbolDeclaration): symbol being enumerated
 
         enumeration ([Enumeration]): enumeration.
 
@@ -841,7 +841,7 @@ class SymbolInterpretation(Expression):
                    (type(self.enumeration) == FunctionEnum and self.default is None),
                    "'⊇' can only be used with a functional enumeration ('→') without else clause")
 
-        self.symbol: Optional[Set_] = None
+        self.symbol_decl: Optional[SymbolDeclaration] = None
         self.is_type_enumeration = None
         self.block = None
 
@@ -885,7 +885,7 @@ class SymbolInterpretation(Expression):
                 elif self.sign == '≜':  # can use default
                     return self.default
 
-        if rank == self.symbol.decl.arity:  # valid tuple -> return a value
+        if rank == self.symbol_decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
             else:

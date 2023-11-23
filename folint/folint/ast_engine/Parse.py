@@ -183,7 +183,7 @@ def SCA_Check(self, detections):
 
     # options = list of list of possible values for an argument
     options = []
-    for i in self.symbol.decl.domains:
+    for i in self.symbol_decl.domains:
         if i.name in [BOOL, INT, REAL, DATE]:
             in_type_values = []
         elif i.decl.enumeration is None:  # Interpretation in Struct
@@ -200,7 +200,7 @@ def SCA_Check(self, detections):
         options.append(in_type_values)
 
     # same logic, for out value
-    out_type, out_type_values = self.symbol.decl.codomain, None
+    out_type, out_type_values = self.symbol_decl.codomain, None
     if out_type.name in [BOOL, INT, REAL, DATE]:
         out_type_values = []
     elif out_type.decl.enumeration is None:
@@ -228,12 +228,12 @@ def SCA_Check(self, detections):
     duplicates = set()
     function = 1 if isinstance(self.enumeration, FunctionEnum) else 0  # to ignore the last element of the tuple
     for t in self.enumeration.tuples:
-        for i in range(0, self.symbol.decl.arity):  # check each argument in tuple
-            check_type(t.args[i], self.symbol.decl.domains[i], options[i], 'Element')
+        for i in range(0, self.symbol_decl.arity):  # check each argument in tuple
+            check_type(t.args[i], self.symbol_decl.domains[i], options[i], 'Element')
 
-        elements = tuple(str(t.args[i]) for i in range(0, self.symbol.decl.arity))
-        if len(t.args) - function > self.symbol.decl.arity:
-            detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
+        elements = tuple(str(t.args[i]) for i in range(0, self.symbol_decl.arity))
+        if len(t.args) - function > self.symbol_decl.arity:
+            detections.append((t.args[0], f"Too many input elements, expected {self.symbol_decl.arity}", "Error"))
         possibilities.discard(elements)
         if elements in duplicates:
             detections.append((t.args[0], "Duplicate input elements", "Error"))

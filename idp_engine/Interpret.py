@@ -188,15 +188,15 @@ def interpret(self: SymbolInterpretation, problem: Theory):
         decl = problem.declarations[self.name]
         assert isinstance(decl, SymbolDeclaration), "Internal error"
         # update problem.extensions
-        if self.symbol.decl.codomain == BOOLT:  # predicate
+        if self.symbol_decl.codomain == BOOLT:  # predicate
             extension = [t.args for t in self.enumeration.tuples]
-            problem.extensions[self.symbol.name] = (extension, None)
+            problem.extensions[self.symbol_decl.name] = (extension, None)
 
         enumeration = self.enumeration  # shorthand
-        self.check(all(len(t.args) == self.symbol.decl.arity
+        self.check(all(len(t.args) == self.symbol_decl.arity
                             + (1 if type(enumeration) == FunctionEnum else 0)
                         for t in enumeration.tuples),
-            f"Incorrect arity of tuples in Enumeration of {self.symbol}.  Please check use of ',' and ';'.")
+            f"Incorrect arity of tuples in Enumeration of {self.symbol_decl.name}.  Please check use of ',' and ';'.")
 
         lookup = {}
         if hasattr(decl, 'instances') and decl.instances and self.default:
@@ -219,7 +219,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
                 condition = decl.has_in_range(value,
                             problem.interpretations, problem.extensions)
                 self.check(not condition.same_as(FALSE),
-                           f"{value} is not in the range of {self.symbol.name}")
+                           f"{value} is not in the range of {self.symbol_decl.name}")
                 if not condition.same_as(TRUE):
                     problem.constraints.append(condition)
             else:
@@ -234,12 +234,12 @@ def interpret(self: SymbolInterpretation, problem: Theory):
             condition = decl.has_in_domain(args,
                             problem.interpretations, problem.extensions)
             self.check(not condition.same_as(FALSE),
-                       f"{a} is not in the domain of {self.symbol.name}")
+                       f"{a} is not in the domain of {self.symbol_decl.name}")
             if not condition.same_as(TRUE):
                 problem.constraints.append(condition)
 
             # check duplicates
-            expr = AppliedSymbol.make(self.symbol, args, type_check=False)
+            expr = AppliedSymbol.make(self.symbol_decl.symbol_expr, args, type_check=False)
             self.check(expr.code not in problem.assignments
                 or problem.assignments[expr.code].status == S.UNKNOWN,
                 f"Duplicate entry in structure for '{self.name}': {str(expr)}")

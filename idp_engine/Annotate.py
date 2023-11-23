@@ -440,15 +440,16 @@ def annotate(self: Expression,
     :returns None:
     """
     assert isinstance(self, SymbolInterpretation), "Internal error"
-    self.symbol = SET_(self.name).annotate(voc, {})
+    self.symbol_decl = voc.symbol_decls[self.name]
     enumeration = self.enumeration  # shorthand
 
     # create constructors if it is a type enumeration
-    self.is_type_enumeration = (type(self.symbol.decl) != SymbolDeclaration)
+    self.is_type_enumeration = (type(self.symbol_decl) != SymbolDeclaration)
     if self.is_type_enumeration and enumeration.constructors:
         # create Constructors before annotating the tuples
         for c in enumeration.constructors:
-            c.codomain = self.symbol
+            if type(self.symbol_decl) == TypeDeclaration:
+                c.codomain = self.symbol_decl.domains[0]
             self.check(c.name not in voc.symbol_decls,
                     f"duplicate '{c.name}' constructor for '{self.name}' symbol")
             voc.symbol_decls[c.name] = c  #TODO risk of side-effects => use local decls ? issue #81
@@ -457,11 +458,11 @@ def annotate(self: Expression,
 
     self.check(self.is_type_enumeration
                 or all(s not in [INTT, REALT, DATET]  # finite domain #TODO
-                        for s in self.symbol.decl.domains)
+                        for s in self.symbol_decl.domains)
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
-    self.check(not(self.symbol.decl.codomain.decl.base_decl == BOOLT
+    self.check(not(self.symbol_decl.codomain.decl.base_decl == BOOLT
                    and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
@@ -918,7 +919,7 @@ def annotate(self: AAggregate,
                         [SET_(v.type.name) for v in q_vars.values()],
                         self.type).annotate_declaration(voc)    # output_domain
                     to_create = True
-                symbol = SymbolExpr.make(symbol_decl.name)
+                symbol = symbol_decl.symbol_expr
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
 
