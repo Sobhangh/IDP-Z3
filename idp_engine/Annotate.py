@@ -147,6 +147,10 @@ def annotate_declaration(self: SymbolDeclaration,
     for s in chain(self.domains, [self.codomain]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
                    f"`Concept` must be qualified with a type signature in {self}")
+
+    self.symbol_expr = SymbolExpr.make(self.name)
+    self.symbol_expr.decl = self
+
     self.base_decl = (None if self.codomain != BOOLT or self.arity != 1 else
                       self.domains[0].decl.base_decl)
     return self

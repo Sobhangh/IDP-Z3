@@ -111,9 +111,6 @@ TypeDeclaration.interpret = interpret
 def interpret(self: SymbolDeclaration, problem: Theory):
     assert all(isinstance(s, Set_) for s in self.domains), 'internal error'
 
-    symbol = SymbolExpr.make(self.name)
-    symbol.decl = self
-
     # determine the extension, i.e., (superset, filter)
     extensions = [s.extension(problem.extensions)
                 for s in self.domains]
@@ -127,7 +124,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         out = AND([f([deepcopy(t)]) if f is not None else TRUE
                     for f, t in zip(filters, args)])
         if self.codomain == BOOLT:
-            out = AND([out, deepcopy(AppliedSymbol.make(symbol, args, type_check=False))])
+            out = AND([out, deepcopy(AppliedSymbol.make(self.symbol_expr, args, type_check=False))])
         return out
 
     if self.codomain == BOOLT:
@@ -143,7 +140,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     if self.name not in RESERVED_SYMBOLS and superset is not None:
         self.instances = {}
         for args in superset:
-            expr = AppliedSymbol.make(symbol, args, type_check=False)
+            expr = AppliedSymbol.make(self.symbol_expr, args, type_check=False)
             self.instances[expr.code] = expr
             problem.assignments.assert__(expr, None, S.UNKNOWN)
 

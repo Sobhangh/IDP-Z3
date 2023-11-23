@@ -477,6 +477,8 @@ class SymbolDeclaration(ASTNode):
 
         codomain (Set_): the type of the symbol
 
+        symbol_expr (SymbolExpr, Optional): symbol expression of the same name
+
         base_decl (TypeDeclaration, Optional): base type of the unary predicate (None otherwise)
 
         instances (dict[string, Expression]):
@@ -522,6 +524,7 @@ class SymbolDeclaration(ASTNode):
         if self.codomain is None:
             self.codomain = SET_(BOOL)
 
+        self.symbol_expr : Optional[SymbolExpr]= None
         self.arity = len(self.domains)
         self.private = None
         self.unit: Optional[str] = None
