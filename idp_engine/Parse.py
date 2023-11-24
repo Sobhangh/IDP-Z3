@@ -385,14 +385,17 @@ class Vocabulary(ASTNode):
         nowvoc.declarations = []
         for t in self.tempdcl:
             for d in self.declarations:
+                print("declaraiton")
+                print(d)
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
                         id = deepcopy(d)
-                        id.arity -=1
-                        id.sorts.pop()
+                        #id.arity -=1
+                        #id.sorts.pop()
                         nowvoc.declarations.append(id)
                 else:
-                    nowvoc.declarations.append(deepcopy(d))
+                    #without deepcopy
+                    nowvoc.declarations.append(d)
         return nowvoc
     
     def generate_next_voc(self):
@@ -404,15 +407,15 @@ class Vocabulary(ASTNode):
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
                         id = deepcopy(d)
-                        id.arity -=1
-                        id.sorts.pop()
+                        #id.arity -=1
+                        #id.sorts.pop()
                         nowvoc.declarations.append(id)
                         next_d = deepcopy(id)
                         next_d.name = d.name + "_next"
                         nowvoc.declarations.append(next_d)
                         #nowvoc.symbol_decls[next_d.name] = next_d
                 else:
-                    nowvoc.declarations.append(deepcopy(d))
+                    nowvoc.declarations.append(d)
         return nowvoc
 
 class Import(ASTNode):
