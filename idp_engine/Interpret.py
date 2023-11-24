@@ -91,7 +91,7 @@ def interpret(self: TypeDeclaration, problem: Theory):
         # and self.interpretation.enumeration.tuples):
         #     # add condition that the interpretation is total over the infinite domain
         #     # ! x in N: type(x) <=> enum.contains(x)
-        #     t = SET_(self.type)  # INT, REAL or DATE
+        #     t = SETNAME(self.type)  # INT, REAL or DATE
         #     t.decl, t.type = self, self.type
         #     var = VARIABLE(f"${self.name}!0$",t)
         #     q_vars = { f"${self.name}!0$": var}

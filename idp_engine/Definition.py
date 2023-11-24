@@ -28,7 +28,7 @@ from typing import (Set, Tuple, List, Optional)
 
 from .utils import (RESERVED_SYMBOLS, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
 from .Expression import (Expression, ZERO, TRUE, FALSE, RecDef,
-                         Constructor, SET_, SetName, AppliedSymbol, Operator, AImplication,
+                         Constructor, SETNAME, SetName, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
                          IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOLT, INTT, REALT)
 from .Parse import Definition, Rule, SymbolDeclaration
@@ -80,7 +80,7 @@ def get_def_constraints(self: Definition,
     for key in self.inductive:
         symbdec = SymbolDeclaration.make(self,
             "_"+str(self.id)+"lvl_"+key.name, key.domains, REALT)
-        level_symbols[key] = SET_(symbdec.name)
+        level_symbols[key] = SETNAME(symbdec.name)
         level_symbols[key].decl = symbdec
 
     # add level mappings

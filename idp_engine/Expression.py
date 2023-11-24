@@ -613,13 +613,13 @@ class SetName(Expression):
             self.check(self.decl.codomain == BOOLT, "internal error")
             return self.decl.contains_element(term, extensions)
 
-def SET_(name: str, ins=None, out=None) -> SetName:
+def SETNAME(name: str, ins=None, out=None) -> SetName:
     return SetName(None, name, ins, out)
 
-BOOLT = SET_(BOOL)
-INTT = SET_(INT)
-REALT = SET_(REAL)
-DATET = SET_(DATE)
+BOOLT = SETNAME(BOOL)
+INTT = SETNAME(INT)
+REALT = SETNAME(REAL)
+DATET = SETNAME(DATE)
 
 class AIfExpr(Expression):
     PRECEDENCE = 10

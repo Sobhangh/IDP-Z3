@@ -30,7 +30,7 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ASTNode, Expression, SET_, SetName, BOOLT, INTT, REALT, DATET,
+from .Expression import (ASTNode, Expression, SETNAME, SetName, BOOLT, INTT, REALT, DATET,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, AConjunction, ADisjunction,
@@ -168,10 +168,15 @@ VarDeclaration.annotate_declaration = annotate_declaration
 # Class SetName  #######################################################
 
 def root_set(s: SetName) -> SetName:
+    """ Recursively finds the root set of a set in the hierarchy.
+
+    It goes up the hierarchy until a declared type or a Concept[..] is found.
+    """
     if type(s.decl) == TypeDeclaration:
         if s.decl.interpretation and hasattr(s.decl.interpretation.enumeration, "type"):
             return s.decl.interpretation.enumeration.type  # numeric type of the interpretation
-        return s
+        else:
+            return s
     elif s.name == CONCEPT:
         return s
     return root_set(s.decl.domains[0])
@@ -588,12 +593,12 @@ def annotate_block(self: ASTNode,
         open_type = TypeDeclaration(self, name=type_name,
                                     constructors=constructors)
         open_type.annotate_declaration(self.voc)
-        open_types[name] = SET_(type_name)
+        open_types[name] = SETNAME(type_name)
 
     for name, out in [
         ('expand', BOOLT),
         ('hide', BOOLT),
-        ('view', SET_('_ViewType')),
+        ('view', SETNAME('_ViewType')),
         ('moveSymbols', BOOLT),
         ('optionalPropagation', BOOLT),
         ('manualPropagation', BOOLT),
@@ -949,7 +954,7 @@ def annotate(self: AAggregate,
                 else:
                     symbol_decl = SymbolDeclaration.make(self,
                         "__"+self.str, # name `__ *`
-                        [SET_(v.type.name) for v in q_vars.values()],
+                        [SETNAME(v.type.name) for v in q_vars.values()],
                         self.type).annotate_declaration(voc)    # output_domain
                     to_create = True
                 symbol = symbol_decl.symbol_expr

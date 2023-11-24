@@ -36,7 +36,7 @@ from .Assignments import Assignments
 from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUCTOR,
                          Accessor, SymbolExpr, Expression,
                          AIfExpr, IF, AQuantification, split_quantees, SetName,
-                         SET_, Quantee, ARImplication, AEquivalence,
+                         SETNAME, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Number, Brackets,
@@ -297,11 +297,11 @@ class Vocabulary(ASTNode):
             TypeDeclaration(self, name=DATE, enumeration=DateRange()),
             TypeDeclaration(self, name=CONCEPT, constructors=[]),
             SymbolDeclaration.make(self, name=GOAL_SYMBOL,
-                            sorts=[SET_(CONCEPT, ins=[], out=SET_(BOOL))],
-                            out=SET_(BOOL)),
+                            sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
+                            out=SETNAME(BOOL)),
             SymbolDeclaration.make(self, name=RELEVANT,
-                            sorts=[SET_(CONCEPT, ins=[], out=SET_(BOOL))],
-                            out=SET_(BOOL)),
+                            sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
+                            out=SETNAME(BOOL)),
             SymbolDeclaration.make(self, name=ABS,
                             sorts=[INTT], out=INTT),
             ] + self.declarations
@@ -491,7 +491,7 @@ class SymbolDeclaration(ASTNode):
         self.domains : List[SetName] = sorts
         self.codomain : SetName = out
         if self.codomain is None:
-            self.codomain = SET_(BOOL)
+            self.codomain = SETNAME(BOOL)
 
         self.symbol_expr : Optional[SymbolExpr]= None
         self.arity = len(self.domains)
