@@ -389,7 +389,7 @@ class Vocabulary(ASTNode):
                 print(d)
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
-                        id = deepcopy(d)
+                        id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out)
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
@@ -406,11 +406,11 @@ class Vocabulary(ASTNode):
             for d in self.declarations:
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
-                        id = deepcopy(d)
+                        id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out)
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
-                        next_d = deepcopy(id)
+                        next_d = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out)
                         next_d.name = d.name + "_next"
                         nowvoc.declarations.append(next_d)
                         #nowvoc.symbol_decls[next_d.name] = next_d
