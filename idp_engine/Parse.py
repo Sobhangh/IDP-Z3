@@ -200,8 +200,8 @@ class IDP(ASTNode):
         self.next_voc = None
         for voc in self.vocabularies.values():
             voc.annotate(self)
-            self.now_voc = voc.generate_now_voc()
-            self.next_voc = voc.generate_next_voc()
+            self.now_voc = voc.generate_now_voc(deepcopy(voc))
+            self.next_voc = voc.generate_next_voc(deepcopy(voc))
             print("now vocab")
             print(self.now_voc)
             print("next vocab")
@@ -214,6 +214,7 @@ class IDP(ASTNode):
             t.annotate(self)
         for struct in self.structures.values():
             struct.annotate(self)
+            #TO DO : ADD STRUCTURE INITIALIZATION
 
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
@@ -375,8 +376,8 @@ class Vocabulary(ASTNode):
                             f"in vocabulary and block {block.name}")
                 block.interpretations[s.name] = s.interpretation
 
-    def generate_now_voc(self):
-        nowvoc = deepcopy(self)
+    def generate_now_voc(self,nowvoc:Vocabulary):
+        #nowvoc = deepcopy(self)
         for t in nowvoc.tempdcl:
             for d in nowvoc.declarations:
                 if isinstance(d,SymbolDeclaration):
@@ -387,8 +388,8 @@ class Vocabulary(ASTNode):
         nowvoc.tempdcl = []
         return nowvoc
     
-    def generate_next_voc(self):
-        nowvoc = deepcopy(self)
+    def generate_next_voc(self,nowvoc:Vocabulary):
+        #nowvoc = deepcopy(self)
         for t in nowvoc.tempdcl:
             for d in nowvoc.declarations:
                 if isinstance(d,SymbolDeclaration):
