@@ -78,9 +78,15 @@ Vocabulary.SCA_Check = SCA_Check
 # class TypeDeclaration(ASTNode):
 
 def SCA_Check(self, detections):
+    if self.name in RESERVED_SYMBOLS:
+        return
+
     # style guide check : capital letter for type
     if self.name[0].islower():
         detections.append((self, "Style guide check, type name should start with a capital letter ", "Warning"))
+
+    if self.interpretation and self.interpretation.enumeration and hasattr(self.interpretation.enumeration, "type"):
+        detections.append((self, f"Consider using `{self.name}: {str(self.interpretation.enumeration.type)} -> Bool` for future compatibility", "Warning"))
 
     # check if type has interpretation, if not check if in structures the type has given an interpretation
     if (self.interpretation is None and not builtIn_type(self.name)):

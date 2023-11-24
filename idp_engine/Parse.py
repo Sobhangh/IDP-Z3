@@ -347,7 +347,7 @@ class TypeDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        domains (List[SetName]): the types of the arguments
+        domains (List[SetName]): a singleton list with a set having the type's name
 
         codomain (SetName): the Boolean type
 
