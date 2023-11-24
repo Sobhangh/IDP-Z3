@@ -409,6 +409,8 @@ class Vocabulary(ASTNode):
             changed = False
             for t in self.tempdcl:
                 if isinstance(d,SymbolDeclaration):
+                    print("temporal symbol")
+                    print(t.symbol)
                     if d.name == t.symbol:
                         changed = True
                         id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
