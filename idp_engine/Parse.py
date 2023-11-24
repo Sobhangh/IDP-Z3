@@ -411,7 +411,8 @@ class Vocabulary(ASTNode):
                 if isinstance(d,SymbolDeclaration):
                     print("temporal symbol")
                     print(t.symbol)
-                    if SYMBOL(d.name) == t.symbol:
+                    print(d.name)
+                    if d.name == t.symbol:
                         changed = True
                         id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
