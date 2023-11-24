@@ -196,10 +196,15 @@ class IDP(ASTNode):
 
         assert len(displays) <= 1, "Too many display blocks"
         self.display = displays[0] if len(displays) == 1 else None
-
+        self.now_voc = None
+        self.next_voc = None
         for voc in self.vocabularies.values():
             voc.annotate(self)
+            self.now_voc = voc.generate_now_voc()
+            self.next_voc = voc.generate_next_voc()
         for t in self.theories.values():
+            if t.ltc:
+                t.initizial_theory()
             t.annotate(self)
         for struct in self.structures.values():
             struct.annotate(self)
@@ -366,6 +371,13 @@ class Vocabulary(ASTNode):
 
     def generate_now_voc(self):
         nowvoc = deepcopy(self)
+        for t in nowvoc.tempdcl:
+            for d in nowvoc.declarations:
+                if isinstance(d,SymbolDeclaration):
+                    if d.name == t.symbol.name:
+                        d.arity -=1
+                        d.sorts.pop()
+                        break
         nowvoc.tempdcl = []
         return nowvoc
     
@@ -379,6 +391,9 @@ class Vocabulary(ASTNode):
                         d.sorts.pop()
                         next_d = deepcopy(d)
                         next_d.name = d.name + "_next"
+                        nowvoc.declarations.append(next_d)
+                        nowvoc.symbol_decls[next_d.name] = next_d
+                        break
         nowvoc.tempdcl = []
         return nowvoc
 
@@ -684,10 +699,65 @@ class TheoryBlock(ASTNode):
         for definition in self.definitions:
             for rule in definition.rules:
                 rule.block = self
+        # For storing the initialized theory for ltc progression
+        self.init_theory : TheoryBlock = None
+        #self.init_constraints = []
+        #self.init_defs = []
+        #self.init_interp = []
 
     def __str__(self):
         return self.name
+    
+    def initizial_theory(self):
+        self.init_theory = TheoryBlock(name=self.name,vocab_name=self.vocab_name,
+                                                     constraints=[],definitions=[],interpretations=[])
+        cnstrs = []
+        for c in self.constraints:
+            #would this be used before start/now are removed or after ?\
+            # look how this is done?
+            ic = deepcopy(c)
+            r = self.init_subexpr(ic)
+            if r != False:
+                cnstrs.append(r)
+        for definition in self.definitions:
+            rules = []
+            idef = deepcopy(definition)
+            for rule in idef.rules:
+                r = self.init_rule(rule)
+                if r != False:
+                    rules.append(r)
+            idef.rules = rules
+            self.init_theory.definitions.append(idef)
+        self.init_theory.constraints = cnstrs
+        
 
+    def init_subexpr(self, expression:Expression):
+        if isinstance(expression, StartAppliedSymbol):
+            return expression.sub_expr
+        if isinstance(expression, NowAppliedSymbol):
+            return expression.sub_expr
+        if isinstance(expression, NextAppliedSymbol):
+            return False
+        sbex : List[Expression] = []
+        for e in expression.sub_exprs:
+            r = self.init_subexpr(e)
+            if r == False:
+                return False
+            sbex.append(r)
+        if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
+            expression.f = sbex[0]
+        expression.sub_exprs = sbex
+        return expression
+    
+    def init_rule(self, rule: Rule):
+        if isinstance(rule.definiendum,NextAppliedSymbol):
+            return False
+        if isinstance(rule.definiendum,(NowAppliedSymbol,StartAppliedSymbol)):
+            rule.definiendum = rule.definiendum.sub_expr
+        rule.body = self.init_subexpr(rule.body)
+        if rule.body == False:
+            return False
+        return rule
 
 class Definition(ASTNode):
     """ The class of AST nodes representing an inductive definition.
@@ -938,7 +1008,21 @@ class SymbolInterpretation(ASTNode):
                                                    applied, args, tuples),
                         out)
             return out
-
+        
+    def initialize_temporal_interpretation(self):
+        initialized_interp = deepcopy(self)
+        tempdc : List[TemporalDeclaration] = self.block.voc.tempdcl
+        for t in tempdc:
+            if t.symbol.name == self.name:
+                for e in initialized_interp.enumeration.tuples:
+                    t_arg = e.args[-1]
+                    self.check( type(t_arg) == Number, f"Last argument should be a number for temporal predicates")
+                    if t_arg == Number(number='0'):
+                        e.args.pop()
+                    else:
+                        initialized_interp.enumeration.tuples.popitem(e)
+        return initialized_interp
+                    
 
 class Enumeration(ASTNode):
     """Represents an enumeration of tuples of expressions.

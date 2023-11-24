@@ -115,9 +115,6 @@ def annotate(self, voc):
     for d in voc.declarations:
         if isinstance(d,SymbolDeclaration) and (not d.temp):
             if d.name == self.symbol.name:
-                print("temporal decl symbols")
-                print(d.name)
-                print(d.symbols)
                 d.temp = True
                 d.arity +=1
                 d.sorts.append(TYPE('Tijd'))
@@ -200,6 +197,9 @@ def annotate(self, idp):
         i.annotate(self)
     self.voc.add_voc_to_block(self)
 
+    # Annotating the init_theory
+    annotate_init_theory(self,idp)
+
     self.definitions = [e.annotate(self.voc, {},self.ltc) for e in self.definitions]
 
     constraints = OrderedSet()
@@ -229,6 +229,19 @@ def annotate(self, idp):
     self.constraints = OrderedSet([e.annotate(self.voc, {},self.ltc)
                                     for e in constraints])
 TheoryBlock.annotate = annotate
+
+#Use this after interpretations have been annotated and add_voc_to_block
+def annotate_init_theory(theory:TheoryBlock,idp):
+    if theory.ltc and theory.init_theory:
+        voc = idp.now_voc
+        theory.init_theory.voc = voc
+        for i in theory.interpretations.values():
+            n = i.initialize_temporal_interpretation()
+            theory.init_theory.interpretations.append(n)
+        theory.init_theory.declarations = theory.declarations
+        theory.init_theory.definitions = [e.annotate(voc, {},False) for e in theory.init_theory.definitions]
+        theory.init_theory.constraints = OrderedSet([e.annotate(voc, {},False)
+                                    for e in theory.init_theory.constraints])
 
 # if there is no temporal returns 0, if start only 1, if now or next 2, if start and (now or next) then 3
 def check_start(constraint,start=False,now_or_next = False):
