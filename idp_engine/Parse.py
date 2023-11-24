@@ -200,8 +200,9 @@ class IDP(ASTNode):
         self.next_voc = None
         for voc in self.vocabularies.values():
             voc.annotate(self)
-            self.now_voc = voc.generate_now_voc(deepcopy(voc))
-            self.next_voc = voc.generate_next_voc(deepcopy(voc))
+            nowvoc = Vocabulary()
+            #self.now_voc = voc.generate_now_voc(deepcopy(voc))
+            self.next_voc = voc.generate_next_voc(voc)
             print("now vocab")
             print(self.now_voc)
             print("next vocab")
