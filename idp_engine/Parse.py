@@ -202,9 +202,15 @@ class IDP(ASTNode):
             voc.annotate(self)
             self.now_voc = voc.generate_now_voc()
             self.next_voc = voc.generate_next_voc()
+            print("now vocab")
+            print(self.now_voc)
+            print("next vocab")
+            print(self.next_voc)
         for t in self.theories.values():
             if t.ltc:
                 t.initizial_theory()
+                print("init theory")
+                print(t.init_theory)
             t.annotate(self)
         for struct in self.structures.values():
             struct.annotate(self)
