@@ -33,7 +33,8 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
 from .Expression import (ASTNode, Expression, SET_, SetName, BOOLT, INTT, REALT, DATET,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
-                         AEquivalence, Operator, AComparison, AUnary,
+                         AEquivalence, AConjunction, ADisjunction,
+                         Operator, AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Variable,
                          VARIABLE, Brackets, SymbolExpr, Number, NOT,
                          EQUALS, AND, OR, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
@@ -743,29 +744,33 @@ AQuantification.set_variables = set_variables
 
 # Class Operator  #######################################################
 
-def base_type(exprs: List[Expression]) -> Optional[SetName]:
-    """ Determines the SetName of the elements of a list of expressions;
-    raises an error if the expressions have incompatible SetName.
-    Returns None if the list is empty.
+def base_type(exprs: List[Expression], bases: List[SetName] = None) -> Optional[SetName]:
+    """ Checks or determines the (sub)types of the expressions in exprs.
+
+    Raises an error if the (sub)type of an expression is not in `bases`.
+    Raises an error if the expressions have incompatible (sub)types.
+    Returns None if exprs is empty.
 
     A mix of Int and Real (or Int and Date) is allowed.
     """
     if not exprs:
-        return None
+        return None if not bases else bases[0]
     if exprs[0].type:
-        base = exprs[0].type.root_set
-        bases = set([base.name])
+        base = exprs[0].type.root_set if not bases else bases[0]
+        bases = set([base.name]) if not bases else set([b.name for b in bases])
         if base in [REALT, DATET]:
             bases.add(INT)  # also accept INT for REAL and DATE
         for e in exprs:
             if e.type:
                 b = e.type.root_set
                 if b.name not in bases:
-                    if base.name == INT and b.name in [REAL, DATE]:
+                    if base == INTT and b in [REALT, DATET]:
                         base = b
                         bases.add(b.name)
                     else:
-                        e.check(False, f"Invalid type {b.name} (expecting {base.name})")
+                        e.check(False, f"{base.name} value expected ({b.name} found: {e} )")
+                elif b in [REALT, DATET]:
+                    base = b
                 # else continue
             else:
                 e.check(False, f"Can't determine the type of {e}")
@@ -800,9 +805,8 @@ Operator.set_variables = set_variables
 def set_variables(self: AImplication) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Implication is not associative.  Please use parenthesis.")
-    for e in self.sub_exprs:
-        e.check(e.type == BOOLT,
-                f"Formula must be boolean (instead of {e.type})")
+    base_type(self.sub_exprs, [BOOLT])
+    self.type = BOOLT
     return Expression.set_variables(self)
 AImplication.set_variables = set_variables
 
@@ -812,9 +816,8 @@ AImplication.set_variables = set_variables
 def set_variables(self: AEquivalence) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Equivalence is not associative.  Please use parenthesis.")
-    for e in self.sub_exprs:
-        e.check(e.type == BOOLT,
-                f"Formula must be boolean (instead of {e.type})")
+    base_type(self.sub_exprs, [BOOLT])
+    self.type = BOOLT
     return Expression.set_variables(self)
 AEquivalence.set_variables = set_variables
 
@@ -832,6 +835,14 @@ def annotate(self: ARImplication,
     return out.annotate(voc, q_vars)
 ARImplication.annotate = annotate
 
+# Class AConjunction, ADisjunction  #######################################################
+
+def set_variables(self: Expression) -> Expression:
+    self.type = base_type(self.sub_exprs, [BOOLT])
+    return Expression.set_variables(self)
+AConjunction.set_variables = set_variables
+ADisjunction.set_variables = set_variables
+
 
 # Class AComparison  #######################################################
 
@@ -846,24 +857,43 @@ def annotate(self: AComparison,
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
         out = NOT(EQUALS(self.sub_exprs)).annotate(voc, q_vars)
         return out
-
-    for e in self.sub_exprs:
-        if self.operator[0] in "<>≤≥" and e.type:
-            decl = voc.symbol_decls.get(e.type.name, None)
-            self.check(e.type.root_set in [INTT, REALT, DATET],
-                        f"Expected numeric formula, got {e.type}: {e}")
     return out
 AComparison.annotate = annotate
 
 def set_variables(self: AppliedSymbol) -> Expression:
-    out = Operator.set_variables(self)
-    self.type = base_type(self.sub_exprs)  # check equality of types
-    self.check(self.type in [INTT, REALT, DATET]
-               or all(e not in "<>≤≥" for e in self.operator),
-            f"Comparison must be between numbers (instead of {self.type})")
+    bases = ([INTT, REALT, DATET] if any(e in "<>≤≥" for e in self.operator) else
+             None)
+    base_type(self.sub_exprs, bases)
     self.type = BOOLT
-    return self
+    return Expression.set_variables(self)
 AComparison.set_variables = set_variables
+
+
+# Class ASumMinus  #######################################################
+
+def set_variables(self: ASumMinus) -> Expression:
+    self.type = base_type(self.sub_exprs, [INTT, REALT, DATET])
+    return Expression.set_variables(self)
+ASumMinus.set_variables = set_variables
+
+
+# Class AMultDiv  #######################################################
+
+def set_variables(self: AMultDiv) -> Expression:
+    self.type = base_type(self.sub_exprs, [INTT, REALT])
+    return Expression.set_variables(self)
+AMultDiv.set_variables = set_variables
+
+
+# Class APower  #######################################################
+
+def set_variables(self: APower) -> Expression:
+    self.sub_exprs[1].check(self.sub_exprs[0].type in [INTT, REALT],
+               f"Number expected ({self.sub_exprs[1].type} found: {self.sub_exprs[1].type})")
+    self.sub_exprs[1].check(self.sub_exprs[1].type == INTT,
+               f"Integer expected ({self.sub_exprs[1].type} found: {self.sub_exprs[1].type})")
+    return Expression.set_variables(self)
+APower.set_variables = set_variables
 
 
 # Class AUnary  #######################################################
@@ -1010,6 +1040,10 @@ def set_variables(self: AppliedSymbol, type_check=True) -> Expression:
                 #     e.check(type_ != type_.decl.domains[0],
                 #             f"{s} expected ({e.type} found: {e})")
                 #     type_ = type_.decl.domains[0]
+
+    # check type of elements of enumeration
+    if self.is_enumeration == 'in':
+        base_type([t.args[0] for t in self.in_enumeration.tuples], [self.decl.codomain])
 
     # determine type
     if out.is_enumerated or out.in_enumeration:

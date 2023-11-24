@@ -176,8 +176,9 @@ class Expression(ASTNode):
             Textual representation of the expression.  Often used as a key.
 
             It is generated from the sub-tree.
-            Some tree transformations change it (e.g., interpret),
-            others don't.
+
+        str (string)
+            Textual representation of the simplified expression.
 
         sub_exprs (List[Expression]):
             The children of the AST node.
