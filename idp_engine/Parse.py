@@ -385,11 +385,9 @@ class Vocabulary(ASTNode):
         nowvoc.declarations = []
         for t in self.tempdcl:
             for d in self.declarations:
-                print("declaraiton")
-                print(d)
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
-                        id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out)
+                        id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations='')
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
@@ -406,11 +404,11 @@ class Vocabulary(ASTNode):
             for d in self.declarations:
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
-                        id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out)
+                        id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations='')
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
-                        next_d = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out)
+                        next_d = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations='')
                         next_d.name = d.name + "_next"
                         nowvoc.declarations.append(next_d)
                         #nowvoc.symbol_decls[next_d.name] = next_d
