@@ -384,27 +384,33 @@ class Vocabulary(ASTNode):
         nowvoc = Vocabulary(name=self.name,tempdcl=[],declarations=[])
         nowvoc.idp = self.idp
         nowvoc.declarations = []
-        for t in self.tempdcl:
-            for d in self.declarations:
+        
+        for d in self.declarations:
+            changed = False
+            for t in self.tempdcl:
                 if isinstance(d,SymbolDeclaration):
-                    if d.name == t.symbol.name:
+                    if d.name == t.symbol:
+                        changed = True
                         id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
-                else:
-                    #without deepcopy
-                    nowvoc.declarations.append(d)
+                        break
+            if not changed:
+                #without deepcopy
+                nowvoc.declarations.append(d)
         return nowvoc
     
     def generate_next_voc(self):
         nowvoc = Vocabulary(name=self.name,tempdcl=[],declarations=[])
         nowvoc.idp = self.idp
         nowvoc.declarations = []
-        for t in self.tempdcl:
-            for d in self.declarations:
+        for d in self.declarations:
+            changed = False
+            for t in self.tempdcl:
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
+                        changed = True
                         id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
                         #id.sorts.pop()
@@ -413,8 +419,9 @@ class Vocabulary(ASTNode):
                         next_d.name = d.name + "_next"
                         nowvoc.declarations.append(next_d)
                         #nowvoc.symbol_decls[next_d.name] = next_d
-                else:
-                    nowvoc.declarations.append(d)
+                        break
+            if not changed:
+                nowvoc.declarations.append(d)
         return nowvoc
 
 class Import(ASTNode):
