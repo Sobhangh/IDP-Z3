@@ -42,7 +42,7 @@ from .Parse import (Import, TypeDeclaration, SymbolDeclaration,
                     ConstructedFrom, Definition)
 from .Expression import (AIfExpr, IF,
                          SymbolExpr, Expression, Constructor, AQuantification,
-                         Set_, FORALL, IMPLIES, AND, AAggregate,
+                         SetName, FORALL, IMPLIES, AND, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Quantee, Variable,
                          VARIABLE, TRUE, FALSE, Number, Extension, BOOLT)
 from .Theory import Theory
@@ -109,7 +109,7 @@ TypeDeclaration.interpret = interpret
 # class SymbolDeclaration  ###########################################################
 
 def interpret(self: SymbolDeclaration, problem: Theory):
-    assert all(isinstance(s, Set_) for s in self.domains), 'internal error'
+    assert all(isinstance(s, SetName) for s in self.domains), 'internal error'
 
     # determine the extension, i.e., (superset, filter)
     extensions = [s.extension(problem.extensions)
@@ -315,7 +315,7 @@ ConstructedFrom.interpret = interpret
 # class Constructor  ###########################################################
 
 def interpret(self: Constructor, problem: Theory) -> Constructor:
-    # assert all(s.decl and isinstance(s.decl.codomain, Set_) for s in self.domains), 'Internal error'
+    # assert all(s.decl and isinstance(s.decl.codomain, SetName) for s in self.domains), 'Internal error'
     if not self.domains:
         self.range = [UnappliedSymbol.construct(self)]
     elif any(s == self.codomain for s in self.domains): # recursive data type
@@ -418,10 +418,10 @@ def _finalize(self: Expression, subs: dict[str, Expression]):
     return self
 
 
-# class Set_ ###########################################################
+# class SetName ###########################################################
 
 def extension(self, extensions: dict[str, Extension]) -> Extension:
-    """returns the extension of a Set_, given some interpretations.
+    """returns the extension of a SetName, given some interpretations.
 
     Normally, the extension is already in `extensions`.
     However, for Concept[T->T], an additional filtering is applied.
@@ -453,7 +453,7 @@ def extension(self, extensions: dict[str, Extension]) -> Extension:
                                         self.concept_domains))]
         extensions[self.code] = (out, None)
     return extensions[self.code]
-Set_.extension = extension
+SetName.extension = extension
 
 # Class AQuantification  ######################################################
 
@@ -484,7 +484,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
         domain = q.sub_exprs[0]
 
         if problem:
-            if isinstance(domain, Set_):  # quantification over type / Concepts
+            if isinstance(domain, SetName):  # quantification over type / Concepts
                 (superset, filter) = domain.extension(problem.extensions)
             elif type(domain) == SymbolExpr:
                 if domain.decl:

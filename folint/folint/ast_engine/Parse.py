@@ -29,7 +29,7 @@ import itertools
 
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, Accessor, SymbolExpr,
-                         Expression, AIfExpr, IF, AQuantification, Set_, Quantee,
+                         Expression, AIfExpr, IF, AQuantification, SetName, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,

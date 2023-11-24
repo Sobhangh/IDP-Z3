@@ -78,7 +78,7 @@ def SCA_Check(self,detections):
         sub.SCA_Check(detections)
 Expression.SCA_Check = SCA_Check
 
-## class Set_(Expression):
+## class SetName(Expression):
 
 ##  class AIfExpr(Expression):
 
@@ -232,7 +232,7 @@ def SCA_Check(self,detections):
             if (hasattr(self.sub_exprs[i], 'sort') and
                     self.sub_exprs[i].sort and
                     len(self.sub_exprs[i].sort.decl.domains) >= 1 and
-                    isinstance(self.sub_exprs[i].sort.decl.domains[0], Set_)):
+                    isinstance(self.sub_exprs[i].sort.decl.domains[0], SetName)):
                 # In the case of a partial function interpretation, the type is actually
                 # the argument.
                 # found_type = str(self.sub_exprs[i].sort.decl.domains[i])

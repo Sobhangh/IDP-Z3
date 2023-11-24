@@ -35,7 +35,7 @@ from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 from .Assignments import Assignments
 from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUCTOR,
                          Accessor, SymbolExpr, Expression,
-                         AIfExpr, IF, AQuantification, split_quantees, Set_,
+                         AIfExpr, IF, AQuantification, split_quantees, SetName,
                          SET_, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
@@ -51,12 +51,12 @@ if TYPE_CHECKING:
 
 
 def str_to_IDP(val_string: str,
-               type_: Set_,
+               type_: SetName,
                 ) -> Expression:
     """recursive function to decode a val_string in set `type_`
 
     Args:
-        type_ (Set_): set containing the value
+        type_ (SetName): set containing the value
         val_string (str): a string containing a value
 
     Raises:
@@ -347,9 +347,9 @@ class TypeDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        domains (List[Set_]): the types of the arguments
+        domains (List[SetName]): the types of the arguments
 
-        codomain (Set_): the Boolean type
+        codomain (SetName): the Boolean type
 
         constructors ([Constructor]): list of constructors in the enumeration
 
@@ -369,8 +369,8 @@ class TypeDeclaration(ASTNode):
         enumeration = enumeration
 
         self.arity : int = 1
-        self.domains : List[Set_] = [Set_(None, self.name)]
-        self.codomain : Set_ = BOOLT
+        self.domains : List[SetName] = [SetName(None, self.name)]
+        self.codomain : SetName = BOOLT
         self.block: Optional[Block] = None
 
         self.map : dict[str, Expression]= {}
@@ -442,9 +442,9 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        domains (List[Set_]): the types of the arguments
+        domains (List[SetName]): the types of the arguments
 
-        codomain (Set_): the type of the symbol
+        codomain (SetName): the type of the symbol
 
         symbol_expr (SymbolExpr, Optional): symbol expression of the same name
 
@@ -475,8 +475,8 @@ class SymbolDeclaration(ASTNode):
     def __init__(self,
                  parent,
                  annotations: Optional[Annotations],
-                 sorts: List[Set_],
-                 out: Set_,
+                 sorts: List[SetName],
+                 out: SetName,
                  symbols: Optional[List[str]] = None,
                  name: Optional[str] = None):
         self.annotations : Annotation = annotations.annotations if annotations else {}
@@ -488,8 +488,8 @@ class SymbolDeclaration(ASTNode):
         else:
             self.symbols = None
             self.name = name
-        self.domains : List[Set_] = sorts
-        self.codomain : Set_ = out
+        self.domains : List[SetName] = sorts
+        self.codomain : SetName = out
         if self.codomain is None:
             self.codomain = SET_(BOOL)
 
@@ -574,7 +574,7 @@ class VarDeclaration(ASTNode):
     Attributes:
         name (str): name of the variable
 
-        subtype (Set_): type of the variable
+        subtype (SetName): type of the variable
     """
 
     def __init__(self, **kwargs):
@@ -1347,7 +1347,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Import, VarDeclaration,
-                                         TypeDeclaration, Accessor, Set_,
+                                         TypeDeclaration, Accessor, SetName,
                                          SymbolDeclaration,
                                          SymbolExpr,
 

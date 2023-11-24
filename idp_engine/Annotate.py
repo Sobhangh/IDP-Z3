@@ -30,7 +30,7 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ASTNode, Expression, SET_, Set_, BOOLT, INTT, REALT, DATET,
+from .Expression import (ASTNode, Expression, SET_, SetName, BOOLT, INTT, REALT, DATET,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, Operator, AComparison, AUnary,
@@ -93,7 +93,7 @@ def annotate_block(self: ASTNode,
                             and type(s) in Declaration.__args__])
     for c in concepts.constructors:
         c.concept_decl = self.symbol_decls[c.name[1:]]
-        c.codomain = Set_(self, CONCEPT, c.concept_decl.domains,
+        c.codomain = SetName(self, CONCEPT, c.concept_decl.domains,
                           c.concept_decl.codomain).annotate(self, {})
 
         self.symbol_decls[c.name] = c
@@ -164,9 +164,9 @@ def annotate_declaration(self: ASTNode,
 VarDeclaration.annotate_declaration = annotate_declaration
 
 
-# Class Set_  #######################################################
+# Class SetName  #######################################################
 
-def root_set(s: Set_) -> Set_:
+def root_set(s: SetName) -> SetName:
     if type(s.decl) == TypeDeclaration:
         if s.decl.interpretation and hasattr(s.decl.interpretation.enumeration, "type"):
             return s.decl.interpretation.enumeration.type  # numeric type of the interpretation
@@ -179,7 +179,7 @@ def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    assert isinstance(self, Set_), "Internal error"
+    assert isinstance(self, SetName), "Internal error"
     if self.name in q_vars:
         return q_vars[self.name]
 
@@ -194,7 +194,7 @@ def annotate(self: Expression,
         self.concept_domains = [s.annotate(voc, q_vars) for s in self.concept_domains]
         self.codomain = self.codomain.annotate(voc, q_vars)
     return self
-Set_.annotate = annotate
+SetName.annotate = annotate
 
 
 # Class TheoryBlock  #######################################################
@@ -236,7 +236,7 @@ def annotate(self: Expression,
     self.rules = [r.annotate(voc, q_vars) for r in self.rules]
 
     # create level-mapping symbols, as needed
-    # self.level_symbols: dict[SymbolDeclaration, Set_]
+    # self.level_symbols: dict[SymbolDeclaration, SetName]
     dependencies = set()
     for r in self.rules:
         symbs: dict[str, SymbolDeclaration] = {}
@@ -576,7 +576,7 @@ def annotate_block(self: ASTNode,
         constraint.generate_constructors(open_constructors)
 
     # Next, we convert the list of constructors to actual types.
-    open_types: dict[str, Optional[Set_]] = {}
+    open_types: dict[str, Optional[SetName]] = {}
     for name, constructors in open_constructors.items():
         # If no constructors were found, then the type is not used.
         if not constructors:
@@ -662,7 +662,7 @@ AIfExpr.set_variables = set_variables
 def annotate_quantee(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             inferred: dict[str, Set_]
+             inferred: dict[str, SetName]
              ) -> Annotated:
     assert isinstance(self, Quantee), "Internal error"
     Expression.annotate(self, voc, q_vars)
@@ -677,7 +677,7 @@ def annotate_quantee(self: Expression,
                 f"the quantified variable '{var.name}' cannot have"
                 f" the same name as another symbol")
             # 1. get variable sort from the quantee, if possible
-            if len(vars) == 1 and self.sub_exprs and type(self.sub_exprs[0]) == Set_:
+            if len(vars) == 1 and self.sub_exprs and type(self.sub_exprs[0]) == SetName:
                 var.type = self.sub_exprs[0]   # `x in p` or `x in Concept[...]`
             elif self.sub_exprs:
                 if self.sub_exprs[0].decl:  # `(x,y) in p`
@@ -743,9 +743,9 @@ AQuantification.set_variables = set_variables
 
 # Class Operator  #######################################################
 
-def base_type(exprs: List[Expression]) -> Optional[Set_]:
-    """ Determines the Set_ of the elements of a list of expressions;
-    raises an error if the expressions have incompatible Set_.
+def base_type(exprs: List[Expression]) -> Optional[SetName]:
+    """ Determines the SetName of the elements of a list of expressions;
+    raises an error if the expressions have incompatible SetName.
     Returns None if the list is empty.
 
     A mix of Int and Real (or Int and Date) is allowed.

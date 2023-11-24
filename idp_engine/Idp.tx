@@ -27,10 +27,10 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
 
     SymbolDeclaration: annotations=Annotations
           symbols+= NAME [','] ':'
-          ( '(' sorts*=Set_[/[*⨯]/] ')' | sorts*=Set_[/[*⨯]/] )
-          ('->' | '→') out=Set_;
+          ( '(' sorts*=SetName[/[*⨯]/] ')' | sorts*=SetName[/[*⨯]/] )
+          ('->' | '→') out=SetName;
 
-    VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ IN subtype=Set_;
+    VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ IN subtype=SetName;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
@@ -47,14 +47,14 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
           definiendum=AppliedSymbol
           (('=' |DefEqOp) out=SumMinus)?
           (('<-'|'←' | 'if' ) body=Expression)? '.' ;
-        Quantee:  subtype=Set_ !IN vars+=Variable[',']
-                | vars+=Variable[','] ( IN (subtype=Set_ | sort=SymbolExpr) )?
-                | vars+=VarTuple[','] ( IN (subtype=Set_ | sort=SymbolExpr) )?;
+        Quantee:  subtype=SetName !IN vars+=Variable[',']
+                | vars+=Variable[','] ( IN (subtype=SetName | sort=SymbolExpr) )?
+                | vars+=VarTuple[','] ( IN (subtype=SetName | sort=SymbolExpr) )?;
             Variable: name=/`?[^\d\W]\w*\b/;
             VarTuple: '(' vars+=Variable[','] ')';
-            Set_: ( name='Concept' '['
-                          ( '(' ins*=Set_[/[*⨯]/] ')' | ins*=Set_[/[*⨯]/] )
-                          ('->' | '→') out=Set_ ']'
+            SetName: ( name='Concept' '['
+                          ( '(' ins*=SetName[/[*⨯]/] ')' | ins*=SetName[/[*⨯]/] )
+                          ('->' | '→') out=SetName ']'
                   )
                 | name=NAME;
 
@@ -152,7 +152,7 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
   ConstructedFrom: constructed=/constructed\s+from/?
                    '{' constructors*=Constructor[',']  '}';
     Constructor: name=ID ('(' args+=Accessor[','] ')' )?;
-    Accessor: (accessor=ID ':')? out=Set_;
+    Accessor: (accessor=ID ':')? out=SetName;
 
   Identifier: AppliedSymbol | UnappliedSymbol | Number | Date;
 

@@ -28,7 +28,7 @@ from typing import (Set, Tuple, List, Optional)
 
 from .utils import (RESERVED_SYMBOLS, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
 from .Expression import (Expression, ZERO, TRUE, FALSE, RecDef,
-                         Constructor, SET_, Set_, AppliedSymbol, Operator, AImplication,
+                         Constructor, SET_, SetName, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
                          IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOLT, INTT, REALT)
 from .Parse import Definition, Rule, SymbolDeclaration
@@ -76,7 +76,7 @@ def get_def_constraints(self: Definition,
         return out
 
     # compute level symbols
-    level_symbols: dict[SymbolDeclaration, Set_] = {}
+    level_symbols: dict[SymbolDeclaration, SetName] = {}
     for key in self.inductive:
         symbdec = SymbolDeclaration.make(self,
             "_"+str(self.id)+"lvl_"+key.name, key.domains, REALT)
@@ -259,7 +259,7 @@ AppliedSymbol.collect_nested_symbols = collect_nested_symbols
 
 # Expression
 def add_level_mapping(self,
-                        level_symbols: dict[SymbolDeclaration, Set_],
+                        level_symbols: dict[SymbolDeclaration, SetName],
                         head: AppliedSymbol,
                         pos_justification: bool,
                         polarity: bool,
@@ -269,7 +269,7 @@ def add_level_mapping(self,
         are added to atoms containing recursive symbols.
 
     Arguments:
-        - level_symbols (dict[SymbolDeclaration, Set_]): the level mapping
+        - level_symbols (dict[SymbolDeclaration, SetName]): the level mapping
             symbols as well as their corresponding recursive symbols
         - head (AppliedSymbol): head of the rule we are adding level mapping
             symbols to.
