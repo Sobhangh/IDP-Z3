@@ -199,14 +199,15 @@ class IDP(ASTNode):
         self.now_voc = None
         self.next_voc = None
         for voc in self.vocabularies.values():
-            voc.annotate(self)
-            nowvoc = Vocabulary()
-            #self.now_voc = voc.generate_now_voc(deepcopy(voc))
-            self.next_voc = voc.generate_next_voc(voc)
+            self.now_voc = voc.generate_now_voc()
+            self.now_voc.annotate(self)
+            self.next_voc = voc.generate_next_voc()
+            self.next_voc.annotate(self)
             print("now vocab")
             print(self.now_voc)
             print("next vocab")
             print(self.next_voc)
+            voc.annotate(self)
         for t in self.theories.values():
             if t.ltc:
                 t.initizial_theory()
@@ -377,32 +378,41 @@ class Vocabulary(ASTNode):
                             f"in vocabulary and block {block.name}")
                 block.interpretations[s.name] = s.interpretation
 
-    def generate_now_voc(self,nowvoc:Vocabulary):
-        #nowvoc = deepcopy(self)
-        for t in nowvoc.tempdcl:
-            for d in nowvoc.declarations:
+    #Has to be called before self is annotated
+    def generate_now_voc(self):
+        nowvoc = Vocabulary(name=self.name,tempdcl=[],declarations=[])
+        nowvoc.idp = self.idp
+        nowvoc.declarations = []
+        for t in self.tempdcl:
+            for d in self.declarations:
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
-                        d.arity -=1
-                        d.sorts.pop()
-                        break
-        nowvoc.tempdcl = []
+                        id = deepcopy(d)
+                        id.arity -=1
+                        id.sorts.pop()
+                        nowvoc.declarations.append(id)
+                else:
+                    nowvoc.declarations.append(deepcopy(d))
         return nowvoc
     
-    def generate_next_voc(self,nowvoc:Vocabulary):
-        #nowvoc = deepcopy(self)
-        for t in nowvoc.tempdcl:
-            for d in nowvoc.declarations:
+    def generate_next_voc(self):
+        nowvoc = Vocabulary(name=self.name,tempdcl=[],declarations=[])
+        nowvoc.idp = self.idp
+        nowvoc.declarations = []
+        for t in self.tempdcl:
+            for d in self.declarations:
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
-                        d.arity -=1
-                        d.sorts.pop()
-                        next_d = deepcopy(d)
+                        id = deepcopy(d)
+                        id.arity -=1
+                        id.sorts.pop()
+                        nowvoc.declarations.append(id)
+                        next_d = deepcopy(id)
                         next_d.name = d.name + "_next"
                         nowvoc.declarations.append(next_d)
-                        nowvoc.symbol_decls[next_d.name] = next_d
-                        break
-        nowvoc.tempdcl = []
+                        #nowvoc.symbol_decls[next_d.name] = next_d
+                else:
+                    nowvoc.declarations.append(deepcopy(d))
         return nowvoc
 
 class Import(ASTNode):
