@@ -1127,7 +1127,7 @@ class Enumeration(ASTNode):
             self.constructors = None
 
     def __deepcopy__(self):
-        return Enumeration(tuples=deepcopy(self.tuples))
+        return Enumeration(tuples=deepcopy(self.tuples.values))
 
     def __repr__(self):
         return (f'{{{", ".join([repr(t) for t in self.tuples])}}}' if self.tuples else
