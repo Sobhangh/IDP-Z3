@@ -389,9 +389,9 @@ class Vocabulary(ASTNode):
             changed = False
             for t in self.tempdcl:
                 if isinstance(d,SymbolDeclaration):
-                    if d.name == t.symbol:
+                    if d.name == t.symbol.name:
                         changed = True
-                        id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
+                        id = SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
@@ -414,11 +414,11 @@ class Vocabulary(ASTNode):
                     if str(d.name) == str(t.symbol):
                         print(d.name)
                         changed = True
-                        id = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
+                        id = SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
-                        next_d = SymbolDeclaration(name=d.name,sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
+                        next_d = SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
                         next_d.name = d.name + "_next"
                         nowvoc.declarations.append(next_d)
                         #nowvoc.symbol_decls[next_d.name] = next_d
