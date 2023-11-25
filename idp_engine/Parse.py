@@ -406,7 +406,7 @@ class Vocabulary(ASTNode):
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
-                        enum = deepcopy(d.interpretation.enumeration)
+                        enum = deepcopy(d.interpretation.enumeration.value())
                     nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=deepcopy(d.constructors),enumeration=enum))
                 else:
                     #without deepcopy
@@ -439,7 +439,7 @@ class Vocabulary(ASTNode):
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
-                        enum = deepcopy(d.interpretation.enumeration)
+                        enum = deepcopy(d.interpretation.enumeration.value())
                     nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=deepcopy(d.constructors),enumeration=enum))
                 else:
                     #without deepcopy
