@@ -500,6 +500,12 @@ class TypeDeclaration(ASTNode):
             SymbolInterpretation(name=SYMBOL(self.name), sign='≜',
                                  enumeration=enumeration, default=None))
 
+    def __deepcopy__(self):
+        enum =None
+        if self.interpretation:
+            enum = deepcopy(self.interpretation.enumeration)
+        return TypeDeclaration(name=self.name,constructors=deepcopy(self.constructors),enumeration=enum)
+
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
             return ''
@@ -629,6 +635,9 @@ class SymbolDeclaration(ASTNode):
     def make(cls, strname, arity, sorts, out):
         o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
         return o
+    def __deepcopy__(self):
+        return SymbolDeclaration(name=SYMBOL(self.name),sorts=deepcopy(self.sorts),out=deepcopy(self.out),annotations=deepcopy(self.annotations))
+
 
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
@@ -1070,12 +1079,20 @@ class SymbolInterpretation(ASTNode):
             for t in tempdc:
                 if t.symbol.name == self.name:
                     changed =True
-                    t_arg = e.args[-1]
-                    self.check( type(t_arg) == Number, f"Last argument should be a number for temporal predicates")
-                    if t_arg == Number(number='0'):
-                        e.args.pop()
+                    if isinstance(e,FunctionTuple):
+                        t_arg = e.args[-2]
+                        self.check( type(t_arg) == Number, f"Last argument should be a number for temporal predicates")
+                        if t_arg == Number(number='0'):
+                            e.args.pop(-2)
+                        else:
+                            initialized_interp.enumeration.tuples.popitem(e)
                     else:
-                        initialized_interp.enumeration.tuples.popitem(e)
+                        t_arg = e.args[-1]
+                        self.check( type(t_arg) == Number, f"Last argument should be a number for temporal predicates")
+                        if t_arg == Number(number='0'):
+                            e.args.pop()
+                        else:
+                            initialized_interp.enumeration.tuples.popitem(e)
                     break
             #if not changed:
 
@@ -1108,6 +1125,9 @@ class Enumeration(ASTNode):
                                  for c in self.tuples]
         else:
             self.constructors = None
+
+    def __deepcopy__(self):
+        return Enumeration(tuples=deepcopy(self.tuples))
 
     def __repr__(self):
         return (f'{{{", ".join([repr(t) for t in self.tuples])}}}' if self.tuples else
@@ -1198,6 +1218,9 @@ class ConstructedFrom(Enumeration):
         self.tuples = None
         self.accessors = dict()
 
+    def __deepcopy__(self):
+        return ConstructedFrom(constructed=deepcopy(self.constructed),constructors=deepcopy(self.constructors))
+    
     def contains(self, args, function, arity=None, rank=0, tuples=None,
                  interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                  extensions: Optional[dict[str, Extension]] = None
@@ -1242,6 +1265,9 @@ class TupleIDP(ASTNode):
 
     def __str__(self):
         return self.code
+    
+    def __deepcopy__(self):
+        return TupleIDP(args=deepcopy(self.args))
 
     def __repr__(self):
         return f"({self.code})" if 1 < len(self.args) else self.code
@@ -1256,6 +1282,10 @@ class FunctionTuple(TupleIDP):
         self.args.append(self.value)
         self.code = intern(",".join([str(a) for a in self.args]))
 
+    def __deepcopy__(self):
+        a = deepcopy(self.args)
+        a.pop()
+        return FunctionTuple(args=a,value=deepcopy(self.value))
 
 class CSVTuple(TupleIDP):
     pass

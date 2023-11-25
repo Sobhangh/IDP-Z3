@@ -119,7 +119,9 @@ def catch_error(func):
 
 class Annotations(ASTNode):
     def __init__(self, parent, annotations: List[str]):
-
+        self.original_ant = []
+        for s in annotations:
+            self.original_ant.append(s) 
         self.annotations : dict[str, Union[str, dict[str, Any]]] = {}
         v: Union[str, dict[str, Any]]
         for s in annotations:
@@ -146,6 +148,8 @@ class Annotations(ASTNode):
                        f"Duplicate annotation: [{k}: {v}]")
             self.annotations[k] = v
 
+    def __deepcopy__(self):
+        return Annotations(None,self.original_ant)
 
 class Constructor(ASTNode):
     """Constructor declaration
@@ -181,6 +185,9 @@ class Constructor(ASTNode):
         self.tester = None
         self.range: Optional[List[Expression]] = None
 
+    def __deepcopy__(self):
+        return Constructor(None,self.name,deepcopy(self.sorts))
+
     def __str__(self):
         return (self.name if not self.sorts else
                 f"{self.name}({', '.join((str(a) for a in self.sorts))})" )
@@ -210,6 +217,8 @@ class Accessor(ASTNode):
         return (self.type if not self.accessor else
                 f"{self.accessor}: {self.type}" )
 
+    def __deepcopy__(self):
+        return Accessor(None,UnappliedSymbol(None,self.type),deepcopy(self.decl))
 
 class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.
