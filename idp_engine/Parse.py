@@ -333,6 +333,7 @@ class Vocabulary(ASTNode):
                     new.symbols = None
                     temp.append(new)
         self.declarations = temp
+        self.original_decl =temp
 
         # define built-in types: Bool, Int, Real, Symbols
         self.declarations = [
@@ -386,9 +387,7 @@ class Vocabulary(ASTNode):
     def generate_now_voc(self):
         nowvoc = Vocabulary(name=self.name,tempdcl=[],declarations=[])
         nowvoc.idp = self.idp
-        nowvoc.declarations = []
-        
-        for d in self.declarations:
+        for d in self.original_decl:
             changed = False
             for t in self.tempdcl:
                 if isinstance(d,SymbolDeclaration):
@@ -400,15 +399,24 @@ class Vocabulary(ASTNode):
                         nowvoc.declarations.append(id)
                         break
             if not changed:
-                #without deepcopy
-                nowvoc.declarations.append(d)
+                if isinstance(d,VarDeclaration):
+                    nowvoc.declarations.append(VarDeclaration(name=SYMBOL(d.name),subtype=d.subtype))
+                elif isinstance(d,SymbolDeclaration):
+                    nowvoc.declarations.append(SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[])))
+                elif isinstance(d,TypeDeclaration):
+                    enum =None
+                    if d.interpretation:
+                        enum = deepcopy(d.interpretation.enumeration)
+                    nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=deepcopy(d.constructors),enumeration=enum))
+                else:
+                    #without deepcopy
+                    nowvoc.declarations.append(d)
         return nowvoc
     
     def generate_next_voc(self):
         nowvoc = Vocabulary(name=self.name,tempdcl=[],declarations=[])
         nowvoc.idp = self.idp
-        nowvoc.declarations = []
-        for d in self.declarations:
+        for d in self.original_decl:
             changed = False
             for t in self.tempdcl:
                 if isinstance(d,SymbolDeclaration):
@@ -424,7 +432,18 @@ class Vocabulary(ASTNode):
                         #nowvoc.symbol_decls[next_d.name] = next_d
                         break
             if not changed:
-                nowvoc.declarations.append(d)
+                if isinstance(d,VarDeclaration):
+                    nowvoc.declarations.append(VarDeclaration(name=SYMBOL(d.name),subtype=d.subtype))
+                elif isinstance(d,SymbolDeclaration):
+                    nowvoc.declarations.append(SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[])))
+                elif isinstance(d,TypeDeclaration):
+                    enum =None
+                    if d.interpretation:
+                        enum = deepcopy(d.interpretation.enumeration)
+                    nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=deepcopy(d.constructors),enumeration=enum))
+                else:
+                    #without deepcopy
+                    nowvoc.declarations.append(d)
         return nowvoc
 
 class Import(ASTNode):
@@ -752,14 +771,16 @@ class TheoryBlock(ASTNode):
         for definition in self.definitions:
             rules = []
             idef = Definition(None,Annotations(None,[]),definition.mode,[])
-            for rule in idef.rules:
-                r = self.init_rule(rule)
+            for rule in definition.rules:
+                r = self.init_rule(deepcopy(rule))
                 if r != False:
                     rules.append(r)
             idef.rules = rules
             self.init_theory.definitions.append(idef)
         self.init_theory.constraints = cnstrs
-        
+        for interp in self.interpretations:
+            r= interp.initialize_temporal_interpretation()
+            self.init_theory.interpretations[r.name] = r
 
     def init_subexpr(self, expression:Expression):
         if isinstance(expression, StartAppliedSymbol):
@@ -1039,18 +1060,25 @@ class SymbolInterpretation(ASTNode):
                         out)
             return out
         
+
     def initialize_temporal_interpretation(self):
-        initialized_interp = deepcopy(self)
+        initialized_interp =SymbolInterpretation(name= UnappliedSymbol(None,SYMBOL(self.name)),sign = self.sign,
+                             enumeration=deepcopy(self.enumeration), default=self.default )
         tempdc : List[TemporalDeclaration] = self.block.voc.tempdcl
-        for t in tempdc:
-            if t.symbol.name == self.name:
-                for e in initialized_interp.enumeration.tuples:
+        for e in initialized_interp.enumeration.tuples:
+            changed = False
+            for t in tempdc:
+                if t.symbol.name == self.name:
+                    changed =True
                     t_arg = e.args[-1]
                     self.check( type(t_arg) == Number, f"Last argument should be a number for temporal predicates")
                     if t_arg == Number(number='0'):
                         e.args.pop()
                     else:
                         initialized_interp.enumeration.tuples.popitem(e)
+                    break
+            #if not changed:
+
         return initialized_interp
                     
 

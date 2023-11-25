@@ -235,10 +235,10 @@ def annotate_init_theory(theory:TheoryBlock,idp):
     if theory.ltc and theory.init_theory:
         voc = idp.now_voc
         theory.init_theory.voc = voc
-        for i in theory.interpretations.values():
-            n = i.initialize_temporal_interpretation()
-            theory.init_theory.interpretations.append(n)
-        theory.init_theory.declarations = theory.declarations
+        for i in theory.init_theory.interpretations.values():
+            i.annotate(theory.init_theory)
+        voc.add_voc_to_block(theory.init_theory)
+        #theory.init_theory.declarations = theory.declarations
         theory.init_theory.definitions = [e.annotate(voc, {},False) for e in theory.init_theory.definitions]
         theory.init_theory.constraints = OrderedSet([e.annotate(voc, {},False)
                                     for e in theory.init_theory.constraints])
