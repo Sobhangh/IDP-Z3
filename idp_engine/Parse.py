@@ -751,7 +751,7 @@ class TheoryBlock(ASTNode):
                 cnstrs.append(r)
         for definition in self.definitions:
             rules = []
-            idef = deepcopy(definition)
+            idef = Definition(None,Annotations(None,[]),definition.mode,[])
             for rule in idef.rules:
                 r = self.init_rule(rule)
                 if r != False:
