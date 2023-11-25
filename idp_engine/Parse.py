@@ -196,18 +196,21 @@ class IDP(ASTNode):
 
         assert len(displays) <= 1, "Too many display blocks"
         self.display = displays[0] if len(displays) == 1 else None
-        self.now_voc = None
-        self.next_voc = None
+        self.now_voc = []
+        self.next_voc = []
         for voc in self.vocabularies.values():
-            self.now_voc = voc.generate_now_voc()
+            now_voc = voc.generate_now_voc()
             print("now vocab")
-            print(self.now_voc)
-            self.now_voc.annotate(self)
-            self.next_voc = voc.generate_next_voc()
-            self.next_voc.annotate(self)
-            
+            print(now_voc)
+            now_voc.annotate(self)
+            self.now_voc.append(now_voc)
+
+            next_voc = voc.generate_next_voc()
+            next_voc.annotate(self)
+            self.next_voc.append(next_voc)
             print("next vocab")
-            print(self.next_voc)
+            print(next_voc)
+
             voc.annotate(self)
         for t in self.theories.values():
             if t.ltc:
@@ -409,10 +412,7 @@ class Vocabulary(ASTNode):
             changed = False
             for t in self.tempdcl:
                 if isinstance(d,SymbolDeclaration):
-                    print("temporal symbol")
-                    print(t.symbol)
                     if str(d.name) == str(t.symbol):
-                        print(d.name)
                         changed = True
                         id = SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
@@ -739,7 +739,7 @@ class TheoryBlock(ASTNode):
         return self.name
     
     def initizial_theory(self):
-        self.init_theory = TheoryBlock(name=self.name,vocab_name=self.vocab_name,
+        self.init_theory = TheoryBlock(name=self.name,vocab_name=self.vocab_name,ltc = None,
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
