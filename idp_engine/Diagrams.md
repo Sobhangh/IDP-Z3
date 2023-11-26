@@ -10,6 +10,7 @@ erDiagram
     Declaration |o--o{ SetName : domains
     Declaration |o--|| SetName: codomain
     Declaration |o--o{ Expression: decl
+    VarDeclaration |o--|| SetName: subtype
     SetName }o--|| Declaration: decl
     SetName |o--o{ SetName: concept_domains
     SetName |o--o| SetName: codomain
@@ -25,6 +26,9 @@ erDiagram
         List[SetName] domains "Sets defining the domain of the symbol"
         SetName codomain "Set defining the codomain of the symbol"
         List[Constructor] constructors "only for `constructured from` enumerations"
+    }
+    VarDeclaration {
+        SetName subtype
     }
     SetName {
         Declaration decl "Declaration of the set name"
