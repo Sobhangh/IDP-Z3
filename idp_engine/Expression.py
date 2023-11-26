@@ -57,7 +57,6 @@ class ASTNode(object):
         except:
             return {'line': 1, 'col': 1, 'end': 1}
 
-
     def check(self, condition: bool, msg: str):
         """raises an exception if `condition` is not True
 
@@ -70,6 +69,9 @@ class ASTNode(object):
         """
         if not condition:
             raise IDPZ3Error(msg, self)
+
+    def SCA_Check(self,detections):
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def dedup_nodes(self,
                     kwargs: dict[str, List[ASTNode]],
@@ -490,9 +492,6 @@ class Expression(ASTNode):
                           ) -> Expression:
         raise IDPZ3Error("Internal error") # monkey-patched
 
-    def SCA_Check(self,detections):
-        raise IDPZ3Error("Internal error") # monkey-patched
-
     def get_type(self):
         return self.type
 
@@ -567,8 +566,8 @@ class SetName(Expression):
         self.concept_domains = ins
         self.codomain = out
         self.sub_exprs = []
-        self.decl: Optional[SymbolDeclaration] = None
-        self.root_set: Optional[SetName] = None
+        self.decl: Declaration = None
+        self.root_set: SetName = None
         super().__init__(parent)
 
     def __str__(self):

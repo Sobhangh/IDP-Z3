@@ -670,12 +670,12 @@ class Definition(Expression):
         assert type(self.mode) == S, f"Unsupported mode: {mode}"
         self.annotations : Annotation = annotations.annotations if annotations else {}
         self.rules: List[Rule] = rules
-        self.renamed = {}
-        self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
-        self.canonicals = {}
-        self.def_vars = {}  # {String: {String: Variable}}
+        self.renamed: dict[SymbolDeclaration, List[Rule]] = {}
+        self.clarks: dict[SymbolDeclaration, Rule] = {}
+        self.canonicals: dict[SymbolDeclaration, List[Rule]] = {}
+        self.def_vars: dict[str, Variable] = {}
         self.inductive: set[SymbolDeclaration] = set()
-        self.cache = {}  # {decl, str: Expression}
+        self.cache: dict[Tuple[Declaration, str], Expression] = {}  # {decl, str: Expression}
         self.inst_def_level = 0
 
     def __str__(self):
@@ -1074,7 +1074,7 @@ class Ranges(Enumeration):
         self.elements = kwargs.pop('elements')
 
         tuples: List[TupleIDP] = []
-        self.type = None
+        self.type: Optional[SetName] = None
         if self.elements:
             self.type = self.elements[0].fromI.type
             for x in self.elements:
