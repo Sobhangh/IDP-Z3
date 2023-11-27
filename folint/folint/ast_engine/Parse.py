@@ -190,6 +190,8 @@ def SCA_Check(self, detections):
     # options = list of list of possible values for an argument
     options = []
     for i in self.symbol_decl.domains:
+        if type(i) != TypeDeclaration:  # can't deal with partial functions yet
+            return
         if i.name in [BOOL, INT, REAL, DATE]:
             in_type_values = []
         elif i.decl.enumeration is None:  # Interpretation in Struct

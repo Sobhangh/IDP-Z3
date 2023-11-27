@@ -82,11 +82,11 @@ We use [Cypress](https://www.cypress.io/) to test the IC.  Installation in top p
 ~~~~
 npm install cypress --save-dev
 ~~~~
-To launch it:
+To launch it, start the Interactive Consultant in development mode, then:
 ~~~~
 npx cypress open
 ~~~~
-
+and choose E2E testing.
 
 # Deploy
 
