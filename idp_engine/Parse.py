@@ -41,7 +41,8 @@ from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUC
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Number, Brackets,
                          Date, Extension, Identifier, Variable, TRUEC, FALSEC,
-                         TRUE, FALSE, EQUALS, AND, OR, BOOLT, INTT, REALT, DATET)
+                         TRUE, FALSE, EQUALS, AND, OR,
+                         BOOLT, INTT, REALT, DATET, EMPTYT)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     MAX_QUANTIFIER_EXPANSION, Semantics as S, flatten)
@@ -494,7 +495,7 @@ class SymbolDeclaration(ASTNode):
             self.codomain = SETNAME(BOOL)
 
         self.symbol_expr : Optional[SymbolExpr]= None
-        self.arity = len(self.domains)
+        self.arity = None
         self.private = None
         self.unit: Optional[str] = None
         self.heading: Optional[str] = None
@@ -509,6 +510,7 @@ class SymbolDeclaration(ASTNode):
     @classmethod
     def make(cls, parent, name, sorts, out):
         o = cls(parent=parent, name=name, sorts=sorts, out=out, annotations=None)
+        o.arity = len([d for d in o.domains if d.root_set is not EMPTYT])
         return o
 
     def __str__(self):
@@ -534,7 +536,7 @@ class SymbolDeclaration(ASTNode):
         Returns:
             Expression: whether `(1,2)` is in the domain of the symbol
         """
-        assert len(self.domains) == len(args), \
+        assert self.arity == len(args), \
             f"Incorrect arity of {str(args)} for {self.name}"
         return AND([typ.has_element(term, extensions)
                    for typ, term in zip(self.domains, args)])

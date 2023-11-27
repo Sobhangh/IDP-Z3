@@ -44,7 +44,8 @@ from .Expression import (AIfExpr, IF,
                          SymbolExpr, Expression, Constructor, AQuantification,
                          SetName, FORALL, IMPLIES, AND, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Quantee, Variable,
-                         VARIABLE, TRUE, FALSE, Number, Extension, BOOLT)
+                         VARIABLE, TRUE, FALSE, Number, Extension,
+                         BOOLT, CONCEPTT, EMPTYT)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND, flatten)
@@ -112,12 +113,18 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     assert all(isinstance(s, SetName) for s in self.domains), 'internal error'
 
     # determine the extension, i.e., (superset, filter)
-    extensions = [s.extension(problem.extensions)
-                for s in self.domains]
-    if any(e[0] is None for e in extensions):
-        superset = None
+    if len(self.domains) == 0:  # () -> ..
+        extensions = [ ([[]], None) ]
+        superset = [[]]
+    elif self.arity == 0:  # subset of ()
+        extensions = [s.extension(problem.extensions) for s in self.domains]
+        superset = [[]]
     else:
-        superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
+        extensions = [s.extension(problem.extensions) for s in self.domains]
+        if any(e[0] is None for e in extensions):
+            superset = None
+        else:
+            superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
 
     filters = [e[1] for e in extensions]
     def filter(args):
@@ -423,7 +430,7 @@ def _finalize(self: Expression, subs: dict[str, Expression]):
 def extension(self, extensions: dict[str, Extension]) -> Extension:
     """returns the extension of a SetName, given some interpretations.
 
-    Normally, the extension is already in `extensions`.
+    Normally, the extension is already in `extensions` by SymbolDeclaration.interpret.
     However, for Concept[T->T], an additional filtering is applied.
 
     Args:

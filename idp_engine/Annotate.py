@@ -30,7 +30,8 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ASTNode, Expression, SETNAME, SetName, BOOLT, INTT, REALT, DATET,
+from .Expression import (ASTNode, Expression, SETNAME, SetName,
+                         BOOLT, INTT, REALT, DATET, EMPTYT,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, AConjunction, ADisjunction,
@@ -138,6 +139,7 @@ def annotate_declaration(self: SymbolDeclaration,
     for s in self.domains:
         s.annotate(voc, {})
     self.codomain.annotate(voc, {})
+    self.arity = len([d for d in self.domains if d.root_set is not EMPTYT])
 
     for s in chain(self.domains, [self.codomain]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
@@ -179,6 +181,8 @@ def root_set(s: SetName) -> SetName:
             return s
     elif s.name == CONCEPT:
         return s
+    elif s.decl.arity == 0:
+        return EMPTYT
     return root_set(s.decl.domains[0])
 
 def annotate(self: Expression,

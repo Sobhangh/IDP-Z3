@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from .Parse import IDP, Vocabulary, Declaration, SymbolDeclaration, SymbolInterpretation, Enumeration
     from .Annotate import Annotated, Exceptions
 
-from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
+from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, EMPTY,
                     RESERVED_SYMBOLS, IDPZ3Error, Semantics)
 
 
@@ -620,6 +620,8 @@ BOOLT = SETNAME(BOOL)
 INTT = SETNAME(INT)
 REALT = SETNAME(REAL)
 DATET = SETNAME(DATE)
+CONCEPTT = SETNAME(CONCEPT)
+EMPTYT = SETNAME(EMPTY)
 
 class AIfExpr(Expression):
     PRECEDENCE = 10

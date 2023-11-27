@@ -38,7 +38,8 @@ from .Expression import (Constructor, Expression, AIfExpr,
                          Quantee, AQuantification, Operator, SetName,
                          ADisjunction, AConjunction, AComparison, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Number,
-                         Date, Brackets, Variable, TRUE, RecDef, BOOLT, INTT, REALT, DATET)
+                         Date, Brackets, Variable, TRUE, RecDef,
+                         BOOLT, INTT, REALT, DATET, EMPTYT)
 from .utils import (BOOL,
                     GOAL_SYMBOL, RELEVANT, RESERVED_SYMBOLS, Semantics)
 
@@ -96,7 +97,7 @@ def translate(self, problem: Theory) -> ExprRef:
         recursive = any(self in def_.clarks
                         for _, def_ in problem.def_constraints.keys()
                         if def_.mode == Semantics.RECDATA)
-        if len(self.domains) == 0:
+        if self.arity == 0:
             out = Const(self.name, self.codomain.root_set.decl.translate(problem))
         else:
             types = ( [x.root_set.decl.translate(problem) for x in self.domains]
