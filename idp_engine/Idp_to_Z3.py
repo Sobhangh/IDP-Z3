@@ -39,7 +39,7 @@ from .Expression import (Constructor, Expression, AIfExpr,
                          ADisjunction, AConjunction, AComparison, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Number,
                          Date, Brackets, Variable, TRUE, RecDef,
-                         BOOLT, INTT, REALT, DATET, EMPTYT)
+                         BOOL_TYPE, INT_TYPE, REAL_TYPE, DATE_TYPE, EMPTY_TYPE)
 from .utils import (BOOL,
                     GOAL_SYMBOL, RELEVANT, RESERVED_SYMBOLS, Semantics)
 
@@ -80,7 +80,7 @@ def translate(self, problem: Theory) -> ExprRef:
                     for e in c.range:
                         self.map[str(e)] = e
         elif type(self.interpretation.enumeration) in [Ranges, IntRange, RealRange, DateRange]: # list of numbers
-            out = (IntSort(problem.ctx) if self.interpretation.enumeration.type in [INTT, DATET] else
+            out = (IntSort(problem.ctx) if self.interpretation.enumeration.type in [INT_TYPE, DATE_TYPE] else
                    RealSort(problem.ctx))
         else:  # empty type --> don't care
             out = IntSort(problem.ctx)
@@ -157,11 +157,11 @@ Expression.reified = reified
 # class SetName  ###############################################################
 
 def translate(self, problem: Theory, vars={}) -> ExprRef:
-    if self == BOOLT:
+    if self == BOOL_TYPE:
         return BoolSort(problem.ctx)
-    elif self == INTT:
+    elif self == INT_TYPE:
         return IntSort(problem.ctx)
-    elif self == REALT:
+    elif self == REAL_TYPE:
         return RealSort(problem.ctx)
     else:
         return self.decl.translate(problem,)

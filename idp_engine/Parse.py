@@ -42,7 +42,7 @@ from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUC
                          AppliedSymbol, UnappliedSymbol, Number, Brackets,
                          Date, Extension, Identifier, Variable, TRUEC, FALSEC,
                          TRUE, FALSE, EQUALS, AND, OR,
-                         BOOLT, INTT, REALT, DATET, EMPTYT)
+                         BOOL_TYPE, INT_TYPE, REAL_TYPE, DATE_TYPE, EMPTY_TYPE)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     MAX_QUANTIFIER_EXPANSION, Semantics as S, flatten)
@@ -67,7 +67,7 @@ def str_to_IDP(val_string: str,
         Expression: the internal representation of the value
     """
     if type_.decl is None:
-        assert type_ == BOOLT, "Internal error"
+        assert type_ == BOOL_TYPE, "Internal error"
         out = (TRUE if val_string in [TRUE, 'True'] else
             FALSE if val_string in [FALSE, 'False']  else
             None)
@@ -115,20 +115,20 @@ def str_to_IDP(val_string: str,
                         type_.decl.name if type(type_.decl) == TypeDeclaration else
                         type_.decl.codomain.name)
 
-        if type_ == BOOLT or enum_type == BOOL:
+        if type_ == BOOL_TYPE or enum_type == BOOL:
             out = (TRUE if val_string in [TRUE, 'True'] else
                     FALSE if val_string in [FALSE, 'False'] else
                     None)
             if out is None:
                 raise IDPZ3Error(f"wrong boolean value: {val_string}")
-        elif type_ == DATET or enum_type == DATE:
+        elif type_ == DATE_TYPE or enum_type == DATE:
             d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
                 date.fromisoformat(val_string[1:]))
             out = Date(iso=f"#{d.isoformat()}")
-        elif type_ == REALT or enum_type == REAL:
+        elif type_ == REAL_TYPE or enum_type == REAL:
             out = Number(number= val_string if '/' in val_string else
                         str(float(eval(val_string.replace('?', '')))))
-        elif type_ == INTT or enum_type == INT:
+        elif type_ == INT_TYPE or enum_type == INT:
             out = Number(number=str(eval(val_string)))
         else:
             raise IDPZ3Error(f"unknown type for: {val_string}: {type_.decl}")
@@ -304,7 +304,7 @@ class Vocabulary(ASTNode):
                             sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
                             out=SETNAME(BOOL)),
             SymbolDeclaration.make(self, name=ABS,
-                            sorts=[INTT], out=INTT),
+                            sorts=[INT_TYPE], out=INT_TYPE),
             ] + self.declarations
 
     def __str__(self):
@@ -371,7 +371,7 @@ class TypeDeclaration(ASTNode):
 
         self.arity : int = 1
         self.domains : List[SetName] = [SetName(None, self.name)]
-        self.codomain : SetName = BOOLT
+        self.codomain : SetName = BOOL_TYPE
         self.block: Optional[Block] = None
 
         self.map : dict[str, Expression]= {}
@@ -510,7 +510,7 @@ class SymbolDeclaration(ASTNode):
     @classmethod
     def make(cls, parent, name, sorts, out):
         o = cls(parent=parent, name=name, sorts=sorts, out=out, annotations=None)
-        o.arity = len([d for d in o.domains if d.root_set is not EMPTYT])
+        o.arity = len([d for d in o.domains if d.root_set is not EMPTY_TYPE])
         return o
 
     def __str__(self):
@@ -554,7 +554,7 @@ class SymbolDeclaration(ASTNode):
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` satisfies the predicate
         """
-        assert self.codomain == BOOLT and self.name is not None, "Internal error"
+        assert self.codomain == BOOL_TYPE and self.name is not None, "Internal error"
         (superset, filter) = extensions[self.name]
         if superset is not None:
             # superset.sort(key=lambda t: str(t))
@@ -1081,8 +1081,8 @@ class Ranges(Enumeration):
             self.type = self.elements[0].fromI.type
             for x in self.elements:
                 if x.fromI.type != self.type:
-                    if self.type in [INTT, REALT] and x.fromI.type in [INTT, REALT]:
-                        self.type = REALT  # convert to REAL
+                    if self.type in [INT_TYPE, REAL_TYPE] and x.fromI.type in [INT_TYPE, REAL_TYPE]:
+                        self.type = REAL_TYPE  # convert to REAL
                         tuples = [TupleIDP(args=[n.args[0].real()])
                                   for n in tuples]
                     else:
@@ -1091,15 +1091,15 @@ class Ranges(Enumeration):
 
                 if x.toI is None:
                     tuples.append(TupleIDP(args=[x.fromI]))
-                elif self.type == INTT and x.fromI.type == INTT and x.toI.type == INTT:
+                elif self.type == INT_TYPE and x.fromI.type == INT_TYPE and x.toI.type == INT_TYPE:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         tuples.append(TupleIDP(args=[Number(number=str(i))]))
-                elif self.type == REALT and x.fromI.type == INTT and x.toI.type == INTT:
+                elif self.type == REAL_TYPE and x.fromI.type == INT_TYPE and x.toI.type == INT_TYPE:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         tuples.append(TupleIDP(args=[Number(number=str(float(i)))]))
-                elif self.type == REALT:
+                elif self.type == REAL_TYPE:
                     self.check(False, f"Can't have a range over real: {x.fromI}..{x.toI}")
-                elif self.type == DATET and x.fromI.type == DATET and x.toI.type == DATET:
+                elif self.type == DATE_TYPE and x.fromI.type == DATE_TYPE and x.toI.type == DATE_TYPE:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         d = Date(iso=f"#{date.fromordinal(i).isoformat()}")
                         tuples.append(TupleIDP(args=[d]))
@@ -1157,7 +1157,7 @@ class RangeElement(Expression):
 class IntRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, parent=self, elements=[])
-        self.type = INTT
+        self.type = INT_TYPE
         self.tuples = None
 
     def extensionE(self,
@@ -1169,7 +1169,7 @@ class IntRange(Ranges):
 class RealRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, parent=self, elements=[])
-        self.type = REALT
+        self.type = REAL_TYPE
         self.tuples = None
 
     def extensionE(self,
@@ -1181,7 +1181,7 @@ class RealRange(Ranges):
 class DateRange(Ranges):
     def __init__(self):
         Ranges.__init__(self, parent=self, elements=[])
-        self.type = DATET
+        self.type = DATE_TYPE
         self.tuples = None
 
     def extensionE(self,

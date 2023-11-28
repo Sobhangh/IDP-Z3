@@ -35,7 +35,7 @@ from .Expression import (Constructor, Expression, AIfExpr, IF,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                          SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
                          Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR,
-                         BOOLT, INTT, DATET)
+                         BOOL_TYPE, INT_TYPE, DATE_TYPE)
 from .Parse import Enumeration, TupleIDP
 from .Assignments import Status as S, Assignment
 from .utils import ABS
@@ -289,11 +289,11 @@ def update_arith(self: Operator, operands: List[Expression]) -> Expression:
         for op, e in zip(self.operator, operands[1:]):
             function = Operator.MAP[op]
 
-            if op == '/' and self.type == INTT:  # integer division
+            if op == '/' and self.type == INT_TYPE:  # integer division
                 out //= e.py_value
             else:
                 out = function(out, e.py_value)
-        value = (Number(number=str(out)) if operands[0].type != DATET else
+        value = (Number(number=str(out)) if operands[0].type != DATE_TYPE else
                  Date.make(out))
         return value
     return self._change(sub_exprs=operands)

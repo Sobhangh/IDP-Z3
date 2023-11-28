@@ -30,7 +30,7 @@ from .utils import (RESERVED_SYMBOLS, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL
 from .Expression import (Expression, ZERO, TRUE, FALSE, RecDef,
                          Constructor, SETNAME, SetName, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
-                         IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOLT, INTT, REALT)
+                         IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOL_TYPE, INT_TYPE, REAL_TYPE)
 from .Parse import Definition, Rule, SymbolDeclaration
 from .Theory import Theory
 
@@ -60,17 +60,17 @@ def get_def_constraints(self: Definition,
         out = {}
         for decl in self.renamed:
             # expr = nested if expression, for each rule
-            decl.check(decl.codomain in [INTT, BOOLT],
+            decl.check(decl.codomain in [INT_TYPE, BOOL_TYPE],
                        f"Recursive functions of type {decl.codomain} are not supported yet")
-            expr = (ZERO if decl.codomain == INTT else
-                    FALSE if decl.codomain == BOOLT else
+            expr = (ZERO if decl.codomain == INT_TYPE else
+                    FALSE if decl.codomain == BOOL_TYPE else
                     FALSE ) # todo: pick a value in type enumeration
             for rule in self.renamed[decl]:
                 val = rule.out if rule.out is not None else TRUE
                 expr = IF(rule.body, val, expr)
 
             vars = sorted(list(self.def_vars[decl.name].values()), key=lambda v: v.name)
-            vars = vars[:-1] if decl.codomain != BOOLT else vars
+            vars = vars[:-1] if decl.codomain != BOOL_TYPE else vars
             expr = RecDef(self, decl.name, vars, expr.interpret(problem, {}))
             out[decl, self] = [expr]
         return out
@@ -79,7 +79,7 @@ def get_def_constraints(self: Definition,
     level_symbols: dict[SymbolDeclaration, SetName] = {}
     for key in self.inductive:
         symbdec = SymbolDeclaration.make(self,
-            "_"+str(self.id)+"lvl_"+key.name, key.domains, REALT)
+            "_"+str(self.id)+"lvl_"+key.name, key.domains, REAL_TYPE)
         level_symbols[key] = SETNAME(symbdec.name)
         level_symbols[key].decl = symbdec
 
@@ -194,7 +194,7 @@ def instantiate_definition(self: Rule,
                 "Internal error")
     subs = dict(zip([e.name for e in self.definiendum.sub_exprs], new_args))
 
-    if self.definiendum.type == BOOLT:  # a predicate
+    if self.definiendum.type == BOOL_TYPE:  # a predicate
         out = EQUIV([instance, out])
     else:
         subs[self.out.name] = instance
@@ -333,8 +333,8 @@ def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mo
             op = ('≥' if pos_justification else '>') \
                 if polarity else ('<' if pos_justification else '≤')
         comp = AComparison.make(op, [
-            AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs, type_=REALT),
-            AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs, type_=REALT)
+            AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs, type_=REAL_TYPE),
+            AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs, type_=REAL_TYPE)
         ])
         if polarity:
             return AND([comp, self])

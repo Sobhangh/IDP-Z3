@@ -31,7 +31,7 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
 from .Expression import (ASTNode, Expression, SETNAME, SetName,
-                         BOOLT, INTT, REALT, DATET, EMPTYT,
+                         BOOL_TYPE, INT_TYPE, REAL_TYPE, DATE_TYPE, EMPTY_TYPE,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, AConjunction, ADisjunction,
@@ -81,10 +81,10 @@ def annotate_block(self: ASTNode,
     for s in self.declarations:
         s.annotate_declaration(self)  # updates self.symbol_decls
 
-    BOOLT.annotate(self, {})
-    INTT.annotate(self, {})
-    REALT.annotate(self, {})
-    DATET.annotate(self, {})
+    BOOL_TYPE.annotate(self, {})
+    INT_TYPE.annotate(self, {})
+    REAL_TYPE.annotate(self, {})
+    DATE_TYPE.annotate(self, {})
 
     concepts = self.symbol_decls[CONCEPT]
     concepts.constructors=([CONSTRUCTOR(f"`{s}")
@@ -139,7 +139,7 @@ def annotate_declaration(self: SymbolDeclaration,
     for s in self.domains:
         s.annotate(voc, {})
     self.codomain.annotate(voc, {})
-    self.arity = len([d for d in self.domains if d.root_set is not EMPTYT])
+    self.arity = len([d for d in self.domains if d.root_set is not EMPTY_TYPE])
 
     for s in chain(self.domains, [self.codomain]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
@@ -182,7 +182,7 @@ def root_set(s: SetName) -> SetName:
     elif s.name == CONCEPT:
         return s
     elif s.decl.arity == 0:
-        return EMPTYT
+        return EMPTY_TYPE
     return root_set(s.decl.domains[0])
 
 def annotate(self: Expression,
@@ -228,7 +228,7 @@ def annotate_block(self: ASTNode,
     constraints = OrderedSet()
     for c in self.constraints:
         c1 = c.annotate(self.voc, {})
-        c1.check(c1.type is None or c1.type == BOOLT,
+        c1.check(c1.type is None or c1.type == BOOL_TYPE,
                     f"{c.code} must be boolean")
         constraints.append(c1)
     self.constraints = constraints
@@ -292,7 +292,7 @@ def annotate(self: Expression,
                     f"Inductively defined nested symbols are not supported yet: "
                     f"{decl.name}.")
         if self.mode != Semantics.RECDATA:
-            self.check(decl.codomain == BOOLT,
+            self.check(decl.codomain == BOOL_TYPE,
                         f"Inductively defined functions are not supported yet: "
                         f"{decl.name}.")
 
@@ -306,7 +306,7 @@ def annotate(self: Expression,
             q_v = {f"{decl.name}{str(i)}_":
                     VARIABLE(f"{decl.name}{str(i)}_", sort)
                     for i, sort in enumerate(decl.domains)}
-            if decl.codomain != BOOLT:
+            if decl.codomain != BOOL_TYPE:
                 q_v[name] = VARIABLE(name, decl.codomain)
             self.def_vars[decl.name] = q_v
 
@@ -468,12 +468,12 @@ def annotate(self: Expression,
     enumeration.annotate(voc, q_vars)
 
     self.check(self.is_type_enumeration
-                or all(s not in [INTT, REALT, DATET]  # finite domain #TODO
+                or all(s not in [INT_TYPE, REAL_TYPE, DATE_TYPE]  # finite domain #TODO
                         for s in self.symbol_decl.domains)
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
-    self.check(not(self.symbol_decl.codomain.root_set == BOOLT
+    self.check(not(self.symbol_decl.codomain.root_set == BOOL_TYPE
                    and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
@@ -557,7 +557,7 @@ def annotate(self: Expression,
     for s in self.domains:
         s.annotate(voc, {})
     self.tester = SymbolDeclaration.make(self,
-            name=f"is_{self.name}", sorts=[self.codomain], out=BOOLT)
+            name=f"is_{self.name}", sorts=[self.codomain], out=BOOL_TYPE)
     self.tester.by_z3 = True
     self.tester.annotate_declaration(voc)
     return self
@@ -600,17 +600,17 @@ def annotate_block(self: ASTNode,
         open_types[name] = SETNAME(type_name)
 
     for name, out in [
-        ('expand', BOOLT),
-        ('hide', BOOLT),
+        ('expand', BOOL_TYPE),
+        ('hide', BOOL_TYPE),
         ('view', SETNAME('_ViewType')),
-        ('moveSymbols', BOOLT),
-        ('optionalPropagation', BOOLT),
-        ('manualPropagation', BOOLT),
-        ('optionalRelevance', BOOLT),
-        ('manualRelevance', BOOLT),
+        ('moveSymbols', BOOL_TYPE),
+        ('optionalPropagation', BOOL_TYPE),
+        ('manualPropagation', BOOL_TYPE),
+        ('optionalRelevance', BOOL_TYPE),
+        ('manualRelevance', BOOL_TYPE),
         ('unit', open_types['unit']),
         ('heading', open_types['heading']),
-        ('noOptimization', BOOLT)
+        ('noOptimization', BOOL_TYPE)
     ]:
         symbol_decl = SymbolDeclaration.make(self, name=name,
                                         sorts=[], out=out)
@@ -660,7 +660,7 @@ Expression.set_variables = set_variables
 # Class AIfExpr  #######################################################
 
 def set_variables(self: AIfExpr) -> Expression:
-    self.sub_exprs[0].check(self.sub_exprs[0].type == BOOLT,
+    self.sub_exprs[0].check(self.sub_exprs[0].type == BOOL_TYPE,
         f"Boolean expected ({self.sub_exprs[0].type} found)")
     self.type = base_type(self.sub_exprs[1:])
     return Expression.set_variables(self)
@@ -745,7 +745,7 @@ def set_variables(self: AQuantification) -> Expression:
             self.variables.update(sort.variables)
     if type(self) == AQuantification:
         for e in self.sub_exprs:
-            e.check(e.type == BOOLT,
+            e.check(e.type == BOOL_TYPE,
                 f"Quantified formula must be boolean (instead of {e.type})")
     return self
 AQuantification.set_variables = set_variables
@@ -767,18 +767,18 @@ def base_type(exprs: List[Expression], bases: List[SetName] = None) -> Optional[
     if exprs[0].type:
         base = exprs[0].type.root_set if not bases else bases[0]
         bases = set([base.name]) if not bases else set([b.name for b in bases])
-        if base in [REALT, DATET]:
+        if base in [REAL_TYPE, DATE_TYPE]:
             bases.add(INT)  # also accept INT for REAL and DATE
         for e in exprs:
             if e.type:
                 b = e.type.root_set
                 if b.name not in bases:
-                    if base == INTT and b in [REALT, DATET]:
+                    if base == INT_TYPE and b in [REAL_TYPE, DATE_TYPE]:
                         base = b
                         bases.add(b.name)
                     else:
                         e.check(False, f"{base.name} value expected ({b.name} found: {e} )")
-                elif b in [REALT, DATET]:
+                elif b in [REAL_TYPE, DATE_TYPE]:
                     base = b
                 # else continue
             else:
@@ -796,7 +796,7 @@ def annotate(self: Operator,
 
     for e in self.sub_exprs:
         if self.operator[0] in '&|∧∨⇒⇐⇔':
-            self.check(e.type is None or e.type == BOOLT or e.str in ['true', 'false'],
+            self.check(e.type is None or e.type == BOOL_TYPE or e.str in ['true', 'false'],
                        f"Expected boolean formula, got {e.type}: {e}")
     return self.set_variables()
 Operator.annotate = annotate
@@ -814,8 +814,8 @@ Operator.set_variables = set_variables
 def set_variables(self: AImplication) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Implication is not associative.  Please use parenthesis.")
-    base_type(self.sub_exprs, [BOOLT])
-    self.type = BOOLT
+    base_type(self.sub_exprs, [BOOL_TYPE])
+    self.type = BOOL_TYPE
     return Expression.set_variables(self)
 AImplication.set_variables = set_variables
 
@@ -825,8 +825,8 @@ AImplication.set_variables = set_variables
 def set_variables(self: AEquivalence) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Equivalence is not associative.  Please use parenthesis.")
-    base_type(self.sub_exprs, [BOOLT])
-    self.type = BOOLT
+    base_type(self.sub_exprs, [BOOL_TYPE])
+    self.type = BOOL_TYPE
     return Expression.set_variables(self)
 AEquivalence.set_variables = set_variables
 
@@ -847,7 +847,7 @@ ARImplication.annotate = annotate
 # Class AConjunction, ADisjunction  #######################################################
 
 def set_variables(self: Expression) -> Expression:
-    self.type = base_type(self.sub_exprs, [BOOLT])
+    self.type = base_type(self.sub_exprs, [BOOL_TYPE])
     return Expression.set_variables(self)
 AConjunction.set_variables = set_variables
 ADisjunction.set_variables = set_variables
@@ -870,10 +870,10 @@ def annotate(self: AComparison,
 AComparison.annotate = annotate
 
 def set_variables(self: AppliedSymbol) -> Expression:
-    bases = ([INTT, REALT, DATET] if any(e in "<>≤≥" for e in self.operator) else
+    bases = ([INT_TYPE, REAL_TYPE, DATE_TYPE] if any(e in "<>≤≥" for e in self.operator) else
              None)
     base_type(self.sub_exprs, bases)
-    self.type = BOOLT
+    self.type = BOOL_TYPE
     return Expression.set_variables(self)
 AComparison.set_variables = set_variables
 
@@ -881,7 +881,7 @@ AComparison.set_variables = set_variables
 # Class ASumMinus  #######################################################
 
 def set_variables(self: ASumMinus) -> Expression:
-    self.type = base_type(self.sub_exprs, [INTT, REALT, DATET])
+    self.type = base_type(self.sub_exprs, [INT_TYPE, REAL_TYPE, DATE_TYPE])
     return Expression.set_variables(self)
 ASumMinus.set_variables = set_variables
 
@@ -889,7 +889,7 @@ ASumMinus.set_variables = set_variables
 # Class AMultDiv  #######################################################
 
 def set_variables(self: AMultDiv) -> Expression:
-    self.type = base_type(self.sub_exprs, [INTT, REALT])
+    self.type = base_type(self.sub_exprs, [INT_TYPE, REAL_TYPE])
     return Expression.set_variables(self)
 AMultDiv.set_variables = set_variables
 
@@ -897,9 +897,9 @@ AMultDiv.set_variables = set_variables
 # Class APower  #######################################################
 
 def set_variables(self: APower) -> Expression:
-    self.sub_exprs[1].check(self.sub_exprs[0].type in [INTT, REALT],
+    self.sub_exprs[1].check(self.sub_exprs[0].type in [INT_TYPE, REAL_TYPE],
                f"Number expected ({self.sub_exprs[1].type} found: {self.sub_exprs[1].type})")
-    self.sub_exprs[1].check(self.sub_exprs[1].type == INTT,
+    self.sub_exprs[1].check(self.sub_exprs[1].type == INT_TYPE,
                f"Integer expected ({self.sub_exprs[1].type} found: {self.sub_exprs[1].type})")
     return Expression.set_variables(self)
 APower.set_variables = set_variables
@@ -928,21 +928,21 @@ def annotate(self: AAggregate,
         if self.aggtype == "sum" and len(self.sub_exprs) == 2:
             self.original = copy(self)
             self.sub_exprs[0].check(
-                self.sub_exprs[0].type.root_set in [INTT, REALT],
+                self.sub_exprs[0].type.root_set in [INT_TYPE, REAL_TYPE],
                 f"Must be numeric: {self.sub_exprs[0]}")
             self.sub_exprs[1].check(
-                self.sub_exprs[1].type.root_set == BOOLT,
+                self.sub_exprs[1].type.root_set == BOOL_TYPE,
                 f"Must be boolean: {self.sub_exprs[1]}")
             self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
                                     self.sub_exprs[0], ZERO).set_variables()]
 
         if self.aggtype == "#":
             self.sub_exprs[0].check(
-                self.sub_exprs[0].type.root_set == BOOLT,
+                self.sub_exprs[0].type.root_set == BOOL_TYPE,
                 f"Must be boolean: {self.sub_exprs[0]}")
             self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
                                  Number(number='0'))]
-            self.type = INTT
+            self.type = INT_TYPE
         else:
             self.type = self.sub_exprs[0].type
             if self.aggtype in ["min", "max"]:
@@ -990,7 +990,7 @@ def annotate(self: AAggregate,
                 return applied
         self.annotated = True
         self.type = base_type(self.sub_exprs)
-        self.sub_exprs[0].check(self.type in [INTT, REALT, DATET],
+        self.sub_exprs[0].check(self.type in [INT_TYPE, REAL_TYPE, DATE_TYPE],
             f"Aggregate formula must be numeric (instead of {self.type})")
     return self
 AAggregate.annotate = annotate
@@ -1056,7 +1056,7 @@ def set_variables(self: AppliedSymbol, type_check=True) -> Expression:
 
     # determine type
     if out.is_enumerated or out.in_enumeration:
-        out.type = BOOLT
+        out.type = BOOL_TYPE
     elif out.decl and out.decl.codomain:
         out.type = out.decl.codomain
     elif type(out.symbol)==SymbolExpr and out.symbol.eval:

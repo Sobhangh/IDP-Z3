@@ -37,7 +37,7 @@ from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true,
 
 from .Assignments import Status as S
 from .Expression import (Expression, AppliedSymbol, AComparison,
-                         TRUE, FALSE, BOOLT, INTT, REALT)
+                         TRUE, FALSE, BOOL_TYPE, INT_TYPE, REAL_TYPE)
 from .Parse import str_to_IDP
 from .Theory import Theory
 from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
@@ -322,7 +322,7 @@ def _first_propagate(self, solver: Solver,
         propositions.append(bool_q)
         prop_map[q_symbol] = (val1, q)
 
-        if complete and q.type not in [BOOLT, INTT, REALT]:
+        if complete and q.type not in [BOOL_TYPE, INT_TYPE, REAL_TYPE]:
             # If complete=True, we also want to propagate every possible value
             # of a function. This is the most complete form of propagation, as
             # it will also tell us which function values are now _not_
