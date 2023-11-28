@@ -17,8 +17,8 @@ Declaring a subset of integers can not be done as follows.
         c: -> row
     }
     theory { c() < 3. }
-    structure S1:V { row := {1..5} }
-    structure S2:V { row := {A, B, C} }
+    structure S1:V { row := {1..5}. }
+    structure S2:V { row := {A, B, C}. }
 
 IDP-Z3 does not accept the theory because it cannot infer that ``c()`` is a number in ``c() < 3.``.
 Indeed, it depends on whether S1 or S2 is used.
