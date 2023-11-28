@@ -679,7 +679,7 @@ def annotate_quantee(self: Expression,
     for vars in self.vars:
         self.check(not self.sub_exprs
                    or not self.sub_exprs[0].decl
-                   or len(vars)==len(self.sub_exprs[0].decl.domains),
+                   or len(vars)==self.sub_exprs[0].decl.arity,
                     f"Incorrect arity for {self}")
         for i, var in enumerate(vars):
             self.check(var.name not in voc.symbol_decls

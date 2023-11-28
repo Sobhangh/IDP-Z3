@@ -616,7 +616,7 @@ def _interpret(self: AppliedSymbol,
     if type(self.symbol) == SymbolExpr and not self.symbol.name:  # $(x)()
         self.symbol = self.symbol._interpret(problem, subs)
         if self.symbol.name:  # found $(x)
-            self.check(len(self.sub_exprs) == len(self.symbol.decl.domains),
+            self.check(len(self.sub_exprs) == self.symbol.decl.arity,
                         f"Incorrect arity for {self.code}")
             kwargs = ({'is_enumerated': self.is_enumerated} if self.is_enumerated else
                         {'in_enumeration': self.in_enumeration} if self.in_enumeration else
