@@ -32,7 +32,7 @@ from enum import Enum, auto
 from typing import Optional, Tuple, TYPE_CHECKING
 from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol, BOOL_TYPE
+from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol, BOOL_SETNAME
 from .utils import NEWL, INT, REAL, DATE
 
 if TYPE_CHECKING:
@@ -155,7 +155,7 @@ class Assignment(object):
     def formula(self) -> Expression:
         if self.value is None:
             raise Exception("can't translate unknown value")
-        if self.sentence.type == BOOL_TYPE:
+        if self.sentence.type == BOOL_SETNAME:
             out = self.sentence if self.value.same_as(TRUE) else \
                 NOT(self.sentence)
         else:
@@ -171,7 +171,7 @@ class Assignment(object):
         Returns:
             [type]: returns an Assignment for the same sentence, but an opposite truth value.
         """
-        assert self.sentence.type == BOOL_TYPE, "Cannot negate a non-boolean assignment"
+        assert self.sentence.type == BOOL_SETNAME, "Cannot negate a non-boolean assignment"
         assert self.value is not None, "Cannot negate an assignment without value"
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
@@ -284,12 +284,12 @@ class Assignments(dict):
                 if "*" in val:
                     val = f"// {val}"
             else:
-                sign = ':=' if k.instances or k.codomain == BOOL_TYPE else '>>'
+                sign = ':=' if k.instances or k.codomain == BOOL_SETNAME else '>>'
                 # TODO improve sign detection (using root_set/extension, interpretation)
                 # needs access to the theory !
                 finite_domain = all(s.name not in [INT, REAL, DATE]
                         for s in k.domains)
-                sign = ':=' if finite_domain or k.codomain == BOOL_TYPE else '>>'
+                sign = ':=' if finite_domain or k.codomain == BOOL_SETNAME else '>>'
                 val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
                 val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
             if not enumerated[k]:

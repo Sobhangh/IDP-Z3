@@ -610,17 +610,17 @@ class SetName(Expression):
             return OR(comparisons)
         else:
             assert self.decl is not None, "Internal error"
-            self.check(self.decl.codomain == BOOL_TYPE, "internal error")
+            self.check(self.decl.codomain == BOOL_SETNAME, "internal error")
             return self.decl.contains_element(term, extensions)
 
 def SETNAME(name: str, ins=None, out=None) -> SetName:
     return SetName(None, name, ins, out)
 
-BOOL_TYPE = SETNAME(BOOL)
-INT_TYPE = SETNAME(INT)
-REAL_TYPE = SETNAME(REAL)
-DATE_TYPE = SETNAME(DATE)
-EMPTY_TYPE = SETNAME(EMPTY)
+BOOL_SETNAME = SETNAME(BOOL)
+INT_SETNAME = SETNAME(INT)
+REAL_SETNAME = SETNAME(REAL)
+DATE_SETNAME = SETNAME(DATE)
+EMPTY_SETNAME = SETNAME(EMPTY)
 
 class AIfExpr(Expression):
     PRECEDENCE = 10
@@ -780,7 +780,7 @@ class AQuantification(Expression):
         self.sub_exprs = [self.f]
         super().__init__(annotations=annotations)
 
-        self.type = BOOL_TYPE
+        self.type = BOOL_SETNAME
         self.supersets: Optional[List[List[List[Union[Identifier, Variable]]]]] = None
         self.new_quantees: Optional[List[Quantee]] = None
         self.vars1 : Optional[List[Variable]] = None
@@ -877,8 +877,8 @@ class Operator(Expression):
 
         super().__init__(parent, annotations=annotations)
 
-        self.type = BOOL_TYPE if self.operator[0] in '&|∧∨⇒⇐⇔' \
-               else BOOL_TYPE if self.operator[0] in '=<>≤≥≠' \
+        self.type = BOOL_SETNAME if self.operator[0] in '&|∧∨⇒⇐⇔' \
+               else BOOL_SETNAME if self.operator[0] in '=<>≤≥≠' \
                else None
 
     @classmethod
@@ -1310,9 +1310,9 @@ TRUEC = CONSTRUCTOR('true')
 FALSEC = CONSTRUCTOR('false')
 
 TRUE = UnappliedSymbol.construct(TRUEC)
-TRUE.type = BOOL_TYPE
+TRUE.type = BOOL_SETNAME
 FALSE = UnappliedSymbol.construct(FALSEC)
-FALSE.type = BOOL_TYPE
+FALSE.type = BOOL_SETNAME
 
 
 class Variable(Expression):
@@ -1366,21 +1366,21 @@ class Number(Expression):
         ops = self.number.split("/")
         if len(ops) == 2:  # possible with str_to_IDP on Z3 value
             self.py_value = Fraction(self.number)
-            self.type = REAL_TYPE
+            self.type = REAL_SETNAME
         elif '.' in self.number:
             self.py_value = Fraction(self.number if not self.number.endswith('?') else
                                      self.number[:-1])
-            self.type = REAL_TYPE
+            self.type = REAL_SETNAME
         else:
             self.py_value = int(self.number)
-            self.type = INT_TYPE
+            self.type = INT_SETNAME
         self.decl = None
 
     def __str__(self): return self.number
 
     def real(self):
         """converts the INT number to REAL"""
-        self.check(self.type in [INT_TYPE, REAL_TYPE], f"Can't convert {self} to {REAL}")
+        self.check(self.type in [INT_SETNAME, REAL_SETNAME], f"Can't convert {self} to {REAL}")
         return Number(number=str(float(self.py_value)))
 
     def is_value(self): return True
@@ -1412,7 +1412,7 @@ class Date(Expression):
         self.variables = set()
 
         self.py_value = int(self.date.toordinal())
-        self.type = DATE_TYPE
+        self.type = DATE_SETNAME
 
     @classmethod
     def make(cls, value: int) -> Date:

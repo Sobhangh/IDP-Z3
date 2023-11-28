@@ -45,7 +45,7 @@ from .Expression import (AIfExpr, IF,
                          SetName, FORALL, IMPLIES, AND, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Quantee, Variable,
                          VARIABLE, TRUE, FALSE, Number, Extension,
-                         BOOL_TYPE,)
+                         BOOL_SETNAME,)
 from .Theory import Theory
 from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND, flatten)
@@ -130,11 +130,11 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     def filter(args):
         out = AND([f([deepcopy(t)]) if f is not None else TRUE
                     for f, t in zip(filters, args)])
-        if self.codomain == BOOL_TYPE:
+        if self.codomain == BOOL_SETNAME:
             out = AND([out, deepcopy(AppliedSymbol.make(self.symbol_expr, args, type_check=False))])
         return out
 
-    if self.codomain == BOOL_TYPE:
+    if self.codomain == BOOL_SETNAME:
         problem.extensions[self.name] = (superset, filter)
 
     (range, _) = self.codomain.extension(problem.extensions)
@@ -156,7 +156,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         problem.interpretations[self.name].interpret(problem)
 
     # create type constraints
-    if type(self.instances) == dict and self.codomain != BOOL_TYPE:
+    if type(self.instances) == dict and self.codomain != BOOL_SETNAME:
         for expr in self.instances.values():
             # add type constraints to problem.constraints
             # ! (x,y) in domain: range(f(x,y))
@@ -195,7 +195,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
         decl = problem.declarations[self.name]
         assert isinstance(decl, SymbolDeclaration), "Internal error"
         # update problem.extensions
-        if self.symbol_decl.codomain == BOOL_TYPE:  # predicate
+        if self.symbol_decl.codomain == BOOL_SETNAME:  # predicate
             extension = [t.args for t in self.enumeration.tuples]
             problem.extensions[self.symbol_decl.name] = (extension, None)
 
@@ -266,7 +266,7 @@ def interpret(self: SymbolInterpretation, problem: Theory):
                         e = problem.assignments.assert__(expr, self.default, status)
                         if (status == S.DEFAULT  # for proper display in IC
                             and type(self.enumeration) == FunctionEnum
-                            and self.default.type != BOOL_TYPE):
+                            and self.default.type != BOOL_SETNAME):
                             problem.assignments.assert__(e.formula(), TRUE, status)
 
         elif self.sign == '≜':
@@ -495,7 +495,7 @@ def get_supersets(self: AQuantification | AAggregate, problem: Optional[Theory])
                 (superset, filter) = domain.extension(problem.extensions)
             elif type(domain) == SymbolExpr:
                 if domain.decl:
-                    self.check(domain.decl.codomain.type == BOOL_TYPE,
+                    self.check(domain.decl.codomain.type == BOOL_SETNAME,
                                 f"{domain} is not a type or predicate")
                     assert domain.decl.name in problem.extensions, "internal error"
                     (superset, filter) = problem.extensions[domain.decl.name]
@@ -636,7 +636,7 @@ def _interpret(self: AppliedSymbol,
     value, co_constraint = None, None
     if out.decl and problem:
         if out.is_enumerated:
-            assert out.decl.codomain != BOOL_TYPE, \
+            assert out.decl.codomain != BOOL_SETNAME, \
                 f"Can't use 'is enumerated' with predicate {out.decl.name}."
             if out.decl.name in problem.interpretations:
                 interpretation = problem.interpretations[out.decl.name]

@@ -34,7 +34,7 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not,
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
                          EQUALS, NOT, Extension, AQuantification,
-                         BOOL_TYPE, INT_TYPE, REAL_TYPE, DATE_TYPE)
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SymbolExpr,
                     TheoryBlock, Structure, Definition, str_to_IDP,
                     SymbolInterpretation)
@@ -892,7 +892,7 @@ class Theory(object):
             to_explain = self.assignments[consequence].sentence
 
             # rules used in justification
-            if to_explain.type != BOOL_TYPE:  # determine numeric value
+            if to_explain.type != BOOL_SETNAME:  # determine numeric value
                 val = self.assignments[consequence].value
                 if val is None:  # can't explain an expanded value
                     solver.pop()
@@ -940,7 +940,7 @@ class Theory(object):
             for ass in out.assignments.values():
                 if (ass.value
                 and (( type(ass.sentence) == AComparison
-                       and (any(e.type in [INT_TYPE, REAL_TYPE, DATE_TYPE]
+                       and (any(e.type in [INT_SETNAME, REAL_SETNAME, DATE_SETNAME]
                                 for e in ass.sentence.sub_exprs)
                             or any(op in '<>≤≥' for op in ass.sentence.operator)))
                     or type(ass.sentence) == AQuantification)):
@@ -1095,7 +1095,7 @@ class Theory(object):
             goal = None
             for atom in questions.values():
                 assignment = self.assignments.get(atom.code, None)
-                if assignment and assignment.value is None and atom.type == BOOL_TYPE:
+                if assignment and assignment.value is None and atom.type == BOOL_SETNAME:
                     if not atom.is_reified():
                         val1 = model.eval(atom.translate(self))
                     else:

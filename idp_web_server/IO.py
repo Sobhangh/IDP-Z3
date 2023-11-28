@@ -25,7 +25,7 @@ import ast
 from typing import TYPE_CHECKING
 
 from idp_engine import Theory, Status
-from idp_engine.Expression import (TRUE, FALSE, Number, Date, BOOL_TYPE)
+from idp_engine.Expression import (TRUE, FALSE, Number, Date, BOOL_SETNAME)
 from idp_engine.Parse import str_to_IDP
 from idp_engine.Assignments import Status as S
 from idp_engine.utils import BOOL, INT, REAL, DATE
@@ -45,7 +45,7 @@ def metaJSON(state):
     for decl in state.assignments.symbols.values():
         if not decl.private:
             typ = decl.codomain
-            symbol_type = "proposition" if typ == BOOL_TYPE and decl.domains == [] else "function"
+            symbol_type = "proposition" if typ == BOOL_SETNAME and decl.domains == [] else "function"
             d = {
                 "idpname": str(decl.name),
                 "type": symbol_type,
@@ -231,7 +231,7 @@ class Output(object):
                             s[key]["value"] = True if value.same_as(TRUE) else \
                                              False if value.same_as(FALSE) else \
                                              str(value)
-                        if ((0 < len(symb.range) or hasattr(symb.codomain.decl, 'enumeration')) and atom.type != BOOL_TYPE):
+                        if ((0 < len(symb.range) or hasattr(symb.codomain.decl, 'enumeration')) and atom.type != BOOL_SETNAME):
                             # allow display of the value in drop box
                             s[key]["values"] = [s[key]["value"]]
                     else:
