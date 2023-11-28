@@ -228,8 +228,8 @@ def annotate_block(self: ASTNode,
     constraints = OrderedSet()
     for c in self.constraints:
         c1 = c.annotate(self.voc, {})
-        c1.check(c1.type is None or c1.type == BOOL_TYPE,
-                    f"{c.code} must be boolean")
+        c1.check(c1.type == BOOL_TYPE,
+                    f"Formula {c.code} must be boolean, not {c1.type}")
         constraints.append(c1)
     self.constraints = constraints
     return out
@@ -814,7 +814,7 @@ Operator.set_variables = set_variables
 def set_variables(self: AImplication) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Implication is not associative.  Please use parenthesis.")
-    base_type(self.sub_exprs, [BOOL_TYPE])
+    _ = base_type(self.sub_exprs, [BOOL_TYPE])  # type check the sub-exprs
     self.type = BOOL_TYPE
     return Expression.set_variables(self)
 AImplication.set_variables = set_variables
@@ -825,7 +825,7 @@ AImplication.set_variables = set_variables
 def set_variables(self: AEquivalence) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Equivalence is not associative.  Please use parenthesis.")
-    base_type(self.sub_exprs, [BOOL_TYPE])
+    _ = base_type(self.sub_exprs, [BOOL_TYPE])  # type check the sub_exprs
     self.type = BOOL_TYPE
     return Expression.set_variables(self)
 AEquivalence.set_variables = set_variables
@@ -872,7 +872,7 @@ AComparison.annotate = annotate
 def set_variables(self: AppliedSymbol) -> Expression:
     bases = ([INT_TYPE, REAL_TYPE, DATE_TYPE] if any(e in "<>≤≥" for e in self.operator) else
              None)
-    base_type(self.sub_exprs, bases)
+    _ = base_type(self.sub_exprs, bases) # type check the sub-expressions
     self.type = BOOL_TYPE
     return Expression.set_variables(self)
 AComparison.set_variables = set_variables
@@ -1038,7 +1038,7 @@ def set_variables(self: AppliedSymbol, type_check=True) -> Expression:
     if not out.decl and out.symbol.name:
         out.decl = out.symbol.decl
 
-    # ¢heck type of arguments
+    # check type of arguments
     if out.decl and type_check:
         for e, s in zip(self.sub_exprs, out.decl.domains):
             if not type(out.decl) == TypeDeclaration:  # Type predicates accept anything
@@ -1050,9 +1050,9 @@ def set_variables(self: AppliedSymbol, type_check=True) -> Expression:
                 #             f"{s} expected ({e.type} found: {e})")
                 #     type_ = type_.decl.domains[0]
 
-    # check type of elements of enumeration
     if self.is_enumeration == 'in':
-        base_type([t.args[0] for t in self.in_enumeration.tuples], [self.decl.codomain])
+        # check the type of elements in the enumeration
+        _ = base_type([t.args[0] for t in self.in_enumeration.tuples], [self.decl.codomain])
 
     # determine type
     if out.is_enumerated or out.in_enumeration:
