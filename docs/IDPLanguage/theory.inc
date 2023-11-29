@@ -187,8 +187,8 @@ Quantified formulas
 
 "is enumerated"
     ``f(a,b) is enumerated`` is a formula,
-    where ``f`` is a function defined by an enumeration and applied to arguments ``a`` and ``b``.
-    Its truth value reflects whether ``(a,b)`` is enumerated in ``f``'s enumeration.
+    where ``f`` is a function defined by a (partial) enumeration and applied to arguments ``a`` and ``b``.
+    Its truth value reflects whether ``(a,b)`` is enumerated in ``f``'s (partial) enumeration.
     If the enumeration has a default value, every tuple of arguments is enumerated.
 
 "in {1,2,3,4}"
