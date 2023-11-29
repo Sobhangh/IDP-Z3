@@ -269,6 +269,11 @@ def interpret(self: SymbolInterpretation, problem: Theory):
                             and self.default.type != BOOL_SETNAME):
                             problem.assignments.assert__(e.formula(), TRUE, status)
 
+            if self.sign == '≜' and decl.arity == 0 and len(decl.domains) == 1:
+                # partial constant => ensure its domain is {()}
+                _, filter = decl.domains[0].extension(problem.extensions)
+                constraint = filter([])
+                problem.constraints.append(constraint)
         elif self.sign == '≜':
             # add condition that the interpretation is total
             # over the domain specified by the type signature
