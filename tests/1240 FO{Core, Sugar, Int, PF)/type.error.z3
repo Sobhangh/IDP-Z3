@@ -30,9 +30,6 @@ Traceback (most recent call last):
     out = Operator.annotate(self, voc, q_vars)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    self = Expression.annotate(self, voc, q_vars)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in annotate
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in <listcomp>

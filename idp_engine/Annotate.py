@@ -677,10 +677,6 @@ def annotate_quantee(self: Expression,
     assert isinstance(self, Quantee), "Internal error"
     Expression.annotate(self, voc, q_vars)
     for vars in self.vars:
-        self.check(not self.sub_exprs
-                   or not self.sub_exprs[0].decl
-                   or len(vars)==self.sub_exprs[0].decl.arity,
-                    f"Incorrect arity for {self}")
         for i, var in enumerate(vars):
             self.check(var.name not in voc.symbol_decls
                         or type(voc.symbol_decls[var.name]) == VarDeclaration,
@@ -714,8 +710,19 @@ def annotate_quantee(self: Expression,
             q_vars[var.name] = var
     if not self.sub_exprs and var.type:
         self.sub_exprs = [var.type]
-    return self
+    return self.fill_attributes_and_check()
 Quantee.annotate_quantee = annotate_quantee
+
+def fill_attributes_and_check(self: AQuantification) -> Expression:
+    assert isinstance(self, Quantee), "Internal error"
+    Expression.fill_attributes_and_check(self)
+    for vars in self.vars:
+        self.check(not self.sub_exprs
+                   or not self.sub_exprs[0].decl
+                   or len(vars)==self.sub_exprs[0].decl.arity,
+                    f"Incorrect arity for {self}")
+    return self
+Quantee.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class AQuantification  #######################################################
@@ -787,22 +794,14 @@ def base_type(exprs: List[Expression], bases: List[SetName] = None) -> Optional[
     else:
         exprs[0].check(False, f"Can't determine the type of {exprs[0]}")
 
-
-def annotate(self: Operator,
-             voc: Vocabulary,
-             q_vars: dict[str, Variable]
-             ) -> Annotated:
-    self = Expression.annotate(self, voc, q_vars)
+def fill_attributes_and_check(self: Operator) -> Expression:
+    assert all(e.type for e in self.sub_exprs), "Can't handle nested concepts yet."
 
     for e in self.sub_exprs:
         if self.operator[0] in '&|∧∨⇒⇐⇔':
             self.check(e.type is None or e.type == BOOL_SETNAME or e.str in ['true', 'false'],
                        f"Expected boolean formula, got {e.type}: {e}")
-    return self.fill_attributes_and_check()
-Operator.annotate = annotate
 
-def fill_attributes_and_check(self: Operator) -> Expression:
-    assert all(e.type for e in self.sub_exprs), "Can't handle nested concepts yet."
     self.type = base_type(self.sub_exprs)
     self.check(self.type is not None, "Type error")
     return Expression.fill_attributes_and_check(self)
@@ -1004,14 +1003,6 @@ def annotate(self: AppliedSymbol,
              q_vars: dict[str, Variable]
              ) -> Annotated:
     self.symbol = self.symbol.annotate(voc, q_vars)
-    if self.symbol.decl:
-        self.check(self.symbol.decl.arity == len(self.sub_exprs)
-                   or self.symbol.decl.name in ['hide', 'unit', 'heading', 'noOptimization'],
-            f"Incorrect number of arguments in {self}: "
-            f"should be {self.symbol.decl.arity}")
-    self.check((not self.symbol.decl or type(self.symbol.decl) != Constructor
-                or 0 < self.symbol.decl.arity),
-               f"Constructor `{self.symbol}` cannot be applied to argument(s)")
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc, q_vars)
@@ -1038,9 +1029,18 @@ def fill_attributes_and_check(self: AppliedSymbol, type_check=True) -> Expressio
     if not out.decl and out.symbol.name:
         out.decl = out.symbol.decl
 
+    if out.symbol.decl:
+        self.check(out.symbol.decl.arity == len(out.sub_exprs)
+                   or out.symbol.decl.name in ['hide', 'unit', 'heading', 'noOptimization'],
+            f"Incorrect number of arguments in {out}: "
+            f"should be {out.symbol.decl.arity}")
+    out.check((not out.symbol.decl or type(out.symbol.decl) != Constructor
+                or 0 < out.symbol.decl.arity),
+               f"Constructor `{out.symbol}` cannot be applied to argument(s)")
+
     # check type of arguments
     if out.decl and type_check:
-        for e, s in zip(self.sub_exprs, out.decl.domains):
+        for e, s in zip(out.sub_exprs, out.decl.domains):
             if not type(out.decl) == TypeDeclaration:  # Type predicates accept anything
                 e.check(e.type.root_set == s.root_set,
                         f"{s.root_set} expected ({e.type.root_set} found: {e})")
