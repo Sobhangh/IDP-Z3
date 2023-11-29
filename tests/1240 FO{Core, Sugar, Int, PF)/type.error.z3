@@ -39,9 +39,9 @@ Traceback (most recent call last):
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
                       ^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    out = self.set_variables()
-          ^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in set_variables
+    out = self.fill_attributes_and_check()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in fill_attributes_and_check
     e.check(e.type.root_set == s.root_set,
   File "idp_engine/Expression.py", line ??, in check
     raise IDPZ3Error(msg, self)

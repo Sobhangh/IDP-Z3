@@ -281,7 +281,7 @@ def add_level_mapping(self,
     """
     return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity, mode)
                                 for e in self.sub_exprs))
-                .set_variables())  # update .variables
+                .fill_attributes_and_check())  # update .variables
 Expression.add_level_mapping = add_level_mapping
 
 
@@ -289,7 +289,7 @@ Expression.add_level_mapping = add_level_mapping
 def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
     sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity, mode),
                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity, mode)]
-    return self.update_exprs(sub_exprs).set_variables()
+    return self.update_exprs(sub_exprs).fill_attributes_and_check()
 AImplication.add_level_mapping = add_level_mapping
 
 
@@ -297,7 +297,7 @@ AImplication.add_level_mapping = add_level_mapping
 def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
     sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity, mode),
                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity, mode)]
-    return self.update_exprs(sub_exprs).set_variables()
+    return self.update_exprs(sub_exprs).fill_attributes_and_check()
 ARImplication.add_level_mapping = add_level_mapping
 
 # AUnary
@@ -308,7 +308,7 @@ def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mo
                                         if self.operator == '¬' else polarity,
                                         mode)
                     for e in self.sub_exprs)
-    return self.update_exprs(sub_exprs).set_variables()
+    return self.update_exprs(sub_exprs).fill_attributes_and_check()
 AUnary.add_level_mapping = add_level_mapping
 
 

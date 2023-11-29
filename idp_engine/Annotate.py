@@ -644,27 +644,27 @@ def annotate(self: Expression,
         Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-    return self.set_variables()
+    return self.fill_attributes_and_check()
 Expression.annotate = annotate
 
 
-def set_variables(self: Expression) -> Expression:
+def fill_attributes_and_check(self: Expression) -> Expression:
     " annotations that are common to __init__ and make() "
     self.variables = set()
     for e in self.sub_exprs:
         self.variables.update(e.variables)
     return self
-Expression.set_variables = set_variables
+Expression.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class AIfExpr  #######################################################
 
-def set_variables(self: AIfExpr) -> Expression:
+def fill_attributes_and_check(self: AIfExpr) -> Expression:
     self.sub_exprs[0].check(self.sub_exprs[0].type == BOOL_SETNAME,
         f"Boolean expected ({self.sub_exprs[0].type} found)")
     self.type = base_type(self.sub_exprs[1:])
-    return Expression.set_variables(self)
-AIfExpr.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+AIfExpr.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class Quantee  #######################################################
@@ -731,11 +731,11 @@ def annotate(self: Expression,
     for q in self.quantees:
         q.annotate_quantee(voc, q_v, inferred)  # adds inner variables to q_v
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-    return self.set_variables()
+    return self.fill_attributes_and_check()
 AQuantification.annotate = annotate
 
-def set_variables(self: AQuantification) -> Expression:
-    Expression.set_variables(self)
+def fill_attributes_and_check(self: AQuantification) -> Expression:
+    Expression.fill_attributes_and_check(self)
     for q in self.quantees:  # remove declared variables
         for vs in q.vars:
             for v in vs:
@@ -748,7 +748,7 @@ def set_variables(self: AQuantification) -> Expression:
             e.check(e.type == BOOL_SETNAME,
                 f"Quantified formula must be boolean (instead of {e.type})")
     return self
-AQuantification.set_variables = set_variables
+AQuantification.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class Operator  #######################################################
@@ -798,37 +798,37 @@ def annotate(self: Operator,
         if self.operator[0] in '&|∧∨⇒⇐⇔':
             self.check(e.type is None or e.type == BOOL_SETNAME or e.str in ['true', 'false'],
                        f"Expected boolean formula, got {e.type}: {e}")
-    return self.set_variables()
+    return self.fill_attributes_and_check()
 Operator.annotate = annotate
 
-def set_variables(self: Operator) -> Expression:
+def fill_attributes_and_check(self: Operator) -> Expression:
     assert all(e.type for e in self.sub_exprs), "Can't handle nested concepts yet."
     self.type = base_type(self.sub_exprs)
     self.check(self.type is not None, "Type error")
-    return Expression.set_variables(self)
-Operator.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+Operator.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class AImplication  #######################################################
 
-def set_variables(self: AImplication) -> Expression:
+def fill_attributes_and_check(self: AImplication) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Implication is not associative.  Please use parenthesis.")
     _ = base_type(self.sub_exprs, [BOOL_SETNAME])  # type check the sub-exprs
     self.type = BOOL_SETNAME
-    return Expression.set_variables(self)
-AImplication.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+AImplication.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class AEquivalence  #######################################################
 
-def set_variables(self: AEquivalence) -> Expression:
+def fill_attributes_and_check(self: AEquivalence) -> Expression:
     self.check(len(self.sub_exprs) == 2,
                "Equivalence is not associative.  Please use parenthesis.")
     _ = base_type(self.sub_exprs, [BOOL_SETNAME])  # type check the sub_exprs
     self.type = BOOL_SETNAME
-    return Expression.set_variables(self)
-AEquivalence.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+AEquivalence.fill_attributes_and_check = fill_attributes_and_check
 
 # Class ARImplication  #######################################################
 
@@ -846,11 +846,11 @@ ARImplication.annotate = annotate
 
 # Class AConjunction, ADisjunction  #######################################################
 
-def set_variables(self: Expression) -> Expression:
+def fill_attributes_and_check(self: Expression) -> Expression:
     self.type = base_type(self.sub_exprs, [BOOL_SETNAME])
-    return Expression.set_variables(self)
-AConjunction.set_variables = set_variables
-ADisjunction.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+AConjunction.fill_attributes_and_check = fill_attributes_and_check
+ADisjunction.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class AComparison  #######################################################
@@ -869,50 +869,50 @@ def annotate(self: AComparison,
     return out
 AComparison.annotate = annotate
 
-def set_variables(self: AppliedSymbol) -> Expression:
+def fill_attributes_and_check(self: AppliedSymbol) -> Expression:
     bases = ([INT_SETNAME, REAL_SETNAME, DATE_SETNAME] if any(e in "<>≤≥" for e in self.operator) else
              None)
     _ = base_type(self.sub_exprs, bases) # type check the sub-expressions
     self.type = BOOL_SETNAME
-    return Expression.set_variables(self)
-AComparison.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+AComparison.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class ASumMinus  #######################################################
 
-def set_variables(self: ASumMinus) -> Expression:
+def fill_attributes_and_check(self: ASumMinus) -> Expression:
     self.type = base_type(self.sub_exprs, [INT_SETNAME, REAL_SETNAME, DATE_SETNAME])
-    return Expression.set_variables(self)
-ASumMinus.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+ASumMinus.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class AMultDiv  #######################################################
 
-def set_variables(self: AMultDiv) -> Expression:
+def fill_attributes_and_check(self: AMultDiv) -> Expression:
     self.type = base_type(self.sub_exprs, [INT_SETNAME, REAL_SETNAME])
-    return Expression.set_variables(self)
-AMultDiv.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+AMultDiv.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class APower  #######################################################
 
-def set_variables(self: APower) -> Expression:
+def fill_attributes_and_check(self: APower) -> Expression:
     self.sub_exprs[1].check(self.sub_exprs[0].type in [INT_SETNAME, REAL_SETNAME],
                f"Number expected ({self.sub_exprs[1].type} found: {self.sub_exprs[1].type})")
     self.sub_exprs[1].check(self.sub_exprs[1].type == INT_SETNAME,
                f"Integer expected ({self.sub_exprs[1].type} found: {self.sub_exprs[1].type})")
-    return Expression.set_variables(self)
-APower.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+APower.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class AUnary  #######################################################
 
-def set_variables(self: AUnary) -> Expression:
+def fill_attributes_and_check(self: AUnary) -> Expression:
     if len(self.operators) % 2 == 0: # negation of negation
         return self.sub_exprs[0]
     self.type = self.sub_exprs[0].type
-    return Expression.set_variables(self)
-AUnary.set_variables = set_variables
+    return Expression.fill_attributes_and_check(self)
+AUnary.fill_attributes_and_check = fill_attributes_and_check
 
 
 # Class AAggregate  #######################################################
@@ -934,7 +934,7 @@ def annotate(self: AAggregate,
                 self.sub_exprs[1].type.root_set == BOOL_SETNAME,
                 f"Must be boolean: {self.sub_exprs[1]}")
             self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
-                                    self.sub_exprs[0], ZERO).set_variables()]
+                                    self.sub_exprs[0], ZERO).fill_attributes_and_check()]
 
         if self.aggtype == "#":
             self.sub_exprs[0].check(
@@ -994,7 +994,7 @@ def annotate(self: AAggregate,
             f"Aggregate formula must be numeric (instead of {self.type})")
     return self
 AAggregate.annotate = annotate
-AAggregate.set_variables = AQuantification.set_variables
+AAggregate.fill_attributes_and_check = AQuantification.fill_attributes_and_check
 
 
 # Class AppliedSymbol  #######################################################
@@ -1015,7 +1015,7 @@ def annotate(self: AppliedSymbol,
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc, q_vars)
-    out = self.set_variables()
+    out = self.fill_attributes_and_check()
 
     # move the negation out
     if 'not' in self.is_enumerated:
@@ -1030,10 +1030,10 @@ def annotate(self: AppliedSymbol,
     return out
 AppliedSymbol.annotate = annotate
 
-def set_variables(self: AppliedSymbol, type_check=True) -> Expression:
-    out = Expression.set_variables(self)
+def fill_attributes_and_check(self: AppliedSymbol, type_check=True) -> Expression:
+    out = Expression.fill_attributes_and_check(self)
     assert type(out) == AppliedSymbol, "Internal error"
-    out.symbol = out.symbol.set_variables()
+    out.symbol = out.symbol.fill_attributes_and_check()
     out.variables.update(out.symbol.variables)
     if not out.decl and out.symbol.name:
         out.decl = out.symbol.decl
@@ -1069,7 +1069,7 @@ def set_variables(self: AppliedSymbol, type_check=True) -> Expression:
             out.type = type_.codomain
 
     return out.simplify1()
-AppliedSymbol.set_variables = set_variables
+AppliedSymbol.fill_attributes_and_check = fill_attributes_and_check
 
 # Class SymbolExpr  #######################################################
 
@@ -1132,7 +1132,7 @@ UnappliedSymbol.annotate = annotate
 
 # Class Brackets  #######################################################
 
-def set_variables(self: Brackets) -> Expression:
+def fill_attributes_and_check(self: Brackets) -> Expression:
     if not self.annotations:
         return self.sub_exprs[0]  # remove the bracket
     self.type = self.sub_exprs[0].type
@@ -1140,7 +1140,7 @@ def set_variables(self: Brackets) -> Expression:
         self.sub_exprs[0].annotations = self.annotations
     self.variables = self.sub_exprs[0].variables
     return self
-Brackets.set_variables = set_variables
+Brackets.fill_attributes_and_check = fill_attributes_and_check
 
 
 Done = True

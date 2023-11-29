@@ -286,7 +286,7 @@ class Expression(ASTNode):
                  ) -> Annotated:
         raise IDPZ3Error("Internal error") # monkey-patched
 
-    def set_variables(self: Expression) -> Expression:
+    def fill_attributes_and_check(self: Expression) -> Expression:
         raise IDPZ3Error("Internal error") # monkey-patched
 
     def has_variables(self) -> bool:
@@ -647,7 +647,7 @@ class AIfExpr(Expression):
              else_f: Expression
              ) -> 'AIfExpr':
         out = (cls)(None, if_f=if_f, then_f=then_f, else_f=else_f)
-        return out.set_variables().simplify1()
+        return out.fill_attributes_and_check().simplify1()
 
     def __str__(self):
         return (f"if {self.sub_exprs[AIfExpr.IF  ].str}"
@@ -718,7 +718,7 @@ class Quantee(Expression):
              sort: Optional[SymbolExpr] = None
              ) -> 'Quantee':
         out = (cls) (None, [var], subtype=subtype, sort=sort)
-        return out.set_variables()
+        return out.fill_attributes_and_check()
 
     def __str__(self):
         signature = ("" if len(self.sub_exprs) <= 1 else
@@ -796,7 +796,7 @@ class AQuantification(Expression):
         out = cls(None, None, q, quantees, f)
         if annotations:
             out.annotations = annotations
-        return out.set_variables()
+        return out.fill_attributes_and_check()
 
     def __str__(self):
         if len(self.sub_exprs) == 0:
@@ -910,7 +910,7 @@ class Operator(Expression):
         if parent:  # for error messages
             out._tx_position = parent. _tx_position
             out._tx_position_end = parent. _tx_position_end
-        return out.set_variables().simplify1()
+        return out.fill_attributes_and_check().simplify1()
 
     def __str__(self):
         def parenthesis(precedence, x):
@@ -1025,7 +1025,7 @@ class AUnary(Expression):
     @classmethod
     def make(cls, op: str, expr: Expression) -> AUnary:
         out = AUnary(None, operators=[op], f=expr)
-        return out.set_variables().simplify1()
+        return out.fill_attributes_and_check().simplify1()
 
     def __str__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
@@ -1155,7 +1155,7 @@ class AppliedSymbol(Expression):
         # annotate
         out.decl = symbol.decl
         out.type = type_
-        return out.set_variables(type_check)
+        return out.fill_attributes_and_check(type_check)
 
     @classmethod
     def construct(cls, constructor, args):
@@ -1343,7 +1343,7 @@ class Variable(Expression):
     def __deepcopy__(self, memo):
         return self
 
-    def set_variables(self: Expression) -> Expression: return self
+    def fill_attributes_and_check(self: Expression) -> Expression: return self
 
     def has_variables(self) -> bool: return True
 
