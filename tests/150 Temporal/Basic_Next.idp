@@ -1,6 +1,6 @@
 vocabulary V {
     type test is {0..5}
-    p: () → Bool
+    p: () -> Bool
     q: Int -> Bool
     Temporal p
 }

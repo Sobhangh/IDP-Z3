@@ -1,7 +1,7 @@
 vocabulary V {
-    q: () → Bool
-    p: () → Bool
-    r: Int → Bool
+    q: () -> Bool
+    p: () -> Bool
+    r: Int -> Bool
     Temporal p
 }
 

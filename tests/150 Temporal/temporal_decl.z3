@@ -1,3 +1,3 @@
 vocabulary {
-    p: (Tijd) → 𝔹
+    p: (Tijd) -> 𝔹
 }

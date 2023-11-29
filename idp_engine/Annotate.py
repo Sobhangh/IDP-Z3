@@ -193,15 +193,16 @@ def annotate(self, idp):
                 f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
 
+    #Annotating the init_theory
+    #Has to be used before interpretation annotate add_voc_to_block
+    annotate_init_theory(self,idp)
+
     for i in self.interpretations.values():
         i.annotate(self)
     self.voc.add_voc_to_block(self)
 
-    # Annotating the init_theory
-    annotate_init_theory(self,idp)
-
     self.definitions = [e.annotate(self.voc, {},self.ltc) for e in self.definitions]
-
+    
     constraints = OrderedSet()
     if self.ltc:
         #if there is Start present then now and next should not be
@@ -228,15 +229,20 @@ def annotate(self, idp):
     #changed self.constraints to constraints
     self.constraints = OrderedSet([e.annotate(self.voc, {},self.ltc)
                                     for e in constraints])
+    
 TheoryBlock.annotate = annotate
 
-#Use this after interpretations have been annotated and add_voc_to_block
+#Use this before interpretations have been annotated and add_voc_to_block to avoid duplicate enumerations
+#Annotation of interpretation applied twice would result in error
 def annotate_init_theory(theory:TheoryBlock,idp):
     if theory.ltc and theory.init_theory:
-        voc = idp.now_voc
+        voc = idp.now_voc[theory.init_theory.vocab_name]
         theory.init_theory.voc = voc
-        for i in theory.init_theory.interpretations.values():
-            i.annotate(theory.init_theory)
+        for i in theory.interpretations.values():
+            r = i.initialize_temporal_interpretation(idp.vocabularies[theory.vocab_name].tempdcl)
+            theory.init_theory.interpretations[r.name] = r
+            #Is annotation necessary given that it has already been done in the original?
+            r.annotate(theory.init_theory)
         voc.add_voc_to_block(theory.init_theory)
         #theory.init_theory.declarations = theory.declarations
         theory.init_theory.definitions = [e.annotate(voc, {},False) for e in theory.init_theory.definitions]
@@ -450,6 +456,7 @@ def annotate(self, voc, q_vars, ltc=False):
             self.quantees += d.quantees
         else:
             self.definiendum = d
+    
     self.check(not self.definiendum.symbol.is_intentional(),
                 f"No support for intentional objects in the head of a rule: "
                 f"{self}")

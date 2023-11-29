@@ -1,6 +1,6 @@
 vocabulary V {
-    r,q: () → Bool
-    p,s: () → Bool
+    r,q: () -> Bool
+    p,s: () -> Bool
     Temporal p
 }
 

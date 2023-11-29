@@ -1,6 +1,6 @@
 vocabulary V {
     // Check if it the resulting vocabulary is as expected.
-    p: () → Bool
+    p: () -> Bool
     Temporal p
 }
 

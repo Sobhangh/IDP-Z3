@@ -196,27 +196,21 @@ class IDP(ASTNode):
 
         assert len(displays) <= 1, "Too many display blocks"
         self.display = displays[0] if len(displays) == 1 else None
-        self.now_voc = []
-        self.next_voc = []
+        self.now_voc = {}
+        self.next_voc = {}
         for voc in self.vocabularies.values():
-            now_voc = voc.generate_now_voc()
-            print("now vocab")
-            print(now_voc)
+            now_voc:Vocabulary = voc.generate_now_voc()
+            self.now_voc[now_voc.name]=now_voc
             now_voc.annotate(self)
-            self.now_voc.append(now_voc)
-
+            
             next_voc = voc.generate_next_voc()
             next_voc.annotate(self)
-            self.next_voc.append(next_voc)
-            print("next vocab")
-            print(next_voc)
+            self.next_voc[next_voc.name]=next_voc
 
             voc.annotate(self)
         for t in self.theories.values():
             if t.ltc:
-                t.initizial_theory()
-                print("init theory")
-                print(t.init_theory)
+                t.initialize_theory()
             t.annotate(self)
         for struct in self.structures.values():
             struct.annotate(self)
@@ -385,15 +379,15 @@ class Vocabulary(ASTNode):
 
     #Has to be called before self is annotated
     def generate_now_voc(self):
-        nowvoc = Vocabulary(name=self.name,tempdcl=[],declarations=[])
-        nowvoc.idp = self.idp
+        nowvoc = Vocabulary(name=self.name+'_now',tempdcl=[],declarations=[])
         for d in self.original_decl:
             changed = False
             for t in self.tempdcl:
                 if isinstance(d,SymbolDeclaration):
                     if d.name == t.symbol.name:
                         changed = True
-                        id = SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
+                        sr = [s.init_copy() for s in d.sorts]
+                        id = SymbolDeclaration(name=SYMBOL(d.name),sorts=sr,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
@@ -406,15 +400,20 @@ class Vocabulary(ASTNode):
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
-                        enum = deepcopy(d.interpretation.enumeration.value())
-                    nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=deepcopy(d.constructors),enumeration=enum))
+                        #if isinstance(d.interpretation.enumeration,Ranges):
+                        #    enum = Ranges(elements=d.interpretation.enumeration.elements)
+                        #else:
+                        #    enum = d.interpretation.enumeration.init_copy()
+                        enum = d.interpretation.enumeration.init_copy()
+                    cnstr = [c.init_copy() for c in d.constructors]
+                    nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=cnstr,enumeration=enum))
                 else:
                     #without deepcopy
                     nowvoc.declarations.append(d)
         return nowvoc
     
     def generate_next_voc(self):
-        nowvoc = Vocabulary(name=self.name,tempdcl=[],declarations=[])
+        nowvoc = Vocabulary(name=self.name+'_next',tempdcl=[],declarations=[])
         nowvoc.idp = self.idp
         for d in self.original_decl:
             changed = False
@@ -422,11 +421,13 @@ class Vocabulary(ASTNode):
                 if isinstance(d,SymbolDeclaration):
                     if str(d.name) == str(t.symbol):
                         changed = True
-                        id = SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
+                        sr = [s.init_copy() for s in d.sorts]
+                        id = SymbolDeclaration(name=SYMBOL(d.name),sorts=sr,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
-                        next_d = SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[]))
+                        srn = [s.init_copy() for s in d.sorts]
+                        next_d = SymbolDeclaration(name=SYMBOL(d.name),sorts=srn,out=d.out,annotations=Annotations(None,[]))
                         next_d.name = d.name + "_next"
                         nowvoc.declarations.append(next_d)
                         #nowvoc.symbol_decls[next_d.name] = next_d
@@ -439,8 +440,13 @@ class Vocabulary(ASTNode):
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
-                        enum = deepcopy(d.interpretation.enumeration.value())
-                    nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=deepcopy(d.constructors),enumeration=enum))
+                        #if isinstance(d.interpretation.enumeration,Ranges):
+                        #    enum = Ranges(elements=d.interpretation.enumeration.elements)
+                        #else:
+                        #    enum = d.interpretation.enumeration.init_copy()
+                        enum = d.interpretation.enumeration.init_copy()
+                    cnstr = [c.init_copy() for c in d.constructors]
+                    nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=cnstr,enumeration=enum))
                 else:
                     #without deepcopy
                     nowvoc.declarations.append(d)
@@ -500,11 +506,12 @@ class TypeDeclaration(ASTNode):
             SymbolInterpretation(name=SYMBOL(self.name), sign='≜',
                                  enumeration=enumeration, default=None))
 
-    def __deepcopy__(self):
+    def init_copy(self):
         enum =None
         if self.interpretation:
-            enum = deepcopy(self.interpretation.enumeration)
-        return TypeDeclaration(name=self.name,constructors=deepcopy(self.constructors),enumeration=enum)
+            enum = self.interpretation.enumeration.init_copy()
+        cnstr = [c.init_copy() for c in self.constructors]
+        return TypeDeclaration(name=self.name,constructors=cnstr,enumeration=enum)
 
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
@@ -635,8 +642,10 @@ class SymbolDeclaration(ASTNode):
     def make(cls, strname, arity, sorts, out):
         o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
         return o
-    def __deepcopy__(self):
-        return SymbolDeclaration(name=SYMBOL(self.name),sorts=deepcopy(self.sorts),out=deepcopy(self.out),annotations=deepcopy(self.annotations))
+    
+    def init_copy(self):
+        sr = [s.init_copy() for s in self.sorts]
+        return SymbolDeclaration(name=SYMBOL(self.name),sorts=sr,out=self.out.init_copy(),annotations=self.annotations.init_copy())
 
 
     def __str__(self):
@@ -766,30 +775,24 @@ class TheoryBlock(ASTNode):
     def __str__(self):
         return self.name
     
-    def initizial_theory(self):
-        self.init_theory = TheoryBlock(name=self.name,vocab_name=self.vocab_name,ltc = None,
+    def initialize_theory(self):
+        self.init_theory = TheoryBlock(name=self.name,vocab_name=self.vocab_name+'_now',ltc = None,
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
             #would this be used before start/now are removed or after ?\
             # look how this is done?
-            ic = deepcopy(c)
-            r = self.init_subexpr(ic)
+            r = self.init_subexpr(c.init_copy())
             if r != False:
-                cnstrs.append(r)
+                self.init_theory.constraints.append(r)
         for definition in self.definitions:
-            rules = []
-            idef = Definition(None,Annotations(None,[]),definition.mode,[])
+            self.init_theory.definitions.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
             for rule in definition.rules:
-                r = self.init_rule(deepcopy(rule))
-                if r != False:
-                    rules.append(r)
-            idef.rules = rules
-            self.init_theory.definitions.append(idef)
-        self.init_theory.constraints = cnstrs
-        for interp in self.interpretations:
-            r= interp.initialize_temporal_interpretation()
-            self.init_theory.interpretations[r.name] = r
+                self.init_theory.definitions[-1].rules.append(self.init_rule(rule.init_copy()))
+                if self.init_theory.definitions[-1].rules[-1] == False:
+                    self.init_theory.definitions[-1].rules.pop()
+            #self.init_theory.definitions.append(idef)
+        #self.init_theory.constraints = cnstrs
 
     def init_subexpr(self, expression:Expression):
         if isinstance(expression, StartAppliedSymbol):
@@ -798,25 +801,54 @@ class TheoryBlock(ASTNode):
             return expression.sub_expr
         if isinstance(expression, NextAppliedSymbol):
             return False
-        sbex : List[Expression] = []
+        if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
+            return expression
+        #sbex : List[Expression] = []
+        i = 0
         for e in expression.sub_exprs:
-            r = self.init_subexpr(e)
-            if r == False:
+            expression.sub_exprs[i] = self.init_subexpr(e)
+            if expression.sub_exprs[i] == False:
                 return False
-            sbex.append(r)
+            i+=1
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
-            expression.f = sbex[0]
-        expression.sub_exprs = sbex
+            expression.f = expression.sub_exprs[0]
+        #expression.sub_exprs = sbex
         return expression
+    
+    def init_subexpr2(self, expression:Expression):
+        i = 0
+        for e in expression.sub_exprs:
+            if isinstance(e, (StartAppliedSymbol,NowAppliedSymbol) ):
+                expression.sub_expr[i] = e.sub_expr
+            elif isinstance(e, NextAppliedSymbol):
+                return False
+            elif isinstance(e,(AppliedSymbol,UnappliedSymbol)):
+                return 
+            else:
+                r = self.init_subexpr(e)
+                if r == False:
+                    return False
+            i+=1
+        if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
+            expression.f = expression.sub_exprs[0]
     
     def init_rule(self, rule: Rule):
         if isinstance(rule.definiendum,NextAppliedSymbol):
             return False
         if isinstance(rule.definiendum,(NowAppliedSymbol,StartAppliedSymbol)):
             rule.definiendum = rule.definiendum.sub_expr
-        rule.body = self.init_subexpr(rule.body)
-        if rule.body == False:
+        #using init_subexpr for the subexpressions of body 
+        if isinstance(rule.body,NextAppliedSymbol):
             return False
+        if isinstance(rule.body,(NowAppliedSymbol,StartAppliedSymbol)):
+            rule.body = rule.body.sub_expr
+        elif isinstance(rule.body,(AppliedSymbol,UnappliedSymbol)): 
+            rule.body
+        else:
+            r = self.init_subexpr2(rule.body)
+            if r == False:
+                return False
+        #rule.body = self.init_subexpr(rule.body)
         return rule
 
 class Definition(ASTNode):
@@ -856,6 +888,7 @@ class Definition(ASTNode):
     def __init__(self, parent, annotations, mode, rules):
         Definition.definition_id += 1
         self.id = Definition.definition_id
+        self.mode_str = mode
         self.mode = (S.WELLFOUNDED if mode is None or 'well-founded' in mode else
                      S.COMPLETION if 'completion' in mode else
                      S.KRIPKEKLEENE if 'Kripke-Kleene' in mode else
@@ -932,6 +965,22 @@ class Rule(ASTNode):
         out.out = deepcopy(self.out)
         out.body = deepcopy(self.body)
         return out
+    
+    def init_copy(self):
+        definiendum =None
+        body =None
+        quantees =[]
+        out=None
+        if self.definiendum:
+            definiendum = self.definiendum.init_copy()
+        if self.out:
+            out = self.out.init_copy()
+        if self.body:
+            body = self.body.init_copy()
+        if self.quantees:
+            quantees = [q.init_copy() for q in self.quantees]
+
+        return Rule(definiendum=definiendum,out=out,body=body,quantees=quantees,annotations=Annotations(None,[]))
 
     def instantiate_definition(self, new_args, theory):
         pass # monkey-patched
@@ -986,8 +1035,9 @@ class SymbolInterpretation(ASTNode):
         self.sign = kwargs.pop('sign')
         self.enumeration : Enumeration = kwargs.pop('enumeration')
         self.default = kwargs.pop('default')
-
+        self.no_enum = False
         if not self.enumeration:
+            self.no_enum = True
             self.enumeration = Enumeration(tuples=[])
 
         self.sign = ('⊇' if self.sign == '>>' else
@@ -1070,30 +1120,47 @@ class SymbolInterpretation(ASTNode):
             return out
         
 
-    def initialize_temporal_interpretation(self):
-        initialized_interp =SymbolInterpretation(name= UnappliedSymbol(None,SYMBOL(self.name)),sign = self.sign,
-                             enumeration=deepcopy(self.enumeration), default=self.default )
-        tempdc : List[TemporalDeclaration] = self.block.voc.tempdcl
-        for e in initialized_interp.enumeration.tuples:
-            changed = False
-            for t in tempdc:
-                if t.symbol.name == self.name:
-                    changed =True
+    def initialize_temporal_interpretation(self,tempdc):
+        enum = None
+        if not self.no_enum:
+            enum = self.enumeration.init_copy()
+        #tempdc : List[TemporalDeclaration] = self.block.voc.tempdcl
+        changed = False
+        for t in tempdc:
+            if (t.symbol.name == self.name) and enum:
+                tp = []
+                for e in enum.tuples.values():
                     if isinstance(e,FunctionTuple):
                         t_arg = e.args[-2]
                         self.check( type(t_arg) == Number, f"Last argument should be a number for temporal predicates")
-                        if t_arg == Number(number='0'):
-                            e.args.pop(-2)
-                        else:
-                            initialized_interp.enumeration.tuples.popitem(e)
+                        if t_arg.number == '0':
+                            print("inside func tuple")
+                            #2 pop to remove the value and time from arg list
+                            e.args.pop()
+                            e.args.pop()
+                            tp.append(FunctionTuple(args=e.args,value=e.value))
+                            #initialized_interp.enumeration.tuples.pop(str(e))
                     else:
                         t_arg = e.args[-1]
                         self.check( type(t_arg) == Number, f"Last argument should be a number for temporal predicates")
-                        if t_arg == Number(number='0'):
+                        if t_arg.number == '0':
                             e.args.pop()
-                        else:
-                            initialized_interp.enumeration.tuples.popitem(e)
-                    break
+                            tp.append((type(e))(args=e.args))
+                            if len(e.args) == 0:
+                                changed =True
+                          #initialized_interp.enumeration.tuples.pop(str(e))
+                #TO DO : ADD ELSE CASE
+                if not isinstance(enum,ConstructedFrom):
+                    enum = (type(enum))(tuples=tp)
+                break
+        default = None
+        if self.default:
+            default = self.default.init_copy()
+        initialized_interp = SymbolInterpretation(name= UnappliedSymbol(None,SYMBOL(self.name)),sign = self.sign,
+                             enumeration=enum, default=default)
+        if changed:
+            initialized_interp.enumeration = Enumeration(tuples=[])
+            initialized_interp.default = TRUE
             #if not changed:
 
         return initialized_interp
@@ -1126,8 +1193,9 @@ class Enumeration(ASTNode):
         else:
             self.constructors = None
 
-    def __deepcopy__(self):
-        return Enumeration(tuples=deepcopy(self.tuples.values))
+    def init_copy(self):
+        tp = [t.init_copy() for t in self.tuples.values()]
+        return Enumeration(tuples=tp)
 
     def __repr__(self):
         return (f'{{{", ".join([repr(t) for t in self.tuples])}}}' if self.tuples else
@@ -1196,9 +1264,15 @@ class FunctionEnum(Enumeration):
         self.check(False,
                    f"Can't use function enumeration for type declaration or quantification")
         return (None, None)  # dead code
-
+    
+    def init_copy(self):
+        tp = [t.init_copy() for t in self.tuples.values()]
+        return FunctionEnum(tuples=tp)
 
 class CSVEnumeration(Enumeration):
+    def init_copy(self):
+        tp = [t.init_copy() for t in self.tuples.values()]
+        return CSVEnumeration(tuples=tp)
     pass
 
 
@@ -1218,8 +1292,9 @@ class ConstructedFrom(Enumeration):
         self.tuples = None
         self.accessors = dict()
 
-    def __deepcopy__(self):
-        return ConstructedFrom(constructed=deepcopy(self.constructed),constructors=deepcopy(self.constructors))
+    def init_copy(self):
+        cnstr = [c.init_copy() for c in self.constructors]
+        return ConstructedFrom(constructed=self.constructed.init_copy(),constructors=cnstr)
     
     def contains(self, args, function, arity=None, rank=0, tuples=None,
                  interpretations: Optional[dict[str, SymbolInterpretation]] = None,
@@ -1266,8 +1341,9 @@ class TupleIDP(ASTNode):
     def __str__(self):
         return self.code
     
-    def __deepcopy__(self):
-        return TupleIDP(args=deepcopy(self.args))
+    def init_copy(self):
+        a = [i.init_copy() for i in self.args]
+        return TupleIDP(args=a)
 
     def __repr__(self):
         return f"({self.code})" if 1 < len(self.args) else self.code
@@ -1282,12 +1358,15 @@ class FunctionTuple(TupleIDP):
         self.args.append(self.value)
         self.code = intern(",".join([str(a) for a in self.args]))
 
-    def __deepcopy__(self):
-        a = deepcopy(self.args)
+    def init_copy(self):
+        a = [i.init_copy() for i in self.args]
         a.pop()
-        return FunctionTuple(args=a,value=deepcopy(self.value))
+        return FunctionTuple(args=a,value=self.value.init_copy())
 
 class CSVTuple(TupleIDP):
+    def init_copy(self):
+        a = [i.init_copy() for i in self.args]
+        return CSVTuple(args=a)
     pass
 
 
@@ -1326,6 +1405,9 @@ class Ranges(Enumeration):
                 else:
                     self.check(False, f"Incorrect value {x.toI} for {self.type}")
         Enumeration.__init__(self, tuples=tuples)
+
+    def init_copy(self):
+        return super().init_copy()
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
                  interpretations: Optional[dict[str, SymbolInterpretation]] = None,
@@ -1378,6 +1460,11 @@ class IntRange(Ranges):
         Ranges.__init__(self, elements=[])
         self.type = INT
         self.tuples = None
+    def init_copy(self):
+        r = super().init_copy()
+        r.type= INT
+        r.tuples =None
+        return r
 
     def extensionE(self,
                    interpretations: Optional[dict[str, SymbolInterpretation]] = None,
@@ -1405,6 +1492,11 @@ class RealRange(Ranges):
         Ranges.__init__(self, elements=[])
         self.type = REAL
         self.tuples = None
+    def init_copy(self):
+        r = super().init_copy()
+        r.type= REAL
+        r.tuples =None
+        return r
 
     def extensionE(self,
                    interpretations: Optional[dict[str, SymbolInterpretation]] = None,
@@ -1418,6 +1510,12 @@ class DateRange(Ranges):
         Ranges.__init__(self, elements=[])
         self.type = DATE
         self.tuples = None
+    
+    def init_copy(self):
+        r = super().init_copy()
+        r.type= DATE
+        r.tuples =None
+        return r
 
     def extensionE(self,
                    interpretations: Optional[dict[str, SymbolInterpretation]] = None,

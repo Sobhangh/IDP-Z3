@@ -1,7 +1,7 @@
 vocabulary V {
     // here comes the specification of the vocabulary
     type test is {0..5}
-    p: () → Bool
+    p: () -> Bool
     q: Int -> Bool
     Temporal p
 }
