@@ -138,6 +138,8 @@ def annotate_declaration(self: SymbolDeclaration,
     voc.symbol_decls[self.name] = self
     for s in self.domains:
         s.annotate(voc, {})
+        s.check(s.root_set is not None,
+                f"Can't use n-ary {s.name} in a type signature")
     self.codomain.annotate(voc, {})
     self.arity = len([d for d in self.domains if d.root_set is not EMPTY_SETNAME])
 
@@ -183,7 +185,9 @@ def root_set(s: SetName) -> SetName:
         return s
     elif s.decl.arity == 0:
         return EMPTY_SETNAME
-    return root_set(s.decl.domains[0])
+    elif len(s.decl.domains) == 1:
+        return root_set(s.decl.domains[0])
+    return None
 
 def annotate(self: Expression,
              voc: Vocabulary,
@@ -202,6 +206,9 @@ def annotate(self: Expression,
     self.root_set = root_set(self)
     if self.codomain:  # a concept domain
         self.concept_domains = [s.annotate(voc, q_vars) for s in self.concept_domains]
+        for s in self.concept_domains:
+            s.check(s.root_set is not None,
+                    f"Can't use n-ary {s.name} in a type signature")
         self.codomain = self.codomain.annotate(voc, q_vars)
     return self
 SetName.annotate = annotate
