@@ -1122,6 +1122,8 @@ def fill_attributes_and_check(self: AppliedSymbol, type_check=True) -> Expressio
         out.type = out.decl.codomain
     elif type(out.symbol)==SymbolExpr and out.symbol.eval:
         type_ = out.symbol.sub_exprs[0].type
+        out.symbol.check(type_.root_set.name == CONCEPT,
+            f"Concept expected ({type_} found: {out.symbol})")
         if type_.name == CONCEPT:
             out.type = type_.codomain
         else:
