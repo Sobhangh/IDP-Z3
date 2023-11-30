@@ -27,8 +27,8 @@ Traceback (most recent call last):
     c1 = c.annotate(self.voc, {})
          ^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    out = Operator.annotate(self, voc, q_vars)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    self = Operator.annotate(self, voc, q_vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -36,11 +36,11 @@ Traceback (most recent call last):
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
                       ^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    self.WDF = AND([self.WDF]+[is_subset_of(e, e.type, d, voc, q_vars)
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    wdf2 = AND([self.WDF]+[is_subset_of(e, e.type, d)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in <listcomp>
-    self.WDF = AND([self.WDF]+[is_subset_of(e, e.type, d, voc, q_vars)
-                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    wdf2 = AND([self.WDF]+[is_subset_of(e, e.type, d)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in is_subset_of
     e.check(s1.root_set == s2.root_set, msg)  # on different branches
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

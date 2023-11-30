@@ -67,7 +67,7 @@ GOAL_SYMBOL = "goal_symbol"
 RELEVANT = " relevant"  # internal.  Leading space to avoid conflict with user vocabulary
 EXPAND = "expand"
 ABS = "abs"
-RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, CONCEPT,
+RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, CONCEPT, EMPTY,
                     GOAL_SYMBOL, RELEVANT, ABS, ]
 
 DEFAULT = "default"

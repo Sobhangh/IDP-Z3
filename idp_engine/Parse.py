@@ -44,7 +44,7 @@ from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUC
                          TRUE, FALSE, EQUALS, AND, OR,
                          BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
-                    CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
+                    CONCEPT, EMPTY, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     MAX_QUANTIFIER_EXPANSION, Semantics as S, flatten)
 
 if TYPE_CHECKING:
@@ -297,6 +297,7 @@ class Vocabulary(ASTNode):
             TypeDeclaration(self, name=REAL, enumeration=RealRange()),
             TypeDeclaration(self, name=DATE, enumeration=DateRange()),
             TypeDeclaration(self, name=CONCEPT, constructors=[]),
+            TypeDeclaration(self, name=EMPTY, constructors=[]),
             SymbolDeclaration.make(self, name=GOAL_SYMBOL,
                             sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
                             out=SETNAME(BOOL)),

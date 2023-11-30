@@ -85,6 +85,7 @@ def annotate_block(self: ASTNode,
     INT_SETNAME.annotate(self, {})
     REAL_SETNAME.annotate(self, {})
     DATE_SETNAME.annotate(self, {})
+    EMPTY_SETNAME.annotate(self, {})
 
     concepts = self.symbol_decls[CONCEPT]
     concepts.constructors=([CONSTRUCTOR(f"`{s}")
@@ -191,30 +192,37 @@ def root_set(s: SetName) -> SetName:
 
 def is_subset_of(e: Expression,
                  s1: SetName,
-                 s2: SetName,
-                 voc: Vocabulary,
-                 q_vars: dict[str, Variable]
+                 s2: SetName
                  ) -> Expression:
-    """ Returns a formula that is true when e (of type s1) is necessarily in the set s2.
-    Raises an error if the formula is FALSE.
+    """ Returns a formula that is true when Expression e (of type s1) is necessarily in the set s2.
 
     Essentially, it goes up the hierarchy of s1 until s2 is found.
+    It raises an error if the formula is FALSE.
+
+    Special case for partial constants: to check that a constant c() is well-defined,
+    e should be c() and s1 be EMPTY_SETNAME (even though e.type is not EMPTY_SETNAME).
+    This is to show the error at the right place in the editor.
     """
     if s1 == s2:
         return TRUE
     msg = f"Not in domain: {e} (of type {s1.name}) is not in {s2.name}"
     e.check(s1.root_set == s2.root_set, msg)  # on different branches
+    if s1 == EMPTY_SETNAME:  #  --> s2(), i.e., () is in s2
+        symbol = SymbolExpr.make(s2.decl.name)
+        symbol.decl = s2.decl
+        return AppliedSymbol.make(symbol, [])
     if type(s1.decl) == TypeDeclaration:
         # must be two numeric predicates --> s2(e), i.e., e is in s2
         symbol = SymbolExpr.make(s2.decl.name)
-        return AppliedSymbol.make(symbol, [e]).annotate(voc, q_vars)
+        symbol.decl = s2.decl
+        return AppliedSymbol.make(symbol, [e])
     if s1.name == CONCEPT:  # Concept[sig] <: Concept
         e.check(s2.name == CONCEPT and len(s2.concept_domains) == 0, msg)
         return TRUE
     e.check(len(s1.decl.domains) > 0, msg)  # s1 = {()} = s2 = {()}
     # go up the hierarchy
     if len(s1.decl.domains) == 1:  #
-        return is_subset_of(e, s1.decl.domains[0], s2, voc, q_vars)
+        return is_subset_of(e, s1.decl.domains[0], s2)
     s1.check(False, f"can't compare cross-product of sets")
     return FALSE  # dead code for mypy
 
@@ -899,13 +907,15 @@ def annotate(self: AComparison,
              q_vars: dict[str, Variable]
              ) -> Annotated:
 
-    out = Operator.annotate(self, voc, q_vars)
+    self = Operator.annotate(self, voc, q_vars)
+    self.WDF = AND([e.WDF for e in self.sub_exprs if e.WDF])
 
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
         out = NOT(EQUALS(self.sub_exprs)).annotate(voc, q_vars)
+        out.WDF = self.WDF
         return out
-    return out
+    return self
 AComparison.annotate = annotate
 
 def fill_attributes_and_check(self: AppliedSymbol) -> Expression:
@@ -1060,8 +1070,14 @@ def annotate(self: AppliedSymbol,
     if self.symbol.decl:
         self.WDF = TRUE
         if type(self.symbol.decl) != TypeDeclaration:
-            self.WDF = AND([self.WDF]+[is_subset_of(e, e.type, d, voc, q_vars)
+            if self.sub_exprs:
+                wdf2 = AND([self.WDF]+[is_subset_of(e, e.type, d)
                             for e, d in zip(self.sub_exprs, self.symbol.decl.domains)])
+            elif self.symbol.decl.domains:  # partial constant
+                wdf2 = is_subset_of(self, EMPTY_SETNAME, self.symbol.decl.domains[0])
+            else:  # constant c()
+                wdf2 = TRUE
+            self.WDF = AND([self.WDF, wdf2])
         self.WDF.original = self
     else:
         self.WDF = None
