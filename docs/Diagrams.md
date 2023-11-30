@@ -1,11 +1,11 @@
 
 ---
-Datamodels
+Datamodel
 ---
 
-For typing:
+Datamodel for type checking:
 
-```mermaid
+```{mermaid}
 erDiagram
     Declaration |o--o{ SetName : domains
     Declaration |o--|| SetName: codomain
