@@ -500,6 +500,9 @@ class Expression(ASTNode):
     def get_type(self):
         return self.type
 
+    def fill_WDF(self) -> None:
+        raise IDPZ3Error("Internal error") # monkey-patched
+
 
 class Constructor(ASTNode):
     """Constructor declaration

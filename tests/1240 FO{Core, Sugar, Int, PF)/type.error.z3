@@ -27,8 +27,8 @@ Traceback (most recent call last):
     c1 = c.annotate(self.voc, {})
          ^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    self = Operator.annotate(self, voc, q_vars)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    out = Operator.annotate(self, voc, q_vars)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -36,15 +36,11 @@ Traceback (most recent call last):
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
                       ^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    wdf2 = AND([self.WDF]+[is_subset_of(e, e.type, d)
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in <listcomp>
-    wdf2 = AND([self.WDF]+[is_subset_of(e, e.type, d)
-                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in is_subset_of
-    e.check(s1.root_set == s2.root_set, msg)  # on different branches
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    out = self.fill_attributes_and_check()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in fill_attributes_and_check
+    e.check(e.type.root_set == s.root_set,
   File "idp_engine/Expression.py", line ??, in check
     raise IDPZ3Error(msg, self)
-idp_engine.utils.IDPZ3Error: Error: line 8 - colStart 14 - colEnd 17 => Not in domain: red (of type Color) is not in animal
+idp_engine.utils.IDPZ3Error: Error: line 8 - colStart 14 - colEnd 17 => LivingBeing expected (Color found: red)
 

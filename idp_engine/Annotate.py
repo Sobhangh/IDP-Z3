@@ -189,41 +189,6 @@ def root_set(s: SetName) -> SetName:
         return root_set(s.decl.domains[0])
     return None
 
-def is_subset_of(e: Expression,
-                 s1: SetName,
-                 s2: SetName
-                 ) -> Expression:
-    """ Returns a formula that is true when Expression e (of type s1) is necessarily in the set s2.
-
-    Essentially, it goes up the hierarchy of s1 until s2 is found.
-    It raises an error if the formula is FALSE.
-
-    Special case for partial constants: to check that a constant c() is well-defined,
-    e should be c() and s1 be EMPTY_SETNAME (even though e.type is not EMPTY_SETNAME).
-    This is to show the error at the right place in the editor.
-    """
-    if s1 == s2:
-        return TRUE
-    msg = f"Not in domain: {e} (of type {s1.name}) is not in {s2.name}"
-    e.check(s1.root_set == s2.root_set, msg)  # on different branches
-    if s1 == EMPTY_SETNAME:  #  --> s2(), i.e., () is in s2
-        symbol = SymbolExpr.make(s2.decl)
-        return AppliedSymbol.make(symbol, [])
-    if type(s1.decl) == TypeDeclaration:
-        # must be two numeric predicates --> s2(e), i.e., e is in s2
-        symbol = SymbolExpr.make(s2.decl)
-        return AppliedSymbol.make(symbol, [e])
-    if s1.name == CONCEPT:  # Concept[sig] <: Concept
-        e.check(s2.name == CONCEPT and len(s2.concept_domains) == 0, msg)
-        return TRUE
-    e.check(len(s1.decl.domains) > 0, msg)  # s1 = {()} = s2 = {()}
-    # go up the hierarchy
-    if len(s1.decl.domains) == 1:  #
-        return is_subset_of(e, s1.decl.domains[0], s2)
-    s1.check(False, f"can't compare cross-product of sets")
-    return FALSE  # dead code for mypy
-
-
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
@@ -272,6 +237,7 @@ def annotate_block(self: ASTNode,
         c1 = c.annotate(self.voc, {})
         c1.check(c1.type == BOOL_SETNAME,
                     f"Formula {c.code} must be boolean, not {c1.type}")
+        c1.fill_WDF()
         if c1.WDF and not c1.WDF.same_as(TRUE):
             out.append(IDPZ3Error(f"Domain error: {c1.code[:20]} is defined only when {c1.WDF}",
                                   node=c, error=False))
@@ -904,15 +870,13 @@ def annotate(self: AComparison,
              q_vars: dict[str, Variable]
              ) -> Annotated:
 
-    self = Operator.annotate(self, voc, q_vars)
-    self.WDF = AND([e.WDF for e in self.sub_exprs if e.WDF])
+    out = Operator.annotate(self, voc, q_vars)
 
     # a≠b --> Not(a=b)
     if len(self.sub_exprs) == 2 and self.operator == ['≠']:
         out = NOT(EQUALS(self.sub_exprs)).annotate(voc, q_vars)
-        out.WDF = self.WDF
         return out
-    return self
+    return out
 AComparison.annotate = annotate
 
 def fill_attributes_and_check(self: AppliedSymbol) -> Expression:
@@ -1049,36 +1013,22 @@ def annotate(self: AppliedSymbol,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    # move the negation out
-    if 'not' in self.is_enumerated:
-        out = AppliedSymbol.make(out.symbol, out.sub_exprs,
-                                 is_enumerated='is enumerated')
-        return NOT(out).annotate(voc, q_vars)
-    elif 'not' in self.is_enumeration:
-        out = AppliedSymbol.make(out.symbol, out.sub_exprs,
-                                 is_enumeration='in',
-                                 in_enumeration=out.in_enumeration)
-        return NOT(out).annotate(voc, q_vars)
-
     self.symbol = self.symbol.annotate(voc, q_vars)
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc, q_vars)
-    if self.symbol.decl:
-        self.WDF = TRUE
-        if type(self.symbol.decl) != TypeDeclaration:
-            if self.sub_exprs:
-                wdf2 = AND([self.WDF]+[is_subset_of(e, e.type, d)
-                            for e, d in zip(self.sub_exprs, self.symbol.decl.domains)])
-            elif self.symbol.decl.domains:  # partial constant
-                wdf2 = is_subset_of(self, EMPTY_SETNAME, self.symbol.decl.domains[0])
-            else:  # constant c()
-                wdf2 = TRUE
-            self.WDF = AND([self.WDF, wdf2])
-        self.WDF.original = self
-    else:
-        self.WDF = None
     out = self.fill_attributes_and_check()
+
+    # move the negation out
+    if 'not' in self.is_enumerated:
+        out = AppliedSymbol.make(out.symbol, out.sub_exprs,
+                                 is_enumerated='is enumerated')
+        out = NOT(out)
+    elif 'not' in self.is_enumeration:
+        out = AppliedSymbol.make(out.symbol, out.sub_exprs,
+                                 is_enumeration='in',
+                                 in_enumeration=out.in_enumeration)
+        out = NOT(out)
     return out
 AppliedSymbol.annotate = annotate
 
