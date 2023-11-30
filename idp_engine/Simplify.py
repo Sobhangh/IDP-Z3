@@ -425,8 +425,7 @@ def update_exprs(self: SymbolExpr,
         if type(symbol) == UnappliedSymbol and symbol.decl:
             assert type(symbol.decl) == Constructor, "Internal error"
             concept_decl = symbol.decl.concept_decl
-            out = SymbolExpr.make(name=concept_decl.name)
-            out.decl = concept_decl
+            out = SymbolExpr.make(concept_decl)
             out.variables = set()
             return out
         else:

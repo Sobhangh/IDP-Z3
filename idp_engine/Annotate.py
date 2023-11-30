@@ -148,8 +148,7 @@ def annotate_declaration(self: SymbolDeclaration,
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
                    f"`Concept` must be qualified with a type signature in {self}")
 
-    self.symbol_expr = SymbolExpr.make(self.name)
-    self.symbol_expr.decl = self
+    self.symbol_expr = SymbolExpr.make(self)
     return self
 SymbolDeclaration.annotate_declaration = annotate_declaration
 
@@ -208,13 +207,11 @@ def is_subset_of(e: Expression,
     msg = f"Not in domain: {e} (of type {s1.name}) is not in {s2.name}"
     e.check(s1.root_set == s2.root_set, msg)  # on different branches
     if s1 == EMPTY_SETNAME:  #  --> s2(), i.e., () is in s2
-        symbol = SymbolExpr.make(s2.decl.name)
-        symbol.decl = s2.decl
+        symbol = SymbolExpr.make(s2.decl)
         return AppliedSymbol.make(symbol, [])
     if type(s1.decl) == TypeDeclaration:
         # must be two numeric predicates --> s2(e), i.e., e is in s2
-        symbol = SymbolExpr.make(s2.decl.name)
-        symbol.decl = s2.decl
+        symbol = SymbolExpr.make(s2.decl)
         return AppliedSymbol.make(symbol, [e])
     if s1.name == CONCEPT:  # Concept[sig] <: Concept
         e.check(s2.name == CONCEPT and len(s2.concept_domains) == 0, msg)

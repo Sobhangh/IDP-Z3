@@ -308,8 +308,7 @@ class Theory(object):
                 symbol = t.args[0]
                 decl = self.declarations[symbol.name[1:]]
                 assert decl.instances, f"goal {decl.name} must be instantiable."
-                relevant = SymbolExpr.make(RELEVANT)
-                relevant.decl = self.declarations[RELEVANT]
+                relevant = SymbolExpr.make(self.declarations[RELEVANT])
                 for i in decl.instances.values():
                     constraint = AppliedSymbol.make(relevant, [i], type_check=False)
                     self.constraints.append(constraint)

@@ -1164,7 +1164,7 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def construct(cls, constructor, args):
-        out= cls.make(SymbolExpr.make(constructor.name), args)
+        out= cls.make(SymbolExpr.make(constructor), args)
         out.decl = constructor
         out.type = constructor.codomain
         out.variables = set()
@@ -1269,8 +1269,10 @@ class SymbolExpr(Expression):
         super().__init__()
 
     @classmethod
-    def make(cls, name: str) -> SymbolExpr:
-        return (cls)(None, name, None, None)
+    def make(cls, decl: Declaration) -> SymbolExpr:
+        out = (cls)(None, decl.name, None, None)
+        out.decl = decl
+        return out
 
     def __str__(self):
         return (f"$({self.sub_exprs[0]})" if self.eval else
