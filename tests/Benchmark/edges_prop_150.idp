@@ -1,10 +1,9 @@
 vocabulary V {
-    type Node
+    type Node := {1..150}
     edge: Node * Node -> Bool
 }
 
 structure S  {
-    Node := {1..150}.
 }
 
 theory T:V  {
