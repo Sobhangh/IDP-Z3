@@ -38,10 +38,10 @@ from .Expression import (ASTNode, Expression, SETNAME, SetName,
                          Operator, AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Variable,
                          VARIABLE, Brackets, SymbolExpr, Number, NOT,
-                         EQUALS, AND, OR, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
+                         EQUALS, AND, OR, TRUE, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-                    OrderedSet, Semantics)
+                    OrderedSet, Semantics, IDPZ3Error)
 
 Exceptions = Union[Exception, List["Exceptions"]]  # nested list of Exceptions
 
@@ -189,6 +189,36 @@ def root_set(s: SetName) -> SetName:
         return root_set(s.decl.domains[0])
     return None
 
+def is_subset_of(e: Expression,
+                 s1: SetName,
+                 s2: SetName,
+                 voc: Vocabulary,
+                 q_vars: dict[str, Variable]
+                 ) -> Expression:
+    """ Returns a formula that is true when e (of type s1) is necessarily in the set s2.
+    Raises an error if the formula is FALSE.
+
+    Essentially, it goes up the hierarchy of s1 until s2 is found.
+    """
+    if s1 == s2:
+        return TRUE
+    msg = f"Not in domain: {e} (of type {s1.name}) is not in {s2.name}"
+    e.check(s1.root_set == s2.root_set, msg)  # on different branches
+    if type(s1.decl) == TypeDeclaration:
+        # must be two numeric predicates --> s2(e), i.e., e is in s2
+        symbol = SymbolExpr.make(s2.decl.name)
+        return AppliedSymbol.make(symbol, [e]).annotate(voc, q_vars)
+    if s1.name == CONCEPT:  # Concept[sig] <: Concept
+        e.check(s2.name == CONCEPT and len(s2.concept_domains) == 0, msg)
+        return TRUE
+    e.check(len(s1.decl.domains) > 0, msg)  # s1 = {()} = s2 = {()}
+    # go up the hierarchy
+    if len(s1.decl.domains) == 1:  #
+        return is_subset_of(e, s1.decl.domains[0], s2, voc, q_vars)
+    s1.check(False, f"can't compare cross-product of sets")
+    return FALSE  # dead code for mypy
+
+
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
@@ -237,6 +267,9 @@ def annotate_block(self: ASTNode,
         c1 = c.annotate(self.voc, {})
         c1.check(c1.type == BOOL_SETNAME,
                     f"Formula {c.code} must be boolean, not {c1.type}")
+        if c1.WDF and not c1.WDF.same_as(TRUE):
+            out.append(IDPZ3Error(f"Domain error: {c1.code[:20]} is defined only when {c1.WDF}",
+                                  node=c, error=False))
         constraints.append(c1)
     self.constraints = constraints
     return out
@@ -1009,22 +1042,30 @@ def annotate(self: AppliedSymbol,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    self.symbol = self.symbol.annotate(voc, q_vars)
-    self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-    if self.in_enumeration:
-        self.in_enumeration.annotate(voc, q_vars)
-    out = self.fill_attributes_and_check()
-
     # move the negation out
     if 'not' in self.is_enumerated:
         out = AppliedSymbol.make(out.symbol, out.sub_exprs,
                                  is_enumerated='is enumerated')
-        out = NOT(out)
+        return NOT(out).annotate(voc, q_vars)
     elif 'not' in self.is_enumeration:
         out = AppliedSymbol.make(out.symbol, out.sub_exprs,
                                  is_enumeration='in',
                                  in_enumeration=out.in_enumeration)
-        out = NOT(out)
+        return NOT(out).annotate(voc, q_vars)
+
+    self.symbol = self.symbol.annotate(voc, q_vars)
+    self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
+    if self.in_enumeration:
+        self.in_enumeration.annotate(voc, q_vars)
+    if self.symbol.decl:
+        self.WDF = TRUE
+        if type(self.symbol.decl) != TypeDeclaration:
+            self.WDF = AND([self.WDF]+[is_subset_of(e, e.type, d, voc, q_vars)
+                            for e, d in zip(self.sub_exprs, self.symbol.decl.domains)])
+        self.WDF.original = self
+    else:
+        self.WDF = None
+    out = self.fill_attributes_and_check()
     return out
 AppliedSymbol.annotate = annotate
 

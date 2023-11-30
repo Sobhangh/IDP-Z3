@@ -217,6 +217,9 @@ class Expression(ASTNode):
         is_type_constraint_for (string):
             name of the symbol for which the expression is a type constraint
 
+        WDF (Expression, optional):
+            a formula that is true only when `self` is well-defined (for partial functions)
+
     """
 
 
@@ -237,6 +240,7 @@ class Expression(ASTNode):
         self.type: Optional[SetName] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional[Expression] = None
+        self.WDF: Optional[Expression] = None
 
         # attributes of the top node of a (co-)constraint
         self.questions: Optional[OrderedSet] = None
@@ -251,6 +255,7 @@ class Expression(ASTNode):
         out.sub_exprs = [deepcopy(e, memo) for e in self.sub_exprs]
         out.variables = deepcopy(self.variables, memo)
         out.co_constraint = deepcopy(self.co_constraint, memo)
+        out.WDF = None  # do not copy WDF
         out.questions = deepcopy(self.questions, memo)
         return out
 

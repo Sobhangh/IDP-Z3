@@ -36,11 +36,15 @@ Traceback (most recent call last):
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
                       ^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    out = self.fill_attributes_and_check()
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Annotate.py", line ??, in fill_attributes_and_check
-    e.check(e.type.root_set == s.root_set,
+    self.WDF = AND([self.WDF]+[is_subset_of(e, e.type, d, voc, q_vars)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in <listcomp>
+    self.WDF = AND([self.WDF]+[is_subset_of(e, e.type, d, voc, q_vars)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in is_subset_of
+    e.check(s1.root_set == s2.root_set, msg)  # on different branches
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Expression.py", line ??, in check
     raise IDPZ3Error(msg, self)
-idp_engine.utils.IDPZ3Error: Error: line 8 - colStart 14 - colEnd 17 => LivingBeing expected (Color found: red)
+idp_engine.utils.IDPZ3Error: Error: line 8 - colStart 14 - colEnd 17 => Not in domain: red (of type Color) is not in animal
 
