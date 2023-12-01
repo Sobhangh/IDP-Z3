@@ -59,6 +59,8 @@ def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
     solver.add(z3_formula)
     return str(solver.check())
 
+def initialize(theory:TheoryBlock,struct:Structure):
+    return model_expand(theory.init_theory,struct.init_struct)
 
 def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
                  max: int = 10,
@@ -305,6 +307,7 @@ def execute(self: IDP) -> None:
     mylocals['Theory'] = Theory
     mylocals['time'] = time
     mylocals['duration'] = duration
+    mylocals['initialize'] = initialize
 
     try:
         exec(main, mybuiltins, mylocals)

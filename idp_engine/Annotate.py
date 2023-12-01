@@ -76,6 +76,7 @@ def annotate(self, idp):
     # annotate declarations
     for s in self.declarations:
         s.annotate(self)  # updates self.symbol_decls
+    print("decl annotate")
 
     concepts = self.symbol_decls[CONCEPT]
     for constructor in concepts.constructors:
@@ -238,6 +239,7 @@ def annotate_init_theory(theory:TheoryBlock,idp):
     if theory.ltc and theory.init_theory:
         voc = idp.now_voc[theory.init_theory.vocab_name]
         theory.init_theory.voc = voc
+        
         for i in theory.interpretations.values():
             r = i.initialize_temporal_interpretation(idp.vocabularies[theory.vocab_name].tempdcl)
             theory.init_theory.interpretations[r.name] = r
@@ -503,10 +505,24 @@ def annotate(self, idp):
     self.check(self.vocab_name in idp.vocabularies,
                f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
+    annotate_init_structure(self,idp)
+    print("init struct ann ....")
     for i in self.interpretations.values():
         i.annotate(self)
     self.voc.add_voc_to_block(self)
 Structure.annotate = annotate
+
+def annotate_init_structure(s,idp):
+    vocab_name = s.vocab_name+'_now'
+    name = s.name+'now'
+    voc = idp.now_voc[s.vocab_name+'_now']
+    s.init_struct = Structure(name=name,vocab_name=vocab_name,interpretations={})
+    s.init_struct.voc = voc
+    for i in s.interpretations.values():
+        r = i.initialize_temporal_interpretation(idp.vocabularies[s.vocab_name].tempdcl)
+        s.init_struct.interpretations[r.name] = r
+        r.annotate(s.init_struct)
+    voc.add_voc_to_block(s.init_struct)
 
 
 # Class SymbolInterpretation  #######################################################

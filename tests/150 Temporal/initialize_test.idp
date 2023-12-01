@@ -1,0 +1,35 @@
+vocabulary V {
+    type test is {0..5}
+    p: () -> Bool
+    q: () -> Bool 
+    r: () -> Int
+    ai: (test) -> Bool
+    te: Int -> Bool
+
+    Temporal p
+    Temporal r
+    Temporal ai
+}
+
+theory LTC T:V {
+    {
+        !i in test: Now[ai(i)] <- i > 0 and i < 10 and Now[p()].
+    }
+    {
+        !i in Int: te(i) <- i > 0 and i < 10.
+    }
+
+}
+
+structure S:V {
+    // Check if the partial assignment of structure works with temporal predicate
+    q := true.
+    p := {0,1,2}.
+    r := {0->1,2->4,3->5}.
+    //ai := {(0,0),(1,0),(1,1),(2,5)}.
+}
+
+procedure main () {
+    //print(Theory(T).formula())
+    pretty_print(initialize(T,S))
+}

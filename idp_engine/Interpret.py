@@ -81,11 +81,11 @@ def interpret(self: TypeDeclaration, problem: Theory):
         if self.constructors is not None:
             for c in self.constructors:
                 c.interpret(problem)
-
+        
         # update problem.extensions
         ext = enum.extensionE(problem.interpretations, problem.extensions)
         problem.extensions[self.name] = ext
-
+        
         # needed ?
         # if (isinstance(self.interpretation.enumeration, Ranges)
         # and self.interpretation.enumeration.tuples):

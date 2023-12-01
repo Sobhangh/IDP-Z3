@@ -150,7 +150,7 @@ class Theory(object):
         self.z3: dict[str, ExprRef] = {}
         self.ctx: Context = Context()
         self.add(*theories)
-
+        
         self.previous_assignments: Assignments = Assignments()
 
         self.satisfied: bool = True
@@ -242,21 +242,20 @@ class Theory(object):
         for block in theories:
             self.z3 = {}
             self._formula = None  # need to reapply the definitions
-
             for name, decl in block.declarations.items():
                 assert (name not in self.declarations
                         or self.declarations[name] == block.declarations[name]
                         or name in RESERVED_SYMBOLS), \
                         f"Can't add declaration for {name} in {block.name}: duplicate"
                 self.declarations[name] = decl
-
+            
             # reset the interpretations of TypeDeclaration
             for decl in self.declarations.values():
                 if type(decl) == TypeDeclaration:
                     decl.interpretation = (  #TODO side-effects ? issue #81
                         None if decl.name not in [INT, REAL, DATE, CONCEPT] else
                         decl.interpretation)
-
+            
             # process block.interpretations
             for name, interpret in block.interpretations.items():
                 assert (name not in self.interpretations
@@ -264,14 +263,14 @@ class Theory(object):
                         or self.interpretations[name] == block.interpretations[name]), \
                         f"Can't add enumeration for {name} in {block.name}: duplicate"
                 self.interpretations[name] = interpret
-
+            
             if isinstance(block, TheoryBlock) or isinstance(block, Theory):
                 self.co_constraints = None
                 self.definitions += block.definitions
                 self.constraints.extend(deepcopy(v) for v in block.constraints)
                 self.def_constraints.update(
                     {k:deepcopy(v) for k,v in block.def_constraints.items()})
-
+        
         ### apply the enumerations and definitions
         self.assignments = Assignments()
         self.extensions = {}  # reset the cache
@@ -279,7 +278,7 @@ class Theory(object):
         # Create a set of all the symbols which are defined in the theory.
         def_vars = [definition.def_vars.keys() for definition in self.definitions]
         defined_symbols = {x: x for sublist in def_vars for x in sublist}
-
+        
         # Interpret the vocabulary in two steps:
         # 1. First, interpret all symbol declarations for symbols that are not
         #   included in definitions.
@@ -290,6 +289,7 @@ class Theory(object):
         for symbol, decl in self.declarations.items():
             if symbol not in defined_symbols:
                 decl.interpret(self)
+
         # Then, interpret defined symbols.
         for symbol in defined_symbols:
             self.declarations[symbol].interpret(self)
@@ -298,7 +298,7 @@ class Theory(object):
             if not(type(v) == AppliedSymbol
                    and v.decl is not None
                    and v.decl.name == RELEVANT)])
-
+        
         # expand goal_symbol
         symbol_interpretation = self.interpretations.get(GOAL_SYMBOL, None)
         if symbol_interpretation:
@@ -311,12 +311,12 @@ class Theory(object):
                 for i in decl.instances.values():
                     constraint = AppliedSymbol.make(relevant, [i])
                     self.constraints.append(constraint)
-
+        
         # expand whole-domain definitions
         for i, defin in enumerate(self.definitions):
             defin.id = i
             defin.interpret(self)
-
+       
         # initialize assignments, co_constraints, questions
 
         self.co_constraints, questions = OrderedSet(), OrderedSet()
@@ -332,11 +332,11 @@ class Theory(object):
                 e.collect_co_constraints(self.co_constraints)
         self.co_constraints = OrderedSet([c.interpret(self, {})
                                           for c in self.co_constraints])
-
+        
         for s in list(questions.values()):
             if s.code not in self.assignments:
                 self.assignments.assert__(s, None, S.UNKNOWN)
-
+        
         self._constraintz = None
         return self
 

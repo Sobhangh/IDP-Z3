@@ -198,30 +198,43 @@ class IDP(ASTNode):
         self.display = displays[0] if len(displays) == 1 else None
         self.now_voc = {}
         self.next_voc = {}
+        init_thrs ={}
+        init_strcs ={}
         for voc in self.vocabularies.values():
             now_voc:Vocabulary = voc.generate_now_voc()
+            print("now voc")
             self.now_voc[now_voc.name]=now_voc
             now_voc.annotate(self)
+            print("annotate")
             
             next_voc = voc.generate_next_voc()
-            next_voc.annotate(self)
             self.next_voc[next_voc.name]=next_voc
+            next_voc.annotate(self)
 
             voc.annotate(self)
         for t in self.theories.values():
             if t.ltc:
                 t.initialize_theory()
+                init_thrs[t.init_theory.name] = t.init_theory
             t.annotate(self)
         for struct in self.structures.values():
             struct.annotate(self)
+            init_strcs[struct.init_struct.name] = struct.init_struct
             #TO DO : ADD STRUCTURE INITIALIZATION
+        for now_voc in self.now_voc.values():
+            self.vocabularies[now_voc.name] = now_voc
+        for next_voc in self.next_voc.values():
+            self.vocabularies[next_voc.name] = next_voc
+        for t in init_thrs.values():
+            self.theories[t.name] = t
+        for s in init_strcs.values():
+            self.structures[s.name] = s
 
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
         self.theory = next(iter(self.theories    .values()))
         if self.display is None:
             self.display = Display(constraints=[], interpretations=[])
-
     @classmethod
     def from_file(cls, file:str) -> "IDP":
         """parse an IDP program from file
@@ -406,10 +419,13 @@ class Vocabulary(ASTNode):
                         #    enum = d.interpretation.enumeration.init_copy()
                         enum = d.interpretation.enumeration.init_copy()
                     cnstr = [c.init_copy() for c in d.constructors]
-                    nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=cnstr,enumeration=enum))
+                    if len(cnstr) ==0:
+                        nowvoc.declarations.append(TypeDeclaration(name=d.name,enumeration=enum))
+                    else:
+                        nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=cnstr,enumeration=enum))
                 else:
                     #without deepcopy
-                    nowvoc.declarations.append(d)
+                    nowvoc.declarations.append(d.init_copy())
         return nowvoc
     
     def generate_next_voc(self):
@@ -446,7 +462,10 @@ class Vocabulary(ASTNode):
                         #    enum = d.interpretation.enumeration.init_copy()
                         enum = d.interpretation.enumeration.init_copy()
                     cnstr = [c.init_copy() for c in d.constructors]
-                    nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=cnstr,enumeration=enum))
+                    if len(cnstr) ==0:
+                        nowvoc.declarations.append(TypeDeclaration(name=d.name,enumeration=enum))
+                    else:
+                        nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=cnstr,enumeration=enum))
                 else:
                     #without deepcopy
                     nowvoc.declarations.append(d)
@@ -776,7 +795,7 @@ class TheoryBlock(ASTNode):
         return self.name
     
     def initialize_theory(self):
-        self.init_theory = TheoryBlock(name=self.name,vocab_name=self.vocab_name+'_now',ltc = None,
+        self.init_theory = TheoryBlock(name=self.name+'_now',vocab_name=self.vocab_name+'_now',ltc = None,
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
@@ -819,13 +838,13 @@ class TheoryBlock(ASTNode):
         i = 0
         for e in expression.sub_exprs:
             if isinstance(e, (StartAppliedSymbol,NowAppliedSymbol) ):
-                expression.sub_expr[i] = e.sub_expr
+                expression.sub_exprs[i] = e.sub_expr
             elif isinstance(e, NextAppliedSymbol):
                 return False
             elif isinstance(e,(AppliedSymbol,UnappliedSymbol)):
                 return 
             else:
-                r = self.init_subexpr(e)
+                r = self.init_subexpr2(e)
                 if r == False:
                     return False
             i+=1
@@ -1009,6 +1028,7 @@ class Structure(ASTNode):
         self.voc = None
         self.declarations = {}
         self.assignments = Assignments()
+        self.init_struct : Structure= None
 
     def __str__(self):
         return self.name
@@ -1134,7 +1154,6 @@ class SymbolInterpretation(ASTNode):
                         t_arg = e.args[-2]
                         self.check( type(t_arg) == Number, f"Last argument should be a number for temporal predicates")
                         if t_arg.number == '0':
-                            print("inside func tuple")
                             #2 pop to remove the value and time from arg list
                             e.args.pop()
                             e.args.pop()
@@ -1151,7 +1170,11 @@ class SymbolInterpretation(ASTNode):
                           #initialized_interp.enumeration.tuples.pop(str(e))
                 #TO DO : ADD ELSE CASE
                 if not isinstance(enum,ConstructedFrom):
-                    enum = (type(enum))(tuples=tp)
+                    if isinstance(enum,Ranges):
+                        #TO DO how is it possible to return Range type
+                        enum = Enumeration(tuples=tp)
+                    else:
+                        enum = (type(enum))(tuples=tp)
                 break
         default = None
         if self.default:
@@ -1407,7 +1430,8 @@ class Ranges(Enumeration):
         Enumeration.__init__(self, tuples=tuples)
 
     def init_copy(self):
-        return super().init_copy()
+        el = [copy(e) for e in self.elements]
+        return Ranges(elements=el)
 
     def contains(self, args, function, arity=None, rank=0, tuples=None,
                  interpretations: Optional[dict[str, SymbolInterpretation]] = None,
@@ -1460,6 +1484,7 @@ class IntRange(Ranges):
         Ranges.__init__(self, elements=[])
         self.type = INT
         self.tuples = None
+
     def init_copy(self):
         r = super().init_copy()
         r.type= INT
