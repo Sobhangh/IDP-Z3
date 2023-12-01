@@ -216,6 +216,21 @@ SetName.annotate = annotate
 
 # Class TheoryBlock  #######################################################
 
+def collect_warnings(expr: Expression, out):
+    """recursively finds the deepest AppliedSymbol(s) that is not well-defined in expr,
+    and create a warning"""
+    if not expr.WDF or expr.WDF.same_as(TRUE):  # well-defined
+        return
+    for e in expr.sub_exprs:  # recursive search
+        collect_warnings(e, out)
+
+    # AppliedSymbol whose arguments are well-defined
+    if (type(expr) == AppliedSymbol
+    and all(not e.WDF or e.WDF.same_as(TRUE) for e in expr.sub_exprs)):
+        out.append(IDPZ3Error(
+            f"Domain error: {expr.code[:20]} is defined only when {expr.WDF}",
+            node=expr, error=False))
+
 def annotate_block(self: ASTNode,
                    idp: IDP,
                    ) -> Exceptions:
@@ -238,8 +253,7 @@ def annotate_block(self: ASTNode,
         c1.check(c1.type == BOOL_SETNAME,
                     f"Formula {c.code} must be boolean, not {c1.type}")
         if c1.WDF and not c1.WDF.same_as(TRUE):
-            out.append(IDPZ3Error(f"Domain error: {c1.code[:20]} is defined only when {c1.WDF}",
-                                  node=c, error=False))
+            collect_warnings(c1, out)
         constraints.append(c1)
     self.constraints = constraints
     return out
