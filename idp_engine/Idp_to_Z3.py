@@ -355,17 +355,21 @@ def translate1(self, problem: Theory, vars={}) -> ExprRef:
                 f"Incorrect number of arguments for {self}")
     if len(self.sub_exprs) == 0:
         return self.decl.translate(problem)
+    elif type(self.symbol.decl) == TypeDeclaration:
+        self.check(self.sub_exprs[0].type in [INT_SETNAME, REAL_SETNAME, DATE_SETNAME],
+                   f"Expecting a number ({self.type} found: {self.code})")
+        return self.sub_exprs[0].type.has_element(self.sub_exprs[0], problem.extensions).translate(problem)
     else:
         arg = [x.translate(problem, vars) for x in self.sub_exprs]
         # assert  all(a != None for a in arg)
         try:
             return (self.decl.translate(problem))(arg)
-        except:
+        except Exception as e:
             if self.original.code.startswith('$'):
                 msg = f"$()() expression is not properly guarded: {self.original.code}"
             else:
                 msg = f"Incorrect symbol application: {self}"
-            self.check(False, msg)
+            self.check(False, f"{msg} ({str(e)})")
 AppliedSymbol.translate1 = translate1
 
 def reified(self, problem: Theory, vars={}) -> DatatypeRef:

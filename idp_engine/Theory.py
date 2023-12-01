@@ -556,7 +556,7 @@ class Theory(object):
         Args:
             solver (Z3 solver): the solver to add the assignments to
         """
-        assignment_forms = [a.formula().translate(self) for a in
+        assignment_forms = [a.translate(self) for a in
                             self.assignments.values()
                             if a.value is not None
                             and a.status in [S.GIVEN, S.EXPANDED, S.DEFAULT]]
