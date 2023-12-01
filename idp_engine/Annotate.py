@@ -237,7 +237,6 @@ def annotate_block(self: ASTNode,
         c1 = c.annotate(self.voc, {})
         c1.check(c1.type == BOOL_SETNAME,
                     f"Formula {c.code} must be boolean, not {c1.type}")
-        c1.fill_WDF()
         if c1.WDF and not c1.WDF.same_as(TRUE):
             out.append(IDPZ3Error(f"Domain error: {c1.code[:20]} is defined only when {c1.WDF}",
                                   node=c, error=False))
@@ -655,7 +654,9 @@ def annotate(self: Expression,
         Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-    return self.fill_attributes_and_check()
+    self = self.fill_attributes_and_check()
+    self.merge_WDFs([e.WDF if e.WDF else TRUE for e in self.sub_exprs])
+    return self
 Expression.annotate = annotate
 
 
@@ -1018,6 +1019,7 @@ def annotate(self: AppliedSymbol,
     if self.in_enumeration:
         self.in_enumeration.annotate(voc, q_vars)
     out = self.fill_attributes_and_check()
+    self.merge_WDFs([e.WDF if e.WDF else TRUE for e in self.sub_exprs])
 
     # move the negation out
     if 'not' in self.is_enumerated:

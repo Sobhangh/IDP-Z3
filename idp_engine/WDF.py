@@ -20,6 +20,7 @@ Methods to compute the Well-definedness condition of an Expression.
 
 """
 from __future__ import annotations
+from typing import List
 
 from .Parse import TypeDeclaration
 from .Expression import (ASTNode, Expression, SETNAME, SetName,
@@ -75,17 +76,19 @@ def is_subset_of(e: Expression,
 def fill_WDF(self):
     for e in self.sub_exprs:
         e.fill_WDF()
-    self.WDF = AND([e.WDF if e.WDF else TRUE for e in self.sub_exprs])
+    self.merge_WDFs([e.WDF if e.WDF else TRUE for e in self.sub_exprs])
 Expression.fill_WDF = fill_WDF
+
+def merge_WDFs(self, wdfs: List[Expression]):
+    self.WDF = AND(wdfs)
+Expression.merge_WDFs = merge_WDFs
 
 
 # Class AppliedSymbol  #######################################################
 
-def fill_WDF(self):
-    self.WDF = AND([e.WDF for e in self.sub_exprs if e.WDF])
-
+def merge_WDFs(self, wdfs: List[Expression]):
     if self.symbol.decl:
-        self.WDF = TRUE
+        self.WDF = AND(wdfs)
         if type(self.symbol.decl) != TypeDeclaration:
             if self.sub_exprs:
                 wdf2 = AND([self.WDF]+[is_subset_of(e, e.type, d)
@@ -97,8 +100,8 @@ def fill_WDF(self):
             self.WDF = AND([self.WDF, wdf2])
         self.WDF.original = self
     else:
-        self.WDF = None
-AppliedSymbol.fill_WDF = fill_WDF
+        self.WDF = AND(wdfs)
+AppliedSymbol.merge_WDFs = merge_WDFs
 
 
 

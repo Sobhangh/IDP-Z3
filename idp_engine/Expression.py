@@ -503,6 +503,9 @@ class Expression(ASTNode):
     def fill_WDF(self) -> None:
         raise IDPZ3Error("Internal error") # monkey-patched
 
+    def merge_WDFs(self, wdfs: List[Expression]) -> None:
+        raise IDPZ3Error("Internal error") # monkey-patched
+
 
 class Constructor(ASTNode):
     """Constructor declaration
