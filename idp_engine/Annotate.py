@@ -669,7 +669,7 @@ def annotate(self: Expression,
     """
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     self = self.fill_attributes_and_check()
-    self.merge_WDFs([e.WDF if e.WDF else TRUE for e in self.sub_exprs])
+    self.merge_WDFs()
     return self
 Expression.annotate = annotate
 
@@ -1033,7 +1033,7 @@ def annotate(self: AppliedSymbol,
     if self.in_enumeration:
         self.in_enumeration.annotate(voc, q_vars)
     out = self.fill_attributes_and_check()
-    self.merge_WDFs([e.WDF if e.WDF else TRUE for e in self.sub_exprs])
+    self.merge_WDFs()
 
     # move the negation out
     if 'not' in self.is_enumerated:

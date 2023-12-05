@@ -76,17 +76,19 @@ def is_subset_of(e: Expression,
 def fill_WDF(self):
     for e in self.sub_exprs:
         e.fill_WDF()
-    self.merge_WDFs([e.WDF if e.WDF else TRUE for e in self.sub_exprs])
+    self.merge_WDFs()
 Expression.fill_WDF = fill_WDF
 
-def merge_WDFs(self, wdfs: List[Expression]):
+def merge_WDFs(self):
+    wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
     self.WDF = AND(wdfs)
 Expression.merge_WDFs = merge_WDFs
 
 
 # Class AppliedSymbol  #######################################################
 
-def merge_WDFs(self, wdfs: List[Expression]):
+def merge_WDFs(self):
+    wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
     if self.symbol.decl:
         self.WDF = AND(wdfs)
         if type(self.symbol.decl) != TypeDeclaration:
