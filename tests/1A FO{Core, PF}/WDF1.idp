@@ -9,6 +9,9 @@ theory T:V {
     p(c()).
     col(c()) & p(c()).
     col(c()).
+    col(c()) => p(c()).
+    col(c()) | p(c()).
+    if col(c()) then p(c()) else true.
 }
 procedure main() {
     Th = Theory(T)

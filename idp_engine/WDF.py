@@ -81,7 +81,21 @@ def merge_WDFs(self):
 Expression.merge_WDFs = merge_WDFs
 
 
-# Class AConjunction  #######################################################
+
+# Class AIfExpr  #######################################################
+
+def merge_WDFs(self):
+    if all(e.WDF for e in self.sub_exprs):
+        self.WDF = AND([
+            self.sub_exprs[0].WDF,
+            IF(self.sub_exprs[0], self.sub_exprs[1].WDF,
+                                  self.sub_exprs[2].WDF)])
+    else:
+        self.WDF = None
+AIfExpr.merge_WDFs = merge_WDFs
+
+
+# Class ADisjunction  #######################################################
 
 def merge_WDFs(self):
     out, testing = TRUE, False
@@ -94,9 +108,28 @@ def merge_WDFs(self):
             else:
                 out, testing = e.WDF, True
         else:
-            out = AND([e.WDF, OR([NOT(e), out])])
+            out = AND([e.WDF, OR([e, out])])  #
+    self.WDF = out
+ADisjunction.merge_WDFs = merge_WDFs
+
+
+# Class AImplication, AConjunction  #######################################################
+
+def merge_WDFs(self):
+    out, testing = TRUE, False
+    for e in reversed(self.sub_exprs):
+        if not e.WDF:
+            continue
+        if not testing:
+            if e.WDF.same_as(TRUE):
+                continue
+            else:
+                out, testing = e.WDF, True
+        else:
+            out = AND([e.WDF, OR([NOT(e), out])])  #
     self.WDF = out
 AConjunction.merge_WDFs = merge_WDFs
+AImplication.merge_WDFs = merge_WDFs
 
 
 # Class AppliedSymbol  #######################################################

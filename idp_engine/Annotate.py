@@ -1119,6 +1119,7 @@ def annotate(self: Variable,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
+    self.WDF = TRUE
     return self
 Variable.annotate = annotate
 
@@ -1129,6 +1130,7 @@ def annotate(self: Number,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
+    self.WDF = TRUE
     self.decl = voc.symbol_decls[self.type.name]
     return self
 Number.annotate = annotate
@@ -1140,6 +1142,7 @@ def annotate(self: UnappliedSymbol,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
+    self.WDF = TRUE
     if self.name in q_vars:  # ignore VarDeclaration
         return q_vars[self.name]
     if self.name in voc.symbol_decls:
