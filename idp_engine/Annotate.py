@@ -31,7 +31,7 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
 from .Expression import (ASTNode, Expression, SETNAME, SetName,
-                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME,
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, AConjunction, ADisjunction,
@@ -85,7 +85,6 @@ def annotate_block(self: ASTNode,
     INT_SETNAME.annotate(self, {})
     REAL_SETNAME.annotate(self, {})
     DATE_SETNAME.annotate(self, {})
-    EMPTY_SETNAME.annotate(self, {})
 
     concepts = self.symbol_decls[CONCEPT]
     concepts.constructors=([CONSTRUCTOR(f"`{s}")
@@ -139,10 +138,10 @@ def annotate_declaration(self: SymbolDeclaration,
     voc.symbol_decls[self.name] = self
     for s in self.domains:
         s.annotate(voc, {})
-        s.check(s.root_set is not None,
+        s.check(s.root_set is not None and len(s.root_set) <= 1,
                 f"Can't use n-ary {s.name} in a type signature")
     self.codomain.annotate(voc, {})
-    self.arity = len([d for d in self.domains if d.root_set is not EMPTY_SETNAME])
+    self.arity = sum([len(d.root_set) for d in self.domains if d.root_set])
 
     for s in chain(self.domains, [self.codomain]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
@@ -171,23 +170,23 @@ VarDeclaration.annotate_declaration = annotate_declaration
 
 # Class SetName  #######################################################
 
-def root_set(s: SetName) -> SetName:
-    """ Recursively finds the root set of a set in the hierarchy.
+def root_set(s: SetName) -> List[SetName]:
+    """ Recursively finds the root sets of a set in the hierarchy.
 
     It goes up the hierarchy until a declared type or a Concept[..] is found.
+    For a set of tuples of domain elements, it returns
+    the list of root sets of the elements of the tuple.
     """
     if type(s.decl) == TypeDeclaration:
         if s.decl.interpretation and hasattr(s.decl.interpretation.enumeration, "type"):
-            return s.decl.interpretation.enumeration.type  # numeric type of the interpretation
+            return [s.decl.interpretation.enumeration.type]  # numeric type of the interpretation
         else:
-            return s
+            return [s]
     elif s.name == CONCEPT:
-        return s
+        return [s]
     elif s.decl.arity == 0:
-        return EMPTY_SETNAME
-    elif len(s.decl.domains) == 1:
-        return root_set(s.decl.domains[0])
-    return None
+        return []
+    return [root_set(s1)[0] for s1 in s.decl.domains]
 
 def annotate(self: Expression,
              voc: Vocabulary,
@@ -207,7 +206,7 @@ def annotate(self: Expression,
     if self.codomain:  # a concept domain
         self.concept_domains = [s.annotate(voc, q_vars) for s in self.concept_domains]
         for s in self.concept_domains:
-            s.check(s.root_set is not None,
+            s.check(s.root_set is not None and len(s.root_set) <= 1,
                     f"Can't use n-ary {s.name} in a type signature")
         self.codomain = self.codomain.annotate(voc, q_vars)
     return self
@@ -497,7 +496,9 @@ def annotate(self: Expression,
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
-    self.check(not(self.symbol_decl.codomain.root_set == BOOL_SETNAME
+    self.check(not(self.symbol_decl.codomain.root_set
+                   and len(self.symbol_decl.codomain.root_set) == 1
+                   and self.symbol_decl.codomain.root_set[0] == BOOL_SETNAME
                    and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
@@ -714,8 +715,8 @@ def annotate_quantee(self: Expression,
             elif self.sub_exprs:
                 if self.sub_exprs[0].decl:  # `(x,y) in p`
                     var.type = self.sub_exprs[0].decl.domains[i]
-                elif self.sub_exprs[0].sub_exprs[0].type:  #  `x in $(p)`
-                    var.type = self.sub_exprs[0].sub_exprs[0].type.root_set.concept_domains[0]
+                elif self.sub_exprs[0].sub_exprs[0].type:  #  `(x,y) in $(p)`
+                    var.type = self.sub_exprs[0].sub_exprs[0].type.root_set[i].concept_domains[0]
             else:
                 var.type = None
             # 2. compare with variable declaration, if any
@@ -798,13 +799,13 @@ def base_type(exprs: List[Expression], bases: List[SetName] = None) -> Optional[
     if not exprs:
         return None if not bases else bases[0]
     if exprs[0].type:
-        base = exprs[0].type.root_set if not bases else bases[0]
+        base = exprs[0].type.root_set[0] if not bases else bases[0]
         bases = set([base.name]) if not bases else set([b.name for b in bases])
         if base in [REAL_SETNAME, DATE_SETNAME]:
             bases.add(INT)  # also accept INT for REAL and DATE
         for e in exprs:
             if e.type:
-                b = e.type.root_set
+                b = e.type.root_set[0]
                 if b.name not in bases:
                     if base == INT_SETNAME and b in [REAL_SETNAME, DATE_SETNAME]:
                         base = b
@@ -953,17 +954,17 @@ def annotate(self: AAggregate,
         if self.aggtype == "sum" and len(self.sub_exprs) == 2:
             self.original = copy(self)
             self.sub_exprs[0].check(
-                self.sub_exprs[0].type.root_set in [INT_SETNAME, REAL_SETNAME],
+                self.sub_exprs[0].type.root_set[0] in [INT_SETNAME, REAL_SETNAME],
                 f"Must be numeric: {self.sub_exprs[0]}")
             self.sub_exprs[1].check(
-                self.sub_exprs[1].type.root_set == BOOL_SETNAME,
+                self.sub_exprs[1].type.root_set[0] == BOOL_SETNAME,
                 f"Must be boolean: {self.sub_exprs[1]}")
             self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
                                     self.sub_exprs[0], ZERO).fill_attributes_and_check()]
 
         if self.aggtype == "#":
             self.sub_exprs[0].check(
-                self.sub_exprs[0].type.root_set == BOOL_SETNAME,
+                self.sub_exprs[0].type.root_set[0] == BOOL_SETNAME,
                 f"Must be boolean: {self.sub_exprs[0]}")
             self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
                                  Number(number='0'))]
@@ -1069,8 +1070,8 @@ def fill_attributes_and_check(self: AppliedSymbol, type_check=True) -> Expressio
     if out.decl and type_check:
         for e, s in zip(out.sub_exprs, out.decl.domains):
             if not type(out.decl) == TypeDeclaration:  # Type predicates accept anything
-                e.check(e.type.root_set == s.root_set,
-                        f"{s.root_set} expected ({e.type.root_set} found: {e})")
+                e.check(len(e.type.root_set) == 1 and e.type.root_set[0] == s.root_set[0],
+                        f"{s.root_set[0]} expected ({e.type.root_set[0]} found: {e})")
                 type_ = e.type
                 # while type_ != s:  # handle case where e_type is a subset of s
                 #     e.check(type_ != type_.decl.domains[0],
@@ -1088,7 +1089,7 @@ def fill_attributes_and_check(self: AppliedSymbol, type_check=True) -> Expressio
         out.type = out.decl.codomain
     elif type(out.symbol)==SymbolExpr and out.symbol.eval:
         type_ = out.symbol.sub_exprs[0].type
-        out.symbol.check(type_.root_set.name == CONCEPT,
+        out.symbol.check(type_.root_set[0].name == CONCEPT,
             f"Concept expected ({type_} found: {out.symbol})")
         if type_.name == CONCEPT:
             out.type = type_.codomain

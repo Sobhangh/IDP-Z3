@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from .Parse import IDP, Vocabulary, Declaration, SymbolDeclaration, SymbolInterpretation, Enumeration
     from .Annotate import Annotated, Exceptions
 
-from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, EMPTY,
+from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
                     RESERVED_SYMBOLS, IDPZ3Error, Semantics)
 
 
@@ -578,7 +578,7 @@ class SetName(Expression):
         self.codomain = out
         self.sub_exprs = []
         self.decl: Declaration = None
-        self.root_set: SetName = None
+        self.root_set: List[SetName] = None
         super().__init__(parent)
 
     def __str__(self):
@@ -631,7 +631,6 @@ BOOL_SETNAME = SETNAME(BOOL)
 INT_SETNAME = SETNAME(INT)
 REAL_SETNAME = SETNAME(REAL)
 DATE_SETNAME = SETNAME(DATE)
-EMPTY_SETNAME = SETNAME(EMPTY)
 
 class AIfExpr(Expression):
     PRECEDENCE = 10

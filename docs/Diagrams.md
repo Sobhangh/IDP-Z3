@@ -32,7 +32,7 @@ erDiagram
     }
     SetName {
         Declaration decl "Declaration of the set name"
-        SetName root_set "root of the set in the type hierarchy"
+        List[SetName] root_set "roots of the set in the type hierarchy"
         List[SetName] concept_domains "only for subset of Concept"
         SetName codomain "only for subset of Concept"
     }

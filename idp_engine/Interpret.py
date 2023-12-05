@@ -47,7 +47,7 @@ from .Expression import (AIfExpr, IF,
                          VARIABLE, TRUE, FALSE, Number, Extension,
                          BOOL_SETNAME,)
 from .Theory import Theory
-from .utils import (BOOL, EMPTY, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
+from .utils import (BOOL, RESERVED_SYMBOLS, CONCEPT, OrderedSet, DEFAULT,
                     GOAL_SYMBOL, EXPAND, flatten)
 
 
@@ -62,9 +62,7 @@ Import.interpret = interpret
 
 def interpret(self: TypeDeclaration, problem: Theory):
     interpretation = problem.interpretations.get(self.name, None)
-    if self.name == EMPTY:
-        pass
-    elif self.name in [BOOL, CONCEPT]:
+    if self.name in [BOOL, CONCEPT]:
         self.translate(problem)
         ranges = [c.interpret(problem).range for c in self.constructors]
         ext = ([[t] for r in ranges for t in r], None)

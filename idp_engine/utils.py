@@ -61,13 +61,12 @@ INT = "ℤ"
 REAL = "ℝ"
 DATE = "Date"
 CONCEPT = "Concept"
-EMPTY = "()"  # the type name of the empty tuple
 
 GOAL_SYMBOL = "goal_symbol"
 RELEVANT = " relevant"  # internal.  Leading space to avoid conflict with user vocabulary
 EXPAND = "expand"
 ABS = "abs"
-RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, CONCEPT, EMPTY,
+RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, CONCEPT,
                     GOAL_SYMBOL, RELEVANT, ABS, ]
 
 DEFAULT = "default"

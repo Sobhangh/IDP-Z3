@@ -24,7 +24,7 @@ from typing import List
 
 from .Parse import TypeDeclaration
 from .Expression import (ASTNode, Expression, SETNAME, SetName,
-                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME,
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, AConjunction, ADisjunction,
@@ -44,16 +44,12 @@ def is_subset_of(e: Expression,
 
     Essentially, it goes up the hierarchy of s1 until s2 is found.
     It raises an error if the formula is FALSE.
-
-    Special case for partial constants: to check that a constant c() is well-defined,
-    e should be c() and s1 be EMPTY_SETNAME (even though e.type is not EMPTY_SETNAME).
-    This is to show the error at the right place in the editor.
     """
     if s1 == s2:
         return TRUE
     msg = f"Not in domain: {e} (of type {s1.name}) is not in {s2.name}"
-    e.check(s1.root_set == s2.root_set, msg)  # on different branches
-    if s1 == EMPTY_SETNAME:  #  --> s2(), i.e., () is in s2
+    e.check((r1 == r2 for r1, r2 in zip (s1.root_set, s2.root_set)), msg)  # not disjoint
+    if len(s1.root_set) == 0:  #  --> s2(), i.e., () is in s2
         symbol = SymbolExpr.make(s2.decl)
         return AppliedSymbol.make(symbol, [])
     if type(s1.decl) == TypeDeclaration:
@@ -95,8 +91,6 @@ def merge_WDFs(self):
             if self.sub_exprs:
                 wdf2 = AND([self.WDF]+[is_subset_of(e, e.type, d)
                             for e, d in zip(self.sub_exprs, self.symbol.decl.domains)])
-            elif self.symbol.decl.domains:  # partial constant
-                wdf2 = is_subset_of(self, EMPTY_SETNAME, self.symbol.decl.domains[0])
             else:  # constant c()
                 wdf2 = TRUE
             self.WDF = AND([self.WDF, wdf2])

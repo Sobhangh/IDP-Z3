@@ -20,7 +20,7 @@ Traceback (most recent call last):
   File "idp_engine/Annotate.py", line ??, in annotate_block
     i.annotate(self.voc, {})
   File "idp_engine/Annotate.py", line ??, in annotate
-    self.check(not(self.symbol_decl.codomain.root_set == BOOL_SETNAME
+    self.check(not(self.symbol_decl.codomain.root_set
   File "idp_engine/Expression.py", line ??, in check
     raise IDPZ3Error(msg, self)
 idp_engine.utils.IDPZ3Error: Error: line 12 - colStart 5 - colEnd 5 => Can't use function enumeration for predicates 'c' (yet)

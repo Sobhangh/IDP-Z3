@@ -42,9 +42,9 @@ from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUC
                          AppliedSymbol, UnappliedSymbol, Number, Brackets,
                          Date, Extension, Identifier, Variable, TRUEC, FALSEC,
                          TRUE, FALSE, EQUALS, AND, OR,
-                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME)
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
-                    CONCEPT, EMPTY, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
+                    CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     MAX_QUANTIFIER_EXPANSION, Semantics as S, flatten)
 
 if TYPE_CHECKING:
@@ -73,9 +73,9 @@ def str_to_IDP(val_string: str,
             None)
         if out is None:
             raise IDPZ3Error(f"wrong boolean value: {val_string}")
-    elif (hasattr(type_.root_set.decl, 'map')
-        and val_string in type_.root_set.decl.map):  # constructor
-        out = type_.root_set.decl.map[val_string]
+    elif (hasattr(type_.root_set[0].decl, 'map')
+        and val_string in type_.root_set[0].decl.map):  # constructor
+        out = type_.root_set[0].decl.map[val_string]
     elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
         assert hasattr(type_.decl, 'interpretation'), "Internal error"
 
@@ -110,7 +110,7 @@ def str_to_IDP(val_string: str,
 
         out = AppliedSymbol.construct(constructor, new_args)
     else:
-        interp = getattr(type_.root_set.decl, "interpretation", None)
+        interp = getattr(type_.root_set[0].decl, "interpretation", None)
         enum_type = (interp.enumeration.type.name if interp else
                         type_.decl.name if type(type_.decl) == TypeDeclaration else
                         type_.decl.codomain.name)
@@ -297,7 +297,6 @@ class Vocabulary(ASTNode):
             TypeDeclaration(self, name=REAL, enumeration=RealRange()),
             TypeDeclaration(self, name=DATE, enumeration=DateRange()),
             TypeDeclaration(self, name=CONCEPT, constructors=[]),
-            TypeDeclaration(self, name=EMPTY, constructors=[]),
             SymbolDeclaration.make(self, name=GOAL_SYMBOL,
                             sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
                             out=SETNAME(BOOL)),
@@ -511,7 +510,8 @@ class SymbolDeclaration(ASTNode):
     @classmethod
     def make(cls, parent, name, sorts, out):
         o = cls(parent=parent, name=name, sorts=sorts, out=out, annotations=None)
-        o.arity = len([d for d in o.domains if d.root_set is not EMPTY_SETNAME])
+        o.arity = sum([len(d.root_set) for d in o.domains
+                       if d.root_set])
         return o
 
     def __str__(self):
