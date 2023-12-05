@@ -1,4 +1,7 @@
-True
+Formula: 
+And(has_c)
+WDF: 
+[]
 
 Model 1
 ==========

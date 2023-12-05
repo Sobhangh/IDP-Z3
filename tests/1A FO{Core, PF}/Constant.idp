@@ -9,6 +9,10 @@ structure S:V {
     c := 1.
 }
 procedure main() {
-    pretty_print(Theory(T).formula())
+    Th = Theory(T, S)
+    print("Formula: ")
+    pretty_print(Th.formula())
+    print("WDF: ")
+    pretty_print(Th.WDFs)
     pretty_print(model_expand(T, S))
 }

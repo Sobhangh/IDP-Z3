@@ -9,7 +9,11 @@ theory T:V {
 }
 
 procedure main() {
-    pretty_print(Theory(T).formula())
+    Th = Theory(T)
+    print("Formula: ")
+    pretty_print(Th.formula())
+    print("WDF: ")
+    pretty_print(Th.WDFs)
     pretty_print(model_expand(T))
 }
 

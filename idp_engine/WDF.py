@@ -81,6 +81,24 @@ def merge_WDFs(self):
 Expression.merge_WDFs = merge_WDFs
 
 
+# Class AConjunction  #######################################################
+
+def merge_WDFs(self):
+    out, testing = TRUE, False
+    for e in reversed(self.sub_exprs):
+        if not e.WDF:
+            continue
+        if not testing:
+            if e.WDF.same_as(TRUE):
+                continue
+            else:
+                out, testing = e.WDF, True
+        else:
+            out = AND([e.WDF, OR([NOT(e), out])])
+    self.WDF = out
+AConjunction.merge_WDFs = merge_WDFs
+
+
 # Class AppliedSymbol  #######################################################
 
 def merge_WDFs(self):

@@ -1,4 +1,7 @@
+Formula: 
 And(Or(Not(has_p), And(p, 3 == c)))
+WDF: 
+true
 
 Model 1
 ==========

@@ -233,7 +233,7 @@ def collect_warnings(expr: Expression, out):
 def annotate_block(self: ASTNode,
                    idp: IDP,
                    ) -> Exceptions:
-    out = []
+    warnings = []
     assert isinstance(self, TheoryBlock), "Internal error"
     self.check(self.vocab_name in idp.vocabularies,
                 f"Unknown vocabulary: {self.vocab_name}")
@@ -252,10 +252,10 @@ def annotate_block(self: ASTNode,
         c1.check(c1.type == BOOL_SETNAME,
                     f"Formula {c.code} must be boolean, not {c1.type}")
         if c1.WDF and not c1.WDF.same_as(TRUE):
-            collect_warnings(c1, out)
+            collect_warnings(c1, warnings)
         constraints.append(c1)
     self.constraints = constraints
-    return out
+    return warnings
 TheoryBlock.annotate_block = annotate_block
 
 

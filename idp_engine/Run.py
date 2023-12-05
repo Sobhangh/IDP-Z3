@@ -33,6 +33,7 @@ from z3 import Solver
 
 from .Parse import IDP, TheoryBlock, Structure
 from .Theory import Theory
+from .Expression import Expression
 from .Assignments import Status as S, Assignments
 from .utils import NEWL, IDPZ3Error, PROCESS_TIMINGS
 
@@ -270,6 +271,9 @@ def pretty_print(x: Any ="") -> None:
                 print(xi)
     elif isinstance(x, Theory):
         print(x.assignments)
+    elif isinstance(x, list) and x and isinstance(x[0], Expression):
+        for c in x:
+            print(c)
     else:
         print(x)
 

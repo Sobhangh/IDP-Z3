@@ -118,6 +118,7 @@ class Theory(object):
         ignored_laws = set(string): laws disabled by the user.
             The string matches Expression.code in expl_reifs.
 
+        WDFs (List[Expression]): when True, the truth value of the theory is well-defined.
     """
 
     def __init__(self,
@@ -151,6 +152,8 @@ class Theory(object):
 
         self.z3: dict[str, ExprRef] = {}
         self.ctx: Context = Context()
+        self.WDFs : List[Expression] = []
+
         self.add(*theories)
 
         self.previous_assignments: Assignments = Assignments()
@@ -273,6 +276,10 @@ class Theory(object):
                 self.constraints.extend(deepcopy(v) for v in block.constraints)
                 self.def_constraints.update(
                     {k:deepcopy(v) for k,v in block.def_constraints.items()})
+
+                for c in block.constraints:
+                    if c.WDF:
+                        self.WDFs.append(c.WDF)
 
         ### apply the enumerations and definitions
         self.assignments = Assignments()
