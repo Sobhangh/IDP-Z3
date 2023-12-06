@@ -76,7 +76,6 @@ def annotate(self, idp):
     # annotate declarations
     for s in self.declarations:
         s.annotate(self)  # updates self.symbol_decls
-    print("decl annotate")
 
     concepts = self.symbol_decls[CONCEPT]
     for constructor in concepts.constructors:
@@ -190,13 +189,18 @@ Type.annotate = annotate
 # Class TheoryBlock  #######################################################
 
 def annotate(self, idp):
+    if self.inv:
+        return
     self.check(self.vocab_name in idp.vocabularies,
                 f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
 
+    
     #Annotating the init_theory
     #Has to be used before interpretation annotate add_voc_to_block
     annotate_init_theory(self,idp)
+    annotate_bis_theory(self,idp)
+    annotate_trs_theory(self,idp)
 
     for i in self.interpretations.values():
         i.annotate(self)
@@ -239,17 +243,53 @@ def annotate_init_theory(theory:TheoryBlock,idp):
     if theory.ltc and theory.init_theory:
         voc = idp.now_voc[theory.init_theory.vocab_name]
         theory.init_theory.voc = voc
-        
         for i in theory.interpretations.values():
-            r = i.initialize_temporal_interpretation(idp.vocabularies[theory.vocab_name].tempdcl)
+            #print("inside init interp")
+            r = i.initialize_temporal_interpretation([]) #idp.vocabularies[theory.vocab_name].tempdcl
             theory.init_theory.interpretations[r.name] = r
             #Is annotation necessary given that it has already been done in the original?
             r.annotate(theory.init_theory)
         voc.add_voc_to_block(theory.init_theory)
         #theory.init_theory.declarations = theory.declarations
         theory.init_theory.definitions = [e.annotate(voc, {},False) for e in theory.init_theory.definitions]
+        #print("i0")
         theory.init_theory.constraints = OrderedSet([e.annotate(voc, {},False)
                                     for e in theory.init_theory.constraints])
+        
+def annotate_bis_theory(theory:TheoryBlock,idp):
+    if theory.ltc and theory.bistate_theory:
+        voc = idp.next_voc[theory.bistate_theory.vocab_name]
+        theory.bistate_theory.voc = voc
+        for i in theory.interpretations.values():
+            #print("inside interp")
+            #Given that symbol interpretation of temporal predicates are not allowed in ltc theories we given empty tempdcl
+            r = i.initialize_temporal_interpretation([])
+            theory.bistate_theory.interpretations[r.name] = r
+            #Is annotation necessary given that it has already been done in the original?
+            r.annotate(theory.bistate_theory)
+        #print("ch1")
+        voc.add_voc_to_block(theory.bistate_theory)
+        #theory.init_theory.declarations = theory.declarations
+        theory.bistate_theory.definitions = [e.annotate(voc, {},False) for e in theory.bistate_theory.definitions]
+        #print("ch15")
+        theory.bistate_theory.constraints = OrderedSet([e.annotate(voc, {},False)
+                                    for e in theory.bistate_theory.constraints])
+        #print("ch2")
+
+def annotate_trs_theory(theory:TheoryBlock,idp):
+    if theory.ltc and theory.transition_theory:
+        voc = idp.next_voc[theory.transition_theory.vocab_name]
+        theory.transition_theory.voc = voc
+        for i in theory.transition_theory.interpretations.values():
+            i.annotate(theory.transition_theory)
+        #print("ch1")
+        voc.add_voc_to_block(theory.transition_theory)
+        #theory.init_theory.declarations = theory.declarations
+        theory.transition_theory.definitions = [e.annotate(voc, {},False) for e in theory.transition_theory.definitions]
+        #print("ch15")
+        theory.transition_theory.constraints = OrderedSet([e.annotate(voc, {},False)
+                                    for e in theory.transition_theory.constraints])
+        #print("ch2")
 
 # if there is no temporal returns 0, if start only 1, if now or next 2, if start and (now or next) then 3
 def check_start(constraint,start=False,now_or_next = False):
@@ -313,7 +353,6 @@ def wrapping_quantifier(constraint):
 def annotate(self: Definition, voc, q_vars,ltc=False,temporal_head=0):
     self.rules = [r.annotate(voc, q_vars,ltc) for r in self.rules]
     
-
     # create level-mapping symbols, as needed
     # self.level_symbols: dict[SymbolDeclaration, Symbol]
     dependencies = set()
@@ -458,7 +497,6 @@ def annotate(self, voc, q_vars, ltc=False):
             self.quantees += d.quantees
         else:
             self.definiendum = d
-    
     self.check(not self.definiendum.symbol.is_intentional(),
                 f"No support for intentional objects in the head of a rule: "
                 f"{self}")
@@ -506,7 +544,6 @@ def annotate(self, idp):
                f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
     annotate_init_structure(self,idp)
-    print("init struct ann ....")
     for i in self.interpretations.values():
         i.annotate(self)
     self.voc.add_voc_to_block(self)

@@ -36,7 +36,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* (tempdcl=Tempo
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
-TheoryBlock: 'theory' (ltc='LTC')? (name=ID ':' vocab_name=ID)? '{'
+TheoryBlock: 'theory' (ltc='LTC')? (inv='INV')? (name=ID ':' vocab_name=ID)? '{'
              ( definitions=Definition*
                constraints=Axiom*
                interpretations=SymbolInterpretation*

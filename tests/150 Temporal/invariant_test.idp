@@ -1,0 +1,38 @@
+vocabulary V {
+    type point is {0..11}
+    value : point*point -> Bool
+    Temporal value
+}
+
+theory LTC T:V {
+    //This is the FO. of the following program:
+    //int j = 3;
+    //for(int i=0; i<4; i++)  
+    //j--;
+    {
+        Start[value(0,3)].
+        !i,j,p,q in point:Next[value(i,j)] <- Now[value(p,q)] and if p<3 then (i = p +1 and j = q-1) else i = p and j =q.  
+    }
+
+}
+theory INV Inv:V{
+    !i,j in point: Now[value(i,j)] => i + j = 3.
+}
+
+structure S:V {
+}
+
+procedure main () {
+    print(isinvariant(T,Inv))
+    structs = initialize(T,S)
+    s = progression(T,structs)
+    print_struct(s)
+    r = progression(T,s)
+    print_struct(r)
+    t = progression(T,r)
+    print_struct(t)
+    t1 = progression(T,t)
+    print_struct(t1)
+    t2 = progression(T,t1)
+    print_struct(t2)
+}

@@ -23,19 +23,20 @@ Classes to store assignments of values to questions
 """
 from __future__ import annotations
 
+
 __all__ = ["Status", "Assignment", "Assignments"]
 
 
 from copy import copy, deepcopy
 from enum import Enum, auto
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
 from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol
+from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol, Identifier
 from .utils import NEWL, BOOL, INT, REAL, DATE
 
 if TYPE_CHECKING:
-    from .Parse import SymbolDeclaration, Enumeration
+    from .Parse import SymbolDeclaration, Enumeration 
     from .Theory import Theory
 
 
@@ -238,6 +239,7 @@ class Assignments(dict):
             self.symbols[out.symbol_decl.name] = out.symbol_decl
         return out
 
+        
     def __str__(self) -> str:
         """ Print the assignments in the same format as a model.
 

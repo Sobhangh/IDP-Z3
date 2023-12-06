@@ -85,6 +85,7 @@ class ASTNode(object):
             AssertionError: in case of duplicate name
         """
         ast_nodes = kwargs.pop(arg_name)
+        
         out = {}
         for i in ast_nodes:
             # can't get location here

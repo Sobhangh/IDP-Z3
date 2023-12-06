@@ -13,7 +13,7 @@ vocabulary V {
 
 theory LTC T:V {
     {
-        !i in test: Now[ai(i)] <- i > 0 and i < 10 and Now[p()].
+        !i in test: Next[ai(i)] <- i > 0 and i < 10 and Now[p()].
     }
     {
         !i in Int: te(i) <- i > 0 and i < 10.
@@ -31,10 +31,7 @@ structure S:V {
 
 procedure main () {
     //print(Theory(T).formula())
-    r = model_expand(T,S,max=5)
-    pretty_print(r)
-    
-    s = initialize(T,S)
-    print_struct(s)
-    //print(s)
+    structs = initialize(T,S)
+    //for s in structs:
+    print_struct(progression(T,structs))
 }

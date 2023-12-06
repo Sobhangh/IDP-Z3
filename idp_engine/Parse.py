@@ -32,6 +32,7 @@ from textx import metamodel_from_file
 from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 
 
+
 from .Assignments import Assignments
 from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR,
                          Accessor, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, Symbol, SYMBOL, SymbolExpr, Expression,
@@ -202,10 +203,8 @@ class IDP(ASTNode):
         init_strcs ={}
         for voc in self.vocabularies.values():
             now_voc:Vocabulary = voc.generate_now_voc()
-            print("now voc")
             self.now_voc[now_voc.name]=now_voc
             now_voc.annotate(self)
-            print("annotate")
             
             next_voc = voc.generate_next_voc()
             self.next_voc[next_voc.name]=next_voc
@@ -215,7 +214,15 @@ class IDP(ASTNode):
         for t in self.theories.values():
             if t.ltc:
                 t.initialize_theory()
+                #print("theories iinit")
+                t.bst_theory()
+                t.trs_theory()
+                #print("theories bis")
+                #if len(t.bistate_theory.definitions) > 1:
+                #    print(t.bistate_theory.definitions[1].rules)
+
                 init_thrs[t.init_theory.name] = t.init_theory
+                init_thrs[t.bistate_theory.name] = t.bistate_theory
             t.annotate(self)
         for struct in self.structures.values():
             struct.annotate(self)
@@ -229,6 +236,7 @@ class IDP(ASTNode):
             self.theories[t.name] = t
         for s in init_strcs.values():
             self.structures[s.name] = s
+        #print("outside")
 
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
@@ -445,6 +453,7 @@ class Vocabulary(ASTNode):
                         srn = [s.init_copy() for s in d.sorts]
                         next_d = SymbolDeclaration(name=SYMBOL(d.name),sorts=srn,out=d.out,annotations=Annotations(None,[]))
                         next_d.name = d.name + "_next"
+                        next_d.is_next= True
                         nowvoc.declarations.append(next_d)
                         #nowvoc.symbol_decls[next_d.name] = next_d
                         break
@@ -468,7 +477,7 @@ class Vocabulary(ASTNode):
                         nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=cnstr,enumeration=enum))
                 else:
                     #without deepcopy
-                    nowvoc.declarations.append(d)
+                    nowvoc.declarations.append(d.init_copy())
         return nowvoc
 
 class Import(ASTNode):
@@ -628,7 +637,7 @@ class SymbolDeclaration(ASTNode):
         self.temp= False
         self.symbols : Optional[List[Symbol]]
         self.name : Optional[str]
-        
+        self.is_next = False
         #self.temp= False
         if 'symbols' in kwargs:
             self.symbols = kwargs.pop('symbols')
@@ -768,6 +777,8 @@ class TheoryBlock(ASTNode):
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
         self.ltc = True if kwargs.pop('ltc') else False
+        self.inv = True if kwargs.pop('inv') else False
+        self.idp =None
         #self.ltc = False
 
         self.name = "T" if not self.name else self.name
@@ -787,6 +798,8 @@ class TheoryBlock(ASTNode):
                 rule.block = self
         # For storing the initialized theory for ltc progression
         self.init_theory : TheoryBlock = None
+        self.bistate_theory : TheoryBlock = None
+        self.transition_theory : TheoryBlock = None
         #self.init_constraints = []
         #self.init_defs = []
         #self.init_interp = []
@@ -794,8 +807,121 @@ class TheoryBlock(ASTNode):
     def __str__(self):
         return self.name
     
+    def contains_next(self,e:Expression):
+        if isinstance(e,NextAppliedSymbol):
+            return True
+        if isinstance(e,(AppliedSymbol,NowAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
+            return False
+        for s in e.sub_exprs:
+            r = self.contains_next(s)
+            if r:
+                return True
+        return False
+    
+    def contains_now(self,e:Expression):
+        if isinstance(e,NowAppliedSymbol):
+            return True
+        if isinstance(e,(AppliedSymbol,NextAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
+            return False
+        for s in e.sub_exprs:
+            r = self.contains_next(s)
+            if r:
+                return True
+        return False
+    
+    def trs_theory(self):
+        self.transition_theory = TheoryBlock(name=self.name+'_transition',vocab_name=self.vocab_name+'_next',ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+        cnstrs = []
+        for c in self.constraints:
+            n = self.contains_next(c)
+            if n:
+                r = self.bis_subexpr(c.init_copy())
+                if r != False:
+                    cnstrs.append(r)
+            else:
+                r = self.sis_subexpr(c.init_copy())
+                r2 = self.bis_subexpr(c.init_copy())
+                if r != False:
+                    cnstrs.append(r)
+                    cnstrs.append(r2)
+        defs = []
+        for definition in self.definitions:
+            defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
+            for rule in definition.rules:
+                rl = rule.init_copy()
+                if isinstance(rule.definiendum,NextAppliedSymbol):
+                    r = self.bis_rule(rl)
+                    if r != False:
+                        defs[-1].rules.append(r)
+                elif isinstance(rule.definiendum,NowAppliedSymbol):
+                    rl2 = rl.init_copy()
+                    rl.definiendum = self.bis_subexpr(rl.definiendum)
+                    rl.body = self.bis_subexpr(rl.definiendum)
+                    if rl.body != False:
+                        defs[-1].rules.append(rl)
+                    rl2.definiendum = self.sis_subexpr(rl2.definiendum)
+                    rl2.body = self.sis_subexpr(rl2.definiendum)
+                    if rl2.body != False:
+                        defs[-1].rules.append(rl2)
+                elif not isinstance(rule.definiendum,StartAppliedSymbol):
+                    if self.contains_now(rl.body):
+                        rl2 = rl.init_copy()
+                        rl.body = self.bis_subexpr(rl.definiendum)
+                        if rl.body != False:
+                            defs[-1].rules.append(rl)
+                        rl2.body = self.sis_subexpr(rl2.definiendum)
+                        if rl2.body != False:
+                            defs[-1].rules.append(rl2)
+                    else:
+                        rl.body = self.sis_subexpr(rl.definiendum)
+                        if rl.body != False:
+                            defs[-1].rules.append(rl)
+        self.transition_theory.constraints = cnstrs
+        self.transition_theory.definitions = defs
+        for d in defs:
+            for r in d.rules:
+                r.block = self.transition_theory
+        for i in self.interpretations.values():
+            r = i.initialize_temporal_interpretation([])
+            self.transition_theory.interpretations[r.name] = r
+        
+
+    def bst_theory(self):
+        self.bistate_theory = TheoryBlock(name=self.name+'_next',vocab_name=self.vocab_name+'_next',ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+        cnstrs = []
+        for c in self.constraints:
+            #would this be used before start/now are removed or after ?\
+            # look how this is done?
+            n = self.contains_next(c)
+            if n:
+                r = self.bis_subexpr(c.init_copy())
+                if r != False:
+                    cnstrs.append(r)
+            else:
+                r = self.sis_subexpr(c.init_copy())
+                if r != False:
+                    cnstrs.append(r)
+        defs = []
+        for definition in self.definitions:
+            defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
+            for rule in definition.rules:
+                defs[-1].rules.append(self.bis_rule(rule.init_copy()))
+                if defs[-1].rules[-1] == False:
+                    defs[-1].rules.pop()
+            #self.init_theory.definitions.append(idef)
+        #self.init_theory.constraints = cnstrs
+        self.bistate_theory.constraints = cnstrs
+        self.bistate_theory.definitions = defs
+        for d in defs:
+            for r in d.rules:
+                r.block = self.bistate_theory
+        
+            
+    
     def initialize_theory(self):
-        self.init_theory = TheoryBlock(name=self.name+'_now',vocab_name=self.vocab_name+'_now',ltc = None,
+        self.init_theory = TheoryBlock(name=self.name+'_now',vocab_name=self.vocab_name+'_now',ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
@@ -810,8 +936,51 @@ class TheoryBlock(ASTNode):
                 self.init_theory.definitions[-1].rules.append(self.init_rule(rule.init_copy()))
                 if self.init_theory.definitions[-1].rules[-1] == False:
                     self.init_theory.definitions[-1].rules.pop()
-            #self.init_theory.definitions.append(idef)
-        #self.init_theory.constraints = cnstrs
+
+    def sis_subexpr(self, expression:Expression):
+        if isinstance(expression, (StartAppliedSymbol,NextAppliedSymbol)):
+            return False
+        if isinstance(expression, NowAppliedSymbol):
+            e = expression.sub_expr
+            symb = SymbolExpr(None,SYMBOL(str(e.symbol)+'_next'))
+            return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+        if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
+            return expression
+        #sbex : List[Expression] = []
+        i = 0
+        for e in expression.sub_exprs:
+            expression.sub_exprs[i] = self.sis_subexpr(e)
+            if expression.sub_exprs[i] == False:
+                return False
+            i+=1
+        if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
+            expression.f = expression.sub_exprs[0]
+        #expression.sub_exprs = sbex
+        return expression
+
+
+    def bis_subexpr(self, expression:Expression):
+        if isinstance(expression, StartAppliedSymbol):
+            return False
+        if isinstance(expression, NowAppliedSymbol):
+            return expression.sub_expr
+        if isinstance(expression, NextAppliedSymbol):
+            e = expression.sub_expr
+            symb = SymbolExpr(None,SYMBOL(str(e.symbol)+'_next'))
+            return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+        if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
+            return expression
+        #sbex : List[Expression] = []
+        i = 0
+        for e in expression.sub_exprs:
+            expression.sub_exprs[i] = self.bis_subexpr(e)
+            if expression.sub_exprs[i] == False:
+                return False
+            i+=1
+        if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
+            expression.f = expression.sub_exprs[0]
+        #expression.sub_exprs = sbex
+        return expression
 
     def init_subexpr(self, expression:Expression):
         if isinstance(expression, StartAppliedSymbol):
@@ -851,6 +1020,31 @@ class TheoryBlock(ASTNode):
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
             expression.f = expression.sub_exprs[0]
     
+    def bis_rule(self, rule: Rule):
+        next = False
+        now = False
+        if isinstance(rule.definiendum,StartAppliedSymbol):
+            return False
+        if isinstance(rule.definiendum,(NextAppliedSymbol,NowAppliedSymbol)):
+            if isinstance(rule.definiendum,(NowAppliedSymbol)):
+                now = True
+            else:
+                next = True
+            e = rule.definiendum.sub_expr
+            symb = SymbolExpr(None,SYMBOL(str(e.symbol)+'_next'))
+            rule.definiendum = AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+            
+        if next:
+            rule.body = self.bis_subexpr(rule.body)
+        elif now:
+            rule.body = self.sis_subexpr(rule.body)
+        else:
+            rule.body = self.sis_subexpr(rule.body)
+        if rule.body == False:
+                return False
+        return rule
+    
+
     def init_rule(self, rule: Rule):
         if isinstance(rule.definiendum,NextAppliedSymbol):
             return False

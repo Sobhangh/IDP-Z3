@@ -123,7 +123,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         superset = None
     else:
         superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
-
+    
     filters = [e[1] for e in extensions]
     def filter(args):
         out = AND([f([deepcopy(t)]) if f is not None else TRUE
@@ -131,7 +131,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         if self.out.decl.name == BOOL:
             out = AND([out, deepcopy(AppliedSymbol.make(symbol, args))])
         return out
-
+    
     if self.out.decl.name == BOOL:
         problem.extensions[self.name] = (superset, filter)
 
@@ -140,7 +140,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         self.range = []
     else:
         self.range = [e[0] for e in range]
-
+    
     # create instances + empty assignment
     if self.name not in RESERVED_SYMBOLS and superset is not None:
         self.instances = {}
@@ -152,7 +152,7 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     # interpret the enumeration
     if self.name in problem.interpretations and self.name != GOAL_SYMBOL:
         problem.interpretations[self.name].interpret(problem)
-
+    
     # create type constraints
     if type(self.instances) == dict and self.out.decl.name != BOOL:
         for expr in self.instances.values():
