@@ -88,8 +88,8 @@ def merge_WDFs(self):
     if all(e.WDF for e in self.sub_exprs):
         self.WDF = AND([
             self.sub_exprs[0].WDF,
-            IF(self.sub_exprs[0], self.sub_exprs[1].WDF,
-                                  self.sub_exprs[2].WDF)])
+            resimplify(IF(self.sub_exprs[0], self.sub_exprs[1].WDF,
+                                  self.sub_exprs[2].WDF))])
     else:
         self.WDF = None
 AIfExpr.merge_WDFs = merge_WDFs
@@ -108,9 +108,28 @@ def merge_WDFs(self):
             else:
                 out, testing = e.WDF, True
         else:
-            out = AND([e.WDF, OR([e, out])])  #
+            out = AND([e.WDF, resimplify(OR([e, out]))])  #
     self.WDF = out
 ADisjunction.merge_WDFs = merge_WDFs
+
+def resimplify(expr: Expression) -> Expression:
+    """Simplifies a disjunction by returning TRUE when it has p or not p."""
+    if not isinstance(expr, ADisjunction):
+        return expr
+    positive, negative = set(), set()
+    for e in expr.sub_exprs:
+        if isinstance(e, AUnary):
+            negative.add(e.sub_exprs[0].code)
+        else:
+            positive.add(e.code)
+    exclude = positive.intersection(negative)
+    if exclude:
+        return TRUE
+    else:
+        out = OR([e for e in expr.sub_exprs
+                if not (e.code in exclude
+                        or (isinstance(e, AUnary) and e.sub_exprs[0].code in exclude))])
+        return out
 
 
 # Class AImplication, AConjunction  #######################################################
@@ -126,7 +145,7 @@ def merge_WDFs(self):
             else:
                 out, testing = e.WDF, True
         else:
-            out = AND([e.WDF, OR([NOT(e), out])])  #
+            out = AND([e.WDF, resimplify(OR([NOT(e), out]))])  #
     self.WDF = out
 AConjunction.merge_WDFs = merge_WDFs
 AImplication.merge_WDFs = merge_WDFs

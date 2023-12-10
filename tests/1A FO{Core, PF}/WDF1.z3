@@ -1,5 +1,8 @@
 Formula: 
-And(p(c),
+And(p(a),
+    col(a),
+    p(a),
+    p(c),
     col(c),
     p(c),
     col(c),
@@ -8,9 +11,12 @@ And(p(c),
     Or(Not(col(c)), p(c)),
     Or(c == a, c == b))
 WDF: 
-col(c())
-¬(col(c())) ∨ col(c())
+col(a)
 true
-¬(col(c())) ∨ col(c())
+col(c())
+true
+true
+true
 col(c()) ∨ col(c())
-¬(col(c())) ∨ col(c())
+true
+true

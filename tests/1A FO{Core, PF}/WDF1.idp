@@ -6,12 +6,15 @@ vocabulary V {
 }
 
 theory T:V {
+    p(a).
+    col(a) & p(a).
     p(c()).
     col(c()) & p(c()).
     col(c()).
     col(c()) => p(c()).
     col(c()) | p(c()).
     if col(c()) then p(c()) else true.
+    ~col(c()) | p(c()).
 }
 procedure main() {
     Th = Theory(T)
