@@ -78,8 +78,8 @@ Expression.fill_WDF = fill_WDF
 def merge_WDFs(self):
     wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
     self.WDF = AND(wdfs)
+    return self
 Expression.merge_WDFs = merge_WDFs
-
 
 
 # Class AIfExpr  #######################################################
@@ -92,7 +92,21 @@ def merge_WDFs(self):
                                   self.sub_exprs[2].WDF))])
     else:
         self.WDF = None
+    return self
 AIfExpr.merge_WDFs = merge_WDFs
+
+
+# Class AQuantification  #######################################################
+
+def merge_WDFs(self):
+    assert len(self.sub_exprs) == 1, "Internal error"
+    if self.sub_exprs[0].WDF:
+        forall = FORALL(self.quantees, self.sub_exprs[0].WDF).simplify1()
+        self.WDF = AND([q.WDF for q in self.quantees] + [forall])
+    else:
+        self.WDF = None
+    return self
+AQuantification.merge_WDFs = merge_WDFs
 
 
 # Class ADisjunction  #######################################################
@@ -110,6 +124,7 @@ def merge_WDFs(self):
         else:
             out = AND([e.WDF, resimplify(OR([e, out]))])  #
     self.WDF = out
+    return self
 ADisjunction.merge_WDFs = merge_WDFs
 
 def resimplify(expr: Expression) -> Expression:
@@ -147,6 +162,7 @@ def merge_WDFs(self):
         else:
             out = AND([e.WDF, resimplify(OR([NOT(e), out]))])  #
     self.WDF = out
+    return self
 AConjunction.merge_WDFs = merge_WDFs
 AImplication.merge_WDFs = merge_WDFs
 
@@ -155,7 +171,7 @@ AImplication.merge_WDFs = merge_WDFs
 
 def merge_WDFs(self):
     wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
-    if self.symbol.decl:
+    if self.symbol.decl:  # known symbol
         self.WDF = AND(wdfs)
         if type(self.symbol.decl) != TypeDeclaration:
             if self.sub_exprs:
@@ -165,10 +181,12 @@ def merge_WDFs(self):
                 wdf2 = TRUE
             self.WDF = AND([self.WDF, wdf2])
         self.WDF.original = self
+    elif self.symbol.WDF:  # $(.)(..)
+        self.WDF = AND([self.symbol.WDF] + wdfs)
     else:
         self.WDF = AND(wdfs)
+    return self
 AppliedSymbol.merge_WDFs = merge_WDFs
-
 
 
 Done = True

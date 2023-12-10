@@ -669,8 +669,7 @@ def annotate(self: Expression,
         Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-    self = self.fill_attributes_and_check()
-    self.merge_WDFs()
+    self = self.fill_attributes_and_check().merge_WDFs()
     return self
 Expression.annotate = annotate
 
@@ -765,7 +764,8 @@ def annotate(self: Expression,
     for q in self.quantees:
         q.annotate_quantee(voc, q_v, inferred)  # adds inner variables to q_v
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-    return self.fill_attributes_and_check()
+    self.fill_attributes_and_check().merge_WDFs()
+    return self
 AQuantification.annotate = annotate
 
 def fill_attributes_and_check(self: AQuantification) -> Expression:
@@ -1033,8 +1033,7 @@ def annotate(self: AppliedSymbol,
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc, q_vars)
-    out = self.fill_attributes_and_check()
-    self.merge_WDFs()
+    out = self.fill_attributes_and_check().merge_WDFs()
 
     # move the negation out
     if 'not' in self.is_enumerated:

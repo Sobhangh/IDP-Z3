@@ -10,11 +10,17 @@ theory T:V {
     col(a) & p(a).
     p(c()).
     col(c()) & p(c()).
+    p(c()) & col(c()).
     col(c()).
     col(c()) => p(c()).
     col(c()) | p(c()).
     if col(c()) then p(c()) else true.
     ~col(c()) | p(c()).
+    p($(`c)()).
+    ?x in Concept[()->color]: p($(x)()).
+    ?x in Concept[()->color]: col($(x)()) & p($(x)()).
+    ?x in Concept[()->color]: col($(x)()) => p($(x)()).
+    ?x in Concept[col -> Bool]: ? y in $(x): y=c().
 }
 procedure main() {
     Th = Theory(T)
