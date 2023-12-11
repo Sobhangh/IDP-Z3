@@ -16,7 +16,7 @@ theory {
 	! x in married: age(spouse(x))>20.
 	! (x,y) in affair: x=y.
 	? (x,y) in affair: true.
-	!x in Marriage: married(A(x)).
+	!x in MarriageT: Marriage(x) <=> person(A(x)) & married(A(x)).
 }
 
 

@@ -1,8 +1,8 @@
-And(6 == total)
+True
 
 Model 1
 ==========
-total := 6.
+has_c := true.
 
 
 No more models.

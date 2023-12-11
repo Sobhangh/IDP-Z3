@@ -1,5 +1,5 @@
 vocabulary V {
-    type T
+    T: Int -> Bool
     p : (T*T) → 𝔹
     r : (T) → 𝔹
     s : (T*T) → 𝔹
@@ -10,7 +10,7 @@ theory T:V {
       !x, y in T: s(x,y) <- p(x,y).
       !x, y in T: s(x,y) <- p(y,x).
       !x, y in T: s(x,y) <- ?z in T: s(x,z) & s(z,y).
-      r(0).
+      r(0) <- T(0).
       !x in T: r(x) <- ?y in T: r(y) & s(y,x).
     }
 }

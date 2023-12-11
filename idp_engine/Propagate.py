@@ -35,10 +35,9 @@ from typing import Optional
 from z3 import (Solver, sat, unsat, unknown, Not, Or, is_false, is_true,
                 is_not, is_eq, Bool, z3types)
 
-from .Assignments import Status as S, Assignments, Assignment
-from .Expression import (Expression, AQuantification, ADisjunction,
-                         AConjunction, AppliedSymbol, AComparison, AUnary,
-                         Brackets, TRUE, FALSE)
+from .Assignments import Status as S
+from .Expression import (Expression, AppliedSymbol, AComparison,
+                         TRUE, FALSE, BOOL_SETNAME, INT_SETNAME, REAL_SETNAME)
 from .Parse import str_to_IDP
 from .Theory import Theory
 from .utils import OrderedSet, IDPZ3Error, NOT_SATISFIABLE
@@ -143,9 +142,10 @@ def _batch_propagate(self, tag=S.CONSEQUENCE):
                     solver.check()  # not sure why this is needed
                     for test in tests:
                         q = lookup[str(test)]
-                        val1 = solver.model().eval(q.reified(self))  #TODO compute model once
-                        val = str_to_IDP(q, str(val1))
-                        yield self.assignments.assert__(q, val, tag)
+                        val1 = str(solver.model().eval(q.reified(self)))  #TODO compute model once
+                        if test not in [val1, val1+"()"]:
+                            val = str_to_IDP(val1, q.type)
+                            yield self.assignments.assert__(q, val, tag)
                     break
                 else:  # unknown
                     # print("Falling back !!")
@@ -207,7 +207,7 @@ def _propagate_inner(self, tag, solver, todo):
                 bool_q = Bool(q_symbol).translate(solver.ctx)
                 solver.add(bool_q == (question == val1))
             propositions.append(bool_q)
-            prop_map[q_symbol] = (val1, q)
+            prop_map[q_symbol] = (str(val1), q)
 
         # Only query the propositions.
         cons = solver.consequences([], propositions)
@@ -230,8 +230,9 @@ def _propagate_inner(self, tag, solver, todo):
             if q_symbol.startswith('Not('):
                 q_symbol = q_symbol[4:-1]
             val1, q = prop_map[q_symbol]
-            val = str_to_IDP(q, str(val1))
-            yield self.assignments.assert__(q, val, tag)
+            if str(q) not in [val1, val1+"()"]:
+                val = str_to_IDP(val1, q.type)
+                yield self.assignments.assert__(q, val, tag)
 
         yield "No more consequences."
     elif res1 == unsat:
@@ -321,7 +322,7 @@ def _first_propagate(self, solver: Solver,
         propositions.append(bool_q)
         prop_map[q_symbol] = (val1, q)
 
-        if complete and q.type not in ['𝔹', 'ℤ', 'ℝ']:
+        if complete and q.type not in [BOOL_SETNAME, INT_SETNAME, REAL_SETNAME]:
             # If complete=True, we also want to propagate every possible value
             # of a function. This is the most complete form of propagation, as
             # it will also tell us which function values are now _not_
@@ -363,7 +364,9 @@ def _first_propagate(self, solver: Solver,
 
         val, q = prop_map[q_symbol]
         # Convert to AST form if the value is in Z3 form.
-        val = str_to_IDP(q, str(val)) if not isinstance(val, Expression) else val
+        if not isinstance(val, Expression):
+            val = (None if str(q) in [str(val), str(val)+"()"] else
+                   str_to_IDP(str(val), q.type))
 
         # In case of `complete=True`, convert the extra function values to
         # comparisons.
@@ -400,15 +403,16 @@ def _propagate_through_models(self, solver, valqs):
         # I.e., there is no possible model in which the value of the question
         # would be different.
         if res2 == unsat:
-            val = str_to_IDP(q, str(val1))
+            if str(q) not in [str(val1), str(val1)+"()"]:
+                val = str_to_IDP(str(val1), q.type)
 
-            # FIXME: do we need the test below?
-            # ass = self.assignments.get(q.code, None)
-            # https://gitlab.com/krr/IDP-Z3/-/merge_requests/325#note_1487419405
-            # if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
-            # and not ass.value.same_as(val)):
-            #     raise IDPZ3Error(NOT_SATISFIABLE)
-            yield self.assignments.assert__(q, val, S.UNIVERSAL)
+                # FIXME: do we need the test below?
+                # ass = self.assignments.get(q.code, None)
+                # https://gitlab.com/krr/IDP-Z3/-/merge_requests/325#note_1487419405
+                # if (ass and ass.status in [S.GIVEN, S.DEFAULT, S.EXPANDED]
+                # and not ass.value.same_as(val)):
+                #     raise IDPZ3Error(NOT_SATISFIABLE)
+                yield self.assignments.assert__(q, val, S.UNIVERSAL)
 
 Theory._propagate_through_models = _propagate_through_models
 
@@ -523,8 +527,10 @@ def _z3_propagate(self, tag=S.CONSEQUENCE):
                     term = consq.children()[0]
                     if term in unreify:
                         q = unreify[term]
-                        val = str_to_IDP(q, consq.children()[1])
-                        yield self.assignments.assert__(q, val, tag)
+                        val1 = str(consq.children()[1])
+                        if str(q) not in [val1, val1+"()"]:
+                            val = str_to_IDP(val1, q.type)
+                            yield self.assignments.assert__(q, val, tag)
                     else:
                         print("???", str(consq))
                 else:

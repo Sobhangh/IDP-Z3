@@ -19,7 +19,7 @@
     Various utilities (in particular, OrderedSet)
 """
 from __future__ import annotations
-from typing import TYPE_CHECKING, Iterator, Union, Optional
+from typing import TYPE_CHECKING, Iterator, Union, Optional, List
 
 from collections.abc import Iterable
 from datetime import datetime
@@ -29,7 +29,7 @@ import tempfile
 from enum import Enum, auto
 
 if TYPE_CHECKING:
-    from .Expression import Expression
+    from .Expression import ASTNode, Expression
     from .Parse import TupleIDP
 
 """
@@ -61,6 +61,7 @@ INT = "ℤ"
 REAL = "ℝ"
 DATE = "Date"
 CONCEPT = "Concept"
+EMPTY = "()"  # the type name of the empty tuple
 
 GOAL_SYMBOL = "goal_symbol"
 RELEVANT = " relevant"  # internal.  Leading space to avoid conflict with user vocabulary
@@ -98,14 +99,38 @@ def log(action):
 
 class IDPZ3Error(Exception):
     """ raised whenever an error occurs in the conversion from AST to Z3 """
-    pass
+    def __init__(self,
+                 msg: str,
+                 node: Optional[ASTNode] = None,
+                 error: Optional[bool] = True):
+        self.node = node
+        self.message = msg
+        self.error = error
+        super().__init__(msg)
 
+    def __str__(self):
+        try:
+            location = self.node.location()
+        except:
+            return self.message
+        return (f"{'Error' if self.error else 'Warning'}: "
+                f"line {location['line']} - colStart {location['col']} "
+                f"- colEnd {location['end']} => {self.message}")
+
+TO = {'Bool': BOOL, 'Int': INT, 'Real': REAL,
+        '`Bool': '`'+BOOL, '`Int': '`'+INT, '`Real': '`'+REAL,}
 
 def unquote(s: str) -> str:
     if s[0] == "'" and s[-1] == "'":
         return s[1:-1]
-    return s
+    return TO.get(s, s)
 
+def flatten(a: List) -> List:
+    # https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
+    out = []
+    for sublist in a:
+        out.extend(sublist)
+    return out
 
 # OrderedSet  #############################################
 
@@ -138,8 +163,8 @@ class OrderedSet(dict):
     # def items(self):
     #     return super(OrderedSet, self).items()
 
-    def pop(self, key: str, default: Optional[Union[Expression, TupleIDP]] = None) -> Union[Expression, TupleIDP]:
-        return super(OrderedSet, self).pop(key, default)
+    # def pop(self, key: str, default: Optional[Union[Expression, TupleIDP]] = None) -> Union[Expression, TupleIDP]:
+    #     return super(OrderedSet, self).pop(key, default)
 
     def __or__(self, other: OrderedSet) -> OrderedSet:
         """returns the union of self and other.  Use: `self | other`.

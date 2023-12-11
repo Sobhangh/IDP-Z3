@@ -2,7 +2,7 @@ vocabulary V {
     // we use an extended square to simplify computations:
     // we add a 1-cell-wide border without mine
 
-    type Range
+    Range : Int -> Bool
     type Count := {0..8}
     max: () → ℤ  // largest index of column / row
     type PseudoBol := {0,1}
@@ -55,7 +55,7 @@ theory T:V {
 }
 
 structure S:V {
-    Range := {0..2}.
+Range := {0..2}.
     max := 2.
 }
 

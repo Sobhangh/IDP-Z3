@@ -8,9 +8,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 The main feature of this release is type checking.
 
+Breaking change: some KB may not pass the type check anymore,
+in particular those declaring numeric types without interpretation (e.g. `type row`).
+See `Explanations / Type checking` in the documentation for details.
+
 Contributors (alphabetical): Pierre Carbonnelle.
 
 ### IDP-Z3
+* MR !336: Improve type checking
 * issue #309: "'AQuantification' object has no attribute 'symbol'" error in IC
 
 

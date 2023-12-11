@@ -27,8 +27,8 @@ from typing import List, TYPE_CHECKING, Optional, Union
 from z3 import ModelRef, FuncInterp, is_and, is_or, is_eq, is_not, AstRef, ExprRef
 
 from .Assignments import Assignments
-from .Expression import Expression, SYMBOL, AppliedSymbol
-from .Parse import str_to_IDP2, SymbolDeclaration
+from .Expression import Expression, AppliedSymbol
+from .Parse import str_to_IDP, SymbolDeclaration
 from .utils import RESERVED_SYMBOLS
 if TYPE_CHECKING:
     from .Theory import Theory
@@ -69,16 +69,16 @@ def get_interpretations(theory: Theory, model: ModelRef, as_z3: bool
                             applied = re.sub(TRUEFALSE, lambda m: m.group(1).lower(), applied)
                             val = args[-1]
                             map[applied] = (val if as_z3 else
-                                            str_to_IDP2("", decl.out.decl, str(val)))
+                                            str_to_IDP(str(val), decl.codomain))
                         try:
                             # use the else value if we can translate it
-                            val = str_to_IDP2("", decl.out.decl, str(a_list[-1]))
+                            val = str_to_IDP(str(a_list[-1]), decl.codomain)
                             _else = (a_list[-1] if as_z3 else val)
                         except AssertionError:
                             pass # Var(0) => can be any value
                 elif isinstance(interp, ExprRef):
                     _else = (interp if as_z3 else
-                             str_to_IDP2("", decl.out.decl, str(interp)))
+                             str_to_IDP(str(interp), decl.codomain))
                 else:
                     assert interp is None, "Internal error"
             out[decl.name] = (map, _else)
@@ -91,17 +91,17 @@ def collect_questions(z3_expr: AstRef,
     """ determines the function applications that should be evaluated/propagated
     based on the function interpretation in `z3_expr` (obtained from a Z3 model).
 
-    i.e., add `<decl>(<value>)` to `out`
+    i.e., add `p(value)` to `out`
        for each occurrence of `var(0) = value`
-       in the else clause of a Z3 function interpretation.
+       in the else clause of the Z3 interpretation of unary `p`.
 
-    example: the interpretation of opgenomen is `z3_expr`, i.e. `
+    example: the interpretation of p is `z3_expr`, i.e. `
             [else ->
                 Or(Var(0) == 12,
                     And(Not(Var(0) == 12), Not(Var(0) == 11), Var(0) == 13),
                     And(Not(Var(0) == 12), Var(0) == 11))]`
 
-    result: `[opgenomen(11), opgenomen(12), opgenomen(13)]` is added to `out`
+    result: `[p(11), p(12), p(13)]` is added to `out`
 
     Args:
         z3_expr (AstRef): the function interpretation in a model of Z3
@@ -118,14 +118,16 @@ def collect_questions(z3_expr: AstRef,
     elif is_and(z3_expr) or is_or(z3_expr) or is_not(z3_expr):
         for e in z3_expr.children():
             collect_questions(e, decl, ass, out)
-    elif is_eq(z3_expr):
-        typ = decl.sorts[0].decl
-        arg_string = str(z3_expr.children()[1])
-        atom_string = f"{decl.name}({arg_string})"
-        if atom_string not in ass:
-            arg = str_to_IDP2(typ.name, typ, arg_string)
-            symb = SYMBOL(decl.name)
-            symb.decl = decl
-            atom = AppliedSymbol.make(symb, [arg])
-            out.append(atom)
+    elif is_eq(z3_expr) and decl.arity == 1:  #TODO higher arity
+        left, right = z3_expr.children()
+        if str(left).startswith("Var(0)"):  # Var(0) = value
+            typ = decl.domains[0]
+            arg_string = str(right)
+            atom_string = f"{decl.name}({arg_string})"  # p(value)
+            if atom_string not in ass:
+                arg = str_to_IDP(arg_string, typ)
+                symb = decl.symbol_expr
+                symb.decl = decl
+                atom = AppliedSymbol.make(symb, [arg])  # p(value)
+                out.append(atom)
     return

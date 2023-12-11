@@ -25,7 +25,7 @@ from copy import copy
 from typing import Optional
 
 from .Assignments import Status, Assignments
-from .Expression import (catch_error, Expression, AQuantification, ADisjunction,
+from .Expression import (Expression, AQuantification, ADisjunction,
                          AConjunction, AppliedSymbol, AComparison, AUnary,
                          Variable, Brackets, TRUE, FALSE)
 
@@ -82,7 +82,6 @@ def propagate1(self, assignments, tag, truth):
 Expression.propagate1 = propagate1
 
 # @log  # decorator patched in by tests/main.py
-@catch_error
 def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self (e0 is not a Variable)
 
@@ -156,7 +155,6 @@ def propagate1(self, assignments, tag, truth=TRUE):
 AUnary.propagate1 = propagate1
 
 # @log_calls  # decorator patched in by tests/main.py
-@catch_error
 def substitute(self, e0, e1, assignments, tag=None):
     """ recursively substitute e0 by e1 in self """
 
@@ -202,10 +200,9 @@ AComparison.propagate1 = propagate1
 # Class Variable  #######################################################
 
 # @log  # decorator patched in by tests/main.py
-@catch_error
 def substitute(self, e0, e1, assignments, tag=None):
-    if self.sort:
-        self.sort = self.sort.substitute(e0,e1, assignments, tag)
+    if self.type:
+        self.type = self.type.substitute(e0,e1, assignments, tag)
     return e1 if self.code == e0.code else self
 Variable.substitute = substitute
 

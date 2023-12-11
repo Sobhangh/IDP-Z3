@@ -17,8 +17,11 @@ And(Or(Not(married(Alice)), 20 < age(Bob)),
        And(married(Tom), affair(Tom, Bob)),
        And(married(Tom), affair(Tom, Tom))),
     ForAll(c!0,
-           Or(Not(And(is(marriage, c!0), Marriage(c!0))),
-              married(A(c!0)))),
+           Or(Not(is(marriage, c!0)),
+              Marriage(c!0) ==
+              And(Or(A(c!0) == Tom,
+                     Or(A(c!0) == Bob, A(c!0) == Alice)),
+                  married(A(c!0))))),
     married(Bob),
     married(Alice),
     Not(married(Tom)),
@@ -32,8 +35,6 @@ And(Or(Not(married(Alice)), 20 < age(Bob)),
 
 Model 1
 ==========
-animal := {Cat, Dog, Frog}.
-person := {Alice, Bob, Tom}.
 married := {Alice, Bob}.
 spouse := {Alice -> Bob, Bob -> Alice}.
 affair := {(Alice, Alice)}.

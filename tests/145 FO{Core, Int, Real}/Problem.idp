@@ -5,7 +5,7 @@ vocabulary V {
     r: () → Real
     type color := {red, blue, green}
     c: () → color
-    type range
+    range: Int -> Bool
     ra: () → range
 }
 

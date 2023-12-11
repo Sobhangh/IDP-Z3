@@ -25,12 +25,12 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
             | enumeration=Enumeration
             | enumeration=ConstructedFrom))?;
 
-    SymbolDeclaration: annotations=Annotations symbols+=Symbol[','] ':'
-          ( '(' sorts*=Type[/[*⨯]/] ')' | sorts*=Type[/[*⨯]/] )
-          ('->' | '→') out=Type;
-      Symbol: name=/`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
+    SymbolDeclaration: annotations=Annotations
+          symbols+= NAME [','] ':'
+          ( '(' sorts*=SetName[/[*⨯]/] ')' | sorts*=SetName[/[*⨯]/] )
+          ('->' | '→') out=SetName;
 
-    VarDeclaration: 'var' name=Symbol ('in' | '∈') subtype=Type;
+    VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ IN subtype=SetName;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;
 
@@ -47,17 +47,16 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
           definiendum=AppliedSymbol
           (('=' |DefEqOp) out=SumMinus)?
           (('<-'|'←' | 'if' ) body=Expression)? '.' ;
-        Quantee:  subtype=Type !'in' !'∈' vars+=Variable[',']
-                | vars+=Variable[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?
-                | vars+=VarTuple[','] ( ('in' | '∈') (subtype=Type | sort=SymbolExpr) )?;
+        Quantee:  subtype=SetName !IN vars+=Variable[',']
+                | vars+=Variable[','] ( IN (subtype=SetName | sort=SymbolExpr) )?
+                | vars+=VarTuple[','] ( IN (subtype=SetName | sort=SymbolExpr) )?;
             Variable: name=/`?[^\d\W]\w*\b/;
             VarTuple: '(' vars+=Variable[','] ')';
-            Type: name=/[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/
-              ( '['
-                ( '(' ins*=Type[/[*⨯]/] ')' | ins*=Type[/[*⨯]/] )
-                ('->' | '→') out=Type
-                ']'
-              )?;
+            SetName: ( name='Concept' '['
+                          ( '(' ins*=SetName[/[*⨯]/] ')' | ins*=SetName[/[*⨯]/] )
+                          ('->' | '→') out=SetName ']'
+                  )
+                | name=NAME;
 
   Axiom: annotations=Annotations expr=Expression '.';
 
@@ -119,10 +118,11 @@ TheoryBlock: 'theory' (name=ID ':' vocab_name=ID)? '{'
               '(' sub_exprs*=Expression[','] ')'
               ( is_enumerated=/is\s+enumerated/
               | is_enumeration=/in|∈/ in_enumeration=Enumeration)?;
-        SymbolExpr: s=Symbol | eval='$' '(' s=Expression ')';
-      UnappliedSymbol: s=Symbol;
+        SymbolExpr: name=SYMBOL
+                  | eval='$' '(' s=Expression ')';
+      UnappliedSymbol: name=SYMBOL;
       Number: number=IDPFLOAT | number=INT;
-        IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
+IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       Date: iso=/#\d{4}-\d{2}-\d{2}/
           | iso='#TODAY' ( '(' y=INT ',' m=INT ',' d=INT ')' )?;
       Brackets: annotations=Annotations '(' f=Expression ')';
@@ -151,8 +151,8 @@ Structure: 'structure' name=ID? (':' vocab_name=ID)?
 
   ConstructedFrom: constructed=/constructed\s+from/?
                    '{' constructors*=Constructor[',']  '}';
-    Constructor: name=UnappliedSymbol ('(' args+=Accessor[','] ')' )?;
-    Accessor: (accessor=UnappliedSymbol ':')? type=UnappliedSymbol;
+    Constructor: name=ID ('(' args+=Accessor[','] ')' )?;
+    Accessor: (accessor=ID ':')? out=SetName;
 
   Identifier: AppliedSymbol | UnappliedSymbol | Number | Date;
 
@@ -176,4 +176,6 @@ Procedure: 'procedure' name=ID '(' args=ID*')' '{' pystatements=PyStatement* '}'
   String: literal=/f?"(\.|[^"])*"/;
   PyList: '[' elements*=PyExpr[','] ']';
 
-
+NAME: /[^\d\W]\w*\b|'(\.|[^'])*'/;
+SYMBOL: /`?[^\d\W]\w*\b|𝔹|ℤ|ℝ|'(\.|[^'])*'/;
+IN: /in|∈/;

@@ -13,21 +13,11 @@ Traceback (most recent call last):
     self.add(*theories)
   File "idp_engine/Theory.py", line ??, in add
     decl.interpret(self)
-  File "idp_engine/Expression.py", line ??, in inner_function
-    raise e
-  File "idp_engine/Expression.py", line ??, in inner_function
-    return func(self, *args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Interpret.py", line ??, in interpret
     problem.interpretations[self.name].interpret(problem)
-  File "idp_engine/Expression.py", line ??, in inner_function
-    raise e
-  File "idp_engine/Expression.py", line ??, in inner_function
-    return func(self, *args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Interpret.py", line ??, in interpret
     self.check(not condition.same_as(FALSE),
   File "idp_engine/Expression.py", line ??, in check
-    raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
-idp_engine.utils.IDPZ3Error: Error on line ??, col 5: Belgium is not in the domain of p
+    raise IDPZ3Error(msg, self)
+idp_engine.utils.IDPZ3Error: Error: line 11 - colStart 5 - colEnd 5 => Belgium is not in the domain of p
 

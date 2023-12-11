@@ -24,20 +24,19 @@ This module contains methods and functions for the handling of definitions
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import (Set, Tuple, List, Optional, TYPE_CHECKING)
+from typing import (Set, Tuple, List, Optional)
 
-from .utils import (RESERVED_SYMBOLS, INT, BOOL, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
-from .Expression import (Expression, catch_error, ZERO, TRUE, FALSE, RecDef, TYPE,
-                         Constructor, Symbol, SYMBOL, AppliedSymbol, Operator, AImplication,
+from .utils import (RESERVED_SYMBOLS, Semantics, CO_CONSTR_RECURSION_DEPTH, REAL)
+from .Expression import (Expression, ZERO, TRUE, FALSE, RecDef,
+                         Constructor, SETNAME, SetName, AppliedSymbol, Operator, AImplication,
                          ARImplication, AAggregate, AUnary, AIfExpr, AComparison,
-                         IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND)
+                         IF, IMPLIES, EQUALS, EQUIV, FORALL, OR, AND, BOOL_SETNAME, INT_SETNAME, REAL_SETNAME)
 from .Parse import Definition, Rule, SymbolDeclaration
 from .Theory import Theory
 
 
 # class Definition  ###########################################################
 
-@catch_error
 def get_def_constraints(self: Definition,
                         problem: Theory,
                         for_explain: bool = False
@@ -55,44 +54,41 @@ def get_def_constraints(self: Definition,
 
     Return:
         dict[SymbolDeclaration, Definition, List[Expression]]:
-            a mapping from (Symbol, Definition) to the list of constraints
+            a mapping from (SymbolDeclaration, Definition) to the list of constraints
     """
     if self.mode == Semantics.RECDATA:
         out = {}
         for decl in self.renamed:
             # expr = nested if expression, for each rule
-            decl.check(decl.out.name in [INT, BOOL],
-                       f"Recursive functions of type {decl.out.name} are not supported yet")
-            expr = (ZERO if decl.out.name == INT else
-                    FALSE if decl.out.name == BOOL else
+            decl.check(decl.codomain in [INT_SETNAME, BOOL_SETNAME],
+                       f"Recursive functions of type {decl.codomain} are not supported yet")
+            expr = (ZERO if decl.codomain == INT_SETNAME else
+                    FALSE if decl.codomain == BOOL_SETNAME else
                     FALSE ) # todo: pick a value in type enumeration
             for rule in self.renamed[decl]:
                 val = rule.out if rule.out is not None else TRUE
                 expr = IF(rule.body, val, expr)
 
             vars = sorted(list(self.def_vars[decl.name].values()), key=lambda v: v.name)
-            vars = vars[:-1] if decl.out.name != BOOL else vars
+            vars = vars[:-1] if decl.codomain != BOOL_SETNAME else vars
             expr = RecDef(self, decl.name, vars, expr.interpret(problem, {}))
             out[decl, self] = [expr]
         return out
 
     # compute level symbols
-    level_symbols: dict[SymbolDeclaration, Symbol] = {}
+    level_symbols: dict[SymbolDeclaration, SetName] = {}
     for key in self.inductive:
-        real = TYPE(REAL)
-        real.decl = problem.declarations[REAL]
-        symbdec = SymbolDeclaration.make(
-            "_"+str(self.id)+"lvl_"+key.name,
-            key.arity, key.sorts, real)
-        level_symbols[key] = SYMBOL(symbdec.name)
+        symbdec = SymbolDeclaration.make(self,
+            "_"+str(self.id)+"lvl_"+key.name, key.domains, REAL_SETNAME)
+        level_symbols[key] = SETNAME(symbdec.name)
         level_symbols[key].decl = symbdec
 
     # add level mappings
     instantiables = {}
     for decl, rules in self.canonicals.items():
         rule = rules[0]
-        rule.has_finite_domain = all(s.extension(problem.interpretations, problem.extensions)[0] is not None
-                                   for s in rule.definiendum.decl.sorts)
+        rule.has_finite_domain = all(s.extension(problem.extensions)[0] is not None
+                                   for s in rule.definiendum.decl.domains)
 
         if rule.has_finite_domain or decl in self.inductive:
             # add a constraint containing the definition over the full domain
@@ -146,15 +142,14 @@ def get_def_constraints(self: Definition,
     return out
 Definition.get_def_constraints = get_def_constraints
 
-@catch_error
 def instantiate_definition(self: Definition, decl, new_args, theory) -> Optional[Expression]:
     rule = self.clarks.get(decl, None)
     # exclude inductive and recursive definitions
     if rule and self.mode != Semantics.RECDATA and decl not in self.inductive:
         instantiable = all(  # finite domain or not a variable
-            s.extension(theory.interpretations, theory.extensions)[0] is not None
+            s.extension(theory.extensions)[0] is not None
             or not v.has_variables()
-            for s, v in zip(rule.definiendum.decl.sorts, new_args))
+            for s, v in zip(rule.definiendum.decl.domains, new_args))
 
         if not instantiable:
             return None
@@ -179,7 +174,6 @@ Definition.instantiate_definition = instantiate_definition
 
 # class Rule  ###########################################################
 
-@catch_error
 def instantiate_definition(self: Rule,
                            new_args: List[Expression],
                            theory: Theory
@@ -200,7 +194,7 @@ def instantiate_definition(self: Rule,
                 "Internal error")
     subs = dict(zip([e.name for e in self.definiendum.sub_exprs], new_args))
 
-    if self.definiendum.decl.type == BOOL:  # a predicate
+    if self.definiendum.type == BOOL_SETNAME:  # a predicate
         out = EQUIV([instance, out])
     else:
         subs[self.out.name] = instance
@@ -265,7 +259,7 @@ AppliedSymbol.collect_nested_symbols = collect_nested_symbols
 
 # Expression
 def add_level_mapping(self,
-                        level_symbols: dict[SymbolDeclaration, Symbol],
+                        level_symbols: dict[SymbolDeclaration, SetName],
                         head: AppliedSymbol,
                         pos_justification: bool,
                         polarity: bool,
@@ -275,7 +269,7 @@ def add_level_mapping(self,
         are added to atoms containing recursive symbols.
 
     Arguments:
-        - level_symbols (dict[SymbolDeclaration, Symbol]): the level mapping
+        - level_symbols (dict[SymbolDeclaration, SetName]): the level mapping
             symbols as well as their corresponding recursive symbols
         - head (AppliedSymbol): head of the rule we are adding level mapping
             symbols to.
@@ -287,7 +281,7 @@ def add_level_mapping(self,
     """
     return (self.update_exprs((e.add_level_mapping(level_symbols, head, pos_justification, polarity, mode)
                                 for e in self.sub_exprs))
-                .annotate1())  # update .variables
+                .fill_attributes_and_check())  # update .variables
 Expression.add_level_mapping = add_level_mapping
 
 
@@ -295,7 +289,7 @@ Expression.add_level_mapping = add_level_mapping
 def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
     sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, not polarity, mode),
                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, polarity, mode)]
-    return self.update_exprs(sub_exprs).annotate1()
+    return self.update_exprs(sub_exprs).fill_attributes_and_check()
 AImplication.add_level_mapping = add_level_mapping
 
 
@@ -303,7 +297,7 @@ AImplication.add_level_mapping = add_level_mapping
 def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mode):
     sub_exprs = [self.sub_exprs[0].add_level_mapping(level_symbols, head, pos_justification, polarity, mode),
                     self.sub_exprs[1].add_level_mapping(level_symbols, head, pos_justification, not polarity, mode)]
-    return self.update_exprs(sub_exprs).annotate1()
+    return self.update_exprs(sub_exprs).fill_attributes_and_check()
 ARImplication.add_level_mapping = add_level_mapping
 
 # AUnary
@@ -314,7 +308,7 @@ def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mo
                                         if self.operator == '¬' else polarity,
                                         mode)
                     for e in self.sub_exprs)
-    return self.update_exprs(sub_exprs).annotate1()
+    return self.update_exprs(sub_exprs).fill_attributes_and_check()
 AUnary.add_level_mapping = add_level_mapping
 
 
@@ -339,8 +333,8 @@ def add_level_mapping(self, level_symbols, head, pos_justification, polarity, mo
             op = ('≥' if pos_justification else '>') \
                 if polarity else ('<' if pos_justification else '≤')
         comp = AComparison.make(op, [
-            AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs),
-            AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs)
+            AppliedSymbol.make(level_symbols[head.symbol.decl], head.sub_exprs, type_=REAL_SETNAME),
+            AppliedSymbol.make(level_symbols[self.symbol.decl], self.sub_exprs, type_=REAL_SETNAME)
         ])
         if polarity:
             return AND([comp, self])

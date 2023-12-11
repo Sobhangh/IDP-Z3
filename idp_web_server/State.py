@@ -81,7 +81,7 @@ class State(Theory):
             idp.vocabulary = idp.vocabularies['decision']
             idp.theory     = idp.theories    ['decision']
         if "_ViewType" not in idp.vocabulary.symbol_decls:
-            idp.display.annotate(idp)
+            idp.display.annotate_block(idp)
             idp.display.run(idp)
         self.idp = idp  # IDP vocabulary and theory
 

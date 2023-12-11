@@ -1,60 +1,46 @@
 Traceback (most recent call last):
-  File "idp_engine/Idp_to_Z3.py", line ??, in translate1
-    return (self.decl.translate(problem))(arg)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "z3/z3.py", line ??, in __call__
-    tmp = self.domain(i).cast(args[i])
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "z3/z3.py", line ??, in cast
-    _z3_assert(self.eq(val.sort()), "Sort mismatch")
-  File "z3/z3.py", line ??, in _z3_assert
-    raise Z3Exception(msg)
-z3.z3types.Z3Exception: Sort mismatch
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
   File "test.py", line ??, in generateZ3
-    idp.execute()
-  File "idp_engine/Run.py", line ??, in execute
-    exec(main, mybuiltins, mylocals)
-  File "<string>", line ??, in <module>
-  File "idp_engine/Run.py", line ??, in pretty_print
-    for i, xi in enumerate(x):
-  File "idp_engine/Run.py", line ??, in model_expand
-    ms = list(problem.expand(max=max, timeout_seconds=timeout_seconds, complete=complete))
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Theory.py", line ??, in expand
-    solver = self.solver
-             ^^^^^^^^^^^
-  File "idp_engine/Theory.py", line ??, in solver
-    if self.constraintz():
-       ^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Theory.py", line ??, in constraintz
-    collect_constraints(e.translate(self), self._constraintz)
-                        ^^^^^^^^^^^^^^^^^
-  File "idp_engine/Idp_to_Z3.py", line ??, in translate
-    out = self.translate1(problem, vars)
+    idp = IDP.from_str(theory)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Parse.py", line ??, in from_str
+    out = idpparser.model_from_str(code)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Expression.py", line ??, in inner_function
-    raise e
-  File "idp_engine/Expression.py", line ??, in inner_function
-    return func(self, *args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Idp_to_Z3.py", line ??, in translate1
-    x = self.sub_exprs[i-1].translate(problem, vars)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Idp_to_Z3.py", line ??, in translate
-    out = self.translate1(problem, vars)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Expression.py", line ??, in inner_function
-    raise e
-  File "idp_engine/Expression.py", line ??, in inner_function
-    return func(self, *args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "idp_engine/Idp_to_Z3.py", line ??, in translate1
-    self.check(False, msg)
+  File "textx/metamodel.py", line ??, in model_from_str
+    model = self._parser_blueprint.clone().get_model_from_str(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "textx/model.py", line ??, in get_model_from_str
+    model = parse_tree_to_objgraph(
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "textx/model.py", line ??, in parse_tree_to_objgraph
+    _end_model_construction(m)
+  File "textx/model.py", line ??, in _end_model_construction
+    obj.__init__(**attrs)
+  File "idp_engine/Parse.py", line ??, in __init__
+    self.warnings = flatten(t.annotate_block(self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/utils.py", line ??, in flatten
+    for sublist in a:
+  File "idp_engine/Parse.py", line ??, in <genexpr>
+    self.warnings = flatten(t.annotate_block(self)
+                            ^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in annotate_block
+    c1 = c.annotate(self.voc, {})
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in annotate
+    out = Operator.annotate(self, voc, q_vars)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in annotate
+    self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in <listcomp>
+    self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in annotate
+    out = self.fill_attributes_and_check()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in fill_attributes_and_check
+    e.check(e.type.root_set == s.root_set,
   File "idp_engine/Expression.py", line ??, in check
-    raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
-idp_engine.utils.IDPZ3Error: Error on line ??, col 5: Incorrect symbol application: spouseOf(red)
+    raise IDPZ3Error(msg, self)
+idp_engine.utils.IDPZ3Error: Error: line 8 - colStart 14 - colEnd 17 => LivingBeing expected (Color found: red)
 

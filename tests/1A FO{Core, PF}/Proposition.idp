@@ -1,0 +1,15 @@
+vocabulary V {
+    has_p : () -> Bool
+    p : has_p → 𝔹
+    c : has_p -> Int
+}
+
+theory T:V {
+    has_p() => p() & c()=3.
+}
+
+procedure main() {
+    pretty_print(Theory(T).formula())
+    pretty_print(model_expand(T))
+}
+
