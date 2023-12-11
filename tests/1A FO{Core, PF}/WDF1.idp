@@ -4,6 +4,8 @@ vocabulary V {
     c: () -> color
     p: col -> Bool
     i: col -> Int
+    q : () -> Bool
+    d: q -> Bool
 }
 
 theory T:V {
@@ -32,6 +34,9 @@ theory T:V {
 
     ? x in col: 0 < 4/i(x).
     ? x in col: i(x) ~= 0 & 0 < 4/i(x).
+
+    d().
+    q() & d().
 }
 procedure main() {
     Th = Theory(T)

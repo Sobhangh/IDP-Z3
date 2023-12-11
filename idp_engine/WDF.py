@@ -81,7 +81,7 @@ def And(sub_exprs: List[Expression]) -> Expression:
     """ Create a simplified conjunction"""
     out = OrderedSet()  # remove duplicates
     for e in sub_exprs:
-        if isinstance(e, AConjunction):  # flatten
+        if isinstance(e, AConjunction):  # flatten p & (q & r)
             for ee in e.sub_exprs:
                 out.append(ee)
         else:
@@ -93,7 +93,7 @@ def Or(sub_exprs: List[Expression]) -> Expression:
     """ Create a simplified disjunction"""
     exprs = OrderedSet()  # remove duplicates
     for e in sub_exprs:
-        if isinstance(e, ADisjunction):  # flatten
+        if isinstance(e, ADisjunction):  # flatten p | (q | r)
             for ee in e.sub_exprs:
                 exprs.append(ee)
         else:
@@ -117,11 +117,11 @@ def Or(sub_exprs: List[Expression]) -> Expression:
 
 def Not(e: Expression) -> Expression:
     """ Create a simplified negation"""
-    if isinstance(e, AConjunction):
+    if isinstance(e, AConjunction):  # ~(p & q)  -->  ~p | ~q
         return Or([Not(ee) for ee in e.sub_exprs])
-    if isinstance(e, ADisjunction):
+    if isinstance(e, ADisjunction):  # ~(p | q)  -->  ~p & ~q
         return And([Not(ee) for ee in e.sub_exprs])
-    if isinstance(e, AUnary):
+    if isinstance(e, AUnary):  # ~(~p))  -->  p
         return e.sub_exprs[0]
     return NOT(e)
 
@@ -144,11 +144,11 @@ Expression.merge_WDFs = merge_WDFs
 # Class AIfExpr  #######################################################
 
 def merge_WDFs(self):
+    # WDF(if(a,b,c)) is WDF(a) & if(a, WDF(b), WDF(c))
     if all(e.WDF for e in self.sub_exprs):
-        self.WDF = And([
-            self.sub_exprs[0].WDF,
-            If(self.sub_exprs[0], self.sub_exprs[1].WDF,
-                                  self.sub_exprs[2].WDF)])
+        self.WDF = And([self.sub_exprs[0].WDF,
+                        If(self.sub_exprs[0], self.sub_exprs[1].WDF,
+                                            self.sub_exprs[2].WDF)])
     else:
         self.WDF = None
     return self
@@ -159,12 +159,14 @@ AIfExpr.merge_WDFs = merge_WDFs
 
 def merge_WDFs(self):
     if len(self.sub_exprs) == 1:  # not a min/max aggregate
+        # WDF(!x in p: phi)  = WDF(p) & !x in p: WDF(phi)
         if self.sub_exprs[0].WDF:
             forall = FORALL(self.quantees, self.sub_exprs[0].WDF).simplify1()
             self.WDF = And([q.WDF for q in self.quantees] + [forall])
         else:
             self.WDF = None
     else:
+        # WDF(min{f|x in p: phi}) = WDF(p) & !x in p: WDF(phi) & (~phi | WDF(f))
         wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
         condition = And([wdfs[1], Or([Not(self.sub_exprs[1]), wdfs[0]])])
         forall = FORALL(self.quantees, condition).simplify1()
@@ -177,6 +179,8 @@ AAggregate.merge_WDFs = merge_WDFs
 # Class ADisjunction  #######################################################
 
 def merge_WDFs(self):
+    # WDF(p | q) = (WDF(p) & p) | (WDF(p) & WDF(q))
+    # if WDF(q) is true, this becomes WDF(p)
     out, testing = TRUE, False
     for e in reversed(self.sub_exprs):
         if not e.WDF:
@@ -187,29 +191,17 @@ def merge_WDFs(self):
             else:
                 out, testing = e.WDF, True
         else:
-            out = And([e.WDF, Or([e, out])])  #
+            out = Or([And([e.WDF, e]), And([e.WDF, out])])
     self.WDF = out
     return self
 ADisjunction.merge_WDFs = merge_WDFs
 
 
-# Class AMultDiv  #######################################################
-
-def merge_WDFs(self):
-    wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
-    self.WDF = And(wdfs)
-    for i, op in enumerate(self.operator):
-        self.check(op != "/" or i == len(self.sub_exprs)-2,
-                   f"Division must be last operation in {self.code}")
-    if self.operator[-1] == "/":
-        self.WDF = And([NOT(EQUALS([self.sub_exprs[-1], ZERO])), self.WDF])
-    return self
-AMultDiv.merge_WDFs = merge_WDFs
-
-
 # Class AImplication, AConjunction  #######################################################
 
 def merge_WDFs(self):
+    # WDF(p & q) = (WDF(p) & ~p) | (WDF(p) & WDF(q))
+    # if WDF(q) is true, this becomes WDF(p)
     out, testing = TRUE, False
     for e in reversed(self.sub_exprs):
         if not e.WDF:
@@ -220,16 +212,32 @@ def merge_WDFs(self):
             else:
                 out, testing = e.WDF, True
         else:
-            out = And([e.WDF, Or([Not(e), out])])  #
+            out = Or([And([e.WDF, Not(e)]), And([e.WDF, out])])  #
     self.WDF = out
     return self
 AConjunction.merge_WDFs = merge_WDFs
 AImplication.merge_WDFs = merge_WDFs
 
 
+# Class AMultDiv  #######################################################
+
+def merge_WDFs(self):
+    # WDF(f*g/h) = WDF(f) & WDF(g) & WDF(h) & h ~= 0
+    wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
+    self.WDF = And(wdfs)
+    for i, op in enumerate(self.operator):
+        self.check(op != "/" or i == len(self.sub_exprs)-2,
+                   f"Division must be the last operation in {self.code}")
+    if self.operator[-1] == "/":
+        self.WDF = And([NOT(EQUALS([self.sub_exprs[-1], ZERO])), self.WDF])
+    return self
+AMultDiv.merge_WDFs = merge_WDFs
+
+
 # Class AppliedSymbol  #######################################################
 
 def merge_WDFs(self):
+    # WDF(p(a, b)) = WDF(p) & WDF(a) & WDF(b) & dom(p)(a,b)
     wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
     if self.symbol.decl:  # known symbol
         self.WDF = And(wdfs)
@@ -237,6 +245,9 @@ def merge_WDFs(self):
             if self.sub_exprs:
                 wdf2 = And([self.WDF]+[is_subset_of(e, e.type, d)
                             for e, d in zip(self.sub_exprs, self.symbol.decl.domains)])
+            elif self.symbol.decl.domains:  #  partial constant
+                symbol = SymbolExpr.make(self.symbol.decl.domains[0].decl)
+                wdf2 = AppliedSymbol.make(symbol, [])
             else:  # constant c()
                 wdf2 = TRUE
             self.WDF = And([self.WDF, wdf2])
