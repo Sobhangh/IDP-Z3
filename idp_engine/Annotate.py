@@ -763,8 +763,7 @@ def annotate(self: Expression,
     for q in self.quantees:
         q.annotate_quantee(voc, q_v, inferred)  # adds inner variables to q_v
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-    self.fill_attributes_and_check().merge_WDFs()
-    return self
+    return self.fill_attributes_and_check().merge_WDFs()
 AQuantification.annotate = annotate
 
 def fill_attributes_and_check(self: AQuantification) -> Expression:
@@ -990,6 +989,7 @@ def annotate(self: AAggregate,
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
                 applied.WDF = self.WDF
+                # set location of applied
                 applied._tx_position = self._tx_position
                 applied._tx_position_end = self._tx_position_end
                 applied.parent = self.parent

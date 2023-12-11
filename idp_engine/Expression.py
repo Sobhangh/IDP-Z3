@@ -566,7 +566,8 @@ class SetName(Expression):
 
         decl (Declaration, Optional): declaration of the type
 
-        root_set (SetName, Optional): a Type or a Concept with signature (Concept[T->T])
+        root_set (List[SetName]): cross-product of root sets that include this set.
+            Used for type checking.
     """
 
     def __init__(self, parent,

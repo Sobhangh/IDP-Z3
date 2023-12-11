@@ -177,10 +177,10 @@ class Assignment(object):
         return Assignment(self.sentence, value, self.status, self.relevant)
 
     def translate(self, problem: Theory) -> BoolRef:
+        # called when the fact is true or false --> it must be defined too.
         out = self.formula()
-        if out.type == BOOL_SETNAME:
-            out.fill_WDF()
-            out = AND([out.WDF, out])
+        out.fill_WDF()
+        out = AND([out.WDF, out])
         return out.translate(problem)
 
     def as_set_condition(self
