@@ -216,16 +216,15 @@ SetName.annotate = annotate
 # Class TheoryBlock  #######################################################
 
 def collect_warnings(expr: Expression, out):
-    """recursively finds the deepest AppliedSymbol(s) that is not well-defined in expr,
+    """recursively finds the deepest Expression that is not well-defined in expr,
     and create a warning"""
     if not expr.WDF or expr.WDF.same_as(TRUE):  # well-defined
         return
     for e in expr.sub_exprs:  # recursive search
         collect_warnings(e, out)
 
-    # AppliedSymbol whose arguments are well-defined
-    if (type(expr) == AppliedSymbol
-    and all(not e.WDF or e.WDF.same_as(TRUE) for e in expr.sub_exprs)):
+    # Expression whose arguments are well-defined
+    if all(not e.WDF or e.WDF.same_as(TRUE) for e in expr.sub_exprs):
         out.append(IDPZ3Error(
             f"Domain error: {expr.code[:20]} is defined only when {expr.WDF}",
             node=expr, error=False))

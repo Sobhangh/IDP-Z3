@@ -29,6 +29,9 @@ theory T:V {
     #{x in color: col(x) & p(x)} = 2.
     min{i(x) | x in color: col(x) & p(x)} = 2.
     min{i(x) | x in color: p(x)} = 2.
+
+    ? x in col: 0 < 4/i(x).
+    ? x in col: i(x) ~= 0 & 0 < 4/i(x).
 }
 procedure main() {
     Th = Theory(T)

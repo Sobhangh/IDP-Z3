@@ -121,6 +121,8 @@ def Not(e: Expression) -> Expression:
         return Or([Not(ee) for ee in e.sub_exprs])
     if isinstance(e, ADisjunction):
         return And([Not(ee) for ee in e.sub_exprs])
+    if isinstance(e, AUnary):
+        return e.sub_exprs[0]
     return NOT(e)
 
 
@@ -189,6 +191,20 @@ def merge_WDFs(self):
     self.WDF = out
     return self
 ADisjunction.merge_WDFs = merge_WDFs
+
+
+# Class AMultDiv  #######################################################
+
+def merge_WDFs(self):
+    wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
+    self.WDF = And(wdfs)
+    for i, op in enumerate(self.operator):
+        self.check(op != "/" or i == len(self.sub_exprs)-2,
+                   f"Division must be last operation in {self.code}")
+    if self.operator[-1] == "/":
+        self.WDF = And([NOT(EQUALS([self.sub_exprs[-1], ZERO])), self.WDF])
+    return self
+AMultDiv.merge_WDFs = merge_WDFs
 
 
 # Class AImplication, AConjunction  #######################################################

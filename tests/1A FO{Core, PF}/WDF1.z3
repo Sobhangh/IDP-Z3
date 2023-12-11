@@ -24,6 +24,9 @@ And(p(a),
     If(And(col(b), p(b)), 1, 0),
     2 == __min(lambda x ∈ color : i(x) if col(x) ∧ p(x)),
     2 == __min(lambda x ∈ color : i(x) if p(x)),
+    Or(And(col(a), 0 < 4/i(a)), And(col(b), 0 < 4/i(b))),
+    Or(And(col(a), And(Not(0 == i(a)), 0 < 4/i(a))),
+       And(col(b), And(Not(0 == i(b)), 0 < 4/i(b)))),
     Or(c == a, c == b),
     Or(And(And(col(a), p(a)),
            __min(lambda x ∈ color : i(x) if col(x) ∧ p(x)) ==
@@ -65,3 +68,5 @@ true
 true
 true
 ∀ x ∈ color: col(x) ∧ (¬(p(x)) ∨ col(x))
+∀ x ∈ col: ¬(i(x) = 0)
+true
