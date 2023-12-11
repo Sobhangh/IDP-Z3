@@ -990,6 +990,10 @@ def annotate(self: AAggregate,
                 symbol = symbol_decl.symbol_expr
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
+                applied.WDF = self.WDF
+                applied._tx_position = self._tx_position
+                applied._tx_position_end = self._tx_position_end
+                applied.parent = self.parent
 
                 if to_create:
                     eq = EQUALS([deepcopy(applied), self.sub_exprs[0]])

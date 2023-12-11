@@ -153,17 +153,23 @@ def merge_WDFs(self):
 AIfExpr.merge_WDFs = merge_WDFs
 
 
-# Class AQuantification  #######################################################
+# Class AQuantification, AAggregate  #######################################################
 
 def merge_WDFs(self):
-    assert len(self.sub_exprs) == 1, "Internal error"
-    if self.sub_exprs[0].WDF:
-        forall = FORALL(self.quantees, self.sub_exprs[0].WDF).simplify1()
-        self.WDF = And([q.WDF for q in self.quantees] + [forall])
+    if len(self.sub_exprs) == 1:  # not a min/max aggregate
+        if self.sub_exprs[0].WDF:
+            forall = FORALL(self.quantees, self.sub_exprs[0].WDF).simplify1()
+            self.WDF = And([q.WDF for q in self.quantees] + [forall])
+        else:
+            self.WDF = None
     else:
-        self.WDF = None
+        wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
+        condition = And([wdfs[1], Or([Not(self.sub_exprs[1]), wdfs[0]])])
+        forall = FORALL(self.quantees, condition).simplify1()
+        self.WDF = And([q.WDF for q in self.quantees] + [forall])
     return self
 AQuantification.merge_WDFs = merge_WDFs
+AAggregate.merge_WDFs = merge_WDFs
 
 
 # Class ADisjunction  #######################################################

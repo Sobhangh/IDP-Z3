@@ -18,7 +18,33 @@ And(p(a),
     Or(Not(col(c)), p(c)),
     Or(And(And(col(a), p(a)), a == c),
        And(And(col(b), p(b)), b == c)),
-    Or(c == a, c == b))
+    2 == If(p(a), 1, 0) + If(p(b), 1, 0),
+    2 ==
+    If(And(col(a), p(a)), 1, 0) +
+    If(And(col(b), p(b)), 1, 0),
+    2 == __min(lambda x ∈ color : i(x) if col(x) ∧ p(x)),
+    2 == __min(lambda x ∈ color : i(x) if p(x)),
+    Or(c == a, c == b),
+    Or(And(And(col(a), p(a)),
+           __min(lambda x ∈ color : i(x) if col(x) ∧ p(x)) ==
+           i(a)),
+       And(And(col(b), p(b)),
+           __min(lambda x ∈ color : i(x) if col(x) ∧ p(x)) ==
+           i(b))),
+    Or(Not(And(col(a), p(a))),
+       __min(lambda x ∈ color : i(x) if col(x) ∧ p(x)) <=
+       i(a)),
+    Or(Not(And(col(b), p(b))),
+       __min(lambda x ∈ color : i(x) if col(x) ∧ p(x)) <=
+       i(b)),
+    Or(And(p(a),
+           __min(lambda x ∈ color : i(x) if p(x)) == i(a)),
+       And(p(b),
+           __min(lambda x ∈ color : i(x) if p(x)) == i(b))),
+    Or(Not(p(a)),
+       __min(lambda x ∈ color : i(x) if p(x)) <= i(a)),
+    Or(Not(p(b)),
+       __min(lambda x ∈ color : i(x) if p(x)) <= i(b)))
 WDF: 
 col(a)
 true
@@ -35,3 +61,7 @@ col(c())
 true
 true
 true
+∀ x ∈ color: col(x)
+true
+true
+∀ x ∈ color: col(x) ∧ (¬(p(x)) ∨ col(x))
