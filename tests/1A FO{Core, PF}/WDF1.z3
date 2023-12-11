@@ -27,7 +27,7 @@ true
 col(c())
 true
 true
-col(c()) ∨ col(c())
+col(c())
 true
 true
 col(c())

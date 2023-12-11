@@ -33,7 +33,7 @@ from .Expression import (ASTNode, Expression, SETNAME, SetName,
                          VARIABLE, Brackets, SymbolExpr, Number, NOT,
                          EQUALS, AND, OR, TRUE, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
 
-from .utils import CONCEPT
+from .utils import CONCEPT, OrderedSet
 
 
 def is_subset_of(e: Expression,
@@ -67,6 +67,63 @@ def is_subset_of(e: Expression,
     return FALSE  # dead code for mypy
 
 
+# WDF constructors  #######################################################
+
+def If(if_: Expression, then_: Expression, else_: Expression) -> Expression:
+    """ Create a simplified If"""
+    out = IF(if_, then_, else_)
+    if isinstance(out, ADisjunction):
+        return Or(out.sub_exprs)
+    return out
+
+
+def And(sub_exprs: List[Expression]) -> Expression:
+    """ Create a simplified conjunction"""
+    out = OrderedSet()  # remove duplicates
+    for e in sub_exprs:
+        if isinstance(e, AConjunction):  # flatten
+            for ee in e.sub_exprs:
+                out.append(ee)
+        else:
+            out.append(e)
+    return AND([e for e in out.values()])
+
+
+def Or(sub_exprs: List[Expression]) -> Expression:
+    """ Create a simplified disjunction"""
+    exprs = OrderedSet()  # remove duplicates
+    for e in sub_exprs:
+        if isinstance(e, ADisjunction):  # flatten
+            for ee in e.sub_exprs:
+                exprs.append(ee)
+        else:
+            exprs.append(e)
+    # remove p | ~p
+    positive, negative = set(), set()
+    for e in exprs.values():
+        if isinstance(e, AUnary):
+            negative.add(e.sub_exprs[0].code)
+        else:
+            positive.add(e.code)
+    exclude = positive.intersection(negative)
+    if exclude:
+        return TRUE
+    else:
+        out = OR([e for e in exprs.values()
+                if not (e.code in exclude
+                        or (isinstance(e, AUnary) and e.sub_exprs[0].code in exclude))])
+        return out
+
+
+def Not(e: Expression) -> Expression:
+    """ Create a simplified negation"""
+    if isinstance(e, AConjunction):
+        return Or([Not(ee) for ee in e.sub_exprs])
+    if isinstance(e, ADisjunction):
+        return And([Not(ee) for ee in e.sub_exprs])
+    return NOT(e)
+
+
 # Class Expression  #######################################################
 
 def fill_WDF(self):
@@ -77,7 +134,7 @@ Expression.fill_WDF = fill_WDF
 
 def merge_WDFs(self):
     wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
-    self.WDF = AND(wdfs)
+    self.WDF = And(wdfs)
     return self
 Expression.merge_WDFs = merge_WDFs
 
@@ -86,10 +143,10 @@ Expression.merge_WDFs = merge_WDFs
 
 def merge_WDFs(self):
     if all(e.WDF for e in self.sub_exprs):
-        self.WDF = AND([
+        self.WDF = And([
             self.sub_exprs[0].WDF,
-            resimplify(IF(self.sub_exprs[0], self.sub_exprs[1].WDF,
-                                  self.sub_exprs[2].WDF))])
+            If(self.sub_exprs[0], self.sub_exprs[1].WDF,
+                                  self.sub_exprs[2].WDF)])
     else:
         self.WDF = None
     return self
@@ -102,7 +159,7 @@ def merge_WDFs(self):
     assert len(self.sub_exprs) == 1, "Internal error"
     if self.sub_exprs[0].WDF:
         forall = FORALL(self.quantees, self.sub_exprs[0].WDF).simplify1()
-        self.WDF = AND([q.WDF for q in self.quantees] + [forall])
+        self.WDF = And([q.WDF for q in self.quantees] + [forall])
     else:
         self.WDF = None
     return self
@@ -122,29 +179,10 @@ def merge_WDFs(self):
             else:
                 out, testing = e.WDF, True
         else:
-            out = AND([e.WDF, resimplify(OR([e, out]))])  #
+            out = And([e.WDF, Or([e, out])])  #
     self.WDF = out
     return self
 ADisjunction.merge_WDFs = merge_WDFs
-
-def resimplify(expr: Expression) -> Expression:
-    """Simplifies a disjunction by returning TRUE when it has p or not p."""
-    if not isinstance(expr, ADisjunction):
-        return expr
-    positive, negative = set(), set()
-    for e in expr.sub_exprs:
-        if isinstance(e, AUnary):
-            negative.add(e.sub_exprs[0].code)
-        else:
-            positive.add(e.code)
-    exclude = positive.intersection(negative)
-    if exclude:
-        return TRUE
-    else:
-        out = OR([e for e in expr.sub_exprs
-                if not (e.code in exclude
-                        or (isinstance(e, AUnary) and e.sub_exprs[0].code in exclude))])
-        return out
 
 
 # Class AImplication, AConjunction  #######################################################
@@ -160,7 +198,7 @@ def merge_WDFs(self):
             else:
                 out, testing = e.WDF, True
         else:
-            out = AND([e.WDF, resimplify(OR([NOT(e), out]))])  #
+            out = And([e.WDF, Or([Not(e), out])])  #
     self.WDF = out
     return self
 AConjunction.merge_WDFs = merge_WDFs
@@ -172,19 +210,19 @@ AImplication.merge_WDFs = merge_WDFs
 def merge_WDFs(self):
     wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
     if self.symbol.decl:  # known symbol
-        self.WDF = AND(wdfs)
+        self.WDF = And(wdfs)
         if type(self.symbol.decl) != TypeDeclaration:
             if self.sub_exprs:
-                wdf2 = AND([self.WDF]+[is_subset_of(e, e.type, d)
+                wdf2 = And([self.WDF]+[is_subset_of(e, e.type, d)
                             for e, d in zip(self.sub_exprs, self.symbol.decl.domains)])
             else:  # constant c()
                 wdf2 = TRUE
-            self.WDF = AND([self.WDF, wdf2])
+            self.WDF = And([self.WDF, wdf2])
         self.WDF.original = self
     elif self.symbol.WDF:  # $(.)(..)
-        self.WDF = AND([self.symbol.WDF] + wdfs)
+        self.WDF = And([self.symbol.WDF] + wdfs)
     else:
-        self.WDF = AND(wdfs)
+        self.WDF = And(wdfs)
     return self
 AppliedSymbol.merge_WDFs = merge_WDFs
 
