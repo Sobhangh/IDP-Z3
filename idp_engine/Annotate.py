@@ -244,6 +244,10 @@ def annotate_block(self: ASTNode,
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self.voc, {}) for e in self.definitions]
+    for d in self.definitions:
+        for r in d.rules:
+            if r.WDF and not r.WDF.same_as(TRUE):
+                collect_warnings(r.WDF.original, warnings)
 
     constraints = OrderedSet()
     for c in self.constraints:
@@ -419,6 +423,15 @@ def annotate(self: Expression,
     self.body = self.body.annotate(voc, q_v)
     if self.out:
         self.out = self.out.annotate(voc, q_v)
+
+    # compute WDF
+    head = self.definiendum if not self.out else EQUALS([self.definiendum, self.out])
+    expr = FORALL(self.quantees, EQUALS([head, self.body]))  # using Clark
+    expr.fill_WDF()
+    expr._tx_position, expr._tx_position_end = self._tx_position, self._tx_position_end
+    expr.parent = self.parent
+    self.WDF = expr.WDF
+    self.WDF.original = expr
 
     return self
 Rule.annotate = annotate

@@ -727,6 +727,7 @@ class Rule(Expression):
         if self.body is None:
             self.body = TRUE
         self.original = None
+        self.WDF : Optional[Expression] = None
 
     def __repr__(self):
         quant = ('' if not self.quantees else

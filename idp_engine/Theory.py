@@ -280,6 +280,10 @@ class Theory(object):
                 for c in block.constraints:
                     if c.WDF:
                         self.WDFs.append(c.WDF)
+                for d in block.definitions:
+                    for r in d.rules:
+                        if r.WDF:
+                            self.WDFs.append(r.WDF)
 
         ### apply the enumerations and definitions
         self.assignments = Assignments()
