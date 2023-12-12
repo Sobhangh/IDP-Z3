@@ -35,52 +35,52 @@
 
 Model 1
 ==========
-a := cons(103146, cons(103145, nil)).
+a := cons(100423, cons(100422, nil)).
 
 
 Model 2
 ==========
-a := cons(133758, cons(133757, nil)).
+a := cons(119010, cons(119009, nil)).
 
 
 Model 3
 ==========
-a := cons(139611, cons(139610, nil)).
+a := cons(131627, cons(131626, nil)).
 
 
 Model 4
 ==========
-a := cons(28957, cons(28956, nil)).
+a := cons(138505, cons(138504, nil)).
 
 
 Model 5
 ==========
-a := cons(31394, cons(31393, nil)).
+a := cons(159089, cons(159088, nil)).
 
 
 Model 6
 ==========
-a := cons(40249, cons(40248, nil)).
+a := cons(34931, cons(34930, nil)).
 
 
 Model 7
 ==========
-a := cons(52046, cons(52045, nil)).
+a := cons(66822, cons(66821, nil)).
 
 
 Model 8
 ==========
-a := cons(60411, cons(60410, nil)).
+a := cons(68145, cons(68144, nil)).
 
 
 Model 9
 ==========
-a := cons(7719, cons(7718, nil)).
+a := cons(8365, cons(8364, nil)).
 
 
 Model 10
 ==========
-a := cons(92696, cons(92695, nil)).
+a := cons(8646, cons(8645, nil)).
 
 
 More models may be available.  Change the max argument to see them.
