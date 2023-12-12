@@ -51,11 +51,13 @@ def is_subset_of(e: Expression,
     e.check((r1 == r2 for r1, r2 in zip (s1.root_set, s2.root_set)), msg)  # not disjoint
     if len(s1.root_set) == 0:  #  --> s2(), i.e., () is in s2
         symbol = SymbolExpr.make(s2.decl)
-        return AppliedSymbol.make(symbol, [])
+        app = AppliedSymbol.make(symbol, []).fill_WDF()
+        return And([app.WDF, app])
     if type(s1.decl) == TypeDeclaration:
         # must be two numeric predicates --> s2(e), i.e., e is in s2
         symbol = SymbolExpr.make(s2.decl)
-        return AppliedSymbol.make(symbol, [e])
+        app = AppliedSymbol.make(symbol, [e]).fill_WDF()
+        return And([app.WDF, app])
     if s1.name == CONCEPT:  # Concept[sig] <: Concept
         e.check(s2.name == CONCEPT and len(s2.concept_domains) == 0, msg)
         return TRUE
@@ -128,13 +130,13 @@ def Not(e: Expression) -> Expression:
 
 # Class Expression  #######################################################
 
-def fill_WDF(self):
+def fill_WDF(self: Expression) -> Expression:
     for e in self.sub_exprs:
         e.fill_WDF()
-    self.merge_WDFs()
+    return self.merge_WDFs()
 Expression.fill_WDF = fill_WDF
 
-def merge_WDFs(self):
+def merge_WDFs(self: Expression) -> Expression:
     wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
     self.WDF = And(wdfs)
     return self

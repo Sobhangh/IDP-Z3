@@ -11,6 +11,7 @@ And(p(a),
     Or(Not(col(c)), p(c)),
     Or(col(c), p(c)),
     Or(Not(col(c)), p(c)),
+    pp(c),
     p(c),
     p(c),
     col(c),
@@ -70,6 +71,7 @@ true
 col(c())
 true
 true
+col(c()) ∧ p(c())
 col(c())
 ∀ x ∈ Concept[->color]: col($(x)())
 true

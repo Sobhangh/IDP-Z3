@@ -3,6 +3,7 @@ vocabulary V {
     col : color -> Bool
     c: () -> color
     p: col -> Bool
+    pp: p -> Bool
     i: col -> Int
     q : () -> Bool
     d: q -> Bool
@@ -20,6 +21,7 @@ theory T:V {
     col(c()) | p(c()).
     if col(c()) then p(c()) else true.
     ~col(c()) | p(c()).
+    pp(c()).
 
     p($(`c)()).
     ?x in Concept[()->color]: p($(x)()).
