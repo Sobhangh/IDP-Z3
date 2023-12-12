@@ -408,6 +408,12 @@ display {
               'showOptimize': True,
               'type': 'function',
               'view': 'normal'},
+             {'environmental': True,
+              'idpname': 'Professional_Buyer',
+              'priority': 'core',
+              'showOptimize': True,
+              'type': 'proposition',
+              'view': 'normal'},
              {'environmental': False,
               'idpname': 'Registration_Type',
               'priority': 'core',
@@ -419,13 +425,7 @@ display {
               'priority': 'core',
               'showOptimize': True,
               'type': 'function',
-              'view': 'expanded'},
-             {'environmental': True,
-              'idpname': 'Professional_Buyer',
-              'priority': 'core',
-              'showOptimize': True,
-              'type': 'proposition',
-              'view': 'normal'}],
+              'view': 'expanded'}],
  'title': 'Interactive Consultant'}
 
 -- propagation ------------------------------
