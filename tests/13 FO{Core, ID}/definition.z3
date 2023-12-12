@@ -2,6 +2,6 @@ f(red)
 No more consequences.
 
 p()
-f(red)
 q()
+f(red)
 No more consequences.
