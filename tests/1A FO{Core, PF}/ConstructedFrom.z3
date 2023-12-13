@@ -90,19 +90,19 @@ opposite := {red -> green, blue -> blue, green -> red, rgb(1, 1) -> rgb(1, 2), r
 Model 8
 ==========
 Color := red.
-opposite := {red -> green, blue -> blue, green -> red, rgb(1, 1) -> rgb(1, 2), rgb(1, 2) -> blue, rgb(2, 1) -> rgb(1, 1), rgb(2, 2) -> red}.
+opposite := {red -> green, blue -> blue, green -> red, rgb(1, 1) -> rgb(1, 2), rgb(1, 2) -> blue, rgb(2, 1) -> green, rgb(2, 2) -> red}.
 
 
 Model 9
 ==========
 Color := red.
-opposite := {red -> green, blue -> blue, green -> red, rgb(1, 1) -> rgb(1, 2), rgb(1, 2) -> blue, rgb(2, 1) -> rgb(1, 2), rgb(2, 2) -> red}.
+opposite := {red -> green, blue -> blue, green -> red, rgb(1, 1) -> rgb(1, 2), rgb(1, 2) -> blue, rgb(2, 1) -> rgb(2, 2), rgb(2, 2) -> red}.
 
 
 Model 10
 ==========
 Color := red.
-opposite := {red -> green, blue -> blue, green -> red, rgb(1, 1) -> rgb(1, 2), rgb(1, 2) -> blue, rgb(2, 1) -> rgb(2, 1), rgb(2, 2) -> red}.
+opposite := {red -> green, blue -> blue, green -> red, rgb(1, 1) -> rgb(1, 2), rgb(1, 2) -> blue, rgb(2, 1) -> rgb(1, 1), rgb(2, 2) -> red}.
 
 
 More models may be available.  Change the max argument to see them.
