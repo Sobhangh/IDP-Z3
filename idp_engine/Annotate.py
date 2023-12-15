@@ -39,9 +39,9 @@ from .Expression import (ASTNode, Expression, SETNAME, SetName,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Variable,
                          VARIABLE, Brackets, SymbolExpr, Number, NOT,
                          EQUALS, AND, OR, TRUE, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
-
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
                     OrderedSet, Semantics, IDPZ3Error)
+from .WDF import is_subset_of
 
 Exceptions = Union[Exception, List["Exceptions"]]  # nested list of Exceptions
 
@@ -135,15 +135,48 @@ def annotate_declaration(self: SymbolDeclaration,
     self.check(self.name is not None, "Internal error")
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
+
+    # annotate sorts -> sort_
+    self.sort_.annotate(voc, {})
+    self.sort_.check(isinstance(self.sort_.decl, TypeDeclaration),
+               f"Type signature can only have types (found {self.sort_})")
+
     voc.symbol_decls[self.name] = self
-    for s in self.domains:
+    for s in self.sorts:
         s.annotate(voc, {})
-        s.check(s.root_set is not None and len(s.root_set) <= 1,
-                f"Can't use n-ary {s.name} in a type signature")
+        if self.sort_ != BOOL_SETNAME:
+            s.check(isinstance(s.decl, TypeDeclaration),
+                f"Type signature can only have types (found {s})")
+
+    # annotate domain and codomain
     self.codomain.annotate(voc, {})
+    self.codomain.check(self.codomain.root_set is not None and len(self.codomain.root_set) == 1,
+            f"Can't use n-ary {self.codomain.name} in a domain signature")
+    if (len(self.sorts) == 0  # partial constant
+        or (len(self.sorts) == 1 and not self.sorts[0].root_set)):  # TODO drop
+        if self.domains:
+            self.check(len(self.domains) == 1 and not self.domains[0].root_set,
+                       f"Incorrect arity of domain: {self.domains[0]}")
+            self.domains[0].annotate(voc, {})
+            if self.sort_ != BOOL_SETNAME:  #TODO predicate
+                self.domains[0].check(not self.domains[0].root_set,
+                        f"Expected arity 0 for {self.domains[0]} (found type {self.domains[0].root_set})")
+    else:
+        self.domains[0].check(len(self.sorts) == len(self.domains),
+                   f"Incorrect arity of domain {self.domains}")
+        for s, d in zip(self.sorts, self.domains):
+            d.annotate(voc, {})
+            d.check(d.root_set is not None and len(d.root_set) == 1,
+                    f"Can't use n-ary {d.name} in a domain signature")
+            if self.sort_ != BOOL_SETNAME:  #TODO predicate
+                try:
+                    is_subset_of(d, d.root_set[0], s)  # raises an error if not
+                except IDPZ3Error:
+                    d.check(False, f"{d} is not a subset of {s}")
+
     self.arity = sum([len(d.root_set) for d in self.domains if d.root_set])
 
-    for s in chain(self.domains, [self.codomain]):
+    for s in chain(self.sorts, [self.sort_]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
                    f"`Concept` must be qualified with a type signature in {self}")
 
@@ -588,13 +621,13 @@ def annotate(self: Expression,
         self.check(a.codomain.name in voc.symbol_decls,
                    f"Unknown type: {a.codomain}" )
         a.decl = SymbolDeclaration.make(self,
-            name=a.accessor, sorts=[self.codomain], out=a.codomain)
+            name=a.accessor, sorts=[self.codomain], sort_=a.codomain)
         a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
     for s in self.domains:
         s.annotate(voc, {})
     self.tester = SymbolDeclaration.make(self,
-            name=f"is_{self.name}", sorts=[self.codomain], out=BOOL_SETNAME)
+            name=f"is_{self.name}", sorts=[self.codomain], sort_=BOOL_SETNAME)
     self.tester.by_z3 = True
     self.tester.annotate_declaration(voc)
     return self
@@ -636,7 +669,7 @@ def annotate_block(self: ASTNode,
         open_type.annotate_declaration(self.voc)
         open_types[name] = SETNAME(type_name)
 
-    for name, out in [
+    for name, sort_ in [
         ('expand', BOOL_SETNAME),
         ('hide', BOOL_SETNAME),
         ('view', SETNAME('_ViewType')),
@@ -649,8 +682,8 @@ def annotate_block(self: ASTNode,
         ('heading', open_types['heading']),
         ('noOptimization', BOOL_SETNAME)
     ]:
-        symbol_decl = SymbolDeclaration.make(self, name=name,
-                                        sorts=[], out=out)
+        symbol_decl = SymbolDeclaration.make(self, name=name, sorts=[],
+                sort_=sort_ or BOOL_SETNAME)
         symbol_decl.annotate_declaration(self.voc)
 
     # annotate constraints and interpretations
@@ -831,6 +864,7 @@ def base_type(exprs: List[Expression], bases: List[SetName] = None) -> Optional[
         return base
     else:
         exprs[0].check(False, f"Can't determine the type of {exprs[0]}")
+    return None
 
 def fill_attributes_and_check(self: Operator) -> Expression:
     assert all(e.type for e in self.sub_exprs), "Can't handle nested concepts yet."

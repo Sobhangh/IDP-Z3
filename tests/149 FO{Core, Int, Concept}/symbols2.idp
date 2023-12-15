@@ -3,7 +3,7 @@ vocabulary {
 	amount_thresholdEU, periodEU: () -> Int
 	amount_threshold, period: Country -> Int
 	obligation: Concept[Country -> Int] -> Bool
-	mapping: obligation -> Concept[() -> Int]
+	mapping: Concept[Country -> Int] -> Concept[() -> Int] (domain: obligation)
 }
 theory {
 	obligation := {`amount_threshold, `period}.

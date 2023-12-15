@@ -1,6 +1,6 @@
 vocabulary V {
     has_c : () -> Bool
-    c : has_c -> Int
+    c : () -> Int (domain: has_c)
 }
 
 theory T:V {

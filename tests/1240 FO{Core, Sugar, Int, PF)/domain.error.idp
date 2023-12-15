@@ -2,7 +2,7 @@ vocabulary {
 	type LivingBeing := { Cat, Dog, Frog, Alice, Bob, Tom }
 	animal, person : LivingBeing → Bool
 	married : person → Bool
-	spouse: married → married
+	spouse: LivingBeing -> LivingBeing (domain: married, range: married)
 }
 theory {
 	animal := { Cat, Dog, Frog }.

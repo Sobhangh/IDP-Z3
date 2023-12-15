@@ -299,12 +299,12 @@ class Vocabulary(ASTNode):
             TypeDeclaration(self, name=CONCEPT, constructors=[]),
             SymbolDeclaration.make(self, name=GOAL_SYMBOL,
                             sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
-                            out=SETNAME(BOOL)),
+                            sort_=SETNAME(BOOL)),
             SymbolDeclaration.make(self, name=RELEVANT,
                             sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
-                            out=SETNAME(BOOL)),
+                            sort_=SETNAME(BOOL)),
             SymbolDeclaration.make(self, name=ABS,
-                            sorts=[INT_SETNAME], out=INT_SETNAME),
+                            sorts=[INT_SETNAME], sort_=INT_SETNAME),
             ] + self.declarations
 
     def __str__(self):
@@ -443,9 +443,13 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        domains (List[SetName]): the types of the arguments
+        sorts (List[SetName]): the types of the arguments
 
-        codomain (SetName): the type of the symbol
+        out (SetName): the type of the symbol applied to arguments
+
+        domains (List[SetName]): the domain of the symbol (as a cross-product)
+
+        codomain (SetName): the codomain of the symbol
 
         symbol_expr (SymbolExpr, Optional): symbol expression of the same name
 
@@ -477,24 +481,20 @@ class SymbolDeclaration(ASTNode):
                  parent,
                  annotations: Optional[Annotations],
                  sorts: List[SetName],
-                 out: SetName,
+                 sort_: SetName,
                  symbols: Optional[List[str]] = None,
-                 name: Optional[str] = None):
+                 name: Optional[str] = None,
+                 domains: Optional[List[SetName]] = None,
+                 codomain: Optional[SetName] = None):
         self.annotations : Annotation = annotations.annotations if annotations else {}
-        self.symbols : Optional[List[str]]
-        self.name : Optional[str]
-        if symbols:
-            self.symbols = symbols
-            self.name = None
-        else:
-            self.symbols = None
-            self.name = name
-        self.domains : List[SetName] = sorts
-        self.codomain : SetName = out
-        if self.codomain is None:
-            self.codomain = SETNAME(BOOL)
+        self.symbols : Optional[List[str]] = symbols
+        self.name : Optional[str] = name
+        self.sorts = sorts
+        self.sort_ = sort_
+        self.domains = domains or sorts
+        self.codomain = codomain or sort_
 
-        self.symbol_expr : Optional[SymbolExpr]= None
+        self.symbol_expr : Optional[SymbolExpr] = None
         self.arity = None
         self.private = None
         self.unit: Optional[str] = None
@@ -508,8 +508,8 @@ class SymbolDeclaration(ASTNode):
         self.by_z3 = False
 
     @classmethod
-    def make(cls, parent, name, sorts, out):
-        o = cls(parent=parent, name=name, sorts=sorts, out=out, annotations=None)
+    def make(cls, parent, name, sorts, sort_):
+        o = cls(parent=parent, name=name, sorts=sorts, sort_=sort_, annotations=None)
         o.arity = sum([len(d.root_set) for d in o.domains
                        if d.root_set])
         return o

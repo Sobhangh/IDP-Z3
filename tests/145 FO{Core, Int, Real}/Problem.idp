@@ -6,7 +6,7 @@ vocabulary V {
     type color := {red, blue, green}
     c: () → color
     range: Int -> Bool
-    ra: () → range
+    ra: () → Int (range: range)
 }
 
 theory T:V {

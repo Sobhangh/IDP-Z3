@@ -1,7 +1,7 @@
 vocabulary V {
     has_p : () -> Bool
     p : has_p → 𝔹
-    c : has_p -> Int
+    c : () -> Int (domain: has_p)
 }
 
 theory T:V {

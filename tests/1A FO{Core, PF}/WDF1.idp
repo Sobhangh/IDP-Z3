@@ -4,7 +4,7 @@ vocabulary V {
     c: () -> color
     p: col -> Bool
     pp: p -> Bool
-    i: col -> Int
+    i: color -> Int (domain: col)
     q : () -> Bool
     d: q -> Bool
 }

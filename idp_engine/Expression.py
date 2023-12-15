@@ -548,6 +548,9 @@ class Constructor(ASTNode):
         return (self.name if not self.args else
                 f"{self.name}({', '.join((str(a) for a in self.args))})" )
 
+    def annotate(self, voc, q_vars):
+        raise IDPZ3Error("Internal error") # monkey-patched
+
 def CONSTRUCTOR(name: str, args=None) -> Constructor:
     return Constructor(None, name, args)
 

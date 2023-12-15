@@ -48,7 +48,7 @@ def is_subset_of(e: Expression,
     if s1 == s2:
         return TRUE
     msg = f"Not in domain: {e} (of type {s1.name}) is not in {s2.name}"
-    e.check((r1 == r2 for r1, r2 in zip (s1.root_set, s2.root_set)), msg)  # not disjoint
+    e.check(all(r1 == r2 for r1, r2 in zip (s1.root_set, s2.root_set)), msg)  # not disjoint
     if len(s1.root_set) == 0:  #  --> s2(), i.e., () is in s2
         symbol = SymbolExpr.make(s2.decl)
         app = AppliedSymbol.make(symbol, []).fill_WDF()
