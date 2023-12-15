@@ -2,7 +2,7 @@ vocabulary V {
     type color := {a, b}
     col : color -> Bool
     c: () -> color
-    p: col -> Bool
+    p: color -> Bool (p << col)
 }
 
 theory T:V {

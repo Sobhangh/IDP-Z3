@@ -2,11 +2,11 @@ vocabulary V {
     type color := {a, b}
     col : color -> Bool
     c: () -> color
-    p: col -> Bool
-    pp: p -> Bool
+    p: color -> Bool (p ⊆ col)
+    pp: color -> Bool (pp ⊆ p)
     i: color -> Int (domain: col)
     q : () -> Bool
-    d: q -> Bool
+    d: () -> Bool (d ⊆ q)
 }
 
 theory T:V {

@@ -8,8 +8,8 @@ vocabulary V {
     type PseudoBol := {0,1}
     has_mine: Int ⨯ Int → PseudoBol (domain: Range ⨯ Range)
     count: Int ⨯ Int → Count (domain: Range * Range)
-    clicked: Range ⨯ Range → 𝔹
-    shown: Range ⨯ Range → 𝔹
+    clicked: Int ⨯ Int → 𝔹 (clicked ⊆ Range ⨯ Range)
+    shown: Int ⨯ Int → 𝔹 (shown ⊆ Range ⨯ Range)
 }
 
 theory T:V {

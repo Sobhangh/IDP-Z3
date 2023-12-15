@@ -1,6 +1,6 @@
 vocabulary V {
     has_p : () -> Bool
-    p : has_p → 𝔹
+    p : () → 𝔹 (p ⊆ has_p)
     c : () -> Int (domain: has_p)
 }
 

@@ -144,9 +144,8 @@ def annotate_declaration(self: SymbolDeclaration,
     voc.symbol_decls[self.name] = self
     for s in self.sorts:
         s.annotate(voc, {})
-        if self.sort_ != BOOL_SETNAME:
-            s.check(isinstance(s.decl, TypeDeclaration),
-                f"Type signature can only have types (found {s})")
+        s.check(isinstance(s.decl, TypeDeclaration),
+            f"Type signature can only have types (found {s})")
 
     # annotate domain and codomain
     self.codomain.annotate(voc, {})
@@ -158,9 +157,8 @@ def annotate_declaration(self: SymbolDeclaration,
             self.check(len(self.domains) == 1 and not self.domains[0].root_set,
                        f"Incorrect arity of domain: {self.domains[0]}")
             self.domains[0].annotate(voc, {})
-            if self.sort_ != BOOL_SETNAME:  #TODO predicate
-                self.domains[0].check(not self.domains[0].root_set,
-                        f"Expected arity 0 for {self.domains[0]} (found type {self.domains[0].root_set})")
+            self.domains[0].check(not self.domains[0].root_set,
+                    f"Expected arity 0 for {self.domains[0]} (found type {self.domains[0].root_set})")
     else:
         self.domains[0].check(len(self.sorts) == len(self.domains),
                    f"Incorrect arity of domain {self.domains}")
@@ -168,11 +166,10 @@ def annotate_declaration(self: SymbolDeclaration,
             d.annotate(voc, {})
             d.check(d.root_set is not None and len(d.root_set) == 1,
                     f"Can't use n-ary {d.name} in a domain signature")
-            if self.sort_ != BOOL_SETNAME:  #TODO predicate
-                try:
-                    is_subset_of(d, d.root_set[0], s)  # raises an error if not
-                except IDPZ3Error:
-                    d.check(False, f"{d} is not a subset of {s}")
+            try:
+                is_subset_of(d, d.root_set[0], s)  # raises an error if not
+            except IDPZ3Error:
+                d.check(False, f"{d} is not a subset of {s}")
 
     self.arity = sum([len(d.root_set) for d in self.domains if d.root_set])
 

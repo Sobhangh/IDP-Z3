@@ -1,9 +1,9 @@
 vocabulary {
 	type LivingBeing := { Cat, Dog, Frog, Alice, Bob, Tom }
 	animal, person : LivingBeing → Bool
-	married : person → Bool
+	married : LivingBeing → Bool (married << person)
 	spouse: LivingBeing -> LivingBeing (domain: married, range: married)
-	affair : married * person → Bool
+	affair : LivingBeing * LivingBeing → Bool (affair << married * person)
 	age : LivingBeing → Int
 	type MarriageT := constructed from {marriage(A: LivingBeing, B: LivingBeing, date: Int)}
 	Marriage : MarriageT -> Bool

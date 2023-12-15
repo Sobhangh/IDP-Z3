@@ -22,7 +22,7 @@ vocabulary V {
 
     type Clause := {1, 4, 15}
     dagen_verlet : () -> Int
-    opgenomen : _window -> Bool
+    opgenomen : Date -> Bool (opgenomen << _window)
     akkoord_werkgever : () -> Bool
     van_toepassing : (Clause) -> Bool
 }
