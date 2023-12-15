@@ -1,0 +1,16 @@
+vocabulary V {
+    type T ≜ {a, b}
+    Q: T → 𝔹
+    p : T → 𝔹
+    f : T ⨯ T → T (domain: Q ⨯ p)
+}
+
+theory T:V {
+    Q(a) ∧ p(a) & f(a,a)=a.
+    !x in T: Q(x) & p(x) => f(x,x)=x.
+}
+
+procedure main() {
+    pretty_print(model_expand(T))
+}
+

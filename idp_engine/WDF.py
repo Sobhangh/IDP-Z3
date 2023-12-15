@@ -94,6 +94,9 @@ def And(sub_exprs: List[Expression]) -> Expression:
 def Or(sub_exprs: List[Expression]) -> Expression:
     """ Create a simplified disjunction"""
     exprs = OrderedSet()  # remove duplicates
+    if isinstance(sub_exprs[-1], AConjunction): # a|(b&c) -> (a|b) & (a|c)
+        return And( Or(sub_exprs[:-1] + [e])
+                   for e in sub_exprs[-1].sub_exprs)
     for e in sub_exprs:
         if isinstance(e, ADisjunction):  # flatten p | (q | r)
             for ee in e.sub_exprs:
