@@ -2,7 +2,7 @@ vocabulary V {
     T: Int -> Bool
     p : Int * Int → 𝔹 (p ⊆ T*T)
     r : Int → 𝔹 (r ⊆ T)
-    s : Int*Int → 𝔹 (S ⊆ T*T)
+    s : Int*Int → 𝔹 (s ⊆ T*T)
 }
 
 theory T:V {

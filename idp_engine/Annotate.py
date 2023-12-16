@@ -151,6 +151,13 @@ def annotate_declaration(self: SymbolDeclaration,
     self.codomain.annotate(voc, {})
     self.codomain.check(self.codomain.root_set is not None and len(self.codomain.root_set) == 1,
             f"Can't use n-ary {self.codomain.name} in a domain signature")
+
+    # validations
+    if self.repeat_name:
+        self.check(self.repeat_name == self.name,
+                    f"Expecting {self.name}, found {self.repeat_name}")
+        self.check(self.sort_ == BOOL_SETNAME,
+                    f"Subset relation can only be specified for predicates")
     if (len(self.sorts) == 0  # partial constant
         or (len(self.sorts) == 1 and not self.sorts[0].root_set)):  # TODO drop
         if self.domains:

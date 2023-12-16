@@ -484,6 +484,7 @@ class SymbolDeclaration(ASTNode):
                  sort_: SetName,
                  symbols: Optional[List[str]] = None,
                  name: Optional[str] = None,
+                 repeat_name: Optional[str] = None,
                  domains: Optional[List[SetName]] = None,
                  codomain: Optional[SetName] = None):
         self.annotations : Annotation = annotations.annotations if annotations else {}
@@ -493,6 +494,7 @@ class SymbolDeclaration(ASTNode):
         self.sort_ = sort_
         self.domains = domains or sorts
         self.codomain = codomain or sort_
+        self.repeat_name = repeat_name
 
         self.symbol_expr : Optional[SymbolExpr] = None
         self.arity = None
