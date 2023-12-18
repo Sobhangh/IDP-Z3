@@ -3,16 +3,18 @@ And(p(a),
     col(a),
     p(a),
     p(c),
-    col(c),
-    p(c),
-    p(c),
-    col(c),
-    col(c),
-    Or(Not(col(c)), p(c)),
-    Or(col(c), p(c)),
-    Or(Not(col(c)), p(c)),
+    1 == i(c),
+    1 == i(c),
     pp(c),
-    p(c),
+    pp(c),
+    1 == i(c),
+    Or(Not(pp(c)), 1 == i(c)),
+    Or(pp(c), 1 == i(c)),
+    Or(Not(pp(c)), 1 == i(c)),
+    1 == i(c),
+    1 == i(a),
+    pp(a),
+    1 == i(a),
     p(c),
     col(c),
     p(c),
@@ -72,6 +74,15 @@ WDF:
 true
 true
 true
+pp(c())
+pp(c())
+true
+true
+pp(c())
+true
+true
+pp(c())
+∀ x ∈ Concept[pp->ℤ]: pp(a)
 true
 true
 true
@@ -79,18 +90,10 @@ true
 true
 true
 true
-true
-true
-true
-true
-true
-true
-true
-true
-true
-∀ x ∈ color: ¬(p(x)) ∨ col(x)
-∀ x ∈ col: ¬(i(x) = 0)
-true
+∀ x ∈ color: ¬(col(x)) ∨ ¬(p(x)) ∨ pp(x)
+∀ x ∈ color: ¬(p(x)) ∨ pp(x)
+∀ x ∈ col: ¬(i(x) = 0) ∧ pp(x)
+∀ x ∈ col: (pp(x) ∧ i(x) = 0 ∨ pp(x)) ∧ (pp(x) ∧ i(x) = 0 ∨ ¬(i(x) = 0))
 true
 true
 true

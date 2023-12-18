@@ -243,24 +243,26 @@ AMultDiv.merge_WDFs = merge_WDFs
 
 def merge_WDFs(self):
     # WDF(p(a, b)) = WDF(p) & WDF(a) & WDF(b) & dom(p)(a,b)
-    wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
+    wdfs = [e.WDF or TRUE for e in self.sub_exprs]
+    wdf1 = self.symbol.WDF or TRUE
+
+    #  wdf2 = WDF for the domain of self
     if self.symbol.decl:  # known symbol
-        self.WDF = And(wdfs)
-        if type(self.symbol.decl) != TypeDeclaration:
-            if self.sub_exprs:
-                wdf2 = And([self.WDF]+[is_subset_of(e, e.type, d)
-                            for e, d in zip(self.sub_exprs, self.symbol.decl.domains)])
-            elif self.symbol.decl.domains:  #  partial constant
-                symbol = SymbolExpr.make(self.symbol.decl.domains[0].decl)
-                wdf2 = AppliedSymbol.make(symbol, [])
-            else:  # constant c()
-                wdf2 = TRUE
-            self.WDF = And([self.WDF, wdf2])
-        self.WDF.original = self
-    elif self.symbol.WDF:  # $(.)(..)
-        self.WDF = And([self.symbol.WDF] + wdfs)
+        domains = self.symbol.decl.domains
+    else:  # $(..)
+        domains = self.symbol.sub_exprs[0].type.concept_domains
+    if not self.symbol.decl or type(self.symbol.decl) != TypeDeclaration:
+        if self.sub_exprs:
+            wdf2 = And([is_subset_of(e, e.type, d)
+                        for e, d in zip(self.sub_exprs, domains)])
+        elif domains:  #  partial constant
+            symbol = SymbolExpr.make(domains[0].decl)
+            wdf2 = AppliedSymbol.make(symbol, [])
+        else:  # constant c()
+            wdf2 = TRUE
     else:
-        self.WDF = And(wdfs)
+        wdf2 = TRUE
+    self.WDF = AND([wdf1, wdf2]+wdfs)
     return self
 AppliedSymbol.merge_WDFs = merge_WDFs
 
