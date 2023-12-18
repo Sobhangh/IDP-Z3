@@ -576,24 +576,25 @@ def _interpret(self: AQuantification | AAggregate,
     if not self.quantees and not subs:  # already expanded
         return Expression._interpret(self, problem, subs)
 
+    out = self
     if not self.supersets:
+        out = copy(self)
         # interpret quantees
-        for q in self.quantees: # for !x in $(output_domain(s,1))
-            q.sub_exprs = [e._interpret(problem, subs) for e in q.sub_exprs]
-        get_supersets(self, problem)
+        out.quantees = [q._interpret(problem, subs) for q in out.quantees]
+        get_supersets(out, problem)
 
-    assert self.new_quantees is not None and self.vars1 is not None, "Internal error"
-    self.quantees = self.new_quantees
+    assert out.new_quantees is not None and out.vars1 is not None, "Internal error"
+    out.quantees = out.new_quantees
     # expand the formula by the cross-product of the supersets, and substitute per `subs`
     forms, subs1 = [], copy(subs)
-    for f in self.sub_exprs:
-        for vals in product(*self.supersets):
+    for f in out.sub_exprs:
+        for vals in product(*out.supersets):
             vals1 = flatten(vals)
-            subs1.update((var.code, val) for var, val in zip(self.vars1, vals1))
+            subs1.update((var.code, val) for var, val in zip(out.vars1, vals1))
             new_f2 = f._interpret(problem, subs1)
             forms.append(new_f2)
 
-    out = self.update_exprs(f for f in forms)
+    out = out.update_exprs(f for f in forms)
     return out
 AQuantification._interpret = _interpret
 
