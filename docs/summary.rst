@@ -19,9 +19,11 @@ The equivalent ASCII-only encoding is shown on the right.
         // built-in types: 𝔹, ℤ, ℝ, Date, Concept Bool, Int, Real, Date, Concept
 
         p : () → 𝔹                                p: () -> Bool
-        p1, p2 : T1 ⨯ T2 → 𝔹                      p1, p2: T1*T2 -> Bool
-        f: T → T                                  f: T -> T
-        f1, f2: Concept[T1->T2] → T               f1, f2: Concept[T1->T2] -> T
+        p1, p2 : T1 → 𝔹                           p1, p2: T1 -> Bool
+        q: T1⨯T1 → 𝔹 (q ⊆ p1⨯p2)                  q: T1*T1 → 𝔹 (q << p1⨯p2)
+        f: T1 → T (total)                         f: T -> T (total)
+        f: T1⨯T1 → T (domain: p1⨯p2, range:q)     f: T1*T1 -> T (domain: p1*p2, range:q)
+        f1, f2: Concept[T1→T2] → T                f1, f2: Concept[T1->T2] -> T
 
         [this is the intended meaning of p]
         p : () → 𝔹

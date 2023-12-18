@@ -28,10 +28,12 @@ Types
 
 IDP-Z3 supports built-in and custom types.
 
-The built-in types are:  ``𝔹``, ``ℤ``, ``ℝ``, ``Date``, and ``Concept[signature]`` (where ``signature`` is any type signature, e.g. ``()->Bool``).
+The built-in types are:  ``𝔹``, ``ℤ``, ``ℝ``, ``Date``, and ``Concept[signature]``
+(where ``signature`` is any type signature, e.g. ``()->Bool``).
 The equivalent ASCII symbols are ``Bool``, ``Int``, and ``Real``.
 
-The type ``Concept[signature]`` has one constructor for each symbol (i.e., function, predicate or constant) declared in the vocabulary with that signature.
+The type ``Concept[T1⨯..⨯Tn -> T]`` has one constructor for each symbol (i.e., function, predicate or constant)
+that have been declared in the vocabulary with exactly the domain ``T1⨯..⨯Tn`` and range ``T``.
 The constructors are the names of the symbol, prefixed with `````.
 
 Custom types are declared using the keyword ``type``, e.g., ``type color``.
@@ -45,45 +47,23 @@ Their extension can be defined in a structure_, or directly in the vocabulary, b
 
 * a list of nullary constructors, e.g., ``type Color ≜ {Red, Blue, Green}``
 
-* a list of n-ary constructors; in that case, the enumeration must be preceded by ``constructed from``, e.g., ``type Color2 ≜ constructed from {Red, Blue, Green, RGB(R: Byte, G: Byte, B: Byte)}``
+* a list of n-ary constructors; in that case, the enumeration must be preceded by ``constructed from``,
+e.g., ``type Color2 ≜ constructed from {Red, Blue, Green, RGB(R: Byte, G: Byte, B: Byte)}``
 
 In the above example, the constructors of ```Color`` are : ``Red``, ``Blue``, ``Green``.
 
 The constructors of ```Color2`` are : ``Red``, ``Blue``, ``Green`` and ``RGB``.
-Each constructor have an associated function (e.g., ``is_Red``, or ``is_RGB``) to test if a Color2 term was created with that constructor.
+Each constructor have an associated function (e.g., ``is_Red``, or ``is_RGB``)
+to test if a Color2 term was created with that constructor.
 The ``RGB`` constructor takes 3 arguments of type ``Byte``.
-``R``, ``G`` and ``B`` are accessor functions: when given a Color2 term constructed with RGB, they return the associated Byte.
+``R``, ``G`` and ``B`` are accessor functions:
+when given a Color2 term constructed with RGB, they return the associated Byte.
 (When given a Color2 not constructed with RGB, they may raise an error)
 
-Constructors can be used to construct :ref:`recursive datatypes<recursive_datatypes>` , e.g., ``type List := constructed from {nil, cons(car:Color, cdr: List)}``.
-(However, unsatisfiable theories with recursive definitions do not terminate; propagation and explanation inferences are not supported).
-
-
-.. _function:
-.. index:: function
-
-Functions
-+++++++++
-
-The functions with name ``myFunc1``, ``myFunc2``, input domains ``p1``, ``p2``, ``p3`` and output range ``p``, are declared by:
-
-.. code::
-
-    myFunc1, myFunc2 : p1 ⨯ p2 ⨯ p3 → p
-
-Their name should not start with a capital letter, by convention.
-The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
-
-The domains and ranges must be one of the following:
-
-* a previously-declared type
-* a previously-declared nullary or unary predicate
-* ``Concept[<signature>]`` to denote the set of concepts with a particular signature, e.g. ``Concept[Person -> Bool]``.
-
-The functions must be total over their domain.
-
-The type of each argument can be directly read in the signature when it is a type or set of concepts,
-or obtained by looking up the type of the argument of the unary predicate otherwise.
+Constructors can be used to construct :ref:`recursive datatypes<recursive_datatypes>` ,
+ e.g., ``type List := constructed from {nil, cons(car:Color, cdr: List)}``.
+(However, unsatisfiable theories with recursive definitions do not terminate;
+propagation and explanation inferences are not supported).
 
 
 .. _predicate:
@@ -92,10 +72,55 @@ or obtained by looking up the type of the argument of the unary predicate otherw
 Predicates
 ++++++++++
 
-A predicate is a function whose range is ``Bool``.
+A predicate is declared using one of these templates:
+
+.. code::
+
+    p1 : T1⨯..⨯Tn → 𝔹
+    p  : T1⨯..⨯Tn → 𝔹T (p << p1)
+    p  : T1⨯..⨯Tn → 𝔹T (p << q1⨯..⨯qn)
+
+
+where ``T1⨯..⨯Tn`` specify the type of the arguments of the predicates,
+and the expression between parenthesis specifies a superset of the interpretation of the predicate.
+This superset can be a predicate with the same type signature,
+or the cross-product of unary predicates that are subsets of the types in the type signature.
+
+The predicate names should start with a lowercase letter, by convention.
+The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
 
 A unary predicate is always interpreted as a subset of a type.
 A nullary predicate is a subset of the singleton set containing the empty tuple.
+
+
+.. _function:
+.. index:: function
+
+Functions
++++++++++
+
+The functions with name ``myFunc1``, ``myFunc2``, argument types ``T1⨯..⨯Tn``, and output range ``T``,
+are declared using one of these templates:
+
+.. code::
+
+    myFunc0 : T1⨯..⨯Tn → T (total)
+    myFunc1, myFunc2 : T1⨯..⨯Tn → T (domain: p1⨯..⨯pn, range: p)
+
+The ``(total)`` keyword is optional.
+The ``domain`` (resp. ``range``) must be used to specify
+the domain of definition (resp. the range) of the function
+when it differs from ``T1⨯..⨯Tn`` (resp. ``T``).
+Symbols ``p1, .. pn, p`` can be :
+
+* previously-declared types
+* previously-declared unary predicates
+* ``Concept[<signature>]`` to denote the set of concepts with a particular domain signature, e.g. ``Concept[Person -> Bool]``.
+
+
+The function names should start with a lowercase letter, by convention.
+The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
+
 
 
 .. _variable declaration:
