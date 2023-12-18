@@ -1,19 +1,15 @@
 vocabulary V {
     type color := {a, b}
     col : color -> Bool
-    c: () -> color
-    p: color -> Bool (p << col)
+    p: color -> Bool
 }
 
 theory T:V {
-    p(c()).
-    col(c()) & p(c()).
-    col(c()).
+    col := {a}.
+    ?x in col: p(x).
 }
 procedure main() {
     Th = Theory(T)
     print("Formula: ")
     pretty_print(Th.formula())
-    print("WDF: ")
-    pretty_print(Th.WDFs)
 }

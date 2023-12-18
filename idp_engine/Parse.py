@@ -352,6 +352,8 @@ class TypeDeclaration(ASTNode):
 
         codomain (SetName): the Boolean type
 
+        super_sets(List[SetName]): same as domains
+
         constructors ([Constructor]): list of constructors in the enumeration
 
         interpretation (SymbolInterpretation): the symbol interpretation
@@ -372,6 +374,7 @@ class TypeDeclaration(ASTNode):
         self.arity : int = 1
         self.domains : List[SetName] = [SetName(None, self.name)]
         self.codomain : SetName = BOOL_SETNAME
+        self.super_sets = self.domains
         self.block: Optional[Block] = None
 
         self.map : dict[str, Expression]= {}
@@ -451,6 +454,8 @@ class SymbolDeclaration(ASTNode):
 
         codomain (SetName): the codomain of the symbol
 
+        super_sets (List[SetName]): for predicates: immediate superset of the interpretation.
+
         symbol_expr (SymbolExpr, Optional): symbol expression of the same name
 
         symbol_expr (SymbolExpr, Optional): a SymbolExpr of the same name
@@ -486,7 +491,8 @@ class SymbolDeclaration(ASTNode):
                  name: Optional[str] = None,
                  repeat_name: Optional[str] = None,
                  domains: Optional[List[SetName]] = None,
-                 codomain: Optional[SetName] = None):
+                 codomain: Optional[SetName] = None,
+                 super_sets: Optional[List[SetName]] = None):
         self.annotations : Annotation = annotations.annotations if annotations else {}
         self.symbols : Optional[List[str]] = symbols
         self.name : Optional[str] = name
@@ -494,6 +500,7 @@ class SymbolDeclaration(ASTNode):
         self.sort_ = sort_
         self.domains = domains or sorts
         self.codomain = codomain or sort_
+        self.super_sets = super_sets or sorts
         self.repeat_name = repeat_name
 
         self.symbol_expr : Optional[SymbolExpr] = None
@@ -512,8 +519,7 @@ class SymbolDeclaration(ASTNode):
     @classmethod
     def make(cls, parent, name, sorts, sort_):
         o = cls(parent=parent, name=name, sorts=sorts, sort_=sort_, annotations=None)
-        o.arity = sum([len(d.root_set) for d in o.domains
-                       if d.root_set])
+        o.arity = len(o.sorts)
         return o
 
     def __str__(self):

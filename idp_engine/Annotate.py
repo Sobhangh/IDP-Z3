@@ -166,6 +166,12 @@ def annotate_declaration(self: SymbolDeclaration,
             self.domains[0].annotate(voc, {})
             self.domains[0].check(not self.domains[0].root_set,
                     f"Expected arity 0 for {self.domains[0]} (found type {self.domains[0].root_set})")
+        if self.super_sets:
+            self.check(len(self.super_sets) == 1 and not self.super_sets[0].root_set,
+                       f"Incorrect arity of superset: {self.super_sets[0]}")
+            self.super_sets[0].annotate(voc, {})
+            self.super_sets[0].check(not self.super_sets[0].root_set,
+                    f"Expected arity 0 for {self.super_sets[0]} (found type {self.super_sets[0].root_set})")
     else:
         self.domains[0].check(len(self.sorts) == len(self.domains),
                    f"Incorrect arity of domain {self.domains}")
@@ -178,7 +184,19 @@ def annotate_declaration(self: SymbolDeclaration,
             except IDPZ3Error:
                 d.check(False, f"{d} is not a subset of {s}")
 
-    self.arity = sum([len(d.root_set) for d in self.domains if d.root_set])
+        # the same, for super_sets
+        self.super_sets[0].check(len(self.sorts) == len(self.super_sets),
+                f"Incorrect arity of superset {self.super_sets}")
+        for s, d in zip(self.sorts, self.super_sets):
+            d.annotate(voc, {})
+            d.check(d.root_set is not None and len(d.root_set) == 1,
+                    f"Can't use n-ary {d.name} in a superset")
+            try:
+                is_subset_of(d, d.root_set[0], s)  # raises an error if not
+            except IDPZ3Error:
+                d.check(False, f"{d} is not a subset of {s}")
+
+    self.arity = len(self.sorts)
 
     for s in chain(self.sorts, [self.sort_]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
@@ -223,7 +241,7 @@ def root_set(s: SetName) -> List[SetName]:
         return [s]
     elif s.decl.arity == 0:
         return []
-    return [root_set(s1)[0] for s1 in s.decl.domains]
+    return [root_set(s1)[0] for s1 in s.decl.super_sets]
 
 def annotate(self: Expression,
              voc: Vocabulary,
@@ -1148,7 +1166,7 @@ def fill_attributes_and_check(self: AppliedSymbol, type_check=True) -> Expressio
             out.type = type_.codomain
         else:
             while not type_.codomain:  # type is a subset of a concept
-                type_ = type_.decl.domains[0]
+                type_ = type_.decl.super_sets[0]
             out.type = type_.codomain
 
     return out.simplify1()

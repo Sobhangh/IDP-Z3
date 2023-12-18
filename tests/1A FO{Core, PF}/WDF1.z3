@@ -17,8 +17,11 @@ And(p(a),
     col(c),
     p(c),
     Or(Not(col(c)), p(c)),
-    Or(And(And(col(a), p(a)), a == c),
-       And(And(col(b), p(b)), b == c)),
+    Or(Or(And(col(a), a == c), And(col(b), b == c)),
+       Or(And(And(col(a), p(a)), a == c),
+          And(And(col(b), p(b)), b == c)),
+       Or(And(And(And(col(a), p(a)), pp(a)), a == c),
+          And(And(And(col(b), p(b)), pp(b)), b == c))),
     2 == If(p(a), 1, 0) + If(p(b), 1, 0),
     2 ==
     If(And(col(a), p(a)), 1, 0) +
@@ -32,6 +35,11 @@ And(p(a),
     q,
     d,
     Or(c == a, c == b),
+    Or(Not(p(a)), col(a)),
+    Or(Not(p(b)), col(b)),
+    Or(Not(pp(a)), p(a)),
+    Or(Not(pp(b)), p(b)),
+    Or(Not(d), q),
     p(a),
     p(a),
     p(c),
@@ -58,32 +66,32 @@ And(p(a),
        __min(lambda x ∈ color : i(x) if p(x)) <= i(a)),
     Or(Not(p(b)),
        __min(lambda x ∈ color : i(x) if p(x)) <= i(b)),
-    And(Or(Not(col(a)), p(a)), Or(Not(col(b)), p(b))),
-    And(Or(Not(col(a)), p(a)), Or(Not(col(b)), p(b))))
+    And(p(a), p(b)),
+    And(p(a), p(b)))
 WDF: 
-col(a)
-true
-col(c())
-true
-col(c())
-true
-true
-col(c())
-true
-true
-col(c()) ∧ p(c())
-col(c())
-∀ x ∈ Concept[->color]: col($(x)())
 true
 true
 true
-∀ x ∈ color: col(x)
 true
 true
-∀ x ∈ color: col(x) ∧ (¬(p(x)) ∨ col(x))
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+∀ x ∈ color: ¬(p(x)) ∨ col(x)
 ∀ x ∈ col: ¬(i(x) = 0)
 true
-q()
 true
 true
-∀ x ∈ color: col(x)
+true
+true

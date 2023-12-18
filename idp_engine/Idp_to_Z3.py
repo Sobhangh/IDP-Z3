@@ -356,8 +356,6 @@ def translate1(self, problem: Theory, vars={}) -> ExprRef:
     if len(self.sub_exprs) == 0:
         return self.decl.translate(problem)
     elif type(self.symbol.decl) == TypeDeclaration:
-        self.check(self.sub_exprs[0].type in [INT_SETNAME, REAL_SETNAME, DATE_SETNAME],
-                   f"Expecting a number ({self.type} found: {self.code})")
         return self.sub_exprs[0].type.has_element(self.sub_exprs[0], problem.extensions).translate(problem)
     else:
         arg = [x.translate(problem, vars) for x in self.sub_exprs]

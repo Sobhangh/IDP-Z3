@@ -29,7 +29,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
           symbols+= NAME [','] ':'
           ( '(' sorts*=SetName[/[*⨯]/] ')' | sorts*=SetName[/[*⨯]/] )
           ('->' | '→') sort_=SetName
-          ( '(' repeat_name=NAME /⊆|<</ domains*=SetName[/[*⨯]/] ')'
+          ( '(' repeat_name=NAME /⊆|<</ super_sets*=SetName[/[*⨯]/] ')'
           | '(' ('domain' ':' domains*=SetName[/[*⨯]/])? ','?
                 ('range' ':' codomain=SetName)?
              ')'

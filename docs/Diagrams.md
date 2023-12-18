@@ -9,6 +9,7 @@ Datamodel for type checking:
 erDiagram
     Declaration |o--o{ SetName : "sorts / domains"
     Declaration |o--|| SetName: "sort_ / codomain"
+    Declaration |o--|| SetName: "super_sets"
     Declaration |o--o{ Expression: decl
     VarDeclaration |o--|| SetName: subtype
     SetName }o--|| Declaration: decl
@@ -23,10 +24,11 @@ erDiagram
     Declaration ||--o{ Constructor: constructors
 
     Declaration {
-        List[SetName]   sorts   "Types of the arguments of the symbol"
-        SetName         sort_     "Type of the symbol applied to arguments"
-        List[SetName]   domains "Domain of the symbol (subset of .sorts)"
-        SetName         codomain "Codomain of the symbol (subset of .out)"
+        List[SetName]   sorts           "Types of the arguments of the symbol"
+        SetName         sort_           "Type of the symbol applied to arguments"
+        List[SetName]   domains         "Domain of the symbol (subset of .sorts)"
+        SetName         codomain        "Codomain of the symbol (subset of .out)"
+        List[SetName]   super_sets      "Supersets of the symbol interpretation"
         List[Constructor] constructors "only for `constructured from` enumerations"
     }
     VarDeclaration {
