@@ -19,6 +19,7 @@ Contributors (alphabetical): Pierre Carbonnelle.
 ### IDP-Z3
 * MR !336: Improve type checking
 * issue #309: "'AQuantification' object has no attribute 'symbol'" error in IC
+* issue #317: "Wrong boolean value" error with empty theory
 
 
 ### Interactive Consultant and Web IDE
