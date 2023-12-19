@@ -32,7 +32,7 @@ from z3 import (ModelRef, FuncInterp, AstRef, ExprRef, DatatypeRef,
 from .Assignments import Assignments
 from .Expression import (Expression, AppliedSymbol, SetName, TRUE, FALSE, Number, Date,
                          BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME)
-from .Parse import str_to_IDP, TypeDeclaration, SymbolDeclaration
+from .Parse import TypeDeclaration, SymbolDeclaration, SymbolInterpretation
 from .utils import RESERVED_SYMBOLS, DATE, INT, REAL
 if TYPE_CHECKING:
     from .Theory import Theory
@@ -65,7 +65,23 @@ def z3_to_idp(val: ExprRef,
     if is_algebraic_value(val):
         return Number(number = str(val))
     if isinstance(val, DatatypeRef):
-        return type_.root_set.decl.map.get(str(val), None)
+        out = type_.root_set.decl.map.get(str(val), None)
+        if out:
+            return out
+        else: # compound term
+            assert hasattr(type_.decl, 'interpretation'), "Internal error"
+            assert type(type_.decl.interpretation) == SymbolInterpretation, "Internal error"
+            try:
+                name = str(val.decl())
+            except:  # Var(0)
+                return None
+            for cons in type_.decl.interpretation.enumeration.constructors:
+                if cons.name == name:
+                    constructor = cons
+            assert constructor is not None, f"wrong constructor name '{name}' for {type_}"
+
+            args = [z3_to_idp(a, s) for a, s in zip(val.children(), constructor.domains)]
+            return AppliedSymbol.construct(constructor, args)
     return None
 
 def get_interpretations(theory: Theory, model: ModelRef, as_z3: bool

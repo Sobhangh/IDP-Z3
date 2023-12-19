@@ -42,7 +42,7 @@ from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, INT, REAL, DATE, IDPZ3Error,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT,
                     NOT_SATISFIABLE)
-from .Z3_to_IDP import collect_questions, get_interpretations
+from .Z3_to_IDP import z3_to_idp, collect_questions, get_interpretations
 
 
 class Propagation(Enum):
@@ -537,8 +537,7 @@ class Theory(object):
                         val1 = model.eval(q.reified(self), model_completion=complete)
                     else:
                         val1 = model.eval(q.translate(self), model_completion=complete)
-                    val = (None if str(q) in [str(val1), str(val1)+"()"] else
-                           str_to_IDP(str(val1), q.type))
+                    val = z3_to_idp(val1, q.type)
 
                 if val is not None:
                     if q.is_assignment() and val == FALSE:  # consequence of the TRUE assignment
