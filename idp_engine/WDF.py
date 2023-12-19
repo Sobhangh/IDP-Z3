@@ -20,6 +20,7 @@ Methods to compute the Well-definedness condition of an Expression.
 
 """
 from __future__ import annotations
+from copy import copy
 from typing import List
 
 from .Parse import TypeDeclaration
@@ -32,8 +33,7 @@ from .Expression import (ASTNode, Expression, SETNAME, SetName,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Variable,
                          VARIABLE, Brackets, SymbolExpr, Number, NOT,
                          EQUALS, AND, OR, TRUE, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
-
-from .utils import CONCEPT, OrderedSet
+from .utils import CONCEPT, OrderedSet, flatten
 
 
 def is_subset_of(e: Expression,
@@ -119,6 +119,23 @@ def Or(sub_exprs: List[Expression]) -> Expression:
                         or (isinstance(e, AUnary) and e.sub_exprs[0].code in exclude))])
         return out
 
+def Forall(qs: List[Quantee], expr: Expression) -> Expression:
+    # move quantifications upward
+    # !x: a&(!y:b)&c   --> !x: !y: a&b&..
+    if isinstance(expr, Operator):
+        for i, e in enumerate(expr.sub_exprs):
+            if type(e) == AQuantification and e.q == "∀":  # e = (!y:b)
+                inner_vars = set(*flatten((q.vars for q in e.quantees)))
+                if inner_vars.isdisjoint(expr.variables):  # x != y
+                    new_expr = copy(expr.sub_exprs)  # new_exprs = a&b&c
+                    new_expr[i] = e.sub_exprs[0]
+                    if type(expr) == AConjunction:
+                        new_expr = And(new_expr)
+                    elif type(expr) == ADisjunction:
+                        new_expr = Or(new_expr)
+                    expr = Forall(e.quantees, new_expr)  # !y: a&b&c
+                    break
+    return FORALL(qs, expr).simplify1()
 
 def Not(e: Expression) -> Expression:
     """ Create a simplified negation"""
@@ -166,7 +183,7 @@ def merge_WDFs(self):
     if len(self.sub_exprs) == 1:  # not a min/max aggregate
         # WDF(!x in p: phi)  = WDF(p) & !x in p: WDF(phi)
         if self.sub_exprs[0].WDF:
-            forall = FORALL(self.quantees, self.sub_exprs[0].WDF).simplify1()
+            forall = Forall(self.quantees, self.sub_exprs[0].WDF)
             self.WDF = And([q.WDF for q in self.quantees] + [forall])
         else:
             self.WDF = None
@@ -174,7 +191,7 @@ def merge_WDFs(self):
         # WDF(min{f|x in p: phi}) = WDF(p) & !x in p: WDF(phi) & (~phi | WDF(f))
         wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
         condition = And([wdfs[1], Or([Not(self.sub_exprs[1]), wdfs[0]])])
-        forall = FORALL(self.quantees, condition).simplify1()
+        forall = Forall(self.quantees, condition)
         self.WDF = And([q.WDF for q in self.quantees] + [forall])
     return self
 AQuantification.merge_WDFs = merge_WDFs

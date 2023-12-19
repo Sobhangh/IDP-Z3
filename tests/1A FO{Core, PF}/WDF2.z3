@@ -1,65 +1,27 @@
-
-Model 1
-==========
-Q := {a, b}.
-p := {a}.
-f := {(a, a) -> a, (b, a) -> a}.
-
-
-Model 2
-==========
-Q := {a}.
-p := {a, b}.
-f := {(a, a) -> a, (a, b) -> a}.
-
-
-Model 3
-==========
-Q := {a}.
-p := {a}.
-f := {(a, a) -> a}.
-
-
-Model 4
-==========
-Q := {a}.
-p := {a, b}.
-f := {(a, a) -> a, (a, b) -> b}.
-
-
-Model 5
-==========
-Q := {a, b}.
-p := {a, b}.
-f := {(a, a) -> a, (a, b) -> a, (b, a) -> a, (b, b) -> b}.
-
-
-Model 6
-==========
-Q := {a, b}.
-p := {a, b}.
-f := {(a, a) -> a, (a, b) -> a, (b, a) -> b, (b, b) -> b}.
-
-
-Model 7
-==========
-Q := {a, b}.
-p := {a, b}.
-f := {(a, a) -> a, (a, b) -> b, (b, a) -> b, (b, b) -> b}.
-
-
-Model 8
-==========
-Q := {a, b}.
-p := {a, b}.
-f := {(a, a) -> a, (a, b) -> b, (b, a) -> a, (b, b) -> b}.
-
-
-Model 9
-==========
-Q := {a, b}.
-p := {a}.
-f := {(a, a) -> a, (b, a) -> b}.
-
-
-No more models.
+Formula: 
+And(Q(a),
+    p(a),
+    f(a, a) == a,
+    Or(Not(And(Q(a), p(a))), f(a, a) == a),
+    Or(Not(And(Q(b), p(b))), f(b, b) == b),
+    Or(Not(Q(a)),
+       And(Or(Not(p(a)), f(a, a) == a),
+           Or(Not(p(b)), f(a, b) == a))),
+    Or(Not(Q(b)),
+       And(Or(Not(p(a)), f(b, a) == b),
+           Or(Not(p(b)), f(b, b) == b))),
+    Or(And(Q(a),
+           And(Or(Not(p(a)), f(a, a) == a),
+               Or(Not(p(b)), f(a, b) == a))),
+       And(Q(b),
+           And(Or(Not(p(a)), f(b, a) == b),
+               Or(Not(p(b)), f(b, b) == b)))),
+    Or(Not(And(Q(a), p(a))), Or(f(a, a) == a, f(a, a) == b)),
+    Or(Not(And(Q(a), p(b))), Or(f(a, b) == a, f(a, b) == b)),
+    Or(Not(And(Q(b), p(a))), Or(f(b, a) == a, f(b, a) == b)),
+    Or(Not(And(Q(b), p(b))), Or(f(b, b) == a, f(b, b) == b)))
+WDF: 
+true
+true
+true
+true

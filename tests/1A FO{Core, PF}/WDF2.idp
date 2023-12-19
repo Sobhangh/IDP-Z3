@@ -8,9 +8,15 @@ vocabulary V {
 theory T:V {
     Q(a) ∧ p(a) & f(a,a)=a.
     !x in T: Q(x) & p(x) => f(x,x)=x.
+    !x in T: Q(x) => ! y in T: p(y) => f(x, y) = x.
+    ?x in T: Q(x) & ! y in T: p(y) => f(x, y) = x.
 }
 
 procedure main() {
-    pretty_print(model_expand(T))
+    Th = Theory(T)
+    print("Formula: ")
+    pretty_print(Th.formula())
+    print("WDF: ")
+    pretty_print(Th.WDFs)
 }
 
