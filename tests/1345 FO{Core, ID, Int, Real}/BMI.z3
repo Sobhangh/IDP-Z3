@@ -1,8 +1,8 @@
-weight() -> 80.0
+weight() -> 80
 No more consequences.
 ['Male', 'Female']
 
-weight() -> 80.0
+weight() -> 80
 bmi() -> 1/320
 riskLevel() -> Low
 No more consequences.

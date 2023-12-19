@@ -751,7 +751,7 @@ class Theory(object):
                 break
         solver.pop()
 
-        val_IDP = str_to_IDP(str(val), sentence.type)
+        val_IDP = z3_to_idp(val, sentence.type)
         if val_IDP is not None:
             self.assert_(str(sentence), val_IDP, S.GIVEN)
             ass = str(EQUALS([sentence, val_IDP]))

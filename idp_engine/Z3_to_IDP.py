@@ -63,7 +63,7 @@ def z3_to_idp(val: ExprRef,
     if is_rational_value(val):
         return Number(number = str(val))
     if is_algebraic_value(val):
-        return Number(number = str(val))
+        return Number(number = str(val)[:-1])  # drop the ?
     if isinstance(val, DatatypeRef):
         out = type_.root_set.decl.map.get(str(val), None)
         if out:
