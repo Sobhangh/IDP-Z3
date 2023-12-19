@@ -43,7 +43,7 @@ TRUEFALSE = re.compile(r"\b(True|False)\b")
 def z3_to_idp(val: ExprRef,
               type_: SetName
              ) -> Expression:
-    """convert a Z3 expression to an IDP expression"""
+    """convert a Z3 expression of type type_ to an IDP expression"""
 
     interp = getattr(type_.root_set.decl, "interpretation", None)
     enum_type = (interp.enumeration.type.name if interp and hasattr(interp.enumeration,  "type") else

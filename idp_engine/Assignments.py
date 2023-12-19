@@ -56,6 +56,7 @@ class Status(Enum):
     DEFAULT = auto()
     GIVEN = auto()
 
+
 def str_to_IDP(val_string: str,
                type_: SetName,
                 ) -> Expression:
@@ -71,15 +72,8 @@ def str_to_IDP(val_string: str,
     Returns:
         Expression: the internal representation of the value
     """
-    if type_.decl is None:
-        assert type_ == BOOL_SETNAME, "Internal error"
-        out = (TRUE if val_string in [TRUE, 'True'] else
-            FALSE if val_string in [FALSE, 'False']  else
-            None)
-        if out is None:
-            raise IDPZ3Error(f"wrong boolean value: {val_string}")
-    elif (hasattr(type_.root_set.decl, 'map')
-        and val_string in type_.root_set.decl.map):  # constructor
+    if (hasattr(type_.root_set.decl, 'map')
+    and val_string in type_.root_set.decl.map):  # constructor
         out = type_.root_set.decl.map[val_string]
     elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
         assert hasattr(type_.decl, 'interpretation'), "Internal error"
@@ -121,9 +115,9 @@ def str_to_IDP(val_string: str,
                         type_.decl.codomain.name)
 
         if type_ == BOOL_SETNAME or enum_type == BOOL:
-            out = (TRUE if val_string in [TRUE, 'True'] else
-                    FALSE if val_string in [FALSE, 'False'] else
-                    None)
+            out = (TRUE  if val_string == 'True'  else
+                   FALSE if val_string == 'False' else
+                   None)
             if out is None:
                 raise IDPZ3Error(f"wrong boolean value: {val_string}")
         elif type_ == DATE_SETNAME or enum_type == DATE:
