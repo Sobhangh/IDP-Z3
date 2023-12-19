@@ -26,8 +26,7 @@ from typing import TYPE_CHECKING
 
 from idp_engine import Theory, Status
 from idp_engine.Expression import (TRUE, FALSE, Number, Date, BOOL_SETNAME)
-from idp_engine.Parse import str_to_IDP
-from idp_engine.Assignments import Status as S
+from idp_engine.Assignments import Status as S, str_to_IDP
 from idp_engine.utils import BOOL, INT, REAL, DATE
 
 if TYPE_CHECKING:

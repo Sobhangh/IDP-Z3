@@ -1364,7 +1364,7 @@ class Number(Expression):
         self.py_value = 0 # to get the type
 
         ops = self.number.split("/")
-        if len(ops) == 2:  # possible with str_to_IDP on Z3 value
+        if len(ops) == 2:  # possible with z3_to_idp for rational value
             self.py_value = Fraction(self.number)
             self.type = REAL_SETNAME
         elif '.' in self.number:

@@ -31,13 +31,12 @@ from typing import Any, Iterator, List, Optional, Tuple, Union
 from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not,
                 And, Or, Implies, is_and, BoolVal, get_param, is_true)
 
-from .Assignments import Status as S, Assignment, Assignments
+from .Assignments import Status as S, Assignment, Assignments, str_to_IDP
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
                          EQUALS, NOT, Extension, AQuantification,
                          BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SymbolExpr,
-                    TheoryBlock, Structure, Definition, str_to_IDP,
-                    SymbolInterpretation)
+                    TheoryBlock, Structure, Definition,                     SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, INT, REAL, DATE, IDPZ3Error,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT,
@@ -362,6 +361,8 @@ class Theory(object):
         atom = self.assignments[code].sentence
         if value is None:
             self.assignments.assert__(atom, None, S.UNKNOWN)
+        elif isinstance(value, Expression):
+            self.assignments.assert__(atom, value, status)
         else:
             val = str_to_IDP(str(value), atom.type)
             self.assignments.assert__(atom, val, status)

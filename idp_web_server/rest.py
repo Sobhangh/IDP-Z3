@@ -45,9 +45,8 @@ from flask_restful import Resource, Api, reqparse
 from idp_engine import IDP
 from idp_engine.utils import log, RUN_FILE
 
-from idp_engine.Assignments import Status as S
+from idp_engine.Assignments import Status as S, str_to_IDP
 from idp_engine.Expression import EQUALS
-from idp_engine.Parse import str_to_IDP
 from idp_engine.utils import redirect_stdout, redirect_stderr_to_stdout
 from .State import State
 from .Inferences import explain, abstract
