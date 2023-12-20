@@ -24,15 +24,12 @@ from copy import copy
 from typing import List
 
 from .Parse import TypeDeclaration
-from .Expression import (ASTNode, Expression, SETNAME, SetName,
-                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME,
-                         Constructor, CONSTRUCTOR, AIfExpr, IF,
-                         AQuantification, Quantee, ARImplication, AImplication,
-                         AEquivalence, AConjunction, ADisjunction,
-                         Operator, AComparison, ASumMinus, AMultDiv, APower, AUnary,
-                         AAggregate, AppliedSymbol, UnappliedSymbol, Variable,
-                         VARIABLE, Brackets, SymbolExpr, Number, NOT,
-                         EQUALS, AND, OR, TRUE, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
+from .Expression import (Expression, SetName, AIfExpr, IF,
+                         AQuantification, Quantee, AImplication,
+                         AConjunction, ADisjunction,
+                         Operator, AMultDiv, AUnary,
+                         AAggregate, AppliedSymbol, SymbolExpr, NOT,
+                         EQUALS, AND, OR, TRUE, FALSE, ZERO, FORALL)
 from .utils import CONCEPT, OrderedSet, flatten
 
 
@@ -120,6 +117,7 @@ def Or(sub_exprs: List[Expression]) -> Expression:
         return out
 
 def Forall(qs: List[Quantee], expr: Expression) -> Expression:
+    """ Create a simplified Forall"""
     # move quantifications upward
     # !x: a&(!y:b)&c   --> !x: !y: a&b&..
     if isinstance(expr, Operator):
@@ -151,12 +149,14 @@ def Not(e: Expression) -> Expression:
 # Class Expression  #######################################################
 
 def fill_WDF(self: Expression) -> Expression:
+    """ Compute the Well-definedness condition of an Expression"""
     for e in self.sub_exprs:
         e.fill_WDF()
     return self.merge_WDFs()
 Expression.fill_WDF = fill_WDF
 
 def merge_WDFs(self: Expression) -> Expression:
+    """ Combine the WDF of the sub-expressions of self"""
     wdfs = [e.WDF if e.WDF else TRUE for e in self.sub_exprs]
     self.WDF = And(wdfs)
     return self

@@ -45,8 +45,6 @@ theory T:V {
     d().
     q() & d().
 
-    { !x in col: p(x).}
-    { !x in color: p(x).}
 }
 procedure main() {
     Th = Theory(T)

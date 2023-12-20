@@ -1,0 +1,25 @@
+vocabulary V {
+    type color := {a, b}
+    col : color -> Bool
+    c: () -> color
+    p: color -> Bool (p ⊆ col)
+    pp: color -> Bool (pp ⊆ p)
+    i: color -> Int (domain: pp)
+    q : () -> Bool
+    d: () -> Bool (d ⊆ q)
+}
+
+theory T:V {
+    { !x in col: p(x).}
+    { !x in color: p(x).}
+    { !x in col: i(x)=1.}
+    { !x in pp: i(x) = 1.}
+    { !x in col: i(x) = 1 <- pp(x).}
+}
+procedure main() {
+    Th = Theory(T)
+    print("Formula: ")
+    pretty_print(Th.formula())
+    print("WDF: ")
+    pretty_print(Th.WDFs)
+}

@@ -302,7 +302,7 @@ def annotate_block(self: ASTNode,
     for d in self.definitions:
         for r in d.rules:
             if r.WDF and not r.WDF.same_as(TRUE):
-                collect_warnings(r.WDF.original, warnings)
+                collect_warnings(r.implication, warnings)
 
     constraints = OrderedSet()
     for c in self.constraints:
@@ -481,12 +481,12 @@ def annotate(self: Expression,
 
     # compute WDF
     head = self.definiendum if not self.out else EQUALS([self.definiendum, self.out])
-    expr = FORALL(self.quantees, EQUALS([head, self.body]))  # using Clark
+    expr = FORALL(self.quantees, IMPLIES([self.body, head]))
     expr.fill_WDF()
     expr._tx_position, expr._tx_position_end = self._tx_position, self._tx_position_end
     expr.parent = self.parent
+    self.implication = expr
     self.WDF = expr.WDF
-    self.WDF.original = expr
 
     return self
 Rule.annotate = annotate

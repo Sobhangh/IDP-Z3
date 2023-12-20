@@ -42,12 +42,6 @@ And(p(a),
     Or(Not(pp(a)), p(a)),
     Or(Not(pp(b)), p(b)),
     Or(Not(d), q),
-    p(a),
-    p(a),
-    p(c),
-    p(c),
-    p(b),
-    p(b),
     Or(And(And(col(a), p(a)),
            __min(lambda x ∈ color : i(x) if col(x) ∧ p(x)) ==
            i(a)),
@@ -67,9 +61,7 @@ And(p(a),
     Or(Not(p(a)),
        __min(lambda x ∈ color : i(x) if p(x)) <= i(a)),
     Or(Not(p(b)),
-       __min(lambda x ∈ color : i(x) if p(x)) <= i(b)),
-    And(p(a), p(b)),
-    And(p(a), p(b)))
+       __min(lambda x ∈ color : i(x) if p(x)) <= i(b)))
 WDF: 
 true
 true
@@ -94,7 +86,5 @@ true
 ∀ x ∈ color: ¬(p(x)) ∨ pp(x)
 ∀ x ∈ col: ¬(i(x) = 0) ∧ pp(x)
 ∀ x ∈ col: (pp(x) ∧ i(x) = 0 ∨ pp(x)) ∧ (pp(x) ∧ i(x) = 0 ∨ ¬(i(x) = 0))
-true
-true
 true
 true
