@@ -9,8 +9,8 @@ structure S  {
 
 theory T:V  {
     !x, y: x ~= y => (edge(x, y) | edge(y, x)).
-    !x, y: x ~= y => (~edge(x, y) | ~edge(y, x)).
-    !x: ?y: x ~= y & edge(x, y).
+    !x, y: x ~= y => (not edge(x, y) | not edge(y, x)).
+    !x: ?y: x ~= y and edge(x, y).
     !x, y: x = y + 10 => edge(x, y).
 }
 

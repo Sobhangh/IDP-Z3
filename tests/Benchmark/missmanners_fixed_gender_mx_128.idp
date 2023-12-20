@@ -19,7 +19,7 @@ structure {
 }
 
 theory {
-    !p1 in Person: !p2 in Person: ((p1 = 128 & p2 = 1) | (has_seat(p1) = has_seat(p2) + 1)) => ?h in Hobby: has_hobby(p1, h) & has_hobby(p2, h).
+    !p1 in Person: !p2 in Person: ((p1 = 128 and p2 = 1) | (has_seat(p1) = has_seat(p2) + 1)) => ?h in Hobby: has_hobby(p1, h) and has_hobby(p2, h).
     !p1 in Person: !p2 in Person: p1 ~= p2 => has_seat(p1) ~= has_seat(p2).
 
     !p1 in Person: !i in Seat: (has_seat(p1) = 2 * i) => has_gender(p1) = f.
