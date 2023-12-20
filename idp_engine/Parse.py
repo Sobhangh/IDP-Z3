@@ -205,37 +205,42 @@ class IDP(ASTNode):
             now_voc:Vocabulary = voc.generate_now_voc()
             self.now_voc[now_voc.name]=now_voc
             now_voc.annotate(self)
-            
+            #print("voc now")
             next_voc = voc.generate_next_voc()
             self.next_voc[next_voc.name]=next_voc
             next_voc.annotate(self)
+            #print("voc next")
 
             voc.annotate(self)
+            #print("voc annot")
         for t in self.theories.values():
             if t.ltc:
                 t.initialize_theory()
-                #print("theories iinit")
+                #print("theories init")
                 t.bst_theory()
-                t.trs_theory()
                 #print("theories bis")
+                t.trs_theory()
+                #print("theories trs")
                 #if len(t.bistate_theory.definitions) > 1:
                 #    print(t.bistate_theory.definitions[1].rules)
 
                 init_thrs[t.init_theory.name] = t.init_theory
                 init_thrs[t.bistate_theory.name] = t.bistate_theory
             t.annotate(self)
+            #print("annotated theory")
         for struct in self.structures.values():
             struct.annotate(self)
+            #print("annotated struct")
             init_strcs[struct.init_struct.name] = struct.init_struct
             #TO DO : ADD STRUCTURE INITIALIZATION
-        for now_voc in self.now_voc.values():
-            self.vocabularies[now_voc.name] = now_voc
-        for next_voc in self.next_voc.values():
-            self.vocabularies[next_voc.name] = next_voc
-        for t in init_thrs.values():
-            self.theories[t.name] = t
-        for s in init_strcs.values():
-            self.structures[s.name] = s
+        #for now_voc in self.now_voc.values():
+        #    self.vocabularies[now_voc.name] = now_voc
+        #for next_voc in self.next_voc.values():
+        #    self.vocabularies[next_voc.name] = next_voc
+        #for t in init_thrs.values():
+        #    self.theories[t.name] = t
+        #for s in init_strcs.values():
+        #    self.structures[s.name] = s
         #print("outside")
 
         # determine default vocabulary, theory, before annotating display
@@ -431,6 +436,9 @@ class Vocabulary(ASTNode):
                         nowvoc.declarations.append(TypeDeclaration(name=d.name,enumeration=enum))
                     else:
                         nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=cnstr,enumeration=enum))
+                elif isinstance(d,Import):
+                    #Not adding import
+                    d
                 else:
                     #without deepcopy
                     nowvoc.declarations.append(d.init_copy())
@@ -475,6 +483,8 @@ class Vocabulary(ASTNode):
                         nowvoc.declarations.append(TypeDeclaration(name=d.name,enumeration=enum))
                     else:
                         nowvoc.declarations.append(TypeDeclaration(name=d.name,constructors=cnstr,enumeration=enum))
+                elif isinstance(d,Import):
+                    d
                 else:
                     #without deepcopy
                     nowvoc.declarations.append(d.init_copy())
@@ -1511,7 +1521,7 @@ class ConstructedFrom(Enumeration):
 
     def init_copy(self):
         cnstr = [c.init_copy() for c in self.constructors]
-        return ConstructedFrom(constructed=self.constructed.init_copy(),constructors=cnstr)
+        return ConstructedFrom(constructed=self.constructed,constructors=cnstr)
     
     def contains(self, args, function, arity=None, rank=0, tuples=None,
                  interpretations: Optional[dict[str, SymbolInterpretation]] = None,

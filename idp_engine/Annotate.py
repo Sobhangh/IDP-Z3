@@ -218,7 +218,7 @@ def annotate(self, idp):
             r = check_start(e)
             self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
 
-        # now or next cannot be inside negation (first part of an implication also but check if they dont cancel each other out)
+        
         # is it possible to say that negeation outside start/now/next will be pushed inside quantification? yes , so if the negation is placed outside of the wraping quantifier then it is not acceptable otherwise it is.
         time: Type = TYPE('Tijd')
         t: Variable = VARIABLE(v_time,time)
@@ -556,12 +556,18 @@ def annotate_init_structure(s,idp):
     vocab_name = s.vocab_name+'_now'
     name = s.name+'now'
     voc = idp.now_voc[s.vocab_name+'_now']
+    #print("s1")
     s.init_struct = Structure(name=name,vocab_name=vocab_name,interpretations={})
     s.init_struct.voc = voc
+    #print("s2")
     for i in s.interpretations.values():
         r = i.initialize_temporal_interpretation(idp.vocabularies[s.vocab_name].tempdcl)
+        #print("s3")
+        #print(i)
         s.init_struct.interpretations[r.name] = r
         r.annotate(s.init_struct)
+        #print("s4")
+    #print("s5")
     voc.add_voc_to_block(s.init_struct)
 
 
@@ -1072,7 +1078,7 @@ def replace(self, voc, q_vars):
 NextAppliedSymbol.replace = replace
 
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
-    if ltc and temporal_head != 0:
+    if ltc : #and temporal_head != 0
         # for the head temporal =0 is not Ok
         self.check(temporal_head ==3, f"Not allowed to use Next[]")
     expanded = self.replace(voc,q_vars)

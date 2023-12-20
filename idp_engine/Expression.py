@@ -220,10 +220,10 @@ class Accessor(ASTNode):
                 f"{self.accessor}: {self.type}" )
 
     def init_copy(self):
-        dcl = None
-        if self.decl:
-            dcl = self.dcl.init_copy()
-        return Accessor(None,UnappliedSymbol(None,self.type),dcl)
+        acc = None
+        if self.accessor:
+            acc = self.accessor.init_copy()
+        return Accessor(None,UnappliedSymbol(None,SYMBOL(self.type)),acc)
 
 class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.
