@@ -28,7 +28,6 @@ import sys
 import time
 
 from idp_engine import IDP
-from contextlib import redirect_stdout
 from z3 import set_option
 from idp_engine.utils import PROCESS_TIMINGS
 
