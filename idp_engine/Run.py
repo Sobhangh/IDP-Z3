@@ -26,9 +26,10 @@ from __future__ import annotations
 from copy import copy
 import gc
 import logging
+from os import linesep
 import time
 import types
-from typing import Any, Iterator, Union
+from typing import Any, Iterator, Union, Optional
 from z3 import Solver
 
 from .Parse import IDP, TheoryBlock, Structure
@@ -248,32 +249,6 @@ def determine_relevance(*theories: Union[TheoryBlock, Structure, Theory]) -> Ite
         if ass.relevant:
             yield str(ass)
 
-
-def pretty_print(x: Any ="") -> None:
-    """Prints its argument on stdout, in a readable form.
-
-    Args:
-        x (Any, optional): the result of an API call. Defaults to "".
-    """
-    if type(x) is tuple and len(x)==2: # result of Theory.explain()
-        facts, laws = x
-        for f in facts:
-            print(str(f))
-        for l in laws:
-            print(l.annotations['reading'])
-    elif isinstance(x, types.GeneratorType):
-        for i, xi in enumerate(x):
-            if isinstance(xi, Assignments):
-                print(f"{NEWL}Model {i+1}{NEWL}==========")
-                print(xi)
-            else:
-                print(xi)
-    elif isinstance(x, Theory):
-        print(x.assignments)
-    else:
-        print(x)
-
-
 def duration(msg: str = "") -> str:
     """Returns the processing time since the last call to `duration()`,
     or since the begining of execution"""
@@ -282,13 +257,44 @@ def duration(msg: str = "") -> str:
     last_call = time.process_time()
     return f"{out} {msg}"
 
-def execute(self: IDP) -> None:
+def execute(self: IDP, capture_print : bool = False) -> Optional[str]:
     """ Execute the ``main()`` procedure block in the IDP program """
     global last_call
-
     last_call = time.process_time()
     main = str(self.procedures['main'])
+
     mybuiltins = {}
+
+    out = []  # List of output lines
+    if capture_print:
+        def print(*args):
+            out.append(''.join(map(str, args)))
+        mybuiltins['print'] = print
+
+    def pretty_print(x: Any ="") -> None:
+        """Prints its argument on stdout, in a readable form.
+
+        Args:
+            x (Any, optional): the result of an API call. Defaults to "".
+        """
+        if type(x) is tuple and len(x)==2: # result of Theory.explain()
+            facts, laws = x
+            for f in facts:
+                out.append(str(f))
+            for l in laws:
+                out.append(l.annotations['reading'])
+        elif isinstance(x, types.GeneratorType):
+            for i, xi in enumerate(x):
+                if isinstance(xi, Assignments):
+                    out.append(f"{NEWL}Model {i+1}{NEWL}==========")
+                    out.append(str(xi))
+                else:
+                    out.append(str(xi))
+        elif isinstance(x, Theory):
+            out.append(str(x.assignments))
+        else:
+            out.append(str(x))
+
     mylocals = copy(self.vocabularies)
     mylocals.update(self.theories)
     mylocals.update(self.structures)
@@ -310,6 +316,8 @@ def execute(self: IDP) -> None:
         exec(main, mybuiltins, mylocals)
     except (SyntaxError, AttributeError) as e:
         raise IDPZ3Error(f'Error in procedure, {e}')
+    if out:
+        return linesep.join(out) + linesep
 
 IDP.execute = execute
 

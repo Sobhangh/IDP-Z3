@@ -1,13 +1,7 @@
-
-Model 1
-==========
-p := {A -> 1, B -> 1, C -> 1, D -> 1}.
-
-
-More models may be available.  Change the max argument to see them.
 Traceback (most recent call last):
   File "test.py", line ??, in generateZ3
-    idp.execute()
+    prints = idp.execute(capture_print = True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Run.py", line ??, in execute
     exec(main, mybuiltins, mylocals)
   File "<string>", line ??, in <module>
