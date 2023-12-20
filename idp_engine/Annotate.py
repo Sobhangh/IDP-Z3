@@ -282,7 +282,7 @@ def collect_warnings(expr: Expression, out):
     if all(not e.WDF or e.WDF.same_as(TRUE) for e in expr.sub_exprs):
         out.append(IDPZ3Error(
             f"Domain error: {expr.code[:20]} is defined only when {expr.WDF}",
-            node=expr, error=False))
+            node=expr, error=True))
 
 def annotate_block(self: ASTNode,
                    idp: IDP,
