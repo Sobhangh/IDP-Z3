@@ -203,6 +203,9 @@ def annotate(self, idp):
     annotate_trs_theory(self,idp)
 
     for i in self.interpretations.values():
+        if self.ltc:
+            for t in self.voc.tempdcl:
+                self.check(i.name != t.symbol.name,f"Cant have temporal symbol interpretation in LTC theory")
         i.annotate(self)
     self.voc.add_voc_to_block(self)
 
