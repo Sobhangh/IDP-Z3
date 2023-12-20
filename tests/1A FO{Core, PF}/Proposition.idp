@@ -1,7 +1,7 @@
 vocabulary V {
     has_p : () -> Bool
-    p : () → 𝔹 (p ⊆ has_p)
-    c : () -> Int (domain: has_p)
+    p : has_p → 𝔹
+    c : has_p -> Int
 }
 
 theory T:V {
@@ -9,11 +9,7 @@ theory T:V {
 }
 
 procedure main() {
-    Th = Theory(T)
-    print("Formula: ")
-    pretty_print(Th.formula())
-    print("WDF: ")
-    pretty_print(Th.WDFs)
+    pretty_print(Theory(T).formula())
     pretty_print(model_expand(T))
 }
 

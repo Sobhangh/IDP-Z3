@@ -1,8 +1,8 @@
 
 Model 1
 ==========
-p := {}.
 f := {true}.
+p := {}.
 
 
 No more models.

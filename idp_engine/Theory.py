@@ -118,7 +118,6 @@ class Theory(object):
         ignored_laws = set(string): laws disabled by the user.
             The string matches Expression.code in expl_reifs.
 
-        WDFs (List[Expression]): when True, the truth value of the theory is well-defined.
     """
 
     def __init__(self,
@@ -152,8 +151,6 @@ class Theory(object):
 
         self.z3: dict[str, ExprRef] = {}
         self.ctx: Context = Context()
-        self.WDFs : List[Expression] = []
-
         self.add(*theories)
 
         self.previous_assignments: Assignments = Assignments()
@@ -277,22 +274,27 @@ class Theory(object):
                 self.def_constraints.update(
                     {k:deepcopy(v) for k,v in block.def_constraints.items()})
 
-                for c in block.constraints:
-                    if c.WDF:
-                        self.WDFs.append(c.WDF)
-                for d in block.definitions:
-                    for r in d.rules:
-                        if r.WDF:
-                            self.WDFs.append(r.WDF)
-
         ### apply the enumerations and definitions
         self.assignments = Assignments()
         self.extensions = {}  # reset the cache
 
-        # Interpret the vocabulary
-        for symbol, decl in self.declarations.items():
-            decl.interpret(self)
+        # Create a set of all the symbols which are defined in the theory.
+        def_vars = [definition.def_vars.keys() for definition in self.definitions]
+        defined_symbols = {x: x for sublist in def_vars for x in sublist}
 
+        # Interpret the vocabulary in two steps:
+        # 1. First, interpret all symbol declarations for symbols that are not
+        #   included in definitions.
+        # 2. Then, interpret the remaining symbol declarations.
+        # This ensures that all symbol declarations have been interpreted
+        # _before_ we interpret the definitions.
+        # See https://gitlab.com/krr/IDP-Z3/-/issues/299
+        for symbol, decl in self.declarations.items():
+            if symbol not in defined_symbols:
+                decl.interpret(self)
+        # Then, interpret defined symbols.
+        for symbol in defined_symbols:
+            self.declarations[symbol].interpret(self)
         # remove RELEVANT constraints
         self.constraints = OrderedSet([v for k,v in self.constraints.items()
             if not(type(v) == AppliedSymbol
@@ -306,7 +308,8 @@ class Theory(object):
                 symbol = t.args[0]
                 decl = self.declarations[symbol.name[1:]]
                 assert decl.instances, f"goal {decl.name} must be instantiable."
-                relevant = SymbolExpr.make(self.declarations[RELEVANT])
+                relevant = SymbolExpr.make(RELEVANT)
+                relevant.decl = self.declarations[RELEVANT]
                 for i in decl.instances.values():
                     constraint = AppliedSymbol.make(relevant, [i], type_check=False)
                     self.constraints.append(constraint)
@@ -554,7 +557,7 @@ class Theory(object):
         Args:
             solver (Z3 solver): the solver to add the assignments to
         """
-        assignment_forms = [a.translate(self) for a in
+        assignment_forms = [a.formula().translate(self) for a in
                             self.assignments.values()
                             if a.value is not None
                             and a.status in [S.GIVEN, S.EXPANDED, S.DEFAULT]]

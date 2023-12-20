@@ -32,7 +32,7 @@ from enum import Enum, auto
 from typing import Optional, Tuple, TYPE_CHECKING
 from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, AND, NOT, EQUALS, AppliedSymbol, BOOL_SETNAME
+from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol, BOOL_SETNAME
 from .utils import NEWL, INT, REAL, DATE
 
 if TYPE_CHECKING:
@@ -177,11 +177,7 @@ class Assignment(object):
         return Assignment(self.sentence, value, self.status, self.relevant)
 
     def translate(self, problem: Theory) -> BoolRef:
-        # called when the fact is true or false --> it must be defined too.
-        out = self.formula()
-        out.fill_WDF()
-        out = AND([out.WDF, out])
-        return out.translate(problem)
+        return self.formula().translate(problem)
 
     def as_set_condition(self
              ) -> Tuple[Optional[AppliedSymbol],

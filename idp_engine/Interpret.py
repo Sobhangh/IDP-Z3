@@ -116,12 +116,12 @@ def interpret(self: SymbolDeclaration, problem: Theory):
     if len(self.domains) == 0:  # () -> ..
         extensions = [ ([[]], None) ]
         superset = [[]]
+    elif self.arity == 0:  # subset of ()
+        extensions = [s.extension(problem.extensions) for s in self.domains]
+        superset = [[]]
     else:
-        sets = self.super_sets if self.codomain == BOOL_SETNAME else self.domains
-        extensions = [s.extension(problem.extensions) for s in sets]
-        if self.arity == 0:  # subset of ()
-            superset = [[]]
-        elif any(e[0] is None for e in extensions):
+        extensions = [s.extension(problem.extensions) for s in self.domains]
+        if any(e[0] is None for e in extensions):
             superset = None
         else:
             superset = list(product(*([ee[0] for ee in e[0]] for e in extensions)))
@@ -156,33 +156,18 @@ def interpret(self: SymbolDeclaration, problem: Theory):
         problem.interpretations[self.name].interpret(problem)
 
     # create type constraints
-    if type(self.instances) == dict and (self.codomain != BOOL_SETNAME or self.repeat_name):
-        symb, symbs = None, None
-        for inst in self.instances.values():
-            if self.codomain != BOOL_SETNAME:
-                # add type constraints to problem.constraints
-                # ! (x,y) in domain: range(f(x,y))
-                range_condition = self.codomain.has_element(deepcopy(inst),
-                                    problem.extensions)
-                if range_condition.same_as(TRUE):
-                    break
-                range_condition = range_condition.interpret(problem, {})
-                constraint = IMPLIES([filter(inst.sub_exprs), range_condition])
-                msg = f"Possible values for {inst}"
-            else:  # self.repeat_name is true -> create superset constraint
-                msg = f"Subset relation for {expr}"
-                if len(self.super_sets) == 1:  # for p << q
-                    symb = symb or SymbolExpr.make(self.super_sets[0].decl) # q
-                    q = AppliedSymbol.make(symb, inst.sub_exprs, type_check=False)
-                    constraint = IMPLIES([inst, q])  # p(x,y) => q(x,y)
-                else:  # for p < q1*qn
-                    symbs = symbs or [SymbolExpr.make(s.decl) for s in self.super_sets]
-                    # p(x,y) => q1(x) & q2(y)
-                    constraint = IMPLIES([inst,
-                                    AND([AppliedSymbol.make(symb, [expr], type_check=False)
-                                        for symb, expr in zip(symbs, inst.sub_exprs)])])
+    if type(self.instances) == dict and self.codomain != BOOL_SETNAME:
+        for expr in self.instances.values():
+            # add type constraints to problem.constraints
+            # ! (x,y) in domain: range(f(x,y))
+            range_condition = self.codomain.has_element(deepcopy(expr),
+                                problem.extensions)
+            if range_condition.same_as(TRUE):
+                break
+            range_condition = range_condition.interpret(problem, {})
+            constraint = IMPLIES([filter(expr.sub_exprs), range_condition])
             constraint.is_type_constraint_for = self.name
-            constraint.annotations['reading'] = msg
+            constraint.annotations['reading'] = f"Possible values for {expr}"
             problem.constraints.append(constraint)
 SymbolDeclaration.interpret = interpret
 
@@ -591,25 +576,24 @@ def _interpret(self: AQuantification | AAggregate,
     if not self.quantees and not subs:  # already expanded
         return Expression._interpret(self, problem, subs)
 
-    out = self
     if not self.supersets:
-        out = copy(self)
         # interpret quantees
-        out.quantees = [q._interpret(problem, subs) for q in out.quantees]
-        get_supersets(out, problem)
+        for q in self.quantees: # for !x in $(output_domain(s,1))
+            q.sub_exprs = [e._interpret(problem, subs) for e in q.sub_exprs]
+        get_supersets(self, problem)
 
-    assert out.new_quantees is not None and out.vars1 is not None, "Internal error"
-    out.quantees = out.new_quantees
+    assert self.new_quantees is not None and self.vars1 is not None, "Internal error"
+    self.quantees = self.new_quantees
     # expand the formula by the cross-product of the supersets, and substitute per `subs`
     forms, subs1 = [], copy(subs)
-    for f in out.sub_exprs:
-        for vals in product(*out.supersets):
+    for f in self.sub_exprs:
+        for vals in product(*self.supersets):
             vals1 = flatten(vals)
-            subs1.update((var.code, val) for var, val in zip(out.vars1, vals1))
+            subs1.update((var.code, val) for var, val in zip(self.vars1, vals1))
             new_f2 = f._interpret(problem, subs1)
             forms.append(new_f2)
 
-    out = out.update_exprs(f for f in forms)
+    out = self.update_exprs(f for f in forms)
     return out
 AQuantification._interpret = _interpret
 

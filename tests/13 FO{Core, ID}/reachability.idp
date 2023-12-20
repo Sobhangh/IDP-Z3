@@ -1,8 +1,8 @@
 vocabulary V {
     T: Int -> Bool
-    p : Int * Int → 𝔹 (p ⊆ T*T)
-    r : Int → 𝔹 (r ⊆ T)
-    s : Int*Int → 𝔹 (s ⊆ T*T)
+    p : (T*T) → 𝔹
+    r : (T) → 𝔹
+    s : (T*T) → 𝔹
 }
 
 theory T:V {

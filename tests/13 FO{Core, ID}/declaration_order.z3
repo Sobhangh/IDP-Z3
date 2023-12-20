@@ -1,8 +1,8 @@
 
 Model 1
 ==========
-opposite_again := red.
 opposite := blue.
+opposite_again := red.
 
 
 No more models.

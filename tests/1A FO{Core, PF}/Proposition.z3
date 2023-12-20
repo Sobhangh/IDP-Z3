@@ -1,12 +1,9 @@
-Formula: 
-And(Or(Not(has_p), And(p, 3 == c)), Or(Not(p), has_p))
-WDF: 
-true
+And(Or(Not(has_p), And(p, 3 == c)))
 
 Model 1
 ==========
 has_p := false.
-p := false.
+// p := *.
 // c := *.
 
 

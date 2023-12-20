@@ -2,7 +2,7 @@ vocabulary {
     type Color := {red, blue, green}
 	type LivingBeing := { Cat, Dog, Frog, Alice, Bob, Tom }
 	animal: LivingBeing → Bool
-	spouseOf: LivingBeing -> LivingBeing (domain: animal, range: animal)
+	spouseOf: animal → animal
 }
 theory {
     spouseOf(red) = blue.

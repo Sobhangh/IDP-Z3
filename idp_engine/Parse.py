@@ -42,7 +42,7 @@ from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUC
                          AppliedSymbol, UnappliedSymbol, Number, Brackets,
                          Date, Extension, Identifier, Variable, TRUEC, FALSEC,
                          TRUE, FALSE, EQUALS, AND, OR,
-                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME)
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     MAX_QUANTIFIER_EXPANSION, Semantics as S, flatten)
@@ -73,9 +73,9 @@ def str_to_IDP(val_string: str,
             None)
         if out is None:
             raise IDPZ3Error(f"wrong boolean value: {val_string}")
-    elif (hasattr(type_.root_set[0].decl, 'map')
-        and val_string in type_.root_set[0].decl.map):  # constructor
-        out = type_.root_set[0].decl.map[val_string]
+    elif (hasattr(type_.root_set.decl, 'map')
+        and val_string in type_.root_set.decl.map):  # constructor
+        out = type_.root_set.decl.map[val_string]
     elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
         assert hasattr(type_.decl, 'interpretation'), "Internal error"
 
@@ -110,7 +110,7 @@ def str_to_IDP(val_string: str,
 
         out = AppliedSymbol.construct(constructor, new_args)
     else:
-        interp = getattr(type_.root_set[0].decl, "interpretation", None)
+        interp = getattr(type_.root_set.decl, "interpretation", None)
         enum_type = (interp.enumeration.type.name if interp else
                         type_.decl.name if type(type_.decl) == TypeDeclaration else
                         type_.decl.codomain.name)
@@ -299,12 +299,12 @@ class Vocabulary(ASTNode):
             TypeDeclaration(self, name=CONCEPT, constructors=[]),
             SymbolDeclaration.make(self, name=GOAL_SYMBOL,
                             sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
-                            sort_=SETNAME(BOOL)),
+                            out=SETNAME(BOOL)),
             SymbolDeclaration.make(self, name=RELEVANT,
                             sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
-                            sort_=SETNAME(BOOL)),
+                            out=SETNAME(BOOL)),
             SymbolDeclaration.make(self, name=ABS,
-                            sorts=[INT_SETNAME], sort_=INT_SETNAME),
+                            sorts=[INT_SETNAME], out=INT_SETNAME),
             ] + self.declarations
 
     def __str__(self):
@@ -352,8 +352,6 @@ class TypeDeclaration(ASTNode):
 
         codomain (SetName): the Boolean type
 
-        super_sets(List[SetName]): same as domains
-
         constructors ([Constructor]): list of constructors in the enumeration
 
         interpretation (SymbolInterpretation): the symbol interpretation
@@ -374,7 +372,6 @@ class TypeDeclaration(ASTNode):
         self.arity : int = 1
         self.domains : List[SetName] = [SetName(None, self.name)]
         self.codomain : SetName = BOOL_SETNAME
-        self.super_sets = self.domains
         self.block: Optional[Block] = None
 
         self.map : dict[str, Expression]= {}
@@ -446,15 +443,9 @@ class SymbolDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[SetName]): the types of the arguments
+        domains (List[SetName]): the types of the arguments
 
-        out (SetName): the type of the symbol applied to arguments
-
-        domains (List[SetName]): the domain of the symbol (as a cross-product)
-
-        codomain (SetName): the codomain of the symbol
-
-        super_sets (List[SetName]): for predicates: immediate superset of the interpretation.
+        codomain (SetName): the type of the symbol
 
         symbol_expr (SymbolExpr, Optional): symbol expression of the same name
 
@@ -486,24 +477,24 @@ class SymbolDeclaration(ASTNode):
                  parent,
                  annotations: Optional[Annotations],
                  sorts: List[SetName],
-                 sort_: SetName,
+                 out: SetName,
                  symbols: Optional[List[str]] = None,
-                 name: Optional[str] = None,
-                 repeat_name: Optional[str] = None,
-                 domains: Optional[List[SetName]] = None,
-                 codomain: Optional[SetName] = None,
-                 super_sets: Optional[List[SetName]] = None):
+                 name: Optional[str] = None):
         self.annotations : Annotation = annotations.annotations if annotations else {}
-        self.symbols : Optional[List[str]] = symbols
-        self.name : Optional[str] = name
-        self.sorts = sorts
-        self.sort_ = sort_
-        self.domains = domains or sorts
-        self.codomain = codomain or sort_
-        self.super_sets = super_sets or sorts
-        self.repeat_name = repeat_name
+        self.symbols : Optional[List[str]]
+        self.name : Optional[str]
+        if symbols:
+            self.symbols = symbols
+            self.name = None
+        else:
+            self.symbols = None
+            self.name = name
+        self.domains : List[SetName] = sorts
+        self.codomain : SetName = out
+        if self.codomain is None:
+            self.codomain = SETNAME(BOOL)
 
-        self.symbol_expr : Optional[SymbolExpr] = None
+        self.symbol_expr : Optional[SymbolExpr]= None
         self.arity = None
         self.private = None
         self.unit: Optional[str] = None
@@ -517,9 +508,9 @@ class SymbolDeclaration(ASTNode):
         self.by_z3 = False
 
     @classmethod
-    def make(cls, parent, name, sorts, sort_):
-        o = cls(parent=parent, name=name, sorts=sorts, sort_=sort_, annotations=None)
-        o.arity = len(o.sorts)
+    def make(cls, parent, name, sorts, out):
+        o = cls(parent=parent, name=name, sorts=sorts, out=out, annotations=None)
+        o.arity = len([d for d in o.domains if d.root_set is not EMPTY_SETNAME])
         return o
 
     def __str__(self):
@@ -734,9 +725,7 @@ class Rule(Expression):
 
         if self.body is None:
             self.body = TRUE
-        self.original: Optional[Rule] = None
-        self.implication: Optional[Expression] = None  # rule in immlication form
-        self.WDF : Optional[Expression] = None
+        self.original = None
 
     def __repr__(self):
         quant = ('' if not self.quantees else

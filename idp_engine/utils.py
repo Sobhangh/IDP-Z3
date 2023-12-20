@@ -61,6 +61,7 @@ INT = "ℤ"
 REAL = "ℝ"
 DATE = "Date"
 CONCEPT = "Concept"
+EMPTY = "()"  # the type name of the empty tuple
 
 GOAL_SYMBOL = "goal_symbol"
 RELEVANT = " relevant"  # internal.  Leading space to avoid conflict with user vocabulary

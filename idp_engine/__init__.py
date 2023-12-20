@@ -1,7 +1,6 @@
 from .Parse      import IDP
 
 from .Annotate import Done
-from .WDF import Done
 from .Interpret import Done
 from .Simplify import Done
 from .Idp_to_Z3 import Done

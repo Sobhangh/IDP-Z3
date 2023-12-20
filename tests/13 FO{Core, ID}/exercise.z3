@@ -1,9 +1,9 @@
 
 Model 1
 ==========
+R := true.
 P := false.
 Q := false.
-R := true.
 S := false.
 T := true.
 

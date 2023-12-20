@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from .Parse import IDP, Vocabulary, Declaration, SymbolDeclaration, SymbolInterpretation, Enumeration
     from .Annotate import Annotated, Exceptions
 
-from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
+from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, EMPTY,
                     RESERVED_SYMBOLS, IDPZ3Error, Semantics)
 
 
@@ -217,9 +217,6 @@ class Expression(ASTNode):
         is_type_constraint_for (string):
             name of the symbol for which the expression is a type constraint
 
-        WDF (Expression, optional):
-            a formula that is true only when `self` is well-defined (for partial functions)
-
     """
 
 
@@ -240,7 +237,6 @@ class Expression(ASTNode):
         self.type: Optional[SetName] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional[Expression] = None
-        self.WDF: Optional[Expression] = None
 
         # attributes of the top node of a (co-)constraint
         self.questions: Optional[OrderedSet] = None
@@ -255,7 +251,6 @@ class Expression(ASTNode):
         out.sub_exprs = [deepcopy(e, memo) for e in self.sub_exprs]
         out.variables = deepcopy(self.variables, memo)
         out.co_constraint = deepcopy(self.co_constraint, memo)
-        out.WDF = None  # do not copy WDF
         out.questions = deepcopy(self.questions, memo)
         return out
 
@@ -500,12 +495,6 @@ class Expression(ASTNode):
     def get_type(self):
         return self.type
 
-    def fill_WDF(self) -> None:
-        raise IDPZ3Error("Internal error") # monkey-patched
-
-    def merge_WDFs(self) -> None:
-        raise IDPZ3Error("Internal error") # monkey-patched
-
 
 class Constructor(ASTNode):
     """Constructor declaration
@@ -548,9 +537,6 @@ class Constructor(ASTNode):
         return (self.name if not self.args else
                 f"{self.name}({', '.join((str(a) for a in self.args))})" )
 
-    def annotate(self, voc, q_vars):
-        raise IDPZ3Error("Internal error") # monkey-patched
-
 def CONSTRUCTOR(name: str, args=None) -> Constructor:
     return Constructor(None, name, args)
 
@@ -569,8 +555,7 @@ class SetName(Expression):
 
         decl (Declaration, Optional): declaration of the type
 
-        root_set (List[SetName]): cross-product of root sets that include this set.
-            Used for type checking.
+        root_set (SetName, Optional): a Type or a Concept with signature (Concept[T->T])
     """
 
     def __init__(self, parent,
@@ -582,7 +567,7 @@ class SetName(Expression):
         self.codomain = out
         self.sub_exprs = []
         self.decl: Declaration = None
-        self.root_set: List[SetName] = None
+        self.root_set: SetName = None
         super().__init__(parent)
 
     def __str__(self):
@@ -635,6 +620,7 @@ BOOL_SETNAME = SETNAME(BOOL)
 INT_SETNAME = SETNAME(INT)
 REAL_SETNAME = SETNAME(REAL)
 DATE_SETNAME = SETNAME(DATE)
+EMPTY_SETNAME = SETNAME(EMPTY)
 
 class AIfExpr(Expression):
     PRECEDENCE = 10
@@ -1173,7 +1159,7 @@ class AppliedSymbol(Expression):
 
     @classmethod
     def construct(cls, constructor, args):
-        out= cls.make(SymbolExpr.make(constructor), args)
+        out= cls.make(SymbolExpr.make(constructor.name), args)
         out.decl = constructor
         out.type = constructor.codomain
         out.variables = set()
@@ -1278,10 +1264,8 @@ class SymbolExpr(Expression):
         super().__init__()
 
     @classmethod
-    def make(cls, decl: Declaration) -> SymbolExpr:
-        out = (cls)(None, decl.name, None, None)
-        out.decl = decl
-        return out
+    def make(cls, name: str) -> SymbolExpr:
+        return (cls)(None, name, None, None)
 
     def __str__(self):
         return (f"$({self.sub_exprs[0]})" if self.eval else

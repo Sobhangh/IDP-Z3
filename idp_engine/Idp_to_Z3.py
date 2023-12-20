@@ -39,7 +39,7 @@ from .Expression import (Constructor, Expression, AIfExpr,
                          ADisjunction, AConjunction, AComparison, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Number,
                          Date, Brackets, Variable, TRUE, RecDef,
-                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME)
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME)
 from .utils import (BOOL,
                     GOAL_SYMBOL, RELEVANT, RESERVED_SYMBOLS, Semantics)
 
@@ -98,10 +98,10 @@ def translate(self, problem: Theory) -> ExprRef:
                         for _, def_ in problem.def_constraints.keys()
                         if def_.mode == Semantics.RECDATA)
         if self.arity == 0:
-            out = Const(self.name, self.codomain.root_set[0].decl.translate(problem))
+            out = Const(self.name, self.codomain.root_set.decl.translate(problem))
         else:
-            types = ( [x.root_set[0].decl.translate(problem) for x in self.domains]
-                    + [self.codomain.root_set[0].decl.translate(problem)])
+            types = ( [x.root_set.decl.translate(problem) for x in self.domains]
+                    + [self.codomain.root_set.decl.translate(problem)])
             out = (Function(self.name, types) if not recursive else
                    RecFunction(self.name, types))
         problem.z3[self.name] = out
@@ -196,7 +196,7 @@ def translate(self, problem: Theory, vars={}) -> ExprRef:
     out = {}
     for vars in self.vars:
         for v in vars:
-            translated = FreshConst(v.type.root_set[0].decl.translate(problem))
+            translated = FreshConst(v.type.root_set.decl.translate(problem))
             out[v.str] = translated
     return out
 Quantee.translate = translate
@@ -355,19 +355,17 @@ def translate1(self, problem: Theory, vars={}) -> ExprRef:
                 f"Incorrect number of arguments for {self}")
     if len(self.sub_exprs) == 0:
         return self.decl.translate(problem)
-    elif type(self.symbol.decl) == TypeDeclaration:
-        return self.sub_exprs[0].type.has_element(self.sub_exprs[0], problem.extensions).translate(problem)
     else:
         arg = [x.translate(problem, vars) for x in self.sub_exprs]
         # assert  all(a != None for a in arg)
         try:
             return (self.decl.translate(problem))(arg)
-        except Exception as e:
+        except:
             if self.original.code.startswith('$'):
                 msg = f"$()() expression is not properly guarded: {self.original.code}"
             else:
                 msg = f"Incorrect symbol application: {self}"
-            self.check(False, f"{msg} ({str(e)})")
+            self.check(False, msg)
 AppliedSymbol.translate1 = translate1
 
 def reified(self, problem: Theory, vars={}) -> DatatypeRef:
@@ -376,7 +374,7 @@ def reified(self, problem: Theory, vars={}) -> DatatypeRef:
         out = problem.z3.get(str, None)
         if out is None:
             sort = (BoolSort(problem.ctx) if self.in_enumeration or self.is_enumerated else
-                    self.decl.codomain.root_set[0].decl.translate(problem))
+                    self.decl.codomain.root_set.decl.translate(problem))
             out = Const(str, sort)
             problem.z3[str] = out
     else:
@@ -436,7 +434,7 @@ Brackets.translate1 = translate1
 def translate1(self, problem: Theory, vars={}) -> ExprRef:
     local_vars = {}
     for v in self.vars:
-        translated = FreshConst(v.type.root_set[0].decl.translate(problem))
+        translated = FreshConst(v.type.root_set.decl.translate(problem))
         local_vars[v.str] = translated
     all_vars = copy(vars)
     all_vars.update(local_vars)

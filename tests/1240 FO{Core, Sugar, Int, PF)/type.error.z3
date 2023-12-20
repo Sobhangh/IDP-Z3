@@ -36,10 +36,10 @@ Traceback (most recent call last):
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
                       ^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in annotate
-    out = self.fill_attributes_and_check().merge_WDFs()
+    out = self.fill_attributes_and_check()
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in fill_attributes_and_check
-    e.check(len(e.type.root_set) == 1 and e.type.root_set[0] == s.root_set[0],
+    e.check(e.type.root_set == s.root_set,
   File "idp_engine/Expression.py", line ??, in check
     raise IDPZ3Error(msg, self)
 idp_engine.utils.IDPZ3Error: Error: line 8 - colStart 14 - colEnd 17 => LivingBeing expected (Color found: red)

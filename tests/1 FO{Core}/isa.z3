@@ -18,7 +18,7 @@ vocabulary isa {
         [short:this is a short info]
         [long:long, this is a long info]
     asi: (type ⨯ subtype) → Bool
-    typeOf: (subtype)→ type  (total)
+    typeOf: (subtype)→ type
 }
 
 theory T:isa {

@@ -15,10 +15,6 @@ structure S:V {
 }
 
 procedure main() {
-    Th = Theory(T, S)
-    print("Formula: ")
-    pretty_print(Th.formula())
-    print("WDF: ")
-    pretty_print(Th.WDFs)
-    pretty_print(model_expand(T, S))
+  pretty_print(Theory(T, S).formula())
+  pretty_print(len(list(Theory(T,S).expand(max=1))))
 }

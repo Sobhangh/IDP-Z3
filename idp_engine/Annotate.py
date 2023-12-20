@@ -31,17 +31,17 @@ from .Parse import (IDP, Vocabulary, Import, TypeDeclaration, Declaration,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
 from .Expression import (ASTNode, Expression, SETNAME, SetName,
-                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME,
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
                          AEquivalence, AConjunction, ADisjunction,
                          Operator, AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol, Variable,
                          VARIABLE, Brackets, SymbolExpr, Number, NOT,
-                         EQUALS, AND, OR, TRUE, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
+                         EQUALS, AND, OR, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
+
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-                    OrderedSet, Semantics, IDPZ3Error)
-from .WDF import is_subset_of
+                    OrderedSet, Semantics)
 
 Exceptions = Union[Exception, List["Exceptions"]]  # nested list of Exceptions
 
@@ -135,74 +135,20 @@ def annotate_declaration(self: SymbolDeclaration,
     self.check(self.name is not None, "Internal error")
     self.check(self.name not in voc.symbol_decls,
                 f"duplicate declaration in vocabulary: {self.name}")
-
-    # annotate sorts -> sort_
-    self.sort_.annotate(voc, {})
-    self.sort_.check(isinstance(self.sort_.decl, TypeDeclaration),
-               f"Type signature can only have types (found {self.sort_})")
-
     voc.symbol_decls[self.name] = self
-    for s in self.sorts:
+    for s in self.domains:
         s.annotate(voc, {})
-        s.check(isinstance(s.decl, TypeDeclaration),
-            f"Type signature can only have types (found {s})")
-
-    # annotate domain and codomain
+        s.check(s.root_set is not None,
+                f"Can't use n-ary {s.name} in a type signature")
     self.codomain.annotate(voc, {})
-    self.codomain.check(self.codomain.root_set is not None and len(self.codomain.root_set) == 1,
-            f"Can't use n-ary {self.codomain.name} in a domain signature")
+    self.arity = len([d for d in self.domains if d.root_set is not EMPTY_SETNAME])
 
-    # validations
-    if self.repeat_name:
-        self.check(self.repeat_name == self.name,
-                    f"Expecting {self.name}, found {self.repeat_name}")
-        self.check(self.sort_ == BOOL_SETNAME,
-                    f"Subset relation can only be specified for predicates")
-    if (len(self.sorts) == 0  # partial constant
-        or (len(self.sorts) == 1 and not self.sorts[0].root_set)):  # TODO drop
-        if self.domains:
-            self.check(len(self.domains) == 1 and not self.domains[0].root_set,
-                       f"Incorrect arity of domain: {self.domains[0]}")
-            self.domains[0].annotate(voc, {})
-            self.domains[0].check(not self.domains[0].root_set,
-                    f"Expected arity 0 for {self.domains[0]} (found type {self.domains[0].root_set})")
-        if self.super_sets:
-            self.check(len(self.super_sets) == 1 and not self.super_sets[0].root_set,
-                       f"Incorrect arity of superset: {self.super_sets[0]}")
-            self.super_sets[0].annotate(voc, {})
-            self.super_sets[0].check(not self.super_sets[0].root_set,
-                    f"Expected arity 0 for {self.super_sets[0]} (found type {self.super_sets[0].root_set})")
-    else:
-        self.domains[0].check(len(self.sorts) == len(self.domains),
-                   f"Incorrect arity of domain {self.domains}")
-        for s, d in zip(self.sorts, self.domains):
-            d.annotate(voc, {})
-            d.check(d.root_set is not None and len(d.root_set) == 1,
-                    f"Can't use n-ary {d.name} in a domain signature")
-            try:
-                is_subset_of(d, d.root_set[0], s)  # raises an error if not
-            except IDPZ3Error:
-                d.check(False, f"{d} is not a subset of {s}")
-
-        # the same, for super_sets
-        self.super_sets[0].check(len(self.sorts) == len(self.super_sets),
-                f"Incorrect arity of superset {self.super_sets}")
-        for s, d in zip(self.sorts, self.super_sets):
-            d.annotate(voc, {})
-            d.check(d.root_set is not None and len(d.root_set) == 1,
-                    f"Can't use n-ary {d.name} in a superset")
-            try:
-                is_subset_of(d, d.root_set[0], s)  # raises an error if not
-            except IDPZ3Error:
-                d.check(False, f"{d} is not a subset of {s}")
-
-    self.arity = len(self.sorts)
-
-    for s in chain(self.sorts, [self.sort_]):
+    for s in chain(self.domains, [self.codomain]):
         self.check(s.name != CONCEPT or s == s, # use equality to check nested concepts
                    f"`Concept` must be qualified with a type signature in {self}")
 
-    self.symbol_expr = SymbolExpr.make(self)
+    self.symbol_expr = SymbolExpr.make(self.name)
+    self.symbol_expr.decl = self
     return self
 SymbolDeclaration.annotate_declaration = annotate_declaration
 
@@ -225,23 +171,23 @@ VarDeclaration.annotate_declaration = annotate_declaration
 
 # Class SetName  #######################################################
 
-def root_set(s: SetName) -> List[SetName]:
-    """ Recursively finds the root sets of a set in the hierarchy.
+def root_set(s: SetName) -> SetName:
+    """ Recursively finds the root set of a set in the hierarchy.
 
     It goes up the hierarchy until a declared type or a Concept[..] is found.
-    For a set of tuples of domain elements, it returns
-    the list of root sets of the elements of the tuple.
     """
     if type(s.decl) == TypeDeclaration:
         if s.decl.interpretation and hasattr(s.decl.interpretation.enumeration, "type"):
-            return [s.decl.interpretation.enumeration.type]  # numeric type of the interpretation
+            return s.decl.interpretation.enumeration.type  # numeric type of the interpretation
         else:
-            return [s]
+            return s
     elif s.name == CONCEPT:
-        return [s]
+        return s
     elif s.decl.arity == 0:
-        return []
-    return [root_set(s1)[0] for s1 in s.decl.super_sets]
+        return EMPTY_SETNAME
+    elif len(s.decl.domains) == 1:
+        return root_set(s.decl.domains[0])
+    return None
 
 def annotate(self: Expression,
              voc: Vocabulary,
@@ -261,7 +207,7 @@ def annotate(self: Expression,
     if self.codomain:  # a concept domain
         self.concept_domains = [s.annotate(voc, q_vars) for s in self.concept_domains]
         for s in self.concept_domains:
-            s.check(s.root_set is not None and len(s.root_set) <= 1,
+            s.check(s.root_set is not None,
                     f"Can't use n-ary {s.name} in a type signature")
         self.codomain = self.codomain.annotate(voc, q_vars)
     return self
@@ -270,24 +216,10 @@ SetName.annotate = annotate
 
 # Class TheoryBlock  #######################################################
 
-def collect_warnings(expr: Expression, out):
-    """recursively finds the deepest Expression that is not well-defined in expr,
-    and create a warning"""
-    if not expr.WDF or expr.WDF.same_as(TRUE):  # well-defined
-        return
-    for e in expr.sub_exprs:  # recursive search
-        collect_warnings(e, out)
-
-    # Expression whose arguments are well-defined
-    if all(not e.WDF or e.WDF.same_as(TRUE) for e in expr.sub_exprs):
-        out.append(IDPZ3Error(
-            f"Domain error: {expr.code[:20]} is defined only when {expr.WDF}",
-            node=expr, error=True))
-
 def annotate_block(self: ASTNode,
                    idp: IDP,
                    ) -> Exceptions:
-    warnings = []
+    out = []
     assert isinstance(self, TheoryBlock), "Internal error"
     self.check(self.vocab_name in idp.vocabularies,
                 f"Unknown vocabulary: {self.vocab_name}")
@@ -299,21 +231,15 @@ def annotate_block(self: ASTNode,
     self.voc.add_voc_to_block(self)
 
     self.definitions = [e.annotate(self.voc, {}) for e in self.definitions]
-    for d in self.definitions:
-        for r in d.rules:
-            if r.WDF and not r.WDF.same_as(TRUE):
-                collect_warnings(r.implication, warnings)
 
     constraints = OrderedSet()
     for c in self.constraints:
         c1 = c.annotate(self.voc, {})
         c1.check(c1.type == BOOL_SETNAME,
                     f"Formula {c.code} must be boolean, not {c1.type}")
-        if c1.WDF and not c1.WDF.same_as(TRUE):
-            collect_warnings(c1, warnings)
         constraints.append(c1)
     self.constraints = constraints
-    return warnings
+    return out
 TheoryBlock.annotate_block = annotate_block
 
 
@@ -479,15 +405,6 @@ def annotate(self: Expression,
     if self.out:
         self.out = self.out.annotate(voc, q_v)
 
-    # compute WDF
-    head = self.definiendum if not self.out else EQUALS([self.definiendum, self.out])
-    expr = FORALL(self.quantees, IMPLIES([self.body, head]))
-    expr.fill_WDF()
-    expr._tx_position, expr._tx_position_end = self._tx_position, self._tx_position_end
-    expr.parent = self.parent
-    self.implication = expr
-    self.WDF = expr.WDF
-
     return self
 Rule.annotate = annotate
 
@@ -563,9 +480,7 @@ def annotate(self: Expression,
                 or self.default is None,
         f"Can't use default value for '{self.name}' on infinite domain nor for type enumeration.")
 
-    self.check(not(self.symbol_decl.codomain.root_set
-                   and len(self.symbol_decl.codomain.root_set) == 1
-                   and self.symbol_decl.codomain.root_set[0] == BOOL_SETNAME
+    self.check(not(self.symbol_decl.codomain.root_set == BOOL_SETNAME
                    and type(enumeration) == FunctionEnum),
         f"Can't use function enumeration for predicates '{self.name}' (yet)")
 
@@ -643,13 +558,13 @@ def annotate(self: Expression,
         self.check(a.codomain.name in voc.symbol_decls,
                    f"Unknown type: {a.codomain}" )
         a.decl = SymbolDeclaration.make(self,
-            name=a.accessor, sorts=[self.codomain], sort_=a.codomain)
+            name=a.accessor, sorts=[self.codomain], out=a.codomain)
         a.decl.by_z3 = True
         a.decl.annotate_declaration(voc)
     for s in self.domains:
         s.annotate(voc, {})
     self.tester = SymbolDeclaration.make(self,
-            name=f"is_{self.name}", sorts=[self.codomain], sort_=BOOL_SETNAME)
+            name=f"is_{self.name}", sorts=[self.codomain], out=BOOL_SETNAME)
     self.tester.by_z3 = True
     self.tester.annotate_declaration(voc)
     return self
@@ -691,7 +606,7 @@ def annotate_block(self: ASTNode,
         open_type.annotate_declaration(self.voc)
         open_types[name] = SETNAME(type_name)
 
-    for name, sort_ in [
+    for name, out in [
         ('expand', BOOL_SETNAME),
         ('hide', BOOL_SETNAME),
         ('view', SETNAME('_ViewType')),
@@ -704,8 +619,8 @@ def annotate_block(self: ASTNode,
         ('heading', open_types['heading']),
         ('noOptimization', BOOL_SETNAME)
     ]:
-        symbol_decl = SymbolDeclaration.make(self, name=name, sorts=[],
-                sort_=sort_ or BOOL_SETNAME)
+        symbol_decl = SymbolDeclaration.make(self, name=name,
+                                        sorts=[], out=out)
         symbol_decl.annotate_declaration(self.voc)
 
     # annotate constraints and interpretations
@@ -736,8 +651,7 @@ def annotate(self: Expression,
         Expression: an equivalent AST node, with updated type, .variables
     """
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
-    self = self.fill_attributes_and_check().merge_WDFs()
-    return self
+    return self.fill_attributes_and_check()
 Expression.annotate = annotate
 
 
@@ -781,8 +695,8 @@ def annotate_quantee(self: Expression,
             elif self.sub_exprs:
                 if self.sub_exprs[0].decl:  # `(x,y) in p`
                     var.type = self.sub_exprs[0].decl.domains[i]
-                elif self.sub_exprs[0].sub_exprs[0].type:  #  `(x,y) in $(p)`
-                    var.type = self.sub_exprs[0].sub_exprs[0].type.root_set[i].concept_domains[0]
+                elif self.sub_exprs[0].sub_exprs[0].type:  #  `x in $(p)`
+                    var.type = self.sub_exprs[0].sub_exprs[0].type.root_set.concept_domains[0]
             else:
                 var.type = None
             # 2. compare with variable declaration, if any
@@ -831,7 +745,7 @@ def annotate(self: Expression,
     for q in self.quantees:
         q.annotate_quantee(voc, q_v, inferred)  # adds inner variables to q_v
     self.sub_exprs = [e.annotate(voc, q_v) for e in self.sub_exprs]
-    return self.fill_attributes_and_check().merge_WDFs()
+    return self.fill_attributes_and_check()
 AQuantification.annotate = annotate
 
 def fill_attributes_and_check(self: AQuantification) -> Expression:
@@ -865,13 +779,13 @@ def base_type(exprs: List[Expression], bases: List[SetName] = None) -> Optional[
     if not exprs:
         return None if not bases else bases[0]
     if exprs[0].type:
-        base = exprs[0].type.root_set[0] if not bases else bases[0]
+        base = exprs[0].type.root_set if not bases else bases[0]
         bases = set([base.name]) if not bases else set([b.name for b in bases])
         if base in [REAL_SETNAME, DATE_SETNAME]:
             bases.add(INT)  # also accept INT for REAL and DATE
         for e in exprs:
             if e.type:
-                b = e.type.root_set[0]
+                b = e.type.root_set
                 if b.name not in bases:
                     if base == INT_SETNAME and b in [REAL_SETNAME, DATE_SETNAME]:
                         base = b
@@ -886,7 +800,6 @@ def base_type(exprs: List[Expression], bases: List[SetName] = None) -> Optional[
         return base
     else:
         exprs[0].check(False, f"Can't determine the type of {exprs[0]}")
-    return None
 
 def fill_attributes_and_check(self: Operator) -> Expression:
     assert all(e.type for e in self.sub_exprs), "Can't handle nested concepts yet."
@@ -1021,17 +934,17 @@ def annotate(self: AAggregate,
         if self.aggtype == "sum" and len(self.sub_exprs) == 2:
             self.original = copy(self)
             self.sub_exprs[0].check(
-                self.sub_exprs[0].type.root_set[0] in [INT_SETNAME, REAL_SETNAME],
+                self.sub_exprs[0].type.root_set in [INT_SETNAME, REAL_SETNAME],
                 f"Must be numeric: {self.sub_exprs[0]}")
             self.sub_exprs[1].check(
-                self.sub_exprs[1].type.root_set[0] == BOOL_SETNAME,
+                self.sub_exprs[1].type.root_set == BOOL_SETNAME,
                 f"Must be boolean: {self.sub_exprs[1]}")
             self.sub_exprs = [AIfExpr(self.parent, self.sub_exprs[1],
                                     self.sub_exprs[0], ZERO).fill_attributes_and_check()]
 
         if self.aggtype == "#":
             self.sub_exprs[0].check(
-                self.sub_exprs[0].type.root_set[0] == BOOL_SETNAME,
+                self.sub_exprs[0].type.root_set == BOOL_SETNAME,
                 f"Must be boolean: {self.sub_exprs[0]}")
             self.sub_exprs = [IF(self.sub_exprs[0], Number(number='1'),
                                  Number(number='0'))]
@@ -1057,11 +970,6 @@ def annotate(self: AAggregate,
                 symbol = symbol_decl.symbol_expr
                 applied = AppliedSymbol.make(symbol, q_vars.values())
                 applied = applied.annotate(voc, q_vars)
-                applied.WDF = self.WDF
-                # set location of applied
-                applied._tx_position = self._tx_position
-                applied._tx_position_end = self._tx_position_end
-                applied.parent = self.parent
 
                 if to_create:
                     eq = EQUALS([deepcopy(applied), self.sub_exprs[0]])
@@ -1105,7 +1013,7 @@ def annotate(self: AppliedSymbol,
     self.sub_exprs = [e.annotate(voc, q_vars) for e in self.sub_exprs]
     if self.in_enumeration:
         self.in_enumeration.annotate(voc, q_vars)
-    out = self.fill_attributes_and_check().merge_WDFs()
+    out = self.fill_attributes_and_check()
 
     # move the negation out
     if 'not' in self.is_enumerated:
@@ -1141,8 +1049,8 @@ def fill_attributes_and_check(self: AppliedSymbol, type_check=True) -> Expressio
     if out.decl and type_check:
         for e, s in zip(out.sub_exprs, out.decl.domains):
             if not type(out.decl) == TypeDeclaration:  # Type predicates accept anything
-                e.check(len(e.type.root_set) == 1 and e.type.root_set[0] == s.root_set[0],
-                        f"{s.root_set[0]} expected ({e.type.root_set[0]} found: {e})")
+                e.check(e.type.root_set == s.root_set,
+                        f"{s.root_set} expected ({e.type.root_set} found: {e})")
                 type_ = e.type
                 # while type_ != s:  # handle case where e_type is a subset of s
                 #     e.check(type_ != type_.decl.domains[0],
@@ -1160,13 +1068,11 @@ def fill_attributes_and_check(self: AppliedSymbol, type_check=True) -> Expressio
         out.type = out.decl.codomain
     elif type(out.symbol)==SymbolExpr and out.symbol.eval:
         type_ = out.symbol.sub_exprs[0].type
-        out.symbol.check(type_.root_set[0].name == CONCEPT,
-            f"Concept expected ({type_} found: {out.symbol})")
         if type_.name == CONCEPT:
             out.type = type_.codomain
         else:
             while not type_.codomain:  # type is a subset of a concept
-                type_ = type_.decl.super_sets[0]
+                type_ = type_.decl.domains[0]
             out.type = type_.codomain
 
     return out.simplify1()
@@ -1190,7 +1096,6 @@ def annotate(self: Variable,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    self.WDF = TRUE
     return self
 Variable.annotate = annotate
 
@@ -1201,7 +1106,6 @@ def annotate(self: Number,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    self.WDF = TRUE
     self.decl = voc.symbol_decls[self.type.name]
     return self
 Number.annotate = annotate
@@ -1213,7 +1117,6 @@ def annotate(self: UnappliedSymbol,
              voc: Vocabulary,
              q_vars: dict[str, Variable]
              ) -> Annotated:
-    self.WDF = TRUE
     if self.name in q_vars:  # ignore VarDeclaration
         return q_vars[self.name]
     if self.name in voc.symbol_decls:

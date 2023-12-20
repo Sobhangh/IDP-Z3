@@ -67,7 +67,6 @@ def generateZ3(theory):
             if 'main' in idp.procedures:
                 idp.execute()
             else:
-                State.cache = {}  # to avoid memory explosion
                 state = State(idp)
                 state.propagate()
                 state.determine_relevance()
@@ -176,7 +175,6 @@ def pipeline():
                         idp = IDP.from_str(fp.read())
 
                         if idp.procedures == {}:
-                            State.cache = {}  # to avoid memory explosion
                             state = State.make(idp, "{}", "{}", "[]")
                             state.determine_relevance()
                             generator = state.expand(max=1,complete=False)

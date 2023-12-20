@@ -6,10 +6,10 @@ vocabulary V {
     type Count := {0..8}
     max: () → ℤ  // largest index of column / row
     type PseudoBol := {0,1}
-    has_mine: Int ⨯ Int → PseudoBol (domain: Range ⨯ Range)
-    count: Int ⨯ Int → Count (domain: Range * Range)
-    clicked: Int ⨯ Int → 𝔹 (clicked ⊆ Range ⨯ Range)
-    shown: Int ⨯ Int → 𝔹 (shown ⊆ Range ⨯ Range)
+    has_mine: Range ⨯ Range → PseudoBol
+    count: Range ⨯ Range → Count
+    clicked: Range ⨯ Range → 𝔹
+    shown: Range ⨯ Range → 𝔹
 }
 
 theory T:V {

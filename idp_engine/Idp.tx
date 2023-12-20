@@ -28,13 +28,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* '}';
     SymbolDeclaration: annotations=Annotations
           symbols+= NAME [','] ':'
           ( '(' sorts*=SetName[/[*⨯]/] ')' | sorts*=SetName[/[*⨯]/] )
-          ('->' | '→') sort_=SetName
-          ( '(' 'total' ')'
-          | '(' repeat_name=NAME /⊆|<</ super_sets*=SetName[/[*⨯]/] ')'
-          | '(' ('domain' ':' domains*=SetName[/[*⨯]/])? ','?
-                ('range' ':' codomain=SetName)?
-             ')'
-          )?;
+          ('->' | '→') out=SetName;
 
     VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ IN subtype=SetName;
 

@@ -1,15 +1,18 @@
 vocabulary V {
-    type color := {a, b}
-    col : color -> Bool
-    p: color -> Bool
+    type color := {red, blue, green}
+    Color: () -> color
+    opposite: color → color
+}
+
+structure S:V {
+    opposite >> {red-> green, green-> red}.
 }
 
 theory T:V {
-    col := {a}.
-    ?x in col: p(x).
+    opposite(Color()) is enumerated.
 }
-procedure main() {
-    Th = Theory(T)
-    print("Formula: ")
-    pretty_print(Th.formula())
+
+
+display {
+  view() = expanded.
 }

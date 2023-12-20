@@ -1,8 +1,8 @@
 vocabulary {
 	type LivingBeing := { Cat, Dog, Frog, Alice, Bob, Tom }
 	animal, person : LivingBeing → Bool
-	married : LivingBeing → Bool (married << person)
-	spouse: LivingBeing -> LivingBeing (domain: married, range: married)
+	married : person → Bool
+	spouse: married → married
 }
 theory {
 	animal := { Cat, Dog, Frog }.
