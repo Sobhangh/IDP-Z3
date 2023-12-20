@@ -1,9 +1,9 @@
 
 Model 1
 ==========
-amount_thresholdEU := 1.
+amount_thresholdEU := 0.
 periodEU := 0.
-amount_threshold := {Belgium -> 0, France -> 0}.
+amount_threshold := {Belgium -> -1, France -> -1}.
 period := {Belgium -> -1, France -> -1}.
 
 

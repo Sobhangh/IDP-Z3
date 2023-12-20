@@ -110,11 +110,11 @@ Not shown(1, 2)
 Not shown(2, 0)
 Not shown(2, 1)
 Not shown(2, 2)
+Not count(1, 1) = 7
+Not count(1, 1) = 8
 Not count(1, 1) = 3
 Not count(1, 1) = 4
 Not count(1, 1) = 5
-Not count(1, 1) = 7
 Not count(1, 1) = 6
-Not count(1, 1) = 8
 Not count(1, 1) = 2
 No more consequences.
