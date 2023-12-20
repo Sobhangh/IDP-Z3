@@ -20,9 +20,11 @@ Contributors (alphabetical): Pierre Carbonnelle.
 * MR !336: Improve type checking
 * issue #309: "'AQuantification' object has no attribute 'symbol'" error in IC
 * issue #317: "Wrong boolean value" error with empty theory
+* issue #319: Can't run IDP-Z3 on Windows
 
 
 ### Interactive Consultant and Web IDE
+* issue #319: Can't run Web IDE on Windows
 
 
 ## [0.10.12] - 2023-11-13
@@ -43,8 +45,6 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### Interactive Consultant and Web IDE
 * issue #301: Propagation error in IC for simple theory
-*
-*
 
 
 ## [0.10.11] - 2023-08-18

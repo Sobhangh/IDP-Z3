@@ -47,7 +47,6 @@ from idp_engine.utils import log, RUN_FILE
 
 from idp_engine.Assignments import Status as S, str_to_IDP
 from idp_engine.Expression import EQUALS
-from idp_engine.utils import redirect_stdout, redirect_stderr_to_stdout
 from .State import State
 from .Inferences import explain, abstract
 from .IO import Output, metaJSON
@@ -134,6 +133,7 @@ class run(Resource):
 
         log("start /run")
         with z3lock:  # don't remove it, or take care of the side-effect of timeout_seconds (in expand()) on other threads
+            out = []  # list of printed lines
             try:
                 start = time.process_time()
                 if with_profiling:
@@ -144,27 +144,24 @@ class run(Resource):
                 parser.add_argument('code', type=str, help='Code')
                 args = parser.parse_args()
                 idp = idpOf(args['code'])
-                # capture stdout, print()
-                with open(RUN_FILE, mode='w', encoding='utf-8') as buf, \
-                    redirect_stdout(to=buf), redirect_stderr_to_stdout():
-                    try:
-                        idp.execute()
-                        print(f"\n> Executed in {round(time.process_time()-start, 3)} sec")
-                    except Exception as exc:
-                        print(exc)
-                with open(RUN_FILE, mode='r', encoding='utf-8') as f:
-                    out = f.read()
-                os.remove(RUN_FILE)
+                try:
+                    prints = idp.execute(capture_print=True)
+                    if prints is not None:
+                        out.append(prints[:-len(os.linesep)])  # drop last \n
+                    out.append(f"\n> Executed in {round(time.process_time()-start, 3)} sec")
+                except Exception as exc:
+                    out.append(str(exc))
 
                 log("end /run ")
                 if with_profiling:
                     g.profiler.stop()
-                    print(g.profiler.output_text(unicode=True, color=True))
+                    out.append(g.profiler.output_text(unicode=True, color=True))
             except Exception as exc:
                 if with_profiling:
                     g.profiler.stop()
                 traceback.print_exc()
-                out = str(exc)
+                out.append(str(exc))
+            out = os.linesep.join(out) + os.linesep
 
         # restore defaults in https://github.com/Z3Prover/z3/blob/master/src/api/python/z3/z3printer.py
         set_option(max_args=128, max_lines=200,

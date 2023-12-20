@@ -68,13 +68,18 @@ def cli(args=None):
             idp.execute()
         else:
             # Print output to file.
-            with open(args.output, mode='w', encoding='utf-8') \
-                    as buf, redirect_stdout(buf):
-                try:
-                    idp.execute()
-                except Exception as exc:
-                    print(exc)
-                    error = 1
+            out = []  # list of printed lines
+            try:
+                prints = idp.execute(capture_print=True)
+                if prints is not None:
+                    out.append(prints[:-len(os.linesep)])
+            except Exception as exc:
+                out.append(str(exc))
+                error = 1
+            with open(args.output, "w", encoding='utf-8') as f:
+                for line in out:
+                    f.write(line)
+                    f.write(os.linesep)
         if args.timing:
             print(f"Elapsed time: {round(time.time() - start_time, 4)}s"
                   f" (Parse: {round(PROCESS_TIMINGS['parse'], 4)}s"
