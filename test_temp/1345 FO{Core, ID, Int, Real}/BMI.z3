@@ -1,15 +1,15 @@
-weight() -> 80.0
+weight() -> 80
 No more consequences.
 ['Male', 'Female']
 
-weight() -> 80.0
 bmi() -> 1/320
 riskLevel() -> Low
+weight() -> 80
 No more consequences.
 
 length() -> 160
-? sex()
 ? BMILevel()
+? sex()
 ? BMILevel() = Severely_Underweight
 ? sex() = Male
 ? BMILevel() = Underweight
@@ -17,8 +17,8 @@ length() -> 160
 
 Low risk if neither Overweight, Obese_I, Obese_II nor Extreme_obesity
 definition of BMILevel
-weight() = 80
 bmi() = weight() / 25600
+weight() = 80
 
 (declare-datatypes ((BMILevelt_t 0)) (((Obese_II) (Obese_I) (Normal) (Severely_Underweight) (Underweight) (Overweight) (Extreme_Obesity))))
 (declare-datatypes ((riskLevelt_t 0)) (((High) (Very_High) (Low) (Increased) (Extremely_High))))
@@ -70,7 +70,6 @@ bmi() = weight() / 25600
       (a!19 (= (= BMILevel Underweight)
                (or (and (> (/ 37.0 2.0) bmi) (= sex Female)) a!1))))
   (and (= (to_real 80) weight)
-       (or (= sex Male) (= sex Female))
        (or (= BMILevel Obese_II)
            (= BMILevel Obese_I)
            (= BMILevel Normal)
@@ -78,6 +77,7 @@ bmi() = weight() / 25600
            (= BMILevel Underweight)
            (= BMILevel Overweight)
            (= BMILevel Extreme_Obesity))
+       (or (= sex Male) (= sex Female))
        (or (= riskLevel High)
            (= riskLevel Very_High)
            (= riskLevel Low)

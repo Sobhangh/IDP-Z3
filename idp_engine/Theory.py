@@ -31,18 +31,17 @@ from typing import Any, Iterator, List, Optional, Tuple, Union
 from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not,
                 And, Or, Implies, is_and, BoolVal, get_param, is_true)
 
-from .Assignments import Status as S, Assignment, Assignments
+from .Assignments import Status as S, Assignment, Assignments, str_to_IDP
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
                          EQUALS, NOT, Extension, AQuantification,
                          BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME)
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SymbolExpr,
-                    TheoryBlock, Structure, Definition, str_to_IDP,
-                    SymbolInterpretation)
+                    TheoryBlock, Structure, Definition,                     SymbolInterpretation)
 from .Simplify import join_set_conditions
 from .utils import (OrderedSet, NEWL, INT, REAL, DATE, IDPZ3Error,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT,
                     NOT_SATISFIABLE)
-from .Z3_to_IDP import collect_questions, get_interpretations
+from .Z3_to_IDP import z3_to_idp, collect_questions, get_interpretations
 
 
 class Propagation(Enum):
@@ -281,22 +280,11 @@ class Theory(object):
         # Create a set of all the symbols which are defined in the theory.
         def_vars = [definition.def_vars.keys() for definition in self.definitions]
         defined_symbols = {x: x for sublist in def_vars for x in sublist}
-        
-        # Interpret the vocabulary in two steps:
-        # 1. First, interpret all symbol declarations for symbols that are not
-        #   included in definitions.
-        # 2. Then, interpret the remaining symbol declarations.
-        # This ensures that all symbol declarations have been interpreted
-        # _before_ we interpret the definitions.
-        # See https://gitlab.com/krr/IDP-Z3/-/issues/299
+
+        # Interpret the vocabulary
         for symbol, decl in self.declarations.items():
-            if symbol not in defined_symbols:
-                decl.interpret(self)
-        #print("th6")
-        # Then, interpret defined symbols.
-        for symbol in defined_symbols:
-            self.declarations[symbol].interpret(self)
-        #print("th7")
+            decl.interpret(self)
+
         # remove RELEVANT constraints
         self.constraints = OrderedSet([v for k,v in self.constraints.items()
             if not(type(v) == AppliedSymbol
@@ -364,6 +352,8 @@ class Theory(object):
         atom = self.assignments[code].sentence
         if value is None:
             self.assignments.assert__(atom, None, S.UNKNOWN)
+        elif isinstance(value, Expression):
+            self.assignments.assert__(atom, value, status)
         else:
             val = str_to_IDP(str(value), atom.type)
             self.assignments.assert__(atom, val, status)
@@ -539,8 +529,7 @@ class Theory(object):
                         val1 = model.eval(q.reified(self), model_completion=complete)
                     else:
                         val1 = model.eval(q.translate(self), model_completion=complete)
-                    val = (None if str(q) in [str(val1), str(val1)+"()"] else
-                           str_to_IDP(str(val1), q.type))
+                    val = z3_to_idp(val1, q.type)
 
                 if val is not None:
                     if q.is_assignment() and val == FALSE:  # consequence of the TRUE assignment
@@ -754,7 +743,7 @@ class Theory(object):
                 break
         solver.pop()
 
-        val_IDP = str_to_IDP(str(val), sentence.type)
+        val_IDP = z3_to_idp(val, sentence.type)
         if val_IDP is not None:
             self.assert_(str(sentence), val_IDP, S.GIVEN)
             ass = str(EQUALS([sentence, val_IDP]))

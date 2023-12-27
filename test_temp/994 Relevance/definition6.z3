@@ -2,7 +2,7 @@
 -- original ---------------------------------
 vocabulary {
     type nat := {1..3}
-    p, q, r : nat → 𝔹
+    p, q, r : nat → Bool
     c: () -> Int
 }
 

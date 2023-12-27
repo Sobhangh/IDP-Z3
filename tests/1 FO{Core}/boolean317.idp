@@ -1,0 +1,11 @@
+vocabulary V {
+	type Node := { 'iri_xsd_boolean' }
+	type Shape := { 'shape_ex_test_shape', 'shape_nf04d1b9aa4a646fe84ca872a3f6dc825b1' }
+	validates: Node * Shape -> Bool
+}
+theory T: V {
+}
+
+procedure main(){
+    pretty_print(Theory(T).expand(max=1))
+}

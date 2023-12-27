@@ -22,18 +22,67 @@ routines to analyze Z3 expressions, e.g., the definition of a function in a mode
 """
 
 from __future__ import annotations
+from datetime import date
 import re
 from typing import List, TYPE_CHECKING, Optional, Union
-from z3 import ModelRef, FuncInterp, is_and, is_or, is_eq, is_not, AstRef, ExprRef
+from z3 import (ModelRef, FuncInterp, AstRef, ExprRef, DatatypeRef,
+                is_true, is_false, is_int_value, is_rational_value, is_algebraic_value,
+                is_and, is_or, is_eq, is_not, )
 
 from .Assignments import Assignments
-from .Expression import Expression, AppliedSymbol
-from .Parse import str_to_IDP, SymbolDeclaration
-from .utils import RESERVED_SYMBOLS
+from .Expression import (Expression, AppliedSymbol, SetName, TRUE, FALSE, Number, Date,
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME)
+from .Parse import TypeDeclaration, SymbolDeclaration, SymbolInterpretation
+from .utils import RESERVED_SYMBOLS, DATE, INT, REAL
 if TYPE_CHECKING:
     from .Theory import Theory
 
 TRUEFALSE = re.compile(r"\b(True|False)\b")
+
+
+def z3_to_idp(val: ExprRef,
+              type_: SetName
+             ) -> Expression:
+    """convert a Z3 expression of type type_ to an IDP expression"""
+
+    interp = getattr(type_.root_set.decl, "interpretation", None)
+    enum_type = (interp.enumeration.type.name if interp and hasattr(interp.enumeration,  "type") else
+                    type_.decl.name if type(type_.decl) == TypeDeclaration else
+                    type_.decl.codomain.name)
+
+    if is_true(val):
+        return TRUE
+    if is_false(val):
+        return FALSE
+    if is_int_value(val):
+        if type_ == DATE_SETNAME or enum_type == DATE:
+            d = date.fromordinal(val.as_long())
+            return Date(iso=f"#{d.isoformat()}")
+        else:
+            return Number(number = str(val))
+    if is_rational_value(val):
+        return Number(number = str(val))
+    if is_algebraic_value(val):
+        return Number(number = str(val)[:-1])  # drop the ?
+    if isinstance(val, DatatypeRef):
+        out = type_.root_set.decl.map.get(str(val), None)
+        if out:
+            return out
+        else: # compound term
+            assert hasattr(type_.decl, 'interpretation'), "Internal error"
+            assert type(type_.decl.interpretation) == SymbolInterpretation, "Internal error"
+            try:
+                name = str(val.decl())
+            except:  # Var(0)
+                return None
+            for cons in type_.decl.interpretation.enumeration.constructors:
+                if cons.name == name:
+                    constructor = cons
+            assert constructor is not None, f"wrong constructor name '{name}' for {type_}"
+
+            args = [z3_to_idp(a, s) for a, s in zip(val.children(), constructor.domains)]
+            return AppliedSymbol.construct(constructor, args)
+    return None
 
 def get_interpretations(theory: Theory, model: ModelRef, as_z3: bool
                         ) -> dict[str, tuple[dict[str, Union[ExprRef, Expression]],
@@ -69,16 +118,15 @@ def get_interpretations(theory: Theory, model: ModelRef, as_z3: bool
                             applied = re.sub(TRUEFALSE, lambda m: m.group(1).lower(), applied)
                             val = args[-1]
                             map[applied] = (val if as_z3 else
-                                            str_to_IDP(str(val), decl.codomain))
-                        try:
-                            # use the else value if we can translate it
-                            val = str_to_IDP(str(a_list[-1]), decl.codomain)
+                                            z3_to_idp(val, decl.codomain))
+
+                        # use the else value if we can translate it
+                        val = z3_to_idp(a_list[-1], decl.codomain)
+                        if val:
                             _else = (a_list[-1] if as_z3 else val)
-                        except AssertionError:
-                            pass # Var(0) => can be any value
                 elif isinstance(interp, ExprRef):
                     _else = (interp if as_z3 else
-                             str_to_IDP(str(interp), decl.codomain))
+                             z3_to_idp(interp, decl.codomain))
                 else:
                     assert interp is None, "Internal error"
             out[decl.name] = (map, _else)
@@ -125,7 +173,7 @@ def collect_questions(z3_expr: AstRef,
             arg_string = str(right)
             atom_string = f"{decl.name}({arg_string})"  # p(value)
             if atom_string not in ass:
-                arg = str_to_IDP(arg_string, typ)
+                arg = z3_to_idp(right, typ)
                 symb = decl.symbol_expr
                 symb.decl = decl
                 atom = AppliedSymbol.make(symb, [arg])  # p(value)

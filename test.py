@@ -28,7 +28,6 @@ except:
     pass
 
 import argparse
-from contextlib import redirect_stdout
 import glob
 import io
 import os
@@ -46,46 +45,43 @@ import re
 from idp_web_server.State import State
 from idp_web_server.IO import Output, metaJSON
 from idp_engine import IDP, Theory, model_expand, Status as S
-from idp_engine.utils import (start, log, NEWL, RUN_FILE,
-                              redirect_stdout, redirect_stderr_to_stdout)
+from idp_engine.utils import (start, log, NEWL)
 
 z3lock = threading.Lock()
 
 
-def generateZ3(theory):
+def generateZ3(theory) -> str:
     """
     Returns a string containing the theory and the initial API responses
     (/meta and /eval propagation).
     Also try to expand the theory and report error.
     """
+    out = []
+    try:
+        idp = IDP.from_str(theory)
+        if 'main' in idp.procedures:
+            prints = idp.execute(capture_print = True)
+            if prints is not None:
+                out.append(prints[:-len(os.linesep)])  # drop last \n
+        else:
+            state = State(idp)
+            state.propagate()
+            state.determine_relevance()
+            temp = Output(state).fill(state)
 
-    # capture stdout, print()
-    with open(RUN_FILE, mode='w', encoding='utf-8') as buf, \
-        redirect_stdout(to=buf), redirect_stderr_to_stdout():
-        try:
-            idp = IDP.from_str(theory)
-            if 'main' in idp.procedures:
-                idp.execute()
-            else:
-                state = State(idp)
-                state.propagate()
-                state.determine_relevance()
-                out = Output(state).fill(state)
-
-                print(
-                    f"{NEWL}-- original ---------------------------------{NEWL}"
-                    f"{theory}"
-                    f"{NEWL}-- meta -------------------------------------{NEWL}"
-                    f"{pprint.pformat(metaJSON(state), width=120)}{NEWL}"
-                    f"{NEWL}-- propagation ------------------------------{NEWL}"
-                    f"{pprint.pformat(out, width=120)}{NEWL}",
-                    end ="")
-        except Exception as exc:
-            print(traceback.format_exc())
-    with open(RUN_FILE, mode='r', encoding='utf-8') as f:
-        return f.read()
-    os.remove(RUN_FILE)
-
+            out.append(
+                f"{NEWL}-- original ---------------------------------{NEWL}"
+                f"{theory}"
+                f"{NEWL}-- meta -------------------------------------{NEWL}"
+                f"{pprint.pformat(metaJSON(state), width=120)}{NEWL}"
+                f"{NEWL}-- propagation ------------------------------{NEWL}"
+                f"{pprint.pformat(temp, width=120)}")
+    except Exception as exc:
+        out.append(str(traceback.format_exc()))
+    if out:
+        return os.linesep.join(out) + os.linesep
+    else:
+        return ""
 
 
 def generate():
@@ -196,38 +192,37 @@ def pipeline():
 def api():
     # capture stdout, print()
     error = 0
-    with open(RUN_FILE, mode='w', encoding='utf-8') as buf, \
-        redirect_stdout(to=buf), redirect_stderr_to_stdout():
-        try:
-            test = """
-                vocabulary {
-                    p, q : () → 𝔹
-                }
+    out = []
+    try:
+        test = """
+            vocabulary {
+                p, q : () → 𝔹
+            }
 
-                theory {
-                    p() => q().
-                }
-                structure {}
+            theory {
+                p() => q().
+            }
+            structure {}
 
-                procedure main() {
-                    print("ok")
-                }
-            """
-            kb = IDP.from_str(test)
-            T, S1 = kb.get_blocks("T, S")
-            kb.execute()
-            for model in model_expand(T,S1,sort=True,complete=True):
-                print(model)
-                print()
-            problem = Theory(T)
-            problem.assert_("p()", True, S.GIVEN)
-            print(problem.propagate().assignments)
-        except Exception as exc:
-            print(traceback.format_exc())
-            error = 1
-    with open(RUN_FILE, mode='r', encoding='utf-8') as f:
-        output = f.read()
-    os.remove(RUN_FILE)
+            procedure main() {
+                print("ok")
+            }
+        """
+        kb = IDP.from_str(test)
+        T, S1 = kb.get_blocks("T, S")
+        prints = kb.execute(capture_print=True)
+        if prints is not None:
+            out.append(prints[:-len(os.linesep)])  # drop last \n
+        for model in model_expand(T,S1,sort=True,complete=True):
+            out.append(str(model))
+            out.append("")
+        problem = Theory(T)
+        problem.assert_("p()", True, S.GIVEN)
+        out.append(str((problem.propagate().assignments)))
+    except Exception as exc:
+        out.append(str(traceback.format_exc()))
+        error = 1
+    output = os.linesep.join(out) + os.linesep
     with open(os.path.join("./tests/api.z3"), "w") as fp:
         fp.write(output)
     return error

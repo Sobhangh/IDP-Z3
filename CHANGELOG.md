@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
+Please run `poetry install` to update the dependencies.
+
 ## [0.11.1] - unreleased yet
 
-The main feature of this release is type checking.
+The main feature of this release is type and domain checking.
 
 Breaking change: some KB may not pass the type check anymore,
 in particular those declaring numeric types without interpretation (e.g. `type row`).
@@ -17,9 +19,12 @@ Contributors (alphabetical): Pierre Carbonnelle.
 ### IDP-Z3
 * MR !336: Improve type checking
 * issue #309: "'AQuantification' object has no attribute 'symbol'" error in IC
+* issue #317: "Wrong boolean value" error with empty theory
+* issue #319: Can't run IDP-Z3 on Windows
 
 
 ### Interactive Consultant and Web IDE
+* issue #319: Can't run Web IDE on Windows
 
 
 ## [0.10.12] - 2023-11-13
@@ -40,8 +45,6 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 ### Interactive Consultant and Web IDE
 * issue #301: Propagation error in IC for simple theory
-*
-*
 
 
 ## [0.10.11] - 2023-08-18

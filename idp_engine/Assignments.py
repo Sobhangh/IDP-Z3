@@ -29,12 +29,15 @@ __all__ = ["Status", "Assignment", "Assignments"]
 
 from collections import defaultdict
 from copy import copy, deepcopy
+from datetime import date
 from enum import Enum, auto
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, List, TYPE_CHECKING
 from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol, Identifier, BOOL_SETNAME
-from .utils import NEWL, INT, REAL, DATE
+from .Expression import (Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol, Identifier, SetName,
+                         Date, Number,
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME)
+from .utils import NEWL, BOOL, INT, REAL, DATE, IDPZ3Error
 
 if TYPE_CHECKING:
     from .Parse import SymbolDeclaration, Enumeration 
@@ -53,6 +56,83 @@ class Status(Enum):
     EXPANDED = auto()
     DEFAULT = auto()
     GIVEN = auto()
+
+
+def str_to_IDP(val_string: str,
+               type_: SetName,
+                ) -> Expression:
+    """recursive function to decode a val_string in set `type_`
+
+    Args:
+        type_ (SetName): set containing the value
+        val_string (str): a string containing a value
+
+    Raises:
+        IDPZ3Error: if wrong value
+
+    Returns:
+        Expression: the internal representation of the value
+    """
+    if (hasattr(type_.root_set.decl, 'map')
+    and val_string in type_.root_set.decl.map):  # constructor
+        out = type_.root_set.decl.map[val_string]
+    elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
+        assert hasattr(type_.decl, 'interpretation'), "Internal error"
+
+        # find constructor name and its arguments in val_string
+        stack : List[int] = []
+        args : List[str] = []
+        for i, c in enumerate(val_string):
+            if c == '(':
+                name : str = val_string[:i].strip() if len(stack) == 0 else name
+                stack.append(i+1)
+            elif c == ',' and len(stack) == 1:
+                start = stack.pop()
+                args.append(val_string[start: i])
+                stack.append(i+2)
+            elif c == ')':
+                start = stack.pop()
+                if len(stack) == 0:
+                    args.append(val_string[start: i])  # TODO construct the AppliedSymbol here, rather than later
+
+        # find the constructor
+        constructor = None
+        assert type(type_.decl.interpretation) == "SymbolInterpretation", "Internal error"
+        for cons in type_.decl.interpretation.enumeration.constructors:
+            if cons.name == name:
+                constructor = cons
+        assert constructor is not None, f"wrong constructor name '{name}' for {type_}"
+
+        new_args = []
+        for a, s in zip(args, constructor.domains):
+            assert s.decl is not None, "Internal error"
+            new_args.append(str_to_IDP(a, s))
+
+        out = AppliedSymbol.construct(constructor, new_args)
+    else:
+        interp = getattr(type_.root_set.decl, "interpretation", None)
+        enum_type = (interp.enumeration.type.name if interp else
+                        type_.decl.name if type(type_.decl) == "TypeDeclaration" else
+                        type_.decl.codomain.name)
+
+        if type_ == BOOL_SETNAME or enum_type == BOOL:
+            out = (TRUE  if val_string == 'True'  else
+                   FALSE if val_string == 'False' else
+                   None)
+            if out is None:
+                raise IDPZ3Error(f"wrong boolean value: {val_string}")
+        elif type_ == DATE_SETNAME or enum_type == DATE:
+            d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
+                date.fromisoformat(val_string[1:]))
+            out = Date(iso=f"#{d.isoformat()}")
+        elif type_ == REAL_SETNAME or enum_type == REAL:
+            out = Number(number= val_string if '/' in val_string else
+                        str(float(eval(val_string.replace('?', '')))))
+        elif type_ == INT_SETNAME or enum_type == INT:
+            out = Number(number=str(eval(val_string)))
+        else:
+            raise IDPZ3Error(f"unknown type for: {val_string}: {type_.decl}")
+    return out
 
 
 class Assignment(object):
