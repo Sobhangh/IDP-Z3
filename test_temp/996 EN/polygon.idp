@@ -20,11 +20,11 @@ vocabulary {
         , irregular}
     [EN:the subtype] subtype : () → Subtype
 
-    [EN:it is convex] convex : () → 𝔹
-    [EN:it is equilateral] equilateral : () → 𝔹
+    [EN:it is convex] convex : () → Bool
+    [EN:it is equilateral] equilateral : () → Bool
     [EN:the perimeter] perimeter: () → ℝ
 
-    [EN: it is big] big: () → 𝔹
+    [EN: it is big] big: () → Bool
 
     // base : () → ℝ
     // height: () → ℝ

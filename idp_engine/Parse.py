@@ -34,58 +34,32 @@ from typing import Tuple, List, Union, Optional, TYPE_CHECKING
 
 
 from .Assignments import Assignments
-from .Expression import (Annotations, ASTNode, Constructor, CONSTRUCTOR,
-                         Accessor, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, Symbol, SYMBOL, SymbolExpr, Expression,
-                         AIfExpr, IF, AQuantification, split_quantees, Type,
-                         TYPE, Quantee, ARImplication, AEquivalence,
+from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUCTOR,
+                         Accessor, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, SymbolExpr, Expression,
+                         AIfExpr, IF, AQuantification, split_quantees, SetName,
+                         SETNAME, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                          AppliedSymbol, UnappliedSymbol, Number, Brackets,
                          Date, Extension, Identifier, Variable, TRUEC, FALSEC,
-                         TRUE, FALSE, EQUALS, AND, OR)
+                         TRUE, FALSE, EQUALS, AND, OR,
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
-                    MAX_QUANTIFIER_EXPANSION, Semantics as S)
+                    MAX_QUANTIFIER_EXPANSION, Semantics as S, flatten)
 
 if TYPE_CHECKING:
     from .Theory import Theory
 
-def str_to_IDP(atom: Expression, val_string: str) -> Optional[Expression]:
-    """cast a string value for 'atom into an Expr object, or None
 
-    used to convert Z3 models or json data from GUI
-
-    Args:
-        atom (Expression): the atom whose value must be converted
-        val_string (str): the string representation of the value
-
-    Returns:
-        Expression: the value cast as Expression, or None if unknown
-    """
-
-    val_string = val_string.replace('True', 'true').replace('False', 'false')
-    if val_string == str(atom) or val_string+"()" == str(atom):
-        return None  # Z3 means the value is unknown
-
-    # determine the type declaration if possible
-    assert atom.type, "Internal error"
-    type_string = atom.type
-    typ = (None if not hasattr(atom, 'decl') or atom.type == BOOL else
-           atom.decl.out.decl)
-    assert typ is None or typ.name == type_string, f"{atom}: {typ.name} != {type_string}"
-    return str_to_IDP2(type_string, typ, val_string)
-
-
-def str_to_IDP2(type_string: str,
-                typ: Union[TypeDeclaration, SymbolDeclaration, None],
-                val_string: str
+def str_to_IDP(val_string: str,
+               type_: SetName,
                 ) -> Expression:
-    """recursive function to decode a val_string of type type_string and type
+    """recursive function to decode a val_string in set `type_`
 
     Args:
-        type_string (str):
-        typ (TypeDeclaration): type declaration of the value string
-        val_string (str): value_string
+        type_ (SetName): set containing the value
+        val_string (str): a string containing a value
 
     Raises:
         IDPZ3Error: if wrong value
@@ -93,73 +67,72 @@ def str_to_IDP2(type_string: str,
     Returns:
         Expression: the internal representation of the value
     """
-    if typ is None:
-        assert type_string == BOOL, "Internal error"
-        out = (TRUE if val_string == 'true' else
-            FALSE if val_string == 'false' else
+    if type_.decl is None:
+        assert type_ == BOOL_SETNAME, "Internal error"
+        out = (TRUE if val_string in [TRUE, 'True'] else
+            FALSE if val_string in [FALSE, 'False']  else
             None)
         if out is None:
             raise IDPZ3Error(f"wrong boolean value: {val_string}")
+    elif (hasattr(type_.root_set.decl, 'map')
+        and val_string in type_.root_set.decl.map):  # constructor
+        out = type_.root_set.decl.map[val_string]
+    elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
+        assert hasattr(type_.decl, 'interpretation'), "Internal error"
+
+        # find constructor name and its arguments in val_string
+        stack : List[int] = []
+        args : List[str] = []
+        for i, c in enumerate(val_string):
+            if c == '(':
+                name : str = val_string[:i].strip() if len(stack) == 0 else name
+                stack.append(i+1)
+            elif c == ',' and len(stack) == 1:
+                start = stack.pop()
+                args.append(val_string[start: i])
+                stack.append(i+2)
+            elif c == ')':
+                start = stack.pop()
+                if len(stack) == 0:
+                    args.append(val_string[start: i])  # TODO construct the AppliedSymbol here, rather than later
+
+        # find the constructor
+        constructor = None
+        assert type(type_.decl.interpretation) == SymbolInterpretation, "Internal error"
+        for cons in type_.decl.interpretation.enumeration.constructors:
+            if cons.name == name:
+                constructor = cons
+        assert constructor is not None, f"wrong constructor name '{name}' for {type_}"
+
+        new_args = []
+        for a, s in zip(args, constructor.domains):
+            assert s.decl is not None, "Internal error"
+            new_args.append(str_to_IDP(a, s))
+
+        out = AppliedSymbol.construct(constructor, new_args)
     else:
-        if (typ.base_type and hasattr(typ.base_type, 'map')
-            and val_string in typ.base_type.map):  # constructor
-            out = typ.base_type.map[val_string]
-        elif 1 < len(val_string.split('(')):  # e.g., pos(0,0)
-            assert hasattr(typ, 'interpretation'), "Internal error"
+        interp = getattr(type_.root_set.decl, "interpretation", None)
+        enum_type = (interp.enumeration.type.name if interp else
+                        type_.decl.name if type(type_.decl) == TypeDeclaration else
+                        type_.decl.codomain.name)
 
-            # find constructor name and its arguments in val_string
-            stack : List[int] = []
-            args : List[str] = []
-            for i, c in enumerate(val_string):
-                if c == '(':
-                    name : str = val_string[:i].strip() if len(stack) == 0 else name
-                    stack.append(i+1)
-                elif c == ',' and len(stack) == 1:
-                    start = stack.pop()
-                    args.append(val_string[start: i])
-                    stack.append(i+2)
-                elif c == ')':
-                    start = stack.pop()
-                    if len(stack) == 0:
-                        args.append(val_string[start: i])  # TODO construct the AppliedSymbol here, rather than later
-
-            # find the constructor
-            constructor = None
-            assert type(typ.interpretation) == SymbolInterpretation, "Internal error"
-            for cons in typ.interpretation.enumeration.constructors:
-                if cons.name == name:
-                    constructor = cons
-            assert constructor is not None, f"wrong constructor name '{name}' for {type_string}"
-
-            new_args = []
-            for a, acc in zip(args, constructor.sorts):
-                assert acc.decl is not None, "Internal error"
-                new_args.append(str_to_IDP2(acc.decl.out.name, acc.decl.out.decl, a))
-
-            out = AppliedSymbol.construct(constructor, new_args)
+        if type_ == BOOL_SETNAME or enum_type == BOOL:
+            out = (TRUE if val_string in [TRUE, 'True'] else
+                    FALSE if val_string in [FALSE, 'False'] else
+                    None)
+            if out is None:
+                raise IDPZ3Error(f"wrong boolean value: {val_string}")
+        elif type_ == DATE_SETNAME or enum_type == DATE:
+            d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
+                date.fromisoformat(val_string[1:]))
+            out = Date(iso=f"#{d.isoformat()}")
+        elif type_ == REAL_SETNAME or enum_type == REAL:
+            out = Number(number= val_string if '/' in val_string else
+                        str(float(eval(val_string.replace('?', '')))))
+        elif type_ == INT_SETNAME or enum_type == INT:
+            out = Number(number=str(eval(val_string)))
         else:
-            interp = getattr(typ.base_type, "interpretation", None)
-            enum_type = (interp.enumeration.type if interp else
-                         typ.name if type(typ) == TypeDeclaration else
-                         typ.out.decl.name)
-
-            if type_string == BOOL or enum_type == BOOL:
-                out = (TRUE if val_string in ['true', 'True'] else
-                       FALSE if val_string in ['false', 'False'] else
-                       None)
-                if out is None:
-                    raise IDPZ3Error(f"wrong boolean value: {val_string}")
-            elif type_string == DATE or enum_type == DATE:
-                d = (date.fromordinal(eval(val_string)) if not val_string.startswith('#') else
-                    date.fromisoformat(val_string[1:]))
-                out = Date(iso=f"#{d.isoformat()}")
-            elif typ.type == REAL or enum_type == REAL:
-                out = Number(number= val_string if '/' in val_string else
-                            str(float(eval(val_string.replace('?', '')))))
-            elif typ.type == INT or enum_type == INT:
-                out = Number(number=str(eval(val_string)))
-            else:
-                raise IDPZ3Error(f"unknown type for: {val_string}: {typ}")
+            raise IDPZ3Error(f"unknown type for: {val_string}: {type_.decl}")
     return out
 
 
@@ -185,6 +158,8 @@ class IDP(ASTNode):
         procedures (dict[str, Procedure]): list of procedure blocks, by name
 
         display (Display, Optional): display block, if any
+
+        warnings (Exceptions): list of warnings
     """
     def __init__(self, **kwargs):
         # log("parsing done")
@@ -204,14 +179,14 @@ class IDP(ASTNode):
         for voc in self.vocabularies.values():
             now_voc:Vocabulary = voc.generate_now_voc()
             self.now_voc[now_voc.name]=now_voc
-            now_voc.annotate(self)
+            now_voc.annotate_block(self)
             #print("voc now")
             next_voc = voc.generate_next_voc()
             self.next_voc[next_voc.name]=next_voc
-            next_voc.annotate(self)
+            next_voc.annotate_block(self)
             #print("voc next")
 
-            voc.annotate(self)
+            voc.annotate_block(self)
             #print("voc annot")
         for t in self.theories.values():
             if t.ltc:
@@ -224,24 +199,15 @@ class IDP(ASTNode):
                 #if len(t.bistate_theory.definitions) > 1:
                 #    print(t.bistate_theory.definitions[1].rules)
 
-                init_thrs[t.init_theory.name] = t.init_theory
-                init_thrs[t.bistate_theory.name] = t.bistate_theory
-            t.annotate(self)
+                #init_thrs[t.init_theory.name] = t.init_theory
+                #init_thrs[t.bistate_theory.name] = t.bistate_theory
+            #t.annotate(self)
             #print("annotated theory")
+        self.warnings = flatten(t.annotate_block(self)
+                                for t in self.theories.values())
         for struct in self.structures.values():
-            struct.annotate(self)
-            #print("annotated struct")
-            init_strcs[struct.init_struct.name] = struct.init_struct
-            #TO DO : ADD STRUCTURE INITIALIZATION
-        #for now_voc in self.now_voc.values():
-        #    self.vocabularies[now_voc.name] = now_voc
-        #for next_voc in self.next_voc.values():
-        #    self.vocabularies[next_voc.name] = next_voc
-        #for t in init_thrs.values():
-        #    self.theories[t.name] = t
-        #for s in init_strcs.values():
-        #    self.structures[s.name] = s
-        #print("outside")
+            struct.annotate_block(self)
+            #init_strcs[struct.init_struct.name] = struct.init_struct
 
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
@@ -319,7 +285,7 @@ class IDP(ASTNode):
         return out
 
     def execute(self) -> None:
-        pass  # monkey patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
 
 ################################ Vocabulary  ##############################
@@ -328,12 +294,14 @@ class IDP(ASTNode):
 class Vocabulary(ASTNode):
     """The class of AST nodes representing a vocabulary block.
     """
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name')
-        self.declarations = kwargs.pop('declarations')
-        self.tempdcl = kwargs.pop('tempdcl')
-        self.idp = None  # parent object
-        self.symbol_decls: dict[str, Declaration] = {}
+    def __init__(self, parent: ASTNode,
+                 name: str,
+                 declarations: List[Union[Declaration, VarDeclaration, Import]],
+                 tempdcl:TemporalDeclaration|None):
+        self.name = name
+        self.tempdcl = tempdcl
+        self.idp : Optional[IDP] = None  # parent object
+        self.symbol_decls: dict[str, Union[Declaration, VarDeclaration, Constructor]] = {}
         self.contains_temporal = False
 
         self.name = 'V' if not self.name else self.name
@@ -341,42 +309,36 @@ class Vocabulary(ASTNode):
 
         # expand multi-symbol declarations
         temp = []
-        for decl in self.declarations:
-            if not isinstance(decl, SymbolDeclaration):
-                decl.private = decl.name.startswith('_')
-                temp.append(decl)
-            else:
+        for decl in declarations:
+            if isinstance(decl, SymbolDeclaration):
                 for symbol in decl.symbols:
                     new = copy(decl)  # shallow copy !
-                    new.name = intern(symbol.name)
+                    new.name = intern(symbol)
                     new.private = new.name.startswith('_')
                     new.symbols = None
                     temp.append(new)
+            else:
+                temp.append(decl)
         self.declarations = temp
         self.original_decl =temp
 
         # define built-in types: Bool, Int, Real, Symbols
         self.declarations = [
-            TypeDeclaration(
+            TypeDeclaration(self,
                 name=BOOL, constructors=[TRUEC, FALSEC]),
-            TypeDeclaration(name=INT, enumeration=IntRange()),
-            TypeDeclaration(name=REAL, enumeration=RealRange()),
-            TypeDeclaration(name=DATE, enumeration=DateRange()),
-            TypeDeclaration(name='Tijd', enumeration=NatRange()),
-            TypeDeclaration(
-                name=CONCEPT,
-                constructors=[]),
-            SymbolDeclaration(annotations='', name=SYMBOL(GOAL_SYMBOL),
-                              sorts=[TYPE(CONCEPT, ins=[],
-                                             out=TYPE(BOOL))],
-                              out=TYPE(BOOL)),
-            SymbolDeclaration(annotations='', name=SYMBOL(RELEVANT),
-                              sorts=[TYPE(CONCEPT, ins=[],
-                                             out=TYPE(BOOL))],
-                              out=TYPE(BOOL)),
-            SymbolDeclaration(annotations='', name=SYMBOL(ABS),
-                                sorts=[TYPE(INT)],
-                                out=TYPE(INT)),
+            TypeDeclaration(self, name=INT, enumeration=IntRange()),
+            TypeDeclaration(self, name=REAL, enumeration=RealRange()),
+            TypeDeclaration(self, name=DATE, enumeration=DateRange()),
+            TypeDeclaration(self, name='Tijd', enumeration=NatRange()),
+            TypeDeclaration(self, name=CONCEPT, constructors=[]),
+            SymbolDeclaration.make(self, name=GOAL_SYMBOL,
+                            sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
+                            out=SETNAME(BOOL)),
+            SymbolDeclaration.make(self, name=RELEVANT,
+                            sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
+                            out=SETNAME(BOOL)),
+            SymbolDeclaration.make(self, name=ABS,
+                            sorts=[INT_SETNAME], out=INT_SETNAME),
             ] + self.declarations
 
     def __str__(self):
@@ -413,16 +375,16 @@ class Vocabulary(ASTNode):
                     if d.name == t.symbol.name:
                         changed = True
                         sr = [s.init_copy() for s in d.sorts]
-                        id = SymbolDeclaration(name=SYMBOL(d.name),sorts=sr,out=d.out,annotations=Annotations(None,[]))
+                        id = SymbolDeclaration(name=(d.name),sorts=sr,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
                         break
             if not changed:
                 if isinstance(d,VarDeclaration):
-                    nowvoc.declarations.append(VarDeclaration(name=SYMBOL(d.name),subtype=d.subtype))
+                    nowvoc.declarations.append(VarDeclaration(name=(d.name),subtype=d.subtype))
                 elif isinstance(d,SymbolDeclaration):
-                    nowvoc.declarations.append(SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[])))
+                    nowvoc.declarations.append(SymbolDeclaration(name=(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[])))
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
@@ -454,12 +416,12 @@ class Vocabulary(ASTNode):
                     if str(d.name) == str(t.symbol):
                         changed = True
                         sr = [s.init_copy() for s in d.sorts]
-                        id = SymbolDeclaration(name=SYMBOL(d.name),sorts=sr,out=d.out,annotations=Annotations(None,[]))
+                        id = SymbolDeclaration(name=d.name,sorts=sr,out=d.out,annotations=Annotations(None,[]))
                         #id.arity -=1
                         #id.sorts.pop()
                         nowvoc.declarations.append(id)
                         srn = [s.init_copy() for s in d.sorts]
-                        next_d = SymbolDeclaration(name=SYMBOL(d.name),sorts=srn,out=d.out,annotations=Annotations(None,[]))
+                        next_d = SymbolDeclaration(name=(d.name),sorts=srn,out=d.out,annotations=Annotations(None,[]))
                         next_d.name = d.name + "_next"
                         next_d.is_next= True
                         nowvoc.declarations.append(next_d)
@@ -467,9 +429,9 @@ class Vocabulary(ASTNode):
                         break
             if not changed:
                 if isinstance(d,VarDeclaration):
-                    nowvoc.declarations.append(VarDeclaration(name=SYMBOL(d.name),subtype=d.subtype))
+                    nowvoc.declarations.append(VarDeclaration(name=(d.name),subtype=d.subtype))
                 elif isinstance(d,SymbolDeclaration):
-                    nowvoc.declarations.append(SymbolDeclaration(name=SYMBOL(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[])))
+                    nowvoc.declarations.append(SymbolDeclaration(name=(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[])))
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
@@ -506,13 +468,9 @@ class TypeDeclaration(ASTNode):
 
         arity (int): the number of arguments
 
-        sorts (List[Symbol]): the types of the arguments
+        domains (List[SetName]): a singleton list with a set having the type's name
 
-        out (Symbol): the Boolean Symbol
-
-        type (string): Z3 type of an element of the type; same as `name`
-
-        base_type : self
+        codomain (SetName): the Boolean type
 
         constructors ([Constructor]): list of constructors in the enumeration
 
@@ -523,26 +481,35 @@ class TypeDeclaration(ASTNode):
         block (Vocabulary): the vocabulary block that contains it
     """
 
-    def __init__(self, **kwargs):
-        self.name : str = kwargs.pop('name')
-        self.constructors : List[Constructor] = ([] if 'constructors' not in kwargs else
-                             kwargs.pop('constructors'))
-        enumeration: Optional[Enumeration] = (None if 'enumeration' not in kwargs else
-                            kwargs.pop('enumeration'))
+    def __init__(self, parent,
+                 name: str,
+                 constructors: Optional[List[Constructor]] = None,
+                 enumeration: Optional[Enumeration] = None):
+        self.name = name
+        self.constructors = constructors if constructors else []
+        enumeration = enumeration
 
         self.arity : int = 1
-        self.sorts : List[Symbol] = [SYMBOL(self.name)]
-        self.out : Symbol = SYMBOL(BOOL)
-        self.type : str = (self.name if type(enumeration) != Ranges else
-                     enumeration.type)  # INT or REAL or DATE
-        self.base_type : TypeDeclaration = self
+        self.domains : List[SetName] = [SetName(None, self.name)]
+        self.codomain : SetName = BOOL_SETNAME
         self.block: Optional[Block] = None
 
         self.map : dict[str, Expression]= {}
 
-        self.interpretation : Optional[SymbolInterpretation] = (None if enumeration is None else
-            SymbolInterpretation(name=SYMBOL(self.name), sign='≜',
-                                 enumeration=enumeration, default=None))
+        self.interpretation : Optional[SymbolInterpretation] = None
+        if enumeration:
+            self.interpretation = SymbolInterpretation(parent=None,
+                                 name=UnappliedSymbol(None, self.name),
+                                 sign='≜',
+                                 enumeration=enumeration, default=FALSE)
+            self.interpretation.block = parent
+
+    def init_copy(self):
+        enum =None
+        if self.interpretation:
+            enum = self.interpretation.enumeration.init_copy()
+        cnstr = [c.init_copy() for c in self.constructors]
+        return TypeDeclaration(parent=None,name=self.name,constructors=cnstr,enumeration=enum)
 
     def init_copy(self):
         enum =None
@@ -556,7 +523,7 @@ class TypeDeclaration(ASTNode):
             return ''
         enumeration = self.enumeration if hasattr(self, 'enumeration') and self.enumeration else ""
         constructors = enumeration.constructors if enumeration else None
-        constructed = ("" if not bool(constructors) or all(0 == len(c.sorts) for c in constructors)
+        constructed = ("" if not bool(constructors) or all(0 == len(c.domains) for c in constructors)
                        else "constructed from ")
         enumeration = (f"{constructed}{{{', '.join(str(c) for c in constructors)}}}" if constructors else
                        f"{self.interpretation}" if self.interpretation else
@@ -564,7 +531,6 @@ class TypeDeclaration(ASTNode):
         return (f"type {self.name} {'' if not enumeration else ':= ' + enumeration}")
 
     def contains_element(self, term: Expression,
-                     interpretations: dict[str, "SymbolInterpretation"],
                      extensions: dict[str, Extension]
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` is in the type
@@ -605,19 +571,19 @@ class SymbolDeclaration(ASTNode):
             `annotations['reading']` is the annotation
             giving the intended meaning of the expression (in English).
 
-        symbols ([Symbol]): the symbols being defined, before expansion
+        symbols ([str]): the symbols being defined, before expansion
 
         name (string): the identifier of the symbol, after expansion of the node
 
         arity (int): the number of arguments
 
-        sorts (List[Symbol]): the types of the arguments
+        domains (List[SetName]): the types of the arguments
 
-        out (Symbol): the type of the symbol
+        codomain (SetName): the type of the symbol
 
-        type (string): name of the Z3 type of an instance of the symbol
+        symbol_expr (SymbolExpr, Optional): symbol expression of the same name
 
-        base_type (TypeDeclaration): base type of the unary predicate (None otherwise)
+        symbol_expr (SymbolExpr, Optional): a SymbolExpr of the same name
 
         instances (dict[string, Expression]):
             a mapping from the code of a symbol applied to a tuple of
@@ -638,61 +604,65 @@ class SymbolDeclaration(ASTNode):
         optimizable (bool):
             whether this symbol should get optimize buttons in the IC
 
-        voc (Vocabulary): the vocabulary block that contains it
+        by_z3 (Bool): True if the symbol is created by z3 (testers and accessors of constructors)
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self,
+                 parent,
+                 annotations: Optional[Annotations],
+                 sorts: List[SetName],
+                 out: SetName,
+                 symbols: Optional[List[str]] = None,
+                 name: Optional[str] = None):
         #temp_symbol  = kwargs.pop('temporal')
-        self.annotations : Annotations = kwargs.pop('annotations')
+        self.annotations : Annotation = annotations.annotations if annotations else {}
         self.temp= False
-        self.symbols : Optional[List[Symbol]]
+        self.symbols : Optional[List[str]]
         self.name : Optional[str]
         self.is_next = False
         #self.temp= False
-        if 'symbols' in kwargs:
-            self.symbols = kwargs.pop('symbols')
+        if symbols:
+            self.symbols = symbols
             self.name = None
         else:
             self.symbols = None
-            if 'name' in kwargs:
-                self.name = intern(kwargs.pop('name').name)
-            else:
-                self.name = intern(kwargs.pop('strname'))
-        self.sorts : List[Symbol] = kwargs.pop('sorts')
-        self.out : Symbol = kwargs.pop('out')
-        if self.out is None:
-            self.out = SYMBOL(BOOL)
-        self.arity = len(self.sorts)
-        self.annotations : Annotations = self.annotations.annotations if self.annotations else {}
+            self.name = name
+        self.domains : List[SetName] = sorts
+        self.codomain : SetName = out
+        if self.codomain is None:
+            self.codomain = SETNAME(BOOL)
+
+        self.symbol_expr : Optional[SymbolExpr]= None
+        self.arity = None
         self.private = None
-        self.unit: str = None
-        self.heading: str = None
+        self.unit: Optional[str] = None
+        self.heading: Optional[str] = None
         self.optimizable: bool = True
 
-        self.type : str = None  # a string
-        self.base_type : Optional[TypeDeclaration]= None
-        self.range : List[AppliedSymbol]= None  # all possible terms.  Used in get_range and IO.py
-        self.instances : dict[str, AppliedSymbol]= None  # not starting with '_'
-        self.block: Optional[Block] = None  # vocabulary where it is declared
+        self.range : Optional[List[AppliedSymbol]]= None  # all possible terms.  Used in get_range and IO.py
+        self.instances : Optional[dict[str, AppliedSymbol]]= None  # not starting with '_'
+        self.block: Optional[ASTNode] = None  # vocabulary where it is declared
         self.view = ViewType.NORMAL  # "hidden" | "normal" | "expanded" whether the symbol box should show atoms that contain that symbol, by default
+        self.by_z3 = False
 
     @classmethod
-    def make(cls, strname, arity, sorts, out):
-        o = cls(strname=strname, arity=arity, sorts=sorts, out=out, annotations={})
+    def make(cls, parent, name, sorts, out):
+        o = cls(parent=parent, name=name, sorts=sorts, out=out, annotations=None)
+        o.arity = len([d for d in o.domains if d.root_set is not EMPTY_SETNAME])
         return o
     
     def init_copy(self):
         sr = [s.init_copy() for s in self.sorts]
-        return SymbolDeclaration(name=SYMBOL(self.name),sorts=sr,out=self.out.init_copy(),annotations=self.annotations.init_copy())
+        return SymbolDeclaration(name=self.name,sorts=sr,out=self.out.init_copy(),annotations=self.annotations.init_copy())
 
 
     def __str__(self):
         if self.name in RESERVED_SYMBOLS:
             return ''
-        args = '⨯'.join(map(str, self.sorts)) if 0 < len(self.sorts) else ''
+        args = '⨯'.join(map(str, self.domains)) if 0 < len(self.domains) else ''
         return (f"{self.name}: "
                 f"{ '('+args+')' if args else '()'}"
-                f" → {self.out.name}")
+                f" → {self.codomain.name}")
 
     def __repr__(self):
         return str(self)
@@ -709,10 +679,10 @@ class SymbolDeclaration(ASTNode):
         Returns:
             Expression: whether `(1,2)` is in the domain of the symbol
         """
-        assert len(self.sorts) == len(args), \
+        assert self.arity == len(args), \
             f"Incorrect arity of {str(args)} for {self.name}"
-        return AND([typ.has_element(term, interpretations, extensions)
-                   for typ, term in zip(self.sorts, args)])
+        return AND([typ.has_element(term, extensions)
+                   for typ, term in zip(self.domains, args)])
 
     def has_in_range(self, value: Expression,
                      interpretations: dict[str, "SymbolInterpretation"],
@@ -720,15 +690,14 @@ class SymbolDeclaration(ASTNode):
                      ) -> Expression:
         """Returns an expression that says whether `value` is in the range of the symbol.
         """
-        return self.out.has_element(value, interpretations, extensions)
+        return self.codomain.has_element(value, extensions)
 
     def contains_element(self, term: Expression,
-                     interpretations: dict[str, "SymbolInterpretation"],
                      extensions: dict[str, Extension]
                      ) -> Expression:
         """returns an Expression that is TRUE when `term` satisfies the predicate
         """
-        assert self.type == BOOL and self.name is not None, "Internal error"
+        assert self.codomain == BOOL_SETNAME and self.name is not None, "Internal error"
         (superset, filter) = extensions[self.name]
         if superset is not None:
             # superset.sort(key=lambda t: str(t))
@@ -741,17 +710,20 @@ class SymbolDeclaration(ASTNode):
             out = TRUE
         return out
 
+    def translate(self, problem: Theory):
+        raise IDPZ3Error("Internal error") # monkey-patched
+
 class VarDeclaration(ASTNode):
     """ represents a declaration of variable (IEP 24)
 
     Attributes:
         name (str): name of the variable
 
-        subtype (Type): type of the variable
+        subtype (SetName): type of the variable
     """
 
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name').name
+        self.name = kwargs.pop('name')
         self.subtype = kwargs.pop('subtype')
 
     def __str__(self):
@@ -783,7 +755,7 @@ class TheoryBlock(ASTNode):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name')
         self.vocab_name = kwargs.pop('vocab_name')
-        constraints = kwargs.pop('constraints')
+        constraints: List[Expression] = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
         self.ltc = True if kwargs.pop('ltc') else False
@@ -806,6 +778,7 @@ class TheoryBlock(ASTNode):
         for definition in self.definitions:
             for rule in definition.rules:
                 rule.block = self
+        self.voc = None
         # For storing the initialized theory for ltc progression
         self.init_theory : TheoryBlock = None
         self.bistate_theory : TheoryBlock = None
@@ -952,7 +925,7 @@ class TheoryBlock(ASTNode):
             return False
         if isinstance(expression, NowAppliedSymbol):
             e = expression.sub_expr
-            symb = SymbolExpr(None,SYMBOL(str(e.symbol)+'_next'))
+            symb = SymbolExpr(None,(str(e.symbol)+'_next'))
             return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
         if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
             return expression
@@ -976,7 +949,7 @@ class TheoryBlock(ASTNode):
             return expression.sub_expr
         if isinstance(expression, NextAppliedSymbol):
             e = expression.sub_expr
-            symb = SymbolExpr(None,SYMBOL(str(e.symbol)+'_next'))
+            symb = SymbolExpr(None,(str(e.symbol)+'_next'))
             return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
         if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
             return expression
@@ -1041,7 +1014,7 @@ class TheoryBlock(ASTNode):
             else:
                 next = True
             e = rule.definiendum.sub_expr
-            symb = SymbolExpr(None,SYMBOL(str(e.symbol)+'_next'))
+            symb = SymbolExpr(None,(str(e.symbol)+'_next'))
             rule.definiendum = AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
             
         if next:
@@ -1074,8 +1047,10 @@ class TheoryBlock(ASTNode):
         #rule.body = self.init_subexpr(rule.body)
         return rule
 
-class Definition(ASTNode):
+class Definition(Expression):
     """ The class of AST nodes representing an inductive definition.
+
+    Attributes:
         id (num): unique identifier for each definition
 
         rules ([Rule]):
@@ -1108,7 +1083,7 @@ class Definition(ASTNode):
     """
     definition_id = 0  # intentional static variable so that no two definitions get the same ID
 
-    def __init__(self, parent, annotations, mode, rules):
+    def __init__(self, parent, annotations: Optional[Annotations], mode, rules):
         Definition.definition_id += 1
         self.id = Definition.definition_id
         self.mode_str = mode
@@ -1120,14 +1095,14 @@ class Definition(ASTNode):
                      S.RECDATA if 'recursive' in mode else
                      mode)
         assert type(self.mode) == S, f"Unsupported mode: {mode}"
-        self.annotations = annotations.annotations if annotations else {}
+        self.annotations : Annotation = annotations.annotations if annotations else {}
         self.rules: List[Rule] = rules
-        self.renamed = {}
-        self.clarks = {}  # {SymbolDeclaration: Transformed Rule}
-        self.canonicals = {}
-        self.def_vars = {}  # {String: {String: Variable}}
+        self.renamed: dict[SymbolDeclaration, List[Rule]] = {}
+        self.clarks: dict[SymbolDeclaration, Rule] = {}
+        self.canonicals: dict[SymbolDeclaration, List[Rule]] = {}
+        self.def_vars: dict[str, Variable] = {}
         self.inductive: set[SymbolDeclaration] = set()
-        self.cache = {}  # {decl, str: Expression}
+        self.cache: dict[Tuple[Declaration, str], Expression] = {}  # {decl, str: Expression}
         self.inst_def_level = 0
 
     def __str__(self):
@@ -1149,26 +1124,29 @@ class Definition(ASTNode):
                             problem,
                             for_explain: bool = False
                             ) -> dict[Tuple[SymbolDeclaration, Definition], List[Expression]]:
-        return {} # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def instantiate_definition(self, decl, new_args, theory):
-        pass # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
 
-class Rule(ASTNode):
-    def __init__(self, **kwargs):
-        self.annotations = kwargs.pop('annotations')
-        self.quantees = kwargs.pop('quantees')
-        self.definiendum = kwargs.pop('definiendum')
-        self.out = kwargs.pop('out')
-        self.body = kwargs.pop('body')
+class Rule(Expression):
+    def __init__(self, parent,
+                 annotations: Annotations,
+                 quantees: List[Quantee],
+                 definiendum: AppliedSymbol,
+                 out: Expression,
+                 body: Expression):
+        self.annotations: Annotation = (annotations.annotations if annotations else
+                            {'reading': str(self)})
+        self.quantees = quantees
+        self.definiendum = definiendum
+        self.out = out
+        self.body = body
         self.has_finite_domain = None  # Bool
         self.block = None  # theory where it occurs
 
         split_quantees(self)
-
-        self.annotations = (self.annotations.annotations if self.annotations else
-                            {'reading': str(self)})
 
         if self.body is None:
             self.body = TRUE
@@ -1181,8 +1159,14 @@ class Rule(ASTNode):
                 f"{(' = ' + str(self.out)) if self.out else ''}"
                 f"← {str(self.body)}")
 
+    def __str__(self): return repr(self)
+
     def __deepcopy__(self, memo):
-        out = copy(self)
+        cls = self.__class__ # Extract the class of the object
+        out = cls.__new__(cls) # Create a new instance of the object based on extracted class
+        memo[id(self)] = out
+        out.__dict__.update(self.__dict__)
+
         out.definiendum = deepcopy(self.definiendum)
         out.definiendum.sub_exprs = [deepcopy(e) for e in self.definiendum.sub_exprs]
         out.out = deepcopy(self.out)
@@ -1206,7 +1190,7 @@ class Rule(ASTNode):
         return Rule(definiendum=definiendum,out=out,body=body,quantees=quantees,annotations=Annotations(None,[]))
 
     def instantiate_definition(self, new_args, theory):
-        pass # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
 
 # Expressions : see Expression.py
@@ -1238,14 +1222,14 @@ class Structure(ASTNode):
         return self.name
 
 
-class SymbolInterpretation(ASTNode):
+class SymbolInterpretation(Expression):
     """
     AST node representing `<symbol> := { <identifiers*> } else <default>.`
 
     Attributes:
         name (string): name of the symbol being enumerated.
 
-        symbol (Symbol): symbol being enumerated
+        symbol_decl (SymbolDeclaration): symbol being enumerated
 
         enumeration ([Enumeration]): enumeration.
 
@@ -1254,15 +1238,19 @@ class SymbolInterpretation(ASTNode):
         is_type_enumeration (Bool): True if the enumeration is for a type symbol.
 
     """
-    def __init__(self, **kwargs):
-        self.name = kwargs.pop('name').name
-        self.sign = kwargs.pop('sign')
-        self.enumeration : Enumeration = kwargs.pop('enumeration')
-        self.default = kwargs.pop('default')
+    def __init__(self, parent,
+                 name: UnappliedSymbol,
+                 sign: str,
+                 enumeration: Enumeration,
+                 default: Optional[Expression]):
+        self.name = name.name
+        self.sign = sign
+        self.enumeration = enumeration
+        self.default = default
         self.no_enum = False
         if not self.enumeration:
             self.no_enum = True
-            self.enumeration = Enumeration(tuples=[])
+            self.enumeration = Enumeration(parent=self, tuples=[])
 
         self.sign = ('⊇' if self.sign == '>>' else
                      '≜' if self.sign == ':=' else self.sign)
@@ -1270,7 +1258,7 @@ class SymbolInterpretation(ASTNode):
                    (type(self.enumeration) == FunctionEnum and self.default is None),
                    "'⊇' can only be used with a functional enumeration ('→') without else clause")
 
-        self.symbol = None
+        self.symbol_decl: Optional[SymbolDeclaration] = None
         self.is_type_enumeration = None
         self.block = None
 
@@ -1311,10 +1299,10 @@ class SymbolInterpretation(ASTNode):
                 key = ",".join(a.code for a in args)
                 if key in self.enumeration.lookup:
                     return self.enumeration.lookup[key]
-                elif self.enumeration.parent.sign == '≜':  # can use default
-                    return self.enumeration.parent.default
+                elif self.sign == '≜':  # can use default
+                    return self.default
 
-        if rank == self.symbol.decl.arity:  # valid tuple -> return a value
+        if rank == self.symbol_decl.arity:  # valid tuple -> return a value
             if not type(self.enumeration) == FunctionEnum:
                 return TRUE if tuples else self.default
             else:
@@ -1393,7 +1381,7 @@ class SymbolInterpretation(ASTNode):
         return initialized_interp
                     
 
-class Enumeration(ASTNode):
+class Enumeration(Expression):
     """Represents an enumeration of tuples of expressions.
     Used for predicates, or types without n-ary constructors.
 
@@ -1406,13 +1394,12 @@ class Enumeration(ASTNode):
 
         constructors (List[Constructor], optional): List of Constructor
     """
-    def __init__(self, **kwargs):
-        self.tuples = kwargs.pop('tuples')
-        self.sorted_tuples = sorted(self.tuples, key=lambda t: t.code)  # do not change dropdown order
-        self.tuples = OrderedSet(self.tuples)
+    def __init__(self, parent:ASTNode, tuples: List[TupleIDP]):
+        self.sorted_tuples = sorted(tuples, key=lambda t: t.code)  # do not change dropdown order
+        self.tuples: Optional[OrderedSet] = OrderedSet(tuples)
 
-        self.lookup = {}
-        self.constructors: List[Constructor]
+        self.lookup: dict[str, Expression] = {}
+        self.constructors: Optional[List[Constructor]]
         if all(len(c.args) == 1 and type(c.args[0]) == UnappliedSymbol
                for c in self.tuples):
             self.constructors = [CONSTRUCTOR(c.args[0].name)
@@ -1428,9 +1415,11 @@ class Enumeration(ASTNode):
         return (f'{{{", ".join([repr(t) for t in self.tuples])}}}' if self.tuples else
                 f'{{{", ".join([repr(t) for t in self.constructors])}}}')
 
-    def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Optional[dict[str, SymbolInterpretation]]=None,
-                 extensions: Optional[dict[str, Extension]]=None
+    def contains(self, args,
+                 arity: Optional[int] = None,
+                 rank: int = 0,
+                 tuples: Optional[List[TupleIDP]] = None,
+                 theory: Optional[Theory] = None
                  ) -> Expression:
         """ returns an Expression that says whether Tuple args is in the enumeration """
 
@@ -1446,8 +1435,8 @@ class Enumeration(ASTNode):
         if args[rank].is_value():
             for val, tuples2 in groups:  # try to resolve
                 if str(args[rank]) == val:
-                    return self.contains(args, function, arity, rank+1, list(tuples2),
-                                interpretations=interpretations, extensions=extensions)
+                    return self.contains(args, arity, rank+1, list(tuples2),
+                                theory=theory)
             return FALSE
         else:
             if rank + 1 == arity:  # use OR
@@ -1460,13 +1449,11 @@ class Enumeration(ASTNode):
             for val, tuples2 in groups:
                 tuples = list(tuples2)
                 out = IF(EQUALS([args[rank], tuples[0].args[rank]]),
-                    self.contains(args, function, arity, rank+1, tuples,
-                            interpretations=interpretations, extensions=extensions),
+                    self.contains(args, arity, rank+1, tuples, theory),
                     out)
             return out
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, "SymbolInterpretation"]]=None,
                    extensions: Optional[dict[str, Extension]]=None
                   ) -> Extension:
         """computes the extension of an enumeration, i.e., a set of tuples and a filter
@@ -1485,7 +1472,6 @@ class Enumeration(ASTNode):
 
 class FunctionEnum(Enumeration):
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         self.check(False,
@@ -1507,52 +1493,57 @@ class ConstructedFrom(Enumeration):
     """Represents a 'constructed from' enumeration of constructors
 
     Attributes:
-        tuples (OrderedSet[TupleIDP]): OrderedSet of tuples of Expression
+        tuples (OrderedSet[TupleIDP], Optional): OrderedSet of tuples of Expression
 
         constructors (List[Constructor]): List of Constructor
 
-        accessors (dict[str, Int]): index of the accessor in the constructors
+        accessors (dict[str, int]): index of the accessor in the constructors
     """
-    def __init__(self, **kwargs):
-        self.constructed = kwargs.pop('constructed')
-        self.constructors = kwargs.pop('constructors')
-        self.tuples = None
-        self.accessors = dict()
+    def __init__(self, parent: Optional[ASTNode],
+                 constructed: str,
+                 constructors: List[Constructor]):
+        self.constructed = constructed
+        self.constructors = constructors
+        self.tuples: Optional[OrderedSet] = None
+        self.accessors: dict[str, int] = dict()
 
     def init_copy(self):
         cnstr = [c.init_copy() for c in self.constructors]
         return ConstructedFrom(constructed=self.constructed,constructors=cnstr)
     
-    def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Optional[dict[str, SymbolInterpretation]] = None,
-                 extensions: Optional[dict[str, Extension]] = None
+    def contains(self, args,
+                 arity: Optional[int] = None,
+                 rank: int = 0,
+                 tuples: Optional[List[TupleIDP]] = None,
+                 theory: Optional[Theory] = None
                  ) -> Expression:
         """returns True if args belong to the type enumeration"""
         # args must satisfy the tester of one of the constructors
+        #TODO add tests
         assert len(args) == 1, f"Incorrect arity in {self.parent.name}{args}"
         if type(args[0].decl) == Constructor:  # try to simplify it
-            self.check(self.parent.name == args[0].decl.type,
+            self.check(self.parent.name == args[0].decl.codomain,
                        f"Incorrect type of {args[0]} for {self.parent.name}")
-            self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
+            self.check(len(args[0].sub_exprs) == len(args[0].decl.domains),
                        f"Incorrect arity")
-            return AND([t.decl.out.has_element(e, interpretations, extensions)
-                        for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
+            return AND([t.decl.codomain.has_element(e, theory.extensions)
+                        for e,t in zip(args[0].sub_exprs, args[0].decl.domains)])
         out = [AppliedSymbol.construct(constructor.tester, args)
                 for constructor in self.constructors]
         return OR(out)
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         def filter(args):
             if type(args[0]) != Variable and type(args[0].decl) == Constructor:  # try to simplify it
-                self.check(self.parent.name == args[0].decl.type,
+                #TODO add tests
+                self.check(self.parent.name == args[0].decl.codomain,
                         f"Incorrect type of {args[0]} for {self.parent.name}")
-                self.check(len(args[0].sub_exprs) == len(args[0].decl.sorts),
+                self.check(len(args[0].sub_exprs) == len(args[0].decl.domains),
                         f"Incorrect arity")
-                return AND([t.decl.out.has_element(e, interpretations, extensions)
-                            for e,t in zip(args[0].sub_exprs, args[0].decl.sorts)])
+                return AND([t.decl.codomain.has_element(e, extensions)
+                            for e,t in zip(args[0].sub_exprs, args[0].decl.domains)])
             out = [AppliedSymbol.construct(constructor.tester, args)
                     for constructor in self.constructors]
             return OR(out)  # return of filter()
@@ -1560,7 +1551,7 @@ class ConstructedFrom(Enumeration):
                 (None, filter))
 
 
-class TupleIDP(ASTNode):
+class TupleIDP(Expression):
     def __init__(self, **kwargs):
         self.args: List[Identifier] = kwargs.pop('args')
         self.code = intern(",".join([str(a) for a in self.args]))
@@ -1598,17 +1589,17 @@ class CSVTuple(TupleIDP):
 
 
 class Ranges(Enumeration):
-    def __init__(self, **kwargs):
+    def __init__(self, parent:ASTNode, **kwargs):
         self.elements = kwargs.pop('elements')
 
-        tuples = []
-        self.type = None
+        tuples: List[TupleIDP] = []
+        self.type: Optional[SetName] = None
         if self.elements:
             self.type = self.elements[0].fromI.type
             for x in self.elements:
                 if x.fromI.type != self.type:
-                    if self.type in [INT, REAL] and x.fromI.type in [INT, REAL]:
-                        self.type = REAL  # convert to REAL
+                    if self.type in [INT_SETNAME, REAL_SETNAME] and x.fromI.type in [INT_SETNAME, REAL_SETNAME]:
+                        self.type = REAL_SETNAME  # convert to REAL
                         tuples = [TupleIDP(args=[n.args[0].real()])
                                   for n in tuples]
                     else:
@@ -1617,29 +1608,31 @@ class Ranges(Enumeration):
 
                 if x.toI is None:
                     tuples.append(TupleIDP(args=[x.fromI]))
-                elif self.type == INT and x.fromI.type == INT and x.toI.type == INT:
+                elif self.type == INT_SETNAME and x.fromI.type == INT_SETNAME and x.toI.type == INT_SETNAME:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         tuples.append(TupleIDP(args=[Number(number=str(i))]))
-                elif self.type == REAL and x.fromI.type == INT and x.toI.type == INT:
+                elif self.type == REAL_SETNAME and x.fromI.type == INT_SETNAME and x.toI.type == INT_SETNAME:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         tuples.append(TupleIDP(args=[Number(number=str(float(i)))]))
-                elif self.type == REAL:
+                elif self.type == REAL_SETNAME:
                     self.check(False, f"Can't have a range over real: {x.fromI}..{x.toI}")
-                elif self.type == DATE and x.fromI.type == DATE and x.toI.type == DATE:
+                elif self.type == DATE_SETNAME and x.fromI.type == DATE_SETNAME and x.toI.type == DATE_SETNAME:
                     for i in range(x.fromI.py_value, x.toI.py_value + 1):
                         d = Date(iso=f"#{date.fromordinal(i).isoformat()}")
                         tuples.append(TupleIDP(args=[d]))
                 else:
                     self.check(False, f"Incorrect value {x.toI} for {self.type}")
-        Enumeration.__init__(self, tuples=tuples)
+        Enumeration.__init__(self, parent=parent, tuples=tuples)
 
     def init_copy(self):
         el = [copy(e) for e in self.elements]
         return Ranges(elements=el)
 
-    def contains(self, args, function, arity=None, rank=0, tuples=None,
-                 interpretations: Optional[dict[str, SymbolInterpretation]] = None,
-                 extensions: Optional[dict[str, Extension]] = None
+    def contains(self, args,
+                 arity: Optional[int] = None,
+                 rank: int = 0,
+                 tuples: Optional[List[TupleIDP]] = None,
+                 theory: Optional[Theory] = None
                  ) -> Expression:
         var = args[0]
         if not self.elements:
@@ -1658,7 +1651,6 @@ class Ranges(Enumeration):
         return OR(sub_exprs)
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         if not self.elements:
@@ -1677,7 +1669,7 @@ class Ranges(Enumeration):
         return(None, filter)
 
 
-class RangeElement(ASTNode):
+class RangeElement(Expression):
     def __init__(self, **kwargs):
         self.fromI = kwargs.pop('fromI')
         self.toI = kwargs.pop('toI')
@@ -1685,18 +1677,17 @@ class RangeElement(ASTNode):
 
 class IntRange(Ranges):
     def __init__(self):
-        Ranges.__init__(self, elements=[])
-        self.type = INT
+        Ranges.__init__(self, parent=self, elements=[])
+        self.type = INT_SETNAME
         self.tuples = None
 
     def init_copy(self):
         r = super().init_copy()
-        r.type= INT
+        r.type= INT_SETNAME
         r.tuples =None
         return r
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         return (None, None)
@@ -1708,8 +1699,13 @@ class NatRange(Ranges):
         self.type = ABS
         self.tuples = None
 
+    def init_copy(self):
+        r = super().init_copy()
+        r.type= INT
+        r.tuples =None
+        return r
+
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         return (None, None)
@@ -1718,8 +1714,8 @@ class NatRange(Ranges):
 
 class RealRange(Ranges):
     def __init__(self):
-        Ranges.__init__(self, elements=[])
-        self.type = REAL
+        Ranges.__init__(self, parent=self, elements=[])
+        self.type = REAL_SETNAME
         self.tuples = None
     def init_copy(self):
         r = super().init_copy()
@@ -1728,7 +1724,6 @@ class RealRange(Ranges):
         return r
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         return (None, None)
@@ -1736,8 +1731,8 @@ class RealRange(Ranges):
 
 class DateRange(Ranges):
     def __init__(self):
-        Ranges.__init__(self, elements=[])
-        self.type = DATE
+        Ranges.__init__(self, parent=self, elements=[])
+        self.type = DATE_SETNAME
         self.tuples = None
     
     def init_copy(self):
@@ -1747,7 +1742,6 @@ class DateRange(Ranges):
         return r
 
     def extensionE(self,
-                   interpretations: Optional[dict[str, SymbolInterpretation]] = None,
                    extensions: Optional[dict[str, Extension]] = None
                   ) -> Extension:
         return (None, None)
@@ -1765,6 +1759,7 @@ class Display(ASTNode):
         self.optionalRelevance = False
         self.manualRelevance = False
         self.name = "display"
+        self.voc = None
 
     def run(self, idp):
         """apply the display block to the idp theory"""
@@ -1798,7 +1793,7 @@ class Display(ASTNode):
                 raise IDPZ3Error(f"Unknown enumeration in display: {interpretation}")
         for constraint in self.constraints:
             if type(constraint) == AppliedSymbol:
-                self.check(type(constraint.symbol) == Symbol,
+                self.check(constraint.symbol.name,
                            f"Invalid syntax: {constraint}")  # SymbolExpr $()
                 name = constraint.symbol.name
                 symbols = base_symbols(name, constraint.sub_exprs)
@@ -1833,7 +1828,7 @@ class Display(ASTNode):
                                      f" {constraint}")
             elif type(constraint) == AComparison:  # e.g. view = normal
                 self.check(constraint.is_assignment(), "Internal error")
-                self.check(type(constraint.sub_exprs[0].symbol) == Symbol,
+                self.check(constraint.sub_exprs[0].symbol.name,
                            f"Invalid syntax: {constraint}")
                 if constraint.sub_exprs[0].symbol.name == 'view':
                     if constraint.sub_exprs[1].name == 'expanded':
@@ -1911,8 +1906,8 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                 classes=[IDP, Annotations,
 
                                          Vocabulary, Import, VarDeclaration,
-                                         TypeDeclaration, Accessor, Type,
-                                         SymbolDeclaration,TemporalDeclaration, Symbol,
+                                         TypeDeclaration, Accessor, SetName,
+                                         SymbolDeclaration,TemporalDeclaration,
                                          SymbolExpr,
 
                                          TheoryBlock, Definition, Rule, AIfExpr,

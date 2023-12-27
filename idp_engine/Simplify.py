@@ -34,10 +34,11 @@ from .Expression import (Constructor, Expression, AIfExpr, IF,
                          ADisjunction, AConjunction, AComparison, EQUALS,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
                          SymbolExpr, AppliedSymbol, UnappliedSymbol, Variable,
-                         Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR)
-from .Parse import Symbol, Enumeration, TupleIDP
+                         Number, Date, Brackets, TRUE, FALSE, NOT, AND, OR,
+                         BOOL_SETNAME, INT_SETNAME, DATE_SETNAME)
+from .Parse import Enumeration, TupleIDP
 from .Assignments import Status as S, Assignment
-from .utils import BOOL, INT, DATE, ABS
+from .utils import ABS
 
 
 # class Expression  ###########################################################
@@ -90,6 +91,10 @@ def simplify1(self: Expression) -> Expression:
     return self.update_exprs(self.sub_exprs)
 Expression.simplify1 = simplify1
 
+# for type checking
+def as_set_condition(self: Expression) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
+    return (None, None, None)
+Expression.as_set_condition = as_set_condition
 
 
 # Class AIfExpr  ###############################################################
@@ -267,12 +272,13 @@ AComparison.update_exprs = update_exprs
 def as_set_condition(self: AComparison) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
     return ((None, None, None) if not self.is_assignment() else
             (self.sub_exprs[0], True,
-             Enumeration(tuples=[TupleIDP(args=[self.sub_exprs[1]])])))
+             Enumeration(parent=self,
+                         tuples=[TupleIDP(args=[self.sub_exprs[1]])])))
 AComparison.as_set_condition = as_set_condition
 
 #############################################################
 
-def update_arith(self: Expression, operands: List[Expression]) -> Expression:
+def update_arith(self: Operator, operands: List[Expression]) -> Expression:
     operands = list(operands)
     if all(e.is_value() for e in operands):
         self.check(all(hasattr(e, 'py_value') for e in operands),
@@ -283,11 +289,11 @@ def update_arith(self: Expression, operands: List[Expression]) -> Expression:
         for op, e in zip(self.operator, operands[1:]):
             function = Operator.MAP[op]
 
-            if op == '/' and self.type == INT:  # integer division
+            if op == '/' and self.type == INT_SETNAME:  # integer division
                 out //= e.py_value
             else:
                 out = function(out, e.py_value)
-        value = (Number(number=str(out)) if operands[0].type != DATE else
+        value = (Number(number=str(out)) if operands[0].type != DATE_SETNAME else
                  Date.make(out))
         return value
     return self._change(sub_exprs=operands)
@@ -377,13 +383,6 @@ def update_exprs(self: AppliedSymbol,
                  new_exprs: Generator[Expression, None, None]
                  ) -> Expression:
     new_exprs = list(new_exprs)
-    if not self.decl and type(self.symbol) == Symbol:
-        self.decl = self.symbol.decl
-    self.type = (BOOL if self.is_enumerated or self.in_enumeration else
-            self.decl.type if self.decl else None)
-    if self.decl and type(self.decl) == Constructor:
-        if all(e.is_value() for e in new_exprs):
-            return self._change(sub_exprs=new_exprs)
 
     # simplify abs()
     if (self.decl and self.decl.name == ABS and len(new_exprs) == 1
@@ -421,15 +420,18 @@ AppliedSymbol.as_set_condition = as_set_condition
 def update_exprs(self: SymbolExpr,
                  new_exprs: Generator[Expression, None, None]
                  ) -> Expression:
-    symbol = list(new_exprs)[0]
-    value = (symbol if self.eval == '' else
-             symbol.decl.symbol if type(symbol) == UnappliedSymbol and symbol.decl else
-             None)
-    if value is not None:
-        self.check(type(value) != Variable,
-                f"Variable `{value}` cannot be applied to argument(s).")
-        return value
-    return self._change(sub_exprs=[symbol])
+    if not self.name:  # $(..)
+        symbol = list(new_exprs)[0]
+        if type(symbol) == UnappliedSymbol and symbol.decl:
+            assert type(symbol.decl) == Constructor, "Internal error"
+            concept_decl = symbol.decl.concept_decl
+            out = SymbolExpr.make(name=concept_decl.name)
+            out.decl = concept_decl
+            out.variables = set()
+            return out
+        else:
+            return self._change(sub_exprs=[symbol])
+    return self
 SymbolExpr.update_exprs = update_exprs
 
 
@@ -474,16 +476,16 @@ def join_set_conditions(assignments: List[Assignment]) -> List[Assignment]:
                     # sort again
                     new_tuples = list(new_tuples.values())
 
-                    out = AppliedSymbol.make(
+                    symb = AppliedSymbol.make(
                         symbol=x.symbol, args=x.sub_exprs,
                         is_enumeration='in',
-                        in_enumeration=Enumeration(tuples=new_tuples)
+                        in_enumeration=Enumeration(parent=None, tuples=new_tuples)
                     )
 
-                    core = deepcopy(AppliedSymbol.make(out.symbol, out.sub_exprs))
-                    out.as_disjunction = out.in_enumeration.contains([core], False)
+                    core = deepcopy(AppliedSymbol.make(symb.symbol, symb.sub_exprs))
+                    symb.as_disjunction = symb.in_enumeration.contains([core])
 
-                    out = Assignment(out,
+                    out = Assignment(symb,
                                      TRUE if belongs else FALSE,
                                      S.UNKNOWN)
 

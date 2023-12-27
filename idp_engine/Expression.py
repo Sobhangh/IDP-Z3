@@ -33,19 +33,29 @@ from re import findall
 from sys import intern
 from textx import get_location
 from typing import (Optional, List, Union, Tuple, Set, Callable, TYPE_CHECKING,
-                    Generator, Any)
+                    Generator, Any, Dict)
 if TYPE_CHECKING:
     from .Theory import Theory
     from .Assignments import Assignments, Status
-    from .Parse import SymbolDeclaration, SymbolInterpretation, Enumeration
+    from .Parse import IDP, Vocabulary, Declaration, SymbolDeclaration, SymbolInterpretation, Enumeration
+    from .Annotate import Annotated, Exceptions
 
-from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT,
+from .utils import (unquote, OrderedSet, BOOL, INT, REAL, DATE, CONCEPT, EMPTY,
                     RESERVED_SYMBOLS, IDPZ3Error, Semantics)
 
 
 class ASTNode(object):
     """superclass of all AST nodes
     """
+
+    def location(self):
+        try:
+            location = get_location(self)
+            location['end'] = (location['col'] +
+                (len(self.code) if hasattr(self, "code") else 0))
+            return location
+        except:
+            return {'line': 1, 'col': 1, 'end': 1}
 
     def check(self, condition: bool, msg: str):
         """raises an exception if `condition` is not True
@@ -58,13 +68,10 @@ class ASTNode(object):
             IDPZ3Error: when `condition` is not met
         """
         if not condition:
-            try:
-                location = get_location(self)
-            except:
-                raise IDPZ3Error(f"{msg}")
-            line = location['line']
-            col = location['col']
-            raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
+            raise IDPZ3Error(msg, self)
+
+    def SCA_Check(self,detections):
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def dedup_nodes(self,
                     kwargs: dict[str, List[ASTNode]],
@@ -94,36 +101,30 @@ class ASTNode(object):
             out[i.name] = i
         return out
 
-    def annotate(self, idp):
-        return  # monkey-patched
+    def annotate_block(self,
+                       idp: IDP,
+                       ) -> Exceptions:
+        raise IDPZ3Error("Internal error") # monkey-patched
 
-    def annotate1(self):
-        return  # monkey-patched
+    def annotate_declaration(self,
+                             voc: Vocabulary,
+                             ) -> ASTNode:
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def interpret(self, problem: Optional[Theory]) -> ASTNode:
-        return self  # monkey-patched
+        return self
 
     def EN(self):
-        pass  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
-
-def catch_error(func):
-    def inner_function(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-        except IDPZ3Error as e:
-            raise e
-        except Exception as e:
-            self.check(False, str(e))
-    return inner_function
-
+Annotation = Dict[str, Union[str, Dict[str, Any]]]
 
 class Annotations(ASTNode):
     def __init__(self, parent, annotations: List[str]):
         self.original_ant = []
         for s in annotations:
             self.original_ant.append(s) 
-        self.annotations : dict[str, Union[str, dict[str, Any]]] = {}
+        self.annotations : Annotation = {}
         v: Union[str, dict[str, Any]]
         for s in annotations:
             p = s.split(':', 1)
@@ -158,72 +159,74 @@ class Constructor(ASTNode):
     Attributes:
         name (string): name of the constructor
 
-        sorts (List[Symbol]): types of the arguments of the constructor
+        args (List[Accessor])
 
-        type (string): name of the type that contains this constructor
+        sorts (List[SetName]): types of the arguments of the constructor
+
+        out (SetName): type that contains this constructor
 
         arity (Int): number of arguments of the constructor
 
-        tester (SymbolDeclaration): function to test if the constructor
+        tester (SymbolDeclaration, Optional): function to test if the constructor
         has been applied to some arguments (e.g., is_rgb)
 
-        symbol (Symbol): only for Symbol constructors
+        concept_decl (SymbolDeclaration, Optional): declaration with name[1:],
+        only for Concept constructors.
 
         range: the list of identifiers
     """
 
-    def __init__(self, parent,
-                 name: Union[UnappliedSymbol, str],
+    def __init__(self, parent: Optional[ASTNode],
+                 name: str,
                  args: Optional[List[Accessor]] = None):
-        self.name : str = (name.s.name if type(name) == UnappliedSymbol else
-                     name)
-        self.sorts = args if args is not None else []
+        self.name : str = name
+        self.args = args if args else []  #TODO avoid self.args by defining Accessor as subclass of SetName
+        self.domains = [a.codomain for a in self.args]
 
-        self.arity = len(self.sorts)
+        self.arity = len(self.domains)
 
-        self.type = None
-        self.symbol = None
-        self.tester = None
+        self.codomain: Optional[SetName] = None
+        self.concept_decl: Optional[SymbolDeclaration] = None
+        self.tester: Optional[SymbolDeclaration] = None
         self.range: Optional[List[Expression]] = None
 
+    def __str__(self):
+        return (self.name if not self.args else
+                f"{self.name}({', '.join((str(a) for a in self.args))})" )
+    
     def init_copy(self):
         sr = [s.init_copy() for s in self.sorts]
         return Constructor(None,self.name,sr)
-
-    def __str__(self):
-        return (self.name if not self.sorts else
-                f"{self.name}({', '.join((str(a) for a in self.sorts))})" )
-
+    
 def CONSTRUCTOR(name: str, args=None) -> Constructor:
     return Constructor(None, name, args)
-
 
 class Accessor(ASTNode):
     """represents an accessor and a type
 
     Attributes:
-        accessor (UnappliedSymbol, Optional): name of accessor function
+        accessor (str, Optional): name of accessor function
 
-        type (string): name of the output type of the accessor
+        codomain (SetName): name of the output type of the accessor
 
         decl (SymbolDeclaration): declaration of the accessor function
     """
     def __init__(self, parent,
-                 type: UnappliedSymbol,
-                 accessor: Optional[UnappliedSymbol] = None):
+                 out: SetName,
+                 accessor: Optional[str] = None):
         self.accessor = accessor
-        self.type = type.name
+        self.codomain = out
         self.decl: Optional[SymbolDeclaration] = None
 
     def __str__(self):
-        return (self.type if not self.accessor else
-                f"{self.accessor}: {self.type}" )
+        return (self.codomain.name if not self.accessor else
+                f"{self.accessor}: {self.codomain.name}" )
 
     def init_copy(self):
         acc = None
         if self.accessor:
             acc = self.accessor.init_copy()
-        return Accessor(None,UnappliedSymbol(None,SYMBOL(self.type)),acc)
+        return Accessor(None,UnappliedSymbol(None,(self.type)),acc)
 
 class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.
@@ -233,16 +236,17 @@ class Expression(ASTNode):
             Textual representation of the expression.  Often used as a key.
 
             It is generated from the sub-tree.
-            Some tree transformations change it (e.g., interpret),
-            others don't.
+
+        str (string)
+            Textual representation of the simplified expression.
 
         sub_exprs (List[Expression]):
             The children of the AST node.
 
             The list may be reduced by simplification.
 
-        type (string):
-            The name of the type of the expression, e.g., ``bool``.
+        type (SetName, Optional):
+            The type of the expression, e.g., ``bool``.
 
         co_constraint (Expression, optional):
             A constraint attached to the node.
@@ -272,27 +276,23 @@ class Expression(ASTNode):
             name of the symbol for which the expression is a type constraint
 
     """
-    # slots for marginally faster code
-    __slots__ = ('sub_exprs', 'code',
-                 'annotations', 'original', 'str', 'variables', 'type',
-                 'is_type_constraint_for', 'co_constraint',
-                 'questions', 'relevant')
 
-    def __init__(self, parent=None):
+
+
+    def __init__(self, parent: Optional[ASTNode]=None,
+                 annotations: Optional[Annotations]=None):
         if parent:
             self.parent = parent
         self.sub_exprs: List[Expression]
 
         self.code: str = intern(str(self))
-        if not hasattr(self, 'annotations') or self.annotations == None:
-            self.annotations: dict[str, str] = {'reading': self.code}
-        elif type(self.annotations) == Annotations:
-            self.annotations = self.annotations.annotations
-        self.original: Expression = self
+        self.annotations: Annotation = (
+            annotations.annotations if annotations else {'reading': self.code})
+        self.original: Optional[Expression] = self
 
         self.str: str = self.code
         self.variables: Optional[Set[str]] = None
-        self.type: Optional[str] = None
+        self.type: Optional[SetName] = None
         self.is_type_constraint_for: Optional[str] = None
         self.co_constraint: Optional[Expression] = None
 
@@ -301,19 +301,15 @@ class Expression(ASTNode):
         self.relevant: Optional[bool] = None
 
     def __deepcopy__(self, memo):
-        """ copies everyting but .original """
-        key = str(self)
-        val = memo.get(key, None)
-        if val is not None:
-            return val
-        if self.is_value():
-            return self
-        out = copy(self)
-        out.sub_exprs = [deepcopy(e, memo) for e in out.sub_exprs]
-        out.variables = deepcopy(out.variables, memo)
-        out.co_constraint = deepcopy(out.co_constraint, memo)
+        cls = self.__class__ # Extract the class of the object
+        out = cls.__new__(cls) # Create a new instance of the object based on extracted class
+        memo[id(self)] = out
+        out.__dict__.update(self.__dict__)
+
+        out.sub_exprs = [deepcopy(e, memo) for e in self.sub_exprs]
+        out.variables = deepcopy(self.variables, memo)
+        out.co_constraint = deepcopy(self.co_constraint, memo)
         out.questions = deepcopy(self.questions, memo)
-        memo[key] = out
         return out
     
     def init_copy(self):
@@ -341,6 +337,24 @@ class Expression(ASTNode):
                 'code': self.code,
                 'str': self.str,
                 'co_constraint': self.co_constraint}
+
+    def annotate(self,
+                 voc: Vocabulary,
+                 q_vars: dict[str, Variable],
+                 ) -> Annotated:
+        raise IDPZ3Error("Internal error") # monkey-patched
+
+    def annotate_quantee(self,
+                 voc: Vocabulary,
+                 q_vars: dict[str, Variable],
+                 inferred: dict[str, SetName],
+                 ltc:bool,
+                 temporal_head:int=0
+                 ) -> Annotated:
+        raise IDPZ3Error("Internal error") # monkey-patched
+
+    def fill_attributes_and_check(self: Expression) -> Expression:
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def has_variables(self) -> bool:
         return any(e.has_variables() for e in self.sub_exprs)
@@ -371,14 +385,16 @@ class Expression(ASTNode):
                         symbols: Optional[dict[str, SymbolDeclaration]] = None,
                         co_constraints: bool=True
                         ) -> dict[str, SymbolDeclaration]:
-        """ returns the list of symbol declarations in self, ignoring type constraints
+        """ returns the list of symbols occurring in self,
+        ignoring type constraints and symbols created by aggregates
         """
         symbols = {} if symbols == None else symbols
         assert symbols is not None, "Internal error"
         if self.is_type_constraint_for is None:  # ignore type constraints
             if (hasattr(self, 'decl') and self.decl
                 and self.decl.__class__.__name__ == "SymbolDeclaration"
-                and not self.decl.name in RESERVED_SYMBOLS):
+                and not self.decl.name in RESERVED_SYMBOLS
+                and not self.decl.name.startswith('__')):  # min/max aggregates
                 symbols[self.decl.name] = self.decl
             for e in self.sub_exprs:
                 e.collect_symbols(symbols, co_constraints)
@@ -388,7 +404,7 @@ class Expression(ASTNode):
                                symbols: Set[SymbolDeclaration],
                                is_nested: bool
                                ) -> Set[SymbolDeclaration]:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def generate_constructors(self, constructors: dict[str, List[Constructor]]):
         """ fills the list `constructors` with all constructors belonging to
@@ -443,10 +459,9 @@ class Expression(ASTNode):
         # vocabulary
         return any(e.has_decision() for e in self.sub_exprs)
 
-    def type_inference(self) -> dict[str, Symbol]:
-        # returns a dictionary {Variable : Symbol}
+    def type_inference(self, voc: Vocabulary) -> dict[str, SetName]:
         try:
-            return dict(ChainMap(*(e.type_inference() for e in self.sub_exprs)))
+            return dict(ChainMap(*(e.type_inference(voc) for e in self.sub_exprs)))
         except AttributeError as e:
             if "has no attribute 'sorts'" in str(e):
                 msg = f"Incorrect arity for {self}"
@@ -456,7 +471,7 @@ class Expression(ASTNode):
             return {}  # dead code
 
     def __str__(self) -> str:
-        return ''  # monkey-patched
+        raise IDPZ3Error("Internal error")  # monkey-patched
 
     def _change(self: Expression,
                 sub_exprs: Optional[List[Expression]] = None,
@@ -464,58 +479,58 @@ class Expression(ASTNode):
                 simpler : Optional[Expression] = None,
                 co_constraint : Optional[Expression] = None
                 ) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def update_exprs(self, new_exprs: Generator[Expression, None, None]) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def simplify1(self) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def interpret(self,
                   problem: Optional[Theory],
                   subs: dict[str, Expression]
                   ) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def _interpret(self,
                     problem: Optional[Theory],
                     subs: dict[str, Expression]
                     ) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def substitute(self,
                    e0: Expression,
                    e1: Expression,
                    assignments: Assignments,
                    tag=None) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def simplify_with(self, assignments: Assignments, co_constraints_too=True) -> Expression:
-        return self  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def symbolic_propagate(self,
                            assignments: Assignments,
                            tag: Status,
                            truth: Optional[Expression] = None
                            ):
-        return  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def propagate1(self,
                    assignments: Assignments,
                    tag: Status,
                    truth: Optional[Expression] = None
                    ):
-        return  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def translate(self, problem: Theory, vars={}):
-        pass  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def reified(self, problem: Theory):
-        pass  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def translate1(self, problem: Theory, vars={}):
-        pass  # monkey-patched
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def as_set_condition(self) -> Tuple[Optional[AppliedSymbol], Optional[bool], Optional[Enumeration]]:
         """Returns an equivalent expression of the type "x in y", or None
@@ -536,84 +551,47 @@ class Expression(ASTNode):
         return out
 
     def add_level_mapping(self,
-                          level_symbols: dict[SymbolDeclaration, Symbol],
+                          level_symbols: dict[SymbolDeclaration, SetName],
                           head: AppliedSymbol,
                           pos_justification: bool,
                           polarity: bool,
                           mode: Semantics
                           ) -> Expression:
-        return self  # monkey-patched
-    def propagate_changes(self):
-        return
+        raise IDPZ3Error("Internal error") # monkey-patched
 
-class Symbol(Expression):
-    """Represents a Symbol.  Handles synonyms.
-
-    Attributes:
-        name (string): name of the symbol
-    """
-    TO = {'Bool': BOOL, 'Int': INT, 'Real': REAL,
-          '`Bool': '`'+BOOL, '`Int': '`'+INT, '`Real': '`'+REAL,}
-
-    def __init__(self, parent, name: str):
-        self.name = unquote(name)
-        self.name = Symbol.TO.get(self.name, self.name)
-        self.sub_exprs = []
-        self.decl: Optional[SymbolDeclaration] = None
-        super().__init__()
-        self.variables = set()
-
-    def __str__(self):
-        return self.name
-    
-    def init_copy(self):
-        return Symbol(None,self.name)
-
-    def __repr__(self):
-        return str(self)
-
-    def is_value(self): return True
-
-    def has_element(self, term: Expression,
-                    interpretations: dict[str, SymbolInterpretation],
-                    extensions: dict[str, Extension]
-                    ) -> Expression:
-        """Returns an expression that says whether `term` is in the type/predicate denoted by `self`.
-
-        Args:
-            term (Expression): the argument to be checked
-
-        Returns:
-            Expression: whether `term` is in the type denoted by `self`.
-        """
-        assert self.decl is not None, "Internal error"
-        self.check(self.decl.out.name == BOOL, "internal error1")
-        return self.decl.contains_element(term, interpretations, extensions)
-
-def SYMBOL(name: str) -> Symbol:
-    return Symbol(None, name)
+    def get_type(self):
+        return self.type
 
 
-class Type(Symbol):
-    """ASTNode representing `aType` or `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
 
-    Inherits from Symbol
+class SetName(Expression):
+    """ASTNode representing a (sub-)type or a `Concept[aSignature]`, e.g., `Concept[T*T->Bool]`
+
+    Inherits from Expression
 
     Args:
-        name (Symbol): name of the concept
+        name (str): name of the concept
 
-        ins (List[Symbol], Optional): domain of the Concept signature, e.g., `[T, T]`
+        concept_domains (List[SetName], Optional): domain of the Concept signature, e.g., `[T, T]`
 
-        out (Symbol, Optional): range of the Concept signature, e.g., `Bool`
+        codomain (SetName, Optional): range of the Concept signature, e.g., `Bool`
+
+        decl (Declaration, Optional): declaration of the type
+
+        root_set (SetName, Optional): a Type or a Concept with signature (Concept[T->T])
     """
 
     def __init__(self, parent,
                  name:str,
-                 ins: Optional[List[Type]] = None,
-                 out: Optional[Type] = None):
-        self.ins = ins
-        self.out = out
-        super().__init__(parent, name)
+                 ins: Optional[List[SetName]] = None,
+                 out: Optional[SetName] = None):
+        self.name = unquote(name)
+        self.concept_domains = ins
+        self.codomain = out
+        self.sub_exprs = []
+        self.decl: Declaration = None
+        self.root_set: SetName = None
+        super().__init__(parent)
 
     def init_copy(self):
         insa = []
@@ -625,30 +603,31 @@ class Type(Symbol):
         outa = None
         if self.out:
             outa =self.out.init_copy()
-        return Type(None,self.name,insa,outa)
+        return SetName(None,self.name,insa,outa)
 
     def __str__(self):
-        return self.name + ("" if not self.out else
-                            f"[{'*'.join(str(s) for s in self.ins)}->{self.out}]")
+        return self.name + ("" if not self.codomain else
+                            f"[{'*'.join(str(s) for s in self.concept_domains)}->{self.codomain}]")
+
+    def __repr__(self):
+        return str(self)
 
     def __eq__(self, other):
-        self.check(self.name != CONCEPT or self.out,
+        self.check(self.name != CONCEPT or self.codomain,
                    f"`Concept` must be qualified with a type signature")
-        return (self.name == other.name and
-                (not self.out or (
-                    self.out == other.out and
-                    len(self.ins) == len(other.ins) and
-                    all(s==o for s, o in zip(self.ins, other.ins)))))
+        return (other and self.name == other.name and
+                (not self.codomain or (
+                    self.codomain == other.codomain and
+                    len(self.concept_domains) == len(other.concept_domains) and
+                    all(s==o for s, o in zip(self.concept_domains, other.concept_domains)))))
 
-    def extension(self,
-                  interpretations: dict[str, SymbolInterpretation],
-                  extensions: dict[str, Extension]
-                  ) -> Extension:
-        return extensions[""]  # monkey-patched
+    def extension(self, extensions: dict[str, Extension]) -> Extension:
+        raise IDPZ3Error("Internal error") # monkey-patched
+
+    def is_value(self): return True
 
     def has_element(self,
                     term: Expression,
-                    interpretations: dict[str, SymbolInterpretation],
                     extensions: dict[str, Extension]
                     ) -> Expression:
         """Returns an Expression that says whether `term` is in the type/predicate denoted by `self`.
@@ -660,18 +639,23 @@ class Type(Symbol):
             Expression: whether `term` `term` is in the type denoted by `self`.
         """
         if self.name == CONCEPT:
-            extension = self.extension(interpretations, extensions)[0]
+            extension = self.extension(extensions)[0]
             assert extension is not None, "Internal error"
             comparisons = [EQUALS([term, c[0]]) for c in extension]
             return OR(comparisons)
         else:
             assert self.decl is not None, "Internal error"
-            self.check(self.decl.out.name == BOOL, "internal error2")
-            return self.decl.contains_element(term, interpretations, extensions)
+            self.check(self.decl.codomain == BOOL_SETNAME, "internal error")
+            return self.decl.contains_element(term, extensions)
 
-def TYPE(name: str, ins=None, out=None) -> Type:
-    return Type(None, name, ins, out)
+def SETNAME(name: str, ins=None, out=None) -> SetName:
+    return SetName(None, name, ins, out)
 
+BOOL_SETNAME = SETNAME(BOOL)
+INT_SETNAME = SETNAME(INT)
+REAL_SETNAME = SETNAME(REAL)
+DATE_SETNAME = SETNAME(DATE)
+EMPTY_SETNAME = SETNAME(EMPTY)
 
 class AIfExpr(Expression):
     PRECEDENCE = 10
@@ -698,7 +682,13 @@ class AIfExpr(Expression):
              else_f: Expression
              ) -> 'AIfExpr':
         out = (cls)(None, if_f=if_f, then_f=then_f, else_f=else_f)
-        return out.annotate1().simplify1()
+        return out.fill_attributes_and_check().simplify1()
+
+    def init_copy(self):
+        return AIfExpr(None,self.if_f.init_copy(),self.then_f.init_copy(),self.else_f.init_copy())
+
+    def init_copy(self):
+        return AIfExpr(None,self.if_f.init_copy(),self.then_f.init_copy(),self.else_f.init_copy())
 
     def init_copy(self):
         return AIfExpr(None,self.if_f.init_copy(),self.then_f.init_copy(),self.else_f.init_copy())
@@ -723,7 +713,7 @@ class Quantee(Expression):
     Attributes:
         vars (List[List[Variable]]): the (tuples of) variables being quantified
 
-        subtype (Type, Optional): a literal Type to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
+        subtype (SetName, Optional): a literal SetName to quantify over, e.g., `Color` or `Concept[Color->Bool]`.
 
         sort (SymbolExpr, Optional): a dereferencing expression, e.g.,. `$(i)`.
 
@@ -737,13 +727,13 @@ class Quantee(Expression):
     """
     def __init__(self, parent,
                  vars: Union[List[Variable], List[List[Variable]]],
-                 subtype: Optional[Type] = None,
+                 subtype: Optional[SetName] = None,
                  sort: Optional[SymbolExpr] = None):
         self.subtype = subtype
         self.sort_orig = sort
         sort = sort
         if self.subtype:
-            self.check(self.subtype.name == CONCEPT or self.subtype.out is None,
+            self.check(self.subtype.name == CONCEPT or self.subtype.codomain is None,
                    f"Can't use signature after predicate {self.subtype.name}")
 
         self.sub_exprs = ([sort] if sort else
@@ -788,11 +778,11 @@ class Quantee(Expression):
     @classmethod
     def make(cls,
              var: List[Variable],
-             subtype: Optional[Type] = None,
+             subtype: Optional[SetName] = None,
              sort: Optional[SymbolExpr] = None
              ) -> 'Quantee':
         out = (cls) (None, [var], subtype=subtype, sort=sort)
-        return out.annotate1()
+        return out.fill_attributes_and_check()
 
     def __str__(self):
         signature = ("" if len(self.sub_exprs) <= 1 else
@@ -837,10 +827,13 @@ class AQuantification(Expression):
     """
     PRECEDENCE = 20
 
-    def __init__(self, parent, annotations, q, quantees, f):
-        self.annotations = annotations
+    def __init__(self, parent: Optional[ASTNode],
+                 annotations: Optional[Annotations],
+                 q: str,
+                 quantees: List[Quantee],
+                 f: Expression):
         self.q = q
-        self.quantees: List[Quantee] = quantees
+        self.quantees = quantees
         self.f = f
         self.wrapper = False
 
@@ -850,23 +843,25 @@ class AQuantification(Expression):
         split_quantees(self)
 
         self.sub_exprs = [self.f]
-        super().__init__()
+        super().__init__(annotations=annotations)
 
-        self.type = BOOL
-        self.supersets: List[List[List[Union[Identifier, Variable]]]] = None
-        self.new_quantees: List[Quantee] = None
-        self.vars1 : List[Variable] = None
+        self.type = BOOL_SETNAME
+        self.supersets: Optional[List[List[List[Union[Identifier, Variable]]]]] = None
+        self.new_quantees: Optional[List[Quantee]] = None
+        self.vars1 : Optional[List[Variable]] = None
 
     @classmethod
     def make(cls,
              q: str,
              quantees: List[Quantee],
              f: Expression,
-             annotations=None
+             annotations: Optional[Annotation]=None
              ) -> 'AQuantification':
         "make and annotate a quantified formula"
-        out = cls(None, annotations, q, quantees, f)
-        return out.annotate1()
+        out = cls(None, None, q, quantees, f)
+        if annotations:
+            out.annotations = annotations
+        return out.fill_attributes_and_check()
 
     def __str__(self):
         if len(self.sub_exprs) == 0:
@@ -884,9 +879,8 @@ class AQuantification(Expression):
             return body
 
     def __deecopy__(self, memo):
-        # also called by AAgregate
-        out = Expression.__deecopy__(self, memo)
-        out.quantees = [deepcopy(q, memo) for q in out.quantees]
+        out = super().__deepcopy__(memo)
+        out.quantees = [deepcopy(q, memo) for q in self.quantees]
         return out
     
     def init_copy(self):
@@ -950,25 +944,28 @@ class Operator(Expression):
         "*": "⨯",
         "is": "=",
     }
+    EN_map: Optional[dict[str, str]] = None
 
-    def __init__(self, parent, operator, sub_exprs, annotations=None):
+    def __init__(self, parent, operator, sub_exprs,
+                 annotations:Optional[Annotations]=None):
         self.operator = operator
         self.sub_exprs = sub_exprs
 
         self.operator = list(map(
             lambda op: Operator.NORMAL.get(op, op)
             , self.operator))
-        super().__init__(parent)
 
-        self.type = BOOL if self.operator[0] in '&|∧∨⇒⇐⇔' \
-               else BOOL if self.operator[0] in '=<>≤≥≠' \
+        super().__init__(parent, annotations=annotations)
+
+        self.type = BOOL_SETNAME if self.operator[0] in '&|∧∨⇒⇐⇔' \
+               else BOOL_SETNAME if self.operator[0] in '=<>≤≥≠' \
                else None
 
     @classmethod
     def make(cls,
              ops: Union[str, List[str]],
              operands: List[Expression],
-             annotations=None,
+             annotations: Optional[Annotation] =None,
              parent=None
              ) -> Expression:
         """ creates a BinaryOp
@@ -986,14 +983,18 @@ class Operator(Expression):
         else:
             if isinstance(ops, str):
                 ops = [ops] * (len(operands)-1)
-            out = (cls)(parent, ops, operands, annotations)
+            out = (cls)(parent, ops, operands)
+        if annotations:
+            out.annotations = annotations
 
         if parent:  # for error messages
             out._tx_position = parent. _tx_position
             out._tx_position_end = parent. _tx_position_end
-        if annotations:
-            out.annotations = annotations
-        return out.annotate1().simplify1()
+        return out.fill_attributes_and_check().simplify1()
+
+    def init_copy(self):
+        sub_ex = [q.init_copy() for q in self.sub_exprs]
+        return Operator(None,self.operator.copy(),sub_ex)
 
     def init_copy(self):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
@@ -1150,7 +1151,10 @@ class AUnary(Expression):
     @classmethod
     def make(cls, op: str, expr: Expression) -> AUnary:
         out = AUnary(None, operators=[op], f=expr)
-        return out.annotate1().simplify1()
+        return out.fill_attributes_and_check().simplify1()
+
+    def init_copy(self):
+        return AUnary(None,self.operators.copy(),self.f.init_copy())
 
     def init_copy(self):
         return AUnary(None,self.operators.copy(),self.f.init_copy())
@@ -1224,7 +1228,9 @@ class AAggregate(Expression):
         return out
 
     def __deepcopy__(self, memo):
-        return super().__deepcopy__(memo)
+        out = super().__deepcopy__(memo)
+        out.quantees = [deepcopy(q, memo) for q in self.quantees]
+        return out
 
     def collect(self, questions, all_=True, co_constraints=True):
         if all_ or len(self.quantees) == 0:
@@ -1266,12 +1272,11 @@ class AppliedSymbol(Expression):
     def __init__(self, parent,
                  symbol,
                  sub_exprs,
-                 annotations=None,
+                 annotations: Optional[Annotations] =None,
                  is_enumerated='',
                  is_enumeration='',
                  in_enumeration=''):
-        self.annotations = annotations
-        self.symbol : Symbol = symbol
+        self.symbol : SymbolExpr = symbol
         self.sub_exprs = sub_exprs
         self.is_enumerated = is_enumerated
         self.is_enumeration = is_enumeration
@@ -1279,30 +1284,38 @@ class AppliedSymbol(Expression):
             self.is_enumeration = 'not'
         self.in_enumeration = in_enumeration
 
-        super().__init__()
+        super().__init__(annotations=annotations)
 
         self.as_disjunction = None
-        self.decl = None
+        self.decl: Optional[Declaration] = None
         self.in_head = False
         self.in_temp = False
 
     @classmethod
     def make(cls,
-             symbol: Symbol,
+             symbol: SymbolExpr,
              args: List[Expression],
-             **kwargs
+             type_: Optional[SetName] = None,
+             annotations: Optional[Annotations] =None,
+             is_enumerated='',
+             is_enumeration='',
+             in_enumeration='',
+             type_check=True
              ) -> AppliedSymbol:
-        out = cls(None, symbol, args, **kwargs)
+        out = cls(None, symbol, args, annotations,
+                  is_enumerated, is_enumeration, in_enumeration)
         out.sub_exprs = args
         # annotate
         out.decl = symbol.decl
-        return out.annotate1()
+        out.type = type_
+        return out.fill_attributes_and_check(type_check)
 
     @classmethod
     def construct(cls, constructor, args):
-        out= cls.make(SYMBOL(constructor.name), args)
+        out= cls.make(SymbolExpr.make(constructor.name), args)
         out.decl = constructor
-        out.variables = {}
+        out.type = constructor.codomain
+        out.variables = set()
         return out
 
     def __str__(self):
@@ -1315,8 +1328,8 @@ class AppliedSymbol(Expression):
 
     def __deepcopy__(self, memo):
         out = super().__deepcopy__(memo)
-        out.symbol = deepcopy(out.symbol)
-        out.as_disjunction = deepcopy(out.as_disjunction)
+        out.symbol = deepcopy(self.symbol, memo)
+        out.as_disjunction = deepcopy(self.as_disjunction, memo)
         return out
 
     def init_copy(self):
@@ -1344,26 +1357,22 @@ class AppliedSymbol(Expression):
         return ((self.decl.block is not None and not self.decl.block.name == 'environment')
             or any(e.has_decision() for e in self.sub_exprs))
 
-    def type_inference(self):
-        if self.symbol.decl:
-            self.check(self.symbol.decl.arity == len(self.sub_exprs),
+    def type_inference(self, voc: Vocabulary):
+        decl = (voc.symbol_decls.get(self.symbol.name, None)
+                 if voc and hasattr(voc, "symbol_decls")
+                 else None)
+        if decl:
+            self.check(decl.arity == len(self.sub_exprs),
                 f"Incorrect number of arguments in {self}: "
-                f"should be {self.symbol.decl.arity}")
-        try:
-            out = {}
-            for i, e in enumerate(self.sub_exprs):
-                if self.decl and isinstance(e, Variable):
-                    out[e.name] = self.decl.sorts[i]
-                else:
-                    out.update(e.type_inference())
-            return out
-        except AttributeError as e:
-            #
-            if "object has no attribute 'sorts'" in str(e):
-                msg = f"Unexpected arity for symbol {self}"
+                f"should be {decl.arity}")
+        # try:
+        out = {}
+        for i, e in enumerate(self.sub_exprs):
+            if decl and type(e) in [Variable, UnappliedSymbol]:
+                out[e.name] = decl.domains[i]
             else:
-                msg = f"Unknown error for symbol {self}"
-            self.check(False, msg)
+                out.update(e.type_inference(voc))
+        return out
 
     def is_value(self) -> bool:
         # independent of is_enumeration and in_enumeration !
@@ -1375,11 +1384,12 @@ class AppliedSymbol(Expression):
         return (not all (e.is_value() for e in self.sub_exprs))
 
     def generate_constructors(self, constructors: dict):
-        symbol = self.symbol.sub_exprs[0]
-        if hasattr(symbol, 'name') and symbol.name in ['unit', 'heading']:
+        assert self.symbol.name, "Can't use concepts here"
+        symbol = self.symbol.name
+        if symbol in ['unit', 'heading']:
             assert type(self.sub_exprs[0]) == UnappliedSymbol, "Internal error"
             constructor = CONSTRUCTOR(self.sub_exprs[0].name)
-            constructors[symbol.name].append(constructor)
+            constructors[symbol].append(constructor)
 
 class StartAppliedSymbol(Expression):
     """Represents a Start symbol applied to  another applied symbol 
@@ -1393,7 +1403,7 @@ class StartAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = SYMBOL('Start')
+        self.symbol  = SymbolExpr(self,'Start')
         self.sub_expr: AppliedSymbol  = arg
         self.sub_exprs = [arg]
         super().__init__()
@@ -1404,7 +1414,7 @@ class StartAppliedSymbol(Expression):
 
     @classmethod
     def make(cls,
-             symbol: Symbol,
+             symbol: SymbolExpr,
              arg: AppliedSymbol,
              ) -> StartAppliedSymbol:
         out = cls(None, symbol, arg)
@@ -1465,7 +1475,7 @@ class NowAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = SYMBOL('Now')
+        self.symbol  = SymbolExpr(self,'Now')
         self.sub_expr: AppliedSymbol  = arg
         self.sub_exprs = [arg]
         super().__init__()
@@ -1476,7 +1486,7 @@ class NowAppliedSymbol(Expression):
 
     @classmethod
     def make(cls,
-             symbol: Symbol,
+             symbol: SymbolExpr,
              arg: AppliedSymbol,
              ) -> StartAppliedSymbol:
         out = cls(None, symbol, arg)
@@ -1537,7 +1547,7 @@ class NextAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = SYMBOL('Next')
+        self.symbol  = SymbolExpr(self,'Next')
         self.sub_expr: AppliedSymbol  = arg
         self.sub_exprs = [arg]
 
@@ -1549,7 +1559,7 @@ class NextAppliedSymbol(Expression):
 
     @classmethod
     def make(cls,
-             symbol: Symbol,
+             symbol: SymbolExpr,
              arg: AppliedSymbol,
              ) -> StartAppliedSymbol:
         out = cls(None, symbol, arg)
@@ -1599,23 +1609,44 @@ class NextAppliedSymbol(Expression):
         self.sub_expr.generate_constructors(constructors,dict)
 
 
-
 class SymbolExpr(Expression):
-    def __init__(self, parent, s, eval=''):
+    """ represents either a type name, a symbol name
+    or a `$(..)` expression evaluating to a type or symbol name
+
+    Attributes:
+
+        name (Optional[str]): name of the type or symbol, or None
+
+        eval (Optional[str]): `$` or None
+
+        s (Optional[Expression]): argument of the `$`.
+
+        decl (Optional[Declaration]): the declaration of the symbol
+
+    Either `name` and `decl`are not None, or `eval` and `s` are not None.
+    When `eval` is None, `s` is None too.
+    """
+    def __init__(self, parent,
+                 name: Optional[str],
+                 eval: Optional[str],
+                 s: Optional[Expression]):
+        self.name = unquote(name) if name else name
         self.eval = eval
-        self.sub_exprs = [s]
-        self.decl = self.sub_exprs[0].decl if not self.eval else None
+        self.s = s
+        self.sub_exprs = [s] if s is not None else []
+        self.decl: Optional[Declaration] = None
         super().__init__()
 
     def init_copy(self):
         return SymbolExpr(None,self.sub_exprs[0].init_copy(),self.eval)
 
+    @classmethod
+    def make(cls, name: str) -> SymbolExpr:
+        return (cls)(None, name, None, None)
+
     def __str__(self):
         return (f"$({self.sub_exprs[0]})" if self.eval else
-                f"{self.sub_exprs[0]}")
-
-    def is_intentional(self):
-        return self.eval
+                f"{self.name}")
 
 class UnappliedSymbol(Expression):
     """The result of parsing a symbol not applied to arguments.
@@ -1625,9 +1656,8 @@ class UnappliedSymbol(Expression):
     """
     PRECEDENCE = 200
 
-    def __init__(self, parent, s):
-        self.s = s
-        self.name = self.s.name
+    def __init__(self, parent: Optional[ASTNode], name: str):
+        self.name = unquote(name)
 
         Expression.__init__(self)
 
@@ -1644,8 +1674,9 @@ class UnappliedSymbol(Expression):
     def construct(cls, constructor: Constructor):
         """Create an UnappliedSymbol from a constructor
         """
-        out = (cls)(None, s=SYMBOL(constructor.name))
+        out = (cls)(None, name=constructor.name)
         out.decl = constructor
+        out.type = constructor.codomain
         out.variables = set()
         return out
 
@@ -1659,7 +1690,9 @@ TRUEC = CONSTRUCTOR('true')
 FALSEC = CONSTRUCTOR('false')
 
 TRUE = UnappliedSymbol.construct(TRUEC)
+TRUE.type = BOOL_SETNAME
 FALSE = UnappliedSymbol.construct(FALSEC)
+FALSE.type = BOOL_SETNAME
 
 
 class Variable(Expression):
@@ -1668,22 +1701,20 @@ class Variable(Expression):
     Args:
         name (str): name of the variable
 
-        sort (Optional[Union[Type, Symbol]]): sort of the variable, if known
+        type (Optional[Union[SetName]]): sort of the variable, if known
     """
     PRECEDENCE = 200
 
     def __init__(self, parent,
                  name:str,
-                 sort: Optional[Union[Type, Symbol]]=None):
+                 type: Optional[SetName]=None):
         self.name = name
-        sort = sort
-        self.sort = sort
-        assert sort is None or isinstance(sort, Type) or isinstance(sort, Symbol), \
+        assert type is None or isinstance(type, SetName), \
             f"Internal error: {self}"
 
         super().__init__()
 
-        self.type = sort.decl.name if sort and sort.decl else ''
+        self.type = type
         self.sub_exprs = []
         self.variables = set([self.name])
 
@@ -1698,12 +1729,12 @@ class Variable(Expression):
             s = self.sort.init_copy()
         return Variable(None,self.name,s)
 
-    def annotate1(self): return self
+    def fill_attributes_and_check(self: Expression) -> Expression: return self
 
     def has_variables(self) -> bool: return True
 
-def VARIABLE(name: str, sort: Union[Type, Symbol]):
-    return Variable(None, name, sort)
+def VARIABLE(name: str, type: SetName):
+    return Variable(None, name, type)
 
 
 class Number(Expression):
@@ -1721,14 +1752,15 @@ class Number(Expression):
         ops = self.number.split("/")
         if len(ops) == 2:  # possible with str_to_IDP on Z3 value
             self.py_value = Fraction(self.number)
-            self.type = REAL
+            self.type = REAL_SETNAME
         elif '.' in self.number:
             self.py_value = Fraction(self.number if not self.number.endswith('?') else
                                      self.number[:-1])
-            self.type = REAL
+            self.type = REAL_SETNAME
         else:
             self.py_value = int(self.number)
-            self.type = INT
+            self.type = INT_SETNAME
+        self.decl = None
 
     def __str__(self): return self.number
 
@@ -1737,7 +1769,7 @@ class Number(Expression):
 
     def real(self):
         """converts the INT number to REAL"""
-        self.check(self.type in [INT, REAL], f"Can't convert {self} to {REAL}")
+        self.check(self.type in [INT_SETNAME, REAL_SETNAME], f"Can't convert {self} to {REAL}")
         return Number(number=str(float(self.py_value)))
 
     def is_value(self): return True
@@ -1769,7 +1801,7 @@ class Date(Expression):
         self.variables = set()
 
         self.py_value = int(self.date.toordinal())
-        self.type = DATE
+        self.type = DATE_SETNAME
 
     @classmethod
     def make(cls, value: int) -> Date:
@@ -1788,14 +1820,13 @@ class Date(Expression):
 class Brackets(Expression):
     PRECEDENCE = 200
 
-    def __init__(self, **kwargs):
-        self.f = kwargs.pop('f')
-        self.annotations = kwargs.pop('annotations')
-        if not self.annotations:
-            self.annotations = {'reading': self.f.annotations['reading']}
+    def __init__(self, parent, f, annotations: Optional[Annotations]=None):
+        self.f = f
         self.sub_exprs = [self.f]
 
         super().__init__()
+        self.annotations = (annotations.annotations if annotations else
+            {'reading': self.f.annotations['reading']})
 
     def init_copy(self):
         return Brackets(f=self.f.init_copy(),annotations=Annotations(None,[]))

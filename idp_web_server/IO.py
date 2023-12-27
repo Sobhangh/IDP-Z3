@@ -25,7 +25,7 @@ import ast
 from typing import TYPE_CHECKING
 
 from idp_engine import Theory, Status
-from idp_engine.Expression import (TRUE, FALSE, Number, Date)
+from idp_engine.Expression import (TRUE, FALSE, Number, Date, BOOL_SETNAME)
 from idp_engine.Parse import str_to_IDP
 from idp_engine.Assignments import Status as S
 from idp_engine.utils import BOOL, INT, REAL, DATE
@@ -44,8 +44,8 @@ def metaJSON(state):
     symbols = []
     for decl in state.assignments.symbols.values():
         if not decl.private:
-            typ = decl.out.name
-            symbol_type = "proposition" if typ == BOOL and decl.sorts == [] else "function"
+            typ = decl.codomain
+            symbol_type = "proposition" if typ == BOOL_SETNAME and decl.domains == [] else "function"
             d = {
                 "idpname": str(decl.name),
                 "type": symbol_type,
@@ -131,7 +131,7 @@ def load_json(assignments, jsonstr: str, keep_defaults: bool):
                             status_map[json_atom["status"]])
 
                     if json_atom["value"] != '' and atom.status == S.UNKNOWN:
-                        value = str_to_IDP(sentence, str(json_atom["value"]))
+                        value = str_to_IDP(str(json_atom["value"]), sentence.type)
                         assignments.assert__(sentence, value, status)
                         if json_atom["typ"] != "Bool":  # needed for default structure
                             code = f"{sentence.code} = {str(value)}"
@@ -161,13 +161,13 @@ class Output(object):
             if symb is not None and not symb.private:
                 s = self.m.setdefault(symb.name, {})
 
-                typ = atom.type
+                typ = atom.type.name
                 if typ == BOOL:
                     symbol = {"typ": "Bool"}
                 elif 0 < len(symb.range):
                     if (isinstance(symb.range[0], Number)
                     or isinstance(symb.range[0], Date)):  # handle numeric ranges
-                        typ = symb.range[0].type
+                        typ = symb.range[0].type.name
                     symbol = {"typ": FROM.get(typ, typ),
                               "values": [str(v) for v in symb.range]}
                 elif typ in [REAL, INT, DATE]:
@@ -231,7 +231,7 @@ class Output(object):
                             s[key]["value"] = True if value.same_as(TRUE) else \
                                              False if value.same_as(FALSE) else \
                                              str(value)
-                        if ((0 < len(symb.range) or hasattr(symb.out.decl, 'enumeration')) and atom.type != BOOL):
+                        if ((0 < len(symb.range) or hasattr(symb.codomain.decl, 'enumeration')) and atom.type != BOOL_SETNAME):
                             # allow display of the value in drop box
                             s[key]["values"] = [s[key]["value"]]
                     else:

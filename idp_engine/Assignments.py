@@ -27,13 +27,14 @@ from __future__ import annotations
 __all__ = ["Status", "Assignment", "Assignments"]
 
 
+from collections import defaultdict
 from copy import copy, deepcopy
 from enum import Enum, auto
 from typing import List, Optional, Tuple, TYPE_CHECKING
 from z3 import BoolRef
 
-from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol, Identifier
-from .utils import NEWL, BOOL, INT, REAL, DATE
+from .Expression import Expression, TRUE, FALSE, NOT, EQUALS, AppliedSymbol, Identifier, BOOL_SETNAME
+from .utils import NEWL, INT, REAL, DATE
 
 if TYPE_CHECKING:
     from .Parse import SymbolDeclaration, Enumeration 
@@ -100,8 +101,8 @@ class Assignment(object):
         self.symbols: dict[str, SymbolDeclaration] = \
             sentence.collect_symbols(co_constraints=False).values()
         for d in self.symbols:
-            if not d.private:
-                if d.block:  # ignore accessors and testers
+            if not d.name.startswith('_'):
+                if not d.by_z3:  # ignore accessors and testers
                     self.symbol_decl = d
                     break
             elif default is None:
@@ -155,7 +156,7 @@ class Assignment(object):
     def formula(self) -> Expression:
         if self.value is None:
             raise Exception("can't translate unknown value")
-        if self.sentence.type == BOOL:
+        if self.sentence.type == BOOL_SETNAME:
             out = self.sentence if self.value.same_as(TRUE) else \
                 NOT(self.sentence)
         else:
@@ -171,7 +172,7 @@ class Assignment(object):
         Returns:
             [type]: returns an Assignment for the same sentence, but an opposite truth value.
         """
-        assert self.sentence.type == BOOL, "Cannot negate a non-boolean assignment"
+        assert self.sentence.type == BOOL_SETNAME, "Cannot negate a non-boolean assignment"
         assert self.value is not None, "Cannot negate an assignment without value"
         value = FALSE if self.value.same_as(TRUE) else TRUE
         return Assignment(self.sentence, value, self.status, self.relevant)
@@ -248,9 +249,12 @@ class Assignments(dict):
         `name := value`.
         """
         out : dict[SymbolDeclaration, dict[str, str]] = {}  # ordered set of strings
+        enumerated : dict[SymbolDeclaration, bool] = defaultdict(lambda: True)
         nullary = set()
         for a in self.values():
             if type(a.sentence) == AppliedSymbol:
+                if a.status not in [Status.DEFAULT, Status.STRUCTURE]:
+                    enumerated[a.symbol_decl] = False
                 args = ", ".join(str(e) for e in a.sentence.sub_exprs)
                 args = f"({args})" if 1 < len(a.sentence.sub_exprs) else args
 
@@ -282,13 +286,14 @@ class Assignments(dict):
                 if "*" in val:
                     val = f"// {val}"
             else:
-                sign = ':=' if k.instances or k.out.name == BOOL else '>>'
-                # TODO improve sign detection (using base_type/extension, interpretation)
+                sign = ':=' if k.instances or k.codomain == BOOL_SETNAME else '>>'
+                # TODO improve sign detection (using root_set/extension, interpretation)
                 # needs access to the theory !
                 finite_domain = all(s.name not in [INT, REAL, DATE]
-                        for s in k.sorts)
-                sign = ':=' if finite_domain or k.out.name == BOOL else '>>'
+                        for s in k.domains)
+                sign = ':=' if finite_domain or k.codomain == BOOL_SETNAME else '>>'
                 val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
                 val = f"{k.name} {sign} {{{ ', '.join(s for s in enum) }}}.{NEWL}"
-            model_str += val
+            if not enumerated[k]:
+                model_str += val
         return model_str

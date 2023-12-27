@@ -3,11 +3,11 @@ vocabulary {
 	amount_thresholdEU, periodEU: () -> Int
 	amount_threshold, period: Country -> Int
 	obligation: Concept[Country -> Int] -> Bool
-	mapping: Concept[Country -> Int] -> Concept[() -> Int]
+	mapping: obligation -> Concept[() -> Int]
 }
 theory {
 	obligation := {`amount_threshold, `period}.
-	mapping := {`amount_threshold -> `amount_thresholdEU, `period -> `periodEU} else `Bool.
+	mapping := {`amount_threshold -> `amount_thresholdEU, `period -> `periodEU}.
 	! o in obligation, c in Country: $(mapping(o))() > $(o)(c).
 }
 procedure main() {

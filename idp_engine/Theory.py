@@ -33,12 +33,13 @@ from z3 import (Context, BoolRef, ExprRef, Solver, sat, unsat, Optimize, Not,
 
 from .Assignments import Status as S, Assignment, Assignments
 from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
-                         EQUALS, NOT, Extension, AQuantification)
-from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SYMBOL,
-                    TheoryBlock, Structure, Definition, str_to_IDP, str_to_IDP2,
+                         EQUALS, NOT, Extension, AQuantification,
+                         BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME)
+from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SymbolExpr,
+                    TheoryBlock, Structure, Definition, str_to_IDP,
                     SymbolInterpretation)
 from .Simplify import join_set_conditions
-from .utils import (OrderedSet, NEWL, BOOL, INT, REAL, DATE, IDPZ3Error,
+from .utils import (OrderedSet, NEWL, INT, REAL, DATE, IDPZ3Error,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT,
                     NOT_SATISFIABLE)
 from .Z3_to_IDP import collect_questions, get_interpretations
@@ -118,6 +119,7 @@ class Theory(object):
             The string matches Expression.code in expl_reifs.
 
     """
+
     def __init__(self,
                  *theories: Union[TheoryBlock, Structure, Theory],
                  extended: bool = False
@@ -308,10 +310,10 @@ class Theory(object):
                 symbol = t.args[0]
                 decl = self.declarations[symbol.name[1:]]
                 assert decl.instances, f"goal {decl.name} must be instantiable."
-                relevant = SYMBOL(RELEVANT)
+                relevant = SymbolExpr.make(RELEVANT)
                 relevant.decl = self.declarations[RELEVANT]
                 for i in decl.instances.values():
-                    constraint = AppliedSymbol.make(relevant, [i])
+                    constraint = AppliedSymbol.make(relevant, [i], type_check=False)
                     self.constraints.append(constraint)
         #print("th9")
         # expand whole-domain definitions
@@ -351,7 +353,7 @@ class Theory(object):
                 code: str,
                 value: Any,
                 status: S = S.GIVEN
-                ) -> Theory:
+                ):
         """asserts that an expression has a value (or not), e.g. ``theory.assert_("p()", True)``
 
         Args:
@@ -363,11 +365,11 @@ class Theory(object):
         if value is None:
             self.assignments.assert__(atom, None, S.UNKNOWN)
         else:
-            val = str_to_IDP(atom, str(value))
+            val = str_to_IDP(str(value), atom.type)
             self.assignments.assert__(atom, val, status)
         self._formula = None
 
-    def enable_law(self, code: str) -> Theory:
+    def enable_law(self, code: str):
         """Enables a law, represented as a code string taken from the output of explain(...).
 
         The law should not result from a structure (e.g., from ``p:=true.``)
@@ -385,7 +387,7 @@ class Theory(object):
                 f"Cannot enable an unknown law: {code}"
         self.ignored_laws.remove(code)
 
-    def disable_law(self, code: str) -> Theory:
+    def disable_law(self, code: str):
         """Disables a law, represented as a code string taken from the output of explain(...).
 
         The law should not result from a structure (e.g., from ``p:=true.``)
@@ -462,7 +464,7 @@ class Theory(object):
         # determine if the expression is defined
         defined = True
         if type(q) == AppliedSymbol:
-            if any(type(T.decl) != TypeDeclaration for T in q.decl.sorts):
+            if any(type(T.decl) != TypeDeclaration for T in q.decl.domains):
                 in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
                 if in_domain.same_as(FALSE):
                     defined = False
@@ -478,7 +480,7 @@ class Theory(object):
         # determine if the expression is certainly undefined
         result = False
         if type(q) == AppliedSymbol:
-            if any(type(T.decl) != TypeDeclaration for T in q.decl.sorts):
+            if any(type(T.decl) != TypeDeclaration for T in q.decl.domains):
                 in_domain = q.decl.has_in_domain(q.sub_exprs, self.interpretations, self.extensions)
                 if in_domain.same_as(FALSE):
                     result = True
@@ -526,9 +528,8 @@ class Theory(object):
                 a.value, a.tag, a.relevant = None, S.UNKNOWN, False
             else:
                 if (isinstance(q, AppliedSymbol)
-                and not q_is_reified
-                and not (q.in_enumeration or q.is_enumerated)):
-                    assert q.symbol.name in interps, "Internal error"
+                and not (q.in_enumeration or q.is_enumerated)
+                and q.symbol.name in interps):
                     maps, _else = interps[q.symbol.name]
                     val = maps.get(q.code, _else)
                 else:
@@ -538,7 +539,8 @@ class Theory(object):
                         val1 = model.eval(q.reified(self), model_completion=complete)
                     else:
                         val1 = model.eval(q.translate(self), model_completion=complete)
-                    val = str_to_IDP(q, str(val1))
+                    val = (None if str(q) in [str(val1), str(val1)+"()"] else
+                           str_to_IDP(str(val1), q.type))
 
                 if val is not None:
                     if q.is_assignment() and val == FALSE:  # consequence of the TRUE assignment
@@ -716,7 +718,7 @@ class Theory(object):
         assert term in self.assignments, (f"Optimization term: \"{term}\" not"
                                           " found in vocabulary (Tip: have you"
                                           " forgotten brackets? e.g. P()).")
-        assert self.assignments[term].symbol_decl.out.name in {INT, REAL}, (
+        assert self.assignments[term].symbol_decl.codomain.name in {INT, REAL}, (
             f"Incorrect optimization term: \"{term}\","
             f" term must be of type {INT} or {REAL}."
         )
@@ -752,7 +754,7 @@ class Theory(object):
                 break
         solver.pop()
 
-        val_IDP = str_to_IDP(sentence, str(val))
+        val_IDP = str_to_IDP(str(val), sentence.type)
         if val_IDP is not None:
             self.assert_(str(sentence), val_IDP, S.GIVEN)
             ass = str(EQUALS([sentence, val_IDP]))
@@ -892,7 +894,7 @@ class Theory(object):
             to_explain = self.assignments[consequence].sentence
 
             # rules used in justification
-            if to_explain.type != BOOL:  # determine numeric value
+            if to_explain.type != BOOL_SETNAME:  # determine numeric value
                 val = self.assignments[consequence].value
                 if val is None:  # can't explain an expanded value
                     solver.pop()
@@ -940,18 +942,20 @@ class Theory(object):
             for ass in out.assignments.values():
                 if (ass.value
                 and (( type(ass.sentence) == AComparison
-                       and (any(e.type in [INT, REAL, DATE] for e in ass.sentence.sub_exprs)
+                       and (any(e.type in [INT_SETNAME, REAL_SETNAME, DATE_SETNAME]
+                                for e in ass.sentence.sub_exprs)
                             or any(op in '<>≤≥' for op in ass.sentence.operator)))
                     or type(ass.sentence) == AQuantification)):
 
                     questions = OrderedSet()
                     ass.sentence.collect(questions, all_=True, co_constraints=False)
                     if (1 < len(ass.symbols)  # more than 1 symbol or 1 question
-                    or 1 < len([q for q in questions.values() if type(q)==AppliedSymbol])):
+                    or 1 < len([q for q in questions.values()
+                                if type(q)==AppliedSymbol])):
                         ass.status = S.UNKNOWN
                         ass.value = None
 
-        new_constraints: List[Expression] = []
+        new_constraints: OrderedSet = OrderedSet()
         for constraint in out.constraints:
             if constraint.code not in self.ignored_laws:
                 new_constraint = constraint.simplify_with(out.assignments,
@@ -962,8 +966,7 @@ class Theory(object):
         return out
 
     def determine_relevance(self) -> Theory:
-        # monkey-patched
-        pass
+        raise IDPZ3Error("Internal error") # monkey-patched
 
     def _generalize(self,
                     conjuncts: List[Assignment],
@@ -1094,7 +1097,7 @@ class Theory(object):
             goal = None
             for atom in questions.values():
                 assignment = self.assignments.get(atom.code, None)
-                if assignment and assignment.value is None and atom.type == BOOL:
+                if assignment and assignment.value is None and atom.type == BOOL_SETNAME:
                     if not atom.is_reified():
                         val1 = model.eval(atom.translate(self))
                     else:
@@ -1228,8 +1231,9 @@ class Theory(object):
         return (models, timeout_hit)
 
     def _first_propagate(self, solver):
-        """monkey-patched"""
-        print()
+        raise IDPZ3Error("Internal error") # monkey-patched
+
+    def EN(self) -> str:
         pass
 
 Done = True

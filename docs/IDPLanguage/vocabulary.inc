@@ -77,7 +77,7 @@ The ASCII equivalent of ``⨯`` is ``*``, and of ``→`` is ``->``.
 The domains and ranges must be one of the following:
 
 * a previously-declared type
-* a previously-declared unary predicate
+* a previously-declared nullary or unary predicate
 * ``Concept[<signature>]`` to denote the set of concepts with a particular signature, e.g. ``Concept[Person -> Bool]``.
 
 The functions must be total over their domain.
@@ -95,6 +95,7 @@ Predicates
 A predicate is a function whose range is ``Bool``.
 
 A unary predicate is always interpreted as a subset of a type.
+A nullary predicate is a subset of the singleton set containing the empty tuple.
 
 
 .. _variable declaration:

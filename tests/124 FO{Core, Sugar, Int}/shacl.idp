@@ -1,0 +1,38 @@
+vocabulary V{
+    type CComponent
+    type Shape := { c }
+    type Node := {a, 'iri_ex_Test' }
+    pred_rdf_type: Node * Node -> Bool
+    pred_ex_pred2: Node * Node -> Bool
+    cc: Node * Shape -> Bool
+    vio: Node -> Bool
+    _shape: Node -> Bool
+    path_0: Node * Node -> Bool
+    cc_are_not_contained: Shape * CComponent -> Bool
+}
+theory T: V {
+    {
+        !x in Node: _shape(x) <-
+        (!y in Node: pred_ex_pred2(x, y) => ?c0 in Node: pred_rdf_type(y, c0))
+        .
+    }
+    {
+        !x in Node:vio(x) <-
+        ~(((?y in Node: pred_rdf_type(x, y) & y = 'iri_ex_Test')) =>_shape(x)
+        ) .
+    }
+
+    !p in CComponent:
+        !v in Shape: ?x in Node:
+            cc_are_not_contained(v, p) => cc(x, v).
+
+
+{ !x in Node, v in Shape: cc(x, v) <- ( (vio(x)) ) . }
+}
+structure S: V{
+    CComponent := { b }.
+}
+
+procedure main() {
+   pretty_print(determine_relevance(Theory(T, S))) 
+}

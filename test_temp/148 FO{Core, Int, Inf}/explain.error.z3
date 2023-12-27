@@ -16,8 +16,14 @@ Traceback (most recent call last):
   File "textx/model.py", line ??, in _end_model_construction
     obj.__init__(**attrs)
   File "idp_engine/Parse.py", line ??, in __init__
-    t.annotate(self)
-  File "idp_engine/Annotate.py", line ??, in annotate
+    self.warnings = flatten(t.annotate_block(self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/utils.py", line ??, in flatten
+    for sublist in a:
+  File "idp_engine/Parse.py", line ??, in <genexpr>
+    self.warnings = flatten(t.annotate_block(self)
+                            ^^^^^^^^^^^^^^^^^^^^^^
+  File "idp_engine/Annotate.py", line ??, in annotate_block
     self.definitions = [e.annotate(self.voc, {}) for e in self.definitions]
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "idp_engine/Annotate.py", line ??, in <listcomp>
@@ -26,6 +32,6 @@ Traceback (most recent call last):
   File "idp_engine/Annotate.py", line ??, in annotate
     self.check(len(error) == 0,
   File "idp_engine/Expression.py", line ??, in check
-    raise IDPZ3Error(f"Error on line {line}, col {col}: {msg}")
-idp_engine.utils.IDPZ3Error: Error on line ??, col 5: Eliminate variable ['y'] in the head of : ∀ x ∈ List1,y ∈ ℤ: len1(x)  = y← y = len1(cdr1(x)) + 1 ∧ is_cons1(x)
+    raise IDPZ3Error(msg, self)
+idp_engine.utils.IDPZ3Error: Error: line 11 - colStart 5 - colEnd 5 => Eliminate variable ['y'] in the head of : ∀ x ∈ List1,y ∈ ℤ: len1(x)  = y← y = len1(cdr1(x)) + 1 ∧ is_cons1(x)
 

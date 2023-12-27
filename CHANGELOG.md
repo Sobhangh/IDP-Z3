@@ -4,7 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) relative to the user interface and to the API exposed by the web server.
 
-## [0.10.x] - unreleased yet
+## [0.11.1] - unreleased yet
+
+The main feature of this release is type checking.
+
+Breaking change: some KB may not pass the type check anymore,
+in particular those declaring numeric types without interpretation (e.g. `type row`).
+See `Explanations / Type checking` in the documentation for details.
+
+Contributors (alphabetical): Pierre Carbonnelle.
+
+### IDP-Z3
+* MR !336: Improve type checking
+* issue #309: "'AQuantification' object has no attribute 'symbol'" error in IC
+
+
+### Interactive Consultant and Web IDE
+
+
+## [0.10.12] - 2023-11-13
 
 The main feature of this release is performance improvements.
 
@@ -15,8 +33,9 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 * issue #289: Unsatisfiable theory without explanation
 * issue #293: add stable semantics + fix completion semantics
 * issue #294: speed up transitive closure of graph (+ fix import of deepcopy)
+* issue #296: improve performance of theories with large enumerations
 * issue #299: Order of declarations matter for symbols in definitions
-*
+* issue #302: avoid "maximum recursion depth exceeded" error for large enumerations
 
 
 ### Interactive Consultant and Web IDE
@@ -49,6 +68,7 @@ Contributors (alphabetical): Pierre Carbonnelle, Simon Vandevelde.
 
 
 ### Interactive Consultant and Web IDE
+* issue #248: detect error for incorrect entry in a Int range
 * issue #283: Allow loading a default theory when theory is incorrect
 
 

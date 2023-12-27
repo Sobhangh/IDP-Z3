@@ -1,0 +1,14 @@
+vocabulary V {
+    has_c : () -> Bool
+    c : has_c -> Int
+}
+
+theory T:V {
+}
+structure S:V {
+    c := 1.
+}
+procedure main() {
+    pretty_print(Theory(T).formula())
+    pretty_print(model_expand(T, S))
+}

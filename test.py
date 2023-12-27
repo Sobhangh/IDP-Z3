@@ -246,6 +246,7 @@ def benchmark():
                   'edges_prop': [50, 100, 150],
                   'minesweeper_prop': [10, 20, 30],
                   'transitive_closure': [10, 50, 90],
+                  'adhesive': [50, 100, 150],
                   }
 
     timings = {}

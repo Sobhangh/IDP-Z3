@@ -1,8 +1,8 @@
 vocabulary V {
     type T
-    p : (T*T) → 𝔹
-    r : (T) → 𝔹
-    s : (T*T) → 𝔹
+    p : (T*T) → Bool
+    r : (T) → Bool
+    s : (T*T) → Bool
 }
 
 theory T:V {

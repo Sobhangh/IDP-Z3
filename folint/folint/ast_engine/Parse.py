@@ -28,14 +28,14 @@ from copy import copy
 import itertools
 
 from .Assignments import Assignments
-from .Expression import (Annotations, ASTNode, Constructor, Accessor, Symbol, SymbolExpr,
-                         Expression, AIfExpr, IF, AQuantification, Type, Quantee,
+from .Expression import (Annotations, ASTNode, Constructor, Accessor, SymbolExpr,
+                         Expression, AIfExpr, IF, AQuantification, SetName, Quantee,
                          ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction,
                          AComparison, ASumMinus, AMultDiv, APower, AUnary,
                          AAggregate, AppliedSymbol, UnappliedSymbol,
                          Number, Brackets, Date, Extension,
-                         Variable, TRUEC, FALSEC, TRUE, FALSE, EQUALS, AND, OR, EQUIV)
+                         Variable, TRUEC, FALSEC, TRUE, FALSE, INT_SETNAME, REAL_SETNAME, DATE_SETNAME)
 from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE, CONCEPT,
                     GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     CO_CONSTR_RECURSION_DEPTH, MAX_QUANTIFIER_EXPANSION)
@@ -78,9 +78,15 @@ Vocabulary.SCA_Check = SCA_Check
 # class TypeDeclaration(ASTNode):
 
 def SCA_Check(self, detections):
+    if self.name in RESERVED_SYMBOLS:
+        return
+
     # style guide check : capital letter for type
     if self.name[0].islower():
         detections.append((self, "Style guide check, type name should start with a capital letter ", "Warning"))
+
+    if self.interpretation and self.interpretation.enumeration and hasattr(self.interpretation.enumeration, "type"):
+        detections.append((self, f"Consider using `{self.name}: {str(self.interpretation.enumeration.type)} -> Bool` for future compatibility", "Warning"))
 
     # check if type has interpretation, if not check if in structures the type has given an interpretation
     if (self.interpretation is None and not builtIn_type(self.name)):
@@ -167,13 +173,13 @@ def SCA_Check(self, detections):
             if str(value) not in ['true', 'false']:
                 err_str = (f'{message} {str(value)} should be Bool')
         elif type.name == REAL:
-            if value.type not in [REAL, INT]:
+            if value.type not in [REAL_SETNAME, INT_SETNAME]:
                 err_str = (f'{message} {str(value)} should be Real')
         elif type.name == INT:
-            if value.type != INT:
+            if value.type != INT_SETNAME:
                 err_str = (f'{message} {str(value)} should be Int')
         elif type.name == DATE:
-            if value.type != DATE:
+            if value.type != DATE_SETNAME:
                 err_str = (f'{message} {str(value)} should be Date')
         else:
             if type and str(value) not in values:
@@ -183,7 +189,9 @@ def SCA_Check(self, detections):
 
     # options = list of list of possible values for an argument
     options = []
-    for i in self.symbol.decl.sorts:
+    for i in self.symbol_decl.domains:
+        if type(i) != TypeDeclaration:  # can't deal with partial functions yet
+            return
         if i.name in [BOOL, INT, REAL, DATE]:
             in_type_values = []
         elif i.decl.enumeration is None:  # Interpretation in Struct
@@ -200,7 +208,7 @@ def SCA_Check(self, detections):
         options.append(in_type_values)
 
     # same logic, for out value
-    out_type, out_type_values = self.symbol.decl.out, None
+    out_type, out_type_values = self.symbol_decl.codomain, None
     if out_type.name in [BOOL, INT, REAL, DATE]:
         out_type_values = []
     elif out_type.decl.enumeration is None:
@@ -228,12 +236,12 @@ def SCA_Check(self, detections):
     duplicates = set()
     function = 1 if isinstance(self.enumeration, FunctionEnum) else 0  # to ignore the last element of the tuple
     for t in self.enumeration.tuples:
-        for i in range(0, self.symbol.decl.arity):  # check each argument in tuple
-            check_type(t.args[i], self.symbol.decl.sorts[i], options[i], 'Element')
+        for i in range(0, self.symbol_decl.arity):  # check each argument in tuple
+            check_type(t.args[i], self.symbol_decl.domains[i], options[i], 'Element')
 
-        elements = tuple(str(t.args[i]) for i in range(0, self.symbol.decl.arity))
-        if len(t.args) - function > self.symbol.decl.arity:
-            detections.append((t.args[0], f"Too many input elements, expected {self.symbol.decl.arity}", "Error"))
+        elements = tuple(str(t.args[i]) for i in range(0, self.symbol_decl.arity))
+        if len(t.args) - function > self.symbol_decl.arity:
+            detections.append((t.args[0], f"Too many input elements, expected {self.symbol_decl.arity}", "Error"))
         possibilities.discard(elements)
         if elements in duplicates:
             detections.append((t.args[0], "Duplicate input elements", "Error"))

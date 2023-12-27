@@ -15,9 +15,9 @@ And(Vehicle(o2),
     If(Vehicle(o1), weight(o1), 0) +
     If(Vehicle(o2), weight(o2), 0) +
     If(Vehicle(o3), weight(o3), 0),
-    min == _min(lambda x ∈ ConfigObj : weight(x)),
-    max == _max(lambda x ∈ ConfigObj : weight(x)),
-    max2 == _max(lambda x ∈ ConfigObj : weight(x)),
+    min == __min(lambda x ∈ ConfigObj : weight(x)),
+    max == __max(lambda x ∈ ConfigObj : weight(x)),
+    max2 == __max(lambda x ∈ ConfigObj : weight(x)),
     fleetTotal(f1) ==
     If(Vehicle(o1), weight(o1), 0) +
     If(Vehicle(o2), weight(o2), 0) +
@@ -32,66 +32,65 @@ And(Vehicle(o2),
     If(Vehicle(o1), 1, 0) + If(Vehicle(o2), 1, 0) + 0,
     fleetCard(f2) == 0 + 0 + If(Vehicle(o3), 1, 0),
     fleetMin(f1) ==
-    _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1),
+    __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1),
     fleetMin(f2) ==
-    _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
+    __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
     fleetMin(f1) ==
-    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1),
+    __min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1),
     fleetMin(f2) ==
-    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2),
-    Or(_min(lambda x ∈ ConfigObj : weight(x)) == weight(o1),
-       _min(lambda x ∈ ConfigObj : weight(x)) == weight(o2),
-       _min(lambda x ∈ ConfigObj : weight(x)) == weight(o3)),
-    _min(lambda x ∈ ConfigObj : weight(x)) <= weight(o1),
-    _min(lambda x ∈ ConfigObj : weight(x)) <= weight(o2),
-    _min(lambda x ∈ ConfigObj : weight(x)) <= weight(o3),
-    Or(_max(lambda x ∈ ConfigObj : weight(x)) == weight(o1),
-       _max(lambda x ∈ ConfigObj : weight(x)) == weight(o2),
-       _max(lambda x ∈ ConfigObj : weight(x)) == weight(o3)),
-    _max(lambda x ∈ ConfigObj : weight(x)) >= weight(o1),
-    _max(lambda x ∈ ConfigObj : weight(x)) >= weight(o2),
-    _max(lambda x ∈ ConfigObj : weight(x)) >= weight(o3),
-    Or(_min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1) ==
+    __min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2),
+    Or(__min(lambda x ∈ ConfigObj : weight(x)) == weight(o1),
+       __min(lambda x ∈ ConfigObj : weight(x)) == weight(o2),
+       __min(lambda x ∈ ConfigObj : weight(x)) == weight(o3)),
+    __min(lambda x ∈ ConfigObj : weight(x)) <= weight(o1),
+    __min(lambda x ∈ ConfigObj : weight(x)) <= weight(o2),
+    __min(lambda x ∈ ConfigObj : weight(x)) <= weight(o3),
+    Or(__max(lambda x ∈ ConfigObj : weight(x)) == weight(o1),
+       __max(lambda x ∈ ConfigObj : weight(x)) == weight(o2),
+       __max(lambda x ∈ ConfigObj : weight(x)) == weight(o3)),
+    __max(lambda x ∈ ConfigObj : weight(x)) >= weight(o1),
+    __max(lambda x ∈ ConfigObj : weight(x)) >= weight(o2),
+    __max(lambda x ∈ ConfigObj : weight(x)) >= weight(o3),
+    Or(__min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1) ==
        weight(o1),
-       _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1) ==
+       __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1) ==
        weight(o2),
        999 ==
-       _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1)),
-    _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1) <=
+       __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1)),
+    __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1) <=
     weight(o1),
-    _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1) <=
+    __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1) <=
     weight(o2),
     999 >=
-    _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1),
+    __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f1),
     Or(999 ==
-       _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
+       __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
        999 ==
-       _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
-       _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2) ==
+       __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
+       __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2) ==
        weight(o3)),
     999 >=
-    _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
+    __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
     999 >=
-    _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
-    _min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2) <=
+    __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2),
+    __min(lambda x ∈ ConfigObj : if fleetOf(x) = f then weight(x) else 999)(f2) <=
     weight(o3),
-    Or(_min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) ==
+    Or(__min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) ==
        weight(o1),
-       _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) ==
+       __min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) ==
        weight(o2)),
-    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) <=
+    __min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) <=
     weight(o1),
-    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) <=
+    __min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f1) <=
     weight(o2),
-    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2) ==
+    __min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2) ==
     weight(o3),
-    _min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2) <=
+    __min(lambda x ∈ ConfigObj : weight(x) if fleetOf(x) = f)(f2) <=
     weight(o3))
 
 Model 1
 ==========
 Vehicle := {o2, o3}.
-fleetOf := {o1 -> f1, o2 -> f1, o3 -> f2}.
 weight := {o1 -> 3, o2 -> 4, o3 -> 5}.
 total := 9.
 min := 3.

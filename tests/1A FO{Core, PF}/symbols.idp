@@ -1,0 +1,22 @@
+vocabulary {
+    type color := {red, blue, green}
+    p, q: () -> Bool
+    important: Concept[() -> Bool] -> Bool
+    opposite: color -> color
+}
+theory {
+  not p() | q().
+  important(`p).
+
+  { !x in Concept[() -> Bool]: important(x) <- not (x=`q) and $(x)(). }
+  !x in Concept[Concept[()->Bool] -> Bool]: !y in Concept[()->Bool]: $(x)(y).
+  `opposite = `opposite.
+  `opposite ~= `color.
+  !x in Concept[color->color]: $(x)(red) is enumerated.
+}
+structure S:V {
+  opposite >> {red->blue}.
+}
+procedure main() {
+    pretty_print(Theory(T, S).formula())
+}
