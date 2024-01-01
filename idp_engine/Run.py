@@ -32,7 +32,7 @@ import types
 from typing import Any, Iterator, List, Union, Optional
 from z3 import Solver
 
-from idp_engine.Expression import FALSE, SYMBOL, TRUE, AUnary, AppliedSymbol, UnappliedSymbol
+from idp_engine.Expression import FALSE, TRUE, AUnary, AppliedSymbol, UnappliedSymbol
 
 from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TemporalDeclaration, TheoryBlock, Structure, TupleIDP, Vocabulary
 from .Theory import Theory
@@ -64,14 +64,15 @@ def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
 
 
 def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclaration]) -> Structure:
-        #print("enter to scuture")
+        #print("enter to structure..")
         out : dict[SymbolDeclaration, List[TupleIDP]] = {}
         outname : dict[str,SymbolDeclaration] = {}
+        outall : dict[str,SymbolDeclaration] = {}
         nullary: dict[SymbolDeclaration, Any] = {}
         nullaryname : dict[str,SymbolDeclaration] = {}
+        nullaryall : dict[str,SymbolDeclaration] = {}
         #print("in loop")
         for a in assign.values():
-            #print(a.symbol_decl)
             if type(a.sentence) == AppliedSymbol:
                 args = [e for e in a.sentence.sub_exprs]
                 c = None
@@ -98,8 +99,11 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
                         enum.append(c) 
                         out[a.symbol_decl] = enum
                         outname[a.symbol_decl.name]= a.symbol_decl
-        #print(outname)
-        #print(out)
+                if a.symbol_decl.arity == 0:
+                    nullaryall[a.symbol_decl.name]= a.symbol_decl
+                else:
+                    outall[a.symbol_decl.name]= a.symbol_decl
+
         nullaryc: dict[SymbolDeclaration, Any] = nullary.copy()
         outc : dict[SymbolDeclaration, List[TupleIDP]] = out.copy()
         for t in tempdcl:
@@ -109,7 +113,7 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
                     if n is None:
                         nullaryc.pop(k)
                     else:
-                        vn = nullary.get(n,None)
+                        vn = nullaryc.get(n,None)
                         if vn is  not None:
                             nullaryc[k] = vn
                 elif k.is_next and k.name.endswith('_next'):
@@ -117,6 +121,11 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
                     #nullaryc[k] = v
                     if t.symbol.name == k.name[:-len('_next')]:
                         nullaryc.pop(k,None)
+                        n = nullaryall.get(k.name[:-len('_next')],None)
+                        if n is None:
+                            print("Error: current state of predicate should be in the list")
+                        else:
+                            nullaryc[n] = v
                 else:
                     #nullaryc[k] = v
                     k
@@ -127,7 +136,7 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
                     if n is None:
                         outc.pop(k)
                     else:
-                        vn = out.get(n,None)
+                        vn = outc.get(n,None)
                         if vn is  not None:
                             outc[k] = vn
                 elif k.is_next and k.name.endswith('_next'):
@@ -135,6 +144,11 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
                     #outc[k] = v
                     if t.symbol.name == k.name[:-len('_next')]:
                         outc.pop(k,None)
+                        n = outall.get(k.name[:-len('_next')],None)
+                        if n is None:
+                            print("Error: current state of predicate should be in the list")
+                        else:
+                            outc[n] = v
                 else:
                     #outc[k] = v
                     k
@@ -145,23 +159,24 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
         interps: List[SymbolInterpretation] = []
         for k ,v in nullaryc.items():
             if k.name:
-                ku = UnappliedSymbol(None,SYMBOL(k.name))
-                interps.append(SymbolInterpretation(name=ku,enumeration=None,sign=':=',default=v))
+                ku = UnappliedSymbol(None,(k.name))
+                interps.append(SymbolInterpretation(parent=None,name=ku,enumeration=None,sign=':=',default=v))
         for k ,v in outc.items():
             if k.name:
-                ku = UnappliedSymbol(None,SYMBOL(k.name))
-                enm = Enumeration(tuples=v)
-                interps.append(SymbolInterpretation(name=ku,enumeration=enm,sign=':=',default=None))
+                ku = UnappliedSymbol(None,(k.name))
+                enm = Enumeration(None,v)
+                interps.append(SymbolInterpretation(parent=None,name=ku,enumeration=enm,sign=':=',default=None))
         s = Structure(name="progression",vocab_name=vocab_name,interpretations=interps)
         s.voc= voc
         for i in s.interpretations.values():
-            i.annotate(s)
+            i.block = s
+            i = i.annotate(voc,{})
         #voc.add_voc_to_block(s)
-
         return s
 
 def initialize(theory:TheoryBlock,struct:Structure):
     #print("inside initialize")
+    #print(theory.init_theory.definitions)
     problem = Theory(theory.init_theory,struct.init_struct)
     PROCESS_TIMINGS['ground'] = time.time() - PROCESS_TIMINGS['ground']
 
@@ -176,7 +191,7 @@ def initialize(theory:TheoryBlock,struct:Structure):
     #    s = m.toStructure(struct.vocab_name,struct.voc)
     #    out.append(s)
     if len(ms) >=1:
-        yield toStructure(ms[0],struct.init_struct.vocab_name,struct.init_struct.voc,[])
+        return toStructure(ms[0],struct.init_struct.vocab_name,struct.init_struct.voc,[])
     PROCESS_TIMINGS['solve'] += time.time() - solve_start
     #return model_expand(theory.init_theory,struct.init_struct)
 
@@ -202,6 +217,12 @@ def progression(theory:TheoryBlock,struct):
                 if voc is None:
                     print("Error vocabulary is wrong")
                     return
+    elif isinstance(struct,Structure):
+        problem = Theory(theory.bistate_theory,struct)
+        voc = struct.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
+        if voc is None:
+            print("Error vocabulary is wrong")
+            return
     PROCESS_TIMINGS['ground'] = time.time() - PROCESS_TIMINGS['ground']
     if problem is None:
         print("reciedved None")
@@ -508,6 +529,7 @@ def pretty_print(x: Any ="") -> None:
         print(x)
 
 def print_struct(x):
+    #print("inside print struct...")
     if isinstance(x, types.GeneratorType):
         for i, xi in enumerate(x):
             if isinstance(xi, Structure):

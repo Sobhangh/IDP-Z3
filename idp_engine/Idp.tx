@@ -30,6 +30,8 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* (tempdcl=Tempo
           ( '(' sorts*=SetName[/[*⨯]/] ')' | sorts*=SetName[/[*⨯]/] )
           ('->' | '→') out=SetName;
 
+    TemporalDeclaration: 'Temporal' name=SymbolExpr;
+
     VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ IN subtype=SetName;
 
   Annotations: ('[' annotations*=/[^\]]*/ ']')*;

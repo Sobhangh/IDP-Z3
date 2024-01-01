@@ -150,8 +150,8 @@ class Annotations(ASTNode):
                        f"Duplicate annotation: [{k}: {v}]")
             self.annotations[k] = v
 
-    def init_copy(self):
-        return Annotations(None,self.original_ant)
+    def init_copy(self,parent=None):
+        return Annotations(parent,self.original_ant)
 
 class Constructor(ASTNode):
     """Constructor declaration
@@ -194,9 +194,11 @@ class Constructor(ASTNode):
         return (self.name if not self.args else
                 f"{self.name}({', '.join((str(a) for a in self.args))})" )
     
-    def init_copy(self):
-        sr = [s.init_copy() for s in self.sorts]
-        return Constructor(None,self.name,sr)
+    def init_copy(self,parent=None):
+        sr = None
+        if self.args:
+            sr = [s.init_copy() for s in self.args]
+        return Constructor(parent,self.name,sr)
     
 def CONSTRUCTOR(name: str, args=None) -> Constructor:
     return Constructor(None, name, args)
@@ -222,11 +224,11 @@ class Accessor(ASTNode):
         return (self.codomain.name if not self.accessor else
                 f"{self.accessor}: {self.codomain.name}" )
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         acc = None
         if self.accessor:
-            acc = self.accessor.init_copy()
-        return Accessor(None,UnappliedSymbol(None,(self.type)),acc)
+            acc = self.accessor
+        return Accessor(parent,self.codomain.init_copy(),acc)
 
 class Expression(ASTNode):
     """The abstract class of AST nodes representing (sub-)expressions.
@@ -312,10 +314,10 @@ class Expression(ASTNode):
         out.questions = deepcopy(self.questions, memo)
         return out
     
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_exprs = [e.init_copy() for e in self.sub_exprs] 
-        expr = Expression()
-        expr.sub_exprs =sub_exprs
+        expr = Expression(parent)
+        expr.sub_exprs = sub_exprs
         return expr       
 
 
@@ -341,6 +343,8 @@ class Expression(ASTNode):
     def annotate(self,
                  voc: Vocabulary,
                  q_vars: dict[str, Variable],
+                 ltc=False,
+                 temporal_head=0
                  ) -> Annotated:
         raise IDPZ3Error("Internal error") # monkey-patched
 
@@ -460,6 +464,8 @@ class Expression(ASTNode):
         return any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self, voc: Vocabulary) -> dict[str, SetName]:
+        if isinstance(self,(NowAppliedSymbol,NextAppliedSymbol,StartAppliedSymbol)):
+            return {}
         try:
             return dict(ChainMap(*(e.type_inference(voc) for e in self.sub_exprs)))
         except AttributeError as e:
@@ -593,17 +599,17 @@ class SetName(Expression):
         self.root_set: SetName = None
         super().__init__(parent)
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         insa = []
-        if self.ins:
-            for i in self.ins:
+        if self.concept_domains:
+            for i in self.concept_domains:
                 insa.append(i.init_copy())
         else:
             insa =None
         outa = None
-        if self.out:
-            outa =self.out.init_copy()
-        return SetName(None,self.name,insa,outa)
+        if self.codomain:
+            outa =self.codomain.init_copy()
+        return SetName(parent,self.name,insa,outa)
 
     def __str__(self):
         return self.name + ("" if not self.codomain else
@@ -684,14 +690,8 @@ class AIfExpr(Expression):
         out = (cls)(None, if_f=if_f, then_f=then_f, else_f=else_f)
         return out.fill_attributes_and_check().simplify1()
 
-    def init_copy(self):
-        return AIfExpr(None,self.if_f.init_copy(),self.then_f.init_copy(),self.else_f.init_copy())
-
-    def init_copy(self):
-        return AIfExpr(None,self.if_f.init_copy(),self.then_f.init_copy(),self.else_f.init_copy())
-
-    def init_copy(self):
-        return AIfExpr(None,self.if_f.init_copy(),self.then_f.init_copy(),self.else_f.init_copy())
+    def init_copy(self,parent=None):
+        return AIfExpr(parent,self.if_f.init_copy(),self.then_f.init_copy(),self.else_f.init_copy())
 
     def __str__(self):
         return (f"if {self.sub_exprs[AIfExpr.IF  ].str}"
@@ -758,7 +758,7 @@ class Quantee(Expression):
         self.check(all(len(v) == self.arity for v in self.vars),
                     f"Inconsistent tuples in {self}")
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         vars  = []
         for lv in self.var_org:
             if isinstance(lv,Variable):
@@ -773,7 +773,7 @@ class Quantee(Expression):
         srt_org = None
         if self.sort_orig:
             srt_org = self.sort_orig.init_copy()
-        return Quantee(None,vars,sbtyp,srt_org)
+        return Quantee(parent,vars,sbtyp,srt_org)
 
     @classmethod
     def make(cls,
@@ -883,7 +883,7 @@ class AQuantification(Expression):
         out.quantees = [deepcopy(q, memo) for q in self.quantees]
         return out
     
-    def init_copy(self):
+    def init_copy(self,parent=None):
         quantees = [q.init_copy() for q in self.quantees]
         q =None
         if self.q:
@@ -891,7 +891,7 @@ class AQuantification(Expression):
         f= None
         if self.f:
             f = self.f.init_copy()
-        ex : AQuantification = AQuantification(None,None,q,quantees,f)
+        ex : AQuantification = AQuantification(parent,None,q,quantees,f)
         return ex
 
     def collect(self, questions, all_=True, co_constraints=True):
@@ -992,13 +992,9 @@ class Operator(Expression):
             out._tx_position_end = parent. _tx_position_end
         return out.fill_attributes_and_check().simplify1()
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return Operator(None,self.operator.copy(),sub_ex)
-
-    def init_copy(self):
-        sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return Operator(None,self.operator.copy(),sub_ex)
+        return Operator(parent,self.operator.copy(),sub_ex)
 
     def __str__(self):
         def parenthesis(precedence, x):
@@ -1018,9 +1014,9 @@ class Operator(Expression):
 class AImplication(Operator):
     PRECEDENCE = 50
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return AImplication(None,self.operator.copy(),sub_ex)
+        return AImplication(parent,self.operator.copy(),sub_ex)
 
 def IMPLIES(exprs, annotations=None):
     return AImplication.make('⇒', exprs, annotations)
@@ -1041,9 +1037,9 @@ class AEquivalence(Operator):
         out = self.update_exprs(e.split_equivalences() for e in self.sub_exprs)
         return out.split()
     
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return AEquivalence(None,self.operator.copy(),sub_ex)
+        return AEquivalence(parent,self.operator.copy(),sub_ex)
 
 def EQUIV(exprs, annotations=None):
     return AEquivalence.make('⇔', exprs, annotations)
@@ -1053,9 +1049,9 @@ def EQUIV(exprs, annotations=None):
 class ARImplication(Operator):
     PRECEDENCE = 30
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return ARImplication(None,self.operator.copy(),sub_ex)
+        return ARImplication(parent,self.operator.copy(),sub_ex)
 
 def RIMPLIES(exprs, annotations):
     return ARImplication.make('⇐', exprs, annotations)
@@ -1064,9 +1060,9 @@ def RIMPLIES(exprs, annotations):
 class ADisjunction(Operator):
     PRECEDENCE = 60
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return ADisjunction(None,self.operator.copy(),sub_ex)
+        return ADisjunction(parent,self.operator.copy(),sub_ex)
 
     def __str__(self):
         if not hasattr(self, 'enumerated'):
@@ -1080,9 +1076,9 @@ def OR(exprs):
 class AConjunction(Operator):
     PRECEDENCE = 70
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return AConjunction(None,self.operator.copy(),sub_ex)
+        return AConjunction(parent,self.operator.copy(),sub_ex)
 
 def AND(exprs):
     return AConjunction.make('∧', exprs)
@@ -1091,9 +1087,9 @@ def AND(exprs):
 class AComparison(Operator):
     PRECEDENCE = 80
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return AComparison(None,self.operator.copy(),sub_ex)
+        return AComparison(parent,self.operator.copy(),sub_ex)
 
     def is_assignment(self):
         # f(x)=y
@@ -1110,25 +1106,25 @@ def EQUALS(exprs):
 class ASumMinus(Operator):
     PRECEDENCE = 90
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return ASumMinus(None,self.operator.copy(),sub_ex)
+        return ASumMinus(parent,self.operator.copy(),sub_ex)
 
 
 class AMultDiv(Operator):
     PRECEDENCE = 100
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return AMultDiv(None,self.operator.copy(),sub_ex)
+        return AMultDiv(parent,self.operator.copy(),sub_ex)
 
 
 class APower(Operator):
     PRECEDENCE = 110
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [q.init_copy() for q in self.sub_exprs]
-        return APower(None,self.operator.copy(),sub_ex)
+        return APower(parent,self.operator.copy(),sub_ex)
 
 
 class AUnary(Expression):
@@ -1153,11 +1149,8 @@ class AUnary(Expression):
         out = AUnary(None, operators=[op], f=expr)
         return out.fill_attributes_and_check().simplify1()
 
-    def init_copy(self):
-        return AUnary(None,self.operators.copy(),self.f.init_copy())
-
-    def init_copy(self):
-        return AUnary(None,self.operators.copy(),self.f.init_copy())
+    def init_copy(self,parent=None):
+        return AUnary(parent,self.operators.copy(),self.f.init_copy())
 
     def __str__(self):
         return f"{self.operator}({self.sub_exprs[0].str})"
@@ -1197,7 +1190,7 @@ class AAggregate(Expression):
         self.supersets, self.new_quantees, self.vars1 = None, None, None
         super().__init__()
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         f = None
         if_ = None
         if self.f != TRUE:
@@ -1205,7 +1198,7 @@ class AAggregate(Expression):
         if self.if_orig:
             if_ = self.if_orig.init_copy()
         quantees = [q.init_copy() for q in self.quantees]
-        return AAggregate(None,self.aggtype,quantees,self.lambda_,f,if_)
+        return AAggregate(parent,self.aggtype,quantees,self.lambda_,f,if_)
 
     def __str__(self):
         # aggregates are over finite domains, and cannot have partial expansion
@@ -1332,9 +1325,9 @@ class AppliedSymbol(Expression):
         out.as_disjunction = deepcopy(self.as_disjunction, memo)
         return out
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         sub_ex = [e.init_copy() for e in self.sub_exprs]
-        return AppliedSymbol(None,self.symbol.init_copy(),sub_ex,None,self.is_enumerated,self.is_enumeration,self.in_enumeration)
+        return AppliedSymbol(parent,self.symbol.init_copy(),sub_ex,None,self.is_enumerated,self.is_enumeration,self.in_enumeration)
 
     def collect(self, questions, all_=True, co_constraints=True):
         if self.decl and self.decl.name not in RESERVED_SYMBOLS:
@@ -1403,7 +1396,7 @@ class StartAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = SymbolExpr(self,'Start')
+        self.symbol  = SymbolExpr(self,'Start',None,None)
         self.sub_expr: AppliedSymbol  = arg
         self.sub_exprs = [arg]
         super().__init__()
@@ -1435,8 +1428,8 @@ class StartAppliedSymbol(Expression):
         out.symbol = deepcopy(out.symbol)
         #out.as_disjunction = deepcopy(out.as_disjunction)
         return out
-    def init_copy(self):
-        return StartAppliedSymbol(None,self.sub_expr.init_copy())
+    def init_copy(self,parent=None):
+        return StartAppliedSymbol(parent,self.sub_expr.init_copy())
 
     def collect(self, questions, all_=True, co_constraints=True):
         self.sub_expr.collect(questions,all,co_constraints)
@@ -1449,8 +1442,6 @@ class StartAppliedSymbol(Expression):
     def has_decision(self):
         return self.sub_expr.has_decision()
 
-    #def type_inference(self):
-        
 
     def is_value(self) -> bool:
         # independent of is_enumeration and in_enumeration !
@@ -1475,7 +1466,7 @@ class NowAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = SymbolExpr(self,'Now')
+        self.symbol  = SymbolExpr(self,'Now',None,None)
         self.sub_expr: AppliedSymbol  = arg
         self.sub_exprs = [arg]
         super().__init__()
@@ -1507,8 +1498,8 @@ class NowAppliedSymbol(Expression):
         out.symbol = deepcopy(out.symbol)
         #out.as_disjunction = deepcopy(out.as_disjunction)
         return out
-    def init_copy(self):
-        return NowAppliedSymbol(None,self.sub_expr.init_copy())
+    def init_copy(self,parent=None):
+        return NowAppliedSymbol(parent,self.sub_expr.init_copy())
 
     def collect(self, questions, all_=True, co_constraints=True):
         self.sub_expr.collect(questions,all,co_constraints)
@@ -1520,10 +1511,7 @@ class NowAppliedSymbol(Expression):
 
     def has_decision(self):
         return self.sub_expr.has_decision()
-
-    #def type_inference(self):
         
-
     def is_value(self) -> bool:
         # independent of is_enumeration and in_enumeration !
         return self.sub_expr.is_value()
@@ -1547,7 +1535,7 @@ class NextAppliedSymbol(Expression):
 
     def __init__(self, parent,
                  arg):
-        self.symbol  = SymbolExpr(self,'Next')
+        self.symbol  = SymbolExpr(self,'Next',None,None)
         self.sub_expr: AppliedSymbol  = arg
         self.sub_exprs = [arg]
 
@@ -1580,8 +1568,8 @@ class NextAppliedSymbol(Expression):
         out.symbol = deepcopy(out.symbol)
         #out.as_disjunction = deepcopy(out.as_disjunction)
         return out
-    def init_copy(self):
-        return NextAppliedSymbol(None,self.sub_expr.init_copy())
+    def init_copy(self,parent=None):
+        return NextAppliedSymbol(parent,self.sub_expr.init_copy())
 
     def collect(self, questions, all_=True, co_constraints=True):
         self.sub_expr.collect(questions,all,co_constraints)
@@ -1593,9 +1581,6 @@ class NextAppliedSymbol(Expression):
 
     def has_decision(self):
         return self.sub_expr.has_decision()
-
-    #def type_inference(self):
-        
 
     def is_value(self) -> bool:
         # independent of is_enumeration and in_enumeration !
@@ -1637,8 +1622,11 @@ class SymbolExpr(Expression):
         self.decl: Optional[Declaration] = None
         super().__init__()
 
-    def init_copy(self):
-        return SymbolExpr(None,self.sub_exprs[0].init_copy(),self.eval)
+    def init_copy(self,parent=None):
+        s = None
+        if self.s:
+            s = self.s.init_copy()
+        return SymbolExpr(parent,self.name,self.eval,s)
 
     @classmethod
     def make(cls, name: str) -> SymbolExpr:
@@ -1667,8 +1655,8 @@ class UnappliedSymbol(Expression):
         self.is_enumeration = None
         self.in_enumeration = None
 
-    def init_copy(self):
-        return UnappliedSymbol(None,self.s.init_copy())
+    def init_copy(self,parent=None):
+        return UnappliedSymbol(parent,self.name)
 
     @classmethod
     def construct(cls, constructor: Constructor):
@@ -1723,11 +1711,11 @@ class Variable(Expression):
     def __deepcopy__(self, memo):
         return self
     
-    def init_copy(self):
+    def init_copy(self,parent=None):
         s = None
-        if self.sort:
-            s = self.sort.init_copy()
-        return Variable(None,self.name,s)
+        if self.type:
+            s = self.type.init_copy()
+        return Variable(parent,self.name,s)
 
     def fill_attributes_and_check(self: Expression) -> Expression: return self
 
@@ -1764,7 +1752,7 @@ class Number(Expression):
 
     def __str__(self): return self.number
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         return Number(number=self.number)
 
     def real(self):
@@ -1809,7 +1797,7 @@ class Date(Expression):
 
     def __str__(self): return f"#{self.date.isoformat()}"
 
-    def init_copy(self):
+    def init_copy(self,parent=None):
         return Date(iso=self.iso)
 
     def is_value(self): return True
@@ -1828,8 +1816,8 @@ class Brackets(Expression):
         self.annotations = (annotations.annotations if annotations else
             {'reading': self.f.annotations['reading']})
 
-    def init_copy(self):
-        return Brackets(f=self.f.init_copy(),annotations=Annotations(None,[]))
+    def init_copy(self,parent=None):
+        return Brackets(parent=parent,f=self.f.init_copy(),annotations=Annotations(None,[]))
     
     # don't @use_value, to have parenthesis
     def __str__(self): return f"({self.sub_exprs[0].str})"
@@ -1853,8 +1841,10 @@ class RecDef(Expression):
         if parent:  # for error messages
             self._tx_position = parent. _tx_position
             self._tx_position_end = parent. _tx_position_end
-    def init_copy(self):
-        return RecDef(None,self.name,self.vars.init_copy(),self.sub_exprs[0].init_copy())
+   
+    def init_copy(self,parent=None):
+        return RecDef(parent,self.name,self.vars.init_copy(),self.sub_exprs[0].init_copy())
+   
     def __str__(self):
         return (f"{self.name}("
                 f"{', '.join(str(v) for v in self.vars)}"
