@@ -190,9 +190,12 @@ def initialize(theory:TheoryBlock,struct:Structure):
     #for i, m in enumerate(ms):
     #    s = m.toStructure(struct.vocab_name,struct.voc)
     #    out.append(s)
-    if len(ms) >=1:
-        return toStructure(ms[0],struct.init_struct.vocab_name,struct.init_struct.voc,[])
+    for i, m in enumerate(ms):
+        s = toStructure(m,struct.init_struct.vocab_name,struct.init_struct.voc,[])
+        out.append(s)
+    out.append(last)
     PROCESS_TIMINGS['solve'] += time.time() - solve_start
+    return out
     #return model_expand(theory.init_theory,struct.init_struct)
 
 def progression(theory:TheoryBlock,struct):
@@ -202,6 +205,8 @@ def progression(theory:TheoryBlock,struct):
     if isinstance(struct, types.GeneratorType):
         for i, xi in enumerate(struct):
             #print(xi)
+            if not isinstance(xi,Structure):
+                pass
             problem = Theory(theory.bistate_theory,xi)
             voc = xi.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
             #print(voc)
@@ -234,18 +239,16 @@ def progression(theory:TheoryBlock,struct):
         ms, last = ms[:-1], ms[-1]
     else:
         last = ""
-    out: List[Structure] = []
-    if len(ms) == 0:
-        #yield last
-        return last
+    out = []
     for i, m in enumerate(ms):
         s = toStructure(m,theory.bistate_theory.vocab_name,voc,theory.voc.tempdcl)
         #for i in s.interpretations.values():
             #print(i)
         out.append(s)
     #yield out 
-    return out
+    out.append(last)
     PROCESS_TIMINGS['solve'] += time.time() - solve_start
+    return out
 
 def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None):
     if len(invariant.constraints) > 1:
@@ -535,12 +538,16 @@ def print_struct(x):
             if isinstance(xi, Structure):
                 print(f"{NEWL}Model {i+1}{NEWL}==========")
                 for interp in xi.interpretations.values():
+                    print(interp.name)
                     print(interp)
-            elif isinstance(xi, List) and len(xi)>0 and isinstance(xi[0],Structure):
+            elif isinstance(xi, List) and len(xi)>0 :
                 for s in xi:
-                    print(f"{NEWL}Model {i+1}{NEWL}==========")
-                    for interp in s.interpretations.values():
-                        print(interp)
+                    if isinstance(s,Structure):
+                        print(f"{NEWL}Model {i+1}{NEWL}==========")
+                        for interp in s.interpretations.values():
+                            print(interp)
+                    else:
+                        print(s)
             else:
                 print(xi)
     elif isinstance(x, Theory):
@@ -552,6 +559,8 @@ def print_struct(x):
                 print(f"{NEWL}Model {i+1}{NEWL}==========")
                 for interp in s.interpretations.values():
                     print(interp)
+            else:
+                print(s)
             i+=1
     else:
         print(x)
