@@ -133,6 +133,7 @@ TypeDeclaration.annotate_declaration = annotate_declaration
 
 # Class TemporalDeclaration  #######################################################
 
+#Adds the time argument at the end of a temporal predicate
 def annotate(self, voc):
     for d in voc.declarations:
         if isinstance(d,SymbolDeclaration) and (not d.temp):
@@ -244,7 +245,7 @@ def annotate_block(self: ASTNode,
                 f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
 
-    #Annotating the init_theory
+    #Annotating the initial, bistate and transition theories; Used in the context fo LTC theories
     #Has to be used before interpretation annotate add_voc_to_block
     annotate_init_theory(self,idp)
     #print("init theory")
@@ -261,10 +262,11 @@ def annotate_block(self: ASTNode,
         i.block = self
         i.annotate(self.voc, {})
     self.voc.add_voc_to_block(self)
-    #print("interep anontated...")
+
     self.definitions = [e.annotate(self.voc, {},self.ltc) for e in self.definitions]
     
     constraints = OrderedSet()
+    #Pre processing for LTC theory constraints
     if self.ltc:
         #if there is Start present then now and next should not be
         for e in self.constraints:
@@ -272,15 +274,15 @@ def annotate_block(self: ASTNode,
             self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
 
         
-        # is it possible to say that negeation outside start/now/next will be pushed inside quantification? yes , so if the negation is placed outside of the wraping quantifier then it is not acceptable otherwise it is.
+        # is it possible to say that negeation outside start/now/next will be pushed inside quantification? yes 
         time: SetName = SETNAME('Tijd')
         t: Variable = VARIABLE(v_time,time)
         qt: Quantee = Quantee(None,[t],time) 
-        #if there is now or next wrap the rest around a quantifier containing time.(if there is an existential quantifier which has next/now inside then returns an error)
         for e in self.constraints:
             r = wrapping_quantifier(e)
-            self.check(r != -1 , f"Can not have Now/Next inside the scope of existential quantifier")
-            if r == 1:
+            #self.check(r != -1 , f"Can not have Now/Next inside the scope of existential quantifier")
+            if r == 1 or r == -1:
+                #Adds a wraping universal quantifier in case it containts now or next
                 constraints.append(AQuantification(None,None,'forall',[qt],e))
             else:
                 constraints.append(e)
@@ -331,11 +333,9 @@ def annotate_bis_theory(theory:TheoryBlock,idp):
             r = i.initialize_temporal_interpretation([])
             theory.bistate_theory.interpretations[r.name] = r
             r.block = theory.bistate_theory
-            #Is annotation necessary given that it has already been done in the original?
             r.annotate(voc,{})
         #print("ch1")
         voc.add_voc_to_block(theory.bistate_theory)
-        #theory.init_theory.declarations = theory.declarations
         theory.bistate_theory.definitions = [e.annotate(voc, {},False) for e in theory.bistate_theory.definitions]
         #print("ch15")
         theory.bistate_theory.constraints = OrderedSet([e.annotate(voc, {},False)
@@ -641,24 +641,6 @@ def annotate_block(self: ASTNode,
     self.voc.add_voc_to_block(self)
     return []
 Structure.annotate_block = annotate_block
-
-def annotate_init_structure(s,idp):
-    vocab_name = s.vocab_name+'_now'
-    name = s.name+'now'
-    voc = idp.now_voc[s.vocab_name+'_now']
-    #print("s1")
-    s.init_struct = Structure(name=name,vocab_name=vocab_name,interpretations={})
-    s.init_struct.voc = voc
-    #print("s2")
-    for i in s.interpretations.values():
-        r = i.initialize_temporal_interpretation(idp.vocabularies[s.vocab_name].tempdcl)
-        #print("s3")
-        #print(i)
-        s.init_struct.interpretations[r.name] = r
-        r.annotate(voc,{})
-        #print("s4")
-    #print("s5")
-    voc.add_voc_to_block(s.init_struct)
 
 def annotate_init_structure(s,idp):
     vocab_name = s.vocab_name+'_now'
@@ -1343,10 +1325,10 @@ def replace(self, voc, q_vars):
     symb : SymbolExpr= self.sub_expr.symbol.annotate(voc, q_vars)
     self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
     #is the name of this variable ok??
-    #Is this type the correct time type?
     time: SetName = SETNAME('Tijd')
     #t: Variable = VARIABLE(v_time,time)
     t = UnappliedSymbol(None,v_time)
+    #If the time varialble is already there then can replace Now[p()] with p(time)
     if v_time in q_vars and q_vars[v_time].type == time:
         self.sub_expr.sub_exprs.append(t)
         content: AppliedSymbol = self.sub_expr
@@ -1354,6 +1336,7 @@ def replace(self, voc, q_vars):
     self.sub_expr.sub_exprs.append(t)
     tv: Variable = VARIABLE(v_time,time)
     qt: Quantee = Quantee(None,[tv],time) 
+    #If the time variable is not declared then Now[p()] -> !t in Tijd: p(t)
     return AQuantification(parent=None,annotations=None,q='forall',quantees=[qt],f=self.sub_expr)
 
 NowAppliedSymbol.replace = replace
@@ -1374,16 +1357,17 @@ def replace(self, voc, q_vars):
     symb : SymbolExpr= self.sub_expr.symbol.annotate(voc, q_vars)
     self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
     #is the name of this variable ok??
-    #Is this type the correct time type?
     time: SetName = SETNAME('Tijd')
     #t: Variable = VARIABLE(v_time,time)
     t = UnappliedSymbol(None,v_time)
+    #If the time varialble is already there then can replace Next[p()] with p(time+1)
     if v_time in q_vars and q_vars[v_time].type == time:
         self.sub_expr.sub_exprs.append(ASumMinus(None,'+',[t,ONE],None))
         return self.sub_expr
     self.sub_expr.sub_exprs.append(ASumMinus(None,'+',[t,ONE],None))
     tv: Variable = VARIABLE(v_time,time)
     qt: Quantee = Quantee(None,[tv],time) 
+    #If the time variable is not declared then Next[p()] -> !t in Tijd: p(t+1)
     return AQuantification(parent=None,annotations=None,q='forall',quantees=[qt],f=self.sub_expr)
 
 NextAppliedSymbol.replace = replace

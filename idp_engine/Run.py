@@ -41,6 +41,9 @@ from .utils import NEWL, IDPZ3Error, PROCESS_TIMINGS, OrderedSet
 
 last_call = time.process_time()  # define it as global
 
+input_recived = False
+sim_input = ""
+
 def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
     """Returns a string stating whether the combination of theories is satisfiable.
 
@@ -66,14 +69,19 @@ def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
 def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclaration]) -> Structure:
         #print("enter to structure..")
         out : dict[SymbolDeclaration, List[TupleIDP]] = {}
+        #To store the symbol declaration of symbols in out
         outname : dict[str,SymbolDeclaration] = {}
+        #To store all symbol declarations of non nullary predicates
         outall : dict[str,SymbolDeclaration] = {}
         nullary: dict[SymbolDeclaration, Any] = {}
+        #To store the symbol declaration of symbols in nullary
         nullaryname : dict[str,SymbolDeclaration] = {}
+        #To store all symbol declarations of nullary predicates
         nullaryall : dict[str,SymbolDeclaration] = {}
         #print("in loop")
         for a in assign.values():
             if type(a.sentence) == AppliedSymbol:
+                #print(a)
                 args = [e for e in a.sentence.sub_exprs]
                 c = None
                 default = False
@@ -106,32 +114,38 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
 
         nullaryc: dict[SymbolDeclaration, Any] = nullary.copy()
         outc : dict[SymbolDeclaration, List[TupleIDP]] = out.copy()
+        #If a symbol has next present then its value should be set to now
+        #If there is no next for a temporal symbol it should be removed
+        # eg p_next = {1 ,2} and p = {0} then after this loop: p = {1 ,2}
         for t in tempdcl:
             for k ,v in nullary.items():
                 if t.symbol.name == k.name:
                     n = nullaryname.get(k.name+'_next',None)
                     if n is None:
+                        #There is no next time so now should be removed
                         nullaryc.pop(k)
                     else:
                         vn = nullaryc.get(n,None)
                         if vn is  not None:
+                            #value of next should replace now
                             nullaryc[k] = vn
                 elif k.is_next and k.name.endswith('_next'):
                     #k.is_next= False
                     #nullaryc[k] = v
                     if t.symbol.name == k.name[:-len('_next')]:
+                        #Next should be removed
                         nullaryc.pop(k,None)
                         n = nullaryall.get(k.name[:-len('_next')],None)
                         if n is None:
                             print("Error: current state of predicate should be in the list")
                         else:
+                            #Value of next should replace now
                             nullaryc[n] = v
                 else:
                     #nullaryc[k] = v
                     k
             for k ,v in out.items():
                 if t.symbol.name == k.name:
-                    #print("remove")
                     n = outname.get(k.name+'_next',None)
                     if n is None:
                         outc.pop(k)
@@ -202,19 +216,29 @@ def progression(theory:TheoryBlock,struct):
     #print("inside progression")
     problem = None
     voc = None
-    if isinstance(struct, types.GeneratorType):
-        for i, xi in enumerate(struct):
-            #print(xi)
-            if not isinstance(xi,Structure):
-                pass
-            problem = Theory(theory.bistate_theory,xi)
-            voc = xi.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
-            #print(voc)
-            if voc is None:
-                print("Error vocabulary is wrong")
-                return
+    #if isinstance(struct, types.GeneratorType):
+    #    for i, xi in enumerate(struct):
+    #        #print(xi)
+    #        if not isinstance(xi,Structure):
+    #            pass
+    #        problem = Theory(theory.bistate_theory,xi)
+    #        voc = xi.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
+    #        #print(voc)
+    #        if voc is None:
+    #            print("Error vocabulary is wrong")
+    #            return
             #print(problem.assignments)
-    elif isinstance(struct,List):
+    #if isinstance(struct,Structure):
+    #    problem = Theory(theory.bistate_theory,struct)
+    #    voc = struct.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
+    #    if voc is None:
+    #        print("Error vocabulary is wrong")
+    #        return
+    out = []
+    PROCESS_TIMINGS['ground'] = time.time() - PROCESS_TIMINGS['ground']
+    solve_start = time.time()
+    if isinstance(struct,List):
+        j = 1
         for xi in struct:
             if isinstance(xi,Structure):
                 problem = Theory(theory.bistate_theory,xi)
@@ -222,35 +246,32 @@ def progression(theory:TheoryBlock,struct):
                 if voc is None:
                     print("Error vocabulary is wrong")
                     return
-    elif isinstance(struct,Structure):
-        problem = Theory(theory.bistate_theory,struct)
-        voc = struct.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
-        if voc is None:
-            print("Error vocabulary is wrong")
-            return
-    PROCESS_TIMINGS['ground'] = time.time() - PROCESS_TIMINGS['ground']
-    if problem is None:
-        print("reciedved None")
-        #problem = Theory(theory.bistate_theory)
-        return
-    solve_start = time.time()
-    ms = list(problem.expand(max=10, timeout_seconds=10, complete=False))
-    if isinstance(ms[-1], str):
-        ms, last = ms[:-1], ms[-1]
-    else:
-        last = ""
-    out = []
-    for i, m in enumerate(ms):
-        s = toStructure(m,theory.bistate_theory.vocab_name,voc,theory.voc.tempdcl)
-        #for i in s.interpretations.values():
-            #print(i)
-        out.append(s)
-    #yield out 
-    out.append(last)
+                if problem is None:
+                    pass
+                ms = list(problem.expand(max=10, timeout_seconds=10, complete=False))
+                if isinstance(ms[-1], str):
+                    ms, last = ms[:-1], ms[-1]
+                else:
+                    last = ""
+                
+                for i, m in enumerate(ms):
+                    s = toStructure(m,theory.bistate_theory.vocab_name,voc,theory.voc.tempdcl)
+                    #for i in s.interpretations.values():
+                        #print(i)
+                    out.append(s)
+                #yield out 
+                out.append(last + " For Strtucture " + str(j))
+            j += 1
+    #if problem is None:
+    #    print("reciedved None")
+    #    #problem = Theory(theory.bistate_theory)
+    #    return
     PROCESS_TIMINGS['solve'] += time.time() - solve_start
     return out
+    
 
 def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None):
+    #TO DO: check if the invariant is correctly formulated
     if len(invariant.constraints) > 1:
         return "Only one formula should be specified for invariant"
     if len(invariant.constraints) == 0:
@@ -606,6 +627,16 @@ def execute(self: IDP, capture_print : bool = False) -> Optional[str]:
                     out.append(str(xi))
                 else:
                     out.append(str(xi))
+        elif isinstance(x, List) and len(x)>0 :
+            i=0
+            for s in x:
+                if isinstance(s,Structure):
+                    out.append(f"{NEWL}Model {i+1}{NEWL}==========")
+                    for interp in s.interpretations.values():
+                        out.append(str(interp))
+                else:
+                    out.append(str(s))
+                i+=1
         elif isinstance(x, Theory):
             out.append(str(x.assignments))
         else:

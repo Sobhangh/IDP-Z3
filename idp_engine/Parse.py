@@ -93,6 +93,9 @@ class IDP(ASTNode):
         init_thrs ={}
         init_strcs ={}
         for voc in self.vocabularies.values():
+            #Annotating vocabulary for current and next time point; useful for LTC theories
+            #For v_now the time argument of temporal predicates would be dropped e.g p(x,time) becomes p(x)
+            #For v_next in addition to above an other prdicate p_next(x) would be added
             now_voc:Vocabulary = voc.generate_now_voc()
             self.now_voc[now_voc.name]=now_voc
             now_voc.annotate_block(self)
@@ -106,18 +109,15 @@ class IDP(ASTNode):
             #print("voc annot")
         for t in self.theories.values():
             if t.ltc:
+                #Adds initialized version of LTC theory: For more info check progression document of IDP.
                 t.initialize_theory()
                 #print("theories init")
+                #Adds bistate theory
                 t.bst_theory()
                 #print("theories bis")
+                #Adds transition theory which is used for invariants: For more info check the paper Simulating dynamic systems with LTC 
                 t.trs_theory()
                 #print("theories trs")
-                #if len(t.bistate_theory.definitions) > 1:
-                #    print(t.bistate_theory.definitions[1].rules)
-
-                #init_thrs[t.init_theory.name] = t.init_theory
-                #init_thrs[t.bistate_theory.name] = t.bistate_theory
-            #t.annotate(self)
         self.warnings = flatten(t.annotate_block(self)
                                 for t in self.theories.values())
         #print("annotated theory")
@@ -215,6 +215,7 @@ class Vocabulary(ASTNode):
                  declarations: List[Union[Declaration, VarDeclaration, Import]],
                  tempdcl:TemporalDeclaration|None):
         self.name = name
+        #List of temporal predicates
         self.tempdcl = tempdcl
         self.idp : Optional[IDP] = None  # parent object
         self.symbol_decls: dict[str, Union[Declaration, VarDeclaration, Constructor]] = {}
@@ -236,7 +237,8 @@ class Vocabulary(ASTNode):
             else:
                 temp.append(decl)
         self.declarations = temp
-        self.original_decl =temp
+        #Used in generation of now and next vocabularies
+        self.original_decl = temp
 
         # define built-in types: Bool, Int, Real, Symbols
         self.declarations = [
@@ -281,13 +283,16 @@ class Vocabulary(ASTNode):
                             f"in vocabulary and block {block.name}")
                 block.interpretations[s.name] = s.interpretation
 
+    #Used for generating the vocabulary of current time, used in the context of LTC theories
     #Has to be called before self is annotated
+    #TO DO: Merge common parts of now and next voc methods            
     def generate_now_voc(self):
         nowvoc = Vocabulary(parent=None,name=self.name+'_now',tempdcl=[],declarations=[])
         for d in self.original_decl:
             changed = False
             for t in self.tempdcl:
                 if isinstance(d,SymbolDeclaration):
+                    #The predicate is temporal
                     if d.name == t.symbol.name:
                         changed = True
                         sr = [s.init_copy() for s in d.sorts]
@@ -304,10 +309,6 @@ class Vocabulary(ASTNode):
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
-                        #if isinstance(d.interpretation.enumeration,Ranges):
-                        #    enum = Ranges(elements=d.interpretation.enumeration.elements)
-                        #else:
-                        #    enum = d.interpretation.enumeration.init_copy()
                         enum = d.interpretation.enumeration.init_copy()
                     cnstr = [c.init_copy() for c in d.constructors]
                     if len(cnstr) ==0:
@@ -315,10 +316,11 @@ class Vocabulary(ASTNode):
                     else:
                         nowvoc.declarations.append(TypeDeclaration(parent=None,name=d.name,constructors=cnstr,enumeration=enum))
                 elif isinstance(d,Import):
-                    #Not adding import
+                    #Not adding import because the declarations there would then get their voc now or next which should not be the case
+                    #TO DO: create new declarations for the improted vocabs in annotating now or next voc
+                    #TO DO: create tests with import and LTC theories 
                     d
                 else:
-                    #without deepcopy
                     nowvoc.declarations.append(d.init_copy())
         return nowvoc
     
@@ -332,11 +334,11 @@ class Vocabulary(ASTNode):
                     if str(d.name) == str(t.symbol):
                         changed = True
                         sr = [s.init_copy() for s in d.sorts]
+                        #Current time predicate
                         id = SymbolDeclaration(parent=None,name=d.name,sorts=sr,out=d.out,annotations=Annotations(None,[]))
-                        #id.arity -=1
-                        #id.sorts.pop()
                         nowvoc.declarations.append(id)
                         srn = [s.init_copy() for s in d.sorts]
+                        #Next time predicate
                         next_d = SymbolDeclaration(parent=None,name=(d.name),sorts=srn,out=d.out,annotations=Annotations(None,[]))
                         next_d.name = d.name + "_next"
                         next_d.is_next= True
@@ -351,10 +353,6 @@ class Vocabulary(ASTNode):
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
-                        #if isinstance(d.interpretation.enumeration,Ranges):
-                        #    enum = Ranges(elements=d.interpretation.enumeration.elements)
-                        #else:
-                        #    enum = d.interpretation.enumeration.init_copy()
                         enum = d.interpretation.enumeration.init_copy()
                     cnstr = [c.init_copy() for c in d.constructors]
                     if len(cnstr) ==0:
@@ -364,7 +362,6 @@ class Vocabulary(ASTNode):
                 elif isinstance(d,Import):
                     d
                 else:
-                    #without deepcopy
                     nowvoc.declarations.append(d.init_copy())
         return nowvoc
 
@@ -525,11 +522,11 @@ class SymbolDeclaration(ASTNode):
                  name: Optional[str] = None):
         #temp_symbol  = kwargs.pop('temporal')
         self.annotations : Annotation = annotations.annotations if annotations else {}
+        #Indicating if the predicate is a temporal one
         self.temp= False
         self.symbols : Optional[List[str]]
         self.name : Optional[str]
         self.is_next = False
-        #self.temp= False
         if symbols:
             self.symbols = symbols
             self.name = None
@@ -667,10 +664,11 @@ class TheoryBlock(ASTNode):
         constraints: List[Expression] = kwargs.pop('constraints')
         self.definitions = kwargs.pop('definitions')
         self.interpretations = self.dedup_nodes(kwargs, 'interpretations')
+        #Indicating if it is an LTC theory
         self.ltc = True if kwargs.pop('ltc') else False
+        #Indicating if it is an invariant
         self.inv = True if kwargs.pop('inv') else False
         self.idp =None
-        #self.ltc = False
 
         self.name = "T" if not self.name else self.name
         self.vocab_name = 'V' if not self.vocab_name else self.vocab_name
@@ -688,17 +686,15 @@ class TheoryBlock(ASTNode):
             for rule in definition.rules:
                 rule.block = self
         self.voc = None
-        # For storing the initialized theory for ltc progression
+        # For storing the initialized, bistate and transition theory for ltc theories
         self.init_theory : TheoryBlock = None
         self.bistate_theory : TheoryBlock = None
         self.transition_theory : TheoryBlock = None
-        #self.init_constraints = []
-        #self.init_defs = []
-        #self.init_interp = []
 
     def __str__(self):
         return self.name
     
+    #checks if an expression contains NextAppliedSymbol
     def contains_next(self,e:Expression):
         if isinstance(e,NextAppliedSymbol):
             return True
@@ -710,6 +706,7 @@ class TheoryBlock(ASTNode):
                 return True
         return False
     
+    #checks if an expression contains NowAppliedSymbol
     def contains_now(self,e:Expression):
         if isinstance(e,NowAppliedSymbol):
             return True
@@ -721,12 +718,13 @@ class TheoryBlock(ASTNode):
                 return True
         return False
     
+    #Initializes the transition thoery; used for LTC theories
     def trs_theory(self):
         self.transition_theory = TheoryBlock(name=self.name+'_transition',vocab_name=self.vocab_name+'_next',ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
-            n = self.contains_next(c)
+            n = self.contains_next(c) 
             if n:
                 r = self.bis_subexpr(c.init_copy())
                 if r != False:
@@ -778,14 +776,12 @@ class TheoryBlock(ASTNode):
             r = i.initialize_temporal_interpretation([])
             self.transition_theory.interpretations[r.name] = r
         
-
+    #Initializes the bistate thoery; used for LTC theories
     def bst_theory(self):
         self.bistate_theory = TheoryBlock(name=self.name+'_next',vocab_name=self.vocab_name+'_next',ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
-            #would this be used before start/now are removed or after ?\
-            # look how this is done?
             n = self.contains_next(c)
             if n:
                 r = self.bis_subexpr(c.init_copy())
@@ -811,14 +807,12 @@ class TheoryBlock(ASTNode):
                 r.block = self.bistate_theory
         
             
-    
+    #Initializes the initial thoery; used for LTC theories
     def initialize_theory(self):
         self.init_theory = TheoryBlock(name=self.name+'_now',vocab_name=self.vocab_name+'_now',ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
-            #would this be used before start/now are removed or after ?\
-            # look how this is done?
             r = self.init_subexpr(c.init_copy())
             if r != False:
                 self.init_theory.constraints.append(r)
@@ -829,6 +823,8 @@ class TheoryBlock(ASTNode):
                 if self.init_theory.definitions[-1].rules[-1] == False:
                     self.init_theory.definitions[-1].rules.pop()
 
+    #Returns the Single state formula transformed to current vocabulary: Now[p(x)] -> p(x)
+    #Returns false if the expression contains Start or Next
     def sis_subexpr(self, expression:Expression):
         if isinstance(expression, (StartAppliedSymbol,NextAppliedSymbol)):
             return False
@@ -850,7 +846,8 @@ class TheoryBlock(ASTNode):
         #expression.sub_exprs = sbex
         return expression
 
-
+    #Returns the Bistate state formula transformed to next vocabulary: Now[p(x)] -> p(x) and Next[p(x)] -> p_next(x)
+    #Returns false if the expression contains Start
     def bis_subexpr(self, expression:Expression):
         if isinstance(expression, StartAppliedSymbol):
             return False
@@ -873,7 +870,9 @@ class TheoryBlock(ASTNode):
             expression.f = expression.sub_exprs[0]
         #expression.sub_exprs = sbex
         return expression
-
+    
+    #Returns the initial state formula transformed to current vocabulary: Now[p(x)] -> p(x) and Start[p(x)] -> p(x)
+    #Returns false if the expression contains Next
     def init_subexpr(self, expression:Expression):
         if isinstance(expression, StartAppliedSymbol):
             return expression.sub_expr
@@ -895,6 +894,7 @@ class TheoryBlock(ASTNode):
         #expression.sub_exprs = sbex
         return expression
     
+    #TO DO: Use init_subexpr instead
     def init_subexpr2(self, expression:Expression):
         i = 0
         for e in expression.sub_exprs:
@@ -911,7 +911,8 @@ class TheoryBlock(ASTNode):
             i+=1
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
             expression.f = expression.sub_exprs[0]
-    
+    #Transforms a possible bistate rule to next vocabulary
+    #If the rule violates the format of bistate rule returns false
     def bis_rule(self, rule: Rule):
         next = False
         now = False
@@ -936,7 +937,8 @@ class TheoryBlock(ASTNode):
                 return False
         return rule
     
-
+    #Transforms a possible initial rule to current vocabulary
+    #If the rule violates the format of initial rule returns false
     def init_rule(self, rule: Rule):
         if isinstance(rule.definiendum,NextAppliedSymbol):
             return False
@@ -1125,6 +1127,7 @@ class Structure(ASTNode):
         self.voc = None
         self.declarations = {}
         self.assignments = Assignments()
+        #Initial structure: Used in the context of LTC theories
         self.init_struct : Structure= None
 
     def __str__(self):
@@ -1175,6 +1178,8 @@ class SymbolInterpretation(Expression):
         return f"{self.name} {self.sign} {self.enumeration}"
 
     def __str__(self) -> str:
+        if self.no_enum:
+            return f"{self.name} {self.sign} {self.default}"
         return f"{self.name} {self.sign} {self.enumeration}"
 
     def interpret_application(self, rank, applied, args, tuples=None):
@@ -1243,7 +1248,7 @@ class SymbolInterpretation(Expression):
                         out)
             return out
         
-
+    #Projects the interpretation to time 0: Used in the context of LTC theories
     def initialize_temporal_interpretation(self,tempdc) -> SymbolInterpretation:
         enum = None
         if not self.no_enum:
@@ -1262,7 +1267,6 @@ class SymbolInterpretation(Expression):
                             e.args.pop()
                             e.args.pop()
                             tp.append(FunctionTuple(args=e.args,value=e.value))
-                            #initialized_interp.enumeration.tuples.pop(str(e))
                     else:
                         t_arg = e.args[-1]
                         self.check( type(t_arg) == Number, f"Last argument should be a number for temporal predicates")
@@ -1271,7 +1275,6 @@ class SymbolInterpretation(Expression):
                             tp.append((type(e))(args=e.args))
                             if len(e.args) == 0:
                                 changed =True
-                          #initialized_interp.enumeration.tuples.pop(str(e))
                 #TO DO : ADD ELSE CASE
                 if not isinstance(enum,ConstructedFrom):
                     if isinstance(enum,Ranges):
