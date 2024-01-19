@@ -41,7 +41,7 @@ from .Expression import (ONE, ASumMinus, ASTNode, Expression, NextAppliedSymbol,
                          EQUALS, AND, OR, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
 
 from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
-                    OrderedSet, Semantics)
+                    OrderedSet, Semantics, v_time)
 
 Exceptions = Union[Exception, List["Exceptions"]]  # nested list of Exceptions
 
@@ -357,6 +357,19 @@ def annotate_trs_theory(theory:TheoryBlock,idp):
         theory.transition_theory.constraints = OrderedSet([e.annotate(voc, {},False)
                                     for e in theory.transition_theory.constraints])
         #print("ch2")
+
+def annotate_exp_theory(theory:TheoryBlock,voc:Vocabulary):
+    theory.voc = voc
+    for i in theory.interpretations.values():
+        i.block = theory
+        i.annotate(voc,{})
+    #print("ch1")
+    voc.add_voc_to_block(theory)
+    theory.definitions = [e.annotate(voc, {},False) for e in theory.definitions]
+    #print("ch15")
+    theory.constraints = OrderedSet([e.annotate(voc, {},False)
+                                for e in theory.constraints])
+    #print("ch2")
 
 # if there is no temporal returns 0, if start only 1, if now or next 2, if start and (now or next) then 3
 def check_start(constraint,start=False,now_or_next = False):
@@ -1340,7 +1353,7 @@ def replace(self, voc, q_vars):
     return AQuantification(parent=None,annotations=None,q='forall',quantees=[qt],f=self.sub_expr)
 
 NowAppliedSymbol.replace = replace
-v_time = 'time'
+#v_time = 'time'
 
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     if ltc and temporal_head != 0:

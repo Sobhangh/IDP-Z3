@@ -30,14 +30,16 @@ from os import linesep
 import time
 import types
 from typing import Any, Iterator, List, Union, Optional
+from idp_engine import Expression
 from z3 import Solver
 
-from idp_engine.Expression import FALSE, TRUE, AUnary, AppliedSymbol, UnappliedSymbol
+from idp_engine.Expression import FALSE, INT_SETNAME, TRUE, AImplication, AQuantification, ASumMinus, AUnary, AppliedSymbol, NextAppliedSymbol, NowAppliedSymbol, Number, StartAppliedSymbol, UnappliedSymbol
 
 from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TemporalDeclaration, TheoryBlock, Structure, TupleIDP, Vocabulary
 from .Theory import Theory
 from .Assignments import Status as S, Assignments
-from .utils import NEWL, IDPZ3Error, PROCESS_TIMINGS, OrderedSet
+from .utils import NEWL, IDPZ3Error, PROCESS_TIMINGS, OrderedSet, v_time
+from .Annotate import annotate_exp_theory
 
 last_call = time.process_time()  # define it as global
 
@@ -228,12 +230,6 @@ def progression(theory:TheoryBlock,struct):
     #            print("Error vocabulary is wrong")
     #            return
             #print(problem.assignments)
-    #if isinstance(struct,Structure):
-    #    problem = Theory(theory.bistate_theory,struct)
-    #    voc = struct.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
-    #    if voc is None:
-    #        print("Error vocabulary is wrong")
-    #        return
     out = []
     PROCESS_TIMINGS['ground'] = time.time() - PROCESS_TIMINGS['ground']
     solve_start = time.time()
@@ -262,6 +258,24 @@ def progression(theory:TheoryBlock,struct):
                 #yield out 
                 out.append(last + " For Strtucture " + str(j))
             j += 1
+    elif isinstance(struct,Structure):
+        problem = Theory(theory.bistate_theory,struct)
+        voc = struct.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
+        if voc is None:
+            print("Error vocabulary is wrong")
+            return
+        if problem is None:
+            pass
+        ms = list(problem.expand(max=10, timeout_seconds=10, complete=False))
+        if isinstance(ms[-1], str):
+            ms, last = ms[:-1], ms[-1]
+        else:
+            last = ""
+        for i, m in enumerate(ms):
+            s = toStructure(m,theory.bistate_theory.vocab_name,voc,theory.voc.tempdcl)
+            out.append(s)
+        #yield out 
+        out.append(last)
     #if problem is None:
     #    print("reciedved None")
     #    #problem = Theory(theory.bistate_theory)
@@ -270,12 +284,35 @@ def progression(theory:TheoryBlock,struct):
     return out
     
 
-def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None):
+def simulate(theory:TheoryBlock,struct:Structure):
+    result = initialize(theory,struct)
+    print_struct(result)
+    question = "Which structure do you want to continue the simulation with?(N to stop the simulation) "
+    while True:  
+        i = input(question)
+        if i == "N":
+            break
+        i = int(i)
+        while (i >= len(result)) or i < 1:
+            i = input(question)
+            if i == "N":
+                break
+            i = int(i)
+        if i == "N":
+            break
+        result = progression(theory,result[i-1])
+        print_struct(result)
+
+def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,forward_chaining=False):
+    if not theory.ltc:
+        return "Invariant proving is only for LTC theories"
     #TO DO: check if the invariant is correctly formulated
     if len(invariant.constraints) > 1:
         return "Only one formula should be specified for invariant"
     if len(invariant.constraints) == 0:
         return "Please provide an invariant"
+    if forward_chaining:
+        return forward_chain(theory,invariant)
     inv = None
     for c in invariant.constraints:
         inv = c
@@ -338,6 +375,121 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None):
         return "****Invariant is FALSE****"
     return "****Invariant is TRUE****"
 
+def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
+    #Format of the thery should be like !t:q(t) and conditions => q(t+n) where n > 0
+    #Checking the correctness of the format 
+    af = None
+    for c in invariant.constraints:
+        af = c
+    if not isinstance(af,AQuantification):
+        return "formula should be of universal quantification"
+    f = af.f
+    if not isinstance(f,AImplication):
+        return "Wrong format: body of quantification should be an implication"
+    implicant = f.sub_exprs[1]
+    if not isinstance(implicant,AppliedSymbol):
+        return "Wrong format: implicant should only have one predicate/function"
+    n = implicant.symbol.name
+    r = contains_symb(f.sub_exprs[0],n)
+    if r == 0:
+        return "Wrong format: The implicant should be available in the antecedent of implication"
+    if r == -1:
+        return "Wrong format: should not have Now,Next, Start in forward chaning"
+    voc_now = theory.voc
+    chain_num = 1
+    if voc_now.tempdcl != None:
+        r = adjust_formula(af,voc_now.tempdcl)
+        if isinstance(r,str):
+            return r
+        chain_num = r
+    af = AUnary(None,['not'],af)
+    af.annotate(voc_now,{})
+    invariant.constraints = OrderedSet([af])
+    voc = voc_now.generate_expanded_voc(chain_num)
+    exp_th = theory.expand_theory(chain_num,voc)
+    annotate_exp_theory(exp_th,voc)
+    p1 = model_expand(exp_th,invariant,timeout_seconds=50)
+    second_step =False
+    j=0
+    for i, xi in enumerate(p1):
+        print(xi)
+        if xi == 'No models.':
+            second_step = True
+        j+=1
+    if not second_step or j>1:
+        return "****Invariant is FALSE****"
+    return "****Invariant is TRUE****"
+
+def adjust_formula(expression:AQuantification,tempdcl:List[TemporalDeclaration]):
+    implicant:AppliedSymbol = expression.sub_exprs[1]
+    n = 0
+    for t in tempdcl:
+        if implicant.symbol.name == t.symbol.name:
+            last = implicant.sub_exprs.pop()
+            if isinstance(last,ASumMinus):
+                if not last.operator == '+':
+                    return "Only addition is acceptable"
+                if len(last.sub_exprs) > 2 :
+                    return "Please provide one number in the additions"
+                for e in last.sub_exprs:
+                    if isinstance(e,Number) and e.type == INT_SETNAME:
+                        n = e.py_value 
+                        implicant.symbol.name = implicant.symbol.name + '_' + n
+                        break   
+            else:
+                return "End of the chain should be determined"
+            break
+    if n == 0:
+        return "Wrong format: No upper limit provided"
+    r = adjust_sub(expression.sub_exprs[0],tempdcl,n)
+    if isinstance(r,str):
+        return r
+    return n
+    
+    
+    
+def adjust_sub(expression:Expression,tempdcl:List[TemporalDeclaration],n:int):
+    if isinstance(expression,(StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol)):
+        return "Not allowed to use Start/Now/Next"
+    if isinstance(expression,AppliedSymbol):
+        for t in tempdcl:
+            if expression.symbol.name == t.symbol.name:
+                last = expression.sub_exprs.pop()
+                if isinstance(last,ASumMinus):
+                    if not last.operator == '+':
+                        return "Only addition is acceptable"
+                    if len(last.sub_exprs) > 2 :
+                        return "Please provide one number in the additions"
+                    for e in last.sub_exprs:
+                        if isinstance(e,Number) and e.type == INT_SETNAME:
+                            if e.py_value > n :
+                                return "Cant use numbers higher than the upperlimit"
+                            level = e.py_value
+                            if level != 0:
+                                expression.symbol.name = expression.symbol.name + '_' + level
+                            break   
+                break
+    for e in expression.sub_exprs:
+        r = adjust_sub(e,tempdcl,n)
+        if r != None:
+            return r
+
+#checks if an expression contains NextAppliedSymbol
+def contains_symb(e:Expression,s:str):
+    if isinstance(e,AppliedSymbol):
+        if e.symbol.name == s:
+            return 1
+        return 0
+    if isinstance(e,(NowAppliedSymbol,StartAppliedSymbol,NextAppliedSymbol)):
+        return -1
+    for sube in e.sub_exprs:
+        r = contains_symb(sube,s)
+        if r == 1:
+            return 1
+        if r == -1:
+            return -1
+    return 0
+    
 
 def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
                  max: int = 10,
@@ -662,6 +814,7 @@ def execute(self: IDP, capture_print : bool = False) -> Optional[str]:
     mylocals['progression'] = progression
     mylocals['print_struct'] = print_struct
     mylocals['isinvariant'] = isinvariant
+    mylocals['simulate'] = simulate
 
     try:
         exec(main, mybuiltins, mylocals)

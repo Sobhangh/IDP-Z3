@@ -92,6 +92,7 @@ class IDP(ASTNode):
         self.next_voc = {}
         init_thrs ={}
         init_strcs ={}
+        #print("annotating begins............")
         for voc in self.vocabularies.values():
             #Annotating vocabulary for current and next time point; useful for LTC theories
             #For v_now the time argument of temporal predicates would be dropped e.g p(x,time) becomes p(x)
@@ -118,6 +119,7 @@ class IDP(ASTNode):
                 #Adds transition theory which is used for invariants: For more info check the paper Simulating dynamic systems with LTC 
                 t.trs_theory()
                 #print("theories trs")
+                t.original_theory()
         self.warnings = flatten(t.annotate_block(self)
                                 for t in self.theories.values())
         #print("annotated theory")
@@ -213,7 +215,7 @@ class Vocabulary(ASTNode):
     def __init__(self, parent: ASTNode,
                  name: str,
                  declarations: List[Union[Declaration, VarDeclaration, Import]],
-                 tempdcl:TemporalDeclaration|None):
+                 tempdcl:List[TemporalDeclaration]|None):
         self.name = name
         #List of temporal predicates
         self.tempdcl = tempdcl
@@ -259,6 +261,7 @@ class Vocabulary(ASTNode):
                             sorts=[INT_SETNAME], out=INT_SETNAME),
             ] + self.declarations
 
+
     def __str__(self):
         return (f"vocabulary {{{NEWL}"
                 f"    {f'{NEWL}    '.join(str(i) for i in self.declarations)}"
@@ -282,6 +285,47 @@ class Vocabulary(ASTNode):
                             f"Duplicate enumeration of {self.name} "
                             f"in vocabulary and block {block.name}")
                 block.interpretations[s.name] = s.interpretation
+
+    def generate_expanded_voc(self,n:int) -> Vocabulary:
+        nowvoc = Vocabulary(parent=None,name=self.name+"_expanded",tempdcl=[],declarations=[])
+        for d in self.original_decl:
+            changed = False
+            for t in self.tempdcl:
+                if isinstance(d,SymbolDeclaration):
+                    #The predicate is temporal
+                    if d.name == t.symbol.name:
+                        changed = True
+                        sr = [s.init_copy() for s in d.sorts]
+                        id = SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.out.init_copy(),annotations=Annotations(None,[]))
+                        nowvoc.declarations.append(id)
+                        i = 1 
+                        while i<n:
+                            srs = [s.init_copy() for s in d.sorts]
+                            #TO DO: There could be possible issues with naming
+                            ids = SymbolDeclaration(parent=None,name=(d.name+"_"+i),sorts=srs,out=d.out.init_copy(),annotations=Annotations(None,[]))
+                            nowvoc.declarations.append(ids)
+                            i+=1
+                        break
+            if not changed:
+                if isinstance(d,VarDeclaration):
+                    nowvoc.declarations.append(VarDeclaration(parent=None,name=(d.name),subtype=d.subtype.init_copy()))
+                elif isinstance(d,SymbolDeclaration):
+                    sr = [s.init_copy() for s in d.sorts]
+                    nowvoc.declarations.append(SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.out,annotations=Annotations(None,[])))
+                elif isinstance(d,TypeDeclaration):
+                    enum =None
+                    if d.interpretation:
+                        enum = d.interpretation.enumeration.init_copy()
+                    cnstr = [c.init_copy() for c in d.constructors]
+                    if len(cnstr) ==0:
+                        nowvoc.declarations.append(TypeDeclaration(parent=None,name=d.name,enumeration=enum))
+                    else:
+                        nowvoc.declarations.append(TypeDeclaration(parent=None,name=d.name,constructors=cnstr,enumeration=enum))
+                elif isinstance(d,Import):
+                    d
+                else:
+                    nowvoc.declarations.append(d.init_copy())
+        return nowvoc
 
     #Used for generating the vocabulary of current time, used in the context of LTC theories
     #Has to be called before self is annotated
@@ -690,10 +734,116 @@ class TheoryBlock(ASTNode):
         self.init_theory : TheoryBlock = None
         self.bistate_theory : TheoryBlock = None
         self.transition_theory : TheoryBlock = None
+        self.org_theory : TheoryBlock = None
 
     def __str__(self):
         return self.name
     
+    
+    def replace_with_n(self,expression:Expression,i,n):
+        if isinstance(expression,(StartAppliedSymbol)):
+            return False
+        if isinstance(expression,(NextAppliedSymbol)):
+            if i+1 <= n:
+                e = expression.sub_expr
+                j = i +1
+                symb = SymbolExpr(None,(str(e.symbol)+'_'+j),None,None)
+                return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+            return False
+        if isinstance(expression,NowAppliedSymbol):
+            e = expression.sub_expr
+            symb = None
+            if i == 0:
+                symb = SymbolExpr(None,(str(e.symbol)),None,None)
+            else:
+                symb = SymbolExpr(None,(str(e.symbol)+'_'+i),None,None)
+            return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+        if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
+            return expression
+        j = 0
+        for e in expression.sub_exprs:
+            expression.sub_exprs[j] = self.replace_with_n(e,i,n)
+            if expression.sub_exprs[j] == False:
+                return False
+            j+=1
+        if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
+            expression.f = expression.sub_exprs[0]
+        return expression
+
+    #Expand the theory to n next time points
+    def expand_theory(self,n:int,vocab:Vocabulary):
+        #voc = vocab.generate_expanded_voc(n)
+        exp_theory = TheoryBlock(name=self.name,vocab_name=vocab.name,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+        cnstrs = []
+        for c in self.constraints:
+            i = 0
+            while i <= n:
+                s = self.replace_with_n(c.init_copy(),i,n)
+                if s != False:
+                    cnstrs.append(s)
+                i+=1
+        defs = []
+        for definition in self.definitions:
+            defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
+            for rule in definition.rules:
+                r = rule.init_copy()
+                if isinstance(r.definiendum,StartAppliedSymbol):
+                    pass
+                i = 0 
+                while i <= n:
+                    r.definiendum = self.replace_with_n(r.definiendum,i,n)
+                    if r.definiendum == False:
+                        break
+                    r.body = self.replace_with_n(r.body,i,n)
+                    if r.body != False:
+                        defs[-1].rules.append(r)
+                    i+=1
+        exp_theory.constraints = cnstrs
+        exp_theory.definitions = defs
+        for d in defs:
+            for r in d.rules:
+                r.block = exp_theory
+        for i in self.interpretations.values():
+            enum = None
+            if not self.no_enum:
+                enum = self.enumeration.init_copy()
+            default = None
+            if self.default:
+                default = self.default.init_copy()
+            r = SymbolInterpretation(None,UnappliedSymbol(None,i.name),i.sign,enum,default)
+            exp_theory.interpretations[r.name] = r
+        return exp_theory
+    
+    
+    #Copies the original theory; used for LTC theories
+    def original_theory(self):
+        self.org_theory = TheoryBlock(name=self.name,vocab_name=self.vocab_name,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+        cnstrs = []
+        for c in self.constraints:
+            cnstrs.append(c.init_copy())
+        defs = []
+        for definition in self.definitions:
+            defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
+            for rule in definition.rules:
+                r = rule.init_copy()
+                defs[-1].rules.append(r)
+        self.org_theory.constraints = cnstrs
+        self.org_theory.definitions = defs
+        for d in defs:
+            for r in d.rules:
+                r.block = self.org_theory
+        for i in self.interpretations.values():
+            enum = None
+            if not self.no_enum:
+                enum = self.enumeration.init_copy()
+            default = None
+            if self.default:
+                default = self.default.init_copy()
+            r = SymbolInterpretation(None,UnappliedSymbol(None,i.name),i.sign,enum,default)
+            self.org_theory.interpretations[r.name] = r
+
     #checks if an expression contains NextAppliedSymbol
     def contains_next(self,e:Expression):
         if isinstance(e,NextAppliedSymbol):

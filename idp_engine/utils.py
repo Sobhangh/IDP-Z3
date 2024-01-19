@@ -70,7 +70,7 @@ ABS = "abs"
 TIJD ="Tijd"
 RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, CONCEPT,
                     GOAL_SYMBOL, RELEVANT, ABS,TIJD ]
-
+v_time = 'time'
 DEFAULT = "default"
 
 NOT_SATISFIABLE ="Not satisfiable."
