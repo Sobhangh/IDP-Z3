@@ -25,12 +25,12 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* (tempdcl=Tempo
             | enumeration=Enumeration
             | enumeration=ConstructedFrom))?;
 
-    SymbolDeclaration: annotations=Annotations
+    SymbolDeclaration: (temporal='<' ('Temporal'| 'Action') '>')? annotations=Annotations
           symbols+= NAME [','] ':'
           ( '(' sorts*=SetName[/[*⨯]/] ')' | sorts*=SetName[/[*⨯]/] )
           ('->' | '→') out=SetName;
 
-    TemporalDeclaration: 'Temporal' name=SymbolExpr;
+    TemporalDeclaration: 'Temporal' symbol=SymbolExpr;
 
     VarDeclaration: 'var' name=/`?[^\d\W]\w*\b/ IN subtype=SetName;
 

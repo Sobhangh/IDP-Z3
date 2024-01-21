@@ -364,7 +364,15 @@ def annotate_exp_theory(theory:TheoryBlock,voc:Vocabulary):
         i.block = theory
         i.annotate(voc,{})
     #print("ch1")
-    voc.add_voc_to_block(theory)
+    #voc.add_voc_to_block(theory)
+    #In order to avoid duplicate error
+    for s in voc.declarations:
+            theory.declarations[s.name] = s
+            if (type(s) == TypeDeclaration
+                and s.interpretation
+                and voc.name != BOOL):
+                theory.interpretations[s.name] = s.interpretation
+
     theory.definitions = [e.annotate(voc, {},False) for e in theory.definitions]
     #print("ch15")
     theory.constraints = OrderedSet([e.annotate(voc, {},False)
@@ -1388,7 +1396,7 @@ NextAppliedSymbol.replace = replace
 def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
     if ltc : #and temporal_head != 0
         # for the head temporal =0 is not Ok
-        self.check(temporal_head ==3, f"Not allowed to use Next[]")
+        self.check(temporal_head ==3 or  temporal_head ==0, f"Not allowed to use Next[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
 

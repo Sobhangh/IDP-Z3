@@ -80,6 +80,7 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
         nullaryname : dict[str,SymbolDeclaration] = {}
         #To store all symbol declarations of nullary predicates
         nullaryall : dict[str,SymbolDeclaration] = {}
+        no_value : dict[SymbolDeclaration, Any] = {}
         #print("in loop")
         for a in assign.values():
             if type(a.sentence) == AppliedSymbol:
@@ -398,16 +399,21 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
     voc_now = theory.voc
     chain_num = 1
     if voc_now.tempdcl != None:
-        r = adjust_formula(af,voc_now.tempdcl)
+        r = adjust_formula(f,voc_now.tempdcl)
         if isinstance(r,str):
             return r
         chain_num = r
+    voc : Vocabulary = voc_now.generate_expanded_voc(chain_num)
+    voc.annotate_block(theory.voc.idp)
     af = AUnary(None,['not'],af)
-    af.annotate(voc_now,{})
+    af.annotate(voc,{})
     invariant.constraints = OrderedSet([af])
-    voc = voc_now.generate_expanded_voc(chain_num)
-    exp_th = theory.expand_theory(chain_num,voc)
+    exp_th = theory.org_theory.expand_theory(chain_num,voc)
     annotate_exp_theory(exp_th,voc)
+    #print("expanded th..")
+    #for d in exp_th.definitions:
+    #    for r in d.rules:
+    #        print(r)
     p1 = model_expand(exp_th,invariant,timeout_seconds=50)
     second_step =False
     j=0
@@ -420,21 +426,21 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
         return "****Invariant is FALSE****"
     return "****Invariant is TRUE****"
 
-def adjust_formula(expression:AQuantification,tempdcl:List[TemporalDeclaration]):
+def adjust_formula(expression:AImplication,tempdcl:List[TemporalDeclaration]):
     implicant:AppliedSymbol = expression.sub_exprs[1]
     n = 0
     for t in tempdcl:
         if implicant.symbol.name == t.symbol.name:
             last = implicant.sub_exprs.pop()
             if isinstance(last,ASumMinus):
-                if not last.operator == '+':
+                if not last.operator[0] == '+':
                     return "Only addition is acceptable"
                 if len(last.sub_exprs) > 2 :
                     return "Please provide one number in the additions"
                 for e in last.sub_exprs:
                     if isinstance(e,Number) and e.type == INT_SETNAME:
                         n = e.py_value 
-                        implicant.symbol.name = implicant.symbol.name + '_' + n
+                        implicant.symbol.name = implicant.symbol.name + '_' + str(n)
                         break   
             else:
                 return "End of the chain should be determined"
@@ -456,8 +462,8 @@ def adjust_sub(expression:Expression,tempdcl:List[TemporalDeclaration],n:int):
             if expression.symbol.name == t.symbol.name:
                 last = expression.sub_exprs.pop()
                 if isinstance(last,ASumMinus):
-                    if not last.operator == '+':
-                        return "Only addition is acceptable"
+                    if not last.operator[0] == '+':
+                        return "Only addition is acceptable in atecedant"
                     if len(last.sub_exprs) > 2 :
                         return "Please provide one number in the additions"
                     for e in last.sub_exprs:
@@ -466,7 +472,7 @@ def adjust_sub(expression:Expression,tempdcl:List[TemporalDeclaration],n:int):
                                 return "Cant use numbers higher than the upperlimit"
                             level = e.py_value
                             if level != 0:
-                                expression.symbol.name = expression.symbol.name + '_' + level
+                                expression.symbol.name = expression.symbol.name + '_' + str(level)
                             break   
                 break
     for e in expression.sub_exprs:

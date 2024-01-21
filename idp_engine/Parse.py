@@ -219,6 +219,8 @@ class Vocabulary(ASTNode):
         self.name = name
         #List of temporal predicates
         self.tempdcl = tempdcl
+        if tempdcl is None:
+            self.tempdcl = []
         self.idp : Optional[IDP] = None  # parent object
         self.symbol_decls: dict[str, Union[Declaration, VarDeclaration, Constructor]] = {}
         self.contains_temporal = False
@@ -236,6 +238,8 @@ class Vocabulary(ASTNode):
                     new.private = new.name.startswith('_')
                     new.symbols = None
                     temp.append(new)
+                    if decl.temporal is not None:
+                        self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=new.name,eval=None,s=None)))
             else:
                 temp.append(decl)
         self.declarations = temp
@@ -286,6 +290,7 @@ class Vocabulary(ASTNode):
                             f"in vocabulary and block {block.name}")
                 block.interpretations[s.name] = s.interpretation
 
+    #Used for forward chaining
     def generate_expanded_voc(self,n:int) -> Vocabulary:
         nowvoc = Vocabulary(parent=None,name=self.name+"_expanded",tempdcl=[],declarations=[])
         for d in self.original_decl:
@@ -296,13 +301,15 @@ class Vocabulary(ASTNode):
                     if d.name == t.symbol.name:
                         changed = True
                         sr = [s.init_copy() for s in d.sorts]
+                        sr.pop()
                         id = SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.out.init_copy(),annotations=Annotations(None,[]))
                         nowvoc.declarations.append(id)
                         i = 1 
-                        while i<n:
+                        while i <= n:
                             srs = [s.init_copy() for s in d.sorts]
+                            srs.pop()
                             #TO DO: There could be possible issues with naming
-                            ids = SymbolDeclaration(parent=None,name=(d.name+"_"+i),sorts=srs,out=d.out.init_copy(),annotations=Annotations(None,[]))
+                            ids = SymbolDeclaration(parent=None,name=(d.name+"_"+str(i)),sorts=srs,out=d.out.init_copy(),annotations=Annotations(None,[]))
                             nowvoc.declarations.append(ids)
                             i+=1
                         break
@@ -341,8 +348,6 @@ class Vocabulary(ASTNode):
                         changed = True
                         sr = [s.init_copy() for s in d.sorts]
                         id = SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.out,annotations=Annotations(None,[]))
-                        #id.arity -=1
-                        #id.sorts.pop()
                         nowvoc.declarations.append(id)
                         break
             if not changed:
@@ -563,7 +568,8 @@ class SymbolDeclaration(ASTNode):
                  sorts: List[SetName],
                  out: SetName,
                  symbols: Optional[List[str]] = None,
-                 name: Optional[str] = None):
+                 name: Optional[str] = None,
+                 temporal: Optional[str] = None):
         #temp_symbol  = kwargs.pop('temporal')
         self.annotations : Annotation = annotations.annotations if annotations else {}
         #Indicating if the predicate is a temporal one
@@ -571,6 +577,7 @@ class SymbolDeclaration(ASTNode):
         self.symbols : Optional[List[str]]
         self.name : Optional[str]
         self.is_next = False
+        self.temporal = temporal
         if symbols:
             self.symbols = symbols
             self.name = None
@@ -688,7 +695,7 @@ class TemporalDeclaration(ASTNode):
     """
 
     def __init__(self, **kwargs):
-        self.symbol = kwargs.pop('name')
+        self.symbol = kwargs.pop('symbol')
 
     def __str__(self):
         return f"Temporal {self.symbol} "
@@ -747,7 +754,7 @@ class TheoryBlock(ASTNode):
             if i+1 <= n:
                 e = expression.sub_expr
                 j = i +1
-                symb = SymbolExpr(None,(str(e.symbol)+'_'+j),None,None)
+                symb = SymbolExpr(None,(str(e.symbol)+'_'+str(j)),None,None)
                 return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
             return False
         if isinstance(expression,NowAppliedSymbol):
@@ -756,7 +763,7 @@ class TheoryBlock(ASTNode):
             if i == 0:
                 symb = SymbolExpr(None,(str(e.symbol)),None,None)
             else:
-                symb = SymbolExpr(None,(str(e.symbol)+'_'+i),None,None)
+                symb = SymbolExpr(None,(str(e.symbol)+'_'+str(i)),None,None)
             return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
         if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
             return expression
@@ -773,7 +780,7 @@ class TheoryBlock(ASTNode):
     #Expand the theory to n next time points
     def expand_theory(self,n:int,vocab:Vocabulary):
         #voc = vocab.generate_expanded_voc(n)
-        exp_theory = TheoryBlock(name=self.name,vocab_name=vocab.name,ltc = None,inv=None,
+        exp_theory = TheoryBlock(name=self.name+"_expanded",vocab_name=vocab.name,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
@@ -787,11 +794,9 @@ class TheoryBlock(ASTNode):
         for definition in self.definitions:
             defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
             for rule in definition.rules:
-                r = rule.init_copy()
-                if isinstance(r.definiendum,StartAppliedSymbol):
-                    pass
                 i = 0 
                 while i <= n:
+                    r = rule.init_copy()
                     r.definiendum = self.replace_with_n(r.definiendum,i,n)
                     if r.definiendum == False:
                         break
@@ -806,16 +811,16 @@ class TheoryBlock(ASTNode):
                 r.block = exp_theory
         for i in self.interpretations.values():
             enum = None
-            if not self.no_enum:
-                enum = self.enumeration.init_copy()
+            if not i.no_enum:
+                enum = i.enumeration.init_copy()
             default = None
-            if self.default:
-                default = self.default.init_copy()
+            if i.default:
+                default = i.default.init_copy()
             r = SymbolInterpretation(None,UnappliedSymbol(None,i.name),i.sign,enum,default)
             exp_theory.interpretations[r.name] = r
         return exp_theory
     
-    
+
     #Copies the original theory; used for LTC theories
     def original_theory(self):
         self.org_theory = TheoryBlock(name=self.name,vocab_name=self.vocab_name,ltc = None,inv=None,
@@ -836,11 +841,11 @@ class TheoryBlock(ASTNode):
                 r.block = self.org_theory
         for i in self.interpretations.values():
             enum = None
-            if not self.no_enum:
-                enum = self.enumeration.init_copy()
+            if not i.no_enum:
+                enum = i.enumeration.init_copy()
             default = None
-            if self.default:
-                default = self.default.init_copy()
+            if i.default:
+                default = i.default.init_copy()
             r = SymbolInterpretation(None,UnappliedSymbol(None,i.name),i.sign,enum,default)
             self.org_theory.interpretations[r.name] = r
 
