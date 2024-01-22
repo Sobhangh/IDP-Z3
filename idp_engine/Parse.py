@@ -130,6 +130,10 @@ class IDP(ASTNode):
         # determine default vocabulary, theory, before annotating display
         self.vocabulary = next(iter(self.vocabularies.values()))
         self.theory = next(iter(self.theories    .values()))
+        #for v in self.now_voc.values():
+        #    self.vocabularies[v.name] = v
+        #for v in self.next_voc.values():
+        #    self.vocabularies[v.name] = v
         if self.display is None:
             self.display = Display(constraints=[], interpretations=[])
     @classmethod
@@ -227,7 +231,7 @@ class Vocabulary(ASTNode):
 
         self.name = 'V' if not self.name else self.name
         self.voc = self
-
+        self.actions : List[str] =[]
         # expand multi-symbol declarations
         temp = []
         for decl in declarations:
@@ -240,6 +244,8 @@ class Vocabulary(ASTNode):
                     temp.append(new)
                     if decl.temporal is not None:
                         self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=new.name,eval=None,s=None)))
+                    if decl.temporal == "Action":
+                        self.actions.append(new.name)
             else:
                 temp.append(decl)
         self.declarations = temp
@@ -268,6 +274,10 @@ class Vocabulary(ASTNode):
 
     def __str__(self):
         return (f"vocabulary {{{NEWL}"
+                f"    {f'{NEWL}    '.join(str(i) for i in self.declarations)}"
+                f"{NEWL}}}{NEWL}").replace("    \n", "")
+    def fullstr(self):
+        return (f"vocabulary {self.name} {{{NEWL}"
                 f"    {f'{NEWL}    '.join(str(i) for i in self.declarations)}"
                 f"{NEWL}}}{NEWL}").replace("    \n", "")
 

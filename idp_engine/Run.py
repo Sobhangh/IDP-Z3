@@ -215,7 +215,7 @@ def initialize(theory:TheoryBlock,struct:Structure):
     return out
     #return model_expand(theory.init_theory,struct.init_struct)
 
-def progression(theory:TheoryBlock,struct):
+def progression(theory:TheoryBlock,struct,additional_theory:TheoryBlock=None):
     #print("inside progression")
     problem = None
     voc = None
@@ -238,7 +238,10 @@ def progression(theory:TheoryBlock,struct):
         j = 1
         for xi in struct:
             if isinstance(xi,Structure):
-                problem = Theory(theory.bistate_theory,xi)
+                if additional_theory:
+                    problem = Theory(theory.bistate_theory,xi,additional_theory)
+                else:
+                    problem = Theory(theory.bistate_theory,xi)
                 voc = xi.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
                 if voc is None:
                     print("Error vocabulary is wrong")
@@ -260,7 +263,11 @@ def progression(theory:TheoryBlock,struct):
                 out.append(last + " For Strtucture " + str(j))
             j += 1
     elif isinstance(struct,Structure):
-        problem = Theory(theory.bistate_theory,struct)
+        if additional_theory:
+            problem = Theory(theory.bistate_theory,struct,additional_theory)
+        else:
+            problem = Theory(theory.bistate_theory,struct)
+        #problem = Theory(theory.bistate_theory,struct)
         voc = struct.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
         if voc is None:
             print("Error vocabulary is wrong")
@@ -288,7 +295,9 @@ def progression(theory:TheoryBlock,struct):
 def simulate(theory:TheoryBlock,struct:Structure):
     result = initialize(theory,struct)
     print_struct(result)
+    act_question = "Please give the action with its arguments(n to pass) "
     question = "Which structure do you want to continue the simulation with?(N to stop the simulation) "
+    action_inp = "(A to choose an action) "
     while True:  
         i = input(question)
         if i == "N":
@@ -301,8 +310,64 @@ def simulate(theory:TheoryBlock,struct:Structure):
             i = int(i)
         if i == "N":
             break
-        result = progression(theory,result[i-1])
-        print_struct(result)
+        ac = input(act_question)
+        first = True
+        if ac != "n":
+            failed = True
+            th = None
+            while failed:
+                act = False
+                if not first:
+                    ac = input(act_question)
+                    if ac == "n":
+                        failed = True
+                        break
+                else:
+                    first = False
+                incorrect_inp = False
+                #print(theory.voc.actions)
+                apred = ""
+                try:
+                    apred = ac[:ac.index('(')]
+                except:
+                    print("ERROR:Please provide arguments of the predicate, if there are no, give ()")
+                    incorrect_inp = True
+                if not incorrect_inp:
+                    for a in theory.voc.actions:
+                            if  apred == a:
+                                act = True
+                                break
+                if act :
+                    failed = False
+                    vtxt = theory.init_theory.voc.fullstr()
+                    #print(vtxt)
+                    thtxt = vtxt + " theory " + "action:"+ theory.init_theory.vocab_name + "{ " + ac + "." " }"
+                    try:
+                        idpt = IDP.from_str(thtxt)
+                        thtemp = idpt.get_blocks("action")[0]
+                        aconstraint : Expression =None
+                        for c in thtemp.constraints:
+                            aconstraint = c
+                        th = TheoryBlock(name="action",vocab_name=theory.init_theory.vocab_name,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+                        th.voc = theory.init_theory.voc
+                        aconstraint.annotate(th.voc,{})
+                        th.constraints = OrderedSet([aconstraint])
+
+                    except (IDPZ3Error) as e :
+                        failed = True
+                        print(e)
+                elif not incorrect_inp:
+                    print("ERROR: The given predicate is not an Action")
+
+            if failed:
+                result = progression(theory,result[i-1])
+            else:
+                result = progression(theory,result[i-1],th)
+            print_struct(result)
+        else:
+            result = progression(theory,result[i-1])
+            print_struct(result)
 
 def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,forward_chaining=False):
     if not theory.ltc:
