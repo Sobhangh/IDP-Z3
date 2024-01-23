@@ -297,7 +297,6 @@ def simulate(theory:TheoryBlock,struct:Structure):
     print_struct(result)
     act_question = "Please give the action with its arguments(n to pass) "
     question = "Which structure do you want to continue the simulation with?(N to stop the simulation) "
-    action_inp = "(A to choose an action) "
     while True:  
         i = input(question)
         if i == "N":
@@ -368,6 +367,15 @@ def simulate(theory:TheoryBlock,struct:Structure):
         else:
             result = progression(theory,result[i-1])
             print_struct(result)
+
+def ForProgression(theory:TheoryBlock,struct,number:int):
+    result = progression(theory,struct)
+    print_struct(result)
+    i = 1
+    while i<=number:
+        result = progression(theory,result)
+        print_struct(result)
+        i+=1
 
 def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,forward_chaining=False):
     if not theory.ltc:
@@ -886,6 +894,7 @@ def execute(self: IDP, capture_print : bool = False) -> Optional[str]:
     mylocals['print_struct'] = print_struct
     mylocals['isinvariant'] = isinvariant
     mylocals['simulate'] = simulate
+    mylocals['ForProgression'] = ForProgression
 
     try:
         exec(main, mybuiltins, mylocals)
