@@ -25,11 +25,11 @@ from __future__ import annotations
 from copy import copy, deepcopy
 from datetime import date
 from enum import Enum
-from itertools import groupby
+from itertools import groupby, product
 from os import path
 from sys import intern
 from textx import metamodel_from_file
-from typing import Tuple, List, Union, Optional, TYPE_CHECKING
+from typing import Any, Tuple, List, Union, Optional, TYPE_CHECKING
 
 
 
@@ -232,6 +232,7 @@ class Vocabulary(ASTNode):
         self.name = 'V' if not self.name else self.name
         self.voc = self
         self.actions : List[str] =[]
+        self.fluents : List[str] =[]
         # expand multi-symbol declarations
         temp = []
         for decl in declarations:
@@ -246,6 +247,8 @@ class Vocabulary(ASTNode):
                         self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=new.name,eval=None,s=None)))
                     if decl.temporal == "Action":
                         self.actions.append(new.name)
+                    elif decl.temporal == "Temporal":
+                        self.fluents.append(new.name)
             else:
                 temp.append(decl)
         self.declarations = temp
@@ -1977,7 +1980,57 @@ class PyAssignment(ASTNode):
 
     def __str__(self):
         return f'{self.var} = {self.val}'
+    
+class TransiotionGraph:
+    def __init__(self,voc:Vocabulary) -> None:
+        self.voc = Vocabulary
+        self.states : List[List[Tuple(str,Identifier)]] = []
+        self.transtions : dict[Tuple(str,str),AppliedSymbol] = {}
+        self.aextentions : dict[str,List[Extension]] = {}
+        self.fextentions : dict[str,List[Extension]] = {}
+        self.FillExtensions()
+        self.SetStates()
 
+    def SetStates(self):
+        fluentstate :List[Tuple(str,List[Tuple])] = []
+        for f , extensions in self.fextentions.items():
+           fluentstate.append(Tuple(f,list(product(*([ee[0] for ee in e[0]] for e in extensions)))))
+        self.states = TransiotionGraph.crossstates(fluentstate)
+
+
+    def crossstates(fluentstate :List[Tuple(str,List[Tuple])])->List[List[Tuple]]:
+        if len(fluentstate) <= 1 :
+            return fluentstate.copy()
+        current = fluentstate[0]
+        out = []
+        result = TransiotionGraph.crossstates(fluentstate[1:])
+        for c in current[1]:
+            for r in result:
+                out.append([Tuple(current[0],c)] + r)
+        return out
+
+
+    def FillExtensions(self):
+        for d in self.voc.declarations:
+            for a in self.voc.actions:
+                if d.name == a:
+                    if len(d.domains) == 0:  # () -> ..
+                        self.aextensions[a] = [ ([[]], None) ]
+                    elif d.arity == 0:  # subset of ()
+                        self.aextensions[a] = [s.extension({}) for s in d.domains]
+                    else:
+                        self.aextensions[a] = [s.extension({}) for s in d.domains]
+        for d in self.voc.declarations:
+            for f in self.voc.fluents:
+                if d.name == f:
+                    if len(d.domains) == 0:  # () -> ..
+                        self.fextensions[f] = [ ([[]], None) ]
+                    elif d.arity == 0:  # subset of ()
+                        self.fextensions[f] = [s.extension({}) for s in d.domains]
+                    else:
+                        self.fextensions[f] = [s.extension({}) for s in d.domains]
+
+        
 
 ########################################################################
 
