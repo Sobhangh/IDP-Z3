@@ -34,9 +34,9 @@ from typing import Any, Tuple, List, Union, Optional, TYPE_CHECKING
 
 
 from .Assignments import Assignments
-from .Expression import (Annotations, Annotation, ASTNode, Constructor, CONSTRUCTOR,
-                         Accessor, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, SymbolExpr, Expression,
-                         AIfExpr, IF, AQuantification, split_quantees, SetName,
+from .Expression import (Annotations, Annotation, ASTNode, CLFormula, Constructor, CONSTRUCTOR,
+                         Accessor, DLFormula, FLFormula, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, RLFormula, StartAppliedSymbol, SymbolExpr, Expression,
+                         AIfExpr, IF, AQuantification, ULFormula, WLFormula, XLFormula, split_quantees, SetName,
                          SETNAME, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
                          ASumMinus, AMultDiv, APower, AUnary, AAggregate,
@@ -83,6 +83,7 @@ class IDP(ASTNode):
         self.vocabularies = self.dedup_nodes(kwargs, 'vocabularies')
         self.theories = self.dedup_nodes(kwargs, 'theories')
         self.structures = self.dedup_nodes(kwargs, 'structures')
+        self.temporallogicformulas = self.dedup_nodes(kwargs, 'temporallogicformulas')
         displays = kwargs.pop('displays')
         self.procedures = self.dedup_nodes(kwargs, 'procedures')
 
@@ -107,6 +108,10 @@ class IDP(ASTNode):
             #print("voc next")
 
             voc.annotate_block(self)
+            #if len(voc.tempdcl) > 0:
+                #voc.transitiongraph = TransiotionGraph(voc)
+                #print("tandsition graph")
+                #print(voc.transitiongraph.states)
             #print("voc annot")
         for t in self.theories.values():
             if t.ltc:
@@ -233,6 +238,7 @@ class Vocabulary(ASTNode):
         self.voc = self
         self.actions : List[str] =[]
         self.fluents : List[str] =[]
+        self.transitiongraph : TransiotionGraph = None
         # expand multi-symbol declarations
         temp = []
         for decl in declarations:
@@ -1273,7 +1279,20 @@ class Rule(Expression):
 
 
 # Expressions : see Expression.py
+    
+################################ TempLogic  ###############################
+    
+class TempLogic(ASTNode):
+    """
+    The class of AST nodes representing a temporal logic block.
+    """
+    def __init__(self,parent,**kwargs):
+        self.name= kwargs.pop('name')
+        self.vocab_name = kwargs.pop('vocab_name')
+        self.formula : LFormula = kwargs.pop('formula')
 
+    def __str__(self):
+        return self.name
 ################################ Structure  ###############################
 
 class Structure(ASTNode):
@@ -1982,53 +2001,72 @@ class PyAssignment(ASTNode):
         return f'{self.var} = {self.val}'
     
 class TransiotionGraph:
-    def __init__(self,voc:Vocabulary) -> None:
-        self.voc = Vocabulary
+    def __init__(self,voc:Vocabulary,problem:Theory):
+        self.voc = voc
         self.states : List[List[Tuple(str,Identifier)]] = []
-        self.transtions : dict[Tuple(str,str),AppliedSymbol] = {}
-        self.aextentions : dict[str,List[Extension]] = {}
-        self.fextentions : dict[str,List[Extension]] = {}
-        self.FillExtensions()
+        self.transtions : dict[Tuple,List[AppliedSymbol]] = {}
+        self.aextentions : dict[str,Extension] = {}
+        self.fextentions : dict[str,Extension] = {}
+        self.FillExtensions(problem.extensions)
+        print("flunents")
+        print(self.fextentions)
         self.SetStates()
 
     def SetStates(self):
-        fluentstate :List[Tuple(str,List[Tuple])] = []
+        fluentstate :List[Tuple(str,Extension)] = []
         for f , extensions in self.fextentions.items():
-           fluentstate.append(Tuple(f,list(product(*([ee[0] for ee in e[0]] for e in extensions)))))
-        self.states = TransiotionGraph.crossstates(fluentstate)
+           fluentstate.append((f,extensions))
+        if len(fluentstate) > 0:
+            self.states = TransiotionGraph.crossstates(fluentstate)
 
 
-    def crossstates(fluentstate :List[Tuple(str,List[Tuple])])->List[List[Tuple]]:
-        if len(fluentstate) <= 1 :
-            return fluentstate.copy()
+    def crossstates(fluentstate :List[Tuple(str,Extension)])->List[List[Tuple]]:
+        #print("cross states")
+        #print(fluentstate)
+        if len(fluentstate) == 1 :
+            return TransiotionGraph.perturbateExtens(fluentstate[0])
         current = fluentstate[0]
         out = []
         result = TransiotionGraph.crossstates(fluentstate[1:])
-        for c in current[1]:
+        #print("2e phase")
+        extent = current[1][0]
+        if extent == [[]]:
             for r in result:
-                out.append([Tuple(current[0],c)] + r)
+                out.append([(current[0],None)]+r)
+                out.append(r)
+        else:
+            for c in extent:
+                for r in result:
+                    #print(r)
+                    out.append([(current[0],c)] + r)
         return out
+    
+    def perturbateExtens(fluentstate :Tuple(str,Extension)):
+        extent = fluentstate[1][0]
+        if extent == [[]]:
+            return [[],[(fluentstate[0],None)]]
+        elif len(extent) > 0:
+            return [[(fluentstate[0],e)] for e in extent]
 
 
-    def FillExtensions(self):
-        for d in self.voc.declarations:
+    def FillExtensions(self,extensions: dict[str, Extension]):
+        for s , e in extensions.items():
             for a in self.voc.actions:
-                if d.name == a:
-                    if len(d.domains) == 0:  # () -> ..
-                        self.aextensions[a] = [ ([[]], None) ]
-                    elif d.arity == 0:  # subset of ()
-                        self.aextensions[a] = [s.extension({}) for s in d.domains]
-                    else:
-                        self.aextensions[a] = [s.extension({}) for s in d.domains]
-        for d in self.voc.declarations:
+                if s == a:
+                    self.aextentions[a] = e
+                    #if self.symbol_decl.codomain == BOOL_SETNAME:  # predicate
+                    #    extension = [t.args for t in self.enumeration.tuples]
+                    #    problem.extensions[self.symbol_decl.name] = (extension, None)
+                    #if len(d.domains) == 0:  # () -> ..
+                    #    self.aextensions[a] = [ ([[]], None) ]
+                    #elif d.arity == 0:  # subset of ()
+                    #    self.aextensions[a] = [s.extension({}) for s in d.domains]
+                    #else:
+                    #    self.aextensions[a] = [s.extension({}) for s in d.domains]
+        for s , e in extensions.items():
             for f in self.voc.fluents:
-                if d.name == f:
-                    if len(d.domains) == 0:  # () -> ..
-                        self.fextensions[f] = [ ([[]], None) ]
-                    elif d.arity == 0:  # subset of ()
-                        self.fextensions[f] = [s.extension({}) for s in d.domains]
-                    else:
-                        self.fextensions[f] = [s.extension({}) for s in d.domains]
+                if s == f:
+                    self.fextentions[f] = e
 
         
 
@@ -2054,6 +2092,8 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          APower, AUnary, AAggregate,
                                          AppliedSymbol, UnappliedSymbol,StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol,
                                          Number, Brackets, Date, Variable,
+                                         TempLogic,ILFormula,DLFormula,
+                                         CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula,
 
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,

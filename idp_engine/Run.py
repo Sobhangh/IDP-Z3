@@ -33,9 +33,9 @@ from typing import Any, Iterator, List, Union, Optional
 from idp_engine import Expression
 from z3 import Solver
 
-from idp_engine.Expression import FALSE, INT_SETNAME, TRUE, AImplication, AQuantification, ASumMinus, AUnary, AppliedSymbol, NextAppliedSymbol, NowAppliedSymbol, Number, StartAppliedSymbol, UnappliedSymbol
+from idp_engine.Expression import FALSE, INT_SETNAME, TRUE, AImplication, AQuantification, ASumMinus, AUnary, AppliedSymbol, NextAppliedSymbol, NowAppliedSymbol, Number, StartAppliedSymbol, SymbolExpr, UnappliedSymbol
 
-from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TemporalDeclaration, TheoryBlock, Structure, TupleIDP, Vocabulary
+from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, Vocabulary
 from .Theory import Theory
 from .Assignments import Status as S, Assignments
 from .utils import NEWL, IDPZ3Error, PROCESS_TIMINGS, OrderedSet, v_time
@@ -569,6 +569,75 @@ def contains_symb(e:Expression,s:str):
             return -1
     return 0
     
+def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
+    #TO DO: check if the init_structure does interpret all the time independant predicates/functions
+    if theory.ltc is None:
+        return "Theory should be an LTC theory"
+    print("inside prove......")
+    vcnm = init_structure.vocab_name+"_now"
+    testth = TheoryBlock(name="T",vocab_name=vcnm,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+    voc_now = init_structure.voc.idp.now_voc[vcnm]
+    testth.voc = voc_now
+    voc_now.add_voc_to_block(testth)
+    problem = Theory(testth)
+    #print(problem.extensions)
+    transitiongraph = TransiotionGraph(init_structure.voc,problem)
+    #print("transiiton graph states")
+    #for l in transitiongraph.states:
+    #    print(l)
+    for s1 in transitiongraph.states:
+        for s2 in transitiongraph.states:
+            for action , extentsion in transitiongraph.aextentions.items():
+                e = extentsion[0]
+                t = False
+                if e == [[]]:
+                    t = checkTransition(action,None,init_structure,theory.transition_theory,s1,s2)
+                    if t != False:
+                        transitiongraph.transtions[(s1,s2)].append(t)
+                else:
+                    for arg in e:
+                        t = checkTransition(action,arg,init_structure,theory.transition_theory,s1,s2)
+                        if t != False:
+                            transitiongraph.transtions[(s1,s2)].append(t)
+
+def checkTransition(action:str,args,init_struct:Structure,transition_theory:TheoryBlock,s1:List,s2:List):
+    actionPred = None
+    if args is None:
+        actionPred = AppliedSymbol(None,SymbolExpr(None,action,None,None),[])
+    else:
+        actionPred = AppliedSymbol(None,SymbolExpr(None,action,None,None),args)
+    actionPred.annotate(transition_theory.voc,{})
+    currentState = []
+    for s in s1:
+        if s[1] is None:
+            currentState.append(AppliedSymbol(None,SymbolExpr(None,s[0],None,None),[]))
+        else:
+            currentState.append(AppliedSymbol(None,SymbolExpr(None,s[0],None,None),s[1]))
+        currentState[-1].annotate(transition_theory.voc,{})
+    nextState = []
+    for s in s2:
+        if s[1] is None:
+            nextState.append(AppliedSymbol(None,SymbolExpr(None,s[0]+"_next",None,None),[]))
+        else:
+            nextState.append(AppliedSymbol(None,SymbolExpr(None,s[0]+"_next",None,None),s[1]))
+        nextState[-1].annotate(transition_theory.voc,{})
+
+    testth = TheoryBlock(name="Transit",vocab_name=transition_theory.vocab_name,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+    testth.constraints = OrderedSet(nextState+currentState+[actionPred])
+    p = model_expand(init_struct,transition_theory,testth)
+    second_step =False
+    j=0
+    for i, xi in enumerate(p):
+        if xi == 'No models.':
+            second_step = True
+        j+=1
+    if second_step and j==1:
+        return False
+    return actionPred
+
+    
 
 def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
                  max: int = 10,
@@ -876,6 +945,7 @@ def execute(self: IDP, capture_print : bool = False) -> Optional[str]:
     mylocals = copy(self.vocabularies)
     mylocals.update(self.theories)
     mylocals.update(self.structures)
+    mylocals.update(self.temporallogicformulas)
     mylocals['gc'] = gc
     mylocals['logging'] = logging
     mylocals['model_check'] = model_check
@@ -895,6 +965,7 @@ def execute(self: IDP, capture_print : bool = False) -> Optional[str]:
     mylocals['isinvariant'] = isinvariant
     mylocals['simulate'] = simulate
     mylocals['ForProgression'] = ForProgression
+    mylocals['ProveModalLogic'] = ProveModalLogic 
 
     try:
         exec(main, mybuiltins, mylocals)

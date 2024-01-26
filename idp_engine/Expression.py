@@ -1593,6 +1593,83 @@ class NextAppliedSymbol(Expression):
     def generate_constructors(self, constructors: dict):
         self.sub_expr.generate_constructors(constructors,dict)
 
+class GLFormula(Expression):
+    """
+        Repressents the following LTL formula: G p 
+    """
+    def __init__(self,parent,expr:LFormula):
+        self.expr = expr
+
+class XLFormula(Expression):
+    """
+        Repressents the following LTL formula: X p 
+    """
+    def __init__(self,parent,expr:LFormula):
+        self.expr = expr
+
+class FLFormula(Expression):
+    """
+        Repressents the following LTL formula: F p 
+    """
+    def __init__(self,parent,expr:LFormula):
+        self.expr = expr
+
+class NLFormula(Expression):
+    """
+        Repressents the following LTL formula: not p 
+    """
+    def __init__(self,parent,expr:LFormula):
+        self.expr = expr
+
+class ULFormula(Expression):
+    """
+        Repressents the following LTL formula: q U p 
+    """
+    def __init__(self,parent,expr1:LFormula,expr2:LFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+
+class WLFormula(Expression):
+    """
+        Repressents the following LTL formula: q W p 
+    """
+    def __init__(self,parent,expr1:LFormula,expr2:LFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+
+class RLFormula(Expression):
+    """
+        Repressents the following LTL formula: q R p 
+    """
+    def __init__(self,parent,expr1:LFormula,expr2:LFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+
+class CLFormula(Expression):
+    """
+        Repressents the following LTL formula: q and p 
+    """
+    def __init__(self,parent,expr1:LFormula,expr2:LFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+
+class DLFormula(Expression):
+    """
+        Repressents the following LTL formula: q or p 
+    """
+    def __init__(self,parent,expr1:LFormula,expr2:LFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+
+class ILFormula(Expression):
+    """
+        Repressents the following LTL formula: q => p 
+    """
+    def __init__(self,parent,expr1:LFormula,expr2:LFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+
+LFormula = Union[Expression,ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula]
 
 class SymbolExpr(Expression):
     """ represents either a type name, a symbol name

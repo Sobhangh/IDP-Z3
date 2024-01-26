@@ -2,6 +2,7 @@ IDP:
     Shebang?
     ( vocabularies=Vocabulary
     | theories=TheoryBlock
+    | temporallogicformulas=TempLogic
     | structures=Structure
     | procedures=Procedure
     | displays=Display) *
@@ -134,6 +135,20 @@ IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
           | iso='#TODAY' ( '(' y=INT ',' m=INT ',' d=INT ')' )?;
       Brackets: annotations=Annotations '(' f=Expression ')';
 
+
+TempLogic: 'temporal_logic' name=ID ':' vocab_name=ID '{'
+             formula=LFormula '}' ;
+  LFormula : Expression | GLFormula | XLFormula | FLFormula | ULFormula | WLFormula | RLFormula | NLFormula | CLFormula | DLFormula | ILFormula ; 
+    GLFormula : '(G' expr=LFormula ')' ;
+    XLFormula : '(X' expr=LFormula ')' ;
+    FLFormula : '(F' expr=LFormula ')' ;
+    ULFormula : '(' expr1=LFormula 'U' expr2=LFormula ')' ;
+    WLFormula : '(' expr1=LFormula 'W' expr2=LFormula ')' ;
+    RLFormula : '(' expr1=LFormula 'R' expr2=LFormula ')' ;
+    NLFormula : '(' UnaryOperator expr=LFormula ')' ;
+    CLFormula : '(' expr1=LFormula ConjunctionOp expr2=LFormula ')' ;
+    DLFormula : '(' expr1=LFormula DisjunctionOp expr2=LFormula ')' ;
+    ILFormula : '(' expr1=LFormula ImplicationOp expr2=LFormula ')' ;
 
 Structure: 'structure' name=ID? (':' vocab_name=ID)?
            '{' interpretations*=SymbolInterpretation '}';
