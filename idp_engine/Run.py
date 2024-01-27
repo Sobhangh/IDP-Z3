@@ -573,6 +573,11 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     #TO DO: check if the init_structure does interpret all the time independant predicates/functions
     if theory.ltc is None:
         return "Theory should be an LTC theory"
+    #In order to avoid giving dupllicae declaration error in Theory.add
+    temps = Structure(name="test",vocab_name=init_structure.vocab_name,interpretations=init_structure.interpretations.values())
+    temps.voc= init_structure.voc
+    #for i in s.interpretations.values():
+    #    i.block = s
     print("inside prove......")
     vcnm = init_structure.vocab_name+"_now"
     testth = TheoryBlock(name="T",vocab_name=vcnm,ltc = None,inv=None,
@@ -586,27 +591,71 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     #print("transiiton graph states")
     #for l in transitiongraph.states:
     #    print(l)
+    Nonaction = {}
+    for action , extentsion in transitiongraph.aextentions.items():
+        e = extentsion[0]
+        if e == [[]]:
+            na = AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,action,None,None),[]))
+            na.annotate(theory.transition_theory.voc,{})
+            nal = Nonaction.get(action,[])
+            nal.append(na)
+            Nonaction[action] = nal
+        else:
+            for arg in e:
+                na = AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,action,None,None),arg))
+                na.annotate(theory.transition_theory.voc,{})
+                nal = Nonaction.get(action,[])
+                nal.append(na)
+                Nonaction[action] = nal
+
+    i =0
     for s1 in transitiongraph.states:
+        j=0
         for s2 in transitiongraph.states:
             for action , extentsion in transitiongraph.aextentions.items():
                 e = extentsion[0]
                 t = False
                 if e == [[]]:
-                    t = checkTransition(action,None,init_structure,theory.transition_theory,s1,s2)
+                    t = checkTransition(action,None,temps,theory.transition_theory,s1,s2,Nonaction)
                     if t != False:
-                        transitiongraph.transtions[(s1,s2)].append(t)
+                        trs = transitiongraph.transtions.get((i,j),[])
+                        trs.append(t)
+                        transitiongraph.transtions[(i,j)] = trs
                 else:
+                    q = 0
                     for arg in e:
-                        t = checkTransition(action,arg,init_structure,theory.transition_theory,s1,s2)
+                        t = checkTransition(action,arg,temps,theory.transition_theory,s1,s2,Nonaction,q)
                         if t != False:
-                            transitiongraph.transtions[(s1,s2)].append(t)
+                            trs = transitiongraph.transtions.get((i,j),[])
+                            trs.append(t)
+                            transitiongraph.transtions[(i,j)] = trs
+                        q += 1
+            j += 1
+        i += 1
+    print("transition states")
+    print(transitiongraph.states)
+    print("transition list")
+    print(transitiongraph.transtions)
 
-def checkTransition(action:str,args,init_struct:Structure,transition_theory:TheoryBlock,s1:List,s2:List):
+def checkTransition(action:str,args,init_struct:Structure,transition_theory:TheoryBlock,s1:List,s2:List,non_action:dict,argindex:int=0):
     actionPred = None
     if args is None:
         actionPred = AppliedSymbol(None,SymbolExpr(None,action,None,None),[])
     else:
         actionPred = AppliedSymbol(None,SymbolExpr(None,action,None,None),args)
+    no_concurrency = []
+    for a , act in non_action.items():
+        if a == action:
+            i = 0
+            while i < len(act):
+                if i != argindex:
+                    no_concurrency += [act[i]]
+                i+=1
+        else:
+            no_concurrency += act 
+    #TO DO: ADD THE SAME NEGATION PRINCIPLE FOR STATES 
+    #Could increase speed by performing this before hand
+    # For the correct one can simple take out what is inside the negation
     actionPred.annotate(transition_theory.voc,{})
     currentState = []
     for s in s1:
@@ -625,11 +674,17 @@ def checkTransition(action:str,args,init_struct:Structure,transition_theory:Theo
 
     testth = TheoryBlock(name="Transit",vocab_name=transition_theory.vocab_name,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
-    testth.constraints = OrderedSet(nextState+currentState+[actionPred])
-    p = model_expand(init_struct,transition_theory,testth)
+    testth.constraints = OrderedSet(nextState+currentState+[actionPred]+no_concurrency)
+    interp = transition_theory.interpretations
+    transition_theory.interpretations = {}
+    p = Theory(init_struct,transition_theory,testth)
+    res = list(p.expand())
+    transition_theory.interpretations = interp
+    #print("interpret transiti")
+    #print(transition_theory.interpretations)
     second_step =False
     j=0
-    for i, xi in enumerate(p):
+    for i, xi in enumerate(res):
         if xi == 'No models.':
             second_step = True
         j+=1

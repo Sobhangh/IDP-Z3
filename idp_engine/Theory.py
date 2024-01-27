@@ -38,7 +38,7 @@ from .Expression import (TRUE, Expression, FALSE, AppliedSymbol, AComparison,
 from .Parse import (TypeDeclaration, Declaration, SymbolDeclaration, SymbolExpr,
                     TheoryBlock, Structure, Definition,                     SymbolInterpretation)
 from .Simplify import join_set_conditions
-from .utils import (OrderedSet, NEWL, INT, REAL, DATE, IDPZ3Error,
+from .utils import (TIJD, OrderedSet, NEWL, INT, REAL, DATE, IDPZ3Error,
                     RESERVED_SYMBOLS, CONCEPT, GOAL_SYMBOL, RELEVANT,
                     NOT_SATISFIABLE)
 from .Z3_to_IDP import z3_to_idp, collect_questions, get_interpretations
@@ -261,7 +261,7 @@ class Theory(object):
             # process block.interpretations
             for name, interpret in block.interpretations.items():
                 assert (name not in self.interpretations
-                        or name in [INT, REAL, DATE, CONCEPT]
+                        or name in [INT, REAL, DATE, CONCEPT, TIJD]
                         or self.interpretations[name] == block.interpretations[name]), \
                         f"Can't add enumeration for {name} in {block.name}: duplicate"
                 self.interpretations[name] = interpret
@@ -284,7 +284,8 @@ class Theory(object):
         # Interpret the vocabulary
         for symbol, decl in self.declarations.items():
             decl.interpret(self)
-
+        #print("problem extension::")
+        #print(self.extensions)
         # remove RELEVANT constraints
         self.constraints = OrderedSet([v for k,v in self.constraints.items()
             if not(type(v) == AppliedSymbol
