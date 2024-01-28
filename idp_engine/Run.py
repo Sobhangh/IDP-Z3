@@ -33,7 +33,7 @@ from typing import Any, Iterator, List, Union, Optional
 from idp_engine import Expression
 from z3 import Solver
 
-from idp_engine.Expression import FALSE, INT_SETNAME, TRUE, AImplication, AQuantification, ASumMinus, AUnary, AppliedSymbol, NextAppliedSymbol, NowAppliedSymbol, Number, StartAppliedSymbol, SymbolExpr, UnappliedSymbol
+from idp_engine.Expression import FALSE, INT_SETNAME, OR, TRUE, AImplication, AQuantification, ASumMinus, AUnary, AppliedSymbol, NextAppliedSymbol, NowAppliedSymbol, Number, StartAppliedSymbol, SymbolExpr, UnappliedSymbol
 
 from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, Vocabulary
 from .Theory import Theory
@@ -591,6 +591,7 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     #print("transiiton graph states")
     #for l in transitiongraph.states:
     #    print(l)
+    #To make beforehand the negation of actions and annotate them
     Nonaction = {}
     for action , extentsion in transitiongraph.aextentions.items():
         e = extentsion[0]
@@ -607,11 +608,41 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
                 nal = Nonaction.get(action,[])
                 nal.append(na)
                 Nonaction[action] = nal
+    Nstate = []
+    Nnextstate = []
+    i = 0
+    for s1 in transitiongraph.states:
+        Nstate.append([])
+        Nnextstate.append([])
+        for s in s1:
+            if s[2] is None:
+                if s[0] == True:
+                    Nstate[-1].append(AppliedSymbol(None,SymbolExpr(None,s[1],None,None),[]))
+                    Nstate[-1][-1].annotate(theory.transition_theory.voc,{})
+                    Nnextstate[-1].append(AppliedSymbol(None,SymbolExpr(None,s[1]+"_next",None,None),[]))
+                    Nnextstate[-1][-1].annotate(theory.transition_theory.voc,{})
+                else:
+                    Nstate[-1].append(AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,s[1],None,None),[])))
+                    Nstate[-1][-1].annotate(theory.transition_theory.voc,{})
+                    Nnextstate[-1].append(AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,s[1]+"_next",None,None),[])))
+                    Nnextstate[-1][-1].annotate(theory.transition_theory.voc,{})
+            else:
+                if s[0] == True:
+                    Nstate[-1].append(AppliedSymbol(None,SymbolExpr(None,s[1],None,None),s[2]))
+                    Nstate[-1][-1].annotate(theory.transition_theory.voc,{})
+                    Nnextstate[-1].append(AppliedSymbol(None,SymbolExpr(None,s[1]+"_next",None,None),s[2]))
+                    Nnextstate[-1][-1].annotate(theory.transition_theory.voc,{})
+                else:
+                    Nstate[-1].append(AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,s[1],None,None),s[2])))
+                    Nstate[-1][-1].annotate(theory.transition_theory.voc,{})
+                    Nnextstate[-1].append(AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,s[1]+"_next",None,None),s[2])))
+                    Nnextstate[-1][-1].annotate(theory.transition_theory.voc,{})
+        #i += 1
 
     i =0
-    for s1 in transitiongraph.states:
+    for s1 in Nstate:
         j=0
-        for s2 in transitiongraph.states:
+        for s2 in Nnextstate:
             for action , extentsion in transitiongraph.aextentions.items():
                 e = extentsion[0]
                 t = False
@@ -637,12 +668,16 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     print("transition list")
     print(transitiongraph.transtions)
 
-def checkTransition(action:str,args,init_struct:Structure,transition_theory:TheoryBlock,s1:List,s2:List,non_action:dict,argindex:int=0):
+#action is the name of the action to checked; ini_struct is the given initial structure;
+#Nstate is a list which contains the annotated of all its positive and negation predicates; Nnextstate is the same but for next time point
+# cstt is the index of the cuurent state in Nstate; nstt is the index of the next state in Nnextstate
+#non_action is dictionary containing the annotated negation of all actions; arg_action is the index for the argument of the action to be checked
+def checkTransition(action:str,args,init_struct:Structure,transition_theory:TheoryBlock,Nstate:List,Nnextstate:List,non_action:dict,argindex:int=0):
     actionPred = None
-    if args is None:
-        actionPred = AppliedSymbol(None,SymbolExpr(None,action,None,None),[])
-    else:
-        actionPred = AppliedSymbol(None,SymbolExpr(None,action,None,None),args)
+    #if args is None:
+    #    actionPred = AppliedSymbol(None,SymbolExpr(None,action,None,None),[])
+    #else:
+    #    actionPred = AppliedSymbol(None,SymbolExpr(None,action,None,None),args)
     no_concurrency = []
     for a , act in non_action.items():
         if a == action:
@@ -650,31 +685,21 @@ def checkTransition(action:str,args,init_struct:Structure,transition_theory:Theo
             while i < len(act):
                 if i != argindex:
                     no_concurrency += [act[i]]
+                else:
+                    actionPred = act[i].sub_exprs[0]
                 i+=1
         else:
             no_concurrency += act 
     #TO DO: ADD THE SAME NEGATION PRINCIPLE FOR STATES 
     #Could increase speed by performing this before hand
     # For the correct one can simple take out what is inside the negation
-    actionPred.annotate(transition_theory.voc,{})
-    currentState = []
-    for s in s1:
-        if s[1] is None:
-            currentState.append(AppliedSymbol(None,SymbolExpr(None,s[0],None,None),[]))
-        else:
-            currentState.append(AppliedSymbol(None,SymbolExpr(None,s[0],None,None),s[1]))
-        currentState[-1].annotate(transition_theory.voc,{})
-    nextState = []
-    for s in s2:
-        if s[1] is None:
-            nextState.append(AppliedSymbol(None,SymbolExpr(None,s[0]+"_next",None,None),[]))
-        else:
-            nextState.append(AppliedSymbol(None,SymbolExpr(None,s[0]+"_next",None,None),s[1]))
-        nextState[-1].annotate(transition_theory.voc,{})
-
+    #actionPred.annotate(transition_theory.voc,{})
+    
     testth = TheoryBlock(name="Transit",vocab_name=transition_theory.vocab_name,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
-    testth.constraints = OrderedSet(nextState+currentState+[actionPred]+no_concurrency)
+    testth.constraints = OrderedSet(Nstate+Nnextstate+[actionPred]+no_concurrency)
+    
+    #print(testth.constraints)
     interp = transition_theory.interpretations
     transition_theory.interpretations = {}
     p = Theory(init_struct,transition_theory,testth)

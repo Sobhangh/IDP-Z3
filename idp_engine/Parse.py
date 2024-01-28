@@ -1435,6 +1435,16 @@ class SymbolInterpretation(Expression):
                         out)
             return out
         
+    def init_copy(self,parent=None):
+        enum = None
+        if not self.no_enum:
+            enum = self.enumeration.init_copy()
+        default = None
+        if self.default:
+            default = self.default.init_copy()
+        return SymbolInterpretation(parent=None,name= UnappliedSymbol(None,(self.name)),sign = self.sign,
+                             enumeration=enum, default=default)
+        
     #Projects the interpretation to time 0: Used in the context of LTC theories
     def initialize_temporal_interpretation(self,tempdc) -> SymbolInterpretation:
         enum = None
@@ -2003,13 +2013,14 @@ class PyAssignment(ASTNode):
 class TransiotionGraph:
     def __init__(self,voc:Vocabulary,problem:Theory):
         self.voc = voc
-        self.states : List[List[Tuple(str,Identifier)]] = []
-        self.transtions : dict[Tuple,List[AppliedSymbol]] = {}
+        #Each state is a list where each element is a tuple where first element is if the predicate is part of the 
+        #state, second the name of the fluent and third its arguments
+        self.states : List[List[Tuple(bool,str,Identifier)]] = []
+        self.transtions : dict[Tuple(int,int),List[AppliedSymbol]] = {}
         self.aextentions : dict[str,Extension] = {}
         self.fextentions : dict[str,Extension] = {}
         self.FillExtensions(problem.extensions)
-        print("flunents")
-        print(self.fextentions)
+        #TO DO : WHAT ABOUT FUNCTIONS and add tests for functions
         self.SetStates()
 
     def SetStates(self):
@@ -2032,21 +2043,32 @@ class TransiotionGraph:
         extent = current[1][0]
         if extent == [[]]:
             for r in result:
-                out.append([(current[0],None)]+r)
-                out.append(r)
+                out.append([(True,current[0],None)]+r)
+                out.append([(False,current[0],None)]+r)
         else:
             for c in extent:
                 for r in result:
                     #print(r)
-                    out.append([(current[0],c)] + r)
+                    tot = [(True,current[0],c)] + r
+                    for c2 in extent:
+                        if c2 != c:
+                            tot += [(False,current[0],c2)]
+                    out.append(tot)
         return out
     
     def perturbateExtens(fluentstate :Tuple(str,Extension)):
         extent = fluentstate[1][0]
         if extent == [[]]:
-            return [[],[(fluentstate[0],None)]]
+            return [[(False,fluentstate[0],None)],[(True,fluentstate[0],None)]]
         elif len(extent) > 0:
-            return [[(fluentstate[0],e)] for e in extent]
+            res = []
+            for e in extent:
+                tot = [(True,fluentstate[0],e)]
+                for e2 in extent:
+                    if e2 != e:
+                        tot += [(False,fluentstate[0],e2)]
+                res.append(tot)
+            return res
 
 
     def FillExtensions(self,extensions: dict[str, Extension]):
