@@ -241,6 +241,7 @@ def annotate_block(self: ASTNode,
     assert isinstance(self, TheoryBlock), "Internal error"
     if self.inv:
         return out
+    #print(idp.vocabularies.keys())
     self.check(self.vocab_name in idp.vocabularies,
                 f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
@@ -354,7 +355,8 @@ def annotate_trs_theory(theory:TheoryBlock,idp):
         #theory.init_theory.declarations = theory.declarations
         theory.transition_theory.definitions = [e.annotate(voc, {},False) for e in theory.transition_theory.definitions]
         #print("ch15")
-        theory.transition_theory.constraints = OrderedSet([e.annotate(voc, {},False)
+        #OrderedSet would remove some of the constraints because so should not be here
+        theory.transition_theory.constraints = ([e.annotate(voc, {})
                                     for e in theory.transition_theory.constraints])
         #print("ch2")
 

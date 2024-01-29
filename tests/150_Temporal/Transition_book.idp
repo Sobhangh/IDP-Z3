@@ -1,0 +1,34 @@
+vocabulary V {
+  type person is {John,Bob,Marry}
+  type book is {B1}
+  <Temporal> owns : (person * book) -> Bool
+  <Cause> ct_owns : (person * book) -> Bool
+  <Cause> cf_owns : (person * book) -> Bool
+  <Action> gives: (person * book * person) -> Bool
+}
+
+theory LTC T:V {
+
+    {
+        Start[owns(Bob,B1)].
+        ! p in person, b in book: Next[owns(p,b)] <- Now[ct_owns(p,b)].
+        ! p in person, b in book: Next[owns(p,b)] <- Now[owns(p,b)] and not Now[cf_owns(p,b)].
+        ! g in person, r in person, b in book: Now[ct_owns(r,b)] <- Now[gives(g,b,r)].
+        ! g in person, r in person, b in book: Now[cf_owns(g,b)] <- Now[gives(g,b,r)].
+    }
+    ! g in person, r in person, b in book: Now[gives(g,b,r)] => Now[owns(g,b)].
+    #{ g in person, b in book, r in person : Now[gives(g,b,r)] } =< 1.
+    
+}
+
+temporal_logic ltl:V {
+    (F owns(Bob,B1) )
+}
+
+structure S:V {
+    // Check if the partial assignment of structure works with temporal predicate
+}
+
+procedure main () {
+    ProveModalLogic(ltl,S,T)
+}

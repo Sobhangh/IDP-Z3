@@ -1194,7 +1194,7 @@ class AAggregate(Expression):
         f = None
         if_ = None
         if self.f != TRUE:
-            f = self.f
+            f = self.f.init_copy()
         if self.if_orig:
             if_ = self.if_orig.init_copy()
         quantees = [q.init_copy() for q in self.quantees]

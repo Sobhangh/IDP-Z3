@@ -1,0 +1,33 @@
+vocabulary V {
+  type test is {0..5}
+  //type t2 is {a,b,c}
+  <Temporal> l1 : () -> Bool
+  <Temporal> l2: () -> Bool
+  <Action> s1: () -> Bool
+  <Action> s2: () -> Bool
+  <Action> sa : () -> Bool
+  //<Temporal> ai: (test * t2) -> Bool
+
+}
+
+theory LTC T:V {
+
+    {
+        Next[l1()] <- Now[s1()] or Now[sa()].
+        Next[l2()] <- Now[s2()] or Now[sa()].
+    }
+
+    
+}
+
+temporal_logic ltl:V {
+    (F l1() )
+}
+
+structure S:V {
+    // Check if the partial assignment of structure works with temporal predicate
+}
+
+procedure main () {
+    ProveModalLogic(ltl,S,T)
+}

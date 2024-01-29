@@ -791,6 +791,8 @@ class TheoryBlock(ASTNode):
             expression.sub_exprs[j] = self.replace_with_n(e,i,n)
             if expression.sub_exprs[j] == False:
                 return False
+            expression.sub_exprs[j].code =intern(str(expression.sub_exprs[j]))
+            expression.sub_exprs[j].str = expression.sub_exprs[j].code
             j+=1
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
             expression.f = expression.sub_exprs[0]
@@ -903,12 +905,18 @@ class TheoryBlock(ASTNode):
                 r = self.bis_subexpr(c.init_copy())
                 if r != False:
                     cnstrs.append(r)
+                    r.code = intern(str(r))
+                    r.str = r.code
             else:
                 r = self.sis_subexpr(c.init_copy())
                 r2 = self.bis_subexpr(c.init_copy())
                 if r != False:
                     cnstrs.append(r)
                     cnstrs.append(r2)
+                    r.code = intern(str(r))
+                    r2.code = intern(str(r2))
+                    r.str = r.code
+                    r2.str = r2.code
         defs = []
         for definition in self.definitions:
             defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
@@ -924,23 +932,33 @@ class TheoryBlock(ASTNode):
                     rl.body = self.bis_subexpr(rl.definiendum)
                     if rl.body != False:
                         defs[-1].rules.append(rl)
+                        rl.code = intern(str(rl))
+                        rl.str = rl.code
                     rl2.definiendum = self.sis_subexpr(rl2.definiendum)
                     rl2.body = self.sis_subexpr(rl2.definiendum)
                     if rl2.body != False:
                         defs[-1].rules.append(rl2)
+                        rl2.code = intern(str(rl2))
+                        rl2.str = rl2.code
                 elif not isinstance(rule.definiendum,StartAppliedSymbol):
                     if self.contains_now(rl.body):
                         rl2 = rl.init_copy()
                         rl.body = self.bis_subexpr(rl.definiendum)
                         if rl.body != False:
                             defs[-1].rules.append(rl)
+                            rl.code = intern(str(rl))
+                            rl.str = rl.code
                         rl2.body = self.sis_subexpr(rl2.definiendum)
                         if rl2.body != False:
                             defs[-1].rules.append(rl2)
+                            rl2.code = intern(str(rl2))
+                            rl2.str = rl2.code
                     else:
                         rl.body = self.sis_subexpr(rl.definiendum)
                         if rl.body != False:
                             defs[-1].rules.append(rl)
+                            rl.code = intern(str(rl))
+                            rl.str = rl.code
         self.transition_theory.constraints = cnstrs
         self.transition_theory.definitions = defs
         for d in defs:
@@ -1014,6 +1032,8 @@ class TheoryBlock(ASTNode):
             expression.sub_exprs[i] = self.sis_subexpr(e)
             if expression.sub_exprs[i] == False:
                 return False
+            expression.sub_exprs[i].code = intern(str(expression.sub_exprs[i]))
+            expression.sub_exprs[i].str = expression.sub_exprs[i].code
             i+=1
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
             expression.f = expression.sub_exprs[0]
@@ -1039,6 +1059,8 @@ class TheoryBlock(ASTNode):
             expression.sub_exprs[i] = self.bis_subexpr(e)
             if expression.sub_exprs[i] == False:
                 return False
+            expression.sub_exprs[i].code = intern(str(expression.sub_exprs[i]))
+            expression.sub_exprs[i].str = expression.sub_exprs[i].code
             i+=1
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
             expression.f = expression.sub_exprs[0]
@@ -1062,6 +1084,8 @@ class TheoryBlock(ASTNode):
             expression.sub_exprs[i] = self.init_subexpr(e)
             if expression.sub_exprs[i] == False:
                 return False
+            expression.sub_exprs[i].code = intern(str(expression.sub_exprs[i]))
+            expression.sub_exprs[i].str = expression.sub_exprs[i].code
             i+=1
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
             expression.f = expression.sub_exprs[0]
@@ -1082,6 +1106,8 @@ class TheoryBlock(ASTNode):
                 r = self.init_subexpr2(e)
                 if r == False:
                     return False
+                r.code = intern(str(r))
+                r.str = r.code
             i+=1
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
             expression.f = expression.sub_exprs[0]
@@ -1109,6 +1135,8 @@ class TheoryBlock(ASTNode):
             rule.body = self.sis_subexpr(rule.body)
         if rule.body == False:
                 return False
+        rule.code = intern(str(rule))
+        rule.str = rule.code
         return rule
     
     #Transforms a possible initial rule to current vocabulary
@@ -1130,6 +1158,8 @@ class TheoryBlock(ASTNode):
             if r == False:
                 return False
         #rule.body = self.init_subexpr(rule.body)
+        rule.code = intern(str(rule))
+        rule.str = rule.code
         return rule
 
 class Definition(Expression):
@@ -2046,14 +2076,17 @@ class TransiotionGraph:
                 out.append([(True,current[0],None)]+r)
                 out.append([(False,current[0],None)]+r)
         else:
-            for c in extent:
-                for r in result:
+            for r in result:
+                tot2 = r
+                for c in extent:
                     #print(r)
                     tot = [(True,current[0],c)] + r
+                    tot2 += [(False,current[0],c)] 
                     for c2 in extent:
                         if c2 != c:
                             tot += [(False,current[0],c2)]
                     out.append(tot)
+                out.append(tot2)
         return out
     
     def perturbateExtens(fluentstate :Tuple(str,Extension)):
@@ -2062,12 +2095,15 @@ class TransiotionGraph:
             return [[(False,fluentstate[0],None)],[(True,fluentstate[0],None)]]
         elif len(extent) > 0:
             res = []
+            tot2 = []
             for e in extent:
                 tot = [(True,fluentstate[0],e)]
+                tot2 += [(False,fluentstate[0],e)]
                 for e2 in extent:
                     if e2 != e:
                         tot += [(False,fluentstate[0],e2)]
                 res.append(tot)
+            res.append(tot2)
             return res
 
 

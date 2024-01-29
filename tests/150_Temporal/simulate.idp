@@ -1,0 +1,26 @@
+vocabulary V {
+  <Temporal> l1 : () -> Bool
+  <Temporal> l2: () -> Bool
+  <Action> s1: () -> Bool
+  <Action> s2: () -> Bool
+  <Action> sa : () -> Bool
+
+}
+
+theory LTC T:V {
+
+    {
+        Next[l1()] <- Now[s1()] or Now[sa()].
+        Next[l2()] <- Now[s2()] or Now[sa()].
+    }
+
+    
+}
+
+structure S:V {
+    // Check if the partial assignment of structure works with temporal predicate
+}
+
+procedure main () {
+    simulate(T,S)
+}
