@@ -1,0 +1,43 @@
+vocabulary V {
+    type light is {1..3}
+    stplt: (light) -> Bool
+    test: (light * Bool) -> light
+    Temporal stplt
+}
+
+vocabulary V2 {
+    q: () -> Bool
+    Temporal q
+}
+
+theory LTC T:V {
+    {
+        Start[stplt(1)].
+        //not Start[stplt(2)].
+        //not Start[stplt(3)].
+        Next[stplt(1)] <- (not Now[stplt(1)]) and (not Now[stplt(2)]) and Now[stplt(3)].
+        Next[stplt(2)] <- (not Now[stplt(2)]) and (not Now[stplt(3)]) and Now[stplt(1)].
+        Next[stplt(3)] <- (not Now[stplt(1)]) and (not Now[stplt(3)]) and Now[stplt(2)].
+    }
+}
+
+theory LTC T2:V2 {
+    {
+        Start[q()].
+        Next[q()] <- not Now[q()].
+    }
+}
+
+theory INV Inv:V{
+    !t in Int: (stplt(1,t) and  not stplt(2,t) and not stplt(3,t) ) => stplt(1,t+3).
+}
+
+theory INV Inv2:V2{
+    !t in Int: q(t) => q(t+4).
+}
+
+
+procedure main () {
+    print(isinvariant(T2,Inv2,forward_chaining=True))
+    print(isinvariant(T,Inv,forward_chaining=True))
+}

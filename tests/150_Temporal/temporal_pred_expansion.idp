@@ -1,0 +1,18 @@
+vocabulary V {
+    r,q: () -> Bool
+    p,s: () -> Bool
+    Temporal p
+}
+
+theory T:V {
+    // here comes the definitions and constraints
+    Now[p()].
+}
+
+structure S:V {
+    // here comes the interpretation of some symbols
+}
+
+procedure main () {
+    print(Theory(T).formula())
+}

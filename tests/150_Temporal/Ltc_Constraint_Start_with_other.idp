@@ -1,0 +1,18 @@
+vocabulary V {
+    p: () -> Bool
+    Temporal p
+}
+
+theory LTC T:V {
+    // Should give an error since Start is used with Now/Next
+    (Start[p()] and  (Next[p()])) or Now[p()].
+}
+
+structure S:V {
+    // here comes the interpretation of some symbols
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

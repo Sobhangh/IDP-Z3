@@ -1,0 +1,18 @@
+vocabulary V {
+    p: () -> Bool
+    q: Int -> Bool
+    Temporal p
+}
+
+theory T:V {
+    // To check if it gives error when a non temporal predicate is placed inside Now/Next/Start
+    Now[q()].
+}
+
+structure S:V {
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

@@ -1,0 +1,21 @@
+vocabulary V {
+    p: () -> Bool
+    q: Int -> Bool
+    Temporal p
+    
+}
+
+theory T:V {
+    // Check the formula generate by Start
+    Start[p()].
+    //!i in Int : i<10 => q(i).
+}
+
+structure S:V {
+    
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

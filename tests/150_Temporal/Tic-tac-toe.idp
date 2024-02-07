@@ -1,0 +1,57 @@
+vocabulary V {
+  type input is {N,X,O}
+  type player is {A,B}
+  type dim is {1,2,3}
+  <Temporal> board : (dim * dim * input) -> Bool
+  <Cause> turn : (player) -> Bool
+  <Cause> win : (player) -> Bool
+  <Cause> horizontalw: (player) -> Bool
+  <Cause> verticalw: (player) -> Bool
+  <Cause> diagonalw: (player) -> Bool
+  <Action> fill: (dim * dim) -> Bool
+}
+
+theory LTC T:V {
+
+    {
+        Start[turn(A)].
+        Next[turn(A)] <- Now[turn(B)].
+        Next[turn(B)] <- Now[turn(A)].
+        ! d in dim, d2 in dim: Start[board(d,d2,N)].
+        ! d in dim, d2 in dim: Next[board(d,d2,X)] <- Now[fill(d,d2)] and Now[turn(A)].
+        ! d in dim, d2 in dim: Next[board(d,d2,O)] <- Now[fill(d,d2)] and Now[turn(B)].
+        ! d in dim, d2 in dim, i in input: Next[board(d,d2,N)] <- Now[board(d,d2,N)] and not (Now[fill(d,d2)]).
+        ! d in dim, d2 in dim, i in input: Next[board(d,d2,X)] <- Now[board(d,d2,X)].
+        ! d in dim, d2 in dim, i in input: Next[board(d,d2,O)] <- Now[board(d,d2,O)].
+        ! p in player: Next[win(p)] <- Now[win(p)].
+        ! p in player: Now[win(p)] <- Now[horizontalw(p)] or Now[verticalw(p)] or Now[diagonalw(p)].
+        Now[horizontalw(A)] <- (? y in dim: ! x in dim : Now[board(x,y,X)]).
+        Now[horizontalw(B)] <- (? y in dim: ! x in dim : Now[board(x,y,O)]).
+        Now[verticalw(A)] <- (? x in dim: ! y in dim : Now[board(x,y,X)]).
+        Now[verticalw(B)] <- (? x in dim: ! y in dim : Now[board(x,y,O)]).
+        Now[diagonalw(A)] <- (! x in dim: ! y in dim : (x=y) => Now[board(x,y,X)]).
+        Now[diagonalw(B)] <- (! x in dim: ! y in dim : (x=y) => Now[board(x,y,O)]).
+    }
+    //! x in dim, y in dim: Now[fill(x,y,X)] => Now[turn(A)].
+    //! x in dim, y in dim: Now[fill(x,y,O)] => Now[turn(B)].
+    //! x in dim, y in dim: not Now[fill(x,y,N)].
+    ! x in dim, y in dim: Now[fill(x,y)] => Now[board(x,y,N)].
+    ! x in dim, y in dim: Now[fill(x,y)] => not (Now[win(A)] or Now[win(B)]).
+    #{ x in dim, y in dim: Now[fill(x,y)] and (not (Now[win(A)] or Now[win(B)]))} = 1.
+    !x in dim, y in dim: #{ i in input: Now[board(x,y,i)] } = 1.
+    
+}
+
+temporal_logic ltl:V {
+    (F owns(Bob,B1) )
+}
+
+structure S:V {
+    
+}
+
+
+procedure main () {
+    ProveModalLogic(ltl,S,T)
+    //simulate(T,S)
+}

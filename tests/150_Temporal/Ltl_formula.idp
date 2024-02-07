@@ -6,8 +6,13 @@ vocabulary V {
   <Action> s1: () -> Bool
   <Action> s2: () -> Bool
   <Action> sa : () -> Bool
-  //<Temporal> ai: (test * t2) -> Bool
+}
 
+vocabulary V2 {
+  type test is {1,2,3}
+  type t2 is {a,b,c}
+  <Temporal> l1 : (test) -> Bool
+  <Temporal> l2: (t2) -> Bool
 }
 
 theory LTC T:V {
@@ -20,14 +25,27 @@ theory LTC T:V {
     
 }
 
+theory LTC T2:V2 {
+
+}
+
 temporal_logic ltl:V {
     (F l1() )
 }
 
+temporal_logic ltl2:V2 {
+    (F l1(2) )
+}
+
 structure S:V {
-    // Check if the partial assignment of structure works with temporal predicate
+   
+}
+
+structure S2:V2 {
+   
 }
 
 procedure main () {
-    ProveModalLogic(ltl,S,T)
+    ProveModalLogic(ltl2,S2,T2)
+    //ProveModalLogic(ltl,S,T)
 }

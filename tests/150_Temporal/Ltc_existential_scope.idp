@@ -1,0 +1,20 @@
+vocabulary V {
+    q: () -> Bool
+    p: () -> Bool
+    r: Int -> Bool
+    Temporal p
+}
+
+theory LTC T:V {
+    // Should not give an error 
+    (q() and  (? i in Int: (i < 10 and r(i) and  not Next[p()]))) or Now[p()].
+}
+
+structure S:V {
+    
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

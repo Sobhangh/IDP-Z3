@@ -1,0 +1,16 @@
+vocabulary V {
+    q: Int -> Bool
+}
+
+theory T:V {
+    // In order to check if the answer I get in the test is the same as online idp with infinite integers
+    !i in Int: q(i).
+}
+
+structure S:V {
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

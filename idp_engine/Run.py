@@ -298,15 +298,33 @@ def simulate(theory:TheoryBlock,struct:Structure):
     act_question = "Please give the action with its arguments(n to pass) "
     question = "Which structure do you want to continue the simulation with?(N to stop the simulation) "
     while True:  
-        i = input(question)
-        if i == "N":
-            break
-        i = int(i)
-        while (i >= len(result)) or i < 1:
+        correctinp = False
+        i = ""
+        while not correctinp:
             i = input(question)
             if i == "N":
                 break
-            i = int(i)
+            try:
+                i = int(i)
+                correctinp = True
+            except ValueError:
+                print("Please give a number")
+        if i == "N":
+            break
+        while (i > len(result)) or i < 1:
+            correctinp = False
+            while not correctinp:
+                i = input(question)
+                if i == "N":
+                    break
+                try:
+                    i = int(i)
+                    correctinp = True
+                except ValueError:
+                    print("Please give a number")
+            if i == "N":
+                break
+            print("Please give a number within the range of possible models.")
         if i == "N":
             break
         ac = input(act_question)
@@ -347,9 +365,9 @@ def simulate(theory:TheoryBlock,struct:Structure):
                         aconstraint : Expression =None
                         for c in thtemp.constraints:
                             aconstraint = c
-                        th = TheoryBlock(name="action",vocab_name=theory.init_theory.vocab_name,ltc = None,inv=None,
+                        th = TheoryBlock(name="action",vocab_name=theory.bistate_theory.vocab_name,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
-                        th.voc = theory.init_theory.voc
+                        th.voc = theory.bistate_theory.voc
                         aconstraint.annotate(th.voc,{})
                         th.constraints = OrderedSet([aconstraint])
 
@@ -610,6 +628,7 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
                 Nonaction[action] = nal
     Nstate = []
     Nnextstate = []
+    removedStates = []
     i = 0
     for s1 in transitiongraph.states:
         Nstate.append([])
@@ -637,8 +656,16 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
                     Nstate[-1][-1].annotate(theory.transition_theory.voc,{})
                     Nnextstate[-1].append(AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,s[1]+"_next",None,None),s[2])))
                     Nnextstate[-1][-1].annotate(theory.transition_theory.voc,{})
-        #i += 1
-
+        #if purgeImpossibleState(Nstate[-1],temps,theory.init_theory):
+            #Nstate.pop()
+            #Nnextstate.pop()
+            #removedStates.append(i)
+        i += 1
+    #remove the removed states form transitiongraph
+    print("transition states")
+    print(transitiongraph.states)
+    print(len(Nstate))
+    print(removedStates)
     i =0
     for s1 in Nstate:
         j=0
@@ -663,8 +690,6 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
                         q += 1
             j += 1
         i += 1
-    print("transition states")
-    print(transitiongraph.states)
     print("transition list")
     print(transitiongraph.transtions)
 
@@ -689,24 +714,15 @@ def checkTransition(action:str,args,init_struct:Structure,transition_theory:Theo
                     actionPred = act[i].sub_exprs[0]
                 i+=1
         else:
-            no_concurrency += act 
-    #TO DO: ADD THE SAME NEGATION PRINCIPLE FOR STATES 
-    #Could increase speed by performing this before hand
-    # For the correct one can simple take out what is inside the negation
-    #actionPred.annotate(transition_theory.voc,{})
-    
+            no_concurrency += act     
     testth = TheoryBlock(name="Transit",vocab_name=transition_theory.vocab_name,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
     testth.constraints = OrderedSet(Nstate+Nnextstate+[actionPred]+no_concurrency)
-    
-    #print(testth.constraints)
     interp = transition_theory.interpretations
     transition_theory.interpretations = {}
     p = Theory(init_struct,transition_theory,testth)
     res = list(p.expand())
     transition_theory.interpretations = interp
-    #print("interpret transiti")
-    #print(transition_theory.interpretations)
     second_step =False
     j=0
     for i, xi in enumerate(res):
@@ -717,7 +733,24 @@ def checkTransition(action:str,args,init_struct:Structure,transition_theory:Theo
         return False
     return actionPred
 
-    
+def purgeImpossibleState(state,init_struct,init_theory):
+    testth = TheoryBlock(name="StateTest",vocab_name=init_theory.vocab_name,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+    testth.constraints = OrderedSet(state)
+    interp = init_theory.interpretations
+    init_theory.interpretations = {}
+    p = Theory(init_struct,init_theory,testth)
+    res = list(p.expand())
+    init_theory.interpretations = interp
+    second_step =False
+    j=0
+    for i, xi in enumerate(res):
+        if xi == 'No models.':
+            second_step = True
+        j+=1
+    if second_step and j==1:
+        return True
+    return False
 
 def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
                  max: int = 10,

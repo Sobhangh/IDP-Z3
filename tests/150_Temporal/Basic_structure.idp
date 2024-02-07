@@ -1,0 +1,27 @@
+vocabulary V {
+    p: () -> Bool
+    q: () -> Bool 
+    r: () -> Int
+    ai: (Int) -> Bool
+
+    Temporal p
+    Temporal r
+    Temporal ai
+}
+
+theory T:V {
+    //Now[p()].
+}
+
+structure S:V {
+    // Check if the partial assignment of structure works with temporal predicate
+    q := true.
+    p := {0,1,2}.
+    r := {0->1,2->4,3->5}.
+    ai := {(0,0),(1,0),(1,1),(2,5)}.
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

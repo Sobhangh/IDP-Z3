@@ -1,0 +1,18 @@
+vocabulary V {
+    p: () -> Bool
+    q: () -> Bool
+    Temporal p
+}
+
+theory LTC T:V {
+    // Should work fine and in the result should only be one temporal variable
+    not Next[p()] or Now[p()] or q().
+}
+
+structure S:V {
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

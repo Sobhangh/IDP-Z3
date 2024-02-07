@@ -238,6 +238,7 @@ class Vocabulary(ASTNode):
         self.voc = self
         self.actions : List[str] =[]
         self.fluents : List[str] =[]
+        self.ftemproral : List[str] =[]
         self.transitiongraph : TransiotionGraph = None
         # expand multi-symbol declarations
         temp = []
@@ -255,6 +256,9 @@ class Vocabulary(ASTNode):
                         self.actions.append(new.name)
                     elif decl.temporal == "Temporal":
                         self.fluents.append(new.name)
+                    elif decl.temporal == "FTemporal":
+                        self.ftemproral.append(new.name)
+                    
             else:
                 temp.append(decl)
         self.declarations = temp
@@ -502,7 +506,11 @@ class TypeDeclaration(ASTNode):
         enumeration = (f"{constructed}{{{', '.join(str(c) for c in constructors)}}}" if constructors else
                        f"{self.interpretation}" if self.interpretation else
                        f"{enumeration}")
-        return (f"type {self.name} {'' if not enumeration else ':= ' + enumeration}")
+        if not enumeration:
+            return (f"type {self.name} {''}")
+        else:
+            return (f"type {enumeration}")
+        #return (f"type {self.name} {'' if not enumeration else ':= ' + enumeration}")
 
     def contains_element(self, term: Expression,
                      extensions: dict[str, Extension]
@@ -929,13 +937,13 @@ class TheoryBlock(ASTNode):
                 elif isinstance(rule.definiendum,NowAppliedSymbol):
                     rl2 = rl.init_copy()
                     rl.definiendum = self.bis_subexpr(rl.definiendum)
-                    rl.body = self.bis_subexpr(rl.definiendum)
+                    rl.body = self.bis_subexpr(rl.body)
                     if rl.body != False:
                         defs[-1].rules.append(rl)
                         rl.code = intern(str(rl))
                         rl.str = rl.code
                     rl2.definiendum = self.sis_subexpr(rl2.definiendum)
-                    rl2.body = self.sis_subexpr(rl2.definiendum)
+                    rl2.body = self.sis_subexpr(rl2.body)
                     if rl2.body != False:
                         defs[-1].rules.append(rl2)
                         rl2.code = intern(str(rl2))
@@ -943,18 +951,18 @@ class TheoryBlock(ASTNode):
                 elif not isinstance(rule.definiendum,StartAppliedSymbol):
                     if self.contains_now(rl.body):
                         rl2 = rl.init_copy()
-                        rl.body = self.bis_subexpr(rl.definiendum)
+                        rl.body = self.bis_subexpr(rl.body)
                         if rl.body != False:
                             defs[-1].rules.append(rl)
                             rl.code = intern(str(rl))
                             rl.str = rl.code
-                        rl2.body = self.sis_subexpr(rl2.definiendum)
+                        rl2.body = self.sis_subexpr(rl2.body)
                         if rl2.body != False:
                             defs[-1].rules.append(rl2)
                             rl2.code = intern(str(rl2))
                             rl2.str = rl2.code
                     else:
-                        rl.body = self.sis_subexpr(rl.definiendum)
+                        rl.body = self.sis_subexpr(rl.body)
                         if rl.body != False:
                             defs[-1].rules.append(rl)
                             rl.code = intern(str(rl))
@@ -974,15 +982,20 @@ class TheoryBlock(ASTNode):
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
-            n = self.contains_next(c)
-            if n:
-                r = self.bis_subexpr(c.init_copy())
-                if r != False:
-                    cnstrs.append(r)
-            else:
-                r = self.sis_subexpr(c.init_copy())
-                if r != False:
-                    cnstrs.append(r)
+            r = self.bis_subexpr(c.init_copy())
+            if r != False:
+                cnstrs.append(r)
+                r.code = intern(str(r))
+                r.str = r.code
+            #n = self.contains_next(c)
+            #if n:
+            #    r = self.bis_subexpr(c.init_copy())
+            #    if r != False:
+            #        cnstrs.append(r)
+            #else:
+            #    r = self.sis_subexpr(c.init_copy())
+            #    if r != False:
+            #        cnstrs.append(r)
         defs = []
         for definition in self.definitions:
             defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
@@ -1008,6 +1021,8 @@ class TheoryBlock(ASTNode):
             r = self.init_subexpr(c.init_copy())
             if r != False:
                 self.init_theory.constraints.append(r)
+                r.code = intern(str(r))
+                r.str = r.code
         for definition in self.definitions:
             self.init_theory.definitions.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
             for rule in definition.rules:
@@ -1015,7 +1030,7 @@ class TheoryBlock(ASTNode):
                 if self.init_theory.definitions[-1].rules[-1] == False:
                     self.init_theory.definitions[-1].rules.pop()
 
-    #Returns the Single state formula transformed to current vocabulary: Now[p(x)] -> p(x)
+    #Returns the Single state formula transformed to current vocabulary: Now[p(x)] -> p_next(x)
     #Returns false if the expression contains Start or Next
     def sis_subexpr(self, expression:Expression):
         if isinstance(expression, (StartAppliedSymbol,NextAppliedSymbol)):
@@ -1098,6 +1113,8 @@ class TheoryBlock(ASTNode):
         for e in expression.sub_exprs:
             if isinstance(e, (StartAppliedSymbol,NowAppliedSymbol) ):
                 expression.sub_exprs[i] = e.sub_expr
+                expression.code = intern(str(expression))
+                expression.str = expression.code
             elif isinstance(e, NextAppliedSymbol):
                 return False
             elif isinstance(e,(AppliedSymbol,UnappliedSymbol)):
@@ -1106,8 +1123,6 @@ class TheoryBlock(ASTNode):
                 r = self.init_subexpr2(e)
                 if r == False:
                     return False
-                r.code = intern(str(r))
-                r.str = r.code
             i+=1
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
             expression.f = expression.sub_exprs[0]
@@ -1119,20 +1134,21 @@ class TheoryBlock(ASTNode):
         if isinstance(rule.definiendum,StartAppliedSymbol):
             return False
         if isinstance(rule.definiendum,(NextAppliedSymbol,NowAppliedSymbol)):
+            sym = None
+            e = rule.definiendum.sub_expr
             if isinstance(rule.definiendum,(NowAppliedSymbol)):
                 now = True
+                symb = SymbolExpr(None,(str(e.symbol)),None,None)
             else:
                 next = True
-            e = rule.definiendum.sub_expr
-            symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
+                symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
             rule.definiendum = AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
-            
         if next:
             rule.body = self.bis_subexpr(rule.body)
         elif now:
-            rule.body = self.sis_subexpr(rule.body)
+            rule.body = self.bis_subexpr(rule.body)
         else:
-            rule.body = self.sis_subexpr(rule.body)
+            rule.body = self.bis_subexpr(rule.body)
         if rule.body == False:
                 return False
         rule.code = intern(str(rule))
@@ -2049,64 +2065,124 @@ class TransiotionGraph:
         self.transtions : dict[Tuple(int,int),List[AppliedSymbol]] = {}
         self.aextentions : dict[str,Extension] = {}
         self.fextentions : dict[str,Extension] = {}
+        self.ffextentions : dict[str,Extension] = {}
+        self.tempfunct : dict(str,set) = {}
+        self.tempfunctarg : dict(str,set) = {}
         self.FillExtensions(problem.extensions)
+        print("fucnt exte")
+        print(self.tempfunct)
+        print(self.tempfunctarg)
         #TO DO : WHAT ABOUT FUNCTIONS and add tests for functions
         self.SetStates()
+        
 
     def SetStates(self):
-        fluentstate :List[Tuple(str,Extension)] = []
+        #first element of tuple is the name of pred , last is whether it is a ftemporal
+        fluentstate :List[Tuple(str,Extension,bool)] = []
         for f , extensions in self.fextentions.items():
-           fluentstate.append((f,extensions))
+           fluentstate.append((f,extensions,False))
+        for f , extensions in self.ffextentions.items():
+           fluentstate.append((f,extensions,True))
         if len(fluentstate) > 0:
-            self.states = TransiotionGraph.crossstates(fluentstate)
+            self.states = self.crossstates(fluentstate)
 
 
-    def crossstates(fluentstate :List[Tuple(str,Extension)])->List[List[Tuple]]:
+    def crossstates(self,fluentstate :List[Tuple(str,Extension,bool)])->List[List[Tuple]]:
         #print("cross states")
         #print(fluentstate)
-        if len(fluentstate) == 1 :
-            return TransiotionGraph.perturbateExtens(fluentstate[0])
         current = fluentstate[0]
-        out = []
-        result = TransiotionGraph.crossstates(fluentstate[1:])
-        #print("2e phase")
         extent = current[1][0]
+        if len(fluentstate) == 1 :
+            if fluentstate[0][2]:
+                return self.flistperm(current[0],list(self.tempfunctarg.get(current[0],set())))
+            return TransiotionGraph.perturbateExtens(fluentstate[0])
+        out = []
+        result = self.crossstates(fluentstate[1:])
+        #print("2e phase")
         if extent == [[]]:
             for r in result:
                 out.append([(True,current[0],None)]+r)
                 out.append([(False,current[0],None)]+r)
         else:
+            perms =[]
+            if current[2]:
+                perms = self.flistperm(current[0],list(self.tempfunctarg.get(current[0],set())))
+            else:
+                perms = TransiotionGraph.listpermutation(current[0],extent)
             for r in result:
-                tot2 = r
-                for c in extent:
+                #tot2 = r
+                for c in perms:
                     #print(r)
-                    tot = [(True,current[0],c)] + r
-                    tot2 += [(False,current[0],c)] 
-                    for c2 in extent:
-                        if c2 != c:
-                            tot += [(False,current[0],c2)]
-                    out.append(tot)
-                out.append(tot2)
+                    out.append(r+c)
+                    #tot = [(True,current[0],c)] + r
+                    #tot2 += [(False,current[0],c)] 
+                    #for c2 in extent:
+                    #    if c2 != c:
+                    #        tot += [(False,current[0],c2)]
+                    #out.append(tot)
+                #out.append(tot2)
         return out
     
-    def perturbateExtens(fluentstate :Tuple(str,Extension)):
+    def perturbateExtens(fluentstate :Tuple(str,Extension,bool)):
         extent = fluentstate[1][0]
         if extent == [[]]:
             return [[(False,fluentstate[0],None)],[(True,fluentstate[0],None)]]
         elif len(extent) > 0:
-            res = []
-            tot2 = []
-            for e in extent:
-                tot = [(True,fluentstate[0],e)]
-                tot2 += [(False,fluentstate[0],e)]
-                for e2 in extent:
-                    if e2 != e:
-                        tot += [(False,fluentstate[0],e2)]
-                res.append(tot)
-            res.append(tot2)
+            #res = []
+            #tot2 = []
+            #for e in extent:
+            #    tot = [(True,fluentstate[0],e)]
+            #    tot2 += [(False,fluentstate[0],e)]
+            #    for e2 in extent:
+            #        if e2 != e:
+            #            tot += [(False,fluentstate[0],e2)]
+            #    res.append(tot)
+            #res.append(tot2)
+            #return res
+            return TransiotionGraph.listpermutation(fluentstate[0],extent)
+
+    def listpermutation(name,elements):
+        if len(elements) == 0:
+            return
+        if len(elements) == 1:
+            return [[(False,name,elements[0])],[(True,name,elements[0])]]
+        restults = TransiotionGraph.listpermutation(name,elements[1:])
+        out = []
+        for r in restults:
+            out.append(r+[(False,name,elements[0])])
+            out.append(r+[(True,name,elements[0])])
+        return out
+    
+    def flistperm(self,name,argl):
+        #argl = self.tempfunctarg[name]
+        outl = list(self.tempfunct[name])
+        if len(argl) <= 1 :
+            a = tuple()
+            if len(argl) == 1 :
+                a = argl[0]
+            res =[]
+            for o in outl:
+
+                res.append([(True,name,a+tuple([o]))])
+                for o2 in outl:
+                    if o2 != o :
+                        res[-1].append((False,name,a+tuple([o2])))
             return res
+        results = self.flistperm(name,argl[1:])
+        a = argl[0]
+        res = []
+        for r in results:
+            for o in outl:
+                tot = [(True,name,a+tuple([o]))]
+                for o2 in outl:
+                    if o2 != o:
+                        tot.append((False,name,a+tuple([o2])))
+                res.append(r+tot)
+        return res
 
 
+    
+    
     def FillExtensions(self,extensions: dict[str, Extension]):
         for s , e in extensions.items():
             for a in self.voc.actions:
@@ -2121,10 +2197,30 @@ class TransiotionGraph:
                     #    self.aextensions[a] = [s.extension({}) for s in d.domains]
                     #else:
                     #    self.aextensions[a] = [s.extension({}) for s in d.domains]
+        
         for s , e in extensions.items():
             for f in self.voc.fluents:
                 if s == f:
                     self.fextentions[f] = e
+            for f in self.voc.ftemproral:
+                if s == f:
+                    self.ffextentions[f] = e
+                    outputl = []
+                    argl =[]
+                    if e[0] == [[]]:
+                        #TO DO: THROW EXCEPTION IN annnote of vocabulary if it is not a function
+                        print("Error: FTemporal should be a function")
+                    for r in e[0]:
+                        outputl.append(r[-1])
+                        if len(r) > 1:
+                            argl.append(r[:-1])
+                    r1 = self.tempfunct.get(f,set())
+                    self.tempfunct[f] = set(outputl).union(r1)
+                    if len(argl) == 0:
+                        pass
+                    else:
+                        r2 = self.tempfunctarg.get(f,{})
+                        self.tempfunctarg[f] = set(argl).union(r2)
 
         
 

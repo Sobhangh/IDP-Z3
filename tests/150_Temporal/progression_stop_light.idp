@@ -1,0 +1,29 @@
+vocabulary V {
+    type light is {1..3}
+    stplt: (light) -> Bool
+    Temporal stplt
+}
+
+theory LTC T:V {
+    {
+        Start[stplt(1)].
+        Next[stplt(1)] <- (not Now[stplt(1)]) and (not Now[stplt(2)]) and Now[stplt(3)].
+        Next[stplt(2)] <- (not Now[stplt(2)]) and (not Now[stplt(3)]) and Now[stplt(1)].
+        Next[stplt(3)] <- (not Now[stplt(1)]) and (not Now[stplt(3)]) and Now[stplt(2)].
+    }
+}
+
+structure S:V {
+    
+}
+
+procedure main () {
+    structs = initialize(T,S)
+    ForProgression(T,structs,5)
+    //s = progression(T,structs)
+    //print_struct(s)
+    //r = progression(T,s)
+    //print_struct(r)
+    //t = progression(T,r)
+    //print_struct(t)
+}
