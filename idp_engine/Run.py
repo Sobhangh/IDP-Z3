@@ -68,6 +68,84 @@ def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
     return str(solver.check())
 
 
+def matchingstates(assign,transitiongraph:TransiotionGraph):
+    fluents = transitiongraph.fextentions.keys()
+    ffluents = transitiongraph.ffextentions.keys()
+    out : dict[SymbolDeclaration, List[TupleIDP]] = {}
+    nullary: dict[SymbolDeclaration, Any] = {}
+    states = []
+    for a in assign.values():
+        if type(a.sentence) == AppliedSymbol:
+            #print(a)
+            args = [e for e in a.sentence.sub_exprs]
+            args = tuple(args)
+            c = None
+            default = False
+            if  a.symbol_decl.is_next and (a.symbol_decl.name[:-len('_next')] in fluents or a.symbol_decl.name[:-len('_next')] in ffluents ):
+                #print(a)
+                if a.symbol_decl.arity == 0:
+                    args = None
+                    #because we dont have functions c can either be true or false
+                    c = a.value
+                elif a.value == TRUE:
+                    c = True
+                elif a.value == FALSE:
+                    c = False
+                if c is not None and c == True:
+                    if len(states) == 0:
+                        states.append([(c,a.symbol_decl.name[:-len('_next')],args)])
+                    else:
+                        for s in states:
+                            s.append((c,a.symbol_decl.name[:-len('_next')],args))
+                elif c is None:
+                    if len(states) == 0:
+                        states.append([(True,a.symbol_decl.name[:-len('_next')],args)])
+                        states.append([])
+                    else:
+                        nstate = []
+                        for s in states:
+                            nstate.append(s+[(True,a.symbol_decl.name[:-len('_next')],args)])
+                            nstate.append(s)
+                        states = nstate
+    #print("states.........,,,,,,")
+    #print(states)
+    #for s in states:
+    #    if s[0][2][2] == s[1][2][2]:
+    #        print(s[0][2][2])
+    matchedStates = []
+    i = 0
+    for os in transitiongraph.states:
+        for s in states:
+            ntrue = 0
+            allmatch = False
+            onematch = False
+            #print("os")
+            #print(os)
+            for e in os:
+                #print(e)
+                onematch = True
+                if e[0] == True:
+                    onematch = False
+                    ntrue += 1
+                    for e2 in s:
+                        if e2[1] == e[1] and str(e2[2]) == str(e[2]):
+                            #print("wordkssfd")
+                            onematch = True
+                            break
+                if not onematch:
+                    allmatch = False
+                    break
+                allmatch =True
+            if ntrue == len(s) and allmatch:
+                matchedStates.append(i)
+                break
+        i += 1
+    #print("mathjsdfjklj")
+    #print(matchedStates)
+    return matchedStates
+            
+    
+
 def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclaration]) -> Structure:
         #print("enter to structure..")
         out : dict[SymbolDeclaration, List[TupleIDP]] = {}
@@ -663,9 +741,15 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
         i += 1
     #remove the removed states form transitiongraph
     print("transition states")
-    print(transitiongraph.states)
+    print(transitiongraph.aextentions)
+    #print(transitiongraph.states)
     print(len(Nstate))
-    print(removedStates)
+    AlternativeAlg2(transitiongraph,Nstate,Nnextstate,Nonaction,temps,theory)
+    print("transition list")
+    for k ,v in transitiongraph.transtions.items():
+        print(k,v)
+        
+    return
     i =0
     for s1 in Nstate:
         j=0
@@ -693,6 +777,152 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     print("transition list")
     print(transitiongraph.transtions)
 
+def AlternativeAlg(transitiongraph:TransiotionGraph,Nstate:List,Nnextstate:List,Nonaction:dict,init_struct:Structure,theory:TheoryBlock):
+    reachedStates =[]
+    nextreachedState = []
+    i = 0
+    for s1 in Nstate:
+        t = checkTransition("",None,init_struct,theory.init_theory,s1,[],{})
+        if t != False:
+            nextreachedState.append(i)
+            reachedStates.append(i)
+        i += 1
+    print("inital state")
+    print(reachedStates)
+    tempstate = nextreachedState.copy()
+    while len(tempstate) > 0 :
+        nextreachedState = tempstate.copy()
+        tempstate = []
+        for i in nextreachedState:
+            j=0
+            for s2 in Nnextstate:
+                for action , extentsion in transitiongraph.aextentions.items():
+                    e = extentsion[0]
+                    t = False
+                    if e == [[]]:
+                        t = checkTransition(action,None,init_struct,theory.transition_theory,Nstate[i],s2,Nonaction)
+                        if t != False:
+                            trs = transitiongraph.transtions.get((i,j),[])
+                            trs.append(t)
+                            transitiongraph.transtions[(i,j)] = trs
+                            if not (j in reachedStates):
+                                tempstate.append(j)
+                                reachedStates.append(j)
+                    else:
+                        q = 0
+                        for arg in e:
+                            t = checkTransition(action,arg,init_struct,theory.transition_theory,Nstate[i],s2,Nonaction,q)
+                            if t != False:
+                                trs = transitiongraph.transtions.get((i,j),[])
+                                trs.append(t)
+                                transitiongraph.transtions[(i,j)] = trs
+                                if not (j in reachedStates):
+                                    tempstate.append(j)
+                                    reachedStates.append(j)
+                            q += 1
+                j += 1
+    print(reachedStates)
+    print(len(reachedStates))
+    for r in reachedStates:
+        print(transitiongraph.states[r])
+
+
+def AlternativeAlg2(transitiongraph:TransiotionGraph,Nstate:List,Nnextstate:List,Nonaction:dict,init_struct:Structure,theory:TheoryBlock):
+    reachedStates =[]
+    nextreachedState = []
+    i = 0
+    for s1 in Nstate:
+        t = checkTransition("",None,init_struct,theory.init_theory,s1,[],{})
+        if t != False:
+            nextreachedState.append(i)
+            reachedStates.append(i)
+        i += 1
+    print("inital state")
+    print(reachedStates)
+    tempstate = nextreachedState.copy()
+    while len(tempstate) > 0 :
+        nextreachedState = tempstate.copy()
+        tempstate = []
+        for i in nextreachedState:
+            for action , extentsion in transitiongraph.aextentions.items():
+                e = extentsion[0]
+                t = False
+                if e == [[]]:
+                    t = findnextStates(transitiongraph,action,None,init_struct,theory.transition_theory,Nstate[i],Nonaction)
+                    for j in t[0]:
+                        trs = transitiongraph.transtions.get((i,j),[])
+                        trs.append(t[1])
+                        transitiongraph.transtions[(i,j)] = trs
+                        if not (j in reachedStates):
+                            tempstate.append(j)
+                            reachedStates.append(j)
+                else:
+                    q = 0
+                    for arg in e:
+                        #print("act.................")
+                        #print(action)
+                        #print(arg)
+                        t = findnextStates(transitiongraph,action,arg,init_struct,theory.transition_theory,Nstate[i],Nonaction,q)
+                        for j in t[0]:
+                            trs = transitiongraph.transtions.get((i,j),[])
+                            trs.append(t[1])
+                            transitiongraph.transtions[(i,j)] = trs
+                            if not (j in reachedStates):
+                                tempstate.append(j)
+                                reachedStates.append(j)
+                        q += 1
+
+    print(reachedStates)
+    print(len(reachedStates))
+    for r in reachedStates:
+        print(transitiongraph.states[r])
+
+def findnextStates(transitiongraph:TransiotionGraph,action:str,args,init_struct:Structure,transition_theory:TheoryBlock,Nstate:List,non_action:dict,argindex:int=0):
+    actionPred = None
+    no_concurrency = []
+    for a , act in non_action.items():
+        if a == action:
+            i = 0
+            while i < len(act):
+                if i != argindex:
+                    no_concurrency += [act[i]]
+                else:
+                    actionPred = act[i].sub_exprs[0]
+                i+=1
+        else:
+            no_concurrency += act     
+    testth = TheoryBlock(name="Transit",vocab_name=transition_theory.vocab_name,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+    if actionPred is None:
+        testth.constraints = OrderedSet(Nstate+no_concurrency)
+    else:
+        testth.constraints = OrderedSet(Nstate+[actionPred]+no_concurrency)
+    interp = transition_theory.interpretations
+    transition_theory.interpretations = {}
+    p = Theory(init_struct,transition_theory,testth)
+    res = list(p.expand())
+    transition_theory.interpretations = interp
+    second_step =False
+    nextstates = []
+    j=0
+    """print("act pred")
+    if str(actionPred.sub_exprs) == str([1,1]):
+        print(actionPred)
+        print(Nstate)
+        print(transition_theory.constraints)
+        for d in transition_theory.definitions:
+            for r in d.rules:
+                print(r)"""
+    for i, xi in enumerate(res):
+        if xi == 'No models.':
+            second_step = True
+        elif type(xi) != str:
+            nextstates += (matchingstates(xi,transitiongraph))
+            #print(nextstates)
+        j+=1
+    if second_step and j==1:
+        return ([],actionPred)
+    return (list(set(nextstates)),actionPred)
 #action is the name of the action to checked; ini_struct is the given initial structure;
 #Nstate is a list which contains the annotated of all its positive and negation predicates; Nnextstate is the same but for next time point
 # cstt is the index of the cuurent state in Nstate; nstt is the index of the next state in Nnextstate
@@ -717,7 +947,10 @@ def checkTransition(action:str,args,init_struct:Structure,transition_theory:Theo
             no_concurrency += act     
     testth = TheoryBlock(name="Transit",vocab_name=transition_theory.vocab_name,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
-    testth.constraints = OrderedSet(Nstate+Nnextstate+[actionPred]+no_concurrency)
+    if actionPred is None:
+        testth.constraints = OrderedSet(Nstate+Nnextstate+no_concurrency)
+    else:
+        testth.constraints = OrderedSet(Nstate+Nnextstate+[actionPred]+no_concurrency)
     interp = transition_theory.interpretations
     transition_theory.interpretations = {}
     p = Theory(init_struct,transition_theory,testth)

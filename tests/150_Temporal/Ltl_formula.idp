@@ -11,7 +11,7 @@ vocabulary V {
 vocabulary V2 {
   type test is {1,2,3}
   type t2 is {a,b,c}
-  <Temporal> l1 : (test) -> Bool
+  <FTemporal> l1 : (test) -> Bool
   <Temporal> l2: (t2) -> Bool
 }
 
