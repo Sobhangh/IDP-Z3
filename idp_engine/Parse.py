@@ -982,20 +982,19 @@ class TheoryBlock(ASTNode):
                                                      constraints=[],definitions=[],interpretations=[])
         cnstrs = []
         for c in self.constraints:
-            r = self.bis_subexpr(c.init_copy())
-            if r != False:
-                cnstrs.append(r)
-                r.code = intern(str(r))
-                r.str = r.code
-            #n = self.contains_next(c)
-            #if n:
-            #    r = self.bis_subexpr(c.init_copy())
-            #    if r != False:
-            #        cnstrs.append(r)
-            #else:
-            #    r = self.sis_subexpr(c.init_copy())
-            #    if r != False:
-            #        cnstrs.append(r)
+            n = self.contains_next(c)
+            if n:
+                r = self.bis_subexpr(c.init_copy())
+                if r != False:
+                    cnstrs.append(r)
+                    r.code = intern(str(r))
+                    r.str = r.code
+            else:
+                r = self.sis_subexpr(c.init_copy())
+                if r != False:
+                    cnstrs.append(r)
+                    r.code = intern(str(r))
+                    r.str = r.code
         defs = []
         for definition in self.definitions:
             defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
@@ -1138,17 +1137,17 @@ class TheoryBlock(ASTNode):
             e = rule.definiendum.sub_expr
             if isinstance(rule.definiendum,(NowAppliedSymbol)):
                 now = True
-                symb = SymbolExpr(None,(str(e.symbol)),None,None)
+                #symb = SymbolExpr(None,(str(e.symbol)),None,None)
             else:
                 next = True
-                symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
+            symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
             rule.definiendum = AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
         if next:
             rule.body = self.bis_subexpr(rule.body)
         elif now:
-            rule.body = self.bis_subexpr(rule.body)
+            rule.body = self.sis_subexpr(rule.body)
         else:
-            rule.body = self.bis_subexpr(rule.body)
+            rule.body = self.sis_subexpr(rule.body)
         if rule.body == False:
                 return False
         rule.code = intern(str(rule))

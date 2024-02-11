@@ -146,7 +146,7 @@ def matchingstates(assign,transitiongraph:TransiotionGraph):
             
     
 
-def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclaration]) -> Structure:
+def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclaration]) -> (Structure,TheoryBlock):
         #print("enter to structure..")
         out : dict[SymbolDeclaration, List[TupleIDP]] = {}
         #To store the symbol declaration of symbols in out
@@ -158,7 +158,8 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
         nullaryname : dict[str,SymbolDeclaration] = {}
         #To store all symbol declarations of nullary predicates
         nullaryall : dict[str,SymbolDeclaration] = {}
-        no_value : dict[SymbolDeclaration, Any] = {}
+        #no_value : dict[SymbolDeclaration, Any] = {}
+        false_val : List[tuple] = []
         #print("in loop")
         for a in assign.values():
             if type(a.sentence) == AppliedSymbol:
@@ -175,6 +176,7 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
                     c = TupleIDP(args=args)
                 elif a.value == FALSE:
                     a
+                    false_val.append((a.symbol_decl,args))
                     #c = TupleIDP(args=[])
                 elif a.value is not None:
                     # Symbol is a function.
@@ -195,6 +197,8 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
 
         nullaryc: dict[SymbolDeclaration, Any] = nullary.copy()
         outc : dict[SymbolDeclaration, List[TupleIDP]] = out.copy()
+        false_th = false_val.copy()
+        ftheories = []
         #If a symbol has next present then its value should be set to now
         #If there is no next for a temporal symbol it should be removed
         # eg p_next = {1 ,2} and p = {0} then after this loop: p = {1 ,2}
@@ -247,7 +251,20 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
                 else:
                     #outc[k] = v
                     k
-        
+            index = 0
+            for k ,v in false_val:
+                if t.symbol.name == k.name:
+                    false_th[index] = None
+                elif k.is_next and k.name.endswith('_next'):
+                    #k.is_next= False
+                    #outc[k] = v
+                    ftheories.append(AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,k.name[:-len('_next')],None,None),v)))
+                    false_th[index] = None
+                index += 1
+            
+        for f in false_th:
+            if f is not None:
+                ftheories.append(AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,f[0].name,None,None),f[1])))
         #print("to struct interprets.....")
         #print(outc)
         #print(nullaryc)
@@ -266,8 +283,15 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
         for i in s.interpretations.values():
             i.block = s
             i = i.annotate(voc,{})
+        for f in ftheories:
+            #print(f)
+            f.annotate(voc,{})
         #voc.add_voc_to_block(s)
-        return s
+        fth = TheoryBlock(name="fth",vocab_name=voc.name,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+        fth.voc = voc
+        fth.constraints = OrderedSet(ftheories)
+        return (s,fth)
 
 def initialize(theory:TheoryBlock,struct:Structure):
     #print("inside initialize")
@@ -286,6 +310,7 @@ def initialize(theory:TheoryBlock,struct:Structure):
     #    s = m.toStructure(struct.vocab_name,struct.voc)
     #    out.append(s)
     for i, m in enumerate(ms):
+        #No tempdcl given so that it is not checked with next
         s = toStructure(m,struct.init_struct.vocab_name,struct.init_struct.voc,[])
         out.append(s)
     out.append(last)
@@ -294,7 +319,7 @@ def initialize(theory:TheoryBlock,struct:Structure):
     #return model_expand(theory.init_theory,struct.init_struct)
 
 def progression(theory:TheoryBlock,struct,additional_theory:TheoryBlock=None):
-    #print("inside progression")
+    print("inside progression")
     problem = None
     voc = None
     #if isinstance(struct, types.GeneratorType):
@@ -315,12 +340,14 @@ def progression(theory:TheoryBlock,struct,additional_theory:TheoryBlock=None):
     if isinstance(struct,List):
         j = 1
         for xi in struct:
-            if isinstance(xi,Structure):
+            if not isinstance(xi,tuple):
+                pass
+            elif isinstance(xi[0],Structure):
                 if additional_theory:
-                    problem = Theory(theory.bistate_theory,xi,additional_theory)
+                    problem = Theory(theory.bistate_theory,xi[0],xi[1],additional_theory)
                 else:
-                    problem = Theory(theory.bistate_theory,xi)
-                voc = xi.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
+                    problem = Theory(theory.bistate_theory,xi[0],xi[1])
+                voc = xi[0].voc.idp.next_voc.get(theory.vocab_name+'_next',None)
                 if voc is None:
                     print("Error vocabulary is wrong")
                     return
@@ -340,13 +367,17 @@ def progression(theory:TheoryBlock,struct,additional_theory:TheoryBlock=None):
                 #yield out 
                 out.append(last + " For Strtucture " + str(j))
             j += 1
-    elif isinstance(struct,Structure):
+    elif isinstance(struct,tuple):
+        #Used in simulate
+        if not isinstance(struct[0],Structure):
+            print("Error a structure should be given")
+            return
         if additional_theory:
-            problem = Theory(theory.bistate_theory,struct,additional_theory)
+            problem = Theory(theory.bistate_theory,struct[0],struct[1],additional_theory)
         else:
-            problem = Theory(theory.bistate_theory,struct)
+            problem = Theory(theory.bistate_theory,struct[0],struct[1])
         #problem = Theory(theory.bistate_theory,struct)
-        voc = struct.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
+        voc = struct[0].voc.idp.next_voc.get(theory.vocab_name+'_next',None)
         if voc is None:
             print("Error vocabulary is wrong")
             return
@@ -1222,7 +1253,12 @@ def print_struct(x):
     elif isinstance(x,List):
         i=0
         for s in x:
-            if isinstance(s,Structure):
+            if type(s) == tuple:
+                if isinstance(s[0],Structure):
+                    print(f"{NEWL}Model {i+1}{NEWL}==========")
+                    for interp in s[0].interpretations.values():
+                        print(interp)
+            elif isinstance(s,Structure):
                 print(f"{NEWL}Model {i+1}{NEWL}==========")
                 for interp in s.interpretations.values():
                     print(interp)
