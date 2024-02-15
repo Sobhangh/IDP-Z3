@@ -27,6 +27,7 @@ from copy import copy
 import gc
 import logging
 from os import linesep
+from sys import intern
 import time
 import types
 from typing import Any, Iterator, List, Union, Optional
@@ -588,14 +589,14 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
     if not isinstance(f,AImplication):
         return "Wrong format: body of quantification should be an implication"
     implicant = f.sub_exprs[1]
-    if not isinstance(implicant,AppliedSymbol):
-        return "Wrong format: implicant should only have one predicate/function"
-    n = implicant.symbol.name
-    r = contains_symb(f.sub_exprs[0],n)
-    if r == 0:
-        return "Wrong format: The implicant should be available in the antecedent of implication"
-    if r == -1:
-        return "Wrong format: should not have Now,Next, Start in forward chaning"
+    #if not isinstance(implicant,AppliedSymbol):
+    #    return "Wrong format: implicant should only have one predicate/function"
+    #n = implicant.symbol.name
+    #r = contains_symb(f.sub_exprs[0],n)
+    #if r == 0:
+    #    return "Wrong format: The implicant should be available in the antecedent of implication"
+    #if r == -1:
+    #    return "Wrong format: should not have Now,Next, Start in forward chaning"
     voc_now = theory.voc
     chain_num = 1
     if voc_now.tempdcl != None:
@@ -603,6 +604,8 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
         if isinstance(r,str):
             return r
         chain_num = r
+    #print("adjusted formula")
+    #print(f)
     voc : Vocabulary = voc_now.generate_expanded_voc(chain_num)
     voc.annotate_block(theory.voc.idp)
     af = AUnary(None,['not'],af)
@@ -610,15 +613,17 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
     invariant.constraints = OrderedSet([af])
     exp_th = theory.org_theory.expand_theory(chain_num,voc)
     annotate_exp_theory(exp_th,voc)
-    #print("expanded th..")
-    #for d in exp_th.definitions:
-    #    for r in d.rules:
-    #        print(r)
+    """print("expanded th..")
+    for c in exp_th.constraints:
+        print(c)
+    for d in exp_th.definitions:
+        for r in d.rules:
+            print(r)"""
     p1 = model_expand(exp_th,invariant,timeout_seconds=50)
     second_step =False
     j=0
     for i, xi in enumerate(p1):
-        print(xi)
+        #print(xi)
         if xi == 'No models.':
             second_step = True
         j+=1
@@ -627,32 +632,55 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
     return "****Invariant is TRUE****"
 
 def adjust_formula(expression:AImplication,tempdcl:List[TemporalDeclaration]):
-    implicant:AppliedSymbol = expression.sub_exprs[1]
-    n = 0
-    for t in tempdcl:
-        if implicant.symbol.name == t.symbol.name:
-            last = implicant.sub_exprs.pop()
-            if isinstance(last,ASumMinus):
-                if not last.operator[0] == '+':
-                    return "Only addition is acceptable"
-                if len(last.sub_exprs) > 2 :
-                    return "Please provide one number in the additions"
-                for e in last.sub_exprs:
-                    if isinstance(e,Number) and e.type == INT_SETNAME:
-                        n = e.py_value 
-                        implicant.symbol.name = implicant.symbol.name + '_' + str(n)
-                        break   
-            else:
-                return "End of the chain should be determined"
-            break
-    if n == 0:
+    implicant:Expression = expression.sub_exprs[1]
+    n = adjust_implicant(implicant,tempdcl)
+    if isinstance(n,str):
+        return n
+    elif n == 0:
         return "Wrong format: No upper limit provided"
     r = adjust_sub(expression.sub_exprs[0],tempdcl,n)
     if isinstance(r,str):
         return r
     return n
     
-    
+def adjust_implicant(expression:Expression,tempdcl:List[TemporalDeclaration]):
+    if isinstance(expression,(StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol)):
+        return "Not allowed to use Start/Now/Next"
+    if isinstance(expression,AppliedSymbol):
+        for t in tempdcl:
+            if expression.symbol.name == t.symbol.name:
+                last = expression.sub_exprs.pop()
+                if isinstance(last,ASumMinus):
+                    if not last.operator[0] == '+':
+                        return "Only addition is acceptable"
+                    if len(last.sub_exprs) > 2 :
+                        return "Please provide one number in the additions"
+                    for e in last.sub_exprs:
+                        if isinstance(e,Number) and e.type == INT_SETNAME:
+                            n = e.py_value 
+                            expression.symbol.name = expression.symbol.name + '_' + str(n)
+                            expression.code = intern(str(expression))
+                            expression.str = expression.code
+                            return n  
+                else:
+                    return "End of the chain should be determined"
+                break
+    n = 0
+    for e in expression.sub_exprs:
+        r = adjust_implicant(e,tempdcl)
+        if r != None:
+            if type(r)  == int:
+                if n == 0 :
+                    n = r
+                elif r != 0:
+                    if r != n:
+                        return "All the predicates in the implicant should be of the same time"
+                    #n = max(n,r)
+            else:
+                return r
+    expression.code = intern(str(expression))
+    expression.str = expression.code
+    return n
     
 def adjust_sub(expression:Expression,tempdcl:List[TemporalDeclaration],n:int):
     if isinstance(expression,(StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol)):
@@ -673,15 +701,19 @@ def adjust_sub(expression:Expression,tempdcl:List[TemporalDeclaration],n:int):
                             level = e.py_value
                             if level != 0:
                                 expression.symbol.name = expression.symbol.name + '_' + str(level)
+                                expression.code = intern(str(expression))
+                                expression.str = expression.code
                             break   
                 break
     for e in expression.sub_exprs:
         r = adjust_sub(e,tempdcl,n)
         if r != None:
             return r
+    expression.code = intern(str(expression))
+    expression.str = expression.code
 
 #checks if an expression contains NextAppliedSymbol
-def contains_symb(e:Expression,s:str):
+def contains_symb(e:Expression,s:str=""):
     if isinstance(e,AppliedSymbol):
         if e.symbol.name == s:
             return 1

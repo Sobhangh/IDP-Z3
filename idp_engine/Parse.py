@@ -792,7 +792,7 @@ class TheoryBlock(ASTNode):
             else:
                 symb = SymbolExpr(None,(str(e.symbol)+'_'+str(i)),None,None)
             return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
-        if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
+        if isinstance(expression,(UnappliedSymbol)):
             return expression
         j = 0
         for e in expression.sub_exprs:
@@ -818,6 +818,8 @@ class TheoryBlock(ASTNode):
                 s = self.replace_with_n(c.init_copy(),i,n)
                 if s != False:
                     cnstrs.append(s)
+                    s.code = intern(str(s))
+                    s.str = s.code
                 i+=1
         defs = []
         for definition in self.definitions:
@@ -882,7 +884,7 @@ class TheoryBlock(ASTNode):
     def contains_next(self,e:Expression):
         if isinstance(e,NextAppliedSymbol):
             return True
-        if isinstance(e,(AppliedSymbol,NowAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
+        if isinstance(e,(NowAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
             return False
         for s in e.sub_exprs:
             r = self.contains_next(s)
@@ -894,7 +896,7 @@ class TheoryBlock(ASTNode):
     def contains_now(self,e:Expression):
         if isinstance(e,NowAppliedSymbol):
             return True
-        if isinstance(e,(AppliedSymbol,NextAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
+        if isinstance(e,(NextAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
             return False
         for s in e.sub_exprs:
             r = self.contains_next(s)
@@ -1038,7 +1040,7 @@ class TheoryBlock(ASTNode):
             e = expression.sub_expr
             symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
             return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
-        if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
+        if isinstance(expression,(UnappliedSymbol)):
             return expression
         #sbex : List[Expression] = []
         i = 0
@@ -1065,7 +1067,7 @@ class TheoryBlock(ASTNode):
             e = expression.sub_expr
             symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
             return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
-        if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
+        if isinstance(expression,(UnappliedSymbol)):
             return expression
         #sbex : List[Expression] = []
         i = 0
@@ -1090,7 +1092,7 @@ class TheoryBlock(ASTNode):
             return expression.sub_expr
         if isinstance(expression, NextAppliedSymbol):
             return False
-        if isinstance(expression,(AppliedSymbol,UnappliedSymbol)):
+        if isinstance(expression,(UnappliedSymbol)):
             return expression
         #sbex : List[Expression] = []
         i = 0
@@ -1116,7 +1118,7 @@ class TheoryBlock(ASTNode):
                 expression.str = expression.code
             elif isinstance(e, NextAppliedSymbol):
                 return False
-            elif isinstance(e,(AppliedSymbol,UnappliedSymbol)):
+            elif isinstance(e,(UnappliedSymbol)):
                 return 
             else:
                 r = self.init_subexpr2(e)
@@ -1166,7 +1168,7 @@ class TheoryBlock(ASTNode):
             return False
         if isinstance(rule.body,(NowAppliedSymbol,StartAppliedSymbol)):
             rule.body = rule.body.sub_expr
-        elif isinstance(rule.body,(AppliedSymbol,UnappliedSymbol)): 
+        elif isinstance(rule.body,(UnappliedSymbol)): 
             rule.body
         else:
             r = self.init_subexpr2(rule.body)
