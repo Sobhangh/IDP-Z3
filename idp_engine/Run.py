@@ -31,15 +31,15 @@ from sys import intern
 import time
 import types
 from typing import Any, Iterator, List, Union, Optional
-from idp_engine import Expression
+import subprocess
 from z3 import Solver
 
-from idp_engine.Expression import FALSE, INT_SETNAME, OR, TRUE, AImplication, AQuantification, ASumMinus, AUnary, AppliedSymbol, NextAppliedSymbol, NowAppliedSymbol, Number, StartAppliedSymbol, SymbolExpr, UnappliedSymbol
+from idp_engine.Expression import FALSE, INT_SETNAME, OR, TRUE, AImplication, AQuantification, ASumMinus, AUnary, AppliedSymbol, NextAppliedSymbol, NowAppliedSymbol, Number, SetName, StartAppliedSymbol, SymbolExpr, UnappliedSymbol
 
-from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, Vocabulary
+from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, TypeDeclaration, Vocabulary
 from .Theory import Theory
 from .Assignments import Status as S, Assignments
-from .utils import NEWL, IDPZ3Error, PROCESS_TIMINGS, OrderedSet, v_time
+from .utils import BOOL, DATE, INT, NEWL, REAL, IDPZ3Error, PROCESS_TIMINGS, OrderedSet, v_time
 from .Annotate import annotate_exp_theory
 
 last_call = time.process_time()  # define it as global
@@ -807,11 +807,178 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     print(transitiongraph.aextentions)
     #print(transitiongraph.states)
     print(len(Nstate))
-    AlternativeAlg2(transitiongraph,Nstate,Nnextstate,Nonaction,temps,theory)
+    initialStates = AlternativeAlg2(transitiongraph,Nstate,Nnextstate,Nonaction,temps,theory)
     print("transition list")
     for k ,v in transitiongraph.transtions.items():
         print(k,v)
+    print(problem.extensions)
+    #eg: person': ([[John], [Bob]])
+    probsets : dict(str,List[List]) = {}
+    probvar : dict(str,List[SetName]) = {}
+    probacts : dict(str,List[SetName]) = {}
+    for s,e in problem.extensions.items():
+        for d in init_structure.voc.original_decl:
+            if isinstance(d,TypeDeclaration):  
+                if s == d.name:
+                    probsets[s] = e[0]
+                    break
+    #TO DO: Check recursive data type definitions and what result for their extension would be
+    #If the definition is is recursive there would be an error?
+    for d in voc_now.declarations:
+        if isinstance(d,SymbolDeclaration):
+            if d.name in init_structure.voc.fluents or d.name in init_structure.voc.ftemproral:
+                #TO DO : WHAT ABOUT FUNCTIONS
+                probvar[d.name] = d.domains
+            if d.name in init_structure.voc.actions:
+                probacts[d.name] = d.domains
+    #TO DO: Check that the sorts dont have inifinte types like INT
+    
+    tsets = "SETS "
+    i = 0
+    for s , e in probsets.items():
+        tsets += s 
+        if e == [[]]:
+            tsets += "=BOOL"
+        else:
+            tsets += " ={"
+            j = 0
+            for elem in e:
+                if j != 0:
+                    tsets += " , "
+                tsets += str(elem[0])
+                j += 1
+            tsets += "}"
         
+        if i != len(probsets.keys()) -1 :
+            tsets += ";"
+        i += 1
+    
+    tvars ="VARIABLES "
+    i = 0
+    for f in probvar.keys():
+        if i != 0:
+            tvars += ", "
+        tvars += f
+        i += 1
+    tinvar ="INVARIANT "
+    i = 0
+    for f , domains in probvar.items():
+        if i != 0:
+            tinvar += " & "
+        tinvar += f + ": "
+        j = 0
+        ld = len(domains)
+        for d in domains:
+            if j == 0 and ld > 2:
+                tinvar += "("
+            if j != 0 and ld > 2 and j != ld -1 :
+                tinvar += " * "
+            elif j != 0 and ld == 2 and j == ld -1 :
+                tinvar += " <-> "
+            elif j != 0 and ld > 2 and j == ld -1 :
+                tinvar += " <-> "
+
+            if d.name == BOOL:
+                tinvar += "BOOL"
+            elif d.name == INT or d.name == DATE or d.name == REAL:
+                return "Int or date or real type is not allowed"
+            elif ld == 1:
+                #TO DO: Check if it is a function to reduce possible overload 
+                tinvar += "POW(" + d.name + ")"
+            else:
+                tinvar += d.name
+
+            if j == ld -2 and ld > 2:
+                tinvar += ")"
+            j += 1
+        i += 1
+    
+    tinint ="INITIALISATION "
+    leninitstate = len(initialStates)
+    initialvalues : List[dict] = []
+    i = 0
+    for s in initialStates:
+        initialvalues.append({})
+        for s1 in transitiongraph.states[s]:
+            if s1[2] is None:
+                if s1[0] == True:
+                    initialvalues[-1][s1[1]] = ["TRUE"]
+                else:
+                    initialvalues[-1][s1[1]] = ["FALSE"]
+            else:
+                if s1[0] == True:
+                    posres = initialvalues[-1].get(s1[1],[])
+                    tp = []
+                    j = 0
+                    for elem in s1[2]:
+                        #if j != 0:
+                        #    tp += ","
+                        if elem.name =="true":
+                            tp.append("TRUE")
+                        elif elem.name =="false":
+                            tp.append("FALSE") 
+                        else:
+                            tp.append(elem)
+                        j += 1
+                    #tp += ")"
+                    posres.append(tp)
+                    initialvalues[-1][s1[1]] = posres
+                else: 
+                    if initialvalues[-1].get(s1[1],None) is None:
+                        initialvalues[-1][s1[1]] = []
+
+    i = 0
+    if leninitstate != 1:
+        tinint += "CHOICE "
+    for initst in initialvalues:
+        if i != 0:
+            tinint += " OR "
+        i2 = 0
+        for k , valv in initst.items():
+            if i2 != 0:
+                tinint += " ; "
+            tinint += k + " := "
+            if len(valv) == 0:
+                #TO DO: It could be the case if a predicate is like int1to5 -> Bool and at first it is false for all 1..5 
+                #in that case; maybe in prob the predicate has to becom (int1to5,Bool) -> Bool for this below to work
+                #TO DO:Partial functions ????
+                tinint += "{}"
+            elif len(valv) == 1 and (valv[0] == "TRUE" or valv[0] == "FALSE"):
+                tinint += valv[0]
+            else:
+                tinint += " {"
+                j = 0
+                for v in valv:
+                    if j != 0:
+                        tinint += " , "
+                    tinint += "("
+                    q = 0
+                    for v1 in v:
+                        if q != 0 :
+                            tinint += " , "
+                        tinint += str(v1)
+                        q += 1
+                    tinint += ")"
+                    j += 1
+
+                tinint += "} " 
+            i2 += 1
+            
+            
+
+        i+=1
+    if leninitstate != 1:
+        tinint += " END"
+
+    print(tinint)
+    print(tinvar)
+    print(tsets)
+    print(tvars)
+            
+    a = subprocess.run('C:\Prob\probcli  -version',shell=True,capture_output=True)
+    print("PROBCLI............")
+    print(a.stdout.decode())
+    print(a.stderr.decode())
     return
     i =0
     for s1 in Nstate:
@@ -843,12 +1010,14 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
 def AlternativeAlg(transitiongraph:TransiotionGraph,Nstate:List,Nnextstate:List,Nonaction:dict,init_struct:Structure,theory:TheoryBlock):
     reachedStates =[]
     nextreachedState = []
+    initialStates = []
     i = 0
     for s1 in Nstate:
         t = checkTransition("",None,init_struct,theory.init_theory,s1,[],{})
         if t != False:
             nextreachedState.append(i)
             reachedStates.append(i)
+            initialStates.append(i)
         i += 1
     print("inital state")
     print(reachedStates)
@@ -888,17 +1057,20 @@ def AlternativeAlg(transitiongraph:TransiotionGraph,Nstate:List,Nnextstate:List,
     print(len(reachedStates))
     for r in reachedStates:
         print(transitiongraph.states[r])
+    return initialStates
 
 
 def AlternativeAlg2(transitiongraph:TransiotionGraph,Nstate:List,Nnextstate:List,Nonaction:dict,init_struct:Structure,theory:TheoryBlock):
     reachedStates =[]
     nextreachedState = []
+    initialStates = []
     i = 0
     for s1 in Nstate:
         t = checkTransition("",None,init_struct,theory.init_theory,s1,[],{})
         if t != False:
             nextreachedState.append(i)
             reachedStates.append(i)
+            initialStates.append(i)
         i += 1
     print("inital state")
     print(reachedStates)
@@ -939,6 +1111,7 @@ def AlternativeAlg2(transitiongraph:TransiotionGraph,Nstate:List,Nnextstate:List
     print(len(reachedStates))
     for r in reachedStates:
         print(transitiongraph.states[r])
+    return initialStates
 
 def findnextStates(transitiongraph:TransiotionGraph,action:str,args,init_struct:Structure,transition_theory:TheoryBlock,Nstate:List,non_action:dict,argindex:int=0):
     actionPred = None
