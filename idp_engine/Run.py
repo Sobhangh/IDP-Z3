@@ -899,33 +899,7 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     i = 0
     for s in initialStates:
         initialvalues.append({})
-        for s1 in transitiongraph.states[s]:
-            if s1[2] is None:
-                if s1[0] == True:
-                    initialvalues[-1][s1[1]] = ["TRUE"]
-                else:
-                    initialvalues[-1][s1[1]] = ["FALSE"]
-            else:
-                if s1[0] == True:
-                    posres = initialvalues[-1].get(s1[1],[])
-                    tp = []
-                    j = 0
-                    for elem in s1[2]:
-                        #if j != 0:
-                        #    tp += ","
-                        if elem.name =="true":
-                            tp.append("TRUE")
-                        elif elem.name =="false":
-                            tp.append("FALSE") 
-                        else:
-                            tp.append(elem)
-                        j += 1
-                    #tp += ")"
-                    posres.append(tp)
-                    initialvalues[-1][s1[1]] = posres
-                else: 
-                    if initialvalues[-1].get(s1[1],None) is None:
-                        initialvalues[-1][s1[1]] = []
+        StateToProb(transitiongraph.states[s],initialvalues[-1])
 
     i = 0
     if leninitstate != 1:
@@ -933,49 +907,113 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     for initst in initialvalues:
         if i != 0:
             tinint += " OR "
-        i2 = 0
-        for k , valv in initst.items():
-            if i2 != 0:
-                tinint += " ; "
-            tinint += k + " := "
-            if len(valv) == 0:
-                #TO DO: It could be the case if a predicate is like int1to5 -> Bool and at first it is false for all 1..5 
-                #in that case; maybe in prob the predicate has to becom (int1to5,Bool) -> Bool for this below to work
-                #TO DO:Partial functions ????
-                tinint += "{}"
-            elif len(valv) == 1 and (valv[0] == "TRUE" or valv[0] == "FALSE"):
-                tinint += valv[0]
-            else:
-                tinint += " {"
-                j = 0
-                for v in valv:
-                    if j != 0:
-                        tinint += " , "
-                    tinint += "("
-                    q = 0
-                    for v1 in v:
-                        if q != 0 :
-                            tinint += " , "
-                        tinint += str(v1)
-                        q += 1
-                    tinint += ")"
-                    j += 1
-
-                tinint += "} " 
-            i2 += 1
-            
-            
-
+        tinint += toProbSubstitution(" := "," ; ",initst)
         i+=1
     if leninitstate != 1:
         tinint += " END"
 
-    print(tinint)
-    print(tinvar)
-    print(tsets)
-    print(tvars)
+    #it contains the list of conditions for each action
+    actioncondition :dict(str,List[str]) = {}
+    actionoperation :dict(str,List) = {}
+
+    for trans ,act in transitiongraph.transtions.items():
+        for a in act:
+            n = a.symbol.name
+            conds = actioncondition.get(n,[])
+            cnd = " ("
+            j = 0
+            #The name of the arguments of action is action0,action1,....
+            for elem in a.sub_exprs:
+                if j != 0:
+                    cnd += " & "
+                if elem.name =="true":
+                    cnd += n + str(j) + " = TRUE"
+                elif elem.name =="false":
+                    cnd += n + str(j) + " = FALSE" 
+                else:
+                    cnd += n + str(j) + " = " + str(elem)
+                j += 1
             
-    a = subprocess.run('C:\Prob\probcli  -version',shell=True,capture_output=True)
+            beginstate = {}
+            StateToProb(transitiongraph.states[trans[0]],beginstate)
+            endstate = {}
+            StateToProb(transitiongraph.states[trans[1]],endstate)
+            if j > 0  and len(beginstate.keys()) > 0:
+                cnd += " & "
+            cnd += toProbSubstitution(" = "," & ",beginstate)
+            cnd += " ) "
+            if j > 0 or len(beginstate.keys()) > 0: 
+                conds.append(cnd)
+                actioncondition[n] = conds
+                op = cnd + " THEN " + toProbSubstitution(" := ", " ; ", endstate)
+                oprtns = actionoperation.get(n,[])
+                oprtns.append(op)
+                actionoperation[n] = oprtns
+    toprts ="OPERATIONS "
+    actnum = 0
+    for a , domains in probacts.items():
+        actstr =""
+        if actnum != 0:
+            actstr += " ; "
+        actstr = a + "("
+        argn = len(domains)
+        j = 0
+        while j < argn:
+            if j != 0:
+                actstr += ", "
+            actstr += a + str(j)
+            j += 1
+        actstr += ") = PRE "
+        j = 0
+        for d in domains:
+            if j != 0:
+                actstr += " & "
+            actstr += a + str(j) + " :"
+            if d.name == BOOL:
+                actstr += "BOOL"
+            else:
+                actstr += d.name
+            j += 1
+        cndln = len(actioncondition[a])
+        if cndln > 0:
+            if argn > 0:
+                actstr += " & ("
+            else:
+                actstr += "("
+        j = 0
+        for a1 in actioncondition[a]:
+            if j != 0 :
+                actstr += " or "
+            actstr += a1
+            j += 1
+        if cndln > 0:
+            actstr += ") "
+        if cndln ==0 and argn == 0:
+            actstr += "TRUE "
+        actstr += " THEN "
+        j = 0
+        for ops in actionoperation[a]:
+            if j == 0:
+                actstr += " IF "
+            else:
+                actstr += " ELSIF "
+            actstr += ops
+            j += 1
+        if len(actionoperation[a]) > 0:
+            actstr += " END END"
+        else:
+            actstr += " skip END"
+        toprts += actstr
+        actnum += 1
+    
+    machine = "MACHINE Test" + '\n' + tsets + '\n' + tvars + '\n' + tinvar + \
+          '\n' + tinint + '\n' + toprts + '\n' + "END"
+    print(machine)
+
+    f = open("test.mch","w")
+    f.write(machine)
+    f.close()        
+    a = subprocess.run('C:\Prob\probcli test.mch -model-check -spdot states.dot',shell=True,capture_output=True)
     print("PROBCLI............")
     print(a.stdout.decode())
     print(a.stderr.decode())
@@ -1006,6 +1044,71 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
         i += 1
     print("transition list")
     print(transitiongraph.transtions)
+
+#initst is the dictionary produced by StateToProb function which for each predicates holds the list of values that is true
+def toProbSubstitution(equalitysign:str,subdeliminator:str,initst:dict) -> str:
+    i2 = 0
+    tinint = ""
+    for k , valv in initst.items():
+        if i2 != 0:
+            tinint += subdeliminator
+        tinint += k + equalitysign
+        if len(valv) == 0:
+            #TO DO: It could be the case if a predicate is like int1to5 -> Bool and at first it is false for all 1..5 
+            #in that case; maybe in prob the predicate has to becom (int1to5,Bool) -> Bool for this below to work
+            #TO DO:Partial functions ????
+            tinint += "{}"
+        elif len(valv) == 1 and (valv[0] == "TRUE" or valv[0] == "FALSE"):
+            tinint += valv[0]
+        else:
+            tinint += " {"
+            j = 0
+            for v in valv:
+                if j != 0:
+                    tinint += " , "
+                tinint += "("
+                q = 0
+                for v1 in v:
+                    if q != 0 :
+                        tinint += " , "
+                    tinint += str(v1)
+                    q += 1
+                tinint += ")"
+                j += 1
+
+            tinint += "} " 
+        i2 += 1
+    return tinint
+            
+
+def StateToProb(state:List,store:dict):
+    for s1 in state:
+        if s1[2] is None:
+            if s1[0] == True:
+                store[s1[1]] = ["TRUE"]
+            else:
+                store[s1[1]] = ["FALSE"]
+        else:
+            if s1[0] == True:
+                posres = store.get(s1[1],[])
+                tp = []
+                j = 0
+                for elem in s1[2]:
+                    #if j != 0:
+                    #    tp += ","
+                    if elem.name =="true":
+                        tp.append("TRUE")
+                    elif elem.name =="false":
+                        tp.append("FALSE") 
+                    else:
+                        tp.append(elem)
+                    j += 1
+                #tp += ")"
+                posres.append(tp)
+                store[s1[1]] = posres
+            else: 
+                if store.get(s1[1],None) is None:
+                    store[s1[1]] = []
 
 def AlternativeAlg(transitiongraph:TransiotionGraph,Nstate:List,Nnextstate:List,Nonaction:dict,init_struct:Structure,theory:TheoryBlock):
     reachedStates =[]
