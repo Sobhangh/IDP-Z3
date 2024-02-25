@@ -75,6 +75,7 @@ def matchingstates(assign,transitiongraph:TransiotionGraph):
     out : dict[SymbolDeclaration, List[TupleIDP]] = {}
     nullary: dict[SymbolDeclaration, Any] = {}
     states = []
+    #print("matching states .....")
     for a in assign.values():
         if type(a.sentence) == AppliedSymbol:
             #print(a)
@@ -88,10 +89,15 @@ def matchingstates(assign,transitiongraph:TransiotionGraph):
                     args = None
                     #because we dont have functions c can either be true or false
                     c = a.value
+                    if str(c) == "true":
+                        c = True
+                    elif str(c) == "false":
+                        c = False
                 elif a.value == TRUE:
                     c = True
                 elif a.value == FALSE:
                     c = False
+                #print(c)
                 if c is not None and c == True:
                     if len(states) == 0:
                         states.append([(c,a.symbol_decl.name[:-len('_next')],args)])
@@ -811,7 +817,8 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     print("transition list")
     for k ,v in transitiongraph.transtions.items():
         print(k,v)
-    print(problem.extensions)
+    #print(problem.extensions)
+        
     #eg: person': ([[John], [Bob]])
     probsets : dict(str,List[List]) = {}
     probvar : dict(str,List[SetName]) = {}
@@ -835,24 +842,42 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     
     tsets = "SETS "
     i = 0
+    numsets = []
     for s , e in probsets.items():
-        tsets += s 
+        #tsets += s 
         if e == [[]]:
-            tsets += "=BOOL"
+            tsets += s + " =BOOL"
         else:
-            tsets += " ={"
-            j = 0
-            for elem in e:
-                if j != 0:
-                    tsets += " , "
-                tsets += str(elem[0])
-                j += 1
-            tsets += "}"
+            if not isinstance(e[0][0],Number):
+                tsets += s + " ={ "
+                j = 0
+                for elem in e:
+                    if j != 0:
+                        tsets += " , "
+                    tsets += str(elem[0])
+                    j += 1
+                tsets += " }"
+            else:
+                numsets.append(s)
         
         if i != len(probsets.keys()) -1 :
             tsets += ";"
         i += 1
-    
+
+    probnumset :dict(str,List) = {}
+    i = 0
+    for s in numsets:
+        smin = int(str(probsets[s][0][0]))
+        smax = smin
+        for elem in probsets[s]:
+            n = int(str(elem[0]))
+            if  n< smin:
+                smin = n
+            if n > smax:
+                smax = n
+        probnumset[s] =[smin,smax]
+        i += 1
+
     tvars ="VARIABLES "
     i = 0
     for f in probvar.keys():
@@ -882,15 +907,23 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
                 tinvar += "BOOL"
             elif d.name == INT or d.name == DATE or d.name == REAL:
                 return "Int or date or real type is not allowed"
-            elif ld == 1:
-                #TO DO: Check if it is a function to reduce possible overload 
-                tinvar += "POW(" + d.name + ")"
             else:
-                tinvar += d.name
+                domname =""
+                if d.name in probnumset.keys():
+                    domname = str(probnumset[d.name][0]) + ".." + str(probnumset[d.name][1])
+                else:
+                    domname = d.name 
+                if ld == 1:
+                    #TO DO: Check if it is a function to reduce possible overload 
+                    tinvar += "POW(" + domname + ")"
+                else:
+                    tinvar += domname
 
             if j == ld -2 and ld > 2:
                 tinvar += ")"
             j += 1
+        if ld == 0:
+            tinvar += "BOOL"
         i += 1
     
     tinint ="INITIALISATION "
@@ -926,9 +959,9 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
             for elem in a.sub_exprs:
                 if j != 0:
                     cnd += " & "
-                if elem.name =="true":
+                if str(elem) =="true":
                     cnd += n + str(j) + " = TRUE"
-                elif elem.name =="false":
+                elif str(elem) =="false":
                     cnd += n + str(j) + " = FALSE" 
                 else:
                     cnd += n + str(j) + " = " + str(elem)
@@ -949,6 +982,7 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
                 oprtns = actionoperation.get(n,[])
                 oprtns.append(op)
                 actionoperation[n] = oprtns
+    
     toprts ="OPERATIONS "
     actnum = 0
     for a , domains in probacts.items():
@@ -972,7 +1006,13 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
             if d.name == BOOL:
                 actstr += "BOOL"
             else:
-                actstr += d.name
+                domname =""
+                if d.name in probnumset.keys():
+                    domname = str(probnumset[d.name][0]) + ".." + str(probnumset[d.name][1])
+                else:
+                    domname = d.name 
+                actstr += domname
+                #actstr += d.name
             j += 1
         cndln = len(actioncondition[a])
         if cndln > 0:
@@ -1096,9 +1136,9 @@ def StateToProb(state:List,store:dict):
                 for elem in s1[2]:
                     #if j != 0:
                     #    tp += ","
-                    if elem.name =="true":
+                    if str(elem) =="true": # elem.name
                         tp.append("TRUE")
-                    elif elem.name =="false":
+                    elif str(elem) =="false":
                         tp.append("FALSE") 
                     else:
                         tp.append(elem)
@@ -1257,8 +1297,9 @@ def findnextStates(transitiongraph:TransiotionGraph,action:str,args,init_struct:
             second_step = True
         elif type(xi) != str:
             nextstates += (matchingstates(xi,transitiongraph))
-            #print(nextstates)
         j+=1
+    #print("next states ...")
+    #print(nextstates)
     if second_step and j==1:
         return ([],actionPred)
     return (list(set(nextstates)),actionPred)
