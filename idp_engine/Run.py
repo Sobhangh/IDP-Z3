@@ -34,9 +34,9 @@ from typing import Any, Iterator, List, Union, Optional
 import subprocess
 from z3 import Solver
 
-from idp_engine.Expression import FALSE, INT_SETNAME, OR, TRUE, AImplication, AQuantification, ASumMinus, AUnary, AppliedSymbol, NextAppliedSymbol, NowAppliedSymbol, Number, SetName, StartAppliedSymbol, SymbolExpr, UnappliedSymbol
+from idp_engine.Expression import FALSE, INT_SETNAME, OR, TRUE, AAggregate, AComparison, AConjunction, ADisjunction, AEquivalence, AIfExpr, AImplication, AMultDiv, APower, AQuantification, ARImplication, ASumMinus, AUnary, AppliedSymbol, Brackets, CLFormula, DLFormula, Expression, FLFormula, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, Number, Operator, RLFormula, SetName, StartAppliedSymbol, SymbolExpr, ULFormula, UnappliedSymbol, WLFormula, XLFormula
 
-from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, TypeDeclaration, Vocabulary
+from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TempLogic, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, TypeDeclaration, Vocabulary
 from .Theory import Theory
 from .Assignments import Status as S, Assignments
 from .utils import BOOL, DATE, INT, NEWL, REAL, IDPZ3Error, PROCESS_TIMINGS, OrderedSet, v_time
@@ -734,7 +734,7 @@ def contains_symb(e:Expression,s:str=""):
             return -1
     return 0
     
-def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
+def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlock):
     #TO DO: check if the init_structure does interpret all the time independant predicates/functions
     if theory.ltc is None:
         return "Theory should be an LTC theory"
@@ -845,6 +845,7 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     numsets = []
     for s , e in probsets.items():
         #tsets += s 
+        notNum = True
         if e == [[]]:
             tsets += s + " =BOOL"
         else:
@@ -858,9 +859,10 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
                     j += 1
                 tsets += " }"
             else:
+                notNum = False
                 numsets.append(s)
         
-        if i != len(probsets.keys()) -1 :
+        if i != len(probsets.keys()) -1 and notNum :
             tsets += ";"
         i += 1
 
@@ -1049,11 +1051,13 @@ def ProveModalLogic(formula,init_structure:Structure,theory:TheoryBlock):
     machine = "MACHINE Test" + '\n' + tsets + '\n' + tvars + '\n' + tinvar + \
           '\n' + tinint + '\n' + toprts + '\n' + "END"
     print(machine)
-
+    #"(F {owns = owns \/ {(1,B1)}}) & G {F {john_owns=TRUE}}"
+    ltlf = "(F { (2,B1):owns })" 
+    ltlf = translateLtlFormula(ltllogic.formula,probnumset)
     f = open("test.mch","w")
     f.write(machine)
     f.close()        
-    a = subprocess.run('C:\Prob\probcli test.mch -model-check -spdot states.dot',shell=True,capture_output=True)
+    a = subprocess.run(f'C:\Prob\probcli -ltlformula "{ltlf}" test.mch ',shell=True,capture_output=True) # -model-check -spdot states.dot
     print("PROBCLI............")
     print(a.stdout.decode())
     print(a.stderr.decode())
@@ -1346,24 +1350,190 @@ def checkTransition(action:str,args,init_struct:Structure,transition_theory:Theo
         return False
     return actionPred
 
-def purgeImpossibleState(state,init_struct,init_theory):
-    testth = TheoryBlock(name="StateTest",vocab_name=init_theory.vocab_name,ltc = None,inv=None,
-                                                     constraints=[],definitions=[],interpretations=[])
-    testth.constraints = OrderedSet(state)
-    interp = init_theory.interpretations
-    init_theory.interpretations = {}
-    p = Theory(init_struct,init_theory,testth)
-    res = list(p.expand())
-    init_theory.interpretations = interp
-    second_step =False
-    j=0
-    for i, xi in enumerate(res):
-        if xi == 'No models.':
-            second_step = True
-        j+=1
-    if second_step and j==1:
-        return True
-    return False
+def translateLtlFormula(formula:LFormula,probnumset):
+    #Union[Expression,ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,
+    #FLFormula,GLFormula,ULFormula,WLFormula,RLFormula]
+    res = "( "
+    res += recTransProb(formula,probnumset)
+    res += " )"
+    return res
+
+#Remember to add the interval for number sorts in quantifiers
+#check if the retured is False then pass that
+def recTransProb(formula:LFormula,probnumset:dict(str,List),firstexp=False):
+    print("ptob parsing")
+    print(type(formula))
+    print(formula)
+    if isinstance(formula,ILFormula):
+        return "(" + recTransProb(formula.expr1,probnumset) + " => " + recTransProb(formula.expr2,probnumset) + ")"
+    elif isinstance(formula,DLFormula):
+        return "(" + recTransProb(formula.expr1,probnumset) + " or " + recTransProb(formula.expr2,probnumset) + ")"
+    elif isinstance(formula,CLFormula):
+        return "(" + recTransProb(formula.expr1,probnumset) + " & " + recTransProb(formula.expr2,probnumset) + ")"
+    elif isinstance(formula,NLFormula):
+        return "(" + " not " + "(" + recTransProb(formula.expr,probnumset) + ")" +  ")"
+    elif isinstance(formula,XLFormula):
+        return "(" + "X " + recTransProb(formula.expr,probnumset) +  ")"
+    elif isinstance(formula,FLFormula):
+        return "(" + "F " + recTransProb(formula.expr,probnumset) +  ")"
+    elif isinstance(formula,GLFormula):
+        return "(" + "G " + recTransProb(formula.expr,probnumset) +  ")"
+    elif isinstance(formula,ULFormula):
+        return "(" + recTransProb(formula.expr1,probnumset) + " U " + recTransProb(formula.expr2,probnumset) + ")"
+    elif isinstance(formula,RLFormula):
+        return "(" + recTransProb(formula.expr1,probnumset) + " R " + recTransProb(formula.expr2,probnumset) + ")"
+    elif isinstance(formula,WLFormula):
+        return "(" + recTransProb(formula.expr1,probnumset) + " W " + recTransProb(formula.expr2,probnumset) + ")"
+    elif isinstance(formula,Expression):
+        res = ""
+        if not firstexp:
+            res += "{ "
+        if isinstance(formula,AQuantification):
+            if formula.q == "∀":
+                res += "!("
+            else:
+                res += "#("
+            precond ="("
+            i = 0
+            for q in formula.quantees:
+                if i != 0:
+                    precond += " & "
+                qvars =[]
+                for q1 in q.vars:
+                    for q2 in q1:
+                        res += str(q2)
+                        qvars.append(str(q2))
+                styp = "" 
+                if str(q.subtype) in probnumset.keys():
+                    styp = str(probnumset[str(q.subtype)][0]) + ".." + str(probnumset[str(q.subtype)][1])
+                else:
+                    styp = str(q.subtype)
+                    if styp == "Bool":
+                        styp = "BOOL"
+                j = 0
+                for q1 in qvars:
+                    if j != 0:
+                        precond += " & "
+                    precond += q1 + ": " + styp
+                    j += 1
+                i += 1
+            res += ").("
+            precond += " ) "
+            res += precond
+            if formula.q == "∀":
+                res += " => "
+            else:
+                res += " & "
+            res += "(" + recTransProb(formula.f,probnumset,True) + ") )"
+        elif isinstance(formula,AppliedSymbol):
+            if len(formula.sub_exprs) > 0:
+                args = "("
+                j = 0
+                for s in formula.sub_exprs:
+                    if j != 0:
+                        args += " , "
+                    args += recTransProb(s,probnumset,True)
+                    j += 1
+                args += ")"
+                #res += str(formula.symbol) + " = " + str(formula.symbol) + " \/ " + "{" + args + "}"
+                res += args + " : " + str(formula.symbol)
+            else:
+                 res += str(formula.symbol) + " = " + "TRUE"
+        elif isinstance(formula,SetName):
+            #TO DO: dealing with concepts???
+            if formula.name == "Bool":
+                res += "BOOL"
+            elif formula.name == "true":
+                res += "TRUE"
+            elif formula.name == "false":
+                res += "FALSE"
+            else:
+                res += str(formula.name)
+        elif isinstance(formula,AIfExpr):
+            res += "IF " + recTransProb(formula.if_f,probnumset,True) + " THEN " + \
+                recTransProb(formula.then_f,probnumset,True) + " ELSE " + recTransProb(formula.else_f,probnumset,True) + " END"
+        elif isinstance(formula,Operator):
+            sign = ""
+            if isinstance(formula,ARImplication):
+                sign = " => "
+                res += "("
+                j = len(formula.sub_exprs) -1
+                while j>= 0:
+                    if j != len(formula.sub_exprs) -1:
+                        res += sign
+                    res += recTransProb(formula.sub_exprs[j],probnumset,True)
+                    j -= 1
+
+                res += ")"
+            else:
+                if isinstance(formula,AImplication):
+                    sign =" => "
+                elif isinstance(formula,AEquivalence):
+                    sign =" <=> "
+                elif isinstance(formula,ADisjunction):
+                    sign =" or "
+                elif isinstance(formula,AConjunction):
+                    sign =" & "
+                elif isinstance(formula,AComparison):
+                    if formula.operator[0] == "∧":
+                        sign =" & "
+                    elif formula.operator[0] == "∨":
+                        sign = " or "   
+                    elif formula.operator[0] == "⨯":
+                        sign = " * "   
+                    elif formula.operator[0] == "≠":
+                        sign = " /= "   
+                    elif formula.operator[0] == "≥":
+                        sign = " >= "   
+                    elif formula.operator[0] == "≤":
+                        sign = " <= "    
+                elif isinstance(formula,ASumMinus):
+                    sign = formula.operator[0] 
+                elif isinstance(formula,AMultDiv):
+                    if formula.operator[0] == "⨯":
+                        sign = " * "   
+                        '/' | '%'
+                    elif formula.operator[0] == "/":
+                        sign = " / "   
+                    elif formula.operator[0] == "%":
+                        sign = " mod "  
+                    else: 
+                        sign = formula.operator[0]   
+                elif isinstance(formula,APower):
+                    sign =" ** "
+                res += "("
+                j = 0
+                while j < len(formula.sub_exprs) :
+                    if j != 0:
+                        res += sign
+                    res += recTransProb(formula.sub_exprs[j],probnumset,True)
+                    j += 1
+                res += ")"
+        elif isinstance(formula,AUnary):
+            res += "not (" + recTransProb(formula.f,probnumset,True) + " )"
+        elif isinstance(formula,AAggregate):
+            pass
+            #TO DO: ADD AGGREGATE ??    
+        elif isinstance(formula,(StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol)):
+            pass
+        elif isinstance(formula,UnappliedSymbol):
+            if formula.name == "true":
+                res += "TRUE"
+            elif formula.name == "false":
+                res += "FALSE"
+            else:
+                res += str(formula.name)
+        elif isinstance(formula,Brackets):
+            res += "( " + recTransProb(formula.f,probnumset,True) + " )"
+        else:
+            res += str(formula)  
+                    
+        if not firstexp:
+            res += " }"
+        return res
+    return ""
+    
+
 
 def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
                  max: int = 10,

@@ -1599,6 +1599,10 @@ class GLFormula(Expression):
     """
     def __init__(self,parent,expr:LFormula):
         self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "G " + str(self.expr) 
 
 class XLFormula(Expression):
     """
@@ -1606,6 +1610,10 @@ class XLFormula(Expression):
     """
     def __init__(self,parent,expr:LFormula):
         self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "X " + str(self.expr) 
 
 class FLFormula(Expression):
     """
@@ -1613,6 +1621,10 @@ class FLFormula(Expression):
     """
     def __init__(self,parent,expr:LFormula):
         self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "F " + str(self.expr) 
 
 class NLFormula(Expression):
     """
@@ -1620,6 +1632,10 @@ class NLFormula(Expression):
     """
     def __init__(self,parent,expr:LFormula):
         self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "not " + str(self.expr) 
 
 class ULFormula(Expression):
     """
@@ -1628,6 +1644,9 @@ class ULFormula(Expression):
     def __init__(self,parent,expr1:LFormula,expr2:LFormula):
         self.expr1 = expr1
         self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+    def __str__(self) -> str:
+        return str(self.expr1) + " U " + str(self.expr2)
 
 class WLFormula(Expression):
     """
@@ -1636,6 +1655,10 @@ class WLFormula(Expression):
     def __init__(self,parent,expr1:LFormula,expr2:LFormula):
         self.expr1 = expr1
         self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return str(self.expr1) + " W " + str(self.expr2)
 
 class RLFormula(Expression):
     """
@@ -1644,6 +1667,10 @@ class RLFormula(Expression):
     def __init__(self,parent,expr1:LFormula,expr2:LFormula):
         self.expr1 = expr1
         self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return str(self.expr1) + " R " + str(self.expr2)
 
 class CLFormula(Expression):
     """
@@ -1652,6 +1679,10 @@ class CLFormula(Expression):
     def __init__(self,parent,expr1:LFormula,expr2:LFormula):
         self.expr1 = expr1
         self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return str(self.expr1) + " & " + str(self.expr2)
 
 class DLFormula(Expression):
     """
@@ -1660,6 +1691,10 @@ class DLFormula(Expression):
     def __init__(self,parent,expr1:LFormula,expr2:LFormula):
         self.expr1 = expr1
         self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return str(self.expr1) + " or " + str(self.expr2)
 
 class ILFormula(Expression):
     """
@@ -1668,6 +1703,10 @@ class ILFormula(Expression):
     def __init__(self,parent,expr1:LFormula,expr2:LFormula):
         self.expr1 = expr1
         self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return str(self.expr1) + " => " + str(self.expr2)
 
 LFormula = Union[Expression,ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula]
 
