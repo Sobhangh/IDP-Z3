@@ -298,6 +298,8 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
                                                      constraints=[],definitions=[],interpretations=[])
         fth.voc = voc
         fth.constraints = OrderedSet(ftheories)
+        #print("negataevie theoriies")
+        #print(fth.constraints)
         return (s,fth)
 
 def initialize(theory:TheoryBlock,struct:Structure):
@@ -336,11 +338,6 @@ def progression(theory:TheoryBlock,struct,additional_theory:TheoryBlock=None):
     #            pass
     #        problem = Theory(theory.bistate_theory,xi)
     #        voc = xi.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
-    #        #print(voc)
-    #        if voc is None:
-    #            print("Error vocabulary is wrong")
-    #            return
-            #print(problem.assignments)
     out = []
     PROCESS_TIMINGS['ground'] = time.time() - PROCESS_TIMINGS['ground']
     solve_start = time.time()
@@ -1361,9 +1358,9 @@ def translateLtlFormula(formula:LFormula,probnumset):
 #Remember to add the interval for number sorts in quantifiers
 #check if the retured is False then pass that
 def recTransProb(formula:LFormula,probnumset:dict(str,List),firstexp=False):
-    print("ptob parsing")
-    print(type(formula))
-    print(formula)
+    #print("ptob parsing")
+    #print(type(formula))
+    #print(formula)
     if isinstance(formula,ILFormula):
         return "(" + recTransProb(formula.expr1,probnumset) + " => " + recTransProb(formula.expr2,probnumset) + ")"
     elif isinstance(formula,DLFormula):
@@ -1371,13 +1368,13 @@ def recTransProb(formula:LFormula,probnumset:dict(str,List),firstexp=False):
     elif isinstance(formula,CLFormula):
         return "(" + recTransProb(formula.expr1,probnumset) + " & " + recTransProb(formula.expr2,probnumset) + ")"
     elif isinstance(formula,NLFormula):
-        return "(" + " not " + "(" + recTransProb(formula.expr,probnumset) + ")" +  ")"
+        return  " not " + "(" + recTransProb(formula.expr,probnumset) + ")" 
     elif isinstance(formula,XLFormula):
-        return "(" + "X " + recTransProb(formula.expr,probnumset) +  ")"
+        return  "X " + "(" + recTransProb(formula.expr,probnumset) +  ")"
     elif isinstance(formula,FLFormula):
-        return "(" + "F " + recTransProb(formula.expr,probnumset) +  ")"
+        return  "F " + "(" + recTransProb(formula.expr,probnumset) +  ")"
     elif isinstance(formula,GLFormula):
-        return "(" + "G " + recTransProb(formula.expr,probnumset) +  ")"
+        return  "G " + "(" + recTransProb(formula.expr,probnumset) +  ")"
     elif isinstance(formula,ULFormula):
         return "(" + recTransProb(formula.expr1,probnumset) + " U " + recTransProb(formula.expr2,probnumset) + ")"
     elif isinstance(formula,RLFormula):
@@ -1399,10 +1396,16 @@ def recTransProb(formula:LFormula,probnumset:dict(str,List),firstexp=False):
                 if i != 0:
                     precond += " & "
                 qvars =[]
+                i2 =0
                 for q1 in q.vars:
+                    j2 =0
                     for q2 in q1:
+                        if i2 != 0 or j2 != 0 or i != 0:
+                            res += ", "
                         res += str(q2)
                         qvars.append(str(q2))
+                        j2 += 1
+                    i2 += 1
                 styp = "" 
                 if str(q.subtype) in probnumset.keys():
                     styp = str(probnumset[str(q.subtype)][0]) + ".." + str(probnumset[str(q.subtype)][1])

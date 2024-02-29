@@ -1,0 +1,45 @@
+vocabulary V {
+    <Temporal> Even : () -> Bool
+    <Temporal> Odd : () -> Bool
+}
+
+vocabulary V2 {
+    type num is {0..10}
+    Even : (num) -> Bool
+    Odd : (num) -> Bool
+}
+
+theory LTC T:V {
+    {
+        Start[Even()].
+        Next[Even()] <- Now[Odd()].
+        Next[Odd()] <- Now[Even()].
+    }
+}
+
+theory T2:V2 {
+    {
+        Even(0).
+        Odd(0) <- false.
+        !x in num: Even(x+1) <- Odd(x).
+        !x in num: Odd(x+1) <- Even(x).
+    }
+}
+theory LTC T3:V{
+    {
+        Start[Even()].
+        Next[Even()] <- not Now[Even()].
+    }
+}
+structure S:V {
+   
+}
+
+structure S2:V2 {
+   
+}
+
+procedure main () {
+    simulate(T,S)
+    pretty_print(model_expand(T2,S2))
+}

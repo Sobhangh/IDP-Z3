@@ -1,0 +1,22 @@
+vocabulary V {
+    // here comes the specification of the vocabulary
+    type test is {0..5}
+    p: () -> Bool
+    q: Int -> Bool
+    Temporal p
+}
+
+theory T:V {
+    // Check if the formula generated is the same as explicit time.
+    Now[p()].
+    !i in Int: q(i).
+}
+
+structure S:V {
+    
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

@@ -209,7 +209,7 @@ def root_set(s: SetName) -> SetName:
 
 def annotate(self: Expression,
              voc: Vocabulary,
-             q_vars: dict[str, Variable],ltc=False,temporal_head=0
+             q_vars: dict[str, Variable],ltc=False,temporal_head=-1
              ) -> Annotated:
     assert isinstance(self, SetName), "Internal error"
     if self.name in q_vars:
@@ -318,6 +318,11 @@ def annotate_init_theory(theory:TheoryBlock,idp):
             #Is annotation necessary given that it has already been done in the original?
             r.annotate(voc,{})
         voc.add_voc_to_block(theory.init_theory)
+        print("init theeoruy")
+        print(theory.init_theory.constraints)
+        for d in theory.init_theory.definitions:
+            for r in d.rules:
+                print(r)
         #theory.init_theory.declarations = theory.declarations
         theory.init_theory.definitions = [e.annotate(voc, {},False) for e in theory.init_theory.definitions]
         #print("i0")
@@ -337,6 +342,11 @@ def annotate_bis_theory(theory:TheoryBlock,idp):
             r.annotate(voc,{})
         #print("ch1")
         voc.add_voc_to_block(theory.bistate_theory)
+        """print("bis theeoruy")
+        print(theory.bistate_theory.constraints)
+        for d in theory.bistate_theory.definitions:
+            for r in d.rules:
+                print(r)"""
         theory.bistate_theory.definitions = [e.annotate(voc, {},False) for e in theory.bistate_theory.definitions]
         #print("ch15")
         theory.bistate_theory.constraints = OrderedSet([e.annotate(voc, {},False)
@@ -352,7 +362,11 @@ def annotate_trs_theory(theory:TheoryBlock,idp):
             i.block = theory.transition_theory
         #print("ch1")
         voc.add_voc_to_block(theory.transition_theory)
-        #theory.init_theory.declarations = theory.declarations
+        """print("trs theeoruy")
+        print(theory.transition_theory.constraints)
+        for d in theory.transition_theory.definitions:
+            for r in d.rules:
+                print(r)"""
         theory.transition_theory.definitions = [e.annotate(voc, {},False) for e in theory.transition_theory.definitions]
         #print("ch15")
         #OrderedSet would remove some of the constraints because so should not be here
@@ -393,8 +407,8 @@ def check_start(constraint,start=False,now_or_next = False):
         if start:
             return 3
         return 2
-    elif isinstance(constraint,AppliedSymbol):
-        return 0
+    #elif isinstance(constraint,AppliedSymbol):
+    #    return 0
     for e in constraint.sub_exprs:
         r = check_start(e,start,now_or_next)
         if r == 3:
@@ -447,7 +461,6 @@ def annotate(self: Expression,
              ) -> Annotated:
     assert isinstance(self, Definition), "Internal error"
     self.rules = [r.annotate(voc, q_vars, ltc) for r in self.rules]
-
     # create level-mapping symbols, as needed
     # self.level_symbols: dict[SymbolDeclaration, SetName]
     dependencies = set()
@@ -579,12 +592,14 @@ Definition.annotate = annotate
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             ltc=False,temporal_head=0
+             ltc=False,temporal_head=-1
              ) -> Annotated:
     assert isinstance(self, Rule), "Internal error"
     self.original = copy(self)
     #temporal head 0 means it is not in a definition, 1 is start head, 2 now, 3 next, -1 no temporal predicate.
-    temporal_head =0
+    temporal_head = 0
+    if not ltc:
+            temporal_head =-1
     d = None
     if not isinstance(self.definiendum, AppliedSymbol):
         if not ltc:
@@ -621,6 +636,8 @@ def annotate(self: Expression,
     #print("rule def annotation...")  
     self.definiendum = self.definiendum.annotate(voc, q_v,ltc)
     #print("def annotated")
+    if ltc:
+        self.check(check_start(self.body) != 3,"Not allowed to have Start with Now/Next")
     self.body = self.body.annotate(voc, q_v,ltc,temporal_head)
     #print("body annotated")
     if self.out:
@@ -690,7 +707,7 @@ def annotate_init_structure(s,idp):
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             ltc=False,temporal_head=0
+             ltc=False,temporal_head=-1
              ) -> Annotated:
     """
     Annotate the symbol.
@@ -743,7 +760,7 @@ SymbolInterpretation.annotate = annotate
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             ltc=False,temporal_head=0
+             ltc=False,temporal_head=-1
              ) -> Annotated:
     assert isinstance(self, Enumeration), "Internal error"
     if self.tuples:
@@ -758,7 +775,7 @@ Enumeration.annotate = annotate
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             ltc=False,temporal_head=0
+             ltc=False,temporal_head=-1
              ) -> Annotated:
     assert isinstance(self, TupleIDP), "Internal error"
     self.args = [arg.annotate(voc, q_vars) for arg in self.args]
@@ -774,7 +791,7 @@ TupleIDP.annotate = annotate
 def annotate(self: ASTNode,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             ltc=False,temporal_head=0
+             ltc=False,temporal_head=-1
              ) -> Annotated:
     assert isinstance(self, ConstructedFrom), "Internal error"
     for c in self.constructors:
@@ -796,7 +813,7 @@ ConstructedFrom.annotate = annotate
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             ltc=False,temporal_head=0
+             ltc=False,temporal_head=-1
              ) -> Annotated:
     assert isinstance(self, Constructor), "Internal error"
     for a in self.args:
@@ -883,7 +900,7 @@ Display.annotate_block = annotate_block
 def annotate(self: Expression,
              voc: Vocabulary,
              q_vars: dict[str, Variable],
-             ltc=False,temporal_head=0
+             ltc=False,temporal_head=-1
              ) -> Annotated:
     """annotate tree after parsing
 
@@ -931,7 +948,7 @@ def annotate_quantee(self: Expression,
              q_vars: dict[str, Variable],
              inferred: dict[str, SetName],
              ltc=False,
-             temporal_head=0
+             temporal_head=-1
              ) -> Annotated:
     assert isinstance(self, Quantee), "Internal error"
     Expression.annotate(self, voc, q_vars,ltc,temporal_head)
@@ -988,7 +1005,7 @@ Quantee.fill_attributes_and_check = fill_attributes_and_check
 
 def annotate(self: Expression,
              voc: Vocabulary,
-             q_vars:dict[str, Variable],ltc=False,temporal_head=0
+             q_vars:dict[str, Variable],ltc=False,temporal_head=-1
              ) -> Annotated:
     # also called by AAgregate.annotate
     assert isinstance(self, AQuantification) or isinstance(self, AAggregate), "Internal error"
@@ -1093,7 +1110,7 @@ AEquivalence.fill_attributes_and_check = fill_attributes_and_check
 
 def annotate(self: ARImplication,
              voc: Vocabulary,
-             q_vars:dict[str, Variable],ltc=False,temporal_head=0
+             q_vars:dict[str, Variable],ltc=False,temporal_head=-1
              ) -> Annotated:
     # reverse the implication
     self.sub_exprs = [e.annotate(voc, q_vars,ltc,temporal_head) for e in self.sub_exprs]
@@ -1117,7 +1134,7 @@ ADisjunction.fill_attributes_and_check = fill_attributes_and_check
 
 def annotate(self: AComparison,
              voc: Vocabulary,
-             q_vars: dict[str, Variable],ltc=False,temporal_head=0
+             q_vars: dict[str, Variable],ltc=False,temporal_head=-1
              ) -> Annotated:
 
     out = Operator.annotate(self, voc, q_vars, ltc,temporal_head)
@@ -1179,7 +1196,7 @@ AUnary.fill_attributes_and_check = fill_attributes_and_check
 
 def annotate(self: AAggregate,
              voc: Vocabulary,
-             q_vars:dict[str, Variable],ltc=False,temporal_head=0
+             q_vars:dict[str, Variable],ltc=False,temporal_head=-1
              ) -> Annotated:
     if not self.annotated:
 
@@ -1261,7 +1278,7 @@ AAggregate.fill_attributes_and_check = AQuantification.fill_attributes_and_check
 
 def annotate(self: AppliedSymbol,
              voc: Vocabulary,
-             q_vars: dict[str, Variable],ltc=False,temporal_head=0) -> Annotated:
+             q_vars: dict[str, Variable],ltc=False,temporal_head=-1) -> Annotated:
     if self.symbol:
         self.symbol = self.symbol.annotate(voc, q_vars,ltc)
         #print("a0....")
@@ -1365,8 +1382,8 @@ def replace(self, voc, q_vars):
 NowAppliedSymbol.replace = replace
 #v_time = 'time'
 
-def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
-    if ltc and temporal_head != 0:
+def annotate(self, voc, q_vars,ltc=False,temporal_head=-1):
+    if ltc and temporal_head != -1:
         self.check(temporal_head!=1, f"Not allowed to use Now[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
@@ -1395,10 +1412,10 @@ def replace(self, voc, q_vars):
 
 NextAppliedSymbol.replace = replace
 
-def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
-    if ltc : #and temporal_head != 0
+def annotate(self, voc, q_vars,ltc=False,temporal_head=-1):
+    if ltc and temporal_head != -1: #and temporal_head != 0
         # for the head temporal =0 is not Ok
-        self.check(temporal_head ==3 or  temporal_head ==0, f"Not allowed to use Next[]")
+        self.check(temporal_head == 3 , f"Not allowed to use Next[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
 
@@ -1415,8 +1432,8 @@ def replace(self, voc, q_vars):
 
 StartAppliedSymbol.replace = replace
 
-def annotate(self, voc, q_vars,ltc=False,temporal_head=0):
-    if ltc and temporal_head != 0:
+def annotate(self, voc, q_vars,ltc=False,temporal_head=-1):
+    if ltc and temporal_head != -1:
         self.check(temporal_head<=1, f"Not allowed to use Start[]")
     expanded = self.replace(voc,q_vars)
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
@@ -1427,7 +1444,7 @@ StartAppliedSymbol.annotate = annotate
 
 def annotate(self: SymbolExpr,
              voc: Vocabulary,
-             q_vars: dict[str, Variable] ,ltc=False,temporal_head=0
+             q_vars: dict[str, Variable] ,ltc=False,temporal_head=-1
              ) -> Annotated:
     self.decl = voc.symbol_decls.get(self.name, None)
     out = Expression.annotate(self, voc, q_vars)
@@ -1439,7 +1456,7 @@ SymbolExpr.annotate = annotate
 
 def annotate(self: Variable,
              voc: Vocabulary,
-             q_vars: dict[str, Variable],ltc=False,temporal_head=0
+             q_vars: dict[str, Variable],ltc=False,temporal_head=-1
              ) -> Annotated:
     return self
 Variable.annotate = annotate
@@ -1449,7 +1466,7 @@ Variable.annotate = annotate
 
 def annotate(self: Number,
              voc: Vocabulary,
-             q_vars: dict[str, Variable],ltc=False,temporal_head=0
+             q_vars: dict[str, Variable],ltc=False,temporal_head=-1
              ) -> Annotated:
     self.decl = voc.symbol_decls[self.type.name]
     return self
@@ -1460,7 +1477,7 @@ Number.annotate = annotate
 
 def annotate(self: UnappliedSymbol,
              voc: Vocabulary,
-             q_vars: dict[str, Variable],ltc=False,temporal_head=0
+             q_vars: dict[str, Variable],ltc=False,temporal_head=-1
              ) -> Annotated:
     if self.name in q_vars:  # ignore VarDeclaration
         return q_vars[self.name]

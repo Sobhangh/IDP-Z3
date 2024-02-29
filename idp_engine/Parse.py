@@ -1026,10 +1026,34 @@ class TheoryBlock(ASTNode):
                 r.str = r.code
         for definition in self.definitions:
             self.init_theory.definitions.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
+            nextl = []
+            nextlquantees = []
+            nextlapplieds = []
+            nextlout = []
+            startnowl = []
             for rule in definition.rules:
+                if isinstance(rule.definiendum,NextAppliedSymbol):
+                    nextl.append(str(rule.definiendum.sub_expr.symbol))
+                    nextlquantees.append(rule.quantees)
+                    if rule.out:
+                        nextlout.append(rule.out.init_copy())
+                    else:
+                        nextlout.append(None)
+                    nextlapplieds.append(rule.definiendum.sub_expr.init_copy())
+                elif isinstance(rule.definiendum,(NowAppliedSymbol,StartAppliedSymbol)):
+                    startnowl.append(str(rule.definiendum.sub_expr.symbol))
                 self.init_theory.definitions[-1].rules.append(self.init_rule(rule.init_copy()))
                 if self.init_theory.definitions[-1].rules[-1] == False:
                     self.init_theory.definitions[-1].rules.pop()
+            j = 0
+            for nx in nextl:
+                if nx in startnowl:
+                    pass
+                else:
+                    qs = [q.init_copy() for q in nextlquantees[j]] 
+                    r = Rule(None,Annotations(None,[]),qs,nextlapplieds[j],nextlout[j],FALSE.init_copy())
+                    self.init_theory.definitions[-1].rules.append(r)
+                j += 1
 
     #Returns the Single state formula transformed to current vocabulary: Now[p(x)] -> p_next(x)
     #Returns false if the expression contains Start or Next

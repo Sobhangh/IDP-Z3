@@ -1,0 +1,29 @@
+vocabulary V {
+    type test is {0..5}
+    p: () -> Bool
+    q: Int -> Bool
+    Temporal p
+}
+
+theory T:V {
+    // To check if the formula resulted form the definition works; the same as the one where time is explicit
+    
+    {
+        Start[p()].
+        Next[p()] <- not Now[p()].
+    }
+    {
+        q(0).
+        !i in Int: q(i+1) <- not q(i). 
+    }
+    
+}
+
+structure S:V {
+    // here comes the interpretation of some symbols
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

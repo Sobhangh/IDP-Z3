@@ -1,0 +1,34 @@
+vocabulary V {
+    //Sign function
+    sgn : Int -> Int
+    //Good state relation
+    GS : (Int * Int) -> Bool
+    //position
+    <Temporal> vp :() -> Int
+    //wind speed
+    <Temporal> ws :() -> Int
+    //vehicle speed
+    <Temporal> vs :() -> Int
+}
+
+theory LTC T:V {
+    //Sign function definition
+    ! x, y in Int : sgn(x) = y <=> (x = 0 and y = 0) or (x < 0 and y = -1) or (x > 0 and y = 1).
+    //Good state relation definition
+    ! x, y in Int: GS(x,y) <=> (x = -3 and y = 1) or (x = -2 and y =1) or (x = -2 and y = 2) or (x = -1 and y = 2) or (x = -1 and y = 3) or (x = 0 and y = -1) or (x = 0 and y = 0) or (x = 0 and y = 1) or (x = 1 and y = -2) or (x = 1 and y = -3) or (x = 2 and y = -1) or (x = 2 and y = -2) or (x = 3 and y = -1).
+    
+    //Change of vehicle position
+    Next[vp()] = Now[vp()] + Now[vs()] + Now[ws()]. 
+    
+    //Change of vehicle speed
+    Next[vs()] = Now[vs()] + (-3 * sgn(Now[vp()] + Now[vs()] + Now[ws()])) + (2 * sgn(Now[vp()])).
+
+}
+
+theory INV Inv:V{
+    !t in Int: (GS(vp(t), ws(t) + vs(t)) and (ws(t)=ws(t+1) and ws(t+1)=ws(t+2) and ws(t+2)=ws(t+3) and ws(t+3)=ws(t+4))) => (vp(t+4)=0 and ws(t+4) + vs(t+4) = 0).
+}
+
+procedure main () {
+    print(isinvariant(T,Inv,forward_chaining=True))
+}
