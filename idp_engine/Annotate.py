@@ -270,9 +270,9 @@ def annotate_block(self: ASTNode,
     #Pre processing for LTC theory constraints
     if self.ltc:
         #if there is Start present then now and next should not be
-        for e in self.constraints:
-            r = check_start(e)
-            self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
+        #for e in self.constraints:
+        #    r = check_start(e)
+        #    self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
 
         
         # is it possible to say that negeation outside start/now/next will be pushed inside quantification? yes 
@@ -280,9 +280,10 @@ def annotate_block(self: ASTNode,
         t: Variable = VARIABLE(v_time,time)
         qt: Quantee = Quantee(None,[t],time) 
         for e in self.constraints:
-            r = wrapping_quantifier(e)
+            r = check_start(e)
+            self.check(r != 3 , f"Can not have Start with Now/Next in {e}")
             #self.check(r != -1 , f"Can not have Now/Next inside the scope of existential quantifier")
-            if r == 1 or r == -1:
+            if r > 1 :
                 #Adds a wraping universal quantifier in case it containts now or next
                 constraints.append(AQuantification(None,None,'forall',[qt],e))
             else:
@@ -342,11 +343,11 @@ def annotate_bis_theory(theory:TheoryBlock,idp):
             r.annotate(voc,{})
         #print("ch1")
         voc.add_voc_to_block(theory.bistate_theory)
-        """print("bis theeoruy")
+        print("bis theeoruy")
         print(theory.bistate_theory.constraints)
         for d in theory.bistate_theory.definitions:
             for r in d.rules:
-                print(r)"""
+                print(r)
         theory.bistate_theory.definitions = [e.annotate(voc, {},False) for e in theory.bistate_theory.definitions]
         #print("ch15")
         theory.bistate_theory.constraints = OrderedSet([e.annotate(voc, {},False)
@@ -362,11 +363,11 @@ def annotate_trs_theory(theory:TheoryBlock,idp):
             i.block = theory.transition_theory
         #print("ch1")
         voc.add_voc_to_block(theory.transition_theory)
-        """print("trs theeoruy")
+        print("trs theeoruy")
         print(theory.transition_theory.constraints)
         for d in theory.transition_theory.definitions:
             for r in d.rules:
-                print(r)"""
+                print(r)
         theory.transition_theory.definitions = [e.annotate(voc, {},False) for e in theory.transition_theory.definitions]
         #print("ch15")
         #OrderedSet would remove some of the constraints because so should not be here
@@ -395,36 +396,57 @@ def annotate_exp_theory(theory:TheoryBlock,voc:Vocabulary):
                                 for e in theory.constraints])
     #print("ch2")
 
-# if there is no temporal returns 0, if start only 1, if now or next 2, if start and (now or next) then 3
-def check_start(constraint,start=False,now_or_next = False):
-    s = False
-    n =False
+# if there is no temporal returns 0, if start only 1, if now 2, if start and (now or next) then 3 , next 4 , now and next 5
+def check_start(constraint,start=False,now = False,next=False):
+    str = False
+    nw =False
+    nx = False
+    #print("in chek str")
     if isinstance(constraint,StartAppliedSymbol):
-        if now_or_next:
+        if now or next:
             return 3
-        return 1
+        start = True
+        #return 1
     elif isinstance(constraint,NowAppliedSymbol) or isinstance(constraint,NextAppliedSymbol):
         if start:
             return 3
-        return 2
+        if isinstance(constraint,NowAppliedSymbol):
+            now = True
+        else:
+            next = True
+        #return 2
     #elif isinstance(constraint,AppliedSymbol):
     #    return 0
+    #start = start or str
+    #now = now or nw
+    #next = next or nx
     for e in constraint.sub_exprs:
-        r = check_start(e,start,now_or_next)
+        #print(e)
+        r = check_start(e,start , now , next )
+        #print(r)
         if r == 3:
             return 3
         elif r == 1:
             start = True
         elif r == 2:
-            now_or_next=True
-        if start and now_or_next:
+            now = True
+        elif r == 4:
+            next = True
+        elif r == 5 :
+            now = True
+            next = True
+        if start and (now or next):
             return 3
-    if start and now_or_next:
+    if start and (now or next):
         return 3
     if start:
         return 1
-    if now_or_next:
+    if now and next:
+        return 5
+    if now :
         return 2
+    if next :
+        return 4
     return 0
 
 # returns 1 if there is now/next; if now/next  is inside existential quantifer -1; otherwise 0
@@ -596,11 +618,35 @@ def annotate(self: Expression,
              ) -> Annotated:
     assert isinstance(self, Rule), "Internal error"
     self.original = copy(self)
-    #temporal head 0 means it is not in a definition, 1 is start head, 2 now, 3 next, -1 no temporal predicate.
+    #temporal head 0 means the difindum is not temporal, 1 is start head, 2 now, 3 next, -1 no temporal predicate.
     temporal_head = 0
+    r = check_start(self.definiendum)
+    br = check_start(self.body)
+    otr = 0
+    if self.out:
+        otr = check_start(self.out)
+    if ltc:
+        self.check(r!=3,"Not allowed to have Start with Now/Next")
+        self.check(br!=3,"Not allowed to have Start with Now/Next")
+        self.check(otr!=3,"Not allowed to have Start with Now/Next")
+    #TO DO:CAN CHECK LTC RULES HERE USING r,out,br
+    if r > 1 or br > 1 or otr > 1:
+        time: SetName = SETNAME('Tijd')
+        t: Variable = VARIABLE(v_time,time)
+        qt: Quantee = Quantee(None,[t],time)
+        self.quantees += [qt]
     if not ltc:
             temporal_head =-1
-    d = None
+    elif r == 0 :
+        temporal_head = 0
+    elif r == 1 :
+        temporal_head = 1
+    elif r == 2 :
+        temporal_head = 2
+    else:
+        temporal_head = 3
+
+    """d = None
     if not isinstance(self.definiendum, AppliedSymbol):
         if not ltc:
             temporal_head =-1
@@ -617,7 +663,7 @@ def annotate(self: Expression,
             self.definiendum = d.f
             self.quantees += d.quantees
         else:
-            self.definiendum = d
+            self.definiendum = d"""
     self.check(self.definiendum.symbol.name,
                 f"No support for intentional objects in the head of a rule: "
                 f"{self}")
@@ -636,12 +682,12 @@ def annotate(self: Expression,
     #print("rule def annotation...")  
     self.definiendum = self.definiendum.annotate(voc, q_v,ltc)
     #print("def annotated")
-    if ltc:
-        self.check(check_start(self.body) != 3,"Not allowed to have Start with Now/Next")
+    #if ltc:
+    #    self.check(check_start(self.body) != 3,"Not allowed to have Start with Now/Next")
     self.body = self.body.annotate(voc, q_v,ltc,temporal_head)
     #print("body annotated")
     if self.out:
-        self.out = self.out.annotate(voc, q_v,ltc)
+        self.out = self.out.annotate(voc, q_v,ltc,temporal_head)
     return self
 Rule.annotate = annotate
 

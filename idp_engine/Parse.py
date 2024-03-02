@@ -782,7 +782,7 @@ class TheoryBlock(ASTNode):
                 e = expression.sub_expr
                 j = i +1
                 symb = SymbolExpr(None,(str(e.symbol)+'_'+str(j)),None,None)
-                return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+                return self.replace_with_n(AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration),i,n)
             return False
         if isinstance(expression,NowAppliedSymbol):
             e = expression.sub_expr
@@ -791,7 +791,7 @@ class TheoryBlock(ASTNode):
                 symb = SymbolExpr(None,(str(e.symbol)),None,None)
             else:
                 symb = SymbolExpr(None,(str(e.symbol)+'_'+str(i)),None,None)
-            return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+            return self.replace_with_n(AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration),i,n)
         if isinstance(expression,(UnappliedSymbol)):
             return expression
         j = 0
@@ -831,6 +831,10 @@ class TheoryBlock(ASTNode):
                     r.definiendum = self.replace_with_n(r.definiendum,i,n)
                     if r.definiendum == False:
                         break
+                    if r.out:
+                        r.out = self.replace_with_n(r.out,i,n)
+                        if r.out == False:
+                            break
                     r.body = self.replace_with_n(r.body,i,n)
                     if r.body != False:
                         defs[-1].rules.append(r)
@@ -863,6 +867,8 @@ class TheoryBlock(ASTNode):
         for definition in self.definitions:
             defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
             for rule in definition.rules:
+                #print("org rule sl k")
+                #print(rule)
                 r = rule.init_copy()
                 defs[-1].rules.append(r)
         self.org_theory.constraints = cnstrs
@@ -884,7 +890,8 @@ class TheoryBlock(ASTNode):
     def contains_next(self,e:Expression):
         if isinstance(e,NextAppliedSymbol):
             return True
-        if isinstance(e,(NowAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
+        #if isinstance(e,(NowAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
+        if isinstance(e,(UnappliedSymbol)):
             return False
         for s in e.sub_exprs:
             r = self.contains_next(s)
@@ -896,10 +903,11 @@ class TheoryBlock(ASTNode):
     def contains_now(self,e:Expression):
         if isinstance(e,NowAppliedSymbol):
             return True
-        if isinstance(e,(NextAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
+        #if isinstance(e,(NextAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
+        if isinstance(e,(UnappliedSymbol)):
             return False
         for s in e.sub_exprs:
-            r = self.contains_next(s)
+            r = self.contains_now(s)
             if r:
                 return True
         return False
@@ -932,40 +940,55 @@ class TheoryBlock(ASTNode):
             defs.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
             for rule in definition.rules:
                 rl = rule.init_copy()
-                if isinstance(rule.definiendum,NextAppliedSymbol):
+                #if isinstance(rule.definiendum,NextAppliedSymbol):
+                nx = self.contains_next(rule.definiendum)
+                nw = self.contains_now(rule.definiendum)
+                if nx:
                     r = self.bis_rule(rl)
                     if r != False:
                         defs[-1].rules.append(r)
-                elif isinstance(rule.definiendum,NowAppliedSymbol):
+                # TO DO: It is more accurate that it gets checked if next is in the body
+                elif nw:
                     rl2 = rl.init_copy()
                     rl.definiendum = self.bis_subexpr(rl.definiendum)
                     rl.body = self.bis_subexpr(rl.body)
-                    if rl.body != False:
+                    if rl.out:
+                        rl.out = self.bis_subexpr(rl.out)
+                    if rl.body != False and (rl.out is None or rl.out != False):
                         defs[-1].rules.append(rl)
                         rl.code = intern(str(rl))
                         rl.str = rl.code
                     rl2.definiendum = self.sis_subexpr(rl2.definiendum)
                     rl2.body = self.sis_subexpr(rl2.body)
-                    if rl2.body != False:
+                    if rl2.out:
+                        rl2.out = self.sis_subexpr(rl2.out)
+                    if rl2.body != False and (rl2.out is None or rl2.out != False):
                         defs[-1].rules.append(rl2)
                         rl2.code = intern(str(rl2))
                         rl2.str = rl2.code
-                elif not isinstance(rule.definiendum,StartAppliedSymbol):
-                    if self.contains_now(rl.body):
-                        rl2 = rl.init_copy()
+                #rule definedum does not have start
+                elif self.bis_subexpr(rl.definiendum) != False:
+                    if self.contains_now(rl.body) and not self.contains_next(rl.body):
+                        rl2 = rule.init_copy()
                         rl.body = self.bis_subexpr(rl.body)
-                        if rl.body != False:
+                        if rl.out:
+                            rl.out = self.bis_subexpr(rl.out)
+                        if rl.body != False and (rl.out is None or rl.out != False):
                             defs[-1].rules.append(rl)
                             rl.code = intern(str(rl))
                             rl.str = rl.code
                         rl2.body = self.sis_subexpr(rl2.body)
-                        if rl2.body != False:
+                        if rl2.out:
+                            rl2.out = self.sis_subexpr(rl2.out)
+                        if rl2.body != False and (rl2.out is None or rl2.out != False):
                             defs[-1].rules.append(rl2)
                             rl2.code = intern(str(rl2))
                             rl2.str = rl2.code
                     else:
-                        rl.body = self.sis_subexpr(rl.body)
-                        if rl.body != False:
+                        rl.body = self.bis_subexpr(rl.body)
+                        if rl.out:
+                            rl.out = self.bis_subexpr(rl.out)
+                        if rl.body != False and (rl.out is None or rl.out != False):
                             defs[-1].rules.append(rl)
                             rl.code = intern(str(rl))
                             rl.str = rl.code
@@ -1021,9 +1044,9 @@ class TheoryBlock(ASTNode):
         for c in self.constraints:
             r = self.init_subexpr(c.init_copy())
             if r != False:
-                self.init_theory.constraints.append(r)
                 r.code = intern(str(r))
                 r.str = r.code
+                self.init_theory.constraints.append(r)
         for definition in self.definitions:
             self.init_theory.definitions.append(Definition(None,Annotations(None,[]),definition.mode_str,[]))
             nextl = []
@@ -1051,8 +1074,14 @@ class TheoryBlock(ASTNode):
                     pass
                 else:
                     qs = [q.init_copy() for q in nextlquantees[j]] 
-                    r = Rule(None,Annotations(None,[]),qs,nextlapplieds[j],nextlout[j],FALSE.init_copy())
-                    self.init_theory.definitions[-1].rules.append(r)
+                    out = None
+                    if nextlout[j]:
+                        out = self.init_subexpr(nextlout[j])
+                        if out == False:
+                            out = None
+                    r = Rule(None,Annotations(None,[]),qs,nextlapplieds[j],out,FALSE.init_copy())
+                    #TO DO; IF YOU UNCOMMENT THIS, THEN MAKE SURE THAT YOU CHECK WITH contains_next and contains_now
+                    #self.init_theory.definitions[-1].rules.append(r)
                 j += 1
 
     #Returns the Single state formula transformed to current vocabulary: Now[p(x)] -> p_next(x)
@@ -1063,7 +1092,7 @@ class TheoryBlock(ASTNode):
         if isinstance(expression, NowAppliedSymbol):
             e = expression.sub_expr
             symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
-            return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+            return self.sis_subexpr(AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration))
         if isinstance(expression,(UnappliedSymbol)):
             return expression
         #sbex : List[Expression] = []
@@ -1086,11 +1115,11 @@ class TheoryBlock(ASTNode):
         if isinstance(expression, StartAppliedSymbol):
             return False
         if isinstance(expression, NowAppliedSymbol):
-            return expression.sub_expr
+            return self.bis_subexpr(expression.sub_expr)
         if isinstance(expression, NextAppliedSymbol):
             e = expression.sub_expr
             symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
-            return AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+            return self.bis_subexpr(AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration))
         if isinstance(expression,(UnappliedSymbol)):
             return expression
         #sbex : List[Expression] = []
@@ -1111,9 +1140,9 @@ class TheoryBlock(ASTNode):
     #Returns false if the expression contains Next
     def init_subexpr(self, expression:Expression):
         if isinstance(expression, StartAppliedSymbol):
-            return expression.sub_expr
+            return self.init_subexpr(expression.sub_expr)
         if isinstance(expression, NowAppliedSymbol):
-            return expression.sub_expr
+            return self.init_subexpr(expression.sub_expr)
         if isinstance(expression, NextAppliedSymbol):
             return False
         if isinstance(expression,(UnappliedSymbol)):
@@ -1144,10 +1173,10 @@ class TheoryBlock(ASTNode):
                 return False
             elif isinstance(e,(UnappliedSymbol)):
                 return 
-            else:
-                r = self.init_subexpr2(e)
-                if r == False:
-                    return False
+            #else:
+            r = self.init_subexpr2(e)
+            if r == False:
+                return False
             i+=1
         if isinstance(expression,(AQuantification,AAggregate,AUnary,Brackets)):
             expression.f = expression.sub_exprs[0]
@@ -1158,7 +1187,15 @@ class TheoryBlock(ASTNode):
         now = False
         if isinstance(rule.definiendum,StartAppliedSymbol):
             return False
-        if isinstance(rule.definiendum,(NextAppliedSymbol,NowAppliedSymbol)):
+        now = self.contains_now(rule.definiendum)
+        next = self.contains_next(rule.definiendum)
+        if next:
+            rule.definiendum = self.bis_subexpr(rule.definiendum)
+        else:
+            rule.definiendum = self.sis_subexpr(rule.definiendum)
+        if rule.definiendum == False:
+            return False
+        """if isinstance(rule.definiendum,(NextAppliedSymbol,NowAppliedSymbol)):
             sym = None
             e = rule.definiendum.sub_expr
             if isinstance(rule.definiendum,(NowAppliedSymbol)):
@@ -1167,13 +1204,25 @@ class TheoryBlock(ASTNode):
             else:
                 next = True
             symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
-            rule.definiendum = AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)
+            rule.definiendum = AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration)"""
         if next:
             rule.body = self.bis_subexpr(rule.body)
+            if rule.out:
+                rule.out = self.bis_subexpr(rule.out)
+                if rule.out == False:
+                    return False
         elif now:
             rule.body = self.sis_subexpr(rule.body)
+            if rule.out:
+                rule.out = self.sis_subexpr(rule.out)
+                if rule.out == False:
+                    return False
         else:
             rule.body = self.sis_subexpr(rule.body)
+            if rule.out:
+                rule.out = self.sis_subexpr(rule.out)
+                if rule.out == False:
+                    return False
         if rule.body == False:
                 return False
         rule.code = intern(str(rule))
@@ -1183,21 +1232,30 @@ class TheoryBlock(ASTNode):
     #Transforms a possible initial rule to current vocabulary
     #If the rule violates the format of initial rule returns false
     def init_rule(self, rule: Rule):
-        if isinstance(rule.definiendum,NextAppliedSymbol):
+        if self.contains_next(rule.definiendum):
             return False
-        if isinstance(rule.definiendum,(NowAppliedSymbol,StartAppliedSymbol)):
-            rule.definiendum = rule.definiendum.sub_expr
+        #if isinstance(rule.definiendum,(NowAppliedSymbol,StartAppliedSymbol)):
+            #rule.definiendum = rule.definiendum.sub_expr
+        rule.definiendum = self.init_subexpr(rule.definiendum)
         #using init_subexpr for the subexpressions of body 
-        if isinstance(rule.body,NextAppliedSymbol):
+        if rule.out:
+            rule.out = self.init_subexpr(rule.out)
+            if rule.out == False:
+                return False
+        rule.body = self.init_subexpr(rule.body)
+        if rule.body == False:
+            return False
+        """if isinstance(rule.body,NextAppliedSymbol):
             return False
         if isinstance(rule.body,(NowAppliedSymbol,StartAppliedSymbol)):
-            rule.body = rule.body.sub_expr
+            #rule.body = rule.body.sub_expr
+            rule.body = self.init_subexpr(rule.body)
         elif isinstance(rule.body,(UnappliedSymbol)): 
             rule.body
         else:
             r = self.init_subexpr2(rule.body)
             if r == False:
-                return False
+                return False"""
         #rule.body = self.init_subexpr(rule.body)
         rule.code = intern(str(rule))
         rule.str = rule.code
@@ -1335,6 +1393,8 @@ class Rule(Expression):
         quantees =[]
         out=None
         if self.definiendum:
+            #print("definedum coop")
+            #print(self.definiendum)
             definiendum = self.definiendum.init_copy()
         if self.out:
             out = self.out.init_copy()

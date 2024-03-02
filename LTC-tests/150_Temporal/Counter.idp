@@ -1,0 +1,21 @@
+vocabulary V {
+    type test is {1..5}
+    <Temporal> Counter : () -> test
+}
+
+theory LTC T:V {
+    {
+        Start[Counter()] = 1.
+        Next[Counter()] = if Now[Counter()] = 5 then 1 else Now[Counter()] + 1.
+    }
+
+}
+
+structure S:V {
+   
+}
+
+procedure main () {
+    structs = initialize(T,S)
+    ForProgression(T,structs,6)
+}

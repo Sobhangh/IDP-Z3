@@ -1,0 +1,21 @@
+vocabulary V {
+    <Temporal> p: () -> Bool
+    q : () -> Bool
+    <Temporal> a : (Int * Int) -> Bool
+    <Temporal> b : () -> Int
+    c : (Int) -> Bool
+    d : () -> Int
+}
+
+theory LTC T5:V {
+    {
+    //has to be accepted
+        //c(d())  <- Now[b()].
+        c(Now[b()])  <- Now[b()]=4.
+    }
+}
+
+procedure main () {
+    //simulate(T,S)
+    //pretty_print(model_expand(T2,S2))
+}

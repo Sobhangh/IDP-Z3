@@ -1,0 +1,19 @@
+vocabulary V {
+    <Temporal> p: () -> Bool
+    q : () -> Bool
+    <Temporal> a : (Int * Int) -> Bool
+    <Temporal> b : () -> Int
+    c : Int -> Bool
+}
+
+theory LTC T3:V {
+    {
+        //has to be accepted
+       !i in Int: c(Start[b()])  <- q().
+    }
+}
+
+procedure main () {
+    //simulate(T,S)
+    //pretty_print(model_expand(T2,S2))
+}

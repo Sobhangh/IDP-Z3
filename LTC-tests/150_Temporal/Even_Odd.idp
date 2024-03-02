@@ -40,6 +40,7 @@ structure S2:V2 {
 }
 
 procedure main () {
-    simulate(T,S)
-    pretty_print(model_expand(T2,S2))
+    print_struct(initialize(T,S))
+    //simulate(T,S)
+    //pretty_print(model_expand(T2,S2))
 }

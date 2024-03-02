@@ -1,0 +1,7 @@
+vocabulary V {
+    <Temporal> p: () -> Bool
+    q : () -> Bool
+    <Temporal> a : (INT * Int) -> Bool
+    <Temporal> b : () -> Int
+    c : (Int) <- Bool
+}

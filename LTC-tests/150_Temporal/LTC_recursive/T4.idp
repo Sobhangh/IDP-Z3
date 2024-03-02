@@ -1,0 +1,14 @@
+vocabulary V {
+    <Temporal> p: () -> Bool
+    q : () -> Bool
+    <Temporal> a : (Int * Int) -> Bool
+    <Temporal> b : () -> Int
+    c : (Int) -> Bool
+}
+
+theory LTC T4:V {
+    {
+    //has to be rejected due to presence of next in body
+        c(Now[b()])  <- Next[b()].
+    }
+}

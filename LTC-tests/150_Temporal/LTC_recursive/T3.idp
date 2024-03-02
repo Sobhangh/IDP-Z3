@@ -1,0 +1,14 @@
+vocabulary V {
+    <Temporal> p: () -> Bool
+    q : () -> Bool
+    <Temporal> a : (Int * Int) -> Bool
+    <Temporal> b : () -> Int
+    c : (Int) -> Bool
+}
+
+theory LTC T3:V {
+    {
+    //has to be rejected due to presence of start and now
+       !i in Int: c(Start[a(Now[b()],i)])  <- q().
+    }
+}

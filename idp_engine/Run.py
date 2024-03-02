@@ -302,14 +302,14 @@ def toStructure(assign,vocab_name:str,voc:Vocabulary,tempdcl:List[TemporalDeclar
         #print(fth.constraints)
         return (s,fth)
 
-def initialize(theory:TheoryBlock,struct:Structure):
+def initialize(theory:TheoryBlock,struct:Structure,nbmodel=10):
     #print("inside initialize")
     #print(theory.init_theory.definitions)
     problem = Theory(theory.init_theory,struct.init_struct)
     PROCESS_TIMINGS['ground'] = time.time() - PROCESS_TIMINGS['ground']
 
     solve_start = time.time()
-    ms = list(problem.expand(max=10, timeout_seconds=10, complete=False))
+    ms = list(problem.expand(max=nbmodel, timeout_seconds=10, complete=False))
     if isinstance(ms[-1], str):
         ms, last = ms[:-1], ms[-1]
     else:
@@ -327,7 +327,7 @@ def initialize(theory:TheoryBlock,struct:Structure):
     return out
     #return model_expand(theory.init_theory,struct.init_struct)
 
-def progression(theory:TheoryBlock,struct,additional_theory:TheoryBlock=None):
+def progression(theory:TheoryBlock,struct,nbmodel=10,additional_theory:TheoryBlock=None):
     print("inside progression")
     problem = None
     voc = None
@@ -342,52 +342,71 @@ def progression(theory:TheoryBlock,struct,additional_theory:TheoryBlock=None):
     PROCESS_TIMINGS['ground'] = time.time() - PROCESS_TIMINGS['ground']
     solve_start = time.time()
     if isinstance(struct,List):
+        #When the result is received either form initialize or progression
         j = 1
         for xi in struct:
-            if not isinstance(xi,tuple):
+            strcx = None
+            thrx =None
+            if isinstance(xi,Structure):
+                strcx = xi
+                #pass
+            elif isinstance(xi[0],Structure) and isinstance(xi[1],TheoryBlock):
+                strcx =xi[0]
+                thrx = xi[1]
+            else:
+                j += 1
+                continue
+            if additional_theory:
+                problem = Theory(theory.bistate_theory,strcx,thrx,additional_theory)
+            else:
+                problem = Theory(theory.bistate_theory,strcx,thrx)
+            voc = strcx.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
+            if voc is None:
+                print("Error vocabulary is wrong")
+                return
+            if problem is None:
                 pass
-            elif isinstance(xi[0],Structure):
-                if additional_theory:
-                    problem = Theory(theory.bistate_theory,xi[0],xi[1],additional_theory)
-                else:
-                    problem = Theory(theory.bistate_theory,xi[0],xi[1])
-                voc = xi[0].voc.idp.next_voc.get(theory.vocab_name+'_next',None)
-                if voc is None:
-                    print("Error vocabulary is wrong")
-                    return
-                if problem is None:
-                    pass
-                ms = list(problem.expand(max=10, timeout_seconds=10, complete=False))
-                if isinstance(ms[-1], str):
-                    ms, last = ms[:-1], ms[-1]
-                else:
-                    last = ""
-                
-                for i, m in enumerate(ms):
-                    s = toStructure(m,theory.bistate_theory.vocab_name,voc,theory.voc.tempdcl)
-                    #for i in s.interpretations.values():
-                        #print(i)
-                    out.append(s)
-                #yield out 
-                out.append(last + " For Strtucture " + str(j))
+            ms = list(problem.expand(max=nbmodel, timeout_seconds=10, complete=False))
+            if isinstance(ms[-1], str):
+                ms, last = ms[:-1], ms[-1]
+            else:
+                last = ""
+            
+            for i, m in enumerate(ms):
+                s = toStructure(m,theory.bistate_theory.vocab_name,voc,theory.voc.tempdcl)
+                #for i in s.interpretations.values():
+                    #print(i)
+                out.append(s)
+            #yield out 
+            out.append(last + " For Strtucture " + str(j))
             j += 1
-    elif isinstance(struct,tuple):
-        #Used in simulate
+    elif isinstance(struct,tuple) or isinstance(struct,Structure):
+        #Used in simulate and in case a single structure is given
+        strcx = None
+        thrx =None
+        if isinstance(struct,Structure):
+            strcx = struct
+        elif isinstance(struct[0],Structure) and isinstance(struct[1],TheoryBlock):
+            strcx =struct[0]
+            thrx = struct[1]
+        else:
+            print("Wrong input given")
+            return
         if not isinstance(struct[0],Structure):
             print("Error a structure should be given")
             return
         if additional_theory:
-            problem = Theory(theory.bistate_theory,struct[0],struct[1],additional_theory)
+            problem = Theory(theory.bistate_theory,strcx,thrx,additional_theory)
         else:
-            problem = Theory(theory.bistate_theory,struct[0],struct[1])
+            problem = Theory(theory.bistate_theory,strcx,thrx)
         #problem = Theory(theory.bistate_theory,struct)
-        voc = struct[0].voc.idp.next_voc.get(theory.vocab_name+'_next',None)
+        voc = strcx.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
         if voc is None:
             print("Error vocabulary is wrong")
             return
         if problem is None:
             pass
-        ms = list(problem.expand(max=10, timeout_seconds=10, complete=False))
+        ms = list(problem.expand(max=nbmodel, timeout_seconds=10, complete=False))
         if isinstance(ms[-1], str):
             ms, last = ms[:-1], ms[-1]
         else:
@@ -405,8 +424,8 @@ def progression(theory:TheoryBlock,struct,additional_theory:TheoryBlock=None):
     return out
     
 
-def simulate(theory:TheoryBlock,struct:Structure):
-    result = initialize(theory,struct)
+def simulate(theory:TheoryBlock,struct:Structure,nbmodel=10):
+    result = initialize(theory,struct,nbmodel=nbmodel)
     print_struct(result)
     act_question = "Please give the action with its arguments(n to pass) "
     question = "Which structure do you want to continue the simulation with?(N to stop the simulation) "
@@ -491,22 +510,28 @@ def simulate(theory:TheoryBlock,struct:Structure):
                     print("ERROR: The given predicate is not an Action")
 
             if failed:
-                result = progression(theory,result[i-1])
+                result = progression(theory,result[i-1],nbmodel=nbmodel)
             else:
-                result = progression(theory,result[i-1],th)
+                result = progression(theory,result[i-1],th,nbmodel=nbmodel)
             print_struct(result)
         else:
-            result = progression(theory,result[i-1])
+            result = progression(theory,result[i-1],nbmodel=nbmodel)
             print_struct(result)
 
-def ForProgression(theory:TheoryBlock,struct,number:int):
-    result = progression(theory,struct)
+def ForProgression(theory:TheoryBlock,struct,number:int,nbmodel=10):
+    m = '\n' +"Generated models by progression number "
+    out = [m+str(1)]
+    result = progression(theory,struct,nbmodel=nbmodel)
+    out += result
     print_struct(result)
-    i = 1
+    i = 2
     while i<=number:
-        result = progression(theory,result)
+        out += [m+str(i)]
+        result = progression(theory,result,nbmodel=nbmodel)
+        out += result
         print_struct(result)
         i+=1
+    return out
 
 def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,forward_chaining=False):
     if not theory.ltc:
@@ -1748,6 +1773,21 @@ def pretty_print(x: Any ="") -> None:
                 print(xi)
     elif isinstance(x, Theory):
         print(x.assignments)
+    elif isinstance(x,List):
+        i=0
+        for s in x:
+            if type(s) == tuple:
+                if isinstance(s[0],Structure):
+                    print(f"{NEWL}Model {i+1}{NEWL}==========")
+                    for interp in s[0].interpretations.values():
+                        print(interp)
+            elif isinstance(s,Structure):
+                print(f"{NEWL}Model {i+1}{NEWL}==========")
+                for interp in s.interpretations.values():
+                    print(interp)
+            else:
+                print(s)
+            i+=1
     else:
         print(x)
 
@@ -1834,12 +1874,18 @@ def execute(self: IDP, capture_print : bool = False) -> Optional[str]:
         elif isinstance(x, List) and len(x)>0 :
             i=0
             for s in x:
-                if isinstance(s,Structure):
+                if type(s) == tuple:
+                    if isinstance(s[0],Structure):
+                        out.append(f"{NEWL}Model {i+1}{NEWL}==========")
+                        for interp in s[0].interpretations.values():
+                            out.append(str(interp))
+                elif isinstance(s,Structure):
                     out.append(f"{NEWL}Model {i+1}{NEWL}==========")
                     for interp in s.interpretations.values():
                         out.append(str(interp))
                 else:
                     out.append(str(s))
+                    i -= 1
                 i+=1
         elif isinstance(x, Theory):
             out.append(str(x.assignments))
