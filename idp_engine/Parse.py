@@ -35,7 +35,7 @@ from typing import Any, Tuple, List, Union, Optional, TYPE_CHECKING
 
 from .Assignments import Assignments
 from .Expression import (Annotations, Annotation, ASTNode, CLFormula, Constructor, CONSTRUCTOR,
-                         Accessor, DLFormula, FLFormula, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, RLFormula, StartAppliedSymbol, SymbolExpr, Expression,
+                         Accessor, DLFormula, FLFormula, ForNext, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, RLFormula, StartAppliedSymbol, SymbolExpr, Expression,
                          AIfExpr, IF, AQuantification, ULFormula, WLFormula, XLFormula, split_quantees, SetName,
                          SETNAME, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
@@ -1447,6 +1447,9 @@ class Structure(ASTNode):
         self.assignments = Assignments()
         #Initial structure: Used in the context of LTC theories
         self.init_struct : Structure= None
+        self.static_now : Structure = None
+        self.static_next : Structure = None
+        self.static_expanded : Structure = None
 
     def __str__(self):
         return self.name
@@ -1622,6 +1625,7 @@ class SymbolInterpretation(Expression):
             #if not changed:
 
         return initialized_interp
+    
                     
 
 class Enumeration(Expression):
@@ -2323,7 +2327,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          SymbolDeclaration,TemporalDeclaration,
                                          SymbolExpr,
 
-                                         TheoryBlock, Definition, Rule, AIfExpr,
+                                         TheoryBlock, Definition, Rule, AIfExpr,ForNext,
                                          AQuantification, Quantee, ARImplication,
                                          AEquivalence, AImplication,
                                          ADisjunction, AConjunction,

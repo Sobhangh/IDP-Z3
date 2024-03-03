@@ -30,7 +30,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* (tempdcl=Tempo
           symbols+= NAME [','] ':'
           ( '(' sorts*=SetName[/[*⨯]/] ')' | sorts*=SetName[/[*⨯]/] )
           ('->' | '→') out=SetName;
-    Temporal: 'Temporal'| 'Action' | 'Cause' | 'FTemporal' ;
+    Temporal: 'Temporal'| 'Action' | 'Cause' | 'FTemporal' | 'Helper' ;
 
     TemporalDeclaration: 'Temporal' symbol=SymbolExpr;
 
@@ -65,7 +65,7 @@ TheoryBlock: 'theory' (ltc='LTC')? (inv='INV')? (name=ID ':' vocab_name=ID)? '{'
 
   Axiom: annotations=Annotations expr=Expression '.';
 
-    Expression:     AQuantification | RImplication;
+    Expression:  AQuantification | RImplication;
     RImplication:   ARImplication   | Equivalence;
     Equivalence:    AEquivalence    | Implication;
     Implication:    AImplication    | Disjunction;
@@ -77,9 +77,10 @@ TheoryBlock: 'theory' (ltc='LTC')? (inv='INV')? (name=ID ':' vocab_name=ID)? '{'
     Power:          APower          | Unary;
     Unary:          AUnary          | Aggregate;
     Aggregate:      AAggregate      | IfExpr;
-    IfExpr:         AIfExpr         | Base;
+    IfExpr:         AIfExpr         | FakeForNext;
+    FakeForNext:    ForNext         | Base;
 
-
+    ForNext : 'ForNext[' exp=Expression ',' number=Number  ',' var=SymbolExpr ']';
     AQuantification: annotations=Annotations q=Quantor quantees+=Quantee[','] ':' f=Expression;
       Quantor: '∀' | '!' | '∃' | '?' | 'for' 'all' | 'there' 'is' 'a';
     ARImplication: sub_exprs=Equivalence (operator=RImplicationOp sub_exprs=Equivalence)+;
@@ -134,7 +135,6 @@ IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;
       Date: iso=/#\d{4}-\d{2}-\d{2}/
           | iso='#TODAY' ( '(' y=INT ',' m=INT ',' d=INT ')' )?;
       Brackets: annotations=Annotations '(' f=Expression ')';
-
 
 TempLogic: 'temporal_logic' name=ID ':' vocab_name=ID '{'
              formula=LogFormula '}' ;

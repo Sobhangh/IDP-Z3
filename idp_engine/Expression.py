@@ -917,6 +917,79 @@ def EXISTS(qs, expr, annotations=None):
     return AQuantification.make('∃', qs, expr, annotations)
 
 
+class ForNext(Expression):
+    """Represents a Start symbol applied to  another applied symbol 
+
+    Args:
+        arg (AppliedSymbol): the applied symbol 
+
+        in_head (Bool): True if the AppliedSymbol occurs in the head of a rule
+    """
+    PRECEDENCE = 20
+
+    def __init__(self, parent,
+                 exp:Expression,number:Number,var:SymbolExpr):
+        self.symbol  = SymbolExpr(self,'ForNext',None,None)
+        self.exp = exp
+        self.num = number
+        self.var = var
+        self.sub_exprs = [exp,number,var]
+        super().__init__()
+
+        #self.as_disjunction = None
+        #self.decl = None
+        self.in_head = False
+
+    @classmethod
+    def make(cls,
+             symbol: SymbolExpr,
+             exp:Expression,number:Number,variable:SymbolExpr
+             ) -> ForNext:
+        out = cls(None, symbol, exp,number,variable)
+        out.sub_exprs = [exp,number]
+        # annotate
+        out.decl = symbol.decl
+        return out.annotate1()
+
+    #@classmethod
+    #def construct(cls, constructor, args):
+
+    def __str__(self):
+        out = f"{self.symbol}[{self.sub_exprs[0].str} , {self.num.str} , {self.var.str}]"
+        return (f"{out}")
+
+    def __deepcopy__(self, memo):
+        out = super().__deepcopy__(memo)
+        out.symbol = deepcopy(out.symbol)
+        #out.as_disjunction = deepcopy(out.as_disjunction)
+        return out
+    def init_copy(self,parent=None):
+        return ForNext(parent,self.exp.init_copy(),self.num.init_copy(),self.var.init_copy())
+
+    def collect(self, questions, all_=True, co_constraints=True):
+        self.exp.collect(questions,all,co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        self.symbol.collect_symbols(symbols, co_constraints)
+        return symbols
+
+    def has_decision(self):
+        return self.exp.has_decision()
+
+
+    def is_value(self) -> bool:
+        # independent of is_enumeration and in_enumeration !
+        return self.exp.is_value()
+
+    def is_reified(self):
+        # independent of is_enumeration and in_enumeration !
+        return self.exp.is_reified()
+
+    def generate_constructors(self, constructors: dict):
+        self.exp.generate_constructors(constructors,dict)
+
+
 class Operator(Expression):
     PRECEDENCE = 0  # monkey-patched
     MAP: dict[str, Callable] = dict()  # monkey-patched
@@ -1326,6 +1399,8 @@ class AppliedSymbol(Expression):
         return out
 
     def init_copy(self,parent=None):
+        #print("sfas")
+        #print(self.sub_exprs)
         sub_ex = [e.init_copy() for e in self.sub_exprs]
         return AppliedSymbol(parent,self.symbol.init_copy(),sub_ex,None,self.is_enumerated,self.is_enumeration,self.in_enumeration)
 

@@ -29,12 +29,13 @@ import logging
 from os import linesep
 from sys import intern
 import time
+from tkinter import Variable
 import types
 from typing import Any, Iterator, List, Union, Optional
 import subprocess
 from z3 import Solver
 
-from idp_engine.Expression import FALSE, INT_SETNAME, OR, TRUE, AAggregate, AComparison, AConjunction, ADisjunction, AEquivalence, AIfExpr, AImplication, AMultDiv, APower, AQuantification, ARImplication, ASumMinus, AUnary, AppliedSymbol, Brackets, CLFormula, DLFormula, Expression, FLFormula, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, Number, Operator, RLFormula, SetName, StartAppliedSymbol, SymbolExpr, ULFormula, UnappliedSymbol, WLFormula, XLFormula
+from idp_engine.Expression import FALSE, INT_SETNAME, OR, SETNAME, TRUE, VARIABLE, AAggregate, AComparison, AConjunction, ADisjunction, AEquivalence, AIfExpr, AImplication, AMultDiv, APower, AQuantification, ARImplication, ASumMinus, AUnary, AppliedSymbol, Brackets, CLFormula, DLFormula, Expression, FLFormula, ForNext, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, Number, Operator, Quantee, RLFormula, SetName, StartAppliedSymbol, SymbolExpr, ULFormula, UnappliedSymbol, WLFormula, XLFormula
 
 from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TempLogic, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, TypeDeclaration, Vocabulary
 from .Theory import Theory
@@ -542,12 +543,22 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,f
     if len(invariant.constraints) == 0:
         return "Please provide an invariant"
     if forward_chaining:
-        return forward_chain(theory,invariant)
-    inv = None
+        if s:
+            return forward_chain(theory,invariant,s)
+        else:
+            return forward_chain(theory,invariant)
+    invorg = None
     for c in invariant.constraints:
-        inv = c
+        invorg = c
+    inv = invorg.init_copy()
     inv2 = inv.init_copy()
     #print("ch1")
+    #Checking the formula is valid LTC expression
+    time: SetName = SETNAME('Tijd')
+    t: Variable = VARIABLE(v_time,time)
+    qt: Quantee = Quantee(None,[t],time) 
+    invorg = AQuantification(None,None,'forall',[qt],invorg)
+    invorg.annotate(theory.voc,{},True)
     n = theory.contains_next(inv)
     if n:
         return "Invariant should only contain signle state formulas"
@@ -564,7 +575,7 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,f
     p0 = None
     first_step = False
     if s is not None:
-        p0 = model_expand(theory.init_theory,invariant,s)
+        p0 = model_expand(theory.init_theory,invariant,s.static_now)
     else:
         p0 = model_expand(theory.init_theory,invariant)
     j =0
@@ -574,7 +585,7 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,f
             first_step = True
         j+=1
     if not first_step or j > 1:
-        return "****Invariant is FALSE****"
+        return "Invariant is FALSE: It cannot be proven at the initial time point"
     invariant2 = TheoryBlock(name=invariant.name,vocab_name=invariant.vocab_name,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
     inv2 = theory.sis_subexpr(inv2)
@@ -592,7 +603,7 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,f
     p1 = None
     second_step = False
     if s is not None:
-        p1 = model_expand(theory.transition_theory,invariant,invariant2,s)
+        p1 = model_expand(theory.transition_theory,invariant,invariant2,s.static_next)
     else:
         p1 = model_expand(theory.transition_theory,invariant,invariant2)
     j=0
@@ -602,10 +613,10 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,f
             second_step = True
         j+=1
     if not second_step or j>1:
-        return "****Invariant is FALSE****"
-    return "****Invariant is TRUE****"
+        return "Invariant is FALSE: Induction step cannot be proven"
+    return "Invariant is TRUE"
 
-def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
+def forward_chain(theory:TheoryBlock,invariant:TheoryBlock,struct:Structure|None=None):
     #Format of the thery should be like !t:q(t) and conditions => q(t+n) where n > 0
     #Checking the correctness of the format 
     af = None
@@ -632,8 +643,8 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
         if isinstance(r,str):
             return r
         chain_num = r
-    #print("adjusted formula")
-    #print(f)
+    print("adjusted formula")
+    print(f)
     voc : Vocabulary = voc_now.generate_expanded_voc(chain_num)
     voc.annotate_block(theory.voc.idp)
     af = AUnary(None,['not'],af)
@@ -641,13 +652,24 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
     invariant.constraints = OrderedSet([af])
     exp_th = theory.org_theory.expand_theory(chain_num,voc)
     annotate_exp_theory(exp_th,voc)
+    
     """print("expanded th..")
     for c in exp_th.constraints:
         print(c)
     for d in exp_th.definitions:
         for r in d.rules:
             print(r)"""
-    p1 = model_expand(exp_th,invariant,timeout_seconds=50)
+    
+    p1 = None
+    if struct is not None:
+        #TO DO : IF THE ANNOTATE OF STRUCTURE CHANGES THEN THIS CODE WOULD ALSO CHANGE
+        struct.static_expanded.voc = voc
+        for i in struct.static_expanded.interpretations.values():
+            i.annotate(voc, {})
+        voc.add_voc_to_block(struct.static_expanded)
+        p1 = model_expand(exp_th,invariant,struct.static_expanded,timeout_seconds=50)
+    else:
+        p1 = model_expand(exp_th,invariant,timeout_seconds=50)
     second_step =False
     j=0
     for i, xi in enumerate(p1):
@@ -656,8 +678,8 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock):
             second_step = True
         j+=1
     if not second_step or j>1:
-        return "****Invariant is FALSE****"
-    return "****Invariant is TRUE****"
+        return "Invariant is FALSE"
+    return "Invariant is TRUE"
 
 def adjust_formula(expression:AImplication,tempdcl:List[TemporalDeclaration]):
     implicant:Expression = expression.sub_exprs[1]
@@ -669,18 +691,20 @@ def adjust_formula(expression:AImplication,tempdcl:List[TemporalDeclaration]):
     r = adjust_sub(expression.sub_exprs[0],tempdcl,n)
     if isinstance(r,str):
         return r
+    expression.sub_exprs[0] = r
     return n
     
 def adjust_implicant(expression:Expression,tempdcl:List[TemporalDeclaration]):
-    if isinstance(expression,(StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol)):
-        return "Not allowed to use Start/Now/Next"
+    if isinstance(expression,(StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol,ForNext)):
+        return "Not allowed to use Start/Now/Next/ForNext"
     if isinstance(expression,AppliedSymbol):
         for t in tempdcl:
             if expression.symbol.name == t.symbol.name:
                 last = expression.sub_exprs.pop()
                 if isinstance(last,ASumMinus):
-                    if not last.operator[0] == '+':
-                        return "Only addition is acceptable"
+                    for op in last.operator:
+                        if not op == '+':
+                            return "Only addition is acceptable"
                     if len(last.sub_exprs) > 2 :
                         return "Please provide one number in the additions"
                     for e in last.sub_exprs:
@@ -710,35 +734,63 @@ def adjust_implicant(expression:Expression,tempdcl:List[TemporalDeclaration]):
     expression.str = expression.code
     return n
     
+#TO DO:Test if empty tmpdcl is given
 def adjust_sub(expression:Expression,tempdcl:List[TemporalDeclaration],n:int):
     if isinstance(expression,(StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol)):
         return "Not allowed to use Start/Now/Next"
+    if isinstance(expression,ForNext):
+        return adjust_sub(expandForNext(expression),tempdcl,n)
     if isinstance(expression,AppliedSymbol):
         for t in tempdcl:
             if expression.symbol.name == t.symbol.name:
                 last = expression.sub_exprs.pop()
                 if isinstance(last,ASumMinus):
-                    if not last.operator[0] == '+':
-                        return "Only addition is acceptable in atecedant"
-                    if len(last.sub_exprs) > 2 :
-                        return "Please provide one number in the additions"
+                    for op in last.operator:
+                        if not op == '+':
+                            return "Only addition is acceptable in atecedant"
+                    sum = 0
                     for e in last.sub_exprs:
                         if isinstance(e,Number) and e.type == INT_SETNAME:
-                            if e.py_value > n :
-                                return "Cant use numbers higher than the upperlimit"
-                            level = e.py_value
-                            if level != 0:
-                                expression.symbol.name = expression.symbol.name + '_' + str(level)
-                                expression.code = intern(str(expression))
-                                expression.str = expression.code
-                            break   
+                            sum += e.py_value
+                    if sum > n :
+                        return "Cant use numbers higher than the upperlimit"
+                    level = sum
+                    if level != 0:
+                        expression.symbol.name = expression.symbol.name + '_' + str(level)
+                        expression.code = intern(str(expression))
+                        expression.str = expression.code
+                    break   
                 break
+    j = 0
     for e in expression.sub_exprs:
         r = adjust_sub(e,tempdcl,n)
-        if r != None:
+        if isinstance(r,str):
             return r
+        expression.sub_exprs[j] = r
+        j += 1
     expression.code = intern(str(expression))
     expression.str = expression.code
+    return expression
+
+def expandForNext(exp:ForNext):
+    n = exp.num.py_value
+    #range(n+1) = 0...n (n is included)
+    expanded = [expanditer(exp.exp.init_copy(),i,exp.var) for i in range(n+1)]
+    ops = ['and'] * (len(expanded)-1)
+    return AConjunction(None,ops,expanded)
+
+def expanditer(expression:Expression,i:int,s:SymbolExpr):
+    if isinstance(expression,(UnappliedSymbol,Variable)):
+        if s.name == expression.name:
+            return Number(number=str(i))
+    j = 0
+    for e in expression.sub_exprs:
+        r = expanditer(e,i,s)
+        expression.sub_exprs[j] = r
+        j += 1
+    expression.code = intern(str(expression))
+    expression.str = expression.code
+    return expression
 
 #checks if an expression contains NextAppliedSymbol
 def contains_symb(e:Expression,s:str=""):

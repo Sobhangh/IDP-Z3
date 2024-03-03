@@ -9,6 +9,7 @@ vocabulary V {
     <Temporal> ws :() -> Int
     //vehicle speed
     <Temporal> vs :() -> Int
+    AB : () -> Int
 }
 
 theory LTC T:V {
@@ -26,9 +27,25 @@ theory LTC T:V {
 }
 
 theory INV Inv:V{
-    !t in Int: (GS(vp(t), ws(t) + vs(t)) and (ws(t)=ws(t+1) and ws(t+1)=ws(t+2) and ws(t+2)=ws(t+3) and ws(t+3)=ws(t+4))) => (vp(t+4)=0 and ws(t+4) + vs(t+4) = 0).
+    //!t in Int: (GS(vp(t), ws(t) + vs(t)) and (ws(t)=ws(t+1) and ws(t+1)=ws(t+2) and ws(t+2)=ws(t+3) and ws(t+3)=ws(t+4))) => (vp(t+4)=0 and ws(t+4) + vs(t+4) = 0).
+    
+    //THIS IS THE ABOVE FORMULA WRITTEN USING FORNEXT
+    !t in Int: (GS(vp(t), ws(t) + vs(t)) and ForNext[ws(t+i)=ws(t+i+1),3,i])  => (vp(t+4)=0 and ws(t+4) + vs(t+4) = 0).
+    
+    //THIS is the above formula that has been falsifed by setting vp(t+4)=1 instead of 0
+    //!t in Int: (GS(vp(t), ws(t) + vs(t)) and ForNext[ws(t+i)=ws(t+i+1),3,i])  => (vp(t+4)=1 and ws(t+4) + vs(t+4) = 0).
+
+    //THis is the second formula but there is minus instead of + in ws(t+1-1): Should give error
+    //!t in Int: (GS(vp(t), ws(t) + vs(t)) and ForNext[ws(t+i)=ws(t+i-1),3,i])  => (vp(t+4)=0 and ws(t+4) + vs(t+4) = 0).
+
+    //This is is the second formula but instead of  + 1 it is + 2: Should give error because it would become higher than 4
+    //!t in Int: (GS(vp(t), ws(t) + vs(t)) and ForNext[ws(t+i)=ws(t+i+2),3,i])  => (vp(t+4)=0 and ws(t+4) + vs(t+4) = 0).
+}
+
+structure S:V{
+    AB := 6.
 }
 
 procedure main () {
-    print(isinvariant(T,Inv,forward_chaining=True))
+    print(isinvariant(T,Inv,S,forward_chaining=True))
 }

@@ -30,7 +30,7 @@ from .Parse import (TemporalDeclaration, IDP, Vocabulary, Import, TypeDeclaratio
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ONE, ASumMinus, ASTNode, Expression, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, SETNAME, SetName,
+from .Expression import (ONE, ASumMinus, ASTNode, Expression, ForNext, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, SETNAME, SetName,
                          BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
@@ -721,6 +721,9 @@ def annotate_block(self: ASTNode,
                f"Unknown vocabulary: {self.vocab_name}")
     self.voc = idp.vocabularies[self.vocab_name]
     annotate_init_structure(self,idp)
+    annotate_static_structure(self,idp,"_now")
+    annotate_static_structure(self,idp,"_next")
+    expanded_static_struct(self,idp)
     for i in self.interpretations.values():
         i.block = self
         i.annotate(self.voc, {})
@@ -747,6 +750,77 @@ def annotate_init_structure(s,idp):
     #print("s5")
     voc.add_voc_to_block(s.init_struct)
 
+def annotate_static_structure(s,idp,suffix:str):
+    now = False
+    next =False
+    vocab_name = s.vocab_name+suffix
+    name = s.name+'static' + suffix
+    voc = None
+    #print("s1")
+    if suffix == "_now":
+        now = True
+        voc = idp.now_voc[s.vocab_name+suffix]
+        s.static_now = Structure(name=name,vocab_name=vocab_name,interpretations={})
+        s.static_now.voc = voc
+    elif suffix == "_next":
+        next = True
+        voc = idp.next_voc[s.vocab_name+suffix]
+        s.static_next = Structure(name=name,vocab_name=vocab_name,interpretations={})
+        s.static_next.voc = voc
+    else:
+        return
+    tempdc = idp.vocabularies[s.vocab_name].tempdcl 
+    #print("s2")
+    for i in s.interpretations.values():
+        add = True
+        for t in tempdc:
+            if (t.symbol.name == i.name):
+                add = False
+                break
+        if add:
+            enum = None
+            if not i.no_enum:
+                enum = i.enumeration.init_copy()
+            if i.default:
+                default = i.default.init_copy()
+            r = SymbolInterpretation(parent=None,name= UnappliedSymbol(None,(i.name)),sign = i.sign,
+                                enumeration=enum, default=default)
+            if now:
+                s.static_now.interpretations[r.name] = r
+                r.block = s.static_now
+            elif next:
+                s.static_next.interpretations[r.name] = r
+                r.block = s.static_next
+            r.annotate(voc,{})
+
+    if now:
+        voc.add_voc_to_block(s.static_now)
+    elif next:
+        voc.add_voc_to_block(s.static_next)
+
+def expanded_static_struct(s:Structure,idp):
+    suffix = "_expanded"
+    vocab_name = s.vocab_name+suffix
+    name = s.name+'static' + suffix
+    s.static_expanded = Structure(name=name,vocab_name=vocab_name,interpretations={})
+    tempdc = idp.vocabularies[s.vocab_name].tempdcl 
+    for i in s.interpretations.values():
+        add = True
+        for t in tempdc:
+            if (t.symbol.name == i.name):
+                add = False
+                break
+        if add:
+            enum = None
+            if not i.no_enum:
+                enum = i.enumeration.init_copy()
+            if i.default:
+                default = i.default.init_copy()
+            r = SymbolInterpretation(parent=None,name= UnappliedSymbol(None,(i.name)),sign = i.sign,
+                                enumeration=enum, default=default)
+            
+            s.static_expanded.interpretations[r.name] = r
+            r.block = s.static_expanded
 
 # Class SymbolInterpretation  #######################################################
 
@@ -1485,6 +1559,13 @@ def annotate(self, voc, q_vars,ltc=False,temporal_head=-1):
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
    
 StartAppliedSymbol.annotate = annotate
+
+# Class ForNext  #######################################################
+
+def annotate(self, voc, q_vars,ltc=False,temporal_head=-1):
+    self.check(False,"Not allowed to use ForNext")
+
+ForNext.annotate = annotate
 
 # Class SymbolExpr  #######################################################
 
