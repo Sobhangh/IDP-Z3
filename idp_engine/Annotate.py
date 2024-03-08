@@ -779,6 +779,7 @@ def annotate_static_structure(s,idp,suffix:str):
                 break
         if add:
             enum = None
+            default = None
             if not i.no_enum:
                 enum = i.enumeration.init_copy()
             if i.default:
@@ -812,6 +813,7 @@ def expanded_static_struct(s:Structure,idp):
                 break
         if add:
             enum = None
+            default = None
             if not i.no_enum:
                 enum = i.enumeration.init_copy()
             if i.default:

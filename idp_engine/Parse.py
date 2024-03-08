@@ -2157,7 +2157,7 @@ class TransiotionGraph:
         self.ffextentions : dict[str,Extension] = {}
         self.tempfunct : dict(str,set) = {}
         self.tempfunctarg : dict(str,set) = {}
-        self.FillExtensions(problem.extensions)
+        self.FillExtensions(problem.extensions,voc)
         print("fucnt exte")
         print(self.tempfunct)
         print(self.tempfunctarg)
@@ -2272,11 +2272,14 @@ class TransiotionGraph:
 
     
     
-    def FillExtensions(self,extensions: dict[str, Extension]):
+    def FillExtensions(self,extensions: dict[str, Extension],voc:Vocabulary):
+        notvisited : dict(str,bool) = {}
         for s , e in extensions.items():
             for a in self.voc.actions:
                 if s == a:
                     self.aextentions[a] = e
+                    notvisited[a] = False
+                notvisited[a] = notvisited.get(a,True)
                     #if self.symbol_decl.codomain == BOOL_SETNAME:  # predicate
                     #    extension = [t.args for t in self.enumeration.tuples]
                     #    problem.extensions[self.symbol_decl.name] = (extension, None)
@@ -2286,6 +2289,37 @@ class TransiotionGraph:
                     #    self.aextensions[a] = [s.extension({}) for s in d.domains]
                     #else:
                     #    self.aextensions[a] = [s.extension({}) for s in d.domains]
+        #TO DO : COULD BE USED FOR ADDING ACTION FUNCTIONS, 
+        now_voc = voc.idp.now_voc[voc.name+"_now"]
+        print("function actions ")
+        for a , v in notvisited.items():
+            if v :
+                for d in now_voc.declarations:
+                    if a == d.name:
+                        print(a)
+                        if d.codomain == BOOL_SETNAME:
+                            #TO DO: THROW ERROR HERE TOO
+                            print("this should only be used for functions")
+                            return
+                        factext = ([],None,True)
+                        for arg in d.domains + [d.codomain]:
+                            print(arg.name)
+                            if len(factext[0]) == 0:
+                                for e in extensions[arg.name][0]:
+                                    factext[0].append(tuple(e))
+                            else:
+                                res = []
+                                for e in extensions[arg.name][0]:
+                                    j = 0
+                                    for t in factext[0]:
+                                        #factext[0][j] += tuple(e)
+                                        res.append(t+tuple(e))
+                                        #print(factext[0][j])
+                                        j += 1
+                                factext = (res,None,True)
+                                    
+                        self.aextentions[a] = factext 
+
         
         for s , e in extensions.items():
             for f in self.voc.fluents:
