@@ -2146,7 +2146,7 @@ class PyAssignment(ASTNode):
         return f'{self.var} = {self.val}'
     
 class TransiotionGraph:
-    def __init__(self,voc:Vocabulary,problem:Theory):
+    def __init__(self,voc:Vocabulary,problem:Theory,alg3=False):
         self.voc = voc
         #Each state is a list where each element is a tuple where first element is if the predicate is part of the 
         #state, second the name of the fluent and third its arguments
@@ -2162,7 +2162,8 @@ class TransiotionGraph:
         print(self.tempfunct)
         print(self.tempfunctarg)
         #TO DO : WHAT ABOUT FUNCTIONS and add tests for functions
-        self.SetStates()
+        if not alg3:
+            self.SetStates()
         
 
     def SetStates(self):
