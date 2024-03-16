@@ -35,7 +35,7 @@ from typing import Any, Iterator, List, Union, Optional
 import subprocess
 from z3 import Solver
 
-from idp_engine.Expression import BOOL_SETNAME, FALSE, INT_SETNAME, OR, SETNAME, TRUE, VARIABLE, AAggregate, AComparison, AConjunction, ADisjunction, AEquivalence, AIfExpr, AImplication, AMultDiv, APower, AQuantification, ARImplication, ASumMinus, AUnary, AppliedSymbol, Brackets, CLFormula, DLFormula, Expression, FLFormula, ForNext, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, Number, Operator, Quantee, RLFormula, SetName, StartAppliedSymbol, SymbolExpr, ULFormula, UnappliedSymbol, WLFormula, XLFormula
+from idp_engine.Expression import BOOL_SETNAME, FALSE, INT_SETNAME, ONE, OR, SETNAME, TRUE, VARIABLE, AAggregate, AComparison, AConjunction, ADisjunction, AEquivalence, AIfExpr, AImplication, AMultDiv, APower, AQuantification, ARImplication, ASumMinus, AUnary, AppliedSymbol, Brackets, CLFormula, DLFormula, Expression, FLFormula, ForNext, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, Number, Operator, Quantee, RLFormula, SetName, StartAppliedSymbol, SymbolExpr, ULFormula, UnappliedSymbol, WLFormula, XLFormula
 
 from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TempLogic, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, TypeDeclaration, Vocabulary
 from .Theory import Theory
@@ -68,6 +68,36 @@ def model_check(*theories: Union[TheoryBlock, Structure, Theory]) -> str:
     solver = Solver(ctx=problem.ctx)
     solver.add(z3_formula)
     return str(solver.check())
+
+def necessary_assignments(lasgn:List[Assignments|str],transitiongraph:TransiotionGraph):
+    fluents = transitiongraph.fextentions.keys()
+    ffluents = transitiongraph.ffextentions.keys()
+    reallist = []
+    if len(lasgn) > 0:
+        reallist.append(lasgn[0])
+
+    for i in range(len(lasgn)-1):
+        if not isinstance(lasgn[i],str):
+            j = 0
+            for k, a  in lasgn[i].items():
+                if type(a.sentence) == AppliedSymbol:
+                    asymb = a.symbol_decl.name[:-len('_next')]
+                    fluent_check = a.symbol_decl.is_next and (asymb  in fluents or asymb in ffluents )
+                    if fluent_check:
+                        if not isinstance(lasgn[i+1],str):
+                            #print("afasdfds")
+                            #print(type(lasgn[i+1][j]))
+                            if str(a.sentence) == str(lasgn[i+1][k].sentence):
+                                if a.value != lasgn[i+1][k].value:
+                                    reallist.append(lasgn[i+1])
+                                    break
+
+                j += 1
+        else:
+            reallist.append(lasgn[i])
+
+    return reallist
+    #return [lasgn[i] for i in reallist]
 
 def identifystates(assign,transitiongraph:TransiotionGraph,initialstate=False):
     fluents = transitiongraph.fextentions.keys()
@@ -199,7 +229,7 @@ def identifystates(assign,transitiongraph:TransiotionGraph,initialstate=False):
         i+=1
     #print("added states")
     #print(addedstates)
-    return addedstates + statesVisited
+    return statesVisited + addedstates
 
 def matchingstates(assign,transitiongraph:TransiotionGraph):
     fluents = transitiongraph.fextentions.keys()
@@ -962,33 +992,94 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     voc_now.add_voc_to_block(testth)
     problem = Theory(testth)
     print(problem.extensions)
-    Alg3 = False  # True
+    TransmachconstructTime = time.time()
+    Alg3 = True  
     transitiongraph = TransiotionGraph(init_structure.voc,problem,Alg3)
     #print("transiiton graph states")
     #for l in transitiongraph.states:
     #    print(l)
-    #To make beforehand the negation of actions and annotate them
+    #Formula for stating ftemporal predicates are functions meaning they have exactly one value at each time
+    ffluentConst = []
+    ffluentinit = []
+    """for d in voc_now.declarations:
+        if isinstance(d,SymbolDeclaration):
+            if d.name in init_structure.voc.ftemproral:
+                j = 0
+                qt = []
+                qt2 = []
+                subex =[]
+                subex2 = []
+                lendom = len(d.domains)
+                for q in d.domains:
+                    if j != lendom -1 :
+                        qt.append(Quantee(None,[VARIABLE(d.name+str(j),q.init_copy())],q.init_copy()))
+                        qt2.append(Quantee(None,[VARIABLE(d.name+str(j),q.init_copy())],q.init_copy()))
+                    subex.append(UnappliedSymbol(None,d.name+str(j)))
+                    subex2.append(UnappliedSymbol(None,d.name+str(j)))
+                    j += 1
+                outpq = [Quantee(None,[VARIABLE(d.name+str(lendom-1),d.domains[lendom-1].init_copy())],d.domains[lendom-1].init_copy())]
+                outpq2 = [Quantee(None,[VARIABLE(d.name+str(lendom-1),d.domains[lendom-1].init_copy())],d.domains[lendom-1].init_copy())]
+                aggconst = AAggregate(None,"#",outpq,f=AppliedSymbol(None,SymbolExpr(None,d.name+"_next",None,None),subex))
+                cardinality = AComparison(None,"=",[aggconst,ONE])
+                uniquant = AQuantification(None,None,"forall",qt,cardinality)
+                uniquant.annotate(theory.transition_theory.voc,{})
+
+                aggconst2 = AAggregate(None,"#",outpq2,f=AppliedSymbol(None,SymbolExpr(None,d.name,None,None),subex2))
+                cardinality2= AComparison(None,"=",[aggconst2,ONE])
+                uniquant2 = AQuantification(None,None,"forall",qt2,cardinality2)
+                uniquant2.annotate(theory.transition_theory.voc,{})
+
+                ffluentConst.append(uniquant)
+                ffluentConst.append(uniquant2)
+                ffluentinit.append(uniquant2)"""
+    print("fluent const")
+    print(ffluentConst)
+    no_conc = False
+    Posaction = {}
     Nonaction = {}
-    for action , extentsion in transitiongraph.aextentions.items():
-        e = extentsion[0]
-        if e == [[]]:
-            na = AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,action,None,None),[]))
-            na.annotate(theory.transition_theory.voc,{})
-            nal = Nonaction.get(action,[])
-            nal.append(na)
-            Nonaction[action] = nal
-        else:
-            for arg in e:
-                na = None
-                if len(extentsion) > 2 and extentsion[2] == True:
-                    ap = AppliedSymbol(None,SymbolExpr(None,action,None,None),arg[:-1])
-                    na = AUnary(None,['not'],AComparison(None,"=",[ap,arg[-1]]))
-                else:
-                    na = AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,action,None,None),arg))
+    #To make beforehand the negation of actions and annotate them
+    if no_conc:
+        for action , extentsion in transitiongraph.aextentions.items():
+            e = extentsion[0]
+            if e == [[]]:
+                na = AppliedSymbol(None,SymbolExpr(None,action,None,None),[])
+                na.annotate(theory.transition_theory.voc,{})
+                nal = Posaction.get(action,[])
+                nal.append(na)
+                Posaction[action] = nal
+            else:
+                for arg in e:
+                    na = None
+                    if len(extentsion) > 2 and extentsion[2] == True:
+                        ap = AppliedSymbol(None,SymbolExpr(None,action,None,None),arg[:-1])
+                        na = AComparison(None,"=",[ap,arg[-1]])
+                    else:
+                        na = AppliedSymbol(None,SymbolExpr(None,action,None,None),arg)
+                    na.annotate(theory.transition_theory.voc,{})
+                    nal = Posaction.get(action,[])
+                    nal.append(na)
+                    Posaction[action] = nal
+    else:
+        for action , extentsion in transitiongraph.aextentions.items():
+            e = extentsion[0]
+            if e == [[]]:
+                na = AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,action,None,None),[]))
                 na.annotate(theory.transition_theory.voc,{})
                 nal = Nonaction.get(action,[])
                 nal.append(na)
                 Nonaction[action] = nal
+            else:
+                for arg in e:
+                    na = None
+                    if len(extentsion) > 2 and extentsion[2] == True:
+                        ap = AppliedSymbol(None,SymbolExpr(None,action,None,None),arg[:-1])
+                        na = AUnary(None,['not'],AComparison(None,"=",[ap,arg[-1]]))
+                    else:
+                        na = AUnary(None,['not'],AppliedSymbol(None,SymbolExpr(None,action,None,None),arg))
+                    na.annotate(theory.transition_theory.voc,{})
+                    nal = Nonaction.get(action,[])
+                    nal.append(na)
+                    Nonaction[action] = nal
     Nstate = []
     Nnextstate = []
     if not Alg3:
@@ -1024,18 +1115,25 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     if not Alg3:
         initialStates = AlternativeAlg2(transitiongraph,Nstate,Nnextstate,Nonaction,temps,theory)
     else:
-        initialStates = AlternativeAlg3(transitiongraph,Nonaction,temps,theory)
-    print("transition states")
+        #initialStates = AlternativeAlg3(transitiongraph,Nonaction,temps,theory,ffluentinit,ffluentConst)
+        if no_conc:
+            initialStates = AlternativeAlg3(transitiongraph,Posaction,temps,theory,no_conc=True)
+        else:
+            #This had the beter performance
+            initialStates = AlternativeAlg3(transitiongraph,Nonaction,temps,theory)
+
+    TransmachconstructTime = time.time() - TransmachconstructTime
+    """print("transition states")
     print(transitiongraph.aextentions)
     print(transitiongraph.states)
     print(len(transitiongraph.states))
     print("transition list")
     print(len(transitiongraph.transtions.keys()))
     for k ,v in transitiongraph.transtions.items():
-        print(k,v)
+        print(k,v)"""
 
     #print(problem.extensions)
-        
+    ProbTransTime = time.time()
     #eg: person': ([[John], [Bob]])
     probsets : dict(str,List[List]) = {}
     probvar : dict(str,List[SetName]) = {}
@@ -1067,10 +1165,14 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
         #tsets += s 
         notNum = True
         if e == [[]]:
+            if i != 0:
+                tsets += " ; "
             tsets += s + " =BOOL"
             setenum = True
         else:
             if not isinstance(e[0][0],Number):
+                if i != 0:
+                    tsets += " ; "
                 setenum = True
                 tsets += s + " ={ "
                 j = 0
@@ -1083,10 +1185,12 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
             else:
                 notNum = False
                 numsets.append(s)
+                i -= 1
         
-        if i != len(probsets.keys()) -1 and notNum :
-            tsets += ";"
+        #if i != len(probsets.keys()) -1 and notNum :
+        #    tsets += ";"
         i += 1
+    #could also be if i != 0
     if not setenum:
         tsets =""
     probnumset :dict(str,List) = {}
@@ -1137,7 +1241,7 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
             else:
                 domname =""
                 if d.name in probnumset.keys():
-                    domname = str(probnumset[d.name][0]) + ".." + str(probnumset[d.name][1])
+                    domname = "(" + str(probnumset[d.name][0]) + ".." + str(probnumset[d.name][1]) +")"
                 else:
                     domname = d.name 
                 if ld == 1:
@@ -1281,18 +1385,38 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     machine = "MACHINE Test" + '\n' + tsets + '\n' + tvars + '\n' + tinvar + \
           '\n' + tinint + '\n' + toprts + '\n' + "END"
     print(machine)
+    ProbTransTime = time.time() - ProbTransTime
     #"(F {owns = owns \/ {(1,B1)}}) & G {F {john_owns=TRUE}}"
     ltlf = "(F { (2,B1):owns })" 
     ltlf = translateLtlFormula(ltllogic.formula,probnumset)
     f = open("test.mch","w")
     f.write(machine)
     f.close()  
-    a =subprocess.run('C:\Prob\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)      
-    #a = subprocess.run(f'C:\Prob\probcli -ltlformula "{ltlf}" test.mch ',shell=True,capture_output=True) # -model-check -spdot states.dot
+    ProbSolvingTime = time.time()
+    #a =subprocess.run('C:\Prob\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)      
+    a = subprocess.run(f'C:\Prob\probcli -ltlformula "{ltlf}" test.mch ',shell=True,capture_output=True) # -model-check -spdot states.dot
+    ProbSolvingTime = time.time() - ProbSolvingTime
+    resmessage = a.stdout.decode()
+    reserrror = a.stderr.decode()
+    
+    nbTransitions = 0
+    for k ,v in transitiongraph.transtions.items():
+        nbTransitions += len(v)
+    print(" Transition machine construction time:")
+    print(TransmachconstructTime)
+    print("prob translation time")
+    print(ProbTransTime)
+    print("prob solving time")
+    print(ProbSolvingTime)
+    print("number of states")
+    print(print(len(transitiongraph.states)))
+    print("number of transitions")
+    print(nbTransitions)
+
     print("PROBCLI............")
-    print(a.stdout.decode())
-    print(a.stderr.decode())
-    return
+    print(resmessage)
+    print(reserrror)
+    return resmessage +'\n' + reserrror
     i =0
     for s1 in Nstate:
         j=0
@@ -1491,47 +1615,73 @@ def AlternativeAlg2(transitiongraph:TransiotionGraph,Nstate:List,Nnextstate:List
         print(transitiongraph.states[r])
     return initialStates
 
-def AlternativeAlg3(transitiongraph:TransiotionGraph,Nonaction:dict,init_struct:Structure,theory:TheoryBlock):
+def AlternativeAlg3(transitiongraph:TransiotionGraph,Nonaction:dict,init_struct:Structure,theory:TheoryBlock,ffluentinit=[],ffluentConst=[],no_conc=False):
     nextreachedState = []
     initialStates = []
     reachedStates = []
+    numreachedstate = 0
     Nstate : dict(int,List) = {}
     i = 0
-    initialStates = findnextStates(transitiongraph,"",None,init_struct,theory.init_theory,[],{},alg3=True)[0]
+    initialStates = findnextStates(transitiongraph,"",None,init_struct,theory.init_theory,[],{},alg3=True,ffluentconst=ffluentinit)[0]
     nextreachedState = initialStates.copy()
     reachedStates= initialStates.copy()
+    if len(initialStates)==0:
+        return []
+    numreachedstate = max(initialStates)
     print("inital state")
     print(initialStates)
     tempstate = nextreachedState.copy()
-    while len(tempstate) > 0 :
-        nextreachedState = tempstate.copy()
-        tempstate = []
-        for i in nextreachedState:
+    oldreached = -1
+    #while len(tempstate) > 0 :
+    while numreachedstate - oldreached > 0:
+        #nextreachedState = tempstate.copy()
+        print("next states")
+        print(numreachedstate)
+        #tempstate = []
+        #for i in nextreachedState:
+        for i in range(oldreached+1,numreachedstate+1):
+            if i == oldreached+1:
+               oldreached = numreachedstate
             Nstate[i] = translateToNstate(transitiongraph.states[i],theory)
             for action , extentsion in transitiongraph.aextentions.items():
                 e = extentsion[0]
                 t = False
                 if e == [[]]:
-                    t = findnextStates(transitiongraph,action,None,init_struct,theory.transition_theory,Nstate[i],Nonaction,alg3=True)
+                    t = []
+                    if no_conc:
+                        ract = Nonaction[action][0]
+                        t = findnextStates(transitiongraph,action,None,init_struct,theory.transition_theory,Nstate[i],Nonaction,alg3=True,ffluentconst=ffluentConst,realaction=ract)
+                    else:
+                        t = findnextStates(transitiongraph,action,None,init_struct,theory.transition_theory,Nstate[i],Nonaction,alg3=True,ffluentconst=ffluentConst)
                     for j in t[0]:
                         trs = transitiongraph.transtions.get((i,j),[])
                         trs.append(t[1])
                         transitiongraph.transtions[(i,j)] = trs
-                        if not (j in reachedStates):
-                            tempstate.append(j)
-                            reachedStates.append(j)
+                        if j > numreachedstate:
+                            numreachedstate = j
+                        #if not (j in reachedStates):
+                        #    tempstate.append(j)
+                        #    reachedStates.append(j)
+                    tempstate
                        
                 else:
                     q = 0
                     for arg in e:
-                        t = findnextStates(transitiongraph,action,arg,init_struct,theory.transition_theory,Nstate[i],Nonaction,q,alg3=True)
+                        t = []
+                        if no_conc:
+                            ract = Nonaction[action][q]
+                            t = findnextStates(transitiongraph,action,arg,init_struct,theory.transition_theory,Nstate[i],Nonaction,q,alg3=True,ffluentconst=ffluentConst,realaction=ract)
+                        else:
+                            t = findnextStates(transitiongraph,action,arg,init_struct,theory.transition_theory,Nstate[i],Nonaction,q,alg3=True,ffluentconst=ffluentConst)
                         for j in t[0]:
                             trs = transitiongraph.transtions.get((i,j),[])
                             trs.append(t[1])
                             transitiongraph.transtions[(i,j)] = trs
-                            if not (j in reachedStates):
-                                tempstate.append(j)
-                                reachedStates.append(j)
+                            if j > numreachedstate:
+                                numreachedstate = j
+                            #if not (j in reachedStates):
+                            #    tempstate.append(j)
+                            #    reachedStates.append(j)
                         q += 1
     return initialStates
 
@@ -1554,27 +1704,30 @@ def translateToNstate(s1,theory):
                 Nstate[-1].annotate(theory.transition_theory.voc,{})
     return Nstate
 
-def findnextStates(transitiongraph:TransiotionGraph,action:str,args,init_struct:Structure,transition_theory:TheoryBlock,Nstate:List,non_action:dict,argindex:int=0,alg3 =False):
+def findnextStates(transitiongraph:TransiotionGraph,action:str,args,init_struct:Structure,transition_theory:TheoryBlock,Nstate:List,non_action:dict,argindex:int=0,alg3 =False,ffluentconst=[],realaction=None):
     actionPred = None
     no_concurrency = []
-    for a , act in non_action.items():
-        if a == action:
-            i = 0
-            while i < len(act):
-                if i != argindex:
-                    #TO DO: COULD MAKE IT MORE EFFICIENT BY CHECKING IF IT IS ACOMPARISON AT THE BEGINING OF THE WHILE LOOP
-                    no_concurrency += [act[i]]
-                else:
-                    actionPred = act[i].sub_exprs[0]
-                i+=1
-        else:
-            no_concurrency += act     
+    if not realaction:
+        for a , act in non_action.items():
+            if a == action:
+                i = 0
+                while i < len(act):
+                    if i != argindex:
+                        #TO DO: COULD MAKE IT MORE EFFICIENT BY CHECKING IF IT IS ACOMPARISON AT THE BEGINING OF THE WHILE LOOP
+                        no_concurrency += [act[i]]
+                    else:
+                        actionPred = act[i].sub_exprs[0]
+                    i+=1
+            else:
+                no_concurrency += act 
+    else:
+        actionPred = realaction    
     testth = TheoryBlock(name="Transit",vocab_name=transition_theory.vocab_name,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
     if actionPred is None:
-        testth.constraints = OrderedSet(Nstate+no_concurrency)
+        testth.constraints = OrderedSet(Nstate+no_concurrency+ffluentconst)
     else:    
-        testth.constraints = OrderedSet(Nstate+[actionPred]+no_concurrency)
+        testth.constraints = OrderedSet(Nstate+[actionPred]+no_concurrency+ffluentconst)
     interp = transition_theory.interpretations
     transition_theory.interpretations = {}
     p = Theory(init_struct,transition_theory,testth)
@@ -1583,15 +1736,19 @@ def findnextStates(transitiongraph:TransiotionGraph,action:str,args,init_struct:
     second_step =False
     nextstates = []
     j = 0
-    """print("act pred")
-    if str(actionPred.sub_exprs) == str([1,1]):
-        print(actionPred)
-        print(Nstate)
-        print(transition_theory.constraints)
-        for d in transition_theory.definitions:
-            for r in d.rules:
-                print(r)"""
-    for i, xi in enumerate(res):
+    #print("act pred")
+    #if str(actionPred.sub_exprs) == str([1,1]):
+    #    print(actionPred)
+    #    print(Nstate)
+    #    print(transition_theory.constraints)
+    #    for d in transition_theory.definitions:
+    #        for r in d.rules:
+    #            print(r)
+    realassigns = necessary_assignments(res,transitiongraph)
+    #realassigns = res
+    #print("NEW CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL")
+    #for i, xi in enumerate(res):
+    for xi in realassigns:
         if xi == 'No models.':
             second_step = True
         elif type(xi) != str:
@@ -1612,6 +1769,9 @@ def findnextStates(transitiongraph:TransiotionGraph,action:str,args,init_struct:
     if second_step and j==1:
         return ([],actionPred)
     return (list(set(nextstates)),actionPred)
+
+
+
 #action is the name of the action to checked; ini_struct is the given initial structure;
 #Nstate is a list which contains the annotated of all its positive and negation predicates; Nnextstate is the same but for next time point
 # cstt is the index of the cuurent state in Nstate; nstt is the index of the next state in Nnextstate
@@ -1658,6 +1818,46 @@ def checkTransition(action:str,args,init_struct:Structure,transition_theory:Theo
         ap.sub_exprs.append(actionPred.sub_exprs[1])
         actionPred = ap"""
     return actionPred
+
+def translateLtlToFo(formula:Expression,t:Expression,tempdcl:List[str],num=0):
+    if isinstance(formula,AppliedSymbol):
+        if formula.symbol.name in tempdcl:
+            formula.sub_exprs.append(t)
+    elif isinstance(formula,UnappliedSymbol):
+        return formula
+    elif isinstance(formula,XLFormula):
+        return translateLtlToFo(formula.expr,ASumMinus(None,"+",[t,ONE]),tempdcl)
+    elif isinstance(formula,(FLFormula,GLFormula,ULFormula)):
+        time = SETNAME('Tijd')
+        tn = VARIABLE("time"+str(num+1),time)
+        qt = Quantee(None,[tn],time) 
+        tu = UnappliedSymbol(None,tn.name)
+        comp = AComparison(None,">",[tu,t])
+        if isinstance(formula,FLFormula):
+            f = AQuantification(None,None,"?",[qt],AConjunction(None,"and",[comp,formula.expr]))
+            return translateLtlToFo(f,tu,tempdcl,num+1)
+        elif isinstance(formula,GLFormula):
+            f = AQuantification(None,None,"forall",[qt],AConjunction(None,"and",[comp,formula.expr]))
+            return translateLtlToFo(f,tu,tempdcl,num+1)
+        elif isinstance(formula,ULFormula):
+            tn2 = VARIABLE("time"+str(num+2),time)
+            qt2 = Quantee(None,[tn2],time) 
+            tu2 = UnappliedSymbol(None,tn2.name)
+            comp2 = AComparison(None,">=",[tu2,t])
+            comp3 = AComparison(None,">",[tu,tu2])
+            comptogether = AConjunction(None,"and",[comp2,comp3])
+            first = translateLtlToFo(formula.expr1,tu2,tempdcl,num+2)
+            uquantif = AQuantification(None,None,"forall",[qt2],AImplication(None,"=>",[comptogether,first]))
+            second = translateLtlToFo(formula.expr2,tu,tempdcl,num+1)
+            return AQuantification(None,None,"?",[qt],AConjunction(None,["and","and"],[comp,uquantif,second]))
+
+     
+    i = 0
+    for f in formula.sub_exprs:
+        formula.sub_exprs[i] = translateLtlToFo(f,t,tempdcl)
+        i+=1
+    return formula
+
 
 def translateLtlFormula(formula:LFormula,probnumset):
     #Union[Expression,ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,
