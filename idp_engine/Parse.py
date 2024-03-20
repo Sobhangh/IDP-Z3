@@ -34,8 +34,8 @@ from typing import Any, Tuple, List, Union, Optional, TYPE_CHECKING
 
 
 from .Assignments import Assignments
-from .Expression import (Annotations, Annotation, ASTNode, CLFormula, Constructor, CONSTRUCTOR,
-                         Accessor, DLFormula, FLFormula, ForNext, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, RLFormula, StartAppliedSymbol, SymbolExpr, Expression,
+from .Expression import (AFFormula, AGFormula, AUFormula, AXFormula, Annotations, Annotation, ASTNode, CCFormula, CLFormula, CTLFormula, Constructor, CONSTRUCTOR,
+                         Accessor, DCFormula, DLFormula, EFFormula, EGFormula, EUFormula, EXFormula, FLFormula, ForNext, GLFormula, ICFormula, ILFormula, LFormula, NCFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, RLFormula, StartAppliedSymbol, SymbolExpr, Expression,
                          AIfExpr, IF, AQuantification, ULFormula, WLFormula, XLFormula, split_quantees, SetName,
                          SETNAME, Quantee, ARImplication, AEquivalence,
                          AImplication, ADisjunction, AConjunction, AComparison,
@@ -239,6 +239,7 @@ class Vocabulary(ASTNode):
         self.actions : List[str] =[]
         self.fluents : List[str] =[]
         self.ftemproral : List[str] =[]
+        self.gentemp = []
         self.transitiongraph : TransiotionGraph = None
         # expand multi-symbol declarations
         temp = []
@@ -254,10 +255,29 @@ class Vocabulary(ASTNode):
                         self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=new.name,eval=None,s=None)))
                     if decl.temporal == "Action":
                         self.actions.append(new.name)
-                    elif decl.temporal == "Temporal":
+                    elif decl.temporal == "Temporal" or decl.temporal == "GTemporal":
                         self.fluents.append(new.name)
-                    elif decl.temporal == "FTemporal":
+                    elif decl.temporal == "FTemporal" or decl.temporal == "GFTemporal":
                         self.ftemproral.append(new.name)
+                    
+                    if decl.temporal == "GTemporal" or decl.temporal == "GFTemporal":
+                        self.gentemp.append(new.name)
+                        ct = new.init_copy()
+                        ct.name = Vocabulary.gen_ct(new.name)
+                        self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=ct.name,eval=None,s=None)))
+                        temp.append(ct)
+
+                        cf = new.init_copy()
+                        cf.name = Vocabulary.gen_cf(new.name)
+                        self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=cf.name,eval=None,s=None)))
+                        temp.append(cf)
+
+                        ig = new.init_copy()
+                        ig.name = Vocabulary.gen_i(new.name)
+                        self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=ig.name,eval=None,s=None)))
+                        temp.append(ig)
+
+
                     
             else:
                 temp.append(decl)
@@ -312,6 +332,15 @@ class Vocabulary(ASTNode):
                             f"Duplicate enumeration of {self.name} "
                             f"in vocabulary and block {block.name}")
                 block.interpretations[s.name] = s.interpretation
+
+    def gen_ct(name:str):
+        return "Ct_" + name
+    
+    def gen_cf(name):
+        return "Cf_" + name
+    
+    def gen_i(name):
+        return "I_" + name
 
     #Used for forward chaining
     def generate_expanded_voc(self,n:int) -> Vocabulary:
@@ -394,6 +423,7 @@ class Vocabulary(ASTNode):
                     d
                 else:
                     nowvoc.declarations.append(d.init_copy())
+                
         return nowvoc
     
     def generate_next_voc(self):
@@ -2372,7 +2402,8 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          Number, Brackets, Date, Variable,
                                          TempLogic,ILFormula,DLFormula,
                                          CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula,
-
+                                         NCFormula , CCFormula , DCFormula , ICFormula , AXFormula , EXFormula  , AFFormula,
+                                         EFFormula , AGFormula , EGFormula , AUFormula , EUFormula,
                                          Structure, SymbolInterpretation,
                                          Enumeration, FunctionEnum, CSVEnumeration,
                                          TupleIDP, FunctionTuple, CSVTuple,

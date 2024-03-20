@@ -1785,6 +1785,148 @@ class ILFormula(Expression):
 
 LFormula = Union[Expression,ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula]
 
+
+
+class ICFormula(Expression):
+    """
+        Repressents the following CTL formula: q => p 
+    """
+    def __init__(self,parent,expr1:CTLFormula,expr2:CTLFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return str(self.expr1) + " => " + str(self.expr2)
+    
+class DCFormula(Expression):
+    """
+        Repressents the following CTL formula: q or p 
+    """
+    def __init__(self,parent,expr1:CTLFormula,expr2:CTLFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return str(self.expr1) + " or " + str(self.expr2)
+    
+class CCFormula(Expression):
+    """
+        Repressents the following CTL formula: q AND p 
+    """
+    def __init__(self,parent,expr1:CTLFormula,expr2:CTLFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return str(self.expr1) + " and " + str(self.expr2)
+
+class NCFormula(Expression):
+    """
+        Repressents the following CTL formula: not q  
+    """
+    def __init__(self,parent,expr:CTLFormula):
+        self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "not " + str(self.expr) 
+
+class AXFormula(Expression):
+    """
+        Repressents the following CTL formula: AX q  
+    """
+    def __init__(self,parent,expr:CTLFormula):
+        self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "AX " + str(self.expr) 
+    
+class EXFormula(Expression):
+    """
+        Repressents the following CTL formula: EX q  
+    """
+    def __init__(self,parent,expr:CTLFormula):
+        self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "EX " + str(self.expr) 
+    
+class AFFormula(Expression):
+    """
+        Repressents the following CTL formula: AF q  
+    """
+    def __init__(self,parent,expr:CTLFormula):
+        self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "AF " + str(self.expr) 
+
+class EFFormula(Expression):
+    """
+        Repressents the following CTL formula: EF q  
+    """
+    def __init__(self,parent,expr:CTLFormula):
+        self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "EF " + str(self.expr) 
+    
+class AGFormula(Expression):
+    """
+        Repressents the following CTL formula: AG q  
+    """
+    def __init__(self,parent,expr:CTLFormula):
+        self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "AG " + str(self.expr) 
+    
+class EGFormula(Expression):
+    """
+        Repressents the following CTL formula: EG q  
+    """
+    def __init__(self,parent,expr:CTLFormula):
+        self.expr = expr
+        self.sub_exprs = [expr]
+
+    def __str__(self) -> str:
+        return "EG " + str(self.expr) 
+    
+class AUFormula(Expression):
+    """
+        Repressents the following CTL formula: A q U p 
+    """
+    def __init__(self,parent,expr1:CTLFormula,expr2:CTLFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return "A " + str(self.expr1) + " U " + str(self.expr2)
+    
+class EUFormula(Expression):
+    """
+        Repressents the following CTL formula: E q U p 
+    """
+    def __init__(self,parent,expr1:CTLFormula,expr2:CTLFormula):
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.sub_exprs = [expr1,expr2]
+
+    def __str__(self) -> str:
+        return "E " + str(self.expr1) + " U " + str(self.expr2)
+    
+CTLFormula = Union[Expression , NCFormula , CCFormula , DCFormula , ICFormula , AXFormula , EXFormula  , AFFormula , EFFormula , AGFormula , EGFormula , AUFormula , EUFormula]
+
+
 class SymbolExpr(Expression):
     """ represents either a type name, a symbol name
     or a `$(..)` expression evaluating to a type or symbol name

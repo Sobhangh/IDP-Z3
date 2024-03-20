@@ -35,7 +35,7 @@ from typing import Any, Iterator, List, Union, Optional
 import subprocess
 from z3 import Solver
 
-from idp_engine.Expression import BOOL_SETNAME, FALSE, INT_SETNAME, ONE, OR, SETNAME, TRUE, VARIABLE, AAggregate, AComparison, AConjunction, ADisjunction, AEquivalence, AIfExpr, AImplication, AMultDiv, APower, AQuantification, ARImplication, ASumMinus, AUnary, AppliedSymbol, Brackets, CLFormula, DLFormula, Expression, FLFormula, ForNext, GLFormula, ILFormula, LFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, Number, Operator, Quantee, RLFormula, SetName, StartAppliedSymbol, SymbolExpr, ULFormula, UnappliedSymbol, WLFormula, XLFormula
+from idp_engine.Expression import BOOL_SETNAME, FALSE, INT_SETNAME, ONE, OR, SETNAME, TRUE, VARIABLE, ZERO, AAggregate, AComparison, AConjunction, ADisjunction, AEquivalence, AFFormula, AGFormula, AIfExpr, AImplication, AMultDiv, APower, AQuantification, ARImplication, ASumMinus, AUFormula, AUnary, AXFormula, AppliedSymbol, Brackets, CCFormula, CLFormula, CTLFormula, DCFormula, DLFormula, EFFormula, EGFormula, EUFormula, EXFormula, Expression, FLFormula, ForNext, GLFormula, ICFormula, ILFormula, LFormula, NCFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, Number, Operator, Quantee, RLFormula, SetName, StartAppliedSymbol, SymbolExpr, ULFormula, UnappliedSymbol, WLFormula, XLFormula
 
 from .Parse import IDP, Enumeration, FunctionTuple, SymbolDeclaration, SymbolInterpretation, TempLogic, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, TypeDeclaration, Vocabulary
 from .Theory import Theory
@@ -974,10 +974,14 @@ def contains_symb(e:Expression,s:str=""):
             return -1
     return 0
     
-def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlock):
+def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlock,direct_check=False):
     #TO DO: check if the init_structure does interpret all the time independant predicates/functions
     if theory.ltc is None:
         return "Theory should be an LTC theory"
+    if direct_check:
+        #if not isinstance(ltllogic.formula,LFormula):
+        #    return "Modal logic formula should be LTL in order for direct check to be possible"
+        return checkLtlFormula(theory,init_structure,ltllogic)
     #In order to avoid giving dupllicae declaration error in Theory.add
     temps = Structure(name="test",vocab_name=init_structure.vocab_name,interpretations=init_structure.interpretations.values())
     temps.voc= init_structure.voc
@@ -1386,15 +1390,21 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
           '\n' + tinint + '\n' + toprts + '\n' + "END"
     print(machine)
     ProbTransTime = time.time() - ProbTransTime
-    #"(F {owns = owns \/ {(1,B1)}}) & G {F {john_owns=TRUE}}"
-    ltlf = "(F { (2,B1):owns })" 
-    ltlf = translateLtlFormula(ltllogic.formula,probnumset)
+    
     f = open("test.mch","w")
     f.write(machine)
     f.close()  
+    #"(F {owns = owns \/ {(1,B1)}}) & G {F {john_owns=TRUE}}"
+    #ltlf = "(EF { (2,B1):owns })" 
+    ltlf = translateLogicFormula(ltllogic.formula,probnumset)
     ProbSolvingTime = time.time()
-    #a =subprocess.run('C:\Prob\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)      
-    a = subprocess.run(f'C:\Prob\probcli -ltlformula "{ltlf}" test.mch ',shell=True,capture_output=True) # -model-check -spdot states.dot
+    #a = subprocess.run(f'C:\Prob\probcli --help ',shell=True,capture_output=True)
+    #a =subprocess.run('C:\Prob\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)  
+    a =subprocess.run('C:\Prob\probcli  test.mch -animate 20 -his history.txt',shell=True,capture_output=True)          
+    #if isinstance(ltllogic.formula,(ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula)):
+    #    a = subprocess.run(f'C:\Prob\probcli -ltlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True) # -model-check -spdot states.dot
+    #else:
+    #    a = subprocess.run(f'C:\Prob\probcli -ctlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True)
     ProbSolvingTime = time.time() - ProbSolvingTime
     resmessage = a.stdout.decode()
     reserrror = a.stderr.decode()
@@ -1409,7 +1419,7 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     print("prob solving time")
     print(ProbSolvingTime)
     print("number of states")
-    print(print(len(transitiongraph.states)))
+    print(len(transitiongraph.states))
     print("number of transitions")
     print(nbTransitions)
 
@@ -1819,67 +1829,26 @@ def checkTransition(action:str,args,init_struct:Structure,transition_theory:Theo
         actionPred = ap"""
     return actionPred
 
-def translateLtlToFo(formula:Expression,t:Expression,tempdcl:List[str],num=0):
-    if isinstance(formula,AppliedSymbol):
-        if formula.symbol.name in tempdcl:
-            formula.sub_exprs.append(t)
-    elif isinstance(formula,UnappliedSymbol):
-        return formula
-    elif isinstance(formula,XLFormula):
-        return translateLtlToFo(formula.expr,ASumMinus(None,"+",[t,ONE]),tempdcl)
-    elif isinstance(formula,(FLFormula,GLFormula,ULFormula)):
-        time = SETNAME('Tijd')
-        tn = VARIABLE("time"+str(num+1),time)
-        qt = Quantee(None,[tn],time) 
-        tu = UnappliedSymbol(None,tn.name)
-        comp = AComparison(None,">",[tu,t])
-        if isinstance(formula,FLFormula):
-            f = AQuantification(None,None,"?",[qt],AConjunction(None,"and",[comp,formula.expr]))
-            return translateLtlToFo(f,tu,tempdcl,num+1)
-        elif isinstance(formula,GLFormula):
-            f = AQuantification(None,None,"forall",[qt],AConjunction(None,"and",[comp,formula.expr]))
-            return translateLtlToFo(f,tu,tempdcl,num+1)
-        elif isinstance(formula,ULFormula):
-            tn2 = VARIABLE("time"+str(num+2),time)
-            qt2 = Quantee(None,[tn2],time) 
-            tu2 = UnappliedSymbol(None,tn2.name)
-            comp2 = AComparison(None,">=",[tu2,t])
-            comp3 = AComparison(None,">",[tu,tu2])
-            comptogether = AConjunction(None,"and",[comp2,comp3])
-            first = translateLtlToFo(formula.expr1,tu2,tempdcl,num+2)
-            uquantif = AQuantification(None,None,"forall",[qt2],AImplication(None,"=>",[comptogether,first]))
-            second = translateLtlToFo(formula.expr2,tu,tempdcl,num+1)
-            return AQuantification(None,None,"?",[qt],AConjunction(None,["and","and"],[comp,uquantif,second]))
-
-     
-    i = 0
-    for f in formula.sub_exprs:
-        formula.sub_exprs[i] = translateLtlToFo(f,t,tempdcl)
-        i+=1
-    return formula
 
 
-def translateLtlFormula(formula:LFormula,probnumset):
+def translateLogicFormula(formula:LFormula|CTLFormula,probnumset):
     #Union[Expression,ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,
     #FLFormula,GLFormula,ULFormula,WLFormula,RLFormula]
-    res = "( "
-    res += recTransProb(formula,probnumset)
-    res += " )"
-    return res
+    return recTransProb(formula,probnumset)
 
 #Remember to add the interval for number sorts in quantifiers
 #check if the retured is False then pass that
-def recTransProb(formula:LFormula,probnumset:dict(str,List),firstexp=False):
+def recTransProb(formula:LFormula|CTLFormula,probnumset:dict(str,List),firstexp=False):
     #print("ptob parsing")
     #print(type(formula))
     #print(formula)
-    if isinstance(formula,ILFormula):
+    if isinstance(formula,(ILFormula,ICFormula)):
         return "(" + recTransProb(formula.expr1,probnumset) + " => " + recTransProb(formula.expr2,probnumset) + ")"
-    elif isinstance(formula,DLFormula):
+    elif isinstance(formula,(DLFormula,DCFormula)):
         return "(" + recTransProb(formula.expr1,probnumset) + " or " + recTransProb(formula.expr2,probnumset) + ")"
-    elif isinstance(formula,CLFormula):
+    elif isinstance(formula,(CLFormula,CCFormula)):
         return "(" + recTransProb(formula.expr1,probnumset) + " & " + recTransProb(formula.expr2,probnumset) + ")"
-    elif isinstance(formula,NLFormula):
+    elif isinstance(formula,(NLFormula,NCFormula)):
         return  " not " + "(" + recTransProb(formula.expr,probnumset) + ")" 
     elif isinstance(formula,XLFormula):
         return  "X " + "(" + recTransProb(formula.expr,probnumset) +  ")"
@@ -1893,6 +1862,22 @@ def recTransProb(formula:LFormula,probnumset:dict(str,List),firstexp=False):
         return "(" + recTransProb(formula.expr1,probnumset) + " R " + recTransProb(formula.expr2,probnumset) + ")"
     elif isinstance(formula,WLFormula):
         return "(" + recTransProb(formula.expr1,probnumset) + " W " + recTransProb(formula.expr2,probnumset) + ")"
+    elif isinstance(formula,AXFormula):   
+        return "AX " + "(" + recTransProb(formula.expr,probnumset) +  ")"
+    elif isinstance(formula,EXFormula):
+        return "EX " + "(" + recTransProb(formula.expr,probnumset) +  ")"
+    elif isinstance(formula,AFFormula):
+        return "AF " + "(" + recTransProb(formula.expr,probnumset) +  ")"
+    elif isinstance(formula,EFFormula):
+        return "EF " + "(" + recTransProb(formula.expr,probnumset) +  ")"
+    elif isinstance(formula,AGFormula):
+        return "AG " + "(" + recTransProb(formula.expr,probnumset) +  ")"
+    elif isinstance(formula,EGFormula):
+        return "EG " + "(" + recTransProb(formula.expr,probnumset) +  ")"
+    elif isinstance(formula,AUFormula):
+        return "(A " + recTransProb(formula.expr1,probnumset) + " U " + recTransProb(formula.expr2,probnumset) + ")"
+    elif isinstance(formula,EUFormula):
+        return "(E " + recTransProb(formula.expr1,probnumset) + " U " + recTransProb(formula.expr2,probnumset) + ")"
     elif isinstance(formula,Expression):
         res = ""
         if not firstexp:
@@ -2047,7 +2032,93 @@ def recTransProb(formula:LFormula,probnumset:dict(str,List),firstexp=False):
             res += " }"
         return res
     return ""
+
+def checkLtlFormula(theory:TheoryBlock,struct:Structure,templog:TempLogic):
+    tempdcl = [t.symbol.name for t in theory.voc.tempdcl]
+    f = translateLtlToFo(templog.formula,ZERO,tempdcl,0)
+    try:
+        f.annotations =None
+        f.annotate(theory.voc,{})
+    except (IDPZ3Error) as e :
+            return e
+    print("tarnslated formula")
+    print(f)
+    thltl = TheoryBlock(name="LogicFormula",vocab_name=theory.vocab_name,ltc = None,inv=None,constraints=[],definitions=[],interpretations=[])
+    thltl.constraints = [f]
+    p = Theory(struct,theory,thltl)
+    res = list(p.expand())
+    second_step =False
+    j=0
+    for i, xi in enumerate(res):
+        if xi == 'No models.':
+            second_step = True
+        j+=1
+    if second_step and j==1:
+        print("FALSE.....")
+        return "Ltl formula is False"
+    print("TRUE.....")
+    return "LTL Formula is TRUE"
     
+def translateLtlToFo(formula:Expression,t:Expression,tempdcl:List[str],num=0):
+    if isinstance(formula,AppliedSymbol):
+        if formula.symbol.name in tempdcl:
+            formula.sub_exprs.append(t)
+    elif isinstance(formula,UnappliedSymbol):
+        return formula
+    elif isinstance(formula,XLFormula):
+        return translateLtlToFo(formula.expr,ASumMinus(None,"+",[t,ONE]),tempdcl)
+    elif isinstance(formula,(FLFormula,GLFormula,ULFormula)):
+        time = INT_SETNAME
+        tn = VARIABLE("time"+str(num+1),time)
+        qt = Quantee(None,[tn],time) 
+        tu = UnappliedSymbol(None,tn.name)
+        comp = AComparison(None,">=",[tu,t])
+        if isinstance(formula,FLFormula):
+            f = translateLtlToFo(formula.expr,tu,tempdcl,num+1)
+            uf = AQuantification(None,None,"?",[qt],AConjunction(None,"∧",[comp,f]))
+            f.code = intern(str(f))
+            f.str = f.code
+            return uf
+        elif isinstance(formula,GLFormula):
+            f = AQuantification(None,None,"forall",[qt],AConjunction(None,"∧",[comp,formula.expr]))
+            return translateLtlToFo(f,tu,tempdcl,num+1)
+        elif isinstance(formula,ULFormula):
+            tn2 = VARIABLE("time"+str(num+2),time)
+            qt2 = Quantee(None,[tn2],time) 
+            tu2 = UnappliedSymbol(None,tn2.name)
+            comp2 = AComparison(None,">=",[tu2,t])
+            comp3 = AComparison(None,">",[tu,tu2])
+            comptogether = AConjunction(None,"∧",[comp2,comp3])
+            first = translateLtlToFo(formula.expr1,tu2,tempdcl,num+2)
+            uquantif = AQuantification(None,None,"forall",[qt2],AImplication(None,"=>",[comptogether,first]))
+            second = translateLtlToFo(formula.expr2,tu,tempdcl,num+1)
+            return AQuantification(None,None,"?",[qt],AConjunction(None,["∧","∧"],[comp,uquantif,second]))
+    elif isinstance(formula,WLFormula):
+        equivalant = ADisjunction(None,"∨",[ULFormula(None,formula.expr1,formula.expr2),GLFormula(None,formula.expr1)])
+        return equivalant
+    elif isinstance(formula,RLFormula):
+        equivalant = WLFormula(None,formula.expr2,AConjunction(None,"∧",[formula.expr1,formula.expr2]))
+        return equivalant
+    elif isinstance(formula,(ILFormula,DLFormula,CLFormula)):
+        first = translateLtlToFo(formula.expr1,t,tempdcl,num)
+        second = translateLtlToFo(formula.expr2,t,tempdcl,num)
+        if isinstance(formula,ILFormula):
+            return AImplication(None,"=>",[first,second])
+        elif isinstance(formula,DLFormula):
+            return ADisjunction(None,"∨",[first,second])
+        elif isinstance(formula,CLFormula):
+            return AConjunction(None,"∧",[first,second])
+    elif isinstance(formula,NLFormula):
+        first = translateLtlToFo(formula.expr,t,tempdcl,num)
+        return AUnary(None,["not"],first)
+    i = 0
+    for f in formula.sub_exprs:
+        formula.sub_exprs[i] = translateLtlToFo(f,t,tempdcl)
+        formula.sub_exprs[i].code = intern(str(formula.sub_exprs[i]))
+        formula.sub_exprs[i].str = formula.sub_exprs[i].code
+        i+=1
+    return formula
+
 
 
 def model_expand(*theories: Union[TheoryBlock, Structure, Theory],

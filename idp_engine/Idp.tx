@@ -30,7 +30,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* (tempdcl=Tempo
           symbols+= NAME [','] ':'
           ( '(' sorts*=SetName[/[*⨯]/] ')' | sorts*=SetName[/[*⨯]/] )
           ('->' | '→') out=SetName;
-    Temporal: 'Temporal'| 'Action' | 'Cause' | 'FTemporal' | 'Helper' ;
+    Temporal: 'Temporal'| 'Action' | 'Cause' | 'FTemporal' | 'Helper' | 'GTemporal' | 'GFTemporal';
 
     TemporalDeclaration: 'Temporal' symbol=SymbolExpr;
 
@@ -150,25 +150,19 @@ TempLogic: 'temporal_logic' name=ID ':' vocab_name=ID '{'
     CLFormula : '(' expr1=LFormula ConjunctionOp expr2=LFormula ')' ;
     DLFormula : '(' expr1=LFormula DisjunctionOp expr2=LFormula ')' ;
     ILFormula : '(' expr1=LFormula ImplicationOp expr2=LFormula ')' ;
-  CTLFormula: StateFormula | PathFormula;
-  StateFormula: Expression | NSFormula | CSFormula | DSFormula | ISFormula | ASFormula | ESFormula;
-    NSFormula : '(' UnaryOperator expr=StateFormula ')' ;
-    CSFormula : '(' expr1=StateFormula ConjunctionOp expr2=StateFormula ')' ;
-    DSFormula : '(' expr1=StateFormula DisjunctionOp expr2=StateFormula ')' ;
-    ISFormula : '(' expr1=StateFormula ImplicationOp expr2=StateFormula ')' ;
-    ASFormula : '(A' expr=StateFormula ')' ;
-    ESFormula : '(E' expr=StateFormula ')' ;
-  PathFormula: StateFormula | NPFormula | CPFormula | DPFormula | IPFormula | XPFormula | FPFormula | GPFormula | UPFormula | WPFormula | RPFormula;
-    NPFormula : '(' UnaryOperator expr=PathFormula ')' ;
-    CPFormula : '(' expr1=PathFormula ConjunctionOp expr2=PathFormula ')' ;
-    DPFormula : '(' expr1=PathFormula DisjunctionOp expr2=PathFormula ')' ;
-    IPFormula : '(' expr1=PathFormula ImplicationOp expr2=PathFormula ')' ;
-    XPFormula : '(X' expr=PathFormula ')' ;
-    FPFormula : '(F' expr=PathFormula ')' ;
-    GPFormula : '(G' expr=PathFormula ')' ;
-    UPFormula : '(' expr1=PathFormula 'U' expr2=PathFormula ')' ;
-    WPFormula : '(' expr1=PathFormula 'W' expr2=PathFormula ')' ;
-    RPFormula : '(' expr1=PathFormula 'R' expr2=PathFormula ')' ;
+  CTLFormula: Expression | NCFormula | CCFormula | DCFormula | ICFormula | AXFormula | EXFormula  | AFFormula | EFFormula | AGFormula | EGFormula | AUFormula | EUFormula ;
+    NCFormula : '(' UnaryOperator expr=CTLFormula ')' ;
+    CCFormula : '(' expr1=CTLFormula ConjunctionOp expr2=CTLFormula ')' ;
+    DCFormula : '(' expr1=CTLFormula DisjunctionOp expr2=CTLFormula ')' ;
+    ICFormula : '(' expr1=CTLFormula ImplicationOp expr2=CTLFormula ')' ;
+    AXFormula : '(AX' expr=CTLFormula ')' ;
+    EXFormula : '(EX' expr=CTLFormula ')' ;
+    AFFormula : '(AF' expr=CTLFormula ')' ;
+    EFFormula : '(EF' expr=CTLFormula ')' ;
+    AGFormula : '(AG' expr=CTLFormula ')' ;
+    EGFormula : '(EG' expr=CTLFormula ')' ;
+    AUFormula : '(A' expr1=CTLFormula 'U' expr2=CTLFormula ')' ;
+    EUFormula : '(E' expr1=CTLFormula 'U' expr2=CTLFormula ')' ;
 
 Structure: 'structure' name=ID? (':' vocab_name=ID)?
            '{' interpretations*=SymbolInterpretation '}';
