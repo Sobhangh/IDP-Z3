@@ -30,7 +30,7 @@ from .Parse import (TemporalDeclaration, IDP, Vocabulary, Import, TypeDeclaratio
                     SymbolDeclaration, VarDeclaration, TheoryBlock, Definition,
                     Rule, Structure, SymbolInterpretation, Enumeration, Ranges,
                     FunctionEnum, TupleIDP, ConstructedFrom, Display)
-from .Expression import (ONE, ASumMinus, ASTNode, Expression, ForNext, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, SETNAME, SetName,
+from .Expression import (ONE, ASumMinus, ASTNode, CauseFalseAppliedSymbol, CauseTrueAppliedSymbol, Expression, ForNext, NextAppliedSymbol, NowAppliedSymbol, StartAppliedSymbol, SETNAME, SetName,
                          BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME,
                          Constructor, CONSTRUCTOR, AIfExpr, IF,
                          AQuantification, Quantee, ARImplication, AImplication,
@@ -40,7 +40,7 @@ from .Expression import (ONE, ASumMinus, ASTNode, Expression, ForNext, NextAppli
                          VARIABLE, Brackets, SymbolExpr, Number, NOT,
                          EQUALS, AND, OR, FALSE, ZERO, IMPLIES, FORALL, EXISTS)
 
-from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS,
+from .utils import (BOOL, INT, REAL, DATE, CONCEPT, RESERVED_SYMBOLS, TIJD,
                     OrderedSet, Semantics, v_time)
 
 Exceptions = Union[Exception, List["Exceptions"]]  # nested list of Exceptions
@@ -140,7 +140,7 @@ def annotate(self, voc):
             if d.name == self.symbol.name:
                 d.temp = True
                 #d.arity +=1
-                d.sorts.append(SETNAME('Tijd'))
+                d.domains.append(SETNAME(TIJD))
                 break
     
 TemporalDeclaration.annotate = annotate
@@ -276,7 +276,7 @@ def annotate_block(self: ASTNode,
 
         
         # is it possible to say that negeation outside start/now/next will be pushed inside quantification? yes 
-        time: SetName = SETNAME('Tijd')
+        time: SetName = SETNAME(TIJD)
         t: Variable = VARIABLE(v_time,time)
         qt: Quantee = Quantee(None,[t],time) 
         for e in self.constraints:
@@ -407,10 +407,10 @@ def check_start(constraint,start=False,now = False,next=False):
             return 3
         start = True
         #return 1
-    elif isinstance(constraint,NowAppliedSymbol) or isinstance(constraint,NextAppliedSymbol):
+    elif isinstance(constraint,(NowAppliedSymbol,CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)) or isinstance(constraint,NextAppliedSymbol):
         if start:
             return 3
-        if isinstance(constraint,NowAppliedSymbol):
+        if isinstance(constraint,(NowAppliedSymbol,CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)):
             now = True
         else:
             next = True
@@ -455,7 +455,7 @@ def wrapping_quantifier(constraint):
     quant = False
     if not isinstance(constraint,Expression):
             return 0
-    if isinstance(constraint,NowAppliedSymbol) or isinstance(constraint,NextAppliedSymbol):
+    if isinstance(constraint,(NowAppliedSymbol,CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)) or isinstance(constraint,NextAppliedSymbol):
         return 1
     if isinstance(constraint, AppliedSymbol):
         return 0       
@@ -631,7 +631,7 @@ def annotate(self: Expression,
         self.check(otr!=3,"Not allowed to have Start with Now/Next")
     #TO DO:CAN CHECK LTC RULES HERE USING r,out,br
     if r > 1 or br > 1 or otr > 1:
-        time: SetName = SETNAME('Tijd')
+        time: SetName = SETNAME(TIJD)
         t: Variable = VARIABLE(v_time,time)
         qt: Quantee = Quantee(None,[t],time)
         self.quantees += [qt]
@@ -725,8 +725,20 @@ def annotate_block(self: ASTNode,
     annotate_static_structure(self,idp,"_next")
     expanded_static_struct(self,idp)
     for i in self.interpretations.values():
-        i.block = self
-        i.annotate(self.voc, {})
+        #TO DO : IF A STRUCTURE IS NOT USED THEN THERE COULD BE ERROR DUE TO TIJD HAVING NO INTERPRETATION
+        if i.name == TIJD:
+            for d in self.voc.declarations:
+                if isinstance(d,TypeDeclaration) and d.name == TIJD:
+                    i.annotate(self.voc, {})
+                    i.block = self
+                    d.interpretation = None
+                    #d.interpretation = i
+                    #reove tijd
+                    break
+        else:
+            i.block = self
+            i.annotate(self.voc, {})
+    #self.interpretations.pop(TIJD,None)
     self.voc.add_voc_to_block(self)
     return []
 Structure.annotate_block = annotate_block
@@ -740,12 +752,13 @@ def annotate_init_structure(s,idp):
     s.init_struct.voc = voc
     #print("s2")
     for i in s.interpretations.values():
-        r = i.initialize_temporal_interpretation(idp.vocabularies[s.vocab_name].tempdcl)
-        #print("s3")
-        #print(i)
-        s.init_struct.interpretations[r.name] = r
-        r.block = s.init_struct
-        r.annotate(voc,{})
+        if i.name != TIJD:
+            r = i.initialize_temporal_interpretation(idp.vocabularies[s.vocab_name].tempdcl)
+            #print("s3")
+            #print(i)
+            s.init_struct.interpretations[r.name] = r
+            r.block = s.init_struct
+            r.annotate(voc,{})
         #print("s4")
     #print("s5")
     voc.add_voc_to_block(s.init_struct)
@@ -772,27 +785,28 @@ def annotate_static_structure(s,idp,suffix:str):
     tempdc = idp.vocabularies[s.vocab_name].tempdcl 
     #print("s2")
     for i in s.interpretations.values():
-        add = True
-        for t in tempdc:
-            if (t.symbol.name == i.name):
-                add = False
-                break
-        if add:
-            enum = None
-            default = None
-            if not i.no_enum:
-                enum = i.enumeration.init_copy()
-            if i.default:
-                default = i.default.init_copy()
-            r = SymbolInterpretation(parent=None,name= UnappliedSymbol(None,(i.name)),sign = i.sign,
-                                enumeration=enum, default=default)
-            if now:
-                s.static_now.interpretations[r.name] = r
-                r.block = s.static_now
-            elif next:
-                s.static_next.interpretations[r.name] = r
-                r.block = s.static_next
-            r.annotate(voc,{})
+        if i.name != TIJD:
+            add = True
+            for t in tempdc:
+                if (t.symbol.name == i.name):
+                    add = False
+                    break
+            if add:
+                enum = None
+                default = None
+                if not i.no_enum:
+                    enum = i.enumeration.init_copy()
+                if i.default:
+                    default = i.default.init_copy()
+                r = SymbolInterpretation(parent=None,name= UnappliedSymbol(None,(i.name)),sign = i.sign,
+                                    enumeration=enum, default=default)
+                if now:
+                    s.static_now.interpretations[r.name] = r
+                    r.block = s.static_now
+                elif next:
+                    s.static_next.interpretations[r.name] = r
+                    r.block = s.static_next
+                r.annotate(voc,{})
 
     if now:
         voc.add_voc_to_block(s.static_now)
@@ -806,23 +820,24 @@ def expanded_static_struct(s:Structure,idp):
     s.static_expanded = Structure(name=name,vocab_name=vocab_name,interpretations={})
     tempdc = idp.vocabularies[s.vocab_name].tempdcl 
     for i in s.interpretations.values():
-        add = True
-        for t in tempdc:
-            if (t.symbol.name == i.name):
-                add = False
-                break
-        if add:
-            enum = None
-            default = None
-            if not i.no_enum:
-                enum = i.enumeration.init_copy()
-            if i.default:
-                default = i.default.init_copy()
-            r = SymbolInterpretation(parent=None,name= UnappliedSymbol(None,(i.name)),sign = i.sign,
-                                enumeration=enum, default=default)
-            
-            s.static_expanded.interpretations[r.name] = r
-            r.block = s.static_expanded
+        if i.name != TIJD:
+            add = True
+            for t in tempdc:
+                if (t.symbol.name == i.name):
+                    add = False
+                    break
+            if add:
+                enum = None
+                default = None
+                if not i.no_enum:
+                    enum = i.enumeration.init_copy()
+                if i.default:
+                    default = i.default.init_copy()
+                r = SymbolInterpretation(parent=None,name= UnappliedSymbol(None,(i.name)),sign = i.sign,
+                                    enumeration=enum, default=default)
+                
+                s.static_expanded.interpretations[r.name] = r
+                r.block = s.static_expanded
 
 # Class SymbolInterpretation  #######################################################
 
@@ -1321,7 +1336,6 @@ def annotate(self: AAggregate,
              q_vars:dict[str, Variable],ltc=False,temporal_head=-1
              ) -> Annotated:
     if not self.annotated:
-
         self = AQuantification.annotate(self, voc, q_vars,ltc,temporal_head)
 
         if self.aggtype == "sum" and len(self.sub_exprs) == 2:
@@ -1487,7 +1501,7 @@ def replace(self, voc, q_vars):
     symb : SymbolExpr= self.sub_expr.symbol.annotate(voc, q_vars)
     self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
     #is the name of this variable ok??
-    time: SetName = SETNAME('Tijd')
+    time: SetName = SETNAME(TIJD)
     #t: Variable = VARIABLE(v_time,time)
     t = UnappliedSymbol(None,v_time)
     #If the time varialble is already there then can replace Now[p()] with p(time)
@@ -1519,7 +1533,7 @@ def replace(self, voc, q_vars):
     symb : SymbolExpr= self.sub_expr.symbol.annotate(voc, q_vars)
     self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
     #is the name of this variable ok??
-    time: SetName = SETNAME('Tijd')
+    time: SetName = SETNAME(TIJD)
     #t: Variable = VARIABLE(v_time,time)
     t = UnappliedSymbol(None,v_time)
     #If the time varialble is already there then can replace Next[p()] with p(time+1)
@@ -1561,6 +1575,40 @@ def annotate(self, voc, q_vars,ltc=False,temporal_head=-1):
     return expanded.annotate(voc,q_vars,ltc,temporal_head)
    
 StartAppliedSymbol.annotate = annotate
+
+# Class CauseTrueAppliedSymbol  #######################################################
+
+def replace(self):
+    symb : SymbolExpr= self.sub_expr.symbol
+    ctaplsymb = AppliedSymbol(None,SymbolExpr(None,"Ct_"+ symb.name,None,None),self.sub_expr.sub_exprs)
+    return NowAppliedSymbol(parent=None,arg=ctaplsymb)
+
+CauseTrueAppliedSymbol.replace = replace
+
+def annotate(self, voc, q_vars,ltc=False,temporal_head=-1):
+    symb : SymbolExpr= self.sub_expr.symbol.annotate(voc, q_vars)
+    self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
+    expanded = self.replace()
+    return expanded.annotate(voc,q_vars,ltc,temporal_head)
+
+CauseTrueAppliedSymbol.annotate = annotate
+
+# Class CauseFalseAppliedSymbol  #######################################################
+
+def replace(self):
+    symb : SymbolExpr= self.sub_expr.symbol
+    ctaplsymb = AppliedSymbol(None,SymbolExpr(None,"Cf_"+symb.name,None,None),self.sub_expr.sub_exprs)
+    return NowAppliedSymbol(parent=None,arg=ctaplsymb)
+
+CauseFalseAppliedSymbol.replace = replace
+
+def annotate(self, voc, q_vars,ltc=False,temporal_head=-1):
+    symb : SymbolExpr= self.sub_expr.symbol.annotate(voc, q_vars)
+    self.check(symb.decl.temp,f"{symb} is not a temporal predicate")
+    expanded = self.replace()
+    return expanded.annotate(voc,q_vars,ltc,temporal_head)
+
+CauseFalseAppliedSymbol.annotate = annotate
 
 # Class ForNext  #######################################################
 

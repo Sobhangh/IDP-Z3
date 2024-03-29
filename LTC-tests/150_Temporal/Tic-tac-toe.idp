@@ -1,0 +1,65 @@
+vocabulary V {
+  type input is {N,X,O}
+  type player is {A,B}
+  type dim is {1..2}
+  <FTemporal> board : (dim * dim * input) -> Bool
+  <FTemporal> turn : (player) -> Bool
+  <Helper> win : (player) -> Bool
+  <Helper> horizontalw: (player) -> Bool
+  <Helper> verticalw: (player) -> Bool
+  <Helper> diagonalw: (player) -> Bool
+  <Action> fill: (dim * dim) -> Bool
+  mirror: dim -> dim
+  maxdim : () -> dim
+}
+
+theory LTC T:V {
+
+    ! d in dim: mirror(d) = if d =< maxdim() /2 then maxdim() - (d - 1) else 1 + maxdim() -d.
+    {
+        Start[turn(A)].
+        Next[turn(A)] <- Now[turn(B)].
+        //Now[turn(A)] <- (#{x in dim,y in dim: Now[board(x,y,X)]} = #{x in dim,y in dim: Now[board(x,y,O)]}).
+        Next[turn(B)] <- Now[turn(A)].
+        ! d in dim, d2 in dim: Start[board(d,d2,N)].
+        ! d in dim, d2 in dim: Next[board(d,d2,X)] <- Now[fill(d,d2)] and Now[turn(A)].
+        ! d in dim, d2 in dim: Next[board(d,d2,O)] <- Now[fill(d,d2)] and Now[turn(B)].
+        ! d in dim, d2 in dim, i in input: Next[board(d,d2,N)] <- Now[board(d,d2,N)] and not (Now[fill(d,d2)]).
+        ! d in dim, d2 in dim, i in input: Next[board(d,d2,X)] <- Now[board(d,d2,X)].
+        ! d in dim, d2 in dim, i in input: Next[board(d,d2,O)] <- Now[board(d,d2,O)].
+        ! p in player: Next[win(p)] <- Now[win(p)].
+        ! p in player: Now[win(p)] <- Now[horizontalw(p)] or Now[verticalw(p)] or Now[diagonalw(p)].
+        Now[horizontalw(A)] <- (? y in dim: (! x in dim : Now[board(x,y,X)])).
+        Now[horizontalw(B)] <- (? y in dim: (! x in dim : Now[board(x,y,O)])).
+        Now[verticalw(A)] <- (? x in dim: (! y in dim : Now[board(x,y,X)])).
+        Now[verticalw(B)] <- (? x in dim: (! y in dim : Now[board(x,y,O)])).
+        //Now[diagonalw(A)] <- (! x in dim: (Now[board(x,x,X)])) or (Now[board(2,1,X)] and Now[board(1,2,X)]).
+        //Now[diagonalw(B)] <- (! x in dim: (Now[board(x,x,O)])) or (Now[board(2,1,O)] and Now[board(1,2,O)]).
+        Now[diagonalw(A)] <- (! x in dim: (Now[board(x,x,X)])) or (! x in dim:Now[board(x,mirror(x),X)] ).
+        Now[diagonalw(B)] <- (! x in dim: (Now[board(x,x,O)])) or (! x in dim:Now[board(x,mirror(x),O)] ).
+    }
+    //! x in dim, y in dim: Now[fill(x,y,X)] => Now[turn(A)].
+    //! x in dim, y in dim: Now[fill(x,y,O)] => Now[turn(B)].
+    //! x in dim, y in dim: not Now[fill(x,y,N)].
+    ! x in dim, y in dim: Now[fill(x,y)] => Now[board(x,y,N)].
+    ! x in dim, y in dim: Now[fill(x,y)] => not (Now[win(A)] or Now[win(B)]).
+    ? x in dim, y in dim: (not Now[win(A)] or Now[win(B)]) => (Now[fill(x,y)]).
+    //#{ x in dim, y in dim: Now[fill(x,y)] and (not (Now[win(A)] or Now[win(B)]))} = 1.
+    #{ x in dim, y in dim: Now[fill(x,y)] } =< 1.
+    //!x in dim, y in dim: #{ i in input: Now[board(x,y,i)] } = 1.
+    
+}
+
+temporal_logic ltl:V {
+    (G board(1,2,X) or board(1,2,N) or board(1,2,O) )
+}
+
+structure S:V {
+    maxdim := 2.
+}
+
+
+procedure main () {
+    pretty_print(ProveModalLogic(ltl,S,T,direct_check=False))
+    //simulate(T,S)
+}

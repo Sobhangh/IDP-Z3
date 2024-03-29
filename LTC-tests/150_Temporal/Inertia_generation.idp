@@ -1,0 +1,30 @@
+vocabulary V {
+  type person is {John,Bob,Marry} 
+  type book is {B1}
+  type test is {0..5}
+  <ITemporal> owns : (person * book) -> Bool
+  <Action> gives: (person * book * person) -> Bool
+}
+
+theory LTC T:V {
+
+    {
+        ! g in person, r in person, b in book: Now[Ct_owns(r,b)] <- Now[gives(g,b,r)].
+        ! g in person, r in person, b in book: Now[Cf_owns(g,b)] <- Now[gives(g,b,r)] . //and  not (g=r)
+    }
+    ! g in person, r in person, b in book: Now[gives(g,b,r)] => Now[owns(g,b)].
+    #{ g in person, b in book, r in person : Now[gives(g,b,r)] } =< 1.
+    
+}
+
+structure S:V {
+    // Check if the partial assignment of structure works with temporal predicate
+    I_owns := {(Bob,B1)}.
+    Time := {0..10}.
+}
+
+
+procedure main () {
+    //print(model_expand(T,S))
+    simulate(T,S)
+}

@@ -1,0 +1,17 @@
+vocabulary V {
+    // Check if it the resulting vocabulary is as expected.
+    p: () -> Bool
+    Temporal p
+}
+
+theory T:V {
+    // Check if it gives error when p is used outside of Start/Now/Next
+}
+
+structure S:V {
+    // here comes the interpretation of some symbols
+}
+
+procedure main () {
+    print(V)
+}

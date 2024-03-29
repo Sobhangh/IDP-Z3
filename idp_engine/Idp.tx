@@ -30,7 +30,7 @@ Vocabulary: 'vocabulary' name=ID? '{' (declarations=Declaration)* (tempdcl=Tempo
           symbols+= NAME [','] ':'
           ( '(' sorts*=SetName[/[*⨯]/] ')' | sorts*=SetName[/[*⨯]/] )
           ('->' | '→') out=SetName;
-    Temporal: 'Temporal'| 'Action' | 'Cause' | 'FTemporal' | 'Helper' | 'GTemporal' | 'GFTemporal';
+    Temporal: 'Temporal'| 'Action' | 'Cause' | 'FTemporal' | 'Helper' | 'ITemporal' | 'IFTemporal';
 
     TemporalDeclaration: 'Temporal' symbol=SymbolExpr;
 
@@ -51,7 +51,7 @@ TheoryBlock: 'theory' (ltc='LTC')? (inv='INV')? (name=ID ':' vocab_name=ID)? '{'
           definiendum=GeneralAppliedSymbol
           (('=' |DefEqOp) out=SumMinus)?
           (('<-'|'←' | 'if' ) body=Expression)? '.' ;
-        GeneralAppliedSymbol: AppliedSymbol | StartAppliedSymbol | NowAppliedSymbol | NextAppliedSymbol;
+        GeneralAppliedSymbol: AppliedSymbol | StartAppliedSymbol | NowAppliedSymbol | NextAppliedSymbol | CauseTrueAppliedSymbol | CauseFalseAppliedSymbol;
         Quantee:  subtype=SetName !IN vars+=Variable[',']
                 | vars+=Variable[','] ( IN (subtype=SetName | sort=SymbolExpr) )?
                 | vars+=VarTuple[','] ( IN (subtype=SetName | sort=SymbolExpr) )?;
@@ -117,7 +117,7 @@ TheoryBlock: 'theory' (ltc='LTC')? (inv='INV')? (name=ID ':' vocab_name=ID)? '{'
     UnaryOperator:   '-' | '~' | '¬' | 'not' ;
 
 
-    Base:  AQuantification | AppliedSymbol | StartAppliedSymbol | NowAppliedSymbol | NextAppliedSymbol |UnappliedSymbol | Number | Date | Brackets;
+    Base:  AQuantification | AppliedSymbol | StartAppliedSymbol | NowAppliedSymbol | NextAppliedSymbol | CauseTrueAppliedSymbol | CauseFalseAppliedSymbol | UnappliedSymbol | Number | Date | Brackets;
 
       AppliedSymbol: annotations=Annotations
               symbol=SymbolExpr
@@ -129,6 +129,8 @@ TheoryBlock: 'theory' (ltc='LTC')? (inv='INV')? (name=ID ':' vocab_name=ID)? '{'
       StartAppliedSymbol: 'Start[' arg=AppliedSymbol ']';
       NowAppliedSymbol: 'Now[' arg=AppliedSymbol ']';
       NextAppliedSymbol: 'Next[' arg=AppliedSymbol ']';
+      CauseTrueAppliedSymbol : '+[' arg= AppliedSymbol ']';
+      CauseFalseAppliedSymbol : '-[' arg= AppliedSymbol ']';
       UnappliedSymbol: name=SYMBOL;
       Number: number=IDPFLOAT | number=INT;
 IDPFLOAT: /[+-]?(\d+(\.\d+)?e[+-]?\d+|\.\d+e[+-]?\d+|\d+(\.\d+)?|\.\d+)/;

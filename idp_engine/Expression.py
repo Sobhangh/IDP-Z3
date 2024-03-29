@@ -464,7 +464,7 @@ class Expression(ASTNode):
         return any(e.has_decision() for e in self.sub_exprs)
 
     def type_inference(self, voc: Vocabulary) -> dict[str, SetName]:
-        if isinstance(self,(NowAppliedSymbol,NextAppliedSymbol,StartAppliedSymbol)):
+        if isinstance(self,(NowAppliedSymbol,NextAppliedSymbol,StartAppliedSymbol,CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)):
             return {}
         try:
             return dict(ChainMap(*(e.type_inference(voc) for e in self.sub_exprs)))
@@ -1624,7 +1624,7 @@ class NextAppliedSymbol(Expression):
     def make(cls,
              symbol: SymbolExpr,
              arg: AppliedSymbol,
-             ) -> StartAppliedSymbol:
+             ) -> NextAppliedSymbol:
         out = cls(None, symbol, arg)
         out.sub_exprs = [arg]
         # annotate
@@ -1645,6 +1645,127 @@ class NextAppliedSymbol(Expression):
         return out
     def init_copy(self,parent=None):
         return NextAppliedSymbol(parent,self.sub_expr.init_copy())
+
+    def collect(self, questions, all_=True, co_constraints=True):
+        self.sub_expr.collect(questions,all,co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        self.symbol.collect_symbols(symbols, co_constraints)
+        return symbols
+
+    def has_decision(self):
+        return self.sub_expr.has_decision()
+
+    def is_value(self) -> bool:
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_value()
+
+    def is_reified(self):
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_reified()
+
+    def generate_constructors(self, constructors: dict):
+        self.sub_expr.generate_constructors(constructors,dict)
+
+class CauseTrueAppliedSymbol(Expression):
+    """Represents a Positive Causality symbol applied to  another applied symbol 
+    """
+    PRECEDENCE = 200
+
+    def __init__(self, parent,
+                 arg):
+        self.symbol  = SymbolExpr(self,'+',None,None)
+        self.sub_expr: AppliedSymbol  = arg
+        self.sub_exprs = [arg]
+        super().__init__()
+        self.in_head = False
+
+    @classmethod
+    def make(cls,
+             symbol: SymbolExpr,
+             arg: AppliedSymbol,
+             ) -> CauseTrueAppliedSymbol:
+        out = cls(None, symbol, arg)
+        out.sub_exprs = [arg]
+        # annotate
+        out.decl = symbol.decl
+        return out.annotate1()
+
+    #@classmethod
+    #def construct(cls, constructor, args):
+
+    def __str__(self):
+        out = f"{self.symbol}({self.sub_expr.str})"
+        return (f"{out}")
+
+    def __deepcopy__(self, memo):
+        out = super().__deepcopy__(memo)
+        out.symbol = deepcopy(out.symbol)
+        #out.as_disjunction = deepcopy(out.as_disjunction)
+        return out
+    def init_copy(self,parent=None):
+        return CauseTrueAppliedSymbol(parent,self.sub_expr.init_copy())
+
+    def collect(self, questions, all_=True, co_constraints=True):
+        self.sub_expr.collect(questions,all,co_constraints)
+
+    def collect_symbols(self, symbols=None, co_constraints=True):
+        symbols = Expression.collect_symbols(self, symbols, co_constraints)
+        self.symbol.collect_symbols(symbols, co_constraints)
+        return symbols
+
+    def has_decision(self):
+        return self.sub_expr.has_decision()
+
+    def is_value(self) -> bool:
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_value()
+
+    def is_reified(self):
+        # independent of is_enumeration and in_enumeration !
+        return self.sub_expr.is_reified()
+
+    def generate_constructors(self, constructors: dict):
+        self.sub_expr.generate_constructors(constructors,dict)
+
+class CauseFalseAppliedSymbol(Expression):
+    """Represents a Positive Causality symbol applied to  another applied symbol 
+    """
+    PRECEDENCE = 200
+
+    def __init__(self, parent,
+                 arg):
+        self.symbol  = SymbolExpr(self,'-',None,None)
+        self.sub_expr: AppliedSymbol  = arg
+        self.sub_exprs = [arg]
+        super().__init__()
+        self.in_head = False
+
+    @classmethod
+    def make(cls,
+             symbol: SymbolExpr,
+             arg: AppliedSymbol,
+             ) -> CauseFalseAppliedSymbol:
+        out = cls(None, symbol, arg)
+        out.sub_exprs = [arg]
+        # annotate
+        out.decl = symbol.decl
+        return out.annotate1()
+
+    #@classmethod
+    #def construct(cls, constructor, args):
+
+    def __str__(self):
+        out = f"{self.symbol}({self.sub_expr.str})"
+        return (f"{out}")
+
+    def __deepcopy__(self, memo):
+        out = super().__deepcopy__(memo)
+        out.symbol = deepcopy(out.symbol)
+        return out
+    def init_copy(self,parent=None):
+        return CauseFalseAppliedSymbol(parent,self.sub_expr.init_copy())
 
     def collect(self, questions, all_=True, co_constraints=True):
         self.sub_expr.collect(questions,all,co_constraints)

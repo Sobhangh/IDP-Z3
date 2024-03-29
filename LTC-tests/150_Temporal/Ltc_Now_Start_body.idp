@@ -1,0 +1,22 @@
+vocabulary V {
+    <Temporal> p: () -> Bool
+    q: () -> Bool
+}
+
+theory LTC T:V {
+    // Check if it gives error due to usage of Start and Now in body. 
+    
+    {
+        q() <- (Now[p()] and Start[p()]).
+    }
+    
+}
+
+structure S:V {
+    
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

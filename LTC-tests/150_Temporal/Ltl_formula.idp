@@ -1,0 +1,54 @@
+vocabulary V {
+  type test is {1,2}
+  <FTemporal> l1 : (test)  -> Bool
+  //<FTemporal> l2: (test) -> Bool
+  <Action> s1: () -> test
+  //<Action> s2: () -> test
+  //<Action> sa : () -> Bool
+}
+
+vocabulary V2 {
+  type test is {1,2,3}
+  type t2 is {a,b,c}
+  <FTemporal> l1 : (test) -> Bool
+  <Temporal> l2: (t2) -> Bool
+  <Action> test1 : (test * Bool) -> Bool
+  <Action> test222 : test -> t2
+  <Action> test33 : () -> t2
+  //test if using INt would give error 
+}
+
+theory LTC T:V {
+
+    {
+        !i in test: Next[l1(i)] <- i= Now[s1()] .
+        //!i in test: Next[l2(i)] <- i= Now[s2()].
+    }
+
+    
+}
+
+theory LTC T2:V2 {
+    //Now[test1(1,true)] = a.
+}
+
+temporal_logic ltl:V {
+    (F l1() )
+}
+
+temporal_logic ltl2:V2 {
+    (F l1(2) )
+}
+
+structure S:V {
+   
+}
+
+structure S2:V2 {
+   
+}
+
+procedure main () {
+    //ProveModalLogic(ltl2,S2,T2)
+    ProveModalLogic(ltl,S,T)
+}

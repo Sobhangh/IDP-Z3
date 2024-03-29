@@ -1,0 +1,22 @@
+vocabulary V {
+    p: () -> Bool
+    Temporal p
+}
+
+theory LTC T:V {
+    // Check if it gives error for Next in the body 
+    
+    {
+        Now[p()] <- Next[p()].
+    }
+    
+}
+
+structure S:V {
+
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

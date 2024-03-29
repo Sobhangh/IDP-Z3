@@ -45,8 +45,13 @@ structure S2:V2 {
     Road := {(A,B),(B,D),(D,A),(B,A)}.
 }
 
+temporal_logic ltl:V {
+    (F Position(B) )
+}
+
 procedure main () {
-    s = initialize(T,S)
-    print_struct(s)
+    //s = initialize(T,S)
+    //print_struct(s)
+    ProveModalLogic(ltl,S,T)
     //simulate(T,S)
 }

@@ -34,7 +34,7 @@ from typing import Any, Tuple, List, Union, Optional, TYPE_CHECKING
 
 
 from .Assignments import Assignments
-from .Expression import (AFFormula, AGFormula, AUFormula, AXFormula, Annotations, Annotation, ASTNode, CCFormula, CLFormula, CTLFormula, Constructor, CONSTRUCTOR,
+from .Expression import (VARIABLE, AFFormula, AGFormula, AUFormula, AXFormula, Annotations, Annotation, ASTNode, CCFormula, CLFormula, CTLFormula, CauseFalseAppliedSymbol, CauseTrueAppliedSymbol, Constructor, CONSTRUCTOR,
                          Accessor, DCFormula, DLFormula, EFFormula, EGFormula, EUFormula, EXFormula, FLFormula, ForNext, GLFormula, ICFormula, ILFormula, LFormula, NCFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, RLFormula, StartAppliedSymbol, SymbolExpr, Expression,
                          AIfExpr, IF, AQuantification, ULFormula, WLFormula, XLFormula, split_quantees, SetName,
                          SETNAME, Quantee, ARImplication, AEquivalence,
@@ -44,7 +44,7 @@ from .Expression import (AFFormula, AGFormula, AUFormula, AXFormula, Annotations
                          Date, Extension, Identifier, Variable, TRUEC, FALSEC,
                          TRUE, FALSE, EQUALS, AND, OR,
                          BOOL_SETNAME, INT_SETNAME, REAL_SETNAME, DATE_SETNAME, EMPTY_SETNAME)
-from .utils import (RESERVED_SYMBOLS, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
+from .utils import (RESERVED_SYMBOLS, TIJD, OrderedSet, NEWL, BOOL, INT, REAL, DATE,
                     CONCEPT, GOAL_SYMBOL, EXPAND, RELEVANT, ABS, IDPZ3Error,
                     MAX_QUANTIFIER_EXPANSION, Semantics as S, flatten)
 
@@ -93,7 +93,11 @@ class IDP(ASTNode):
         self.next_voc = {}
         init_thrs ={}
         init_strcs ={}
-        #print("annotating begins............")
+
+        #has to be added before vocabulary is annotated to avoid having a last time argument
+        for t in self.theories.values():
+            if t.ltc:
+                t.generate_inertia_def(self)
         for voc in self.vocabularies.values():
             #Annotating vocabulary for current and next time point; useful for LTC theories
             #For v_now the time argument of temporal predicates would be dropped e.g p(x,time) becomes p(x)
@@ -108,13 +112,13 @@ class IDP(ASTNode):
             #print("voc next")
 
             voc.annotate_block(self)
-            #if len(voc.tempdcl) > 0:
-                #voc.transitiongraph = TransiotionGraph(voc)
-                #print("tandsition graph")
-                #print(voc.transitiongraph.states)
+            
+          
             #print("voc annot")
+            #print(voc)
         for t in self.theories.values():
             if t.ltc:
+                #t.generate_inertia_def(self)
                 #Adds initialized version of LTC theory: For more info check progression document of IDP.
                 t.initialize_theory()
                 #print("theories init")
@@ -239,7 +243,7 @@ class Vocabulary(ASTNode):
         self.actions : List[str] =[]
         self.fluents : List[str] =[]
         self.ftemproral : List[str] =[]
-        self.gentemp = []
+        self.gentemp : List[SymbolDeclaration]= []
         self.transitiongraph : TransiotionGraph = None
         # expand multi-symbol declarations
         temp = []
@@ -255,26 +259,27 @@ class Vocabulary(ASTNode):
                         self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=new.name,eval=None,s=None)))
                     if decl.temporal == "Action":
                         self.actions.append(new.name)
-                    elif decl.temporal == "Temporal" or decl.temporal == "GTemporal":
+                    elif decl.temporal == "Temporal" or decl.temporal == "ITemporal":
                         self.fluents.append(new.name)
-                    elif decl.temporal == "FTemporal" or decl.temporal == "GFTemporal":
+                    elif decl.temporal == "FTemporal" or decl.temporal == "IFTemporal":
                         self.ftemproral.append(new.name)
                     
-                    if decl.temporal == "GTemporal" or decl.temporal == "GFTemporal":
-                        self.gentemp.append(new.name)
+                    if decl.temporal == "ITemporal" or decl.temporal == "IFTemporal":
+                        self.gentemp.append(new)
                         ct = new.init_copy()
+                        ct.causality = True
                         ct.name = Vocabulary.gen_ct(new.name)
                         self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=ct.name,eval=None,s=None)))
                         temp.append(ct)
 
                         cf = new.init_copy()
+                        cf.causality = True
                         cf.name = Vocabulary.gen_cf(new.name)
                         self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=cf.name,eval=None,s=None)))
                         temp.append(cf)
 
                         ig = new.init_copy()
                         ig.name = Vocabulary.gen_i(new.name)
-                        self.tempdcl.append(TemporalDeclaration(symbol=SymbolExpr(None,name=ig.name,eval=None,s=None)))
                         temp.append(ig)
 
 
@@ -292,7 +297,8 @@ class Vocabulary(ASTNode):
             TypeDeclaration(self, name=INT, enumeration=IntRange()),
             TypeDeclaration(self, name=REAL, enumeration=RealRange()),
             TypeDeclaration(self, name=DATE, enumeration=DateRange()),
-            TypeDeclaration(self, name='Tijd', enumeration=IntRange()),
+            TypeDeclaration(self, name=TIJD, enumeration=IntRange()),
+            #TypeDeclaration(self, name=TIJD, enumeration=None),
             TypeDeclaration(self, name=CONCEPT, constructors=[]),
             SymbolDeclaration.make(self, name=GOAL_SYMBOL,
                             sorts=[SETNAME(CONCEPT, ins=[], out=SETNAME(BOOL))],
@@ -352,16 +358,16 @@ class Vocabulary(ASTNode):
                     #The predicate is temporal
                     if d.name == t.symbol.name:
                         changed = True
-                        sr = [s.init_copy() for s in d.sorts]
+                        sr = [s.init_copy() for s in d.domains]
                         sr.pop()
-                        id = SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.out.init_copy(),annotations=Annotations(None,[]))
+                        id = SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.codomain.init_copy(),annotations=Annotations(None,[]))
                         nowvoc.declarations.append(id)
                         i = 1 
                         while i <= n:
-                            srs = [s.init_copy() for s in d.sorts]
+                            srs = [s.init_copy() for s in d.domains]
                             srs.pop()
                             #TO DO: There could be possible issues with naming
-                            ids = SymbolDeclaration(parent=None,name=(d.name+"_"+str(i)),sorts=srs,out=d.out.init_copy(),annotations=Annotations(None,[]))
+                            ids = SymbolDeclaration(parent=None,name=(d.name+"_"+str(i)),sorts=srs,out=d.codomain.init_copy(),annotations=Annotations(None,[]))
                             nowvoc.declarations.append(ids)
                             i+=1
                         break
@@ -369,8 +375,8 @@ class Vocabulary(ASTNode):
                 if isinstance(d,VarDeclaration):
                     nowvoc.declarations.append(VarDeclaration(parent=None,name=(d.name),subtype=d.subtype.init_copy()))
                 elif isinstance(d,SymbolDeclaration):
-                    sr = [s.init_copy() for s in d.sorts]
-                    nowvoc.declarations.append(SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.out,annotations=Annotations(None,[])))
+                    sr = [s.init_copy() for s in d.domains]
+                    nowvoc.declarations.append(SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.codomain,annotations=Annotations(None,[])))
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
@@ -398,15 +404,15 @@ class Vocabulary(ASTNode):
                     #The predicate is temporal
                     if d.name == t.symbol.name:
                         changed = True
-                        sr = [s.init_copy() for s in d.sorts]
-                        id = SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.out,annotations=Annotations(None,[]))
+                        sr = [s.init_copy() for s in d.domains]
+                        id = SymbolDeclaration(parent=None,name=(d.name),sorts=sr,out=d.codomain,annotations=Annotations(None,[]))
                         nowvoc.declarations.append(id)
                         break
             if not changed:
                 if isinstance(d,VarDeclaration):
                     nowvoc.declarations.append(VarDeclaration(parent=None,name=(d.name),subtype=d.subtype))
                 elif isinstance(d,SymbolDeclaration):
-                    nowvoc.declarations.append(SymbolDeclaration(parent=None,name=(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[])))
+                    nowvoc.declarations.append(SymbolDeclaration(parent=None,name=(d.name),sorts=d.domains,out=d.codomain,annotations=Annotations(None,[])))
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
@@ -435,13 +441,13 @@ class Vocabulary(ASTNode):
                 if isinstance(d,SymbolDeclaration):
                     if str(d.name) == str(t.symbol):
                         changed = True
-                        sr = [s.init_copy() for s in d.sorts]
+                        sr = [s.init_copy() for s in d.domains]
                         #Current time predicate
-                        id = SymbolDeclaration(parent=None,name=d.name,sorts=sr,out=d.out,annotations=Annotations(None,[]))
+                        id = SymbolDeclaration(parent=None,name=d.name,sorts=sr,out=d.codomain,annotations=Annotations(None,[]))
                         nowvoc.declarations.append(id)
-                        srn = [s.init_copy() for s in d.sorts]
+                        srn = [s.init_copy() for s in d.domains]
                         #Next time predicate
-                        next_d = SymbolDeclaration(parent=None,name=(d.name),sorts=srn,out=d.out,annotations=Annotations(None,[]))
+                        next_d = SymbolDeclaration(parent=None,name=(d.name),sorts=srn,out=d.codomain,annotations=Annotations(None,[]))
                         next_d.name = d.name + "_next"
                         next_d.is_next= True
                         nowvoc.declarations.append(next_d)
@@ -451,7 +457,7 @@ class Vocabulary(ASTNode):
                 if isinstance(d,VarDeclaration):
                     nowvoc.declarations.append(VarDeclaration(parent=None,name=(d.name),subtype=d.subtype))
                 elif isinstance(d,SymbolDeclaration):
-                    nowvoc.declarations.append(SymbolDeclaration(parent=None,name=(d.name),sorts=d.sorts,out=d.out,annotations=Annotations(None,[])))
+                    nowvoc.declarations.append(SymbolDeclaration(parent=None,name=(d.name),sorts=d.domains,out=d.codomain,annotations=Annotations(None,[])))
                 elif isinstance(d,TypeDeclaration):
                     enum =None
                     if d.interpretation:
@@ -634,6 +640,7 @@ class SymbolDeclaration(ASTNode):
         self.symbols : Optional[List[str]]
         self.name : Optional[str]
         self.is_next = False
+        self.causality = False
         self.temporal = temporal
         if symbols:
             self.symbols = symbols
@@ -667,7 +674,7 @@ class SymbolDeclaration(ASTNode):
     
     def init_copy(self,parent=None):
         sr = [s.init_copy() for s in self.sorts]
-        return SymbolDeclaration(parent=parent,name=self.name,sorts=sr,out=self.out.init_copy(),annotations=self.annotations.init_copy())
+        return SymbolDeclaration(parent=parent,name=self.name,sorts=sr,out=self.out.init_copy(),annotations=None)
 
 
     def __str__(self):
@@ -803,6 +810,41 @@ class TheoryBlock(ASTNode):
     def __str__(self):
         return self.name
     
+    def generate_inertia_def(self,idp:IDP):
+        voc :Vocabulary= idp.vocabularies[self.vocab_name]
+        defs = []
+        for t in voc.gentemp:
+            defs.append(Definition(None,Annotations(None,[]),None,[]))
+            sqt = []
+            sargs = []
+            for i in range(len(t.domains)):
+                st = t.domains[i].init_copy()
+                sqt.append(Quantee(None,[VARIABLE(t.name+str(i),st)],st))
+                sargs.append(UnappliedSymbol(None,t.name+str(i)))
+            
+            tempvar = AppliedSymbol(None,SymbolExpr(None,t.name,None,None),sargs)
+            sdefindum =StartAppliedSymbol(None,tempvar)
+            sbody = AppliedSymbol(None,SymbolExpr(None,Vocabulary.gen_i(t.name),None,None),[s.init_copy() for s in sargs])
+            startrule = Rule(None,Annotations(None,[]),sqt,sdefindum,None,sbody)
+            startrule.block = self
+
+            ctdef = NextAppliedSymbol(None,tempvar.init_copy())
+            ctbody = NowAppliedSymbol(None,AppliedSymbol(None,SymbolExpr(None,Vocabulary.gen_ct(t.name),None,None),[s.init_copy() for s in sargs]))
+            ctrule = Rule(None,Annotations(None,[]),[q.init_copy() for q in sqt],ctdef,None,ctbody)
+            ctrule.block = self 
+
+            cfdef = ctdef.init_copy()
+            negcf = AUnary(None,["not"],NowAppliedSymbol(None,AppliedSymbol(None,SymbolExpr(None,Vocabulary.gen_cf(t.name),None,None),[s.init_copy() for s in sargs])))
+            cfbody = AConjunction(None,"∧",[NowAppliedSymbol(None,tempvar.init_copy()),negcf])
+            cfrule = Rule(None,Annotations(None,[]),[q.init_copy() for q in sqt],cfdef,None,cfbody)
+            cfrule.block = self 
+
+            defs[-1].rules.append(startrule)
+            defs[-1].rules.append(ctrule)
+            defs[-1].rules.append(cfrule)
+        self.definitions += defs
+
+
     
     def replace_with_n(self,expression:Expression,i,n):
         if isinstance(expression,(StartAppliedSymbol)):
@@ -822,6 +864,8 @@ class TheoryBlock(ASTNode):
             else:
                 symb = SymbolExpr(None,(str(e.symbol)+'_'+str(i)),None,None)
             return self.replace_with_n(AppliedSymbol(None,symb,e.sub_exprs,None,e.is_enumerated,e.is_enumeration,e.in_enumeration),i,n)
+        if isinstance(expression,(CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)):
+            return self.replace_with_n(expression.replace(),i,n)
         if isinstance(expression,(UnappliedSymbol)):
             return expression
         j = 0
@@ -931,7 +975,7 @@ class TheoryBlock(ASTNode):
     
     #checks if an expression contains NowAppliedSymbol
     def contains_now(self,e:Expression):
-        if isinstance(e,NowAppliedSymbol):
+        if isinstance(e,(NowAppliedSymbol,CauseFalseAppliedSymbol,CauseTrueAppliedSymbol)):
             return True
         #if isinstance(e,(NextAppliedSymbol,StartAppliedSymbol,UnappliedSymbol)):
         if isinstance(e,(UnappliedSymbol)):
@@ -971,6 +1015,8 @@ class TheoryBlock(ASTNode):
             for rule in definition.rules:
                 rl = rule.init_copy()
                 #if isinstance(rule.definiendum,NextAppliedSymbol):
+                if isinstance(rl.definiendum,(CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)):
+                    rl.definiendum =rl.definiendum.replace()
                 nx = self.contains_next(rule.definiendum)
                 nw = self.contains_now(rule.definiendum)
                 if nx:
@@ -1119,6 +1165,8 @@ class TheoryBlock(ASTNode):
     def sis_subexpr(self, expression:Expression):
         if isinstance(expression, (StartAppliedSymbol,NextAppliedSymbol)):
             return False
+        if isinstance(expression,(CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)):
+            return self.sis_subexpr(expression.replace())
         if isinstance(expression, NowAppliedSymbol):
             e = expression.sub_expr
             symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
@@ -1146,6 +1194,8 @@ class TheoryBlock(ASTNode):
             return False
         if isinstance(expression, NowAppliedSymbol):
             return self.bis_subexpr(expression.sub_expr)
+        if isinstance(expression,(CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)):
+            return self.bis_subexpr(expression.replace())
         if isinstance(expression, NextAppliedSymbol):
             e = expression.sub_expr
             symb = SymbolExpr(None,(str(e.symbol)+'_next'),None,None)
@@ -1173,6 +1223,8 @@ class TheoryBlock(ASTNode):
             return self.init_subexpr(expression.sub_expr)
         if isinstance(expression, NowAppliedSymbol):
             return self.init_subexpr(expression.sub_expr)
+        if isinstance(expression,(CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)):
+            return self.init_subexpr(expression.replace())
         if isinstance(expression, NextAppliedSymbol):
             return False
         if isinstance(expression,(UnappliedSymbol)):
@@ -1217,6 +1269,8 @@ class TheoryBlock(ASTNode):
         now = False
         if isinstance(rule.definiendum,StartAppliedSymbol):
             return False
+        if isinstance(rule.definiendum,(CauseTrueAppliedSymbol,CauseFalseAppliedSymbol)):
+            rule.definiendum =rule.definiendum.replace()
         now = self.contains_now(rule.definiendum)
         next = self.contains_next(rule.definiendum)
         if next:
@@ -2177,7 +2231,7 @@ class PyAssignment(ASTNode):
     
 class TransiotionGraph:
     def __init__(self,voc:Vocabulary,problem:Theory,alg3=False):
-        self.voc = voc
+        #self.voc = voc
         #Each state is a list where each element is a tuple where first element is if the predicate is part of the 
         #state, second the name of the fluent and third its arguments
         self.states : List[List[Tuple(bool,str,Identifier)]] = []
@@ -2306,7 +2360,8 @@ class TransiotionGraph:
     def FillExtensions(self,extensions: dict[str, Extension],voc:Vocabulary):
         notvisited : dict(str,bool) = {}
         for s , e in extensions.items():
-            for a in self.voc.actions:
+            for a in voc.actions:
+            #for a in self.voc.actions:
                 if s == a:
                     self.aextentions[a] = e
                     notvisited[a] = False
@@ -2353,10 +2408,12 @@ class TransiotionGraph:
 
         
         for s , e in extensions.items():
-            for f in self.voc.fluents:
+            for f in voc.fluents:
+            #for f in self.voc.fluents:
                 if s == f:
                     self.fextentions[f] = e
-            for f in self.voc.ftemproral:
+            for f in voc.ftemproral:
+            #for f in self.voc.ftemproral:
                 if s == f:
                     self.ffextentions[f] = e
                     outputl = []
@@ -2399,6 +2456,7 @@ idpparser = metamodel_from_file(dslFile, memoization=True,
                                          AComparison, ASumMinus, AMultDiv,
                                          APower, AUnary, AAggregate,
                                          AppliedSymbol, UnappliedSymbol,StartAppliedSymbol,NowAppliedSymbol,NextAppliedSymbol,
+                                         CauseFalseAppliedSymbol,CauseTrueAppliedSymbol,
                                          Number, Brackets, Date, Variable,
                                          TempLogic,ILFormula,DLFormula,
                                          CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula,

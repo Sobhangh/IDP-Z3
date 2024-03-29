@@ -1,0 +1,39 @@
+vocabularyV {
+    <Temporal> pos_x : () -> Real
+    <Temporal> pos_y : () -> Real
+    <Temporal> v_x : () -> Real
+    <Temporal> v_y : () -> Real
+    gravity : () -> Real
+
+    I_pos_x : () -> Real
+    I_pos_y : () -> Real
+    I_v_x : () -> Real
+    I_v_y : () -> Real
+}
+
+theory LTC T:V{
+    Start[pos_x()] = I_pos_x().
+    Start[pos_y()] = I_pos_y().
+    Start[v_x()] = I_v_x().
+    Start[v_y()] = I_v_y().
+
+    Next[v_x()] = Now[v_x()].
+    Next[v_y()] = Now[v_y()] - gravity().
+
+    Next[pos_x()] = Now[pos_x()] + Now[v_x()].
+    Next[pos_y()] = Now[pos_y()] + Now[v_y()].
+}
+
+structure S:V{
+    gravity := 10.
+    I_pos_x := 0.
+    I_pos_y := 0.
+    I_v_x := 20.
+    I_v_y := 500.
+
+    Time := {0..10}.
+}
+
+procedure main () {
+  pretty_print(model_expand(T,S,timeout_seconds=100))
+}

@@ -1,0 +1,16 @@
+vocabulary V{
+    type dim is {1..5}
+    mirror: dim -> dim
+    maxdim : () -> dim
+}
+theory T:V {
+    ! d in dim: mirror(d) = if d =< maxdim() /2 then maxdim() - (d - 1) else 1 + maxdim() -d.
+}
+
+structure S:V {
+    maxdim := 5.
+}
+
+procedure main(){
+    pretty_print(model_expand(T,S))
+}

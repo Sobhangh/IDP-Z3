@@ -1,0 +1,22 @@
+vocabulary V {
+    <Temporal> p: () -> Bool
+    q : () -> Bool
+    <Temporal> a : (Int * Int) -> Bool
+    <Temporal> b : () -> Int
+    c : (Int) -> Bool
+}
+
+theory LTC T:V {
+    {
+        q() <- (Now[p()]).
+    }
+}
+
+structure S:V {
+   
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}

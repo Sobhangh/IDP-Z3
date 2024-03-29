@@ -1,0 +1,21 @@
+vocabulary V {
+    <Temporal> p: () -> Bool
+}
+
+theory LTC T:V {
+    // Check if it gives error because p is outside of higher order predicate.
+    p().
+    {
+        //!t in Int: p(t+1) <- p(t).
+    }
+    
+}
+
+structure S:V {
+    
+}
+
+procedure main () {
+    print(Theory(T).formula())
+    pretty_print(model_expand(T,S,max=5))
+}
