@@ -1,0 +1,36 @@
+vocabulary V {
+    type City is {A,B}
+    <Temporal> p : (City) -> Bool
+    <Cause> Ct_p : (City) -> Bool
+    <Cause> Ct_both : () -> Bool
+    <Action> Move: () -> Bool
+}
+
+theory LTC T:V {
+    {
+        !n in City:Start[p(n)] <- false.
+        !n in City: Next[p(n)] <- Now[Ct_p(n)].
+        !n in City: Next[p(n)] <- Now[p(n)].
+        //!n in City: Next[Position(n)] <- Now[Position(n)] and not Now[Cf_Position(n)].
+        !n in City,m in City:  Now[Ct_both()] <- Now[Move()].
+        //!n in City,m in City:  Now[Cf_Position(n)] <- Now[Move(n,m)].
+    }
+    !n in City: Now[Ct_both()] <=> ((Now[Ct_p(A)] or Now[Ct_p(B)]) and not (Now[Ct_p(A)] and Now[Ct_p(B)])).
+
+
+}
+
+
+structure S:V {
+    
+}
+
+temporal_logic ltl:V {
+    (EF p(A) )
+}
+
+procedure main () {
+    //,generate_transition_machine=True
+    ProveModalLogic(ltl,S,T,generate_transition_machine=True)
+    //simulate(T,S)
+}

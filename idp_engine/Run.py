@@ -229,7 +229,8 @@ def identifystates(assign,transitiongraph:TransiotionGraph,initialstate=False):
     out : dict[SymbolDeclaration, List[TupleIDP]] = {}
     nullary: dict[SymbolDeclaration, Any] = {}
     states = []
-    #print("matching states .....")
+    print("matching states .....")
+    print(initialstate)
     for a in assign.values():
         if type(a.sentence) == AppliedSymbol:
             #print(a)
@@ -245,7 +246,7 @@ def identifystates(assign,transitiongraph:TransiotionGraph,initialstate=False):
                 asymb = a.symbol_decl.name[:-len('_next')]
                 fluent_check = a.symbol_decl.is_next and (asymb  in fluents or asymb in ffluents )
             if fluent_check:
-                #print(a)
+                print(a)
                 if a.symbol_decl.arity == 0:
                     args = None
                     #because we dont have functions c can either be true or false
@@ -280,42 +281,64 @@ def identifystates(assign,transitiongraph:TransiotionGraph,initialstate=False):
     matchedStates = []
     statesVisited = []
     i = 0
+    # for s in states:
+    #     nstrue = 0
+    #     for e2 in s:
+    #         if e2[0]== True:
+    #             nstrue += 1
+    #     statenmbr = 0
+    #     for os in transitiongraph.states:
+    #         ntrue = 0
+    #         allmatch = False
+    #         onematch = False
+    #         #print("os")
+    #         #print(os)
+    #         for e in os:
+    #             #print(e)
+    #             onematch = True
+    #             if e[0] == True:
+    #                 onematch = False
+    #                 ntrue += 1
+    #                 for e2 in s:
+    #                     if e2[0]== True and e2[1] == e[1] and str(e2[2]) == str(e[2]):
+    #                         #print("wordkssfd")
+    #                         onematch = True
+    #                         break
+    #             if not onematch:
+    #                 allmatch = False
+    #                 break
+    #             allmatch =True
+            
+    #         if ntrue == nstrue and allmatch:
+    #             matchedStates.append(i)
+    #             statesVisited.append(statenmbr)
+    #             break
+    #         statenmbr += 1
+    #     i += 1
+    #print("matched states")
+    #print(matchedStates)
+    #USES THE CHRACTERISTIC THAT THE ORDER OF PREDICATES IS THE SAME ACROSS DIFFERENT STATES.
     for s in states:
-        nstrue = 0
-        for e2 in s:
-            if e2[0]== True:
-                nstrue += 1
         statenmbr = 0
         for os in transitiongraph.states:
-            ntrue = 0
-            allmatch = False
-            onematch = False
+            onematch = True
             #print("os")
             #print(os)
-            for e in os:
-                #print(e)
-                onematch = True
-                if e[0] == True:
+            if len(os) != len(s):
+                print("ERROR:THE LENGTHS SHOULD MAYCH !!!!!!!!!!!!")
+                return
+            j = 0
+            while j < len(os):
+                if os[j][0] != s[j][0]:
                     onematch = False
-                    ntrue += 1
-                    for e2 in s:
-                        if e2[0]== True and e2[1] == e[1] and str(e2[2]) == str(e[2]):
-                            #print("wordkssfd")
-                            onematch = True
-                            break
-                if not onematch:
-                    allmatch = False
                     break
-                allmatch =True
-            
-            if ntrue == nstrue and allmatch:
+                j +=1
+            if onematch:
                 matchedStates.append(i)
                 statesVisited.append(statenmbr)
                 break
             statenmbr += 1
         i += 1
-    #print("matched states")
-    #print(matchedStates)
     addedstates = []
     index = len(transitiongraph.states)
     i = 0
@@ -613,7 +636,8 @@ def initialize(theory:TheoryBlock,struct:Structure,nbmodel=10):
     return out
     #return model_expand(theory.init_theory,struct.init_struct)
 
-def progression(theory:TheoryBlock,struct,nbmodel=10,additional_theory:TheoryBlock=None):
+#Start inclusive , end exclusive
+def progression(theory:TheoryBlock,struct,nbmodel=10,additional_theory:TheoryBlock=None,start=0,end=-1):
     print("inside progression")
     problem = None
     voc = None
@@ -629,42 +653,53 @@ def progression(theory:TheoryBlock,struct,nbmodel=10,additional_theory:TheoryBlo
     solve_start = time.time()
     if isinstance(struct,List):
         #When the result is received either form initialize or progression
+        if end == -1:
+            end = len(struct)
+        else:
+            if start>end:
+                return "The end index should be larger than start"
+            if end>len(struct):
+                return "end should be smaller than the length of input structures"
+            if start <0:
+                return "start should be positive"
+            
         j = 1
         for xi in struct:
-            strcx = None
-            thrx =None
-            if isinstance(xi,Structure):
-                strcx = xi
-                #pass
-            elif isinstance(xi[0],Structure) and isinstance(xi[1],TheoryBlock):
-                strcx =xi[0]
-                thrx = xi[1]
-            else:
-                j += 1
-                continue
-            if additional_theory:
-                problem = Theory(theory.bistate_theory,strcx,thrx,additional_theory)
-            else:
-                problem = Theory(theory.bistate_theory,strcx,thrx)
-            voc = strcx.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
-            if voc is None:
-                print("Error vocabulary is wrong")
-                return
-            if problem is None:
-                pass
-            ms = list(problem.expand(max=nbmodel, timeout_seconds=10, complete=False))
-            if isinstance(ms[-1], str):
-                ms, last = ms[:-1], ms[-1]
-            else:
-                last = ""
-            
-            for i, m in enumerate(ms):
-                s = toStructure(m,theory.bistate_theory.vocab_name,voc,theory.voc.tempdcl)
-                #for i in s.interpretations.values():
-                    #print(i)
-                out.append(s)
-            #yield out 
-            out.append(last + " For Strtucture " + str(j))
+            if j>start and j <= end:
+                strcx = None
+                thrx =None
+                if isinstance(xi,Structure):
+                    strcx = xi
+                    #pass
+                elif isinstance(xi[0],Structure) and isinstance(xi[1],TheoryBlock):
+                    strcx =xi[0]
+                    thrx = xi[1]
+                else:
+                    j += 1
+                    continue
+                if additional_theory:
+                    problem = Theory(theory.bistate_theory,strcx,thrx,additional_theory)
+                else:
+                    problem = Theory(theory.bistate_theory,strcx,thrx)
+                voc = strcx.voc.idp.next_voc.get(theory.vocab_name+'_next',None)
+                if voc is None:
+                    print("Error vocabulary is wrong")
+                    return
+                if problem is None:
+                    pass
+                ms = list(problem.expand(max=nbmodel, timeout_seconds=10, complete=False))
+                if isinstance(ms[-1], str):
+                    ms, last = ms[:-1], ms[-1]
+                else:
+                    last = ""
+                
+                for i, m in enumerate(ms):
+                    s = toStructure(m,theory.bistate_theory.vocab_name,voc,theory.voc.tempdcl)
+                    #for i in s.interpretations.values():
+                        #print(i)
+                    out.append(s)
+                #yield out 
+                out.append(last + " For Structure " + str(j))
             j += 1
     elif isinstance(struct,tuple) or isinstance(struct,Structure):
         #Used in simulate and in case a single structure is given
@@ -968,8 +1003,8 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock,struct:Structure|None
         j+=1
     #return output
     if not second_step or j>1:
-        return "Invariant is FALSE"
-    return "Invariant is TRUE"
+        return "Forward chaining formula is FALSE"
+    return "Forward chaining formula is TRUE"
 
 def adjust_formula(expression:AImplication,tempdcl:List[TemporalDeclaration]):
     implicant:Expression = expression.sub_exprs[1]
@@ -1407,8 +1442,61 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     #it contains the list of conditions for each action
     actioncondition :dict(str,List[str]) = {}
     actionoperation :dict(str,List) = {}
+    transitmachine:dict((int,AppliedSymbol),List[int])={}
 
     for trans ,act in transitiongraph.transtions.items():
+        for a in act:
+            n = transitmachine.get((trans[0],a),[])
+            n.append(trans[1])
+            transitmachine[(trans[0],a)] = n
+    #This is where if there are multiple final states for state and action pair, then CHOICE will be used for the final state.
+    for stateaction ,nxtstates in transitmachine.items():
+        a = stateaction[1]
+        n = a.symbol.name
+        conds = actioncondition.get(n,[])
+        cnd = " ("
+        j = 0
+        #The name of the arguments of action is action0,action1,....
+        for elem in a.sub_exprs:
+            if j != 0:
+                cnd += " & "
+            if str(elem) =="true":
+                cnd += n + str(j) + " = TRUE"
+            elif str(elem) =="false":
+                cnd += n + str(j) + " = FALSE" 
+            else:
+                cnd += n + str(j) + " = " + str(elem)
+            j += 1
+        
+        beginstate = {}
+        StateToProb(transitiongraph.states[stateaction[0]],beginstate)
+        endstates = []
+        for ns in nxtstates:
+            endstates.append({})
+            StateToProb(transitiongraph.states[ns],endstates[-1])
+        if j > 0  and len(beginstate.keys()) > 0:
+            cnd += " & "
+        cnd += toProbSubstitution(" = "," & ",beginstate)
+        cnd += " ) "
+        if j > 0 or len(beginstate.keys()) > 0: 
+            conds.append(cnd)
+            actioncondition[n] = conds
+            op =""
+            if len(endstates) == 1:
+                op = cnd + " THEN " + toProbSubstitution(" := ", " ; ", endstates[0])
+            else:
+                op = cnd + " THEN CHOICE "
+                ei =0
+                for e in endstates:
+                    if ei != 0:
+                        op += " OR "
+                    op += toProbSubstitution(" := ", " ; ", e)
+                    ei += 1
+                op += " END "
+            oprtns = actionoperation.get(n,[])
+            oprtns.append(op)
+            actionoperation[n] = oprtns
+    """for trans ,act in transitiongraph.transtions.items():
         for a in act:
             n = a.symbol.name
             conds = actioncondition.get(n,[])
@@ -1440,7 +1528,7 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
                 op = cnd + " THEN " + toProbSubstitution(" := ", " ; ", endstate)
                 oprtns = actionoperation.get(n,[])
                 oprtns.append(op)
-                actionoperation[n] = oprtns
+                actionoperation[n] = oprtns"""
     
     toprts ="OPERATIONS "
     actnum = 0
@@ -1448,15 +1536,19 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
         actstr = ""
         if actnum != 0:
             actstr += " ; "
-        actstr += a + "("
+        actstr += a 
         argn = len(domains)
+        if argn > 0:
+            actstr += "("
         j = 0
         while j < argn:
             if j != 0:
                 actstr += ", "
             actstr += a + str(j)
             j += 1
-        actstr += ") = PRE "
+        if argn > 0:
+            actstr += ")"
+        actstr += " = PRE "
         j = 0
         for d in domains:
             if j != 0:
@@ -1519,6 +1611,7 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     reserrror= ""
     resmessage = ""
     if generate_transition_machine:
+        #open('states.dot', 'w').close()
         a =subprocess.run('C:\Prob\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)  
         stsf = open('states.dot',"r")
         resmessage = stsf.read()
@@ -1965,8 +2058,13 @@ def findnextStates(transitiongraph:TransiotionGraph,action:str,args,init_struct:
     #        for r in d.rules:
     #            print(r)
     
-    realassigns = necessary_assignments(res,transitiongraph)
-    #realassigns = res
+    #This caused error for graph_movement
+    realassigns = []
+    if len(Nstate) == 0 and action == "":
+        realassigns = res
+    else:
+        realassigns = necessary_assignments(res,transitiongraph)
+    
     
     #print("NEW CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL")
     #for i, xi in enumerate(res):
@@ -2420,8 +2518,6 @@ def iterative_planning(theory:TheoryBlock,endcond:TheoryBlock,structure:Structur
             return res
         start += step
         print(start)
-
-
 
 def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
                  max: int = 10,

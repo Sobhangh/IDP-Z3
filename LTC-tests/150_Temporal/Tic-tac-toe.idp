@@ -60,6 +60,6 @@ structure S:V {
 
 
 procedure main () {
-    pretty_print(ProveModalLogic(ltl,S,T,direct_check=False))
+    pretty_print(ProveModalLogic(ltl,S,T))
     //simulate(T,S)
 }
