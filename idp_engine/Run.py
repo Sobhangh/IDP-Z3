@@ -780,7 +780,9 @@ def simulate(theory:TheoryBlock,struct:Structure,nbmodel=10):
             print("Please give a number within the range of possible models.")
         if i == "N":
             break
-        ac = input(act_question)
+        #Disabling asking for giving an action
+        #ac = input(act_question)
+        ac = "n"
         first = True
         if ac != "n":
             failed = True
