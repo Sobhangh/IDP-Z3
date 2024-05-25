@@ -229,8 +229,8 @@ def identifystates(assign,transitiongraph:TransiotionGraph,initialstate=False):
     out : dict[SymbolDeclaration, List[TupleIDP]] = {}
     nullary: dict[SymbolDeclaration, Any] = {}
     states = []
-    print("matching states .....")
-    print(initialstate)
+    #print("matching states .....")
+    #print(initialstate)
     for a in assign.values():
         if type(a.sentence) == AppliedSymbol:
             #print(a)
@@ -246,7 +246,7 @@ def identifystates(assign,transitiongraph:TransiotionGraph,initialstate=False):
                 asymb = a.symbol_decl.name[:-len('_next')]
                 fluent_check = a.symbol_decl.is_next and (asymb  in fluents or asymb in ffluents )
             if fluent_check:
-                print(a)
+                #print(a)
                 if a.symbol_decl.arity == 0:
                     args = None
                     #because we dont have functions c can either be true or false
@@ -839,7 +839,7 @@ def simulate(theory:TheoryBlock,struct:Structure,nbmodel=10):
             result = progression(theory,result[i-1],nbmodel=nbmodel)
             print_struct(result)
 
-def ForProgression(theory:TheoryBlock,struct,number:int,nbmodel=10):
+def ForProgression(theory:TheoryBlock,struct,nbprogressions:int,nbmodel=10):
     m = '\n' +"Generated models by progression number "
     out = [m+str(1)]
     result = progression(theory,struct,nbmodel=nbmodel)
@@ -1078,7 +1078,7 @@ def adjust_sub(expression:Expression,tempdcl:List[TemporalDeclaration],n:int):
                         if isinstance(e,Number) and e.type == INT_SETNAME:
                             sum += e.py_value
                     if sum > n :
-                        return "Cant use numbers higher than the upperlimit"
+                        return "Can not use numbers higher than the upper limit"
                     level = sum
                     if level != 0:
                         expression.symbol.name = expression.symbol.name + '_' + str(level)
@@ -1618,21 +1618,21 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
         stsf.close()
         #resmessage = a.stdout.decode()
         reserrror = a.stderr.decode()
+    #"(F {owns = owns \/ {(1,B1)}}) & G {F {john_owns=TRUE}}"
+    #ltlf = "(EF { (2,B1):owns })" 
+    ltlf = translateLogicFormula(ltllogic.formula,probnumset)
+    ProbSolvingTime = time.time()
+    #a = subprocess.run(f'C:\Prob\probcli --help ',shell=True,capture_output=True)
+    #a =subprocess.run('C:\Prob\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)  
+    #a =subprocess.run('C:\Prob\probcli  test.mch -animate 20 -his history.txt',shell=True,capture_output=True)          
+    if isinstance(ltllogic.formula,(ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula)):
+        a = subprocess.run(f'C:\Prob\probcli -ltlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True) # -model-check -spdot states.dot
     else:
-        #"(F {owns = owns \/ {(1,B1)}}) & G {F {john_owns=TRUE}}"
-        #ltlf = "(EF { (2,B1):owns })" 
-        ltlf = translateLogicFormula(ltllogic.formula,probnumset)
-        ProbSolvingTime = time.time()
-        #a = subprocess.run(f'C:\Prob\probcli --help ',shell=True,capture_output=True)
-        #a =subprocess.run('C:\Prob\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)  
-        #a =subprocess.run('C:\Prob\probcli  test.mch -animate 20 -his history.txt',shell=True,capture_output=True)          
-        if isinstance(ltllogic.formula,(ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula)):
-            a = subprocess.run(f'C:\Prob\probcli -ltlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True) # -model-check -spdot states.dot
-        else:
-            a = subprocess.run(f'C:\Prob\probcli -ctlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True)
-        ProbSolvingTime = time.time() - ProbSolvingTime
-        resmessage = a.stdout.decode()
-        reserrror = a.stderr.decode()
+        a = subprocess.run(f'C:\Prob\probcli -ctlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True)
+    
+    ProbSolvingTime = time.time() - ProbSolvingTime
+    resmessage = a.stdout.decode()
+    reserrror = a.stderr.decode()
         
     nbTransitions = 0
     for k ,v in transitiongraph.transtions.items():
