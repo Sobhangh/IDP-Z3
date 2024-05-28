@@ -67,7 +67,7 @@ GOAL_SYMBOL = "goal_symbol"
 RELEVANT = " relevant"  # internal.  Leading space to avoid conflict with user vocabulary
 EXPAND = "expand"
 ABS = "abs"
-TIJD ="Tijd"
+TIJD ="Time"
 RESERVED_SYMBOLS = [BOOL, INT, REAL, DATE, CONCEPT,
                     GOAL_SYMBOL, RELEVANT, ABS,TIJD ]
 v_time = 'time'

@@ -638,7 +638,7 @@ def initialize(theory:TheoryBlock,struct:Structure,nbmodel=10):
 
 #Start inclusive , end exclusive
 def progression(theory:TheoryBlock,struct,nbmodel=10,additional_theory:TheoryBlock=None,start=0,end=-1):
-    print("inside progression")
+    #print("inside progression")
     problem = None
     voc = None
     #if isinstance(struct, types.GeneratorType):
@@ -1144,7 +1144,7 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     temps.voc= init_structure.voc
     #for i in s.interpretations.values():
     #    i.block = s
-    print("inside prove......")
+    #print("inside prove......")
     vcnm = init_structure.vocab_name+"_now"
     testth = TheoryBlock(name="T",vocab_name=vcnm,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
@@ -1152,7 +1152,7 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     testth.voc = voc_now
     voc_now.add_voc_to_block(testth)
     problem = Theory(testth)
-    print(problem.extensions)
+    #print(problem.extensions)
     TransmachconstructTime = time.time()
     Alg3 = True  
     transitiongraph = TransiotionGraph(init_structure.voc,problem,Alg3)
@@ -1193,8 +1193,8 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
                 ffluentConst.append(uniquant)
                 ffluentConst.append(uniquant2)
                 ffluentinit.append(uniquant2)"""
-    print("fluent const")
-    print(ffluentConst)
+    #print("fluent const")
+    #print(ffluentConst)
     no_conc = False
     Posaction = {}
     Nonaction = {}
@@ -1603,7 +1603,7 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     
     machine = "MACHINE Test" + '\n' + tsets + '\n' + tvars + '\n' + tinvar + \
           '\n' + tinint + '\n' + toprts + '\n' + "END"
-    print(machine)
+    #print(machine)
     ProbTransTime = time.time() - ProbTransTime
     
     f = open("test.mch","w")
@@ -1639,20 +1639,20 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     nbTransitions = 0
     for k ,v in transitiongraph.transtions.items():
         nbTransitions += len(v)
-    print(" Transition machine construction time:")
-    print(TransmachconstructTime)
-    print("prob translation time")
-    print(ProbTransTime)
-    print("prob solving time")
-    print(ProbSolvingTime)
-    print("number of states")
-    print(len(transitiongraph.states))
-    print("number of transitions")
-    print(nbTransitions)
+    # print(" Transition machine construction time:")
+    # print(TransmachconstructTime)
+    # print("prob translation time")
+    # print(ProbTransTime)
+    # print("prob solving time")
+    # print(ProbSolvingTime)
+    # print("number of states")
+    # print(len(transitiongraph.states))
+    # print("number of transitions")
+    # print(nbTransitions)
 
-    print("PROBCLI............")
-    print(resmessage)
-    print(reserrror)
+    # print("PROBCLI............")
+    # print(resmessage)
+    # print(reserrror)
     return resmessage +'\n' + reserrror
 
 #initst is the dictionary produced by StateToProb function which for each predicates holds the list of values that is true
@@ -1842,15 +1842,15 @@ def AlternativeAlg3(transitiongraph:TransiotionGraph,Nonaction:dict,init_struct:
     if len(initialStates)==0:
         return []
     numreachedstate = max(initialStates)
-    print("inital state")
-    print(initialStates)
+    #print("inital state")
+    #print(initialStates)
     tempstate = nextreachedState.copy()
     oldreached = -1
     #while len(tempstate) > 0 :
     while numreachedstate - oldreached > 0:
         #nextreachedState = tempstate.copy()
-        print("next states")
-        print(numreachedstate)
+        #print("next states")
+        #print(numreachedstate)
         #tempstate = []
         #for i in nextreachedState:
         for i in range(oldreached+1,numreachedstate+1):
@@ -1899,8 +1899,8 @@ def AlternativeAlg3(transitiongraph:TransiotionGraph,Nonaction:dict,init_struct:
                             #    reachedStates.append(j)
                         z3solvetime += t[2]
                         q += 1
-    print("TOTAL Z3 SOLVING TIME:")
-    print(z3solvetime)
+    #print("TOTAL Z3 SOLVING TIME:")
+    #print(z3solvetime)
     return initialStates
 
 def AlternativeAlgparallel(transitiongraph:TransiotionGraph,Nonaction:dict,init_struct:Structure,theory:TheoryBlock,ffluentinit=[],ffluentConst=[],no_conc=False):
@@ -2414,8 +2414,8 @@ def checkLtlFormula(theory:TheoryBlock,struct:Structure,templog:TempLogic):
         f.annotate(theory.voc,{})
     except (IDPZ3Error) as e :
             return e
-    print("tarnslated formula")
-    print(f)
+    #print("tarnslated formula")
+    #print(f)
     thltl = TheoryBlock(name="LogicFormula",vocab_name=theory.vocab_name,ltc = None,inv=None,constraints=[],definitions=[],interpretations=[])
     thltl.constraints = [f]
     p = Theory(struct,theory,thltl)
@@ -2427,9 +2427,9 @@ def checkLtlFormula(theory:TheoryBlock,struct:Structure,templog:TempLogic):
             second_step = True
         j+=1
     if second_step and j==1:
-        print("FALSE.....")
+        #print("FALSE.....")
         return "Ltl formula is False"
-    print("TRUE.....")
+    #print("TRUE.....")
     return "LTL Formula is TRUE"
     
 def translateLtlToFo(formula:Expression,t:Expression,tempdcl:List[str],num=0):
@@ -2493,7 +2493,7 @@ def translateLtlToFo(formula:Expression,t:Expression,tempdcl:List[str],num=0):
     return formula
 #Structure should not contain interpretation of Time
 def iterative_planning(theory:TheoryBlock,endcond:TheoryBlock,structure:Structure,start=1,max=10,step=1):
-    print("iterative planning....")
+    #print("iterative planning....")
     Timestruct=  Structure(name="tiemstruct",vocab_name=structure.vocab_name,interpretations=[])
     for d in structure.voc.declarations:
         if isinstance(d,TypeDeclaration) and d.name == TIJD:
@@ -2515,11 +2515,11 @@ def iterative_planning(theory:TheoryBlock,endcond:TheoryBlock,structure:Structur
                 second_step = True
             j+=1
         if not second_step:
-            for r in res:
-                print(r)
+            #for r in res:
+                #print(r)
             return res
         start += step
-        print(start)
+        #print(start)
 
 def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
                  max: int = 10,
@@ -2563,7 +2563,7 @@ def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
 
     solve_start = time.time()
     ms = list(problem.expand(max=max, timeout_seconds=timeout_seconds, complete=complete))
-    print("models  ........")
+    #print("models  ........")
     #print(ms)
     if isinstance(ms[-1], str):
         ms, last = ms[:-1], ms[-1]
@@ -2574,7 +2574,7 @@ def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
     out = ""
     for i, m in enumerate(ms):
         out = out + (f"{NEWL}Model {i+1}{NEWL}==========\n{m}\n")
-    print(out)
+    #print(out)
     yield out + last
     PROCESS_TIMINGS['solve'] += time.time() - solve_start
 

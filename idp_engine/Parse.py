@@ -2242,9 +2242,9 @@ class TransiotionGraph:
         self.tempfunct : dict(str,set) = {}
         self.tempfunctarg : dict(str,set) = {}
         self.FillExtensions(problem.extensions,voc)
-        print("fucnt exte")
-        print(self.tempfunct)
-        print(self.tempfunctarg)
+        #print("fucnt exte")
+        #print(self.tempfunct)
+        #print(self.tempfunctarg)
         #TO DO : WHAT ABOUT FUNCTIONS and add tests for functions
         if not alg3:
             self.SetStates()
@@ -2377,19 +2377,19 @@ class TransiotionGraph:
                     #    self.aextensions[a] = [s.extension({}) for s in d.domains]
         #TO DO : COULD BE USED FOR ADDING ACTION FUNCTIONS, 
         now_voc = voc.idp.now_voc[voc.name+"_now"]
-        print("function actions ")
+        #print("function actions ")
         for a , v in notvisited.items():
             if v :
                 for d in now_voc.declarations:
                     if a == d.name:
-                        print(a)
+                        #print(a)
                         if d.codomain == BOOL_SETNAME:
                             #TO DO: THROW ERROR HERE TOO
                             print("this should only be used for functions")
                             return
                         factext = ([],None,True)
                         for arg in d.domains + [d.codomain]:
-                            print(arg.name)
+                            #print(arg.name)
                             if len(factext[0]) == 0:
                                 for e in extensions[arg.name][0]:
                                     factext[0].append(tuple(e))

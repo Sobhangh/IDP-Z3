@@ -319,11 +319,11 @@ def annotate_init_theory(theory:TheoryBlock,idp):
             #Is annotation necessary given that it has already been done in the original?
             r.annotate(voc,{})
         voc.add_voc_to_block(theory.init_theory)
-        print("init theeoruy")
-        print(theory.init_theory.constraints)
-        for d in theory.init_theory.definitions:
-            for r in d.rules:
-                print(r)
+        # print("init theeoruy")
+        # print(theory.init_theory.constraints)
+        # for d in theory.init_theory.definitions:
+        #     for r in d.rules:
+        #         print(r)
         #theory.init_theory.declarations = theory.declarations
         theory.init_theory.definitions = [e.annotate(voc, {},False) for e in theory.init_theory.definitions]
         #print("i0")
@@ -343,11 +343,11 @@ def annotate_bis_theory(theory:TheoryBlock,idp):
             r.annotate(voc,{})
         #print("ch1")
         voc.add_voc_to_block(theory.bistate_theory)
-        print("bis theeoruy")
-        print(theory.bistate_theory.constraints)
-        for d in theory.bistate_theory.definitions:
-            for r in d.rules:
-                print(r)
+        # print("bis theeoruy")
+        # print(theory.bistate_theory.constraints)
+        # for d in theory.bistate_theory.definitions:
+        #     for r in d.rules:
+        #         print(r)
         theory.bistate_theory.definitions = [e.annotate(voc, {},False) for e in theory.bistate_theory.definitions]
         #print("ch15")
         theory.bistate_theory.constraints = OrderedSet([e.annotate(voc, {},False)
@@ -363,11 +363,11 @@ def annotate_trs_theory(theory:TheoryBlock,idp):
             i.block = theory.transition_theory
         #print("ch1")
         voc.add_voc_to_block(theory.transition_theory)
-        print("trs theeoruy")
-        print(theory.transition_theory.constraints)
-        for d in theory.transition_theory.definitions:
-            for r in d.rules:
-                print(r)
+        # print("trs theeoruy")
+        # print(theory.transition_theory.constraints)
+        # for d in theory.transition_theory.definitions:
+        #     for r in d.rules:
+        #         print(r)
         theory.transition_theory.definitions = [e.annotate(voc, {},False) for e in theory.transition_theory.definitions]
         #print("ch15")
         #OrderedSet would remove some of the constraints because so should not be here
