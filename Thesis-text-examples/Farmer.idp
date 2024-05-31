@@ -1,7 +1,7 @@
 vocabulary V {
     type Entity is {Farmer,Chicken,Fox,Grain}
-    <Temporal> Left : (Entity) -> Bool
-    <Temporal> Right : (Entity) -> Bool
+    <ITemporal> Left : (Entity) -> Bool
+    <ITemporal> Right : (Entity) -> Bool
     <Action> MoveL: (Entity) -> Bool
     <Action> MoveR: (Entity) -> Bool
     <Cause> Ct_Left : (Entity) -> Bool
@@ -19,17 +19,13 @@ theory LTC T:V {
     ! e in Entity : Now[MoveL(e)] => (Now[Left(e)] and Now[Left(Farmer)]).
     ! e in Entity : Now[MoveR(e)] => (Now[Right(e)] and Now[Right(Farmer)]).
     #{e in Entity: Now[MoveL(e)] or Now[MoveR(e)]} =< 1.
+    !e in Entity : I_Left(e) .
+    !e in Entity : not I_Right(e) .
     {
-        !e in Entity : Start[Left(e)].
-        !e in Entity : Start[Right(e)] <- false.
-        !e in Entity : Next[Left(e)] <- Now[Ct_Left(e)].
-        !e in Entity : Next[Left(e)] <- Now[Left(e)] and not Now[Cf_Left(e)].
-        !e in Entity : Next[Right(e)] <- Now[Ct_Right(e)].
-        !e in Entity : Next[Right(e)] <- Now[Right(e)] and not Now[Cf_Right(e)].
-        !e in Entity : Now[Ct_Right(e)] <- if e = Farmer then ? e2 in Entity:Now[MoveL(e2)] else Now[MoveL(e)].
-        !e in Entity : Now[Cf_Right(e)] <- if e = Farmer then ? e2 in Entity:Now[MoveR(e2)] else Now[MoveR(e)].
-        !e in Entity : Now[Ct_Left(e)] <- if e = Farmer then ? e2 in Entity:Now[MoveR(e2)] else Now[MoveR(e)].
-        !e in Entity : Now[Cf_Left(e)] <- if e = Farmer then ? e2 in Entity:Now[MoveL(e2)] else Now[MoveL(e)].
+        !e in Entity : +[Right(e)] <- if e = Farmer then ? e2 in Entity:Now[MoveL(e2)] else Now[MoveL(e)].
+        !e in Entity : -[Right(e)] <- if e = Farmer then ? e2 in Entity:Now[MoveR(e2)] else Now[MoveR(e)].
+        !e in Entity : +[Left(e)] <- if e = Farmer then ? e2 in Entity:Now[MoveR(e2)] else Now[MoveR(e)].
+        !e in Entity : -[Left(e)] <- if e = Farmer then ? e2 in Entity:Now[MoveL(e2)] else Now[MoveL(e)].
     }
 }
 
@@ -42,58 +38,8 @@ structure S:V{
     Time := {0..10}.
 }
 
-temporal_logic ltl:V {
-    (F Right(Chicken))
-}
 procedure main () {
-  //pretty_print(model_expand(T, T2,S,timeout_seconds=100))
+  pretty_print(model_expand(T, T2,S,timeout_seconds=100))
   //pretty_print(minimize(T, T2,S,term="sumMove()"))
-  ProveModalLogic(ltl,S,T,generate_transition_machine=True)
 }
 
-vocabulary V2 {
-    type Entity is {Farmer,Chicken,Fox,Grain}
-    type Time is {0..10}
-    Left : (Entity*Time) -> Bool
-    Right : (Entity*Time) -> Bool
-    MoveL: (Entity*Time) -> Bool
-    MoveR: (Entity*Time) -> Bool
-   Ct_Left : (Entity*Time) -> Bool
-   Cf_Left : (Entity*Time) -> Bool
-   Ct_Right : (Entity*Time) -> Bool
-   Cf_Right : (Entity*Time) -> Bool
-   sumMove : () -> Int
-}
-
-theory T12:V2 {
-    !t in Time :not ( Left(Fox,t)  and  Left(Chicken,t)  and not  Left(Farmer,t) ).
-    !t in Time :  not ( Left(Grain,t)  and  Left(Chicken,t)  and not  Left(Farmer,t) ).
-    !t in Time :not ( Right(Fox,t)  and  Right(Chicken,t)  and not  Right(Farmer,t) ).
-    !t in Time : not ( Right(Grain,t)  and  Right(Chicken,t)  and not  Right(Farmer,t) ).
-    !t in Time , e in Entity :  MoveL(e,t)  => ( Left(e,t)  and  Left(Farmer,t) ).
-    !t in Time , e in Entity :  MoveR(e,t)  => ( Right(e,t)  and  Right(Farmer,t) ).
-    !t in Time : #{e in Entity:  MoveL(e,t)  or  MoveR(e,t) } =< 1.
-    {
-        !e in Entity :  Left(e,0) .
-        !e in Entity :  Right(e,0)  <- false.
-        !e in Entity , t in Time :  Left(e,t+1)  <-  Ct_Left(e,t) .
-        !e in Entity, t in Time :  Left(e,t+1)  <-  Left(e,t)  and not  Cf_Left(e,t) .
-        !e in Entity, t in Time :  Right(e,t+1)  <-  Ct_Right(e,t) .
-        !e in Entity, t in Time :  Right(e,t+1)  <-  Right(e,t)  and not  Cf_Right(e,t) .
-        !e in Entity , t in Time:  Ct_Right(e,t)  <- if e = Farmer then ? e2 in Entity: MoveL(e2,t)  else  MoveL(e,t) .
-        !e in Entity, t in Time :  Cf_Right(e,t)  <- if e = Farmer then ? e2 in Entity: MoveR(e2,t)  else  MoveR(e,t) .
-        !e in Entity, t in Time :  Ct_Left(e,t)  <- if e = Farmer then ? e2 in Entity: MoveR(e2,t)  else  MoveR(e,t) .
-        !e in Entity, t in Time :  Cf_Left(e,t)  <- if e = Farmer then ? e2 in Entity: MoveL(e2,t)  else  MoveL(e,t) .
-    }
-    sumMove() = #{t in Time,e in Entity:MoveL(e,t)}+ #{ t in Time,e in Entity:MoveR(e,t)}.
-}
-
-theory T22:V2{
-    ? t in Time: ! e in Entity: Right(e,t).
-}
-
-
-
-//procedure main () {
-//  pretty_print(minimize(T12, T22,term="sumMove()"))
-//}

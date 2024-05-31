@@ -3,20 +3,10 @@ vocabulary V {
     Road: (City * City) -> Bool
     <IFTemporal> Position : (City) -> Bool
     <Action> Move: (City * City) -> Bool
-    //<Cause> Ct_Position : (City) -> Bool
-    //<Cause> Cf_Position : (City) -> Bool
-}
-vocabulary V2 {
-    type City is {A,B,C,D}
-    Road: (City * City) -> Bool
-    <ITemporal> Position : (City) -> Bool
-    <Action> Move: (City * City) -> Bool
 }
 
 theory LTC T:V {
     {
-        //!n in City: Next[Position(n)] <- Now[Ct_Position(n)].
-        //!n in City: Next[Position(n)] <- Now[Position(n)] and not Now[Cf_Position(n)].
         !n in City,m in City:  +[Position(n)] <- Now[Move(m,n)].
         !n in City,m in City:  -[Position(n)] <- Now[Move(n,m)].
     }
@@ -26,36 +16,11 @@ theory LTC T:V {
 
 }
 
-theory LTC T2:V2 {
-    {
-        !n in City,m in City:  +[Position(n)] <- Now[Move(m,n)].
-        !n in City,m in City:  -[Position(n)] <- Now[Move(n,m)].
-    }
-    !n in City,m in City: Now[Move(n,m)] => (Now[Position(n)] and (Road(n,m) )).
-    #{n in City,m in City: Now[Move(n,m)]} =< 1.
-    #{n in City: Now[Position(n)]} = 1.
-}
-
 structure S:V {
     Road := {(A,B),(B,D),(D,A),(B,A)}.
 }
 
-structure S2:V2 {
-    Road := {(A,B),(B,D),(D,A),(B,A)}.
-}
-
-temporal_logic ltl:V {
-    (EF Position(C) )
-}
-
 procedure main () {
-    //s = initialize(T2,S2)
-    //print_struct(s)
-    //r1 = initialize(T,S)
-    //r2 = progression(T,r1)
-    //pretty_print(r2)
-
-    //,generate_transition_machine=True
-    //ProveModalLogic(ltl,S,T)
-    simulate(T,S)
+    s = initialize(T2,S2)
+    pretty_print(s)
 }

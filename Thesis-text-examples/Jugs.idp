@@ -3,22 +3,15 @@ vocabulary V {
     type Liters is {0..10}
     maxContents: (Jug) -> Liters
 
-    //type Action is constructed from { Fill(Jug), Transfer(Jug, Jug, Liters), Empty(Jug) }
-    //<Action> do: (Action) -> Bool
     <Action> Fill :(Jug) -> Bool 
     <Action> Transfer : (Jug * Jug * Liters) -> Bool
     <Action> Empty: (Jug) -> Bool
-    <Temporal> contents: (Jug * Liters) -> Bool
-    I_contents: (Jug * Liters) -> Bool
-    <Cause> C_contents: (Jug * Liters) -> Bool
-    <Cause> Cn_contents: (Jug * Liters) -> Bool
-
+    <ITemporal> contents: (Jug * Liters) -> Bool
 }
 
 structure S : V {
     maxContents := { J5->5, J3->3 }.
     I_contents := { (J3,0),(J5,0) }.
-    //Time := {0..10}.
 }
 
 theory LTC T:V {
@@ -44,19 +37,19 @@ theory LTC T:V {
     // Inertia
     {
         ! j in Jug, l in Liters: Start[contents(j,l)]  <- I_contents(j,l).
-        ! j in Jug, l in Liters: Next[contents(j,l)]  <- Now[C_contents( j, l)].
-        ! j in Jug, l in Liters: Next[contents(j,l)]  <- Now[contents(j,l)] & not Now[Cn_contents( j, l)].
+        ! j in Jug, l in Liters: Next[contents(j,l)]  <- +[contents( j, l)].
+        ! j in Jug, l in Liters: Next[contents(j,l)]  <- Now[contents(j,l)] & not -[contents( j, l)].
     }
 
     // Causes
     {
         // If the content changes, all other values are no longer it's content.
-        !  j in Jug, l in Liters ,m in Liters: Now[Cn_contents( j, l)] <- Now[C_contents( j, m)] and l ~= m.
+        !  j in Jug, l in Liters ,m in Liters: -[contents( j, l)] <- +[contents( j, m)] and l ~= m.
 
-        !  j in Jug: Now[C_contents( j, maxContents(j))] <- Now[Fill(j)].
-        !  j in Jug: Now[C_contents( j, 0)] <- Now[Empty(j)].
-        !  j in Jug, l in Liters: Now[C_contents( j, l)] <- ? k in Jug ,m in Liters: Now[ Transfer(j, k, m)] & Now[contents(j,m+l)].
-        !  j in Jug, l in Liters: Now[C_contents( j, l)] <- ? k in Jug ,m in Liters: Now[ Transfer(k, j, m)] & Now[contents(j,l-m)].
+        !  j in Jug: +[contents( j, maxContents(j))] <- Now[Fill(j)].
+        !  j in Jug: +[contents( j, 0)] <- Now[Empty(j)].
+        !  j in Jug, l in Liters: +[contents( j, l)] <- ? k in Jug ,m in Liters: Now[ Transfer(j, k, m)] & Now[contents(j,m+l)].
+        !  j in Jug, l in Liters: +[contents( j, l)] <- ? k in Jug ,m in Liters: Now[ Transfer(k, j, m)] & Now[contents(j,l-m)].
     }
 
     // Exactly one action in every timestep
@@ -75,6 +68,5 @@ theory T2:V{
 
 
 procedure main() {
-    //pretty_print(model_expand(T, T2, S))
     pretty_print(iterative_planning(T, T2, S,4))
 }

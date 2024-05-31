@@ -51,7 +51,8 @@ theory LTC T:V {
 }
 
 temporal_logic ltl:V {
-    (G board(1,2,X) or board(1,2,N) or board(1,2,O) )
+    //(G board(1,2,X) or board(1,2,N) or board(1,2,O) )
+    ( F board( 1 , 2 ,N) )
 }
 
 structure S:V {
