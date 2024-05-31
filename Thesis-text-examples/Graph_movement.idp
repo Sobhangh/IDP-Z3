@@ -1,7 +1,7 @@
 vocabulary V {
     type City is {A,B,C,D}
     Road: (City * City) -> Bool
-    <IFTemporal> Position : (City) -> Bool
+    <ITemporal> Position : (City) -> Bool
     <Action> Move: (City * City) -> Bool
 }
 
