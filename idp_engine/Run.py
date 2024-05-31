@@ -1633,8 +1633,8 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
         a = subprocess.run(f'C:\Prob\probcli -ctlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True)
     
     ProbSolvingTime = time.time() - ProbSolvingTime
-    resmessage = a.stdout.decode()
-    reserrror = a.stderr.decode()
+    resmessage += a.stdout.decode()
+    reserrror += a.stderr.decode()
         
     nbTransitions = 0
     for k ,v in transitiongraph.transtions.items():
@@ -2507,7 +2507,7 @@ def iterative_planning(theory:TheoryBlock,endcond:TheoryBlock,structure:Structur
         Timestruct.interpretations[TIJD] = SymbolInterpretation(None,UnappliedSymbol(None,TIJD),":=",enum,None)
         Timestruct.interpretations[TIJD].annotate(structure.voc,{})
         p = Theory(theory,endcond,structure,Timestruct)
-        res = list(p.expand(timeout_seconds=20))
+        res = list(p.expand(timeout_seconds=100))
         second_step =False
         j=0
         for i, xi in enumerate(res):

@@ -1,0 +1,65 @@
+vocabulary V {
+    type Jug is {J3,J5}
+    type Liters is {0..10}
+    maxContents: (Jug) -> Liters
+
+    <Action> Fill :(Jug) -> Bool 
+    <Action> Transfer : (Jug * Jug * Liters) -> Bool
+    <Action> Empty: (Jug) -> Bool
+    <ITemporal> contents: (Jug * Liters) -> Bool
+}
+
+structure S : V {
+    maxContents := { J5->5, J3->3 }.
+    I_contents := { (J3,0),(J5,0) }.
+}
+
+theory LTC T:V {
+    // Do not fill from empty jug (optional)
+    !  j in Jug, k in Jug, l in Liters , l2 in Liters: Now[Transfer(j, k, l)] => (Now[contents(j,l2)] => l2 > 0).
+
+    // Do not fill self
+    !  j in Jug, k in Jug, l in Liters: Now[Transfer(j, k, l)] => j ~= k.
+    // Do not fill full jug (optional)
+    !  j in Jug, l2 in Liters: Now[Fill(j)] => (Now[contents(j,l2)] => l2 ~= maxContents(j)).
+
+    // Do not empty empty jug (optional)
+    !  j in Jug, l2 in Liters : Now[Empty(j)] => (Now[contents(j,l2)] => l2 ~= 0).
+
+    // The number of liters should match the current situation
+    // Transfer no more than what's contained in the jug.
+    !j in Jug, k in Jug, l in Liters, l2 in Liters: Now[Transfer(j, k, l)] => (Now[contents(j,l2)] => l =< l2).
+    // Transfer no more than what can be filled in the receiving jug.
+    !  j in Jug, k in Jug, l in Liters, l2 in Liters: Now[Transfer(j, k, l)] => (Now[contents(k,l2)] => (l =< maxContents(k) - l2 )) .
+    // Transfer either the full jug or what is maximally possible.
+    !  j in Jug, k in Jug, l in Liters, l2 in Liters, l3 in Liters: Now[ Transfer(j,k,l)] => (Now[contents(j,l2)] => l = l2) or (Now[contents(k,l3)] => l = maxContents(k) - l3).
+
+    // Causes
+    {
+        // If the content changes, all other values are no longer it's content.
+        !  j in Jug, l in Liters ,m in Liters: -[contents( j, l)] <- +[contents( j, m)] and l ~= m.
+
+        !  j in Jug: +[contents( j, maxContents(j))] <- Now[Fill(j)].
+        !  j in Jug: +[contents( j, 0)] <- Now[Empty(j)].
+        !  j in Jug, l in Liters: +[contents( j, l)] <- ? k in Jug ,m in Liters: Now[ Transfer(j, k, m)] & Now[contents(j,m+l)].
+        !  j in Jug, l in Liters: +[contents( j, l)] <- ? k in Jug ,m in Liters: Now[ Transfer(k, j, m)] & Now[contents(j,l-m)].
+    }
+
+    // Exactly one action in every timestep
+    #{j in Jug: Now[Fill(j)]} + #{j in Jug:Now[Empty(j)] } + #{j in Jug, k in Jug, l in Liters: Now[Transfer(j,k,l)]} =< 1.
+
+    !j in Jug: #{l in Liters: Now[contents(j,l)]}=1.
+    
+}
+
+theory T2:V{
+    // Search for planning to 4 liters
+    // Finding a plan/possible state is done by demanding this state
+    ? t in Time, j in Jug: contents(j,4,t).
+}
+
+
+
+procedure main() {
+    pretty_print(iterative_planning(T, T2, S,4))
+}

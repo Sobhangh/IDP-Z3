@@ -2,8 +2,6 @@ vocabulary V {
   type person is {John,Bob,Marry} 
   type book is {B1}
   <ITemporal> owns : (person * book) -> Bool
-  <Cause> ct_owns : (person * book) -> Bool
-  <Cause> cf_owns : (person * book) -> Bool
   <Action> gives: (person * book * person) -> Bool
 }
 
@@ -31,7 +29,7 @@ structure S:V {
 }
 
 procedure main () {
-    //ProveModalLogic(ltl,S,T,generate_transition_machine=True)
+    //pretty_print(ProveModalLogic(ltl,S,T,generate_transition_machine=True))
     //simulate(T,S)
     r1 = initialize(T,S)
     pretty_print(r1)

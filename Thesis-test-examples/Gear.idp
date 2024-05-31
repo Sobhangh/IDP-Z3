@@ -1,0 +1,34 @@
+vocabulary V_Gear{
+    type G  is {g0,g1,g2,g3,g4}
+    <ITemporal> Turn: G -> Bool
+    <Action> Rotate: G -> Bool
+    <Action> Block: G -> Bool
+    Conn: (G * G) -> Bool
+    DConn: (G * G) -> Bool
+}
+
+theory LTC T_Gear:V_Gear{
+
+{
+    ! g in G: +[Turn(g)] <- Now[Rotate(g)].
+    ! g in G: +[Turn(g)] <- ?gn in G: Conn(g,gn) and +[Turn(gn)].
+    ! g in G: -[Turn(g)] <- Now[Block(g)].
+    ! g in G: -[Turn(g)] <- ?gn in G: Conn(g,gn) and -[Turn(gn)].
+}
+    
+{ !x, y in G: Conn(x,y)<-DConn(x,y) or DConn(y,x).} 
+    
+#{g in G: Now[Block(g)]} + #{g in G: Now[Rotate(g)]} < 2.
+
+}
+
+structure S_Gear:V_Gear{
+    Time:={0..5}.
+    DConn:={(g0,g1),(g1,g2),(g2,g3)}.
+    I_Turn:={} . 
+}
+
+
+procedure main(){
+    simulate(T_Gear,S_Gear)
+}

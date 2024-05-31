@@ -1,0 +1,26 @@
+vocabulary V {
+    type City is {A,B,C,D}
+    Road: (City * City) -> Bool
+    <ITemporal> Position : (City) -> Bool
+    <Action> Move: (City * City) -> Bool
+}
+
+theory LTC T:V {
+    {
+        !n in City,m in City:  +[Position(n)] <- Now[Move(m,n)].
+        !n in City,m in City:  -[Position(n)] <- Now[Move(n,m)].
+    }
+    !n in City,m in City: Now[Move(n,m)] => (Now[Position(n)] and (Road(n,m) )).//or n = m
+    #{n in City,m in City: Now[Move(n,m)]} =< 1.
+    #{n in City: Now[Position(n)]} = 1.
+
+}
+
+structure S:V {
+    Road := {(A,B),(B,D),(D,A),(B,A)}.
+}
+
+procedure main () {
+    s = initialize(T,S)
+    pretty_print(s)
+}
