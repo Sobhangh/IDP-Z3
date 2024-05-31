@@ -30,6 +30,8 @@ To launch the Interactive Consultant web server:
 * open your browser at http://127.0.0.1:5000
 
 The Web IDE is at http://127.0.0.1:5000/IDE
+To use the CLI run the command: poetry run python3 idp-engine.py path/to/file.idp
+For more information on the CLI check: https://docs.idp-z3.be/en/stable/IDP-Z3.html#command-line-interface
 
 
 # Develop
