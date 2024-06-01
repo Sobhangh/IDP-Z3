@@ -26,24 +26,25 @@ from __future__ import annotations
 from copy import copy
 import gc
 import logging
-from multiprocessing.managers import BaseManager
+#from multiprocessing.managers import BaseManager
 from os import linesep
+import platform
 from sys import intern
 import time
-from tkinter import Variable
+#from tkinter import Variable
 import types
 from typing import Any, Iterator, List, Union, Optional
 import subprocess
 from z3 import Solver
 
-from idp_engine.Expression import BOOL_SETNAME, FALSE, INT_SETNAME, ONE, OR, SETNAME, TRUE, VARIABLE, ZERO, AAggregate, AComparison, AConjunction, ADisjunction, AEquivalence, AFFormula, AGFormula, AIfExpr, AImplication, AMultDiv, APower, AQuantification, ARImplication, ASumMinus, AUFormula, AUnary, AXFormula, AppliedSymbol, Brackets, CCFormula, CLFormula, CTLFormula, DCFormula, DLFormula, EFFormula, EGFormula, EUFormula, EXFormula, Expression, FLFormula, ForNext, GLFormula, ICFormula, ILFormula, LFormula, NCFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, Number, Operator, Quantee, RLFormula, SetName, StartAppliedSymbol, SymbolExpr, ULFormula, UnappliedSymbol, WLFormula, XLFormula
+from idp_engine.Expression import BOOL_SETNAME, FALSE, INT_SETNAME, ONE, OR, SETNAME, TRUE, VARIABLE, ZERO, AAggregate, AComparison, AConjunction, ADisjunction, AEquivalence, AFFormula, AGFormula, AIfExpr, AImplication, AMultDiv, APower, AQuantification, ARImplication, ASumMinus, AUFormula, AUnary, AXFormula, AppliedSymbol, Brackets, CCFormula, CLFormula, CTLFormula, DCFormula, DLFormula, EFFormula, EGFormula, EUFormula, EXFormula, Expression, FLFormula, ForNext, GLFormula, ICFormula, ILFormula, LFormula, NCFormula, NLFormula, NextAppliedSymbol, NowAppliedSymbol, Number, Operator, Quantee, RLFormula, SetName, StartAppliedSymbol, SymbolExpr, ULFormula, UnappliedSymbol, Variable, WLFormula, XLFormula
 
 from .Parse import IDP, Enumeration, FunctionTuple, RangeElement, Ranges, SymbolDeclaration, SymbolInterpretation, TempLogic, TemporalDeclaration, TheoryBlock, Structure, TransiotionGraph, TupleIDP, TypeDeclaration, Vocabulary
 from .Theory import Theory
 from .Assignments import Status as S, Assignments
 from .utils import BOOL, DATE, INT, NEWL, REAL, TIJD, IDPZ3Error, PROCESS_TIMINGS, OrderedSet, v_time
 from .Annotate import annotate_exp_theory
-import multiprocessing
+#import multiprocessing
 last_call = time.process_time()  # define it as global
 
 input_recived = False
@@ -1612,9 +1613,14 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     ProbSolvingTime = 0
     reserrror= ""
     resmessage = ""
+    osname = platform.system()
     if generate_transition_machine:
         #open('states.dot', 'w').close()
-        a =subprocess.run('C:\Prob\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)  
+        a = None
+        if osname == "Linux":
+            a =subprocess.run('./probcli.sh  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)  
+        else:
+            a =subprocess.run('WinProb\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)  
         stsf = open('states.dot',"r")
         resmessage = stsf.read()
         stsf.close()
@@ -1628,9 +1634,15 @@ def ProveModalLogic(ltllogic:TempLogic,init_structure:Structure,theory:TheoryBlo
     #a =subprocess.run('C:\Prob\probcli  test.mch -model-check -spdot states.dot',shell=True,capture_output=True)  
     #a =subprocess.run('C:\Prob\probcli  test.mch -animate 20 -his history.txt',shell=True,capture_output=True)          
     if isinstance(ltllogic.formula,(ILFormula,DLFormula,CLFormula,NLFormula,XLFormula,FLFormula,GLFormula,ULFormula,WLFormula,RLFormula)):
-        a = subprocess.run(f'C:\Prob\probcli -ltlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True) # -model-check -spdot states.dot
+        if osname == "Linux":
+            a = subprocess.run(f'./probcli.sh -ltlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True) 
+        else:
+            a = subprocess.run(f'WinProb\probcli -ltlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True) # -model-check -spdot states.dot
     else:
-        a = subprocess.run(f'C:\Prob\probcli -ctlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True)
+        if osname == "Linux":
+            a = subprocess.run(f'./probcli.sh -ctlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True)
+        else:
+            a = subprocess.run(f'WinProb\probcli -ctlformula "{ltlf}" test.mch -disable_timeout',shell=True,capture_output=True)
     
     ProbSolvingTime = time.time() - ProbSolvingTime
     resmessage += a.stdout.decode()
@@ -1903,7 +1915,7 @@ def AlternativeAlg3(transitiongraph:TransiotionGraph,Nonaction:dict,init_struct:
     #print(z3solvetime)
     return initialStates
 
-def AlternativeAlgparallel(transitiongraph:TransiotionGraph,Nonaction:dict,init_struct:Structure,theory:TheoryBlock,ffluentinit=[],ffluentConst=[],no_conc=False):
+"""def AlternativeAlgparallel(transitiongraph:TransiotionGraph,Nonaction:dict,init_struct:Structure,theory:TheoryBlock,ffluentinit=[],ffluentConst=[],no_conc=False):
     initialStates = []
     z3solvetime = 0
     numreachedstate = 0
@@ -1998,7 +2010,7 @@ def parallelalgo(shared_dict,theory=None,init_struct=None,Nonaction=None,no_conc
                     if j > shared_dict['numreachedstate']:
                         shared_dict['numreachedstate'] = j
                 shared_dict['z3solvetime'] += t[2]
-                q += 1
+                q += 1"""
 
 def translateToNstate(s1,theory):
     Nstate = []
@@ -2093,7 +2105,7 @@ def findnextStates(transitiongraph:TransiotionGraph,action:str,args,init_struct:
     return (list(set(nextstates)),actionPred,solvetime)
 
 
-def findnextStatesparallel(transitiongraph:TransiotionGraph,action:str,args,init_struct:Structure,transition_theory:TheoryBlock,Nstate:List,non_action:dict,lock,argindex:int=0,alg3 =False,ffluentconst=[],realaction=None):
+"""def findnextStatesparallel(transitiongraph:TransiotionGraph,action:str,args,init_struct:Structure,transition_theory:TheoryBlock,Nstate:List,non_action:dict,lock,argindex:int=0,alg3 =False,ffluentconst=[],realaction=None):
     actionPred = None
     no_concurrency = []
     if not realaction:
@@ -2151,7 +2163,7 @@ def findnextStatesparallel(transitiongraph:TransiotionGraph,action:str,args,init
         actionPred = ap
     if second_step and j==1:
         return ([],actionPred,solvetime)
-    return (list(set(nextstates)),actionPred,solvetime)
+    return (list(set(nextstates)),actionPred,solvetime)"""
 
 
 
