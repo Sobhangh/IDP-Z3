@@ -29,7 +29,9 @@ To launch the Interactive Consultant web server:
 * open a terminal in that directory and run `poetry run python3 main.py`
 * open your browser at http://127.0.0.1:5000
 
+
 The Web IDE is at http://127.0.0.1:5000/IDE
+In Linux, give probcli execution right by executing the following: chmod +x probcli.sh in the IDP-Z3 folder
 To use the CLI run the command: poetry run python3 idp-engine.py path/to/file.idp
 For more information on the CLI check: https://docs.idp-z3.be/en/stable/IDP-Z3.html#command-line-interface
 Becuase ProB is used, make sure at least Java 8 is installed.
