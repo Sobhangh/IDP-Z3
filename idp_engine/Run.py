@@ -876,12 +876,12 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,f
     inv = invorg.init_copy()
     inv2 = inv.init_copy()
     #print("ch1")
-    #Checking the formula is valid LTC expression
-    time: SetName = SETNAME(TIJD)
-    t: Variable = VARIABLE(v_time,time)
-    qt: Quantee = Quantee(None,[t],time) 
-    invorg = AQuantification(None,None,'forall',[qt],invorg)
-    invorg.annotate(theory.voc,{},True)
+    #Checking the formula is valid LTC expression: IT SHOULD NOT BE DONE BECAUSE IN OTHER USAGES THE ANNOTATED FORM IS THEN COPIED TO OTHER INVARIANTS.
+    #time: SetName = SETNAME(TIJD)
+    #t: Variable = VARIABLE(v_time,time)
+    #qt: Quantee = Quantee(None,[t],time) 
+    #invorg = AQuantification(None,None,'forall',[qt],invorg)
+    #invorg.annotate(theory.voc,{},True)
     n = theory.contains_next(inv)
     if n:
         return "Invariant should only contain signle state formulas"
@@ -893,14 +893,16 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,f
     inv = AUnary(None,['not'],inv)
     voc_now = theory.init_theory.voc
     inv.annotate(voc_now,{})
-    invariant.constraints = OrderedSet([inv])
+    invariant1 = TheoryBlock(name=invariant.name+"1",vocab_name=invariant.vocab_name,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+    invariant1.constraints = OrderedSet([inv])
     #print(invariant.constraints)
     p0 = None
     first_step = False
     if s is not None:
-        p0 = model_expand(theory.init_theory,invariant,s.static_now)
+        p0 = model_expand(theory.init_theory,invariant1,s.static_now)
     else:
-        p0 = model_expand(theory.init_theory,invariant)
+        p0 = model_expand(theory.init_theory,invariant1)
     j =0
     for i, xi in enumerate(p0):
         #print(xi)
@@ -909,7 +911,7 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,f
         j+=1
     if not first_step or j > 1:
         return "Invariant is FALSE: It cannot be proven at the initial time point"
-    invariant2 = TheoryBlock(name=invariant.name,vocab_name=invariant.vocab_name,ltc = None,inv=None,
+    invariant2 = TheoryBlock(name=invariant.name+"2",vocab_name=invariant.vocab_name,ltc = None,inv=None,
                                                      constraints=[],definitions=[],interpretations=[])
     inv2 = theory.sis_subexpr(inv2)
     #print(inv2.sub_exprs[0].sub_exprs)
@@ -922,13 +924,13 @@ def isinvariant(theory:TheoryBlock,invariant:TheoryBlock,s:Structure|None=None,f
     #print("inv2")
     #print(invariant2.constraints)
     inv = inv.sub_exprs[0]
-    invariant.constraints = OrderedSet([inv])
+    invariant1.constraints = OrderedSet([inv])
     p1 = None
     second_step = False
     if s is not None:
-        p1 = model_expand(theory.transition_theory,invariant,invariant2,s.static_next)
+        p1 = model_expand(theory.transition_theory,invariant1,invariant2,s.static_next)
     else:
-        p1 = model_expand(theory.transition_theory,invariant,invariant2)
+        p1 = model_expand(theory.transition_theory,invariant1,invariant2)
     j=0
     for i, xi in enumerate(p1):
         #print(xi)
@@ -945,6 +947,9 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock,struct:Structure|None
     af = None
     for c in invariant.constraints:
         af = c
+    af = af.init_copy()
+    #print("RECIVED INVARIANT")
+    #print(af)
     if not isinstance(af,AQuantification):
         return "formula should be of universal quantification"
     f = af.f
@@ -959,7 +964,7 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock,struct:Structure|None
     #    return "Wrong format: The implicant should be available in the antecedent of implication"
     #if r == -1:
     #    return "Wrong format: should not have Now,Next, Start in forward chaning"
-    voc_now = theory.voc
+    voc_now : Vocabulary = theory.voc
     chain_num = 1
     if voc_now.tempdcl != None:
         r = adjust_formula(f,voc_now.tempdcl)
@@ -970,11 +975,17 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock,struct:Structure|None
     print("adjusted formula")
     print(f)
     output += str(f) + '\n'"""
-    voc : Vocabulary = voc_now.generate_expanded_voc(chain_num)
-    voc.annotate_block(theory.voc.idp)
+    if voc_now.expanded_voc == None:
+        voc : Vocabulary = voc_now.generate_expanded_voc(chain_num)
+        voc.annotate_block(theory.voc.idp)
+        voc_now.expanded_voc = voc
+    else:
+        voc : Vocabulary = voc_now.expanded_voc
     af = AUnary(None,['not'],af)
     af.annotate(voc,{})
-    invariant.constraints = OrderedSet([af])
+    invariant1 = TheoryBlock(name=invariant.name+"1",vocab_name=invariant.vocab_name,ltc = None,inv=None,
+                                                     constraints=[],definitions=[],interpretations=[])
+    invariant1.constraints = OrderedSet([af])
     exp_th = theory.org_theory.expand_theory(chain_num,voc)
     annotate_exp_theory(exp_th,voc)
     
@@ -989,14 +1000,18 @@ def forward_chain(theory:TheoryBlock,invariant:TheoryBlock,struct:Structure|None
     
     p1 = None
     if struct is not None:
+        expvocname = ""
+        if struct.static_expanded.voc !=None:
+            expvocname = struct.static_expanded.voc.name
         #TO DO : IF THE ANNOTATE OF STRUCTURE CHANGES THEN THIS CODE WOULD ALSO CHANGE
-        struct.static_expanded.voc = voc
-        for i in struct.static_expanded.interpretations.values():
-            i.annotate(voc, {})
-        voc.add_voc_to_block(struct.static_expanded)
-        p1 = model_expand(exp_th,invariant,struct.static_expanded,timeout_seconds=50)
+        if expvocname != voc.name:
+            struct.static_expanded.voc = voc
+            for i in struct.static_expanded.interpretations.values():
+                i.annotate(voc, {})
+            voc.add_voc_to_block(struct.static_expanded)
+        p1 = model_expand(exp_th,invariant1,struct.static_expanded,timeout_seconds=50)
     else:
-        p1 = model_expand(exp_th,invariant,timeout_seconds=50)
+        p1 = model_expand(exp_th,invariant1,timeout_seconds=50)
     second_step =False
     j=0
     for i, xi in enumerate(p1):

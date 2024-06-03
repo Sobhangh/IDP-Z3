@@ -240,6 +240,7 @@ class Vocabulary(ASTNode):
 
         self.name = 'V' if not self.name else self.name
         self.voc = self
+        self.expanded_voc = None
         self.actions : List[str] =[]
         self.fluents : List[str] =[]
         self.ftemproral : List[str] =[]
