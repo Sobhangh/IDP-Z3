@@ -145,9 +145,9 @@ TempLogic: 'temporal_logic' name=ID ':' vocab_name=ID '{'
     GLFormula : '(G' expr=LFormula ')' ;
     XLFormula : '(X' expr=LFormula ')' ;
     FLFormula : '(F' expr=LFormula ')' ;
-    ULFormula : '(' expr1=LFormula 'U' expr2=LFormula ')' ;
-    WLFormula : '(' expr1=LFormula 'W' expr2=LFormula ')' ;
-    RLFormula : '(' expr1=LFormula 'R' expr2=LFormula ')' ;
+    ULFormula : '(' expr1=LFormula ' U ' expr2=LFormula ')' ;
+    WLFormula : '(' expr1=LFormula ' W ' expr2=LFormula ')' ;
+    RLFormula : '(' expr1=LFormula ' R ' expr2=LFormula ')' ;
     NLFormula : '(' UnaryOperator expr=LFormula ')' ;
     CLFormula : '(' expr1=LFormula ConjunctionOp expr2=LFormula ')' ;
     DLFormula : '(' expr1=LFormula DisjunctionOp expr2=LFormula ')' ;
@@ -163,8 +163,8 @@ TempLogic: 'temporal_logic' name=ID ':' vocab_name=ID '{'
     EFFormula : '(EF' expr=CTLFormula ')' ;
     AGFormula : '(AG' expr=CTLFormula ')' ;
     EGFormula : '(EG' expr=CTLFormula ')' ;
-    AUFormula : '(A' expr1=CTLFormula 'U' expr2=CTLFormula ')' ;
-    EUFormula : '(E' expr1=CTLFormula 'U' expr2=CTLFormula ')' ;
+    AUFormula : '(A' expr1=CTLFormula ' U ' expr2=CTLFormula ')' ;
+    EUFormula : '(E' expr1=CTLFormula ' U ' expr2=CTLFormula ')' ;
 
 Structure: 'structure' name=ID? (':' vocab_name=ID)?
            '{' interpretations*=SymbolInterpretation '}';
