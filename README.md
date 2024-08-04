@@ -1,3 +1,15 @@
+This is an extention of the IDP-Z3 knowledgebase. This extention involves adding syntax for handling history-less dynamic systems in a more elegant way. Additionally some inferences related to such systems is added such as LTL/CTL model checking, progression, simulation, invariant checking, forward chaining, iterative planning. As an example of such modeling, consider the farmer example: There is a farmer with a fox, chicken and grain. The farmer wants to move them to the other side of the river but in each passage only one of these can be taken. Additionally, the pair (fox ,chicken) and the pair (chicken, grain) cannot be left alone together. Here is the modeling of this problem using the extention:
+
+
+![Screenshot 2024-08-04 at 17-49-08 Extending IDP-Z3 with Linear Time Calculus - KU_Leuven_Computer_Science_Thesis-16 pdf](https://github.com/user-attachments/assets/cfb3ecaf-83c2-4131-b86b-decac2816d91)
+
+![Screenshot 2024-08-04 at 17-50-11 Extending IDP-Z3 with Linear Time Calculus - KU_Leuven_Computer_Science_Thesis-16 pdf](https://github.com/user-attachments/assets/3f148be3-befb-4dc6-8509-d22a726729ef)
+
+For example following is the transition machine of this problem which can be derived for LTL/CTL checking:
+
+![Screenshot_4-8-2024_175726_](https://github.com/user-attachments/assets/b4bb4fb7-e52d-46d4-9f41-6df5d8ccb19e)
+
+
 idp-engine is a reasoning engine for knowledge represented using the FO(.) language.
 FO(.) (aka FO-dot) is First Order logic, with various extensions to make it more expressive:  types, equality, arithmetic, inductive definitions, aggregates, and intensional objects.
 The idp-engine uses the Z3 SMT solver as a back-end.
