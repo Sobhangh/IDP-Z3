@@ -5,10 +5,12 @@ This is an extention of the IDP-Z3 knowledgebase. This extention involves adding
 
 ![Screenshot 2024-08-04 at 17-50-11 Extending IDP-Z3 with Linear Time Calculus - KU_Leuven_Computer_Science_Thesis-16 pdf](https://github.com/user-attachments/assets/3f148be3-befb-4dc6-8509-d22a726729ef)
 
-For example following is the transition machine of this problem which can be derived for LTL/CTL checking:
+
+For example, following is the transition machine of this problem which can be derived for LTL/CTL checking:
 
 ![Screenshot_4-8-2024_175726_](https://github.com/user-attachments/assets/b4bb4fb7-e52d-46d4-9f41-6df5d8ccb19e)
 
+# Introduction
 
 idp-engine is a reasoning engine for knowledge represented using the FO(.) language.
 FO(.) (aka FO-dot) is First Order logic, with various extensions to make it more expressive:  types, equality, arithmetic, inductive definitions, aggregates, and intensional objects.
